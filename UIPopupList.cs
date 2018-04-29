@@ -333,7 +333,7 @@ public class UIPopupList : UIWidgetContainer
 	}
 
 	
-	private void Highlight(UILabel lbl, bool instant)
+	protected void Highlight(UILabel lbl, bool instant)
 	{
 		if (this.mHighlight != null)
 		{
@@ -360,7 +360,7 @@ public class UIPopupList : UIWidgetContainer
 	}
 
 	
-	private Vector3 GetHighlightPosition()
+	protected virtual Vector3 GetHighlightPosition()
 	{
 		if (this.mHighlightedLabel == null || this.mHighlight == null)
 		{
@@ -394,7 +394,7 @@ public class UIPopupList : UIWidgetContainer
 	}
 
 	
-	private void OnItemHover(GameObject go, bool isOver)
+	protected void OnItemHover(GameObject go, bool isOver)
 	{
 		if (isOver)
 		{
@@ -404,7 +404,7 @@ public class UIPopupList : UIWidgetContainer
 	}
 
 	
-	private void OnItemPress(GameObject go, bool isPressed)
+	protected void OnItemPress(GameObject go, bool isPressed)
 	{
 		if (isPressed)
 		{
@@ -473,7 +473,7 @@ public class UIPopupList : UIWidgetContainer
 	}
 
 	
-	private void OnSelect(bool isSelected)
+	protected void OnSelect(bool isSelected)
 	{
 		if (!isSelected)
 		{
@@ -536,7 +536,7 @@ public class UIPopupList : UIWidgetContainer
 	}
 
 	
-	private void AnimateColor(UIWidget widget)
+	protected void AnimateColor(UIWidget widget)
 	{
 		Color color = widget.color;
 		widget.color = new Color(color.r, color.g, color.b, 0f);
@@ -554,7 +554,7 @@ public class UIPopupList : UIWidgetContainer
 	}
 
 	
-	private void AnimateScale(UIWidget widget, bool placeAbove, float bottom)
+	protected void AnimateScale(UIWidget widget, bool placeAbove, float bottom)
 	{
 		GameObject gameObject = widget.gameObject;
 		Transform cachedTransform = widget.cachedTransform;
@@ -570,7 +570,7 @@ public class UIPopupList : UIWidgetContainer
 	}
 
 	
-	private void Animate(UIWidget widget, bool placeAbove, float bottom)
+	protected void Animate(UIWidget widget, bool placeAbove, float bottom)
 	{
 		this.AnimateColor(widget);
 		this.AnimatePosition(widget, placeAbove, bottom);
@@ -623,7 +623,7 @@ public class UIPopupList : UIWidgetContainer
 	}
 
 	
-	public void Show()
+	public virtual void Show()
 	{
 		if (base.enabled && NGUITools.GetActive(base.gameObject) && UIPopupList.mChild == null && this.atlas != null && this.isValid && this.items.Count > 0)
 		{
@@ -844,7 +844,7 @@ public class UIPopupList : UIWidgetContainer
 	public static UIPopupList current;
 
 	
-	private static GameObject mChild;
+	protected static GameObject mChild;
 
 	
 	private static float mFadeOutComplete;
@@ -915,45 +915,45 @@ public class UIPopupList : UIWidgetContainer
 	
 	[HideInInspector]
 	[SerializeField]
-	private string mSelectedItem;
+	protected string mSelectedItem;
 
 	
 	[HideInInspector]
 	[SerializeField]
-	private UIPanel mPanel;
+	protected UIPanel mPanel;
 
 	
 	[HideInInspector]
 	[SerializeField]
-	private UISprite mBackground;
+	protected UISprite mBackground;
 
 	
 	[HideInInspector]
 	[SerializeField]
-	private UISprite mHighlight;
+	protected UISprite mHighlight;
 
 	
 	[HideInInspector]
 	[SerializeField]
-	private UILabel mHighlightedLabel;
+	protected UILabel mHighlightedLabel;
 
 	
 	[HideInInspector]
 	[SerializeField]
-	private List<UILabel> mLabelList = new List<UILabel>();
+	protected List<UILabel> mLabelList = new List<UILabel>();
 
 	
 	[HideInInspector]
 	[SerializeField]
-	private float mBgBorder;
+	protected float mBgBorder;
 
 	
 	[NonSerialized]
-	private GameObject mSelection;
+	protected GameObject mSelection;
 
 	
 	[NonSerialized]
-	private int mOpenFrame;
+	protected int mOpenFrame;
 
 	
 	[HideInInspector]

@@ -85,13 +85,20 @@ namespace TheForest.UI
 		public Font CurrentLanguageFont { get; private set; }
 
 		
+		public static Texture[] GetAvailableTranslationsIcons()
+		{
+			UiTranslationDatabase.GetAvailableTranslations();
+			return UiTranslationDatabase.Instance._availableTranslationsIcons;
+		}
+
+		
 		public static string[] GetAvailableTranslations()
 		{
-			if (UiTranslationDatabase.Instance._availableTranslations != null)
+			if (UiTranslationDatabase.Instance._availableTranslations != null && UiTranslationDatabase.Instance._availableTranslations.Length != 0 && UiTranslationDatabase.Instance._availableTranslationsIcons != null)
 			{
-				if (UiTranslationDatabase.Instance._availableTranslations.Length != 0)
+				if (UiTranslationDatabase.Instance._availableTranslationsIcons.Length == UiTranslationDatabase.Instance._availableTranslations.Length)
 				{
-					goto IL_327;
+					goto IL_394;
 				}
 			}
 			try
@@ -99,6 +106,7 @@ namespace TheForest.UI
 				int num = -1;
 				bool flag = false;
 				List<string> list = new List<string>();
+				List<Texture> list2 = new List<Texture>();
 				if (!Directory.Exists(UiTranslationDatabase.TranslationsPath))
 				{
 					Directory.CreateDirectory(UiTranslationDatabase.TranslationsPath);
@@ -107,7 +115,7 @@ namespace TheForest.UI
 				{
 					flag = true;
 				}
-				List<string> list2 = (from f in Directory.GetFiles(UiTranslationDatabase.TranslationsPath, "*.json", SearchOption.TopDirectoryOnly)
+				List<string> list3 = (from f in Directory.GetFiles(UiTranslationDatabase.TranslationsPath, "*.json", SearchOption.TopDirectoryOnly)
 				select f.Substring(f.LastIndexOf('/') + 1).Replace(".json", string.Empty)).ToList<string>();
 				foreach (UiTranslationDatabase.Language language in UiTranslationDatabase.Instance._builtInLanguages)
 				{
@@ -117,24 +125,26 @@ namespace TheForest.UI
 					{
 						text2 = text;
 					}
-					if (flag || !list2.Contains(text))
+					if (flag || !list3.Contains(text))
 					{
 						File.WriteAllText(UiTranslationDatabase.TranslationsPath + language._data.name + ".json", language._data.text);
 					}
-					if (list2.Contains(text))
+					if (list3.Contains(text))
 					{
-						list2.Remove(text);
+						list3.Remove(text);
 					}
 					if (!list.Contains(text2))
 					{
 						list.Add(text2);
+						list2.Add(language._icon);
 					}
 				}
-				foreach (string item in list2)
+				foreach (string item in list3)
 				{
 					if (!list.Contains(item))
 					{
 						list.Add(item);
+						list2.Add(null);
 					}
 				}
 				GUIText guitext = new GameObject("TestFont").AddComponent<GUIText>();
@@ -151,18 +161,21 @@ namespace TheForest.UI
 						guitext.text = list[j].Substring(0, num2);
 						if (guitext.GetScreenRect().width < 10f)
 						{
-							Debug.LogWarning("[Translation] Missing font, removing " + list2[j]);
+							Debug.LogWarning("[Translation] Missing font, removing " + list3[j]);
 							list.RemoveAt(j);
+							list2.RemoveAt(j);
 						}
 					}
 					else
 					{
-						Debug.LogWarning("[Translation] Invalid translation name, removing " + list2[j]);
+						Debug.LogWarning("[Translation] Invalid translation name, removing " + list3[j]);
 						list.RemoveAt(j);
+						list2.RemoveAt(j);
 					}
 				}
 				UnityEngine.Object.DestroyImmediate(guitext.gameObject);
 				UiTranslationDatabase.Instance._availableTranslations = list.ToArray();
+				UiTranslationDatabase.Instance._availableTranslationsIcons = list2.ToArray();
 				UiTranslationDatabase.Instance._language = UiTranslationDatabase.Instance._language;
 				File.WriteAllText(UiTranslationDatabase.TranslationsPath + "version.txt", UiTranslationDatabase.Instance._version.ToString());
 			}
@@ -170,7 +183,7 @@ namespace TheForest.UI
 			{
 				Debug.LogException(exception);
 			}
-			IL_327:
+			IL_394:
 			return UiTranslationDatabase.Instance._availableTranslations;
 		}
 
@@ -378,6 +391,10 @@ namespace TheForest.UI
 
 		
 		[SerializeField]
+		private Texture[] _availableTranslationsIcons;
+
+		
+		[SerializeField]
 		private string _language = "English";
 
 		
@@ -389,6 +406,9 @@ namespace TheForest.UI
 		{
 			
 			public TextAsset _data;
+
+			
+			public Texture _icon;
 
 			
 			public string _name;

@@ -668,36 +668,33 @@ namespace TheForest.Items.Craft
 			Receipe validRecipe = this._validRecipe;
 			this._craftSfxEmitter.Play();
 			UnityEngine.Object.Instantiate<GameObject>(this._craftParticle1, this._craftParticleSpawnPos.position, this._craftParticleSpawnPos.rotation);
-			if (!validRecipe._type.Equals(Receipe.Types.Upgrade))
-			{
-				this._upgradeCount = 1;
-			}
+			int num = validRecipe._type.Equals(Receipe.Types.Upgrade) ? this._upgradeCount : 1;
 			ItemProperties itemProperties = ItemProperties.Any;
 			for (int i = 0; i < validRecipe._ingredients.Length; i++)
 			{
 				ReceipeIngredient receipeIngredient = validRecipe._ingredients[i];
 				ReceipeIngredient receipeIngredient2 = this.TryGetIngredient(receipeIngredient._itemID);
-				int num;
+				int num2;
 				if (i == 0)
 				{
 					if (validRecipe._type.Equals(Receipe.Types.Upgrade))
 					{
-						num = receipeIngredient._amount;
+						num2 = receipeIngredient._amount;
 					}
 					else if (validRecipe._type.Equals(Receipe.Types.Extension))
 					{
-						num = 0;
+						num2 = 0;
 					}
 					else
 					{
-						num = receipeIngredient._amount * this._upgradeCount;
+						num2 = receipeIngredient._amount * num;
 					}
 				}
 				else
 				{
-					num = receipeIngredient._amount * this._upgradeCount;
+					num2 = receipeIngredient._amount * num;
 				}
-				receipeIngredient2._amount -= num;
+				receipeIngredient2._amount -= num2;
 				if (i == 1)
 				{
 					itemProperties = ((!this._itemViewsCache[receipeIngredient2._itemID]._allowMultiView) ? this._itemViewsCache[receipeIngredient2._itemID].Properties : this._itemViewsCache[receipeIngredient2._itemID].GetFirstViewProperties());
@@ -713,7 +710,7 @@ namespace TheForest.Items.Craft
 				}
 				this.ToggleItemInventoryView(receipeIngredient._itemID, ItemProperties.Any);
 			}
-			int upgradeCount = this._upgradeCount;
+			int upgradeCount = num;
 			if (!validRecipe._type.Equals(Receipe.Types.Extension))
 			{
 				this.Add(validRecipe._productItemID, validRecipe._productItemAmount, ItemProperties.Any);
@@ -733,7 +730,7 @@ namespace TheForest.Items.Craft
 			}
 			InventoryItemView itemView = this.GetItemView(validRecipe._productItemID);
 			this._completedItemViewProxy._targetView = itemView;
-			if (!this._upgradeCog.enabled)
+			if (!this._upgradeCog.enabled && itemView)
 			{
 				base.StartCoroutine(this.animateCraftedItemRoutine(itemView.transform));
 			}
@@ -806,7 +803,7 @@ namespace TheForest.Items.Craft
 				Receipe receipe = list[i];
 				if (receipe.CanCarryProduct)
 				{
-					flag2 |= (receipe._type == Receipe.Types.Craft);
+					flag2 |= (receipe._type == Receipe.Types.Craft | receipe._type == Receipe.Types.Extension);
 					int num = receipe._ingredients.Sum((ReceipeIngredient ingredient) => Mathf.Max(ingredient._amount, 1));
 					int matchedIngredientSum = CraftingCog.GetMatchedIngredientSum(receipe, this._ingredients);
 					float num2 = (float)matchedIngredientSum / (float)num;

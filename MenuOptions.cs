@@ -404,7 +404,10 @@ public class MenuOptions : MonoBehaviour
 	private IEnumerator Start()
 	{
 		yield return YieldPresets.WaitForEndOfFrame;
-		this.Language.value = ((!this.Language.items.Contains(PlayerPreferences.Language)) ? "ENGLISH" : PlayerPreferences.Language);
+		if (this.Language)
+		{
+			this.Language.value = ((!this.Language.items.Contains(PlayerPreferences.Language)) ? "ENGLISH" : PlayerPreferences.Language);
+		}
 		this.EndIgnoreEvents();
 		if (this.Preset)
 		{

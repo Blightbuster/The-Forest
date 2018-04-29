@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{37097A12-FDD6-40FD-BA47-C8C70FC9BBD8}</ProjectGuid>
+    <ProjectGuid>{566F655E-0CF2-4043-8D50-664FE2696740}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Assembly-CSharp</RootNamespace>
@@ -3222,6 +3222,7 @@
     <Compile Include="TheForest\UI\ItemDualActionWidget.cs" />
     <Compile Include="TheForest\UI\ItemListWidget.cs" />
     <Compile Include="TheForest\UI\ItemListWidgetEntry.cs" />
+    <Compile Include="TheForest\UI\LanguageMenu.cs" />
     <Compile Include="TheForest\UI\LoadingProgress.cs" />
     <Compile Include="TheForest\UI\LoadSaveSlotInfo.cs" />
     <Compile Include="TheForest\UI\LoadSaveSlotThumbnail.cs" />
@@ -3529,6 +3530,7 @@
     <Compile Include="UIPlaySound.cs" />
     <Compile Include="UIPlayTween.cs" />
     <Compile Include="UIPopupList.cs" />
+    <Compile Include="UIPopupListIcon.cs" />
     <Compile Include="UIProgressBar.cs" />
     <Compile Include="UIRect.cs" />
     <Compile Include="UIRoot.cs" />
