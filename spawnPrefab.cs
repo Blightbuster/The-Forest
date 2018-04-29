@@ -22,7 +22,7 @@ public class spawnPrefab : MonoBehaviour
 		}
 		if (this.defaultBehaviour)
 		{
-			UnityEngine.Object.Instantiate(this.go, base.transform.position, base.transform.rotation);
+			UnityEngine.Object.Instantiate<GameObject>(this.go, base.transform.position, base.transform.rotation);
 		}
 		else
 		{

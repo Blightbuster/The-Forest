@@ -3,6 +3,7 @@ using System.Collections;
 using Bolt;
 using FMOD.Studio;
 using TheForest.Items;
+using TheForest.Items.Inventory;
 using TheForest.Utils;
 using UnityEngine;
 
@@ -31,6 +32,9 @@ public class PlayerSfx : EntityEventListener<IPlayerState>
 			this.EatMeatEvent,
 			this.EatPoisonEvent,
 			this.EatMedsEvent,
+			this.PutOnClothingEvent,
+			this.PutOnArmorEvent,
+			this.PutOnStealthArmorEvent,
 			this.DrinkEvent,
 			this.DrinkFromWaterSourceEvent,
 			this.StaminaBreathEvent,
@@ -289,16 +293,59 @@ public class PlayerSfx : EntityEventListener<IPlayerState>
 	}
 
 	
-	private EventInstance PlayEvent(string path, Vector3 position)
+	public EventInstance PlayEvent(string path, Vector3 position)
 	{
-		if ((!this.Remote && this.entity && this.entity.isAttached) || CoopPeerStarter.DedicatedHost)
+		if (LocalPlayer.CurrentView > PlayerInventory.PlayerViews.Loading)
 		{
-			FmodOneShot fmodOneShot = FmodOneShot.Create(GlobalTargets.Others, ReliabilityModes.Unreliable);
-			fmodOneShot.EventPath = CoopAudioEventDb.FindId(path);
-			fmodOneShot.Position = position;
-			fmodOneShot.Send();
+			if ((!this.Remote && base.entity && base.entity.isAttached) || CoopPeerStarter.DedicatedHost)
+			{
+				FmodOneShot fmodOneShot = FmodOneShot.Create(GlobalTargets.Others, ReliabilityModes.Unreliable);
+				fmodOneShot.EventPath = CoopAudioEventDb.FindId(path);
+				fmodOneShot.Position = position;
+				fmodOneShot.Send();
+			}
+			return (!FMOD_StudioSystem.instance || CoopPeerStarter.DedicatedHost) ? null : FMOD_StudioSystem.instance.PlayOneShot(path, position, null);
 		}
-		return (!FMOD_StudioSystem.instance || CoopPeerStarter.DedicatedHost) ? null : FMOD_StudioSystem.instance.PlayOneShot(path, position, null);
+		return null;
+	}
+
+	
+	private Vector3 GetItemSfxPosition()
+	{
+		return (!Grabber.FocusedItem) ? (LocalPlayer.Transform.position + LocalPlayer.MainCamTr.forward) : Grabber.FocusedItem.transform.position;
+	}
+
+	
+	public bool PlayItemCustomSfx(int itemId, bool fallback = true)
+	{
+		return this.PlayItemCustomSfx(ItemDatabase.ItemById(itemId), this.GetItemSfxPosition(), fallback);
+	}
+
+	
+	public bool PlayItemCustomSfx(int itemId, Vector3 position, bool fallback = true)
+	{
+		return this.PlayItemCustomSfx(ItemDatabase.ItemById(itemId), position, fallback);
+	}
+
+	
+	public bool PlayItemCustomSfx(Item item, bool fallback = true)
+	{
+		return this.PlayItemCustomSfx(item, this.GetItemSfxPosition(), fallback);
+	}
+
+	
+	public bool PlayItemCustomSfx(Item item, Vector3 position, bool fallback = true)
+	{
+		if (!string.IsNullOrEmpty(item._customSfxEvent))
+		{
+			this.PlayEvent(item._customSfxEvent, position);
+			return true;
+		}
+		if (fallback)
+		{
+			this.PlayWhoosh();
+		}
+		return false;
 	}
 
 	
@@ -335,6 +382,24 @@ public class PlayerSfx : EntityEventListener<IPlayerState>
 	public void PlayDryFlareFireSfx()
 	{
 		this.PlayEvent(this.FlareDryFireEvent, this.SfxPlayer);
+	}
+
+	
+	public void PlayPutOnArmorSfx()
+	{
+		this.PlayEvent(this.PutOnArmorEvent, this.SfxPlayer);
+	}
+
+	
+	public void PlayPutOnClothingSfx()
+	{
+		this.PlayEvent(this.PutOnClothingEvent, this.SfxPlayer);
+	}
+
+	
+	public void PlayPutOnStealthArmorSfx()
+	{
+		this.PlayEvent(this.PutOnStealthArmorEvent, this.SfxPlayer);
 	}
 
 	
@@ -472,6 +537,15 @@ public class PlayerSfx : EntityEventListener<IPlayerState>
 			break;
 		case Item.SFXCommands.PlayShootFlintLockSfx:
 			path = this.ShootFlintLockEvent;
+			break;
+		case Item.SFXCommands.PlayPutOnArmorSfx:
+			path = this.PutOnArmorEvent;
+			break;
+		case Item.SFXCommands.PlayPutOnStealthArmorSfx:
+			path = this.PutOnStealthArmorEvent;
+			break;
+		case Item.SFXCommands.PlayPutOnClothingSfx:
+			path = this.PutOnClothingEvent;
 			break;
 		}
 		FMODCommon.PlayOneshot(path, this.SfxGUI.transform);
@@ -1029,7 +1103,7 @@ public class PlayerSfx : EntityEventListener<IPlayerState>
 	{
 		if (!SteamDSConfig.isDedicatedServer)
 		{
-			if (!this.entity.isOwner)
+			if (!base.entity.isOwner)
 			{
 				base.state.AddCallback("LoopingEventPath", new PropertyCallbackSimple(this.OnLoopingEventPathUpdate));
 				base.state.AddCallback("LoopingEventPosition", new PropertyCallbackSimple(this.OnLoopingEventPathUpdate));
@@ -1093,7 +1167,7 @@ public class PlayerSfx : EntityEventListener<IPlayerState>
 	
 	private void SyncLoopingEvent(string path, Vector3 position)
 	{
-		if ((!this.Remote && this.entity && this.entity.isAttached) || CoopPeerStarter.DedicatedHost)
+		if ((!this.Remote && base.entity && base.entity.isAttached) || CoopPeerStarter.DedicatedHost)
 		{
 			base.state.LoopingEventPosition = position;
 			base.state.LoopingEventPath = CoopAudioEventDb.FindId(path);
@@ -1192,6 +1266,15 @@ public class PlayerSfx : EntityEventListener<IPlayerState>
 
 	
 	public string EatMedsEvent;
+
+	
+	public string PutOnClothingEvent;
+
+	
+	public string PutOnArmorEvent;
+
+	
+	public string PutOnStealthArmorEvent;
 
 	
 	public string DrinkEvent;

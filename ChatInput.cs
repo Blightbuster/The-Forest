@@ -2,8 +2,8 @@
 using UnityEngine;
 
 
-[AddComponentMenu("NGUI/Examples/Chat Input")]
 [RequireComponent(typeof(UIInput))]
+[AddComponentMenu("NGUI/Examples/Chat Input")]
 public class ChatInput : MonoBehaviour
 {
 	

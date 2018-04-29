@@ -85,9 +85,6 @@ namespace ICSharpCode.SharpZipLib.Encryption
 		private const int AUTH_CODE_LENGTH = 10;
 
 		
-		private const int CRYPTO_BLOCK_SIZE = 16;
-
-		
 		private Stream _stream;
 
 		
@@ -101,6 +98,9 @@ namespace ICSharpCode.SharpZipLib.Encryption
 
 		
 		private int _slideBufFreePos;
+
+		
+		private const int CRYPTO_BLOCK_SIZE = 16;
 
 		
 		private int _blockAndAuth;

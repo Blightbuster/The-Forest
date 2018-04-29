@@ -5,8 +5,8 @@ using UnityEngine;
 namespace TheForest.Buildings.Creation
 {
 	
-	[DoNotSerializePublic]
 	[AddComponentMenu("Buildings/Creation/Wall Addition Trigger")]
+	[DoNotSerializePublic]
 	public class WallAdditionTrigger : MonoBehaviour
 	{
 		

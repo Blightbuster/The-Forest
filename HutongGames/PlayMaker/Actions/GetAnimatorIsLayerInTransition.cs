@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Returns true if the specified layer is in a transition. Can also send events")]
 	[ActionCategory("Animator")]
+	[Tooltip("Returns true if the specified layer is in a transition. Can also send events")]
 	public class GetAnimatorIsLayerInTransition : FsmStateAction
 	{
 		
@@ -92,14 +92,14 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
-		[CheckForComponent(typeof(Animator))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animator))]
+		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("The layer's index")]
 		[RequiredField]
+		[Tooltip("The layer's index")]
 		public FsmInt layerIndex;
 
 		
@@ -107,9 +107,9 @@ namespace HutongGames.PlayMaker.Actions
 		public bool everyFrame;
 
 		
+		[ActionSection("Results")]
 		[UIHint(UIHint.Variable)]
 		[Tooltip("True if automatic matching is active")]
-		[ActionSection("Results")]
 		public FsmBool isInTransition;
 
 		

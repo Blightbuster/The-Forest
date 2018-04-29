@@ -49,7 +49,7 @@ public class setupGirlMutant : MonoBehaviour
 		if (!Scene.SceneTracker.endBossSpawned)
 		{
 			this.updateTimer = Time.time + 1f;
-			GameObject gameObject = UnityEngine.Object.Instantiate(this.realPrefab, this.placedPrefab.transform.position, this.placedPrefab.transform.rotation) as GameObject;
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.realPrefab, this.placedPrefab.transform.position, this.placedPrefab.transform.rotation);
 			UnityEngine.Object.Destroy(this.placedPrefab);
 			this.activateGirlScript.girlAnimator = gameObject.GetComponentInChildren<Animator>();
 			base.enabled = false;

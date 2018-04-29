@@ -199,30 +199,57 @@ public class TouchJoystick : MonoBehaviour
 				{
 					if (this.touchPad)
 					{
-						switch (this.inputMode)
+						TouchJoystick.InputMode inputMode = this.inputMode;
+						if (inputMode != TouchJoystick.InputMode.TouchPadPositional)
 						{
-						case TouchJoystick.InputMode.TouchPadPositional:
-						{
-							Vector2 a = new Vector2((touch.position.x - this.touchZoneRect.center.x) / this.sensitivityRelativeX, (touch.position.y - this.touchZoneRect.center.y) / this.sensitivityRelativeY) * 2f;
-							Vector2 vector3 = Vector2.Lerp(this.position, a * this.sensitivity, Time.deltaTime * this.interpolateTime);
-							if (this.useX)
+							if (inputMode != TouchJoystick.InputMode.TouchPadRelativePositional)
 							{
-								this.position.x = Mathf.Clamp(vector3.x, -1f, 1f);
+								if (inputMode == TouchJoystick.InputMode.TouchPadSwipe)
+								{
+									if (touch.phase == TouchPhase.Began)
+									{
+										this.lastTouchPos = touch.position;
+										this.touchDelta = Vector2.zero;
+									}
+									this.touchDelta = Vector2.Lerp(this.touchDelta, (this.lastTouchPos - touch.position) / this.swipeScale, Time.deltaTime * this.interpolateTime);
+									if (touch.deltaTime > 0f)
+									{
+										if (this.useX)
+										{
+											float x = this.touchDelta.x * this.sensitivity;
+											this.position.x = x;
+										}
+										if (this.useY)
+										{
+											float y = this.touchDelta.y * this.sensitivity;
+											this.position.y = y;
+										}
+									}
+									this.lastTouchPos = touch.position;
+								}
 							}
-							if (this.useY)
+							else
 							{
-								this.position.y = Mathf.Clamp(vector3.y, -1f, 1f);
+								if (touch.phase == TouchPhase.Began)
+								{
+									this.touchStart = touch.position;
+								}
+								Vector2 a = new Vector2((touch.position.x - this.touchStart.x) / this.sensitivityRelativeX, (touch.position.y - this.touchStart.y) / this.sensitivityRelativeY);
+								Vector2 vector3 = Vector2.Lerp(this.position, a * this.sensitivity * 2f, Time.deltaTime * this.interpolateTime);
+								if (this.useX)
+								{
+									this.position.x = Mathf.Clamp(vector3.x, -1f, 1f);
+								}
+								if (this.useY)
+								{
+									this.position.y = Mathf.Clamp(vector3.y, -1f, 1f);
+								}
 							}
-							break;
 						}
-						case TouchJoystick.InputMode.TouchPadRelativePositional:
+						else
 						{
-							if (touch.phase == TouchPhase.Began)
-							{
-								this.touchStart = touch.position;
-							}
-							Vector2 a2 = new Vector2((touch.position.x - this.touchStart.x) / this.sensitivityRelativeX, (touch.position.y - this.touchStart.y) / this.sensitivityRelativeY);
-							Vector2 vector4 = Vector2.Lerp(this.position, a2 * this.sensitivity * 2f, Time.deltaTime * this.interpolateTime);
+							Vector2 a2 = new Vector2((touch.position.x - this.touchZoneRect.center.x) / this.sensitivityRelativeX, (touch.position.y - this.touchZoneRect.center.y) / this.sensitivityRelativeY) * 2f;
+							Vector2 vector4 = Vector2.Lerp(this.position, a2 * this.sensitivity, Time.deltaTime * this.interpolateTime);
 							if (this.useX)
 							{
 								this.position.x = Mathf.Clamp(vector4.x, -1f, 1f);
@@ -231,30 +258,6 @@ public class TouchJoystick : MonoBehaviour
 							{
 								this.position.y = Mathf.Clamp(vector4.y, -1f, 1f);
 							}
-							break;
-						}
-						case TouchJoystick.InputMode.TouchPadSwipe:
-							if (touch.phase == TouchPhase.Began)
-							{
-								this.lastTouchPos = touch.position;
-								this.touchDelta = Vector2.zero;
-							}
-							this.touchDelta = Vector2.Lerp(this.touchDelta, (this.lastTouchPos - touch.position) / this.swipeScale, Time.deltaTime * this.interpolateTime);
-							if (touch.deltaTime > 0f)
-							{
-								if (this.useX)
-								{
-									float x = this.touchDelta.x * this.sensitivity;
-									this.position.x = x;
-								}
-								if (this.useY)
-								{
-									float y = this.touchDelta.y * this.sensitivity;
-									this.position.y = y;
-								}
-							}
-							this.lastTouchPos = touch.position;
-							break;
 						}
 					}
 					else

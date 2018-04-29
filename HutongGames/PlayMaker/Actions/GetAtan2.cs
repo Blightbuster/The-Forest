@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Get the Arc Tangent 2 as in atan2(y,x). You can get the result in degrees, simply check on the RadToDeg conversion")]
 	[ActionCategory("Trigonometry")]
+	[Tooltip("Get the Arc Tangent 2 as in atan2(y,x). You can get the result in degrees, simply check on the RadToDeg conversion")]
 	public class GetAtan2 : FsmStateAction
 	{
 		
@@ -46,8 +46,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The x value of the tan")]
 		[RequiredField]
+		[Tooltip("The x value of the tan")]
 		public FsmFloat xValue;
 
 		
@@ -56,9 +56,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat yValue;
 
 		
-		[Tooltip("The resulting angle. Note:If you want degrees, simply check RadToDeg")]
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("The resulting angle. Note:If you want degrees, simply check RadToDeg")]
 		public FsmFloat angle;
 
 		

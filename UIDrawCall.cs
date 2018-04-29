@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-[AddComponentMenu("NGUI/Internal/Draw Call")]
 [ExecuteInEditMode]
+[AddComponentMenu("NGUI/Internal/Draw Call")]
 public class UIDrawCall : MonoBehaviour
 {
 	
@@ -247,7 +247,7 @@ public class UIDrawCall : MonoBehaviour
 		{
 			this.mDynamicMat = new Material(this.mMaterial);
 			this.mDynamicMat.name = "[NGUI] " + this.mMaterial.name;
-			this.mDynamicMat.hideFlags = (HideFlags.DontSaveInEditor | HideFlags.NotEditable | HideFlags.DontUnloadUnusedAsset | HideFlags.DontSaveInBuild);
+			this.mDynamicMat.hideFlags = (HideFlags.DontSaveInEditor | HideFlags.NotEditable | HideFlags.DontSaveInBuild | HideFlags.DontUnloadUnusedAsset);
 			this.mDynamicMat.CopyPropertiesFromMaterial(this.mMaterial);
 			string[] shaderKeywords = this.mMaterial.shaderKeywords;
 			for (int i = 0; i < shaderKeywords.Length; i++)
@@ -273,7 +273,7 @@ public class UIDrawCall : MonoBehaviour
 		{
 			this.mDynamicMat = new Material(this.shader);
 			this.mDynamicMat.name = "[NGUI] " + this.shader.name;
-			this.mDynamicMat.hideFlags = (HideFlags.DontSaveInEditor | HideFlags.NotEditable | HideFlags.DontUnloadUnusedAsset | HideFlags.DontSaveInBuild);
+			this.mDynamicMat.hideFlags = (HideFlags.DontSaveInEditor | HideFlags.NotEditable | HideFlags.DontSaveInBuild | HideFlags.DontUnloadUnusedAsset);
 		}
 	}
 
@@ -747,9 +747,6 @@ public class UIDrawCall : MonoBehaviour
 	}
 
 	
-	private const int maxIndexBufferCache = 10;
-
-	
 	private static BetterList<UIDrawCall> mActiveList = new BetterList<UIDrawCall>();
 
 	
@@ -867,6 +864,9 @@ public class UIDrawCall : MonoBehaviour
 
 	
 	public UIDrawCall.OnRenderCallback onRender;
+
+	
+	private const int maxIndexBufferCache = 10;
 
 	
 	private static List<int[]> mCache = new List<int[]>(10);

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Applies an explosion Force to all Game Objects with a Rigid Body inside a Radius.")]
 	[ActionCategory(ActionCategory.Physics)]
+	[Tooltip("Applies an explosion Force to all Game Objects with a Rigid Body inside a Radius.")]
 	public class Explosion : FsmStateAction
 	{
 		
@@ -61,8 +61,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The world position of the center of the explosion.")]
 		[RequiredField]
+		[Tooltip("The world position of the center of the explosion.")]
 		public FsmVector3 center;
 
 		
@@ -88,8 +88,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmInt layer;
 
 		
-		[Tooltip("Layers to effect.")]
 		[UIHint(UIHint.Layer)]
+		[Tooltip("Layers to effect.")]
 		public FsmInt[] layerMask;
 
 		

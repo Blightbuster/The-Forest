@@ -9,7 +9,6 @@ public class limitBlurDistance : MonoBehaviour
 	private void Start()
 	{
 		this.thisTr = base.transform;
-		base.Invoke("getAmplifyObj", 0.2f);
 		float value = UnityEngine.Random.value;
 		if (!base.IsInvoking("checkPlayerDist"))
 		{
@@ -26,19 +25,6 @@ public class limitBlurDistance : MonoBehaviour
 		this.rendererDist = 25600f;
 		this.enableAnimation();
 		this.enableRenderers();
-		if (CoopPeerStarter.DedicatedHost)
-		{
-			AmplifyMotionObject[] componentsInChildren = base.transform.GetComponentsInChildren<AmplifyMotionObject>(true);
-			AmplifyMotionObjectBase[] componentsInChildren2 = base.transform.GetComponentsInChildren<AmplifyMotionObjectBase>(true);
-			foreach (AmplifyMotionObject obj in componentsInChildren)
-			{
-				UnityEngine.Object.Destroy(obj);
-			}
-			foreach (AmplifyMotionObjectBase obj2 in componentsInChildren2)
-			{
-				UnityEngine.Object.Destroy(obj2);
-			}
-		}
 	}
 
 	
@@ -64,25 +50,6 @@ public class limitBlurDistance : MonoBehaviour
 		{
 			this.enableAnimation();
 		}
-		if (this.playerDist > 625f && this.doAmplify)
-		{
-			this.disableAmplifyMotion();
-		}
-		else if (this.playerDist < 625f && this.doAmplify)
-		{
-			this.enableAmplifyMotion();
-		}
-	}
-
-	
-	private void getAmplifyObj()
-	{
-		if (this.amplifyBase.Length == 0)
-		{
-			this.amplifyBase = base.transform.parent.GetComponentsInChildren<AmplifyMotionObjectBase>(true);
-		}
-		this.doAmplify = true;
-		this.disableAmplifyMotion();
 	}
 
 	
@@ -144,41 +111,6 @@ public class limitBlurDistance : MonoBehaviour
 	}
 
 	
-	private void disableAmplifyMotion()
-	{
-		if (this.amplifyBase != null && this.doEnable)
-		{
-			for (int i = 0; i < this.amplifyBase.Length; i++)
-			{
-				if (this.amplifyBase[i])
-				{
-					this.amplifyBase[i].enabled = false;
-				}
-			}
-			this.doEnable = false;
-		}
-	}
-
-	
-	private void enableAmplifyMotion()
-	{
-		if (this.amplifyBase != null && !this.doEnable)
-		{
-			for (int i = 0; i < this.amplifyBase.Length; i++)
-			{
-				if (this.amplifyBase[i])
-				{
-					this.amplifyBase[i].enabled = true;
-				}
-			}
-			this.doEnable = true;
-		}
-	}
-
-	
-	public AmplifyMotionObjectBase[] amplifyBase;
-
-	
 	public GameObject[] joints;
 
 	
@@ -192,9 +124,6 @@ public class limitBlurDistance : MonoBehaviour
 
 	
 	private float playerDist;
-
-	
-	private bool doEnable;
 
 	
 	public bool useParentAsSource;

@@ -4,8 +4,8 @@ using TheForest.Utils;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the pressed state of the specified Button and stores it in a Bool Variable. See Unity Input Manager docs.")]
 	[ActionCategory(ActionCategory.Input)]
+	[Tooltip("Gets the pressed state of the specified Button and stores it in a Bool Variable. See Unity Input Manager docs.")]
 	public class GetButton : FsmStateAction
 	{
 		
@@ -39,8 +39,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The name of the button. Set in the Unity Input Manager.")]
 		[RequiredField]
+		[Tooltip("The name of the button. Set in the Unity Input Manager.")]
 		public FsmString buttonName;
 
 		

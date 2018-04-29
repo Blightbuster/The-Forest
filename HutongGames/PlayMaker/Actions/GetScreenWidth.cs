@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the Width of the Screen in pixels.")]
 	[ActionCategory(ActionCategory.Application)]
+	[Tooltip("Gets the Width of the Screen in pixels.")]
 	public class GetScreenWidth : FsmStateAction
 	{
 		
@@ -22,8 +22,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmFloat storeScreenWidth;
 	}
 }

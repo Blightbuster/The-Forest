@@ -76,7 +76,7 @@ public class activateBench : EntityBehaviour<IworkBenchState>
 			flag = true;
 		}
 		float num = Vector3.Distance(base.transform.position, LocalPlayer.Transform.position);
-		if (this.checkForCloseWall())
+		if (this.checkForCloseWall() || (!this.ValidateTriggerForCoop() && !this.Sitting))
 		{
 			this.Sheen.SetActive(false);
 			this.MyPickUp.SetActive(false);
@@ -185,11 +185,33 @@ public class activateBench : EntityBehaviour<IworkBenchState>
 	}
 
 	
+	private bool ValidateTriggerForCoop()
+	{
+		if (!LocalPlayer.IsInEndgame)
+		{
+			return true;
+		}
+		for (int i = 0; i < Scene.SceneTracker.allPlayers.Count; i++)
+		{
+			targetStats component = Scene.SceneTracker.allPlayers[i].GetComponent<targetStats>();
+			if (Scene.SceneTracker.allPlayers[i] && Scene.SceneTracker.allPlayers[i].CompareTag("PlayerNet") && component)
+			{
+				float sqrMagnitude = (Scene.SceneTracker.allPlayers[i].transform.position - base.transform.position).sqrMagnitude;
+				if (sqrMagnitude < 2.25f)
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	
 	private bool checkForCloseWall()
 	{
 		Vector3 direction = LocalPlayer.MainCamTr.position - base.transform.position;
 		RaycastHit raycastHit;
-		return Physics.Raycast(base.transform.position, direction, out raycastHit, direction.magnitude, this.wallMask);
+		return Physics.Raycast(base.transform.position, direction, out raycastHit, direction.magnitude, this.wallMask, QueryTriggerInteraction.Ignore);
 	}
 
 	

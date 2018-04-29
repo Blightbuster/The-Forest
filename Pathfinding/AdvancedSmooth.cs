@@ -5,8 +5,8 @@ using UnityEngine;
 namespace Pathfinding
 {
 	
-	[HelpURL("http:
 	[AddComponentMenu("Pathfinding/Modifiers/Advanced Smooth")]
+	[HelpURL("http:
 	[Serializable]
 	public class AdvancedSmooth : MonoModifier
 	{
@@ -570,9 +570,6 @@ namespace Pathfinding
 			}
 
 			
-			public const double ThreeSixtyRadians = 6.2831853071795862;
-
-			
 			public float constantBias;
 
 			
@@ -580,6 +577,9 @@ namespace Pathfinding
 
 			
 			public static float turningRadius = 1f;
+
+			
+			public const double ThreeSixtyRadians = 6.2831853071795862;
 
 			
 			public static Vector3 prev;

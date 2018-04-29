@@ -55,9 +55,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject the Material is applied to.")]
 		[RequiredField]
 		[CheckForComponent(typeof(Renderer))]
+		[Tooltip("The GameObject the Material is applied to.")]
 		public FsmOwnerDefault gameObject;
 
 		

@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E250DFDC-F6BD-4B2B-86FA-D12876B6BBF1}</ProjectGuid>
+    <ProjectGuid>{37097A12-FDD6-40FD-BA47-C8C70FC9BBD8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Assembly-CSharp</RootNamespace>
@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -30,6 +31,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
@@ -47,38 +49,23 @@
     <Reference Include="Pathfinding.ClipperLib">
       <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\Pathfinding.ClipperLib.dll</HintPath>
     </Reference>
-    <Reference Include="Pathfinding.Poly2Tri">
-      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\Pathfinding.Poly2Tri.dll</HintPath>
-    </Reference>
     <Reference Include="bolt">
       <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\bolt.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
-    <Reference Include="RestSharp">
-      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\RestSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="bolt.user">
-      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\bolt.user.dll</HintPath>
-    </Reference>
-    <Reference Include="udpkit.common">
-      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\udpkit.common.dll</HintPath>
-    </Reference>
     <Reference Include="udpkit">
       <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\udpkit.dll</HintPath>
-    </Reference>
-    <Reference Include="Rewired_Core">
-      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\Rewired_Core.dll</HintPath>
     </Reference>
     <Reference Include="TheForest.Commons">
       <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\TheForest.Commons.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\UnityEngine.UI.dll</HintPath>
+    <Reference Include="udpkit.common">
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\udpkit.common.dll</HintPath>
+    </Reference>
+    <Reference Include="bolt.user">
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\bolt.user.dll</HintPath>
     </Reference>
     <Reference Include="PlayMaker">
       <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\PlayMaker.dll</HintPath>
@@ -86,20 +73,17 @@
     <Reference Include="TheForest.Modding">
       <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\TheForest.Modding.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="Rewired_Core">
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\Rewired_Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Pathfinding.Poly2Tri">
+      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\Pathfinding.Poly2Tri.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml">
       <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\System.Xml.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Runtime.Serialization">
-      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\System.Runtime.Serialization.dll</HintPath>
-    </Reference>
-    <Reference Include="BaseModLib">
-      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\BaseModLib.dll</HintPath>
-    </Reference>
-    <Reference Include="BaseModLib">
-      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\BaseModLib.dll</HintPath>
-    </Reference>
-    <Reference Include="UltimateCheatmenu">
-      <HintPath>..\..\..\..\Program Files (x86)\Steam\steamapps\common\The Forest\TheForest_Data\Managed\UltimateCheatmenu.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -160,20 +144,9 @@
     <Compile Include="AmbientLightFake.cs" />
     <Compile Include="ammoCollisionDetect.cs" />
     <Compile Include="amplifyDisableHook.cs" />
-    <Compile Include="AmplifyMotionCamera.cs" />
-    <Compile Include="AmplifyMotionEffect.cs" />
-    <Compile Include="AmplifyMotionEffectBase.cs" />
-    <Compile Include="AmplifyMotionObject.cs" />
-    <Compile Include="AmplifyMotionObjectBase.cs" />
-    <Compile Include="AmplifyMotionPostProcess.cs" />
-    <Compile Include="AmplifyMotion\ClothState.cs" />
-    <Compile Include="AmplifyMotion\MotionState.cs" />
-    <Compile Include="AmplifyMotion\ObjectType.cs" />
-    <Compile Include="AmplifyMotion\Quality.cs" />
-    <Compile Include="AmplifyMotion\SkinnedState.cs" />
-    <Compile Include="AmplifyMotion\SolidState.cs" />
-    <Compile Include="AmplifyMotion\VersionInfo.cs" />
-    <Compile Include="AmplifyMotion\WorkerThreadPool.cs" />
+    <Compile Include="AmplifyOcclusionBase.cs" />
+    <Compile Include="AmplifyOcclusionEffect.cs" />
+    <Compile Include="AmplifyOcclusion\VersionInfo.cs" />
     <Compile Include="animalAI.cs" />
     <Compile Include="animalAnimatorControl.cs" />
     <Compile Include="animalAttack.cs" />
@@ -222,7 +195,14 @@
     <Compile Include="arrowStickToTarget.cs" />
     <Compile Include="arrowTrajectory.cs" />
     <Compile Include="ArtifactAudioState.cs" />
+    <Compile Include="artifactBallController.cs" />
+    <Compile Include="artifactBallEffectSetup.cs" />
+    <Compile Include="artifactBallPlacedController.cs" />
+    <Compile Include="artifactExplodeController.cs" />
     <Compile Include="artifactGlowSetup.cs" />
+    <Compile Include="artifactIconSetup.cs" />
+    <Compile Include="artifactInventorySync.cs" />
+    <Compile Include="artifactSpawn.cs" />
     <Compile Include="AssemblyCSharp\Plugin.cs" />
     <Compile Include="AssemblyCSharp\PluginManager.cs" />
     <Compile Include="AssemblyCSharp\TypeExtensions.cs" />
@@ -307,6 +287,7 @@
     <Compile Include="BundleKey.cs" />
     <Compile Include="Buoyancy.cs" />
     <Compile Include="BurnDummy.cs" />
+    <Compile Include="burnTimmyPhoto.cs" />
     <Compile Include="BurtBush.cs" />
     <Compile Include="BushDamage.cs" />
     <Compile Include="bushHitTrigger.cs" />
@@ -318,6 +299,7 @@
     <Compile Include="CamController.cs" />
     <Compile Include="camCorderAnimSetup.cs" />
     <Compile Include="Camera2World.cs" />
+    <Compile Include="CameraDepthFix.cs" />
     <Compile Include="CameraGUIOff.cs" />
     <Compile Include="CameraLook.cs" />
     <Compile Include="CameraMouseEvents.cs" />
@@ -334,6 +316,7 @@
     <Compile Include="CaveData.cs" />
     <Compile Include="CaveDoor.cs" />
     <Compile Include="CaveEnter.cs" />
+    <Compile Include="caveEntranceManager.cs" />
     <Compile Include="CaveNames.cs" />
     <Compile Include="CaveOptimizer.cs" />
     <Compile Include="CaveTriggers.cs" />
@@ -477,41 +460,11 @@
     <Compile Include="Cheats.cs" />
     <Compile Include="Checker.cs" />
     <Compile Include="chopEnemy.cs" />
-    <Compile Include="ChromaExample01.cs" />
-    <Compile Include="ChromaSDKAnimation1D.cs" />
-    <Compile Include="ChromaSDKAnimation2D.cs" />
-    <Compile Include="ChromaSDKBaseAnimation.cs" />
-    <Compile Include="ChromaSDK\Api\ChromaApi.cs" />
-    <Compile Include="ChromaSDK\Api\IChromaApi.cs" />
-    <Compile Include="ChromaSDK\ChromaConnectionManager.cs" />
-    <Compile Include="ChromaSDK\ChromaDevice1DEnum.cs" />
-    <Compile Include="ChromaSDK\ChromaDevice2DEnum.cs" />
-    <Compile Include="ChromaSDK\ChromaLink.cs" />
-    <Compile Include="ChromaSDK\ChromaPackage\Model\DeleteChromaSdkResponse.cs" />
-    <Compile Include="ChromaSDK\ChromaPackage\Model\EffectArray1dInput.cs" />
-    <Compile Include="ChromaSDK\ChromaPackage\Model\EffectArray2dInput.cs" />
-    <Compile Include="ChromaSDK\ChromaPackage\Model\EffectIdentifierInput.cs" />
-    <Compile Include="ChromaSDK\ChromaPackage\Model\EffectIdentifierResponse.cs" />
-    <Compile Include="ChromaSDK\ChromaPackage\Model\EffectIdentifierResponseResults.cs" />
-    <Compile Include="ChromaSDK\ChromaPackage\Model\EffectInput.cs" />
-    <Compile Include="ChromaSDK\ChromaPackage\Model\EffectInputParam.cs" />
-    <Compile Include="ChromaSDK\ChromaPackage\Model\EffectResponse.cs" />
-    <Compile Include="ChromaSDK\ChromaPackage\Model\EffectResponseId.cs" />
-    <Compile Include="ChromaSDK\ChromaPackage\Model\EffectType.cs" />
-    <Compile Include="ChromaSDK\ChromaUtils.cs" />
-    <Compile Include="ChromaSDK\Client\ApiClient.cs" />
-    <Compile Include="ChromaSDK\Client\ApiException.cs" />
-    <Compile Include="ChromaSDK\Client\Configuration.cs" />
-    <Compile Include="ChromaSDK\Client\ExceptionFactory.cs" />
-    <Compile Include="ChromaSDK\Headset.cs" />
-    <Compile Include="ChromaSDK\ImageManager.cs" />
-    <Compile Include="ChromaSDK\Keyboard.cs" />
-    <Compile Include="ChromaSDK\Keypad.cs" />
-    <Compile Include="ChromaSDK\Mouse.cs" />
-    <Compile Include="ChromaSDK\Mousepad.cs" />
     <Compile Include="ClearSave.cs" />
     <Compile Include="ClearStaticVars.cs" />
     <Compile Include="ClickButton.cs" />
+    <Compile Include="ClickedEventArgs.cs" />
+    <Compile Include="ClickedEventHandler.cs" />
     <Compile Include="ClickMeAndDie.cs" />
     <Compile Include="clientNooseTrapFixer.cs" />
     <Compile Include="climbable.cs" />
@@ -586,6 +539,7 @@
     <Compile Include="CoopCharacterScale.cs" />
     <Compile Include="coopChoppedPartsReplicator.cs" />
     <Compile Include="CoopClientCallbacks.cs" />
+    <Compile Include="coopClientHeldFirePos.cs" />
     <Compile Include="CoopComponentDisabler.cs" />
     <Compile Include="CoopConnectToken.cs" />
     <Compile Include="CoopConstruction.cs" />
@@ -652,6 +606,7 @@
     <Compile Include="CoopMutantPredictor.cs" />
     <Compile Include="CoopMutantPriority.cs" />
     <Compile Include="CoopMutantPropSync.cs" />
+    <Compile Include="coopMutantRagdollSync.cs" />
     <Compile Include="CoopMutantRemote.cs" />
     <Compile Include="CoopMutantRemoteMale.cs" />
     <Compile Include="CoopMutantSetup.cs" />
@@ -676,6 +631,7 @@
     <Compile Include="CoopRaft.cs" />
     <Compile Include="CoopRaftPusher2.cs" />
     <Compile Include="CoopRagdoll.cs" />
+    <Compile Include="CoopRagdollToken.cs" />
     <Compile Include="CoopRigidbody.cs" />
     <Compile Include="CoopRigidbody2.cs" />
     <Compile Include="coopRockThrower.cs" />
@@ -706,6 +662,7 @@
     <Compile Include="CoopSteamVoicePlayer.cs" />
     <Compile Include="CoopSuitcase.cs" />
     <Compile Include="CoopSuitcasePusher.cs" />
+    <Compile Include="coopSyncAltHeldFire.cs" />
     <Compile Include="CoopSyncGirlPickupToken.cs" />
     <Compile Include="CoopTrapGUIDisable.cs" />
     <Compile Include="CoopTree.cs" />
@@ -731,6 +688,7 @@
     <Compile Include="CoopWorldCrates.cs" />
     <Compile Include="CoopZiplineToken.cs" />
     <Compile Include="CoopZiplineTreeToken.cs" />
+    <Compile Include="copyBloodFromTarget.cs" />
     <Compile Include="CopyCam.cs" />
     <Compile Include="CoroutineReturn.cs" />
     <Compile Include="CorpseBlood.cs" />
@@ -766,8 +724,10 @@
     <Compile Include="deactivateOnStart.cs" />
     <Compile Include="deadCamNetHider.cs" />
     <Compile Include="DeadSpotController.cs" />
+    <Compile Include="deadStewardessSetup.cs" />
     <Compile Include="debrisPart2.cs" />
     <Compile Include="debugMutantSplash.cs" />
+    <Compile Include="DecalDestroyer.cs" />
     <Compile Include="DedicatedServerTest.cs" />
     <Compile Include="deerAnimatorControl.cs" />
     <Compile Include="DeferredLight.cs" />
@@ -780,7 +740,7 @@
     <Compile Include="DemoSeeker.cs" />
     <Compile Include="DemoTurret.cs" />
     <Compile Include="destroyAfter.cs" />
-    <Compile Include="destroyStructure.cs" />
+    <Compile Include="destroyTimer.cs" />
     <Compile Include="DestroyWall.cs" />
     <Compile Include="detachFromZipLine.cs" />
     <Compile Include="Digger.cs" />
@@ -841,6 +801,8 @@
     <Compile Include="effectPlayVolume.cs" />
     <Compile Include="effectSpawnVolume.cs" />
     <Compile Include="effigyRangeDetect.cs" />
+    <Compile Include="ElevatorGlobalState.cs" />
+    <Compile Include="ElevatorManager.cs" />
     <Compile Include="EmptyObjectIdentifier.cs" />
     <Compile Include="enableChild.cs" />
     <Compile Include="EnableDisableObject.cs" />
@@ -856,6 +818,7 @@
     <Compile Include="EndGameStats.cs" />
     <Compile Include="endPlaneAnimEvents.cs" />
     <Compile Include="endRoomEnable.cs" />
+    <Compile Include="endStingAnimSetup.cs" />
     <Compile Include="enemyAnimEvents.cs" />
     <Compile Include="enemyAvoidance.cs" />
     <Compile Include="enemyCanPush.cs" />
@@ -864,6 +827,7 @@
     <Compile Include="enemyDeathTrigger.cs" />
     <Compile Include="EnemyHealth.cs" />
     <Compile Include="enemyNetCollisionFixer.cs" />
+    <Compile Include="enemyParticleFireController.cs" />
     <Compile Include="enemyPlayerContact.cs" />
     <Compile Include="EnemyRagdollDeath.cs" />
     <Compile Include="EnemySightRadius.cs" />
@@ -885,6 +849,7 @@
     <Compile Include="EventDelegate.cs" />
     <Compile Include="ExampleDragDropItem.cs" />
     <Compile Include="ExampleDragDropSurface.cs" />
+    <Compile Include="ExampleWheelController.cs" />
     <Compile Include="exitClimb.cs" />
     <Compile Include="Explode.cs" />
     <Compile Include="explodeDummy.cs" />
@@ -923,16 +888,22 @@
     <Compile Include="fishPosFix.cs" />
     <Compile Include="FishZone.cs" />
     <Compile Include="fixCollisionOnSpawn.cs" />
+    <Compile Include="fixDeadCamHair.cs" />
+    <Compile Include="fixMolotovAudio.cs" />
     <Compile Include="fixPlayerCollision.cs" />
     <Compile Include="FixRackPosition.cs" />
     <Compile Include="fixSledDynamicCollision.cs" />
     <Compile Include="fixWeaponPosition.cs" />
+    <Compile Include="flameThrowerController.cs" />
+    <Compile Include="flameThrowerDamage.cs" />
     <Compile Include="flareGunAnimSetup.cs" />
     <Compile Include="flareHeldAnimSetup.cs" />
     <Compile Include="FlareWeapon.cs" />
+    <Compile Include="FlickerArtifactLight.cs" />
     <Compile Include="FlickerLight.cs" />
     <Compile Include="flintLockAnimSetup.cs" />
     <Compile Include="flintLockNetSetup.cs" />
+    <Compile Include="Floor_ReflectionScriptCamera.cs" />
     <Compile Include="flyingObjectFixer.cs" />
     <Compile Include="flyingObjectFixerFrame.cs" />
     <Compile Include="FMODCommon.cs" />
@@ -949,10 +920,12 @@
     <Compile Include="followWeaponFire.cs" />
     <Compile Include="ForceFindPrefabs.cs" />
     <Compile Include="ForceLocalPosZero.cs" />
+    <Compile Include="ForestVR.cs" />
     <Compile Include="FPSCounter.cs" />
     <Compile Include="FPSDisplay.cs" />
     <Compile Include="FPSmeter.cs" />
     <Compile Include="FPSTEMP.cs" />
+    <Compile Include="FrameCounter.cs" />
     <Compile Include="FreeLookCam.cs" />
     <Compile Include="Frost.cs" />
     <Compile Include="FTEM_AnimationScrollTexture.cs" />
@@ -964,6 +937,8 @@
     <Compile Include="FXAA.cs" />
     <Compile Include="FXAAPostEffectsBase.cs" />
     <Compile Include="Garden.cs" />
+    <Compile Include="GazeEventArgs.cs" />
+    <Compile Include="GazeEventHandler.cs" />
     <Compile Include="getAnimatorParams.cs" />
     <Compile Include="getAxePos.cs" />
     <Compile Include="GetCameraMatrices.cs" />
@@ -1014,9 +989,10 @@
     <Compile Include="GUIArea.cs" />
     <Compile Include="GUIBackgroundColor.cs" />
     <Compile Include="GUIScale.cs" />
+    <Compile Include="GunAim.cs" />
+    <Compile Include="GunShoot.cs" />
     <Compile Include="HackFogCave.cs" />
     <Compile Include="hangingRopeTrigger.cs" />
-    <Compile Include="HBAO.cs" />
     <Compile Include="HeadLookController.cs" />
     <Compile Include="headShotObject.cs" />
     <Compile Include="HellDoorWeight.cs" />
@@ -1745,6 +1721,7 @@
     <Compile Include="ICSharpCode\SharpZipLib\Zip\ZipExtraData.cs" />
     <Compile Include="ICSharpCode\SharpZipLib\Zip\ZipHelperStream.cs" />
     <Compile Include="IDeserialized.cs" />
+    <Compile Include="IgnoreCollisionInChildren.cs" />
     <Compile Include="ignoreFauxHits.cs" />
     <Compile Include="ignorePushCollider.cs" />
     <Compile Include="ImageEffectOptimizer.cs" />
@@ -1774,11 +1751,14 @@
     <Compile Include="Inspector\SliderAttribute.cs" />
     <Compile Include="Inspector\ToggleAttribute.cs" />
     <Compile Include="int2.cs" />
+    <Compile Include="IntervalTextureLogger.cs" />
     <Compile Include="InvAttachmentPoint.cs" />
     <Compile Include="InvBaseItem.cs" />
     <Compile Include="InvDatabase.cs" />
     <Compile Include="InventoryFakeGround.cs" />
     <Compile Include="InventoryImageEffectOptimizer.cs" />
+    <Compile Include="inventoryItemSpreadSetup.cs" />
+    <Compile Include="inventoryItemSpreadTrigger.cs" />
     <Compile Include="InvEquipment.cs" />
     <Compile Include="Investigate.cs" />
     <Compile Include="InvGameItem.cs" />
@@ -1792,7 +1772,6 @@
     <Compile Include="iTween.cs" />
     <Compile Include="iTweenFSMEvents.cs" />
     <Compile Include="iTweenFSMType.cs" />
-    <Compile Include="IUpdate.cs" />
     <Compile Include="IYieldInstruction.cs" />
     <Compile Include="JetParticleEffect.cs" />
     <Compile Include="Joystick.cs" />
@@ -1823,6 +1802,7 @@
     <Compile Include="LevelSerializer.cs" />
     <Compile Include="LightningFlicker.cs" />
     <Compile Include="limitBlurDistance.cs" />
+    <Compile Include="LimitRotation.cs" />
     <Compile Include="limitSledBlur.cs" />
     <Compile Include="lineAimerScript.cs" />
     <Compile Include="LinearEmitter.cs" />
@@ -1878,6 +1858,7 @@
     <Compile Include="LOD_CaveMedium.cs" />
     <Compile Include="LOD_CaveSmall.cs" />
     <Compile Include="LOD_GroupToggle.cs" />
+    <Compile Include="LOD_GroupToggleMultiPoint.cs" />
     <Compile Include="LOD_Manager.cs" />
     <Compile Include="LOD_Manager_StipplingMaterialsSwitcher.cs" />
     <Compile Include="LOD_PickUps.cs" />
@@ -1907,6 +1888,7 @@
     <Compile Include="MakeClearing.cs" />
     <Compile Include="Manifest.cs" />
     <Compile Include="ManualRVOAgent.cs" />
+    <Compile Include="mapRaiseController.cs" />
     <Compile Include="MassDestructionSaveManager.cs" />
     <Compile Include="MasterFireSpread.cs" />
     <Compile Include="MB2_TestShowHide.cs" />
@@ -1948,9 +1930,12 @@
     <Compile Include="MeshCombineUtility.cs" />
     <Compile Include="mikeHelpers.cs" />
     <Compile Include="MipTexMap.cs" />
+    <Compile Include="MirrorReflection.cs" />
     <Compile Include="MobileInput.cs" />
     <Compile Include="Molotov.cs" />
+    <Compile Include="molotovCollisionProxy.cs" />
     <Compile Include="molotovCollisionTransfer.cs" />
+    <Compile Include="molotovSpearFollow.cs" />
     <Compile Include="MonoBehaviourEx.cs" />
     <Compile Include="MoonFix.cs" />
     <Compile Include="MouseLayerAlloc.cs" />
@@ -2005,6 +1990,7 @@
     <Compile Include="mutantTargetFunctions.cs" />
     <Compile Include="mutantTargetSwitching.cs" />
     <Compile Include="mutantToPlayerFunctions.cs" />
+    <Compile Include="mutantTransferFire.cs" />
     <Compile Include="mutantTypeSetup.cs" />
     <Compile Include="mutantVis.cs" />
     <Compile Include="mutantWaterDetect.cs" />
@@ -2053,10 +2039,61 @@
     <Compile Include="OrbCreationExtensions\TransformExtensions.cs" />
     <Compile Include="OrbCreationExtensions\Vector2Extensions.cs" />
     <Compile Include="OrbCreationExtensions\Vector3Extensions.cs" />
+    <Compile Include="overheadPlaneController.cs" />
+    <Compile Include="overheadPlaneSetup.cs" />
+    <Compile Include="OVRBoundary.cs" />
+    <Compile Include="OVRCameraComposition.cs" />
+    <Compile Include="OVRCameraRig.cs" />
+    <Compile Include="OVRChromaticAberration.cs" />
+    <Compile Include="OVRComposition.cs" />
+    <Compile Include="OVRCompositionUtil.cs" />
+    <Compile Include="OVRCubemapCapture.cs" />
+    <Compile Include="OVRDebugHeadController.cs" />
+    <Compile Include="OVRDebugInfo.cs" />
+    <Compile Include="OVRDirectComposition.cs" />
+    <Compile Include="OVRDisplay.cs" />
+    <Compile Include="OVRExtensions.cs" />
+    <Compile Include="OVRExternalComposition.cs" />
+    <Compile Include="OVRGazePointer.cs" />
+    <Compile Include="OVRGearVrControllerTest.cs" />
+    <Compile Include="OVRGrabbable.cs" />
+    <Compile Include="OVRGrabber.cs" />
+    <Compile Include="OVRGridCube.cs" />
+    <Compile Include="OVRHaptics.cs" />
+    <Compile Include="OVRHapticsClip.cs" />
+    <Compile Include="OVRInput.cs" />
+    <Compile Include="OVRLayerAttribute.cs" />
+    <Compile Include="OVRManager.cs" />
+    <Compile Include="OVRMixedReality.cs" />
+    <Compile Include="OVRMixedRealityCaptureSettings.cs" />
+    <Compile Include="OVRModeParms.cs" />
+    <Compile Include="OVRMonoscopic.cs" />
+    <Compile Include="OVRMousePointer.cs" />
+    <Compile Include="OVRMRForegroundCameraManager.cs" />
+    <Compile Include="OVRNativeBuffer.cs" />
+    <Compile Include="OVROverlay.cs" />
+    <Compile Include="OVRPlatformMenu.cs" />
+    <Compile Include="OVRPlayerController.cs" />
+    <Compile Include="OVRPlugin.cs" />
+    <Compile Include="OVRPose.cs" />
+    <Compile Include="OVRProfile.cs" />
+    <Compile Include="OVRProgressIndicator.cs" />
+    <Compile Include="OVRRaycaster.cs" />
+    <Compile Include="OVRResetOrientation.cs" />
+    <Compile Include="OVRSandwichComposition.cs" />
+    <Compile Include="OVRSceneSampleController.cs" />
+    <Compile Include="OVRScreenFade.cs" />
+    <Compile Include="OVRTouchpad.cs" />
+    <Compile Include="OVRTouchpadHelper.cs" />
+    <Compile Include="OVRTrackedRemote.cs" />
+    <Compile Include="OVRTracker.cs" />
+    <Compile Include="OVRWaitCursor.cs" />
     <Compile Include="PanWithMouse.cs" />
     <Compile Include="parentObjectsToWorld.cs" />
     <Compile Include="parentToWorld.cs" />
     <Compile Include="particleController.cs" />
+    <Compile Include="ParticleExamples.cs" />
+    <Compile Include="ParticleMenu.cs" />
     <Compile Include="ParticleScale2.cs" />
     <Compile Include="ParticleSceneControls.cs" />
     <Compile Include="ParticleSystemDestroyer.cs" />
@@ -2280,6 +2317,7 @@
     <Compile Include="playerEpilogueEvents.cs" />
     <Compile Include="PlayerFillPotAction.cs" />
     <Compile Include="playerFSMHelper.cs" />
+    <Compile Include="PlayerGoodbyeTimmyAction.cs" />
     <Compile Include="playerHashIDs.cs" />
     <Compile Include="playerHitReactions.cs" />
     <Compile Include="PlayerIcon.cs" />
@@ -2290,6 +2328,7 @@
     <Compile Include="playerOnRaftSetup.cs" />
     <Compile Include="playerOpenKeypadDoorAction.cs" />
     <Compile Include="playerParticleSpawn.cs" />
+    <Compile Include="playerPlaceArtifactAction.cs" />
     <Compile Include="playerPlaneControl.cs" />
     <Compile Include="PlayerPreferences.cs" />
     <Compile Include="PlayerPrefsFile.cs" />
@@ -2314,12 +2353,15 @@
     <Compile Include="PlayMakerUtils.cs" />
     <Compile Include="pmCombatReplace.cs" />
     <Compile Include="pmSearchReplace.cs" />
+    <Compile Include="PointerEventArgs.cs" />
+    <Compile Include="PointerEventHandler.cs" />
     <Compile Include="PreClamp.cs" />
     <Compile Include="PrefabIdentifier.cs" />
     <Compile Include="PrefabInstance.cs" />
     <Compile Include="prefs.cs" />
     <Compile Include="PreserveObjectWhenLoading.cs" />
     <Compile Include="PreWarm.cs" />
+    <Compile Include="PrewarmSerializer.cs" />
     <Compile Include="ProceduralGridMover.cs" />
     <Compile Include="ProjectCubeIntoSH3.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -2340,6 +2382,8 @@
     <Compile Include="RabbitCage.cs" />
     <Compile Include="rabbitEvents.cs" />
     <Compile Include="raccoonAnimatorControl.cs" />
+    <Compile Include="RackPlacement.cs" />
+    <Compile Include="RackPlacementTypes.cs" />
     <Compile Include="Radical.cs" />
     <Compile Include="RadicalLibrary\CRSpline.cs" />
     <Compile Include="RadicalLibrary\CubicBez.cs" />
@@ -2360,24 +2404,20 @@
     <Compile Include="raftFoamController.cs" />
     <Compile Include="raftOnLand.cs" />
     <Compile Include="RaftPush.cs" />
+    <Compile Include="ragdollExplode.cs" />
     <Compile Include="RagePixelSupport.cs" />
     <Compile Include="RainEffigy.cs" />
+    <Compile Include="rainHeightChecker.cs" />
     <Compile Include="rainParent.cs" />
+    <Compile Include="rainParticleController.cs" />
     <Compile Include="RainSfx.cs" />
     <Compile Include="rainToWorld.cs" />
     <Compile Include="RainTypes.cs" />
     <Compile Include="randomRitualArt.cs" />
-    <Compile Include="RazerSDK\Api\IRazerApi.cs" />
-    <Compile Include="RazerSDK\Api\RazerApi.cs" />
-    <Compile Include="RazerSDK\ChromaPackage\Model\ChromaSdkInput.cs" />
-    <Compile Include="RazerSDK\ChromaPackage\Model\ChromaSdkInputAuthor.cs" />
-    <Compile Include="RazerSDK\ChromaPackage\Model\PostChromaSdkResponse.cs" />
-    <Compile Include="RazerSDK\Client\ApiClient.cs" />
-    <Compile Include="RazerSDK\Client\ApiException.cs" />
-    <Compile Include="RazerSDK\Client\Configuration.cs" />
-    <Compile Include="RazerSDK\Client\ExceptionFactory.cs" />
+    <Compile Include="RandomTable.cs" />
     <Compile Include="rbSolve.cs" />
     <Compile Include="RealTime.cs" />
+    <Compile Include="RecenterOnAwake.cs" />
     <Compile Include="redmanSetup.cs" />
     <Compile Include="redmanSpawner.cs" />
     <Compile Include="ReflectProbeUpdate.cs" />
@@ -2394,12 +2434,12 @@
     <Compile Include="RendererExtensions.cs" />
     <Compile Include="ReplaceWithNewPrefab.cs" />
     <Compile Include="resetArtifactProperties.cs" />
+    <Compile Include="resetBloodMaterialDamage.cs" />
     <Compile Include="ResetTraps.cs" />
     <Compile Include="ResolveHoleCollision.cs" />
-    <Compile Include="RestSharp\Contrib\Helpers.cs" />
-    <Compile Include="RestSharp\Contrib\HttpEncoder.cs" />
-    <Compile Include="RestSharp\Contrib\HttpUtility.cs" />
     <Compile Include="ResultLogger.cs" />
+    <Compile Include="RewiredConsts\Actions.cs" />
+    <Compile Include="RewiredConsts\TFCustomController.cs" />
     <Compile Include="Rewired\Data\UserDataStore_PlayerPrefs.cs" />
     <Compile Include="Rewired\Demos\ControlMapperDemoMessage.cs" />
     <Compile Include="Rewired\InputManager.cs" />
@@ -2470,12 +2510,12 @@
     <Compile Include="SaveLoad.cs" />
     <Compile Include="SaveTurnOff.cs" />
     <Compile Include="ScaleObject.cs" />
+    <Compile Include="SceneCameraMovement.cs" />
     <Compile Include="SceneColorControl_Anim.cs" />
     <Compile Include="SceneIndex.cs" />
     <Compile Include="sceneTracker.cs" />
     <Compile Include="ScionDebug.cs" />
     <Compile Include="ScionEngine\Bloom.cs" />
-    <Compile Include="ScionEngine\BloomParameters.cs" />
     <Compile Include="ScionEngine\CameraMode.cs" />
     <Compile Include="ScionEngine\CameraParameters.cs" />
     <Compile Include="ScionEngine\ColorGrading.cs" />
@@ -2487,13 +2527,20 @@
     <Compile Include="ScionEngine\DepthFocusMode.cs" />
     <Compile Include="ScionEngine\DepthOfField.cs" />
     <Compile Include="ScionEngine\DepthOfFieldParameters.cs" />
-    <Compile Include="ScionEngine\DepthOfFieldQuality.cs" />
+    <Compile Include="ScionEngine\DepthOfFieldSamples.cs" />
     <Compile Include="ScionEngine\Downsampling.cs" />
+    <Compile Include="ScionEngine\GlareParameters.cs" />
     <Compile Include="ScionEngine\LensDirtParameters.cs" />
+    <Compile Include="ScionEngine\LensFlareBlurSamples.cs" />
+    <Compile Include="ScionEngine\LensFlareGhostSamples.cs" />
+    <Compile Include="ScionEngine\LensFlareParameters.cs" />
     <Compile Include="ScionEngine\PostProcessParameters.cs" />
     <Compile Include="ScionEngine\PreCalcValues.cs" />
     <Compile Include="ScionEngine\ScionGraphics.cs" />
+    <Compile Include="ScionEngine\ScionLensFlare.cs" />
     <Compile Include="ScionEngine\ScionPostProcess.cs" />
+    <Compile Include="ScionEngine\ScionPostProcessBase.cs" />
+    <Compile Include="ScionEngine\ScionPostProcessNoTonemap.cs" />
     <Compile Include="ScionEngine\ScionUtility.cs" />
     <Compile Include="ScionEngine\ShaderSettings.cs" />
     <Compile Include="ScionEngine\TonemappingMode.cs" />
@@ -2501,12 +2548,14 @@
     <Compile Include="ScreenScale.cs" />
     <Compile Include="ScriptedExample.cs" />
     <Compile Include="ScrollView.cs" />
+    <Compile Include="secondArtifactController.cs" />
     <Compile Include="Seeker.cs" />
     <Compile Include="Seen.cs" />
     <Compile Include="SelectorHelperClass.cs" />
     <Compile Include="SelectPageNumber.cs" />
     <Compile Include="sendCollisionEventsAsDamage.cs" />
     <Compile Include="sendEnemyRunAway.cs" />
+    <Compile Include="SenderTypes.cs" />
     <Compile Include="sendStarLocations.cs" />
     <Compile Include="SerializationHelper.cs" />
     <Compile Include="Serialization\AttributeListProvider.cs" />
@@ -2562,7 +2611,6 @@
     <Compile Include="SerializeVector3.cs" />
     <Compile Include="SerializeVector4.cs" />
     <Compile Include="SerializeWaitForSeconds.cs" />
-    <Compile Include="SESSAO.cs" />
     <Compile Include="setAmmoType.cs" />
     <Compile Include="SetColorOnSelection.cs" />
     <Compile Include="setIkPosition.cs" />
@@ -2601,6 +2649,7 @@
     <Compile Include="SheenBillboard.cs" />
     <Compile Include="SheenBillboardSettings.cs" />
     <Compile Include="SheenBillboardSlave.cs" />
+    <Compile Include="SheenTimeManager.cs" />
     <Compile Include="ShelterTrigger.cs" />
     <Compile Include="SHlighting.cs" />
     <Compile Include="ShowCanLoad.cs" />
@@ -2615,11 +2664,6 @@
     <Compile Include="simpleFPSCamera.cs" />
     <Compile Include="simpleIkLegs.cs" />
     <Compile Include="simpleIkSolver.cs" />
-    <Compile Include="SimpleLODClickObject.cs" />
-    <Compile Include="SimpleLODDemo.cs" />
-    <Compile Include="SimpleLODDemoCamera.cs" />
-    <Compile Include="SimpleLODShowInfo.cs" />
-    <Compile Include="SimpleLODTredMill.cs" />
     <Compile Include="SimpleMouseRotator.cs" />
     <Compile Include="simpleObjectAvoidance.cs" />
     <Compile Include="SimpleTarget.cs" />
@@ -2633,14 +2677,6 @@
     <Compile Include="SkylightingAndGICamera.cs" />
     <Compile Include="slingShotController.cs" />
     <Compile Include="SlowMoButton.cs" />
-    <Compile Include="Smaa\DebugPass.cs" />
-    <Compile Include="Smaa\EdgeDetectionMethod.cs" />
-    <Compile Include="Smaa\HDRMode.cs" />
-    <Compile Include="Smaa\MinAttribute.cs" />
-    <Compile Include="Smaa\PredicationPreset.cs" />
-    <Compile Include="Smaa\Preset.cs" />
-    <Compile Include="Smaa\QualityPreset.cs" />
-    <Compile Include="Smaa\SMAA.cs" />
     <Compile Include="smashHitTrigger.cs" />
     <Compile Include="SmokeParticles.cs" />
     <Compile Include="SmoothCameraOrbit.cs" />
@@ -2685,6 +2721,39 @@
     <Compile Include="SteamManager.cs" />
     <Compile Include="SteamPlatform.cs" />
     <Compile Include="SteamSocket.cs" />
+    <Compile Include="SteamVR.cs" />
+    <Compile Include="SteamVR_Camera.cs" />
+    <Compile Include="SteamVR_CameraFlip.cs" />
+    <Compile Include="SteamVR_CameraMask.cs" />
+    <Compile Include="SteamVR_Controller.cs" />
+    <Compile Include="SteamVR_ControllerManager.cs" />
+    <Compile Include="SteamVR_Ears.cs" />
+    <Compile Include="SteamVR_Events.cs" />
+    <Compile Include="SteamVR_ExternalCamera.cs" />
+    <Compile Include="SteamVR_Fade.cs" />
+    <Compile Include="SteamVR_Frustum.cs" />
+    <Compile Include="SteamVR_GameView.cs" />
+    <Compile Include="SteamVR_GazeTracker.cs" />
+    <Compile Include="SteamVR_IK.cs" />
+    <Compile Include="SteamVR_LaserPointer.cs" />
+    <Compile Include="SteamVR_LoadLevel.cs" />
+    <Compile Include="SteamVR_Menu.cs" />
+    <Compile Include="SteamVR_Overlay.cs" />
+    <Compile Include="SteamVR_PlayArea.cs" />
+    <Compile Include="SteamVR_Render.cs" />
+    <Compile Include="SteamVR_RenderModel.cs" />
+    <Compile Include="SteamVR_Skybox.cs" />
+    <Compile Include="SteamVR_SphericalProjection.cs" />
+    <Compile Include="SteamVR_Stats.cs" />
+    <Compile Include="SteamVR_Teleporter.cs" />
+    <Compile Include="SteamVR_TestController.cs" />
+    <Compile Include="SteamVR_TestThrow.cs" />
+    <Compile Include="SteamVR_TestTrackedCamera.cs" />
+    <Compile Include="SteamVR_TrackedCamera.cs" />
+    <Compile Include="SteamVR_TrackedController.cs" />
+    <Compile Include="SteamVR_TrackedObject.cs" />
+    <Compile Include="SteamVR_UpdatePoses.cs" />
+    <Compile Include="SteamVR_Utils.cs" />
     <Compile Include="stickToTerrain.cs" />
     <Compile Include="StickyBomb.cs" />
     <Compile Include="Storage.cs" />
@@ -2754,6 +2823,7 @@
     <Compile Include="TheForest\Audio\Sfx.cs" />
     <Compile Include="TheForest\Audio\SfxInfo.cs" />
     <Compile Include="TheForest\Audio\WeaponHitSfxInfo.cs" />
+    <Compile Include="TheForest\Buildings\Creation\AllowConstruction.cs" />
     <Compile Include="TheForest\Buildings\Creation\BoneFenceArchitect.cs" />
     <Compile Include="TheForest\Buildings\Creation\BoneFenceChunkArchitect.cs" />
     <Compile Include="TheForest\Buildings\Creation\BridgeArchitect.cs" />
@@ -2785,6 +2855,7 @@
     <Compile Include="TheForest\Buildings\Creation\MultipointShapeGizmo.cs" />
     <Compile Include="TheForest\Buildings\Creation\PlaceGhostSfx.cs" />
     <Compile Include="TheForest\Buildings\Creation\PlacerDistance.cs" />
+    <Compile Include="TheForest\Buildings\Creation\PreventConstruction.cs" />
     <Compile Include="TheForest\Buildings\Creation\RaftArchitect.cs" />
     <Compile Include="TheForest\Buildings\Creation\RaftOarSwap.cs" />
     <Compile Include="TheForest\Buildings\Creation\RockFenceArchitect.cs" />
@@ -2887,6 +2958,7 @@
     <Compile Include="TheForest\DeathMPTut.cs" />
     <Compile Include="TheForest\DebugConsole.cs" />
     <Compile Include="TheForest\DebugConsoleRoutine.cs" />
+    <Compile Include="TheForest\DebugMacro.cs" />
     <Compile Include="TheForest\Graphics\CGUtility.cs" />
     <Compile Include="TheForest\Graphics\Floating.cs" />
     <Compile Include="TheForest\Graphics\Lake.cs" />
@@ -2899,6 +2971,7 @@
     <Compile Include="TheForest\Items\Core\IItemStorage.cs" />
     <Compile Include="TheForest\Items\Core\ItemAnimatorHashHelper.cs" />
     <Compile Include="TheForest\Items\Core\ItemStorage.cs" />
+    <Compile Include="TheForest\Items\Crafting\ShowRecipeBook.cs" />
     <Compile Include="TheForest\Items\Craft\CraftingCog.cs" />
     <Compile Include="TheForest\Items\Craft\DisassembleExtension.cs" />
     <Compile Include="TheForest\Items\Craft\Interfaces\ICraftOverride.cs" />
@@ -2932,6 +3005,7 @@
     <Compile Include="TheForest\Items\Inventory\ItemProperties.cs" />
     <Compile Include="TheForest\Items\Inventory\ItemStorageProxy.cs" />
     <Compile Include="TheForest\Items\Inventory\MapInventoryItemView.cs" />
+    <Compile Include="TheForest\Items\Inventory\MouseEventsProxy.cs" />
     <Compile Include="TheForest\Items\Inventory\PlayerInventory.cs" />
     <Compile Include="TheForest\Items\Inventory\RobotInventoryItemView.cs" />
     <Compile Include="TheForest\Items\Inventory\WaterSkinInventoryItemView.cs" />
@@ -3023,6 +3097,15 @@
     <Compile Include="TheForest\Player\Actions\PlayerSkinAnimalAction.cs" />
     <Compile Include="TheForest\Player\ActiveAreaInfo.cs" />
     <Compile Include="TheForest\Player\AimingReticle.cs" />
+    <Compile Include="TheForest\Player\Clothing\ClothingInventoryView.cs" />
+    <Compile Include="TheForest\Player\Clothing\ClothingItem.cs" />
+    <Compile Include="TheForest\Player\Clothing\ClothingItemDatabase.cs" />
+    <Compile Include="TheForest\Player\Clothing\ClothingItemIdPicker.cs" />
+    <Compile Include="TheForest\Player\Clothing\ClothingPickup.cs" />
+    <Compile Include="TheForest\Player\Clothing\MaterialSet.cs" />
+    <Compile Include="TheForest\Player\Clothing\PlayerClothing.cs" />
+    <Compile Include="TheForest\Player\Data\BoolData.cs" />
+    <Compile Include="TheForest\Player\DynamicBookLinks.cs" />
     <Compile Include="TheForest\Player\GameMode_Creative.cs" />
     <Compile Include="TheForest\Player\HeldItemsData.cs" />
     <Compile Include="TheForest\Player\IAccountInfo.cs" />
@@ -3036,6 +3119,7 @@
     <Compile Include="TheForest\Player\PlayerRainFollow.cs" />
     <Compile Include="TheForest\Player\PlayerVariationSelector.cs" />
     <Compile Include="TheForest\Player\rockThrowerAimingReticle.cs" />
+    <Compile Include="TheForest\Player\SanityTester.cs" />
     <Compile Include="TheForest\Player\SeasonGreebleLayers.cs" />
     <Compile Include="TheForest\Player\SerializableSurvivalBookTodo.cs" />
     <Compile Include="TheForest\Player\SteamAccountInfo.cs" />
@@ -3105,6 +3189,7 @@
     <Compile Include="TheForest\Tools\PreloadSerializerPrefabs.cs" />
     <Compile Include="TheForest\Tools\SendMessageTo.cs" />
     <Compile Include="TheForest\Tools\ShowBounds.cs" />
+    <Compile Include="TheForest\Tools\ShowSkinnedMeshBones.cs" />
     <Compile Include="TheForest\Tools\TfEvent.cs" />
     <Compile Include="TheForest\Tools\UnloadUnusedAssets.cs" />
     <Compile Include="TheForest\UI\ActionIcon.cs" />
@@ -3124,12 +3209,15 @@
     <Compile Include="TheForest\UI\EnableOnSelectProxy.cs" />
     <Compile Include="TheForest\UI\ExpandBookTab.cs" />
     <Compile Include="TheForest\UI\FirstSelectControl.cs" />
+    <Compile Include="TheForest\UI\GamepadInputIconPosition.cs" />
     <Compile Include="TheForest\UI\GamepadInputToSelectedControl.cs" />
+    <Compile Include="TheForest\UI\GamepadInputToSelectedPopup.cs" />
     <Compile Include="TheForest\UI\GamepadSelectedControl.cs" />
     <Compile Include="TheForest\UI\HostNotRespondingAlert.cs" />
     <Compile Include="TheForest\UI\InputDeviceManager.cs" />
     <Compile Include="TheForest\UI\InputDeviceRow.cs" />
     <Compile Include="TheForest\UI\InputMappingIcons.cs" />
+    <Compile Include="TheForest\UI\Interfaces\IScreenSizeRatio.cs" />
     <Compile Include="TheForest\UI\Interfaces\IVirtualCursorSnapNodeGroupTester.cs" />
     <Compile Include="TheForest\UI\ItemDualActionWidget.cs" />
     <Compile Include="TheForest\UI\ItemListWidget.cs" />
@@ -3159,17 +3247,23 @@
     <Compile Include="TheForest\UI\SideIcons.cs" />
     <Compile Include="TheForest\UI\SleepTimerDisplay.cs" />
     <Compile Include="TheForest\UI\SteamBuildIdLabel.cs" />
+    <Compile Include="TheForest\UI\TimeSinceLevelLoad.cs" />
     <Compile Include="TheForest\UI\TogglePosition.cs" />
     <Compile Include="TheForest\UI\ToggleUIPopupListSelection.cs" />
     <Compile Include="TheForest\UI\UiFollowTarget.cs" />
+    <Compile Include="TheForest\UI\UiFollowTarget2.cs" />
     <Compile Include="TheForest\UI\UiTranslationDatabase.cs" />
     <Compile Include="TheForest\UI\UiTranslationLabel.cs" />
+    <Compile Include="TheForest\UI\UiTranslationLabelDyn.cs" />
     <Compile Include="TheForest\UI\UiTranslationNode.cs" />
     <Compile Include="TheForest\UI\UiTranslationOverlayLabel.cs" />
     <Compile Include="TheForest\UI\UiTranslationOverlayNode.cs" />
     <Compile Include="TheForest\UI\UiTranslationOverlaySystem.cs" />
     <Compile Include="TheForest\UI\UiTranslationOverlayWorld.cs" />
     <Compile Include="TheForest\UI\UiTranslationPopupLabel.cs" />
+    <Compile Include="TheForest\UI\UiTranslationTextMesh.cs" />
+    <Compile Include="TheForest\UI\UiTranslationTextMeshDyn.cs" />
+    <Compile Include="TheForest\UI\UiTranslationTextMeshNode.cs" />
     <Compile Include="TheForest\UI\UsernameLabel.cs" />
     <Compile Include="TheForest\UI\VirtualCursor.cs" />
     <Compile Include="TheForest\UI\VirtualCursorSnapFocus.cs" />
@@ -3184,6 +3278,7 @@
     <Compile Include="TheForest\Utils\AssetBundle\BundledPrefabLoader.cs" />
     <Compile Include="TheForest\Utils\BillboardFast.cs" />
     <Compile Include="TheForest\Utils\BurnProxy.cs" />
+    <Compile Include="TheForest\Utils\CameraEx.cs" />
     <Compile Include="TheForest\Utils\ChangeColorOnHover.cs" />
     <Compile Include="TheForest\Utils\CheckUniqueTag.cs" />
     <Compile Include="TheForest\Utils\ColorEx.cs" />
@@ -3201,22 +3296,27 @@
     <Compile Include="TheForest\Utils\DoAfter.cs" />
     <Compile Include="TheForest\Utils\Enums\CapsuleDirections.cs" />
     <Compile Include="TheForest\Utils\FakeParent.cs" />
+    <Compile Include="TheForest\Utils\GameObjectExtensions.cs" />
     <Compile Include="TheForest\Utils\GamepadToggleGo.cs" />
     <Compile Include="TheForest\Utils\GameSetup.cs" />
     <Compile Include="TheForest\Utils\GameStats.cs" />
     <Compile Include="TheForest\Utils\GeoHash.cs" />
     <Compile Include="TheForest\Utils\GeoHashHelper.cs" />
+    <Compile Include="TheForest\Utils\GeoHashUnique.cs" />
     <Compile Include="TheForest\Utils\GlobalDataBinding.cs" />
     <Compile Include="TheForest\Utils\GlobalDataSaver.cs" />
     <Compile Include="TheForest\Utils\GotCleanProxy.cs" />
     <Compile Include="TheForest\Utils\HitParticles.cs" />
+    <Compile Include="TheForest\Utils\InCaveToggleGo.cs" />
     <Compile Include="TheForest\Utils\Input.cs" />
     <Compile Include="TheForest\Utils\InputActionButton.cs" />
     <Compile Include="TheForest\Utils\InputActionRow.cs" />
     <Compile Include="TheForest\Utils\InputMapping.cs" />
     <Compile Include="TheForest\Utils\InputMappingAction.cs" />
     <Compile Include="TheForest\Utils\LerpPositionBasedOnRatio.cs" />
+    <Compile Include="TheForest\Utils\ListExtensions.cs" />
     <Compile Include="TheForest\Utils\LocalPlayer.cs" />
+    <Compile Include="TheForest\Utils\Lookup.cs" />
     <Compile Include="TheForest\Utils\MaterialPropertyColors.cs" />
     <Compile Include="TheForest\Utils\MathEx.cs" />
     <Compile Include="TheForest\Utils\Mood.cs" />
@@ -3254,7 +3354,6 @@
     <Compile Include="TheForest\Utils\RewiredSpawner.cs" />
     <Compile Include="TheForest\Utils\SaveSlotUtils.cs" />
     <Compile Include="TheForest\Utils\Scene.cs" />
-    <Compile Include="TheForest\Utils\SceneUtils.cs" />
     <Compile Include="TheForest\Utils\SerializableTimer.cs" />
     <Compile Include="TheForest\Utils\SetLightColor.cs" />
     <Compile Include="TheForest\Utils\SetMaterialProperty.cs" />
@@ -3263,9 +3362,12 @@
     <Compile Include="TheForest\Utils\Settings\AnimalSettings.cs" />
     <Compile Include="TheForest\Utils\Settings\GameSettings.cs" />
     <Compile Include="TheForest\Utils\Settings\SurvivalSettings.cs" />
+    <Compile Include="TheForest\Utils\SkewTransform.cs" />
     <Compile Include="TheForest\Utils\SpawnMutantGlobalDataBinding.cs" />
     <Compile Include="TheForest\Utils\SpawnMutantsSerializerMessageProxy.cs" />
     <Compile Include="TheForest\Utils\SpawnParticles.cs" />
+    <Compile Include="TheForest\Utils\StringEx.cs" />
+    <Compile Include="TheForest\Utils\StringExtensions.cs" />
     <Compile Include="TheForest\Utils\TimedStippling.cs" />
     <Compile Include="TheForest\Utils\TimedStippling_Distance.cs" />
     <Compile Include="TheForest\Utils\TimedStippling_Pool.cs" />
@@ -3273,6 +3375,7 @@
     <Compile Include="TheForest\Utils\TriggerTagSensor.cs" />
     <Compile Include="TheForest\Utils\VideoStreaming.cs" />
     <Compile Include="TheForest\Utils\WorkSchedulerInterfaces\IThreadSafeTask.cs" />
+    <Compile Include="TheForest\VR\VRCustomRewiredController.cs" />
     <Compile Include="TheForest\World\Areas\Area.cs" />
     <Compile Include="TheForest\World\Areas\AreaGate.cs" />
     <Compile Include="TheForest\World\Areas\AreaMembers.cs" />
@@ -3280,6 +3383,7 @@
     <Compile Include="TheForest\World\ButtonDoorSystem.cs" />
     <Compile Include="TheForest\World\DoorWeightOpener.cs" />
     <Compile Include="TheForest\World\DynamicFloor.cs" />
+    <Compile Include="TheForest\World\DynamicFloorProxy.cs" />
     <Compile Include="TheForest\World\ElevatorSystem.cs" />
     <Compile Include="TheForest\World\EnableInWaterProxy.cs" />
     <Compile Include="TheForest\World\IsOcean.cs" />
@@ -3322,6 +3426,7 @@
     <Compile Include="TouchPadSwipe.cs" />
     <Compile Include="TrackMouseMovement.cs" />
     <Compile Include="trailEffectTestObject.cs" />
+    <Compile Include="transferParent.cs" />
     <Compile Include="TransformExtensions.cs" />
     <Compile Include="TransformLerp.cs" />
     <Compile Include="Transform_Demo.cs" />
@@ -3359,6 +3464,7 @@
     <Compile Include="Tutorial5.cs" />
     <Compile Include="TweenAlpha.cs" />
     <Compile Include="TweenColor.cs" />
+    <Compile Include="TweenerAutoStart.cs" />
     <Compile Include="TweenFill.cs" />
     <Compile Include="TweenFOV.cs" />
     <Compile Include="TweenHeight.cs" />
@@ -3380,6 +3486,7 @@
     <Compile Include="UIBasicSprite.cs" />
     <Compile Include="UIButton.cs" />
     <Compile Include="UIButtonActivate.cs" />
+    <Compile Include="UIButtonActivateN.cs" />
     <Compile Include="UIButtonColor.cs" />
     <Compile Include="UIButtonKeys.cs" />
     <Compile Include="UIButtonMessage.cs" />
@@ -3427,6 +3534,7 @@
     <Compile Include="UIRoot.cs" />
     <Compile Include="UISavedOption.cs" />
     <Compile Include="UIScrollBar.cs" />
+    <Compile Include="UIScrollOnNavigation.cs" />
     <Compile Include="UIScrollView.cs" />
     <Compile Include="UIShowControlScheme.cs" />
     <Compile Include="UISlider.cs" />
@@ -3467,9 +3575,61 @@
     <Compile Include="UniLinq\SortDirection.cs" />
     <Compile Include="UniLinq\SortSequenceContext.cs" />
     <Compile Include="UniqueIdentifier.cs" />
+    <Compile Include="UnityEngine\EventSystems\OVRInputModule.cs" />
+    <Compile Include="UnityEngine\EventSystems\OVRPhysicsRaycaster.cs" />
+    <Compile Include="UnityEngine\EventSystems\OVRPointerEventData.cs" />
+    <Compile Include="UnityEngine\EventSystems\PointerEventDataExtension.cs" />
+    <Compile Include="UnityEngine\PostProcessing\AmbientOcclusionComponent.cs" />
+    <Compile Include="UnityEngine\PostProcessing\AmbientOcclusionModel.cs" />
+    <Compile Include="UnityEngine\PostProcessing\AntialiasingModel.cs" />
+    <Compile Include="UnityEngine\PostProcessing\BloomComponent.cs" />
+    <Compile Include="UnityEngine\PostProcessing\BloomModel.cs" />
+    <Compile Include="UnityEngine\PostProcessing\BuiltinDebugViewsComponent.cs" />
+    <Compile Include="UnityEngine\PostProcessing\BuiltinDebugViewsModel.cs" />
+    <Compile Include="UnityEngine\PostProcessing\ChromaticAberrationComponent.cs" />
+    <Compile Include="UnityEngine\PostProcessing\ChromaticAberrationModel.cs" />
+    <Compile Include="UnityEngine\PostProcessing\ColorGradingComponent.cs" />
+    <Compile Include="UnityEngine\PostProcessing\ColorGradingCurve.cs" />
+    <Compile Include="UnityEngine\PostProcessing\ColorGradingModel.cs" />
+    <Compile Include="UnityEngine\PostProcessing\DepthOfFieldComponent.cs" />
+    <Compile Include="UnityEngine\PostProcessing\DepthOfFieldModel.cs" />
+    <Compile Include="UnityEngine\PostProcessing\DitheringComponent.cs" />
+    <Compile Include="UnityEngine\PostProcessing\DitheringModel.cs" />
+    <Compile Include="UnityEngine\PostProcessing\EyeAdaptationComponent.cs" />
+    <Compile Include="UnityEngine\PostProcessing\EyeAdaptationModel.cs" />
+    <Compile Include="UnityEngine\PostProcessing\FogComponent.cs" />
+    <Compile Include="UnityEngine\PostProcessing\FogModel.cs" />
+    <Compile Include="UnityEngine\PostProcessing\FxaaComponent.cs" />
+    <Compile Include="UnityEngine\PostProcessing\GetSetAttribute.cs" />
+    <Compile Include="UnityEngine\PostProcessing\GrainComponent.cs" />
+    <Compile Include="UnityEngine\PostProcessing\GrainModel.cs" />
+    <Compile Include="UnityEngine\PostProcessing\GraphicsUtils.cs" />
+    <Compile Include="UnityEngine\PostProcessing\MaterialFactory.cs" />
+    <Compile Include="UnityEngine\PostProcessing\MinAttribute.cs" />
+    <Compile Include="UnityEngine\PostProcessing\MotionBlurComponent.cs" />
+    <Compile Include="UnityEngine\PostProcessing\MotionBlurModel.cs" />
+    <Compile Include="UnityEngine\PostProcessing\PostProcessingBehaviour.cs" />
+    <Compile Include="UnityEngine\PostProcessing\PostProcessingComponent.cs" />
+    <Compile Include="UnityEngine\PostProcessing\PostProcessingComponentBase.cs" />
+    <Compile Include="UnityEngine\PostProcessing\PostProcessingComponentCommandBuffer.cs" />
+    <Compile Include="UnityEngine\PostProcessing\PostProcessingComponentRenderTexture.cs" />
+    <Compile Include="UnityEngine\PostProcessing\PostProcessingContext.cs" />
+    <Compile Include="UnityEngine\PostProcessing\PostProcessingModel.cs" />
+    <Compile Include="UnityEngine\PostProcessing\PostProcessingProfile.cs" />
+    <Compile Include="UnityEngine\PostProcessing\RenderTextureFactory.cs" />
+    <Compile Include="UnityEngine\PostProcessing\ScreenSpaceReflectionComponent.cs" />
+    <Compile Include="UnityEngine\PostProcessing\ScreenSpaceReflectionModel.cs" />
+    <Compile Include="UnityEngine\PostProcessing\TaaComponent.cs" />
+    <Compile Include="UnityEngine\PostProcessing\TrackballAttribute.cs" />
+    <Compile Include="UnityEngine\PostProcessing\TrackballGroupAttribute.cs" />
+    <Compile Include="UnityEngine\PostProcessing\UserLutComponent.cs" />
+    <Compile Include="UnityEngine\PostProcessing\UserLutModel.cs" />
+    <Compile Include="UnityEngine\PostProcessing\VignetteComponent.cs" />
+    <Compile Include="UnityEngine\PostProcessing\VignetteModel.cs" />
     <Compile Include="UnitySampleAssets\Characters\FirstPerson\MouseLook.cs" />
     <Compile Include="UnitySerializerVersion.cs" />
     <Compile Include="UnParent.cs" />
+    <Compile Include="UnscaledTimeParticle.cs" />
     <Compile Include="uSkyManager.cs" />
     <Compile Include="uSky\DistanceCloud.cs" />
     <Compile Include="uSky\DistanceCloud_Dominik.cs" />
@@ -3483,12 +3643,94 @@
     <Compile Include="uSky_GUI.cs" />
     <Compile Include="U_r_g_utils\clsurgutils.cs" />
     <Compile Include="ValueLookup.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\AfterTimer_Component.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\AllowTeleportWhileAttachedToHand.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\ArcheryTarget.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\Arrow.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\ArrowHand.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\ArrowheadRotation.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\Balloon.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\BalloonColliders.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\BalloonHapticBump.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\BalloonSpawner.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\BodyCollider.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\ChaperoneInfo.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\CircularDrive.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\ComplexThrowable.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\ControllerButtonHints.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\ControllerHintsExample.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\ControllerHoverHighlight.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\CustomEvents.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\DebugUI.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\DestroyOnDetachedFromHand.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\DestroyOnParticleSystemDeath.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\DestroyOnTriggerEnter.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\DistanceHaptics.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\DontDestroyOnLoad.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\EnumFlags.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\ExplosionWobble.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\FallbackCameraController.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\FireSource.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\Hand.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\HapticRack.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\HideOnHandFocusLost.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\IgnoreHovering.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\IgnoreTeleportTrace.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\InputModule.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\Interactable.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\InteractableButtonEvents.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\InteractableExample.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\InteractableHoverEvents.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\ItemPackage.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\ItemPackageReference.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\ItemPackageSpawner.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\LinearAnimation.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\LinearAnimator.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\LinearAudioPitch.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\LinearBlendshape.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\LinearDisplacement.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\LinearDrive.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\LinearMapping.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\Longbow.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\Player.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\PlaySound.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\SeeThru.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\SleepOnAwake.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\SoundBowClick.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\SoundDeparent.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\SoundPlayOneshot.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\SpawnAndAttachAfterControllerIsTracking.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\SpawnAndAttachToHand.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\SpawnRenderModel.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\Teleport.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\TeleportArc.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\TeleportArea.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\TeleportMarkerBase.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\TeleportPoint.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\Throwable.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\UIElement.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\Unparent.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\Util.cs" />
+    <Compile Include="Valve\VR\InteractionSystem\VelocityEstimator.cs" />
     <Compile Include="VariablesToSave.cs" />
     <Compile Include="Vertical.cs" />
     <Compile Include="VerticalCentered.cs" />
     <Compile Include="vhsCameraSetup.cs" />
     <Compile Include="VirtualInput.cs" />
     <Compile Include="visRangeSetup.cs" />
+    <Compile Include="VRCameraControl.cs" />
+    <Compile Include="VRCameraTextureSwitcher.cs" />
+    <Compile Include="VRCameraUISwitcher.cs" />
+    <Compile Include="VRGameobjectSwitcher.cs" />
+    <Compile Include="VRHudControl.cs" />
+    <Compile Include="VRInventoryTreeDisabler.cs" />
+    <Compile Include="VRPlayerAdapter.cs" />
+    <Compile Include="VRPlayerControl.cs" />
+    <Compile Include="VRSwitcher.cs" />
+    <Compile Include="VRSystemTarget.cs" />
+    <Compile Include="VRTheatreController.cs" />
+    <Compile Include="VRTurnOn.cs" />
+    <Compile Include="VRVignetteController.cs" />
     <Compile Include="WaitForAnimation.cs" />
     <Compile Include="WallChunkLods.cs" />
     <Compile Include="wallTriggerSetup.cs" />
@@ -3502,6 +3744,7 @@
     <Compile Include="WaypointProgressTracker.cs" />
     <Compile Include="wayPointSetup.cs" />
     <Compile Include="WeakReference.cs" />
+    <Compile Include="weaponFireParticleController.cs" />
     <Compile Include="weaponInfo.cs" />
     <Compile Include="WeaponInfoPlants.cs" />
     <Compile Include="weightsRandomizer.2.cs" />
@@ -3512,6 +3755,7 @@
     <Compile Include="WindowAutoYaw.cs" />
     <Compile Include="WindowDragTilt.cs" />
     <Compile Include="WireFrameLineRenderer.cs" />
+    <Compile Include="wobblePlane.cs" />
     <Compile Include="WorkScheduler.cs" />
     <Compile Include="WorkSchedulerBatch.cs" />
     <Compile Include="WorldHeightmap.cs" />

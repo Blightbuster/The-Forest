@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Animates the value of a Rect Variable using an Animation Curve.")]
 	[ActionCategory("AnimateVariables")]
+	[Tooltip("Animates the value of a Rect Variable using an Animation Curve.")]
 	public class AnimateRect : AnimateFsmAction
 	{
 		
@@ -71,8 +71,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmRect rectVariable;
 
 		

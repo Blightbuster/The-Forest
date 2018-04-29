@@ -314,8 +314,7 @@ public static class Radical
 	
 	public static IEnumerable<TResult> Discrete<TResult, T1>(this IEnumerable<TResult> seq, Func<TResult, T1> func)
 	{
-		return from g in seq.GroupBy(func)
-		select g.First<TResult>();
+		return seq.GroupBy(func).Select(new Func<IGrouping<T1, TResult>, TResult>(Enumerable.First<TResult>));
 	}
 
 	

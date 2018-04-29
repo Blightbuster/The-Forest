@@ -216,9 +216,39 @@ public class mutantPropManager : EntityBehaviour
 		{
 			this.SetBlendShapeWeight(28, 0);
 		}
-		switch (this.regularMaleDice)
+		int num = this.regularMaleDice;
+		if (num != 0)
 		{
-		case 0:
+			if (num != 1)
+			{
+				if (num == 2)
+				{
+					this.hats[0].SetActive(false);
+					this.props1Go.SetActive(false);
+					this.props2Go.SetActive(false);
+					this.props3Go.SetActive(true);
+					if (!this.dummySetup && UnityEngine.Random.value > 0.65f)
+					{
+						this.enableRegularWeapon(-1);
+					}
+					this.SetSkin(this.paintedTribeMats[0]);
+				}
+			}
+			else
+			{
+				this.hats[0].SetActive(false);
+				this.props1Go.SetActive(false);
+				this.props2Go.SetActive(true);
+				this.props3Go.SetActive(false);
+				if (!this.dummySetup && UnityEngine.Random.value > 0.65f)
+				{
+					this.enableRegularWeapon(-1);
+				}
+				this.SetSkin(this.paintedTribeMats[1]);
+			}
+		}
+		else
+		{
 			this.hats[0].SetActive(false);
 			this.props1Go.SetActive(false);
 			this.props2Go.SetActive(true);
@@ -228,29 +258,6 @@ public class mutantPropManager : EntityBehaviour
 				this.enableRegularWeapon(-1);
 			}
 			this.SetSkin(this.paintedTribeMats[0]);
-			break;
-		case 1:
-			this.hats[0].SetActive(false);
-			this.props1Go.SetActive(false);
-			this.props2Go.SetActive(true);
-			this.props3Go.SetActive(false);
-			if (!this.dummySetup && UnityEngine.Random.value > 0.65f)
-			{
-				this.enableRegularWeapon(-1);
-			}
-			this.SetSkin(this.paintedTribeMats[1]);
-			break;
-		case 2:
-			this.hats[0].SetActive(false);
-			this.props1Go.SetActive(false);
-			this.props2Go.SetActive(false);
-			this.props3Go.SetActive(true);
-			if (!this.dummySetup && UnityEngine.Random.value > 0.65f)
-			{
-				this.enableRegularWeapon(-1);
-			}
-			this.SetSkin(this.paintedTribeMats[0]);
-			break;
 		}
 		this.setSkinColor();
 		if (!this.dummySetup)
@@ -734,7 +741,7 @@ public class mutantPropManager : EntityBehaviour
 		this.skinRenderer.SetBlendShapeWeight(index, (float)value);
 		if (BoltNetwork.isServer && !this.female && index == 28)
 		{
-			this.entity.GetState<IMutantMaleState>().BlendShapeWeight0 = (float)value;
+			base.entity.GetState<IMutantMaleState>().BlendShapeWeight0 = (float)value;
 		}
 	}
 
@@ -805,7 +812,7 @@ public class mutantPropManager : EntityBehaviour
 		yield return YieldPresets.WaitTwoSeconds;
 		if (n == 0)
 		{
-			GameObject leg = UnityEngine.Object.Instantiate(this.setup.feedingProps[UnityEngine.Random.Range(0, this.setup.feedingProps.Length)], this.setup.headJoint.transform.position, Quaternion.identity) as GameObject;
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.setup.feedingProps[UnityEngine.Random.Range(0, this.setup.feedingProps.Length)], this.setup.headJoint.transform.position, Quaternion.identity);
 		}
 		else
 		{
@@ -828,7 +835,7 @@ public class mutantPropManager : EntityBehaviour
 	{
 		if (this.setup.heldMeat.activeSelf)
 		{
-			GameObject gameObject = UnityEngine.Object.Instantiate(this.setup.spawnedMeat, this.setup.heldMeat.transform.position, this.setup.heldMeat.transform.rotation) as GameObject;
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.setup.spawnedMeat, this.setup.heldMeat.transform.position, this.setup.heldMeat.transform.rotation);
 			this.setup.heldMeat.SetActive(false);
 		}
 		if (this.setup.ai.fireman)

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("GUI Vertical Slider connected to a Float Variable.")]
 	[ActionCategory(ActionCategory.GUI)]
+	[Tooltip("GUI Vertical Slider connected to a Float Variable.")]
 	public class GUIVerticalSlider : GUIAction
 	{
 		
@@ -31,8 +31,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmFloat floatVariable;
 
 		

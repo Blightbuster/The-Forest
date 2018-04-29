@@ -14,7 +14,7 @@ public class RottingBodyInfection : MonoBehaviour
 	
 	private void Rotting()
 	{
-		ParticleSystem particleSystem = (ParticleSystem)UnityEngine.Object.Instantiate(Prefabs.Instance.FliesPSPrefab, base.transform.position, base.transform.rotation);
+		ParticleSystem particleSystem = UnityEngine.Object.Instantiate<ParticleSystem>(Prefabs.Instance.FliesPSPrefab, base.transform.position, base.transform.rotation);
 		particleSystem.transform.parent = base.transform;
 		particleSystem.gameObject.SetActive(true);
 		CoopSliceAndDiceMutant componentInParent = base.GetComponentInParent<CoopSliceAndDiceMutant>();

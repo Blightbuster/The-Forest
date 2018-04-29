@@ -49,13 +49,13 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("The Color variable.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The Color variable.")]
 		public FsmColor color;
 
 		
-		[Tooltip("Store the red channel in a float variable.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the red channel in a float variable.")]
 		public FsmFloat storeRed;
 
 		
@@ -64,8 +64,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat storeGreen;
 
 		
-		[Tooltip("Store the blue channel in a float variable.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the blue channel in a float variable.")]
 		public FsmFloat storeBlue;
 
 		

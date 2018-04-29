@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Store all active GameObjects with a specific tag. Tags must be declared in the tag manager before using them")]
 	[ActionCategory("ArrayMaker/ArrayList")]
+	[Tooltip("Store all active GameObjects with a specific tag. Tags must be declared in the tag manager before using them")]
 	public class ArrayListFindGameObjectsByTag : ArrayListActions
 	{
 		
@@ -40,8 +40,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[ActionSection("Set up")]
-		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
 		[RequiredField]
+		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
 		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 

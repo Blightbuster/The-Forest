@@ -7,7 +7,7 @@ public class gooseRagdollify : MonoBehaviour
 	
 	public Transform metgoragdoll(Vector3 varpvelocity = default(Vector3))
 	{
-		Transform transform = UnityEngine.Object.Instantiate(this.vargamragdoll, base.transform.position, base.transform.rotation) as Transform;
+		Transform transform = UnityEngine.Object.Instantiate<Transform>(this.vargamragdoll, base.transform.position, base.transform.rotation);
 		transform.localScale = base.transform.localScale;
 		Rigidbody[] componentsInChildren = transform.GetComponentsInChildren<Rigidbody>();
 		if (!this.spinRagdoll)

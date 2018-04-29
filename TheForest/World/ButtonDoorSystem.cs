@@ -8,6 +8,16 @@ namespace TheForest.World
 	public class ButtonDoorSystem : MonoBehaviour
 	{
 		
+		
+		private bool IsReady
+		{
+			get
+			{
+				return (this._useLimit <= 0 || this._useCount < this._useLimit) && (this._door._state == AutomatedDoorSystem.State.Closed || this._door._state == AutomatedDoorSystem.State.Opened);
+			}
+		}
+
+		
 		private void Awake()
 		{
 			base.enabled = false;
@@ -18,7 +28,7 @@ namespace TheForest.World
 		
 		private void Update()
 		{
-			if (TheForest.Utils.Input.GetButtonDown("Take") && (this._door._state == AutomatedDoorSystem.State.Closed || this._door._state == AutomatedDoorSystem.State.Opened))
+			if (TheForest.Utils.Input.GetButtonDown("Take") && this.IsReady)
 			{
 				if (this._sequence)
 				{
@@ -51,6 +61,7 @@ namespace TheForest.World
 		
 		public void ActivateButton()
 		{
+			this._useCount++;
 			this._alpha = 0f;
 			this.ToggleGoArray(this._lockedGos, false);
 			this.ToggleGoArray(this._unlockedGos, false);
@@ -121,6 +132,12 @@ namespace TheForest.World
 
 		
 		public int _sequenceStage;
+
+		
+		public int _useLimit;
+
+		
+		private int _useCount;
 
 		
 		private float _alpha;

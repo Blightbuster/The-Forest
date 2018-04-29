@@ -32,15 +32,18 @@ public class CoopMutantMaterialSync : EntityBehaviour<IMutantState>
 	
 	public override void Attached()
 	{
-		if (!this.entity.IsOwner())
+		if (!base.entity.IsOwner())
 		{
 			base.state.AddCallback("MainMaterialIndex", new PropertyCallback(this.OnMainMaterialIndexChanged));
-			this.token = (this.entity.attachToken as CoopMutantDummyToken);
-			if (this.token != null && !this.ignoreScale)
+			this.token = (base.entity.attachToken as CoopMutantDummyToken);
+			if (this.token != null)
 			{
-				base.transform.localScale = this.token.Scale;
+				if (!this.ignoreScale)
+				{
+					base.transform.localScale = this.token.Scale;
+				}
+				this.ApplyMaterial(this.token.MaterialIndex);
 			}
-			this.ApplyMaterial(this.token.MaterialIndex);
 		}
 		base.Invoke("resetSkinDamage", 0.3f);
 		if (this.dummyDamageSync && BoltNetwork.isRunning)
@@ -52,7 +55,7 @@ public class CoopMutantMaterialSync : EntityBehaviour<IMutantState>
 	
 	private void Update()
 	{
-		if (this.entity.IsOwner())
+		if (base.entity.IsOwner())
 		{
 			if (this.SkinnedRenderer)
 			{
@@ -161,7 +164,7 @@ public class CoopMutantMaterialSync : EntityBehaviour<IMutantState>
 	
 	private void setSkinDamage()
 	{
-		if (this.Renderers != null)
+		if (this.Renderers != null && this.token != null)
 		{
 			for (int i = 0; i < this.Renderers.Length; i++)
 			{

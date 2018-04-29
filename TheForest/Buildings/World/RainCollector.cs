@@ -7,8 +7,8 @@ using UnityEngine;
 namespace TheForest.Buildings.World
 {
 	
-	[AddComponentMenu("Buildings/World/Rain Collector")]
 	[DoNotSerializePublic]
+	[AddComponentMenu("Buildings/World/Rain Collector")]
 	public class RainCollector : EntityBehaviour<IWaterSourceState>
 	{
 		
@@ -68,7 +68,7 @@ namespace TheForest.Buildings.World
 			{
 				this.UpdateWater();
 			}
-			if (BoltNetwork.isServer && this.entity && this.entity.isAttached && this.entity.isOwner && base.state.toggled != this._waterGO.activeSelf)
+			if (BoltNetwork.isServer && base.entity && base.entity.isAttached && base.entity.isOwner && base.state.toggled != this._waterGO.activeSelf)
 			{
 				base.state.toggled = this._waterGO.activeSelf;
 			}

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Loads a Level by Index number. Before you can load a level, you have to add it to the list of levels defined in File->Build Settings...")]
 	[ActionCategory(ActionCategory.Level)]
+	[Tooltip("Loads a Level by Index number. Before you can load a level, you have to add it to the list of levels defined in File->Build Settings...")]
 	public class LoadLevelNum : FsmStateAction
 	{
 		
@@ -38,8 +38,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The level index in File->Build Settings")]
 		[RequiredField]
+		[Tooltip("The level index in File->Build Settings")]
 		public FsmInt levelIndex;
 
 		

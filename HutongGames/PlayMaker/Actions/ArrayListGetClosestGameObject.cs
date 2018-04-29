@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Return the closest GameObject within an arrayList from a transform or position.")]
 	[ActionCategory("ArrayMaker/ArrayList")]
+	[Tooltip("Return the closest GameObject within an arrayList from a transform or position.")]
 	public class ArrayListGetClosestGameObject : ArrayListActions
 	{
 		
@@ -55,28 +56,41 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			float num = float.PositiveInfinity;
 			int num2 = 0;
-			foreach (object obj in this.proxy.arrayList)
+			IEnumerator enumerator = this.proxy.arrayList.GetEnumerator();
+			try
 			{
-				GameObject gameObject = (GameObject)obj;
-				if (gameObject != null)
+				while (enumerator.MoveNext())
 				{
-					float sqrMagnitude = (gameObject.transform.position - vector).sqrMagnitude;
-					if (sqrMagnitude <= num)
+					object obj = enumerator.Current;
+					GameObject gameObject = (GameObject)obj;
+					if (gameObject != null)
 					{
-						num = sqrMagnitude;
-						this.closestGameObject.Value = gameObject;
-						this.closestIndex.Value = num2;
+						float sqrMagnitude = (gameObject.transform.position - vector).sqrMagnitude;
+						if (sqrMagnitude <= num)
+						{
+							num = sqrMagnitude;
+							this.closestGameObject.Value = gameObject;
+							this.closestIndex.Value = num2;
+						}
 					}
+					num2++;
 				}
-				num2++;
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 
 		
-		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
-		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
-		[RequiredField]
 		[ActionSection("Set up")]
+		[RequiredField]
+		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
+		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -95,8 +109,8 @@ namespace HutongGames.PlayMaker.Actions
 		public bool everyframe;
 
 		
-		[UIHint(UIHint.Variable)]
 		[ActionSection("Result")]
+		[UIHint(UIHint.Variable)]
 		public FsmGameObject closestGameObject;
 
 		

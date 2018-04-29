@@ -1,10 +1,23 @@
 ﻿using System;
 using Bolt;
+using TheForest.Player.Clothing;
 using UnityEngine;
 
 
 public class CoopSuitcase : EntityBehaviour<ISuitcaseState>, IPriorityCalculator
 {
+	
+	public void PushedByClient(Vector3 direction)
+	{
+		this.correctionStartTime = Time.time + 0.5f;
+		ClientSuitcasePush clientSuitcasePush = ClientSuitcasePush.Create(GlobalTargets.Everyone);
+		clientSuitcasePush.Suitcase = base.entity;
+		clientSuitcasePush.Direction = direction * 10f;
+		clientSuitcasePush.Send();
+		this.Rigidbody.velocity = direction * 10f;
+		base.enabled = true;
+	}
+
 	
 	
 	bool IPriorityCalculator.Always
@@ -13,30 +26,6 @@ public class CoopSuitcase : EntityBehaviour<ISuitcaseState>, IPriorityCalculator
 		{
 			return true;
 		}
-	}
-
-	
-	float IPriorityCalculator.CalculateStatePriority(BoltConnection connection, int skipped)
-	{
-		return CoopUtils.CalculatePriorityFor(connection, this.entity, 1f, skipped);
-	}
-
-	
-	float IPriorityCalculator.CalculateEventPriority(BoltConnection connection, Bolt.Event evnt)
-	{
-		return CoopUtils.CalculatePriorityFor(connection, this.entity, 1f, 1);
-	}
-
-	
-	public void PushedByClient(Vector3 direction)
-	{
-		this.correctionStartTime = Time.time + 0.5f;
-		ClientSuitcasePush clientSuitcasePush = ClientSuitcasePush.Create(GlobalTargets.Everyone);
-		clientSuitcasePush.Suitcase = this.entity;
-		clientSuitcasePush.Direction = direction * 10f;
-		clientSuitcasePush.Send();
-		this.Rigidbody.velocity = direction * 10f;
-		base.enabled = true;
 	}
 
 	
@@ -51,7 +40,7 @@ public class CoopSuitcase : EntityBehaviour<ISuitcaseState>, IPriorityCalculator
 	
 	private void Update()
 	{
-		if (BoltNetwork.isClient && this.entity.IsAttached() && this.ClientTransform && this.correctionStartTime < Time.time)
+		if (BoltNetwork.isClient && base.entity.IsAttached() && this.ClientTransform && this.correctionStartTime < Time.time)
 		{
 			if (this.clientTransformPrevPos != this.ClientTransform.position)
 			{
@@ -80,7 +69,12 @@ public class CoopSuitcase : EntityBehaviour<ISuitcaseState>, IPriorityCalculator
 		{
 			base.state.Transform.SetTransforms(base.transform);
 		}
-		if (this.entity.isOwner)
+		ClothingPickup componentInChildren = base.GetComponentInChildren<ClothingPickup>(true);
+		if (componentInChildren != null)
+		{
+			componentInChildren.Attached();
+		}
+		if (base.entity.isOwner)
 		{
 			if (this.ClothPickup && !this.ClothPickup.activeSelf)
 			{
@@ -105,7 +99,7 @@ public class CoopSuitcase : EntityBehaviour<ISuitcaseState>, IPriorityCalculator
 		if (this.ClothPickup)
 		{
 			this.ClothPickup.SetActive(false);
-			if (this.entity.isOwner)
+			if (base.entity.isOwner)
 			{
 				base.SendMessage("UpdateGreebleData");
 			}
@@ -143,7 +137,16 @@ public class CoopSuitcase : EntityBehaviour<ISuitcaseState>, IPriorityCalculator
 	}
 
 	
-	private const float correctionDelay = 0.5f;
+	float IPriorityCalculator.CalculateStatePriority(BoltConnection connection, int skipped)
+	{
+		return CoopUtils.CalculatePriorityFor(connection, base.entity, 1f, skipped);
+	}
+
+	
+	float IPriorityCalculator.CalculateEventPriority(BoltConnection connection, Bolt.Event evnt)
+	{
+		return CoopUtils.CalculatePriorityFor(connection, base.entity, 1f, 1);
+	}
 
 	
 	public Transform Trigger;
@@ -168,6 +171,9 @@ public class CoopSuitcase : EntityBehaviour<ISuitcaseState>, IPriorityCalculator
 
 	
 	private Vector3 clientTransformPrevPos;
+
+	
+	private const float correctionDelay = 0.5f;
 
 	
 	public GameObject[] DisableOnOpen;

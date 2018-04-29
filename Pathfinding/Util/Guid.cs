@@ -9,8 +9,8 @@ namespace Pathfinding.Util
 		
 		public Guid(byte[] bytes)
 		{
-			ulong num = (ulong)bytes[0] | (ulong)bytes[1] << 8 | (ulong)bytes[2] << 16 | (ulong)bytes[3] << 24 | (ulong)bytes[4] << 32 | (ulong)bytes[5] << 40 | (ulong)bytes[6] << 48 | (ulong)bytes[7] << 56;
-			ulong num2 = (ulong)bytes[8] | (ulong)bytes[9] << 8 | (ulong)bytes[10] << 16 | (ulong)bytes[11] << 24 | (ulong)bytes[12] << 32 | (ulong)bytes[13] << 40 | (ulong)bytes[14] << 48 | (ulong)bytes[15] << 56;
+			ulong num = (ulong)bytes[0] << 0 | (ulong)bytes[1] << 8 | (ulong)bytes[2] << 16 | (ulong)bytes[3] << 24 | (ulong)bytes[4] << 32 | (ulong)bytes[5] << 40 | (ulong)bytes[6] << 48 | (ulong)bytes[7] << 56;
+			ulong num2 = (ulong)bytes[8] << 0 | (ulong)bytes[9] << 8 | (ulong)bytes[10] << 16 | (ulong)bytes[11] << 24 | (ulong)bytes[12] << 32 | (ulong)bytes[13] << 40 | (ulong)bytes[14] << 48 | (ulong)bytes[15] << 56;
 			this._a = ((!BitConverter.IsLittleEndian) ? Guid.SwapEndianness(num) : num);
 			this._b = ((!BitConverter.IsLittleEndian) ? Guid.SwapEndianness(num2) : num2);
 		}
@@ -71,15 +71,6 @@ namespace Pathfinding.Util
 		}
 
 		
-		static Guid()
-		{
-			
-			Guid guid = new Guid(new byte[16]);
-			Guid.zeroString = guid.ToString();
-			Guid.random = new Random();
-		}
-
-		
 		public static Guid Parse(string input)
 		{
 			return new Guid(input);
@@ -88,7 +79,7 @@ namespace Pathfinding.Util
 		
 		private static ulong SwapEndianness(ulong value)
 		{
-			ulong num = value & 255UL;
+			ulong num = value >> 0 & 255UL;
 			ulong num2 = value >> 8 & 255UL;
 			ulong num3 = value >> 16 & 255UL;
 			ulong num4 = value >> 24 & 255UL;
@@ -96,7 +87,7 @@ namespace Pathfinding.Util
 			ulong num6 = value >> 40 & 255UL;
 			ulong num7 = value >> 48 & 255UL;
 			ulong num8 = value >> 56 & 255UL;
-			return num << 56 | num2 << 48 | num3 << 40 | num4 << 32 | num5 << 24 | num6 << 16 | num7 << 8 | num8;
+			return num << 56 | num2 << 48 | num3 << 40 | num4 << 32 | num5 << 24 | num6 << 16 | num7 << 8 | num8 << 0;
 		}
 
 		
@@ -119,6 +110,18 @@ namespace Pathfinding.Util
 			byte[] array = new byte[16];
 			Guid.random.NextBytes(array);
 			return new Guid(array);
+		}
+
+		
+		public static bool operator ==(Guid lhs, Guid rhs)
+		{
+			return lhs._a == rhs._a && lhs._b == rhs._b;
+		}
+
+		
+		public static bool operator !=(Guid lhs, Guid rhs)
+		{
+			return lhs._a != rhs._a || lhs._b != rhs._b;
 		}
 
 		
@@ -146,7 +149,7 @@ namespace Pathfinding.Util
 			{
 				Guid.text = new StringBuilder();
 			}
-			StringBuilder obj = Guid.text;
+			object obj = Guid.text;
 			string result;
 			lock (obj)
 			{
@@ -158,15 +161,12 @@ namespace Pathfinding.Util
 		}
 
 		
-		public static bool operator ==(Guid lhs, Guid rhs)
+		static Guid()
 		{
-			return lhs._a == rhs._a && lhs._b == rhs._b;
-		}
-
-		
-		public static bool operator !=(Guid lhs, Guid rhs)
-		{
-			return lhs._a != rhs._a || lhs._b != rhs._b;
+			
+			Guid guid = new Guid(new byte[16]);
+			Guid.zeroString = guid.ToString();
+			Guid.random = new Random();
 		}
 
 		

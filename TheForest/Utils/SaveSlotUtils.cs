@@ -100,6 +100,13 @@ namespace TheForest.Utils
 		}
 
 		
+		public static bool HasLocalFile(Slots slot, string filename)
+		{
+			string localSlotPath = SaveSlotUtils.GetLocalSlotPath(slot);
+			return File.Exists(localSlotPath + filename);
+		}
+
+		
 		private static void DeleteDirectory(string target_dir)
 		{
 			string[] files = Directory.GetFiles(target_dir);

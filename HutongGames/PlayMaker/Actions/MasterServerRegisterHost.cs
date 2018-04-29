@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Register this server on the master server.\n\nIf the master server address information has not been changed the default Unity master server will be used.")]
 	[ActionCategory(ActionCategory.Network)]
+	[Tooltip("Register this server on the master server.\n\nIf the master server address information has not been changed the default Unity master server will be used.")]
 	public class MasterServerRegisterHost : FsmStateAction
 	{
 		
@@ -30,8 +30,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The unique game type name.")]
 		[RequiredField]
+		[Tooltip("The unique game type name.")]
 		public FsmString gameTypeName;
 
 		

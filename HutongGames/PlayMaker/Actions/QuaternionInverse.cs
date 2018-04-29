@@ -44,9 +44,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmQuaternion rotation;
 
 		
-		[Tooltip("Store the inverse of the rotation variable.")]
 		[RequiredField]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the inverse of the rotation variable.")]
 		public FsmQuaternion result;
 
 		

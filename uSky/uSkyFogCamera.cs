@@ -4,9 +4,9 @@ using UnityEngine;
 namespace uSky
 {
 	
-	[AddComponentMenu("uSky/uSky Fog Camera")]
-	[RequireComponent(typeof(Camera))]
 	[ExecuteInEditMode]
+	[RequireComponent(typeof(Camera))]
+	[AddComponentMenu("uSky/uSky Fog Camera")]
 	public class uSkyFogCamera : MonoBehaviour
 	{
 		

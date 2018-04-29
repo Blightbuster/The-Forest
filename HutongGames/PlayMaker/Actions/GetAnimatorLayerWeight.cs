@@ -4,9 +4,9 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
+	[ActionCategory("Animator")]
 	[Tooltip("Gets the layer's current weight")]
 	[HelpUrl("https:
-	[ActionCategory("Animator")]
 	public class GetAnimatorLayerWeight : FsmStateAction
 	{
 		
@@ -83,8 +83,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
 		[CheckForComponent(typeof(Animator))]
+		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -97,10 +97,10 @@ namespace HutongGames.PlayMaker.Actions
 		public bool everyFrame;
 
 		
-		[UIHint(UIHint.Variable)]
-		[RequiredField]
-		[Tooltip("The layer's current weight")]
 		[ActionSection("Results")]
+		[RequiredField]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("The layer's current weight")]
 		public FsmFloat layerWeight;
 
 		

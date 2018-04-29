@@ -114,8 +114,8 @@ public class DeferredShadingCamera : MonoBehaviour
 		RenderTexture.active = active;
 		for (int i = 0; i < 3; i++)
 		{
-			string propertyName = "gbuffer" + i.ToString();
-			Shader.SetGlobalTexture(propertyName, this.gbufferTextures[i]);
+			string name = "gbuffer" + i.ToString();
+			Shader.SetGlobalTexture(name, this.gbufferTextures[i]);
 		}
 		Shader.SetGlobalTexture("gdepth", this.depthTexture);
 	}
@@ -130,8 +130,8 @@ public class DeferredShadingCamera : MonoBehaviour
 		Graphics.SetRenderTarget(this.gbufferBuffers, this.depthBuffer);
 		for (int i = 0; i < 3; i++)
 		{
-			string propertyName = "gbuffer" + i.ToString();
-			Shader.SetGlobalTexture(propertyName, this.gbufferTextures[i]);
+			string name = "gbuffer" + i.ToString();
+			Shader.SetGlobalTexture(name, this.gbufferTextures[i]);
 		}
 		Shader.SetGlobalTexture("gdepth", this.depthTexture);
 	}
@@ -327,9 +327,6 @@ public class DeferredShadingCamera : MonoBehaviour
 	}
 
 	
-	private const int numBuffers = 3;
-
-	
 	private Camera c;
 
 	
@@ -418,6 +415,9 @@ public class DeferredShadingCamera : MonoBehaviour
 
 	
 	private object initChecker;
+
+	
+	private const int numBuffers = 3;
 
 	
 	public DeferredShadingCamera.DebugDisplay displayMode;

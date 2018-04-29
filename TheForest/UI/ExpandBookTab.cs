@@ -13,11 +13,14 @@ namespace TheForest.UI
 			base.transform.localPosition = Vector3.zero;
 			this._holder = base.transform.parent.GetComponent<SelectPageNumber>();
 			this._self = base.GetComponent<SelectPageNumber>();
+			if (this._tabNum)
+			{
+				this._tabNum.SetActive(false);
+			}
 			if (this._tabNum2)
 			{
 				this._tabNum2.SetActive(false);
 			}
-			this._tabNum.SetActive(false);
 		}
 
 		

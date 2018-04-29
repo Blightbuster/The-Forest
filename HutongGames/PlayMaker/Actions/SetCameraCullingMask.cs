@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the Culling Mask used by the Camera.")]
 	[ActionCategory(ActionCategory.Camera)]
+	[Tooltip("Sets the Culling Mask used by the Camera.")]
 	public class SetCameraCullingMask : ComponentAction<Camera>
 	{
 		
@@ -49,8 +49,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmOwnerDefault gameObject;
 
 		
-		[UIHint(UIHint.Layer)]
 		[Tooltip("Cull these layers.")]
+		[UIHint(UIHint.Layer)]
 		public FsmInt[] cullingMask;
 
 		

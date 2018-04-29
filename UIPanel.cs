@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 
@@ -71,7 +72,12 @@ public class UIPanel : UIRect
 			if (this.mDepth != value)
 			{
 				this.mDepth = value;
-				UIPanel.list.Sort(new Comparison<UIPanel>(UIPanel.CompareFunc));
+				List<UIPanel> list = UIPanel.list;
+				if (UIPanel.<>f__mg$cache0 == null)
+				{
+					UIPanel.<>f__mg$cache0 = new Comparison<UIPanel>(UIPanel.CompareFunc);
+				}
+				list.Sort(UIPanel.<>f__mg$cache0);
 			}
 		}
 	}
@@ -758,7 +764,12 @@ public class UIPanel : UIRect
 		this.mAlphaFrameID = -1;
 		this.mMatrixFrame = -1;
 		UIPanel.list.Add(this);
-		UIPanel.list.Sort(new Comparison<UIPanel>(UIPanel.CompareFunc));
+		List<UIPanel> list = UIPanel.list;
+		if (UIPanel.<>f__mg$cache1 == null)
+		{
+			UIPanel.<>f__mg$cache1 = new Comparison<UIPanel>(UIPanel.CompareFunc);
+		}
+		list.Sort(UIPanel.<>f__mg$cache1);
 	}
 
 	
@@ -1016,7 +1027,12 @@ public class UIPanel : UIRect
 	public void SortWidgets()
 	{
 		this.mSortWidgets = false;
-		this.widgets.Sort(new Comparison<UIWidget>(UIWidget.PanelCompareFunc));
+		List<UIWidget> list = this.widgets;
+		if (UIPanel.<>f__mg$cache2 == null)
+		{
+			UIPanel.<>f__mg$cache2 = new Comparison<UIWidget>(UIWidget.PanelCompareFunc);
+		}
+		list.Sort(UIPanel.<>f__mg$cache2);
 	}
 
 	
@@ -1600,18 +1616,18 @@ public class UIPanel : UIRect
 	private Texture2D mClipTexture;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private float mAlpha = 1f;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private UIDrawCall.Clipping mClipping;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private Vector4 mClipRange = new Vector4(0f, 0f, 300f, 200f);
 
 	
@@ -1620,13 +1636,13 @@ public class UIPanel : UIRect
 	private Vector2 mClipSoftness = new Vector2(4f, 4f);
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private int mDepth;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private int mSortingOrder;
 
 	
@@ -1680,6 +1696,18 @@ public class UIPanel : UIRect
 
 	
 	private bool mForced;
+
+	
+	[CompilerGenerated]
+	private static Comparison<UIPanel> <>f__mg$cache0;
+
+	
+	[CompilerGenerated]
+	private static Comparison<UIPanel> <>f__mg$cache1;
+
+	
+	[CompilerGenerated]
+	private static Comparison<UIWidget> <>f__mg$cache2;
 
 	
 	public enum RenderQueue

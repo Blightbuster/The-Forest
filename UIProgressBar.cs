@@ -397,15 +397,15 @@ public class UIProgressBar : UIWidgetContainer
 			}
 			if (this.isHorizontal)
 			{
-				Vector3 from = Vector3.Lerp(array[0], array[1], 0.5f);
-				Vector3 to = Vector3.Lerp(array[2], array[3], 0.5f);
-				this.SetThumbPosition(Vector3.Lerp(from, to, (!this.isInverted) ? this.value : (1f - this.value)));
+				Vector3 a = Vector3.Lerp(array[0], array[1], 0.5f);
+				Vector3 b = Vector3.Lerp(array[2], array[3], 0.5f);
+				this.SetThumbPosition(Vector3.Lerp(a, b, (!this.isInverted) ? this.value : (1f - this.value)));
 			}
 			else
 			{
-				Vector3 from2 = Vector3.Lerp(array[0], array[3], 0.5f);
-				Vector3 to2 = Vector3.Lerp(array[1], array[2], 0.5f);
-				this.SetThumbPosition(Vector3.Lerp(from2, to2, (!this.isInverted) ? this.value : (1f - this.value)));
+				Vector3 a2 = Vector3.Lerp(array[0], array[3], 0.5f);
+				Vector3 b2 = Vector3.Lerp(array[1], array[2], 0.5f);
+				this.SetThumbPosition(Vector3.Lerp(a2, b2, (!this.isInverted) ? this.value : (1f - this.value)));
 			}
 		}
 		if (flag)
@@ -484,8 +484,8 @@ public class UIProgressBar : UIWidgetContainer
 	public Transform thumb;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	protected UIWidget mBG;
 
 	

@@ -10,7 +10,7 @@ public class CoopSliceAndDiceMutantMale : CoopSliceAndDiceMutant
 	{
 		get
 		{
-			return this.entity.GetState<IMutantMaleDummyState>().BodyPartsDamage;
+			return base.entity.GetState<IMutantMaleDummyState>().BodyPartsDamage;
 		}
 	}
 }

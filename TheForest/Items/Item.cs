@@ -52,8 +52,8 @@ namespace TheForest.Items
 		public int _id;
 
 		
-		[EnumFlags]
 		[Header("Core")]
+		[EnumFlags]
 		public Item.Types _type;
 
 		
@@ -79,8 +79,8 @@ namespace TheForest.Items
 		public bool _preventClosingInventoryAfterEquip;
 
 		
-		[Tooltip("When calling inventory.RemoveItem()/Owns()/AmountOf() for a not owned item, it will try to fallback to this if defined")]
 		[ItemIdPicker]
+		[Tooltip("When calling inventory.RemoveItem()/Owns()/AmountOf() for a not owned item, it will try to fallback to this if defined")]
 		public int[] _fallbackItemIds;
 
 		
@@ -104,8 +104,8 @@ namespace TheForest.Items
 		public float _unequipDelay = 0.7f;
 
 		
-		[ItemIdPicker]
 		[Header("Edible (reset: NoBonus / Unspecified)")]
+		[ItemIdPicker]
 		public int _rechargeOfItemId;
 
 		
@@ -147,6 +147,9 @@ namespace TheForest.Items
 		public Item.SFXCommands _dryFireSFX;
 
 		
+		public string _customSfxEvent;
+
+		
 		[Header("PM Events")]
 		public Item.FSMEvents _attackEvent;
 
@@ -163,8 +166,8 @@ namespace TheForest.Items
 		public Item.FSMEvents _unblockEvent;
 
 		
-		[EnumFlags]
 		[Header("Ranged")]
+		[EnumFlags]
 		public Item.RangedStyle _rangedStyle;
 
 		
@@ -207,10 +210,10 @@ namespace TheForest.Items
 
 		
 		[Header("Materials")]
-		public Material _addMat;
+		public Material _sheenMaterial;
 
 		
-		public Material _takeMat;
+		public Material _pickupMaterial;
 
 		
 		[Header("World")]
@@ -225,6 +228,10 @@ namespace TheForest.Items
 
 		
 		public float _hitRumbleDuration = 0.1f;
+
+		
+		[Header("Rack")]
+		public RackPlacement[] _rackPlacements;
 
 		
 		[Flags]
@@ -257,7 +264,9 @@ namespace TheForest.Items
 			
 			Weapon = 4096,
 			
-			Extension = 8192
+			Extension = 8192,
+			
+			Armor = 16384
 		}
 
 		
@@ -270,7 +279,9 @@ namespace TheForest.Items
 			
 			Chest,
 			
-			Feet
+			Feet,
+			
+			FullBody
 		}
 
 		
@@ -355,7 +366,11 @@ namespace TheForest.Items
 			
 			aimSlingBool,
 			
-			waterSkinHeld
+			waterSkinHeld,
+			
+			flameThrowerHeld,
+			
+			artifactHeld
 		}
 
 		
@@ -450,7 +465,13 @@ namespace TheForest.Items
 			
 			StopWalkyTalky,
 			
-			PlayShootFlintLockSfx
+			PlayShootFlintLockSfx,
+			
+			PlayPutOnArmorSfx,
+			
+			PlayPutOnStealthArmorSfx,
+			
+			PlayPutOnClothingSfx
 		}
 
 		

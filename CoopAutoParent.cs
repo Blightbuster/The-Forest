@@ -7,17 +7,6 @@ using TheForest.Buildings.Creation;
 public class CoopAutoParent : EntityBehaviour<IHierarchyObjectState>, IEntityReplicationFilter
 {
 	
-	bool IEntityReplicationFilter.AllowReplicationTo(BoltConnection connection)
-	{
-		if (base.transform.parent)
-		{
-			BoltEntity componentInParent = base.transform.parent.GetComponentInParent<BoltEntity>();
-			return this._ready && connection.ExistsOnRemote(componentInParent) == ExistsResult.Yes;
-		}
-		return this._ready;
-	}
-
-	
 	public override void Attached()
 	{
 		base.StartCoroutine(this.DelayedAttached());
@@ -49,10 +38,10 @@ public class CoopAutoParent : EntityBehaviour<IHierarchyObjectState>, IEntityRep
 			{
 				if (base.state.ParentHack && base.state.ParentHack.transform)
 				{
-					DynamicBuilding db = base.state.ParentHack.transform.GetComponent<DynamicBuilding>();
-					if (db && db._parentOverride)
+					DynamicBuilding component = base.state.ParentHack.transform.GetComponent<DynamicBuilding>();
+					if (component && component._parentOverride)
 					{
-						base.transform.parent = db._parentOverride;
+						base.transform.parent = component._parentOverride;
 					}
 					else
 					{
@@ -64,6 +53,17 @@ public class CoopAutoParent : EntityBehaviour<IHierarchyObjectState>, IEntityRep
 			}
 		}
 		yield break;
+	}
+
+	
+	bool IEntityReplicationFilter.AllowReplicationTo(BoltConnection connection)
+	{
+		if (base.transform.parent)
+		{
+			BoltEntity componentInParent = base.transform.parent.GetComponentInParent<BoltEntity>();
+			return this._ready && connection.ExistsOnRemote(componentInParent) == ExistsResult.Yes;
+		}
+		return this._ready;
 	}
 
 	

@@ -180,7 +180,7 @@ namespace AssetBundles
 		{
 			if (!AssetBundleManager.m_Instance)
 			{
-				AssetBundleManager.SetSourceAssetBundleURL("file:
+				AssetBundleManager.SetSourceAssetBundleURL(Path.GetFullPath(Application.dataPath).Replace("\\", "/") + "/AssetBundles/");
 				AssetBundleManager assetBundleManager = new GameObject("AssetBundleManager").AddComponent<AssetBundleManager>();
 				UnityEngine.Object.DontDestroyOnLoad(assetBundleManager);
 				AssetBundleManager.m_Instance = assetBundleManager;
@@ -228,33 +228,21 @@ namespace AssetBundles
 			{
 				AssetBundleManager.m_DownloadingErrors.Remove(assetBundleName);
 			}
-			if (AssetBundleManager.m_DownloadingWWWs.ContainsKey(assetBundleName))
+			if (AssetBundleManager.m_DownloadingReqs.ContainsKey(assetBundleName))
 			{
 				Dictionary<string, int> downloadingTicks;
-				Dictionary<string, int> dictionary = downloadingTicks = AssetBundleManager.m_DownloadingTicks;
-				int num = downloadingTicks[assetBundleName];
-				dictionary[assetBundleName] = num + 1;
+				(downloadingTicks = AssetBundleManager.m_DownloadingTicks)[assetBundleName] = downloadingTicks[assetBundleName] + 1;
 				return true;
 			}
 			if (AssetBundleManager.m_ToUnloadAssetBundles.TryGetValue(assetBundleName, out loadedAssetBundle))
 			{
 				loadedAssetBundle.m_ReferencedCount = 1;
-				loadedAssetBundle.m_UnloadTicks = 0;
 				AssetBundleManager.m_LoadedAssetBundles.Add(assetBundleName, loadedAssetBundle);
 				AssetBundleManager.m_ToUnloadAssetBundles.Remove(assetBundleName);
 				return false;
 			}
-			string url = AssetBundleManager.m_BaseDownloadingURL + assetBundleName;
-			WWW value;
-			if (isLoadingAssetBundleManifest)
-			{
-				value = new WWW(url);
-			}
-			else
-			{
-				value = WWW.LoadFromCacheOrDownload(url, AssetBundleManager.m_AssetBundleManifest.GetAssetBundleHash(assetBundleName), 0u);
-			}
-			AssetBundleManager.m_DownloadingWWWs.Add(assetBundleName, value);
+			AssetBundleCreateRequest value = AssetBundle.LoadFromFileAsync(AssetBundleManager.m_BaseDownloadingURL + assetBundleName);
+			AssetBundleManager.m_DownloadingReqs.Add(assetBundleName, value);
 			AssetBundleManager.m_DownloadingTicks.Add(assetBundleName, 1);
 			return false;
 		}
@@ -285,13 +273,11 @@ namespace AssetBundles
 		
 		public static void UnloadAssetBundle(string assetBundleName)
 		{
-			WWW www;
-			if (AssetBundleManager.m_DownloadingWWWs.TryGetValue(assetBundleName, out www))
+			AssetBundleCreateRequest assetBundleCreateRequest;
+			if (AssetBundleManager.m_DownloadingReqs.TryGetValue(assetBundleName, out assetBundleCreateRequest))
 			{
 				Dictionary<string, int> downloadingTicks;
-				Dictionary<string, int> dictionary = downloadingTicks = AssetBundleManager.m_DownloadingTicks;
-				int num = downloadingTicks[assetBundleName];
-				if ((dictionary[assetBundleName] = num - 1) <= 0)
+				if (((downloadingTicks = AssetBundleManager.m_DownloadingTicks)[assetBundleName] = downloadingTicks[assetBundleName] - 1) <= 0)
 				{
 					AssetBundleManager.m_DownloadingTicks[assetBundleName] = 0;
 				}
@@ -355,24 +341,18 @@ namespace AssetBundles
 				AssetBundleManager.m_ToUnloadAssetBundles.Remove(key);
 			}
 			this.keysToRemove.Clear();
-			foreach (KeyValuePair<string, WWW> keyValuePair2 in AssetBundleManager.m_DownloadingWWWs)
+			foreach (KeyValuePair<string, AssetBundleCreateRequest> keyValuePair2 in AssetBundleManager.m_DownloadingReqs)
 			{
-				WWW value = keyValuePair2.Value;
-				if (value.error != null)
-				{
-					AssetBundleManager.m_DownloadingErrors.Add(keyValuePair2.Key, string.Format("Failed downloading bundle {0} from {1}: {2}", keyValuePair2.Key, value.url, value.error));
-					this.keysToRemove.Add(keyValuePair2.Key);
-				}
-				else if (AssetBundleManager.m_DownloadingErrors.ContainsKey(keyValuePair2.Key))
-				{
-					this.keysToRemove.Add(keyValuePair2.Key);
-				}
-				else if (value.isDone)
+				AssetBundleCreateRequest value = keyValuePair2.Value;
+				if (value.isDone)
 				{
 					AssetBundle assetBundle = value.assetBundle;
 					if (assetBundle == null)
 					{
-						AssetBundleManager.m_DownloadingErrors.Add(keyValuePair2.Key, string.Format("{0} is not a valid asset bundle.", keyValuePair2.Key));
+						if (!AssetBundleManager.m_DownloadingErrors.ContainsKey(keyValuePair2.Key))
+						{
+							AssetBundleManager.m_DownloadingErrors.Add(keyValuePair2.Key, string.Format("{0} is not a valid asset bundle.", keyValuePair2.Key));
+						}
 						this.keysToRemove.Add(keyValuePair2.Key);
 					}
 					else
@@ -399,24 +379,21 @@ namespace AssetBundles
 					}
 				}
 			}
-			for (int k = 0; k < this.keysToRemove.Count; k++)
+			foreach (string key2 in this.keysToRemove)
 			{
-				string key2 = this.keysToRemove[k];
-				WWW www = AssetBundleManager.m_DownloadingWWWs[key2];
-				AssetBundleManager.m_DownloadingWWWs.Remove(key2);
-				www.Dispose();
+				AssetBundleManager.m_DownloadingReqs.Remove(key2);
 				AssetBundleManager.m_DownloadingTicks.Remove(key2);
 			}
-			int l = 0;
-			while (l < AssetBundleManager.m_InProgressOperations.Count)
+			int k = 0;
+			while (k < AssetBundleManager.m_InProgressOperations.Count)
 			{
-				if (!AssetBundleManager.m_InProgressOperations[l].Update())
+				if (!AssetBundleManager.m_InProgressOperations[k].Update())
 				{
-					AssetBundleManager.m_InProgressOperations.RemoveAt(l);
+					AssetBundleManager.m_InProgressOperations.RemoveAt(k);
 				}
 				else
 				{
-					l++;
+					k++;
 				}
 			}
 		}
@@ -532,7 +509,7 @@ namespace AssetBundles
 		private static Dictionary<string, LoadedAssetBundle> m_ToUnloadAssetBundles = new Dictionary<string, LoadedAssetBundle>();
 
 		
-		private static Dictionary<string, WWW> m_DownloadingWWWs = new Dictionary<string, WWW>();
+		private static Dictionary<string, AssetBundleCreateRequest> m_DownloadingReqs = new Dictionary<string, AssetBundleCreateRequest>();
 
 		
 		private static Dictionary<string, int> m_DownloadingTicks = new Dictionary<string, int>();

@@ -18,7 +18,7 @@ namespace TheForest.Items.World
 					Scene.HudGui.RewindCamcorderIcon.SetActive(false);
 				}
 			}
-			else
+			else if (LocalPlayer.Animator.GetBool("camCorderHeld"))
 			{
 				if (!Scene.HudGui.RewindCamcorderIcon.activeSelf)
 				{

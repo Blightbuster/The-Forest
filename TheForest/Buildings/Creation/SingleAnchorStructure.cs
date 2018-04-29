@@ -6,8 +6,8 @@ using UnityEngine;
 namespace TheForest.Buildings.Creation
 {
 	
-	[DoNotSerializePublic]
 	[AddComponentMenu("Buildings/Creation/Anchorable Structure")]
+	[DoNotSerializePublic]
 	public class SingleAnchorStructure : MonoBehaviour, IAnchorValidation
 	{
 		

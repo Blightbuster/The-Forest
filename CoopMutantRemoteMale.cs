@@ -8,7 +8,7 @@ public class CoopMutantRemoteMale : EntityBehaviour<IMutantState>
 	
 	public override void Attached()
 	{
-		if (!this.entity.isOwner)
+		if (!base.entity.isOwner)
 		{
 			base.state.AddCallback("BlendShapeWeight0", delegate
 			{

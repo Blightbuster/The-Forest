@@ -48,6 +48,18 @@ namespace Pathfinding
 		}
 
 		
+		public static bool operator ==(IntRect a, IntRect b)
+		{
+			return a.xmin == b.xmin && a.xmax == b.xmax && a.ymin == b.ymin && a.ymax == b.ymax;
+		}
+
+		
+		public static bool operator !=(IntRect a, IntRect b)
+		{
+			return a.xmin != b.xmin || a.xmax != b.xmax || a.ymin != b.ymin || a.ymax != b.ymax;
+		}
+
+		
 		public override bool Equals(object _b)
 		{
 			IntRect intRect = (IntRect)_b;
@@ -147,18 +159,6 @@ namespace Pathfinding
 			Debug.DrawLine(vector2, vector3, col);
 			Debug.DrawLine(vector3, vector4, col);
 			Debug.DrawLine(vector4, vector, col);
-		}
-
-		
-		public static bool operator ==(IntRect a, IntRect b)
-		{
-			return a.xmin == b.xmin && a.xmax == b.xmax && a.ymin == b.ymin && a.ymax == b.ymax;
-		}
-
-		
-		public static bool operator !=(IntRect a, IntRect b)
-		{
-			return a.xmin != b.xmin || a.xmax != b.xmax || a.ymin != b.ymin || a.ymax != b.ymax;
 		}
 
 		

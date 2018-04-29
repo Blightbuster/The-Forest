@@ -14,7 +14,7 @@ public class CoopRigidbody2 : EntityBehaviour<IRigidbodyState>
 		}
 		if (this.targetRigidbody)
 		{
-			if (!this.entity.isOwner)
+			if (!base.entity.isOwner)
 			{
 				this.targetRigidbody.useGravity = false;
 				this.targetRigidbody.isKinematic = true;

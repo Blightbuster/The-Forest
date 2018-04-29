@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the target FSM for all subsequent events sent by this state. The default 'Self' sends events to this FSM.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Sets the target FSM for all subsequent events sent by this state. The default 'Self' sends events to this FSM.")]
 	public class SetEventTarget : FsmStateAction
 	{
 		

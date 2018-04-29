@@ -44,6 +44,16 @@ public class CoopRagdoll : CoopBase<IRagdollState>
 	}
 
 	
+	private void setupSnowRabbitTypeTrigger()
+	{
+		AnimalTypeTrigger componentInChildren = base.transform.GetComponentInChildren<AnimalTypeTrigger>(true);
+		if (componentInChildren && componentInChildren._type == AnimalType.EuropeanRabbit)
+		{
+			componentInChildren._type = AnimalType.snowRabbit;
+		}
+	}
+
+	
 	private void transferStuckArrows()
 	{
 		if (this.animalArrowSync)
@@ -106,6 +116,33 @@ public class CoopRagdoll : CoopBase<IRagdollState>
 	}
 
 	
+	private void transferClientFire()
+	{
+		if (this.closestStoredToken == null)
+		{
+			return;
+		}
+		mutantTransferFire component = base.transform.GetComponent<mutantTransferFire>();
+		if (component && component.allBones.Count > 0)
+		{
+			storeLocalMutantInfo2 component2 = this.closestStoredToken.transform.GetComponent<storeLocalMutantInfo2>();
+			if (component2 == null || component2.fire.Count == 0)
+			{
+				return;
+			}
+			for (int i = 0; i < component2.fire.Count; i++)
+			{
+				if (component2.fire[i] && component2.fire[i].gameObject.activeSelf)
+				{
+					component2.fire[i].parent = component.allBones[i];
+					component2.fire[i].localPosition = component2.firePos[i];
+					component2.fire[i].localRotation = component2.fireRot[i];
+				}
+			}
+		}
+	}
+
+	
 	private void Start()
 	{
 		if (BoltNetwork.isRunning && BoltNetwork.isClient)
@@ -116,27 +153,40 @@ public class CoopRagdoll : CoopBase<IRagdollState>
 			{
 				this.transferStuckArrows();
 			}
+			if (this.animalFireSync)
+			{
+				this.transferClientFire();
+			}
 		}
 	}
 
 	
 	public override void Attached()
 	{
-		if (!this.entity.isOwner)
+		if (!base.entity.isOwner)
 		{
-			CoopMutantDummyToken coopMutantDummyToken = this.entity.attachToken as CoopMutantDummyToken;
+			CoopMutantDummyToken coopMutantDummyToken = base.entity.attachToken as CoopMutantDummyToken;
+			CoopRagdollToken coopRagdollToken = base.entity.attachToken as CoopRagdollToken;
+			if (coopRagdollToken != null && coopRagdollToken.onFireApplied)
+			{
+				doBurn component = base.transform.GetComponent<doBurn>();
+				if (component && component.fire)
+				{
+					component.fire.SetActive(true);
+				}
+			}
 			if (coopMutantDummyToken != null)
 			{
-				animalSkinSetup component = base.transform.GetComponent<animalSkinSetup>();
-				if (component)
+				animalSkinSetup component2 = base.transform.GetComponent<animalSkinSetup>();
+				if (component2)
 				{
 					MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
-					component.skin.GetPropertyBlock(materialPropertyBlock);
+					component2.skin.GetPropertyBlock(materialPropertyBlock);
 					materialPropertyBlock.SetFloat("_Damage1", coopMutantDummyToken.skinDamage1);
 					materialPropertyBlock.SetFloat("_Damage2", coopMutantDummyToken.skinDamage2);
 					materialPropertyBlock.SetFloat("_Damage3", coopMutantDummyToken.skinDamage3);
 					materialPropertyBlock.SetFloat("_Damage4", coopMutantDummyToken.skinDamage4);
-					component.skin.SetPropertyBlock(materialPropertyBlock);
+					component2.skin.SetPropertyBlock(materialPropertyBlock);
 				}
 			}
 		}
@@ -163,8 +213,14 @@ public class CoopRagdoll : CoopBase<IRagdollState>
 	private GameObject closestStoredToken;
 
 	
+	private CoopRagdollToken ragdollToken;
+
+	
 	public Material snowMat;
 
 	
 	public bool animalArrowSync;
+
+	
+	public bool animalFireSync;
 }

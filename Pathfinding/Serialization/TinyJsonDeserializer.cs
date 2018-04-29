@@ -318,18 +318,17 @@ namespace Pathfinding.Serialization
 			{
 				this.EatUntil(",{}[]", false);
 				char c = (char)this.reader.Peek();
-				char c2 = c;
-				switch (c2)
+				switch (c)
 				{
 				case '[':
-					goto IL_55;
+					goto IL_53;
 				default:
-					switch (c2)
+					switch (c)
 					{
 					case '{':
-						goto IL_55;
+						goto IL_53;
 					default:
-						if (c2 != ',')
+						if (c != ',')
 						{
 							goto Block_1;
 						}
@@ -339,25 +338,25 @@ namespace Pathfinding.Serialization
 						}
 						break;
 					case '}':
-						goto IL_5E;
+						goto IL_5C;
 					}
 					break;
 				case ']':
-					goto IL_5E;
+					goto IL_5C;
 				}
-				IL_92:
+				IL_90:
 				this.reader.Read();
 				continue;
-				IL_55:
+				IL_53:
 				num++;
-				goto IL_92;
-				IL_5E:
+				goto IL_90;
+				IL_5C:
 				num--;
 				if (num < 0)
 				{
 					return;
 				}
-				goto IL_92;
+				goto IL_90;
 			}
 			Block_1:
 			throw new Exception("Should not reach this part");

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("GUILayout Text Field. Optionally send an event if the text has been edited.")]
 	[ActionCategory(ActionCategory.GUILayout)]
+	[Tooltip("GUILayout Text Field. Optionally send an event if the text has been edited.")]
 	public class GUILayoutTextField : GUILayoutAction
 	{
 		

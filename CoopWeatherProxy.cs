@@ -57,7 +57,7 @@ public class CoopWeatherProxy : EntityBehaviour<IWeatherState>
 	{
 		CoopWeatherProxy.Instance = this;
 		base.state.AddCallback("BreakableWalls[]", new PropertyCallbackSimple(this.BreakableWallsChanged));
-		if (!this.entity.isOwner)
+		if (!base.entity.isOwner)
 		{
 			IWeatherState s = base.state;
 			s.AddCallback("TimeOfDay", new PropertyCallbackSimple(this.ReceivedTimeOfDay));

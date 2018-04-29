@@ -19,6 +19,12 @@ public class playerEnterCaveAction : MonoBehaviour
 	}
 
 	
+	private void setGoodbyeTimmyState(bool t)
+	{
+		this.timmyCutscene = t;
+	}
+
+	
 	private void enterCave(GameObject go)
 	{
 		base.StartCoroutine(this.doCave(go, true));
@@ -33,6 +39,7 @@ public class playerEnterCaveAction : MonoBehaviour
 	
 	public IEnumerator doCave(GameObject posGo, bool enter)
 	{
+		LocalPlayer.AnimControl.enteringACave = true;
 		LocalPlayer.ScriptSetup.pmControl.FsmVariables.GetFsmBool("noControl").Value = true;
 		LocalPlayer.Animator.SetBoolReflected("stickBlock", false);
 		LocalPlayer.FpCharacter.enabled = false;
@@ -61,6 +68,10 @@ public class playerEnterCaveAction : MonoBehaviour
 		LocalPlayer.Transform.parent = posGo.transform;
 		LocalPlayer.Transform.localPosition = new Vector3(0f, 0.01945f, 0f);
 		LocalPlayer.Transform.localEulerAngles = Vector3.zero;
+		if (this.swimCave)
+		{
+			LocalPlayer.Animator.SetBool("swimmingBool", true);
+		}
 		if (enter)
 		{
 			LocalPlayer.Animator.SetIntegerReflected("enterCaveInt", 1);
@@ -87,15 +98,27 @@ public class playerEnterCaveAction : MonoBehaviour
 		{
 			LocalPlayer.Animator.SetLayerWeightReflected(4, 0f);
 		}
+		if (this.timmyCutscene)
+		{
+			LocalPlayer.Animator.SetBool("goodbyeTimmy", true);
+		}
 		base.Invoke("resetCaveParams", 2.4f);
 		if (this.swimCave)
 		{
-			yield return YieldPresets.WaitThreeSeconds;
+			float timer = Time.time + 2.5f;
+			while (Time.time < timer)
+			{
+				LocalPlayer.Animator.SetBool("swimmingBool", true);
+				yield return null;
+			}
 		}
 		else
 		{
-			yield return YieldPresets.WaitOnePointFiveSeconds;
+			yield return YieldPresets.WaitOneSecond;
 		}
+		Scene.HudGui.LoadingCavesInfo.SetActive(true);
+		Scene.HudGui.LoadingCavesFill.fillAmount = 0f;
+		yield return YieldPresets.WaitPointFiveSeconds;
 		if (!this.ignoreLighting)
 		{
 			LocalPlayer.GameObject.SendMessage((!enter) ? "NotInACave" : "InACave", SendMessageOptions.DontRequireReceiver);
@@ -137,8 +160,25 @@ public class playerEnterCaveAction : MonoBehaviour
 					LocalPlayer.ScriptSetup.heldLog2.SetActive(false);
 				}
 			}
+			if (Scene.HudGui.LoadingCavesFill.fillAmount < 1f)
+			{
+				Scene.HudGui.LoadingCavesFill.fillAmount = Mathf.Max(0.1f, (this.layer0.normalizedTime - 0.25f) / 0.45f);
+				if (Scene.HudGui.LoadingCavesFill.fillAmount >= 1f)
+				{
+					Scene.HudGui.LoadingCavesInfo.SetActive(false);
+					Scene.HudGui.Grid.repositionNow = true;
+				}
+			}
+			if (this.timmyCutscene)
+			{
+				LocalPlayer.AnimControl.enteringACave = false;
+				LocalPlayer.SpecialActions.SendMessage("goodbyeTimmyRoutine");
+				yield break;
+			}
 			yield return null;
 		}
+		Scene.HudGui.LoadingCavesInfo.SetActive(false);
+		Scene.HudGui.Grid.repositionNow = true;
 		if (!this.swimCave)
 		{
 			if (hasLog)
@@ -157,6 +197,7 @@ public class playerEnterCaveAction : MonoBehaviour
 		{
 			LocalPlayer.ScriptSetup.pmControl.SendEvent("toReset2");
 		}
+		LocalPlayer.Transform.parent = Scene.SceneTracker.transform;
 		LocalPlayer.Transform.parent = null;
 		LocalPlayer.Transform.localScale = new Vector3(1f, 1f, 1f);
 		LocalPlayer.Transform.localEulerAngles = new Vector3(0f, LocalPlayer.Transform.localEulerAngles.y, 0f);
@@ -177,6 +218,7 @@ public class playerEnterCaveAction : MonoBehaviour
 		LocalPlayer.AnimControl.controller.isKinematic = false;
 		LocalPlayer.AnimControl.useRootMotion = false;
 		LocalPlayer.CamRotator.rotationRange = new Vector2(LocalPlayer.FpCharacter.minCamRotationRange, 0f);
+		LocalPlayer.AnimControl.enteringACave = false;
 		if (!this.swimCave)
 		{
 			LocalPlayer.Animator.SetLayerWeightReflected(1, 1f);
@@ -214,4 +256,7 @@ public class playerEnterCaveAction : MonoBehaviour
 
 	
 	private bool swimCave;
+
+	
+	private bool timmyCutscene;
 }

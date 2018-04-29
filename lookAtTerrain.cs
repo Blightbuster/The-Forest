@@ -43,8 +43,8 @@ public class lookAtTerrain : MonoBehaviour
 		{
 			this.terrainPos = this.hit.point.y + 0.2f;
 			this.lookAtPos = new Vector3(this.endTr.position.x, this.terrainPos, this.endTr.position.z);
-			Quaternion to = Quaternion.LookRotation(this.lookAtPos - this.tr.position);
-			this.tr.rotation = Quaternion.Slerp(this.tr.rotation, to, Time.deltaTime * this.damping);
+			Quaternion b = Quaternion.LookRotation(this.lookAtPos - this.tr.position);
+			this.tr.rotation = Quaternion.Slerp(this.tr.rotation, b, Time.deltaTime * this.damping);
 		}
 		if (LocalPlayer.AnimControl.swimming || !LocalPlayer.Inventory.IsRightHandEmpty())
 		{

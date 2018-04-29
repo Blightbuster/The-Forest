@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 namespace ICSharpCode.SharpZipLib.Encryption
 {
 	
-	internal class PkzipClassicEncryptCryptoTransform : PkzipClassicCryptoBase, IDisposable, ICryptoTransform
+	internal class PkzipClassicEncryptCryptoTransform : PkzipClassicCryptoBase, ICryptoTransform, IDisposable
 	{
 		
 		internal PkzipClassicEncryptCryptoTransform(byte[] keyBlock)

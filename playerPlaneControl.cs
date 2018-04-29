@@ -12,6 +12,7 @@ public class playerPlaneControl : MonoBehaviour
 		{
 			UnityEngine.Object.Destroy(this);
 		}
+		this.localHeadConstrainPos = this._headFollow.localPosition;
 	}
 
 	
@@ -21,6 +22,10 @@ public class playerPlaneControl : MonoBehaviour
 		this.planeAnimator = base.GetComponent<Animator>();
 		this.tr = base.transform;
 		this.smoothCamX = 0f;
+		if (ForestVR.Enabled)
+		{
+			this.planeAnimator.SetBool("vrBlock", true);
+		}
 	}
 
 	
@@ -54,6 +59,14 @@ public class playerPlaneControl : MonoBehaviour
 			}
 			this.normCamX /= 90f;
 			this.normCamX = (Mathf.Clamp(this.normCamX, -1f, 1f) - 0.1f) * 10f;
+			Vector3 localPosition = this.localHeadConstrainPos;
+			float num3 = this.normCamY;
+			if (num3 > 0f && !this._client)
+			{
+				num3 = 0f;
+			}
+			localPosition.x = this.localHeadConstrainPos.x + num3 * this.scaleXFactor;
+			this._headFollow.localPosition = localPosition;
 			this.normCamY = num / 90f;
 			this.normCamY = Mathf.Clamp(this.normCamY, -1f, 1f) * 10f;
 			this.smoothCamY = this.normCamY;
@@ -73,11 +86,6 @@ public class playerPlaneControl : MonoBehaviour
 	
 	private void LateUpdate()
 	{
-		Quaternion quaternion = this.neckJnt.rotation;
-		Vector3 vector = this.tr.InverseTransformDirection(LocalPlayer.MainCamTr.forward);
-		quaternion = Quaternion.AngleAxis(this.normCamX * 10f, base.transform.right) * quaternion;
-		quaternion = Quaternion.AngleAxis(this.normCamY * -10f, base.transform.forward) * quaternion;
-		this.neckJnt.rotation = quaternion;
 	}
 
 	
@@ -97,6 +105,12 @@ public class playerPlaneControl : MonoBehaviour
 
 	
 	public GameObject book;
+
+	
+	public Transform headFollowVR;
+
+	
+	public Transform _headFollow;
 
 	
 	public float torsoFollowSpeed;
@@ -121,4 +135,13 @@ public class playerPlaneControl : MonoBehaviour
 
 	
 	private float mouseDeltax;
+
+	
+	public float scaleXFactor = 0.05f;
+
+	
+	private Vector3 localHeadConstrainPos;
+
+	
+	public bool _client;
 }

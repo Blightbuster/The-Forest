@@ -40,11 +40,11 @@ public class chopEnemy : MonoBehaviour
 	{
 		if (this.encounterBool)
 		{
-			UnityEngine.Object.Instantiate(this.RagDollExploded, this.rootGo.transform.position, this.rootGo.transform.rotation);
+			UnityEngine.Object.Instantiate<GameObject>(this.RagDollExploded, this.rootGo.transform.position, this.rootGo.transform.rotation);
 		}
 		else
 		{
-			UnityEngine.Object.Instantiate(this.RagDollExploded, this.hips.transform.position, this.hips.transform.rotation);
+			UnityEngine.Object.Instantiate<GameObject>(this.RagDollExploded, this.hips.transform.position, this.hips.transform.rotation);
 		}
 		if (this.sendTrapReset)
 		{

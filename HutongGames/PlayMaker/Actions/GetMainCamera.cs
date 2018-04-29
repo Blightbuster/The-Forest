@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the camera tagged MainCamera from the scene")]
 	[ActionCategory(ActionCategory.Camera)]
+	[Tooltip("Gets the camera tagged MainCamera from the scene")]
 	public class GetMainCamera : FsmStateAction
 	{
 		

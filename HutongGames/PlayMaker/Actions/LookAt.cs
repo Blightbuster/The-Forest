@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Rotates a Game Object so its forward vector points at a Target. The Target can be specified as a GameObject or a world Position. If you specify both, then Position specifies a local offset from the target object's Position.")]
 	[ActionCategory(ActionCategory.Transform)]
+	[Tooltip("Rotates a Game Object so its forward vector points at a Target. The Target can be specified as a GameObject or a world Position. If you specify both, then Position specifies a local offset from the target object's Position.")]
 	public class LookAt : FsmStateAction
 	{
 		
@@ -99,8 +99,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject to rotate.")]
 		[RequiredField]
+		[Tooltip("The GameObject to rotate.")]
 		public FsmOwnerDefault gameObject;
 
 		

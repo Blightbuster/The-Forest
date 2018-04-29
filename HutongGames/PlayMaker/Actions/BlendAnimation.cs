@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Blends an Animation towards a Target Weight over a specified Time.\nOptionally sends an Event when finished.")]
 	[ActionCategory(ActionCategory.Animation)]
+	[Tooltip("Blends an Animation towards a Target Weight over a specified Time.\nOptionally sends an Event when finished.")]
 	public class BlendAnimation : FsmStateAction
 	{
 		
@@ -43,14 +43,14 @@ namespace HutongGames.PlayMaker.Actions
 			Animation component = go.GetComponent<Animation>();
 			if (component == null)
 			{
-				this.LogWarning("Missing Animation component on GameObject: " + go.name);
+				base.LogWarning("Missing Animation component on GameObject: " + go.name);
 				base.Finish();
 				return;
 			}
 			AnimationState animationState = component[this.animName.Value];
 			if (animationState == null)
 			{
-				this.LogWarning("Missing animation: " + this.animName.Value);
+				base.LogWarning("Missing animation: " + this.animName.Value);
 				base.Finish();
 				return;
 			}
@@ -67,27 +67,27 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
+		[RequiredField]
 		[CheckForComponent(typeof(Animation))]
 		[Tooltip("The GameObject to animate.")]
-		[RequiredField]
 		public FsmOwnerDefault gameObject;
 
 		
+		[RequiredField]
 		[UIHint(UIHint.Animation)]
 		[Tooltip("The name of the animation to blend.")]
-		[RequiredField]
 		public FsmString animName;
 
 		
+		[RequiredField]
 		[HasFloatSlider(0f, 1f)]
 		[Tooltip("Target weight to blend to.")]
-		[RequiredField]
 		public FsmFloat targetWeight;
 
 		
-		[Tooltip("How long should the blend take.")]
 		[RequiredField]
 		[HasFloatSlider(0f, 5f)]
+		[Tooltip("How long should the blend take.")]
 		public FsmFloat time;
 
 		

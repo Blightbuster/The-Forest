@@ -167,7 +167,7 @@ public class ExplodeTreeStump : MonoBehaviour
 		if (this._blownUpStump && !BoltNetwork.isRunning)
 		{
 			this.NavCheck();
-			UnityEngine.Object.Instantiate(this._blownUpStump, base.transform.position, base.transform.rotation);
+			UnityEngine.Object.Instantiate<GameObject>(this._blownUpStump, base.transform.position, base.transform.rotation);
 		}
 		if (lt)
 		{
@@ -185,7 +185,7 @@ public class ExplodeTreeStump : MonoBehaviour
 		Collider component = base.transform.GetComponent<Collider>();
 		if (component)
 		{
-			GameObject gameObject = (GameObject)UnityEngine.Object.Instantiate((GameObject)Resources.Load("dummyNavRemove"), base.transform.position, base.transform.rotation);
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>((GameObject)Resources.Load("dummyNavRemove"), base.transform.position, base.transform.rotation);
 			gameObject.SendMessage("doDummyNavRemove", component.bounds, SendMessageOptions.DontRequireReceiver);
 		}
 	}

@@ -59,6 +59,10 @@ public class animalHealth : MonoBehaviour
 	private void OnEnable()
 	{
 		base.StartCoroutine(this.delayedAnimalVisRoutine());
+		if (this.Fire)
+		{
+			this.Fire.SetActive(false);
+		}
 		this.Burning = false;
 	}
 
@@ -97,10 +101,6 @@ public class animalHealth : MonoBehaviour
 		if (this.spawnFunctions.deer)
 		{
 			this.resetAnimalFleeDistance();
-		}
-		if (this.Fire)
-		{
-			this.Fire.SetActive(false);
 		}
 	}
 
@@ -397,14 +397,6 @@ public class animalHealth : MonoBehaviour
 			EventRegistry.Animal.Publish(TfEvent.KilledDeer, base.gameObject);
 			this.scene.maxDeerAmount--;
 		}
-		if (this.Fire)
-		{
-			if (this.Fire.activeSelf)
-			{
-				this.ai.goBurntRagdoll();
-			}
-			this.Fire.SetActive(false);
-		}
 		base.CancelInvoke("HitPoison");
 		base.CancelInvoke("disablePoison");
 		base.CancelInvoke("HitFire");
@@ -500,7 +492,7 @@ public class animalHealth : MonoBehaviour
 	{
 		if (this.explodedGo)
 		{
-			UnityEngine.Object.Instantiate(this.explodedGo, base.transform.position, base.transform.rotation);
+			UnityEngine.Object.Instantiate<GameObject>(this.explodedGo, base.transform.position, base.transform.rotation);
 			if (PoolManager.Pools["creatures"].IsSpawned(base.transform))
 			{
 				this.spawnFunctions.despawn();

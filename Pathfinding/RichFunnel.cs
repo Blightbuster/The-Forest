@@ -73,17 +73,24 @@ namespace Pathfinding
 			if (raycastableGraph != null && this.funnelSimplificationMode != RichFunnel.FunnelSimplification.None)
 			{
 				List<GraphNode> list = ListPool<GraphNode>.Claim(end - start);
-				switch (this.funnelSimplificationMode)
+				RichFunnel.FunnelSimplification funnelSimplification = this.funnelSimplificationMode;
+				if (funnelSimplification != RichFunnel.FunnelSimplification.Iterative)
 				{
-				case RichFunnel.FunnelSimplification.Iterative:
+					if (funnelSimplification != RichFunnel.FunnelSimplification.RecursiveBinary)
+					{
+						if (funnelSimplification == RichFunnel.FunnelSimplification.RecursiveTrinary)
+						{
+							RichFunnel.SimplifyPath3(raycastableGraph, nodes, start, end, list, this.exactStart, this.exactEnd, 0);
+						}
+					}
+					else
+					{
+						RichFunnel.SimplifyPath2(raycastableGraph, nodes, start, end, list, this.exactStart, this.exactEnd);
+					}
+				}
+				else
+				{
 					this.SimplifyPath(raycastableGraph, nodes, start, end, list, this.exactStart, this.exactEnd);
-					break;
-				case RichFunnel.FunnelSimplification.RecursiveBinary:
-					RichFunnel.SimplifyPath2(raycastableGraph, nodes, start, end, list, this.exactStart, this.exactEnd);
-					break;
-				case RichFunnel.FunnelSimplification.RecursiveTrinary:
-					RichFunnel.SimplifyPath3(raycastableGraph, nodes, start, end, list, this.exactStart, this.exactEnd, 0);
-					break;
 				}
 				if (this.nodes.Capacity < list.Count)
 				{

@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Compares 2 Game Objects and sends Events based on the result.")]
 	[ActionCategory(ActionCategory.Logic)]
+	[Tooltip("Compares 2 Game Objects and sends Events based on the result.")]
 	public class GameObjectCompare : FsmStateAction
 	{
 		
@@ -50,15 +50,15 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
-		[Tooltip("A Game Object variable to compare.")]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		[Title("Game Object")]
+		[Tooltip("A Game Object variable to compare.")]
 		public FsmOwnerDefault gameObjectVariable;
 
 		
-		[Tooltip("Compare the variable with this Game Object")]
 		[RequiredField]
+		[Tooltip("Compare the variable with this Game Object")]
 		public FsmGameObject compareTo;
 
 		

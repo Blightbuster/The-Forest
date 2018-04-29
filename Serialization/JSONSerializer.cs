@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.Text;
 using LitJson;
 
@@ -182,31 +182,13 @@ namespace Serialization
 			string name = type.Name;
 			if (name != null)
 			{
-				if (JSONSerializer.<>f__switch$map22 == null)
+				if (name == "DateTime")
 				{
-					JSONSerializer.<>f__switch$map22 = new Dictionary<string, int>(2)
-					{
-						{
-							"DateTime",
-							0
-						},
-						{
-							"String",
-							1
-						}
-					};
+					return DateTime.Parse((string)this._reader.Value);
 				}
-				int num;
-				if (JSONSerializer.<>f__switch$map22.TryGetValue(name, out num))
+				if (name == "String")
 				{
-					if (num == 0)
-					{
-						return DateTime.Parse((string)this._reader.Value);
-					}
-					if (num == 1)
-					{
-						return UnitySerializer.UnEscape((string)this._reader.Value);
-					}
+					return UnitySerializer.UnEscape((string)this._reader.Value);
 				}
 			}
 			return this._reader.Value;
@@ -483,14 +465,27 @@ namespace Serialization
 				this._json.Append("\"contents\":[");
 			}
 			bool flag = true;
-			foreach (object value in array)
+			IEnumerator enumerator = array.GetEnumerator();
+			try
 			{
-				if (!flag)
+				while (enumerator.MoveNext())
 				{
-					this._json.Append(",");
+					object value = enumerator.Current;
+					if (!flag)
+					{
+						this._json.Append(",");
+					}
+					flag = false;
+					this.WriteSimpleValue(value);
 				}
-				flag = false;
-				this.WriteSimpleValue(value);
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 			this._json.Append("],");
 		}

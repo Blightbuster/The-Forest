@@ -85,9 +85,6 @@ public class FPSTEMP : MonoBehaviour
 	}
 
 	
-	private const float jumpRayLength = 0.7f;
-
-	
 	[SerializeField]
 	private float runSpeed = 8f;
 
@@ -117,6 +114,9 @@ public class FPSTEMP : MonoBehaviour
 
 	
 	private CapsuleCollider capsule;
+
+	
+	private const float jumpRayLength = 0.7f;
 
 	
 	private Vector2 input;

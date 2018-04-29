@@ -28,13 +28,13 @@ public class mutantWorldSearchFunctions : MonoBehaviour
 	{
 		GameObject closestObj = null;
 		float closestDist = float.PositiveInfinity;
-		foreach (GameObject marker in this.sceneInfo.caveMarkers)
+		foreach (GameObject gameObject in this.sceneInfo.caveMarkers)
 		{
-			float dist = (this.tr.position - marker.transform.position).sqrMagnitude;
-			if (dist < closestDist)
+			float sqrMagnitude = (this.tr.position - gameObject.transform.position).sqrMagnitude;
+			if (sqrMagnitude < closestDist)
 			{
-				closestDist = dist;
-				closestObj = marker;
+				closestDist = sqrMagnitude;
+				closestObj = gameObject;
 			}
 			this.setup.pmSleep.FsmVariables.GetFsmGameObject("closestEntranceGo").Value = closestObj;
 			this.setup.homeGo = closestObj;
@@ -52,13 +52,13 @@ public class mutantWorldSearchFunctions : MonoBehaviour
 		int size = this.sceneInfo.feedingEncounters.Count;
 		if (size >= 1)
 		{
-			foreach (GameObject go in this.sceneInfo.feedingEncounters)
+			foreach (GameObject gameObject in this.sceneInfo.feedingEncounters)
 			{
-				float dist = (this.setup.sceneInfo.allPlayers[0].transform.position - go.transform.position).sqrMagnitude;
-				if (dist < closestDist)
+				float sqrMagnitude = (this.setup.sceneInfo.allPlayers[0].transform.position - gameObject.transform.position).sqrMagnitude;
+				if (sqrMagnitude < closestDist)
 				{
-					closestDist = dist;
-					closestObj = go;
+					closestDist = sqrMagnitude;
+					closestObj = gameObject;
 				}
 				count++;
 				this.setup.feederGo = closestObj;
@@ -256,10 +256,10 @@ public class mutantWorldSearchFunctions : MonoBehaviour
 	{
 		if (go)
 		{
-			chopEnemy chop = go.GetComponentInChildren<chopEnemy>();
-			if (chop)
+			chopEnemy componentInChildren = go.GetComponentInChildren<chopEnemy>();
+			if (componentInChildren)
 			{
-				chop.triggerChop();
+				componentInChildren.triggerChop();
 			}
 		}
 		yield return null;
@@ -271,10 +271,10 @@ public class mutantWorldSearchFunctions : MonoBehaviour
 	{
 		if (go)
 		{
-			explodeDummy ed = go.GetComponentInChildren<explodeDummy>();
-			if (ed)
+			explodeDummy componentInChildren = go.GetComponentInChildren<explodeDummy>();
+			if (componentInChildren)
 			{
-				ed.Explosion(5f);
+				componentInChildren.Explosion(5f);
 			}
 		}
 		yield return null;

@@ -19,17 +19,23 @@ public static class SunshineMath
 			a = 4096;
 		}
 		num2 = Mathf.Min(a, num2);
-		switch (resolution)
+		if (resolution != SunshineLightResolutions.LowResolution)
 		{
-		case SunshineLightResolutions.LowResolution:
+			if (resolution != SunshineLightResolutions.MediumResolution)
+			{
+				if (resolution == SunshineLightResolutions.VeryHighResolution)
+				{
+					num2 *= 2;
+				}
+			}
+			else
+			{
+				num2 /= 2;
+			}
+		}
+		else
+		{
 			num2 /= 4;
-			break;
-		case SunshineLightResolutions.MediumResolution:
-			num2 /= 2;
-			break;
-		case SunshineLightResolutions.VeryHighResolution:
-			num2 *= 2;
-			break;
 		}
 		return Mathf.Min(a, num2);
 	}
@@ -223,8 +229,8 @@ public static class SunshineMath
 		float num = SunshineMath.RadialClipCornerRatio(camera);
 		float z = (!radial) ? nearClip : (nearClip * num);
 		float z2 = (!radial) ? farClip : (farClip * num);
-		Vector3 from = camera.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, nearClip));
-		Vector3 to = camera.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, z2));
+		Vector3 a = camera.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, nearClip));
+		Vector3 b = camera.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, z2));
 		Vector3 vector = camera.ViewportToWorldPoint(new Vector3(0f, 0f, z));
 		Vector3 vector2 = camera.ViewportToWorldPoint(new Vector3(1f, 1f, farClip));
 		Vector3 vector3 = (!radial) ? vector2 : camera.ViewportToWorldPoint(new Vector3(1f, 1f, z2));
@@ -236,7 +242,7 @@ public static class SunshineMath
 		float num4 = 0.2f;
 		for (int i = 0; i < maxSteps; i++)
 		{
-			Vector3 vector4 = Vector3.Lerp(from, to, num3);
+			Vector3 vector4 = Vector3.Lerp(a, b, num3);
 			float num5 = SunshineMath.MinRadiusSq(vector4, SunshineMath._frustumTestPoints);
 			if (num5 < num2)
 			{

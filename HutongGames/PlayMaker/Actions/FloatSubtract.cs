@@ -48,8 +48,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("The float variable to subtract from.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The float variable to subtract from.")]
 		public FsmFloat floatVariable;
 
 		

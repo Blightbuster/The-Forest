@@ -11,7 +11,7 @@ namespace TheForest.Items.Special
 		{
 			if (enable)
 			{
-				enable = (!LocalPlayer.FpCharacter.PushingSled && !LocalPlayer.WaterViz.InWater && !LocalPlayer.AnimControl.WaterBlock && !LocalPlayer.AnimControl.onRope);
+				enable = (!LocalPlayer.FpCharacter.PushingSled && !LocalPlayer.WaterViz.InWater && !LocalPlayer.AnimControl.WaterBlock && !LocalPlayer.AnimControl.onRope && !LocalPlayer.AnimControl.endGameCutScene && !LocalPlayer.AnimControl.useRootMotion);
 				Scene.HudGui.MapIcon.SetActive(enable);
 			}
 			else
@@ -24,7 +24,7 @@ namespace TheForest.Items.Special
 		
 		protected override void OnActivating()
 		{
-			if (!LocalPlayer.Animator.GetBool("drawBowBool") && !LocalPlayer.Create.CreateMode)
+			if (!LocalPlayer.Animator.GetBool("drawBowBool") && !LocalPlayer.Create.CreateMode && !LocalPlayer.AnimControl.endGameCutScene && !LocalPlayer.AnimControl.useRootMotion)
 			{
 				LocalPlayer.Inventory.Equip(this._itemId, false);
 			}

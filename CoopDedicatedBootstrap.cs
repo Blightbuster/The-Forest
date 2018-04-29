@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Bolt;
 using Steamworks;
 using TheForest.Commons.Enums;
@@ -25,7 +26,11 @@ public class CoopDedicatedBootstrap : MonoBehaviour
 			if (this.HasOption(commandLineArgs, "-showlogs", SteamDSConfig.ShowLogs))
 			{
 				ConsoleWriter.Open();
-				Application.logMessageReceived += CoopAdminCommand.Application_logMessageReceived;
+				if (CoopDedicatedBootstrap.<>f__mg$cache0 == null)
+				{
+					CoopDedicatedBootstrap.<>f__mg$cache0 = new Application.LogCallback(CoopAdminCommand.Application_logMessageReceived);
+				}
+				Application.logMessageReceived += CoopDedicatedBootstrap.<>f__mg$cache0;
 				SteamDSConfig.ShowLogs = true;
 			}
 			this.ServerRoutine(commandLineArgs);
@@ -324,4 +329,8 @@ public class CoopDedicatedBootstrap : MonoBehaviour
 
 	
 	public Canvas canvas;
+
+	
+	[CompilerGenerated]
+	private static Application.LogCallback <>f__mg$cache0;
 }

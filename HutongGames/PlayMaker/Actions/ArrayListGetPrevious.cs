@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Each time this action is called it gets the previous item from a PlayMaker ArrayList Proxy component. \nThis lets you quickly loop backward through all the children of an object to perform actions on them.\nNOTE: To get to specific item use ArrayListGet instead.")]
 	[ActionCategory("ArrayMaker/ArrayList")]
+	[Tooltip("Each time this action is called it gets the previous item from a PlayMaker ArrayList Proxy component. \nThis lets you quickly loop backward through all the children of an object to perform actions on them.\nNOTE: To get to specific item use ArrayListGet instead.")]
 	public class ArrayListGetPrevious : ArrayListActions
 	{
 		
@@ -94,10 +94,10 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[RequiredField]
 		[ActionSection("Set up")]
-		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
+		[RequiredField]
 		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
+		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 
 		

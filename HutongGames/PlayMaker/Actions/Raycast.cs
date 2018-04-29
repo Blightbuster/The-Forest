@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Casts a Ray against all Colliders in the scene. Use either a Game Object or Vector3 world position as the origin of the ray. Use GetRaycastInfo to get more detailed info.")]
 	[ActionCategory(ActionCategory.Physics)]
+	[Tooltip("Casts a Ray against all Colliders in the scene. Use either a Game Object or Vector3 world position as the origin of the ray. Use GetRaycastInfo to get more detailed info.")]
 	public class Raycast : FsmStateAction
 	{
 		
@@ -116,14 +116,14 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat distance;
 
 		
-		[UIHint(UIHint.Variable)]
 		[ActionSection("Result")]
 		[Tooltip("Event to send if the ray hits an object.")]
+		[UIHint(UIHint.Variable)]
 		public FsmEvent hitEvent;
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("Set a bool variable to true if hit something, otherwise false.")]
+		[UIHint(UIHint.Variable)]
 		public FsmBool storeDidHit;
 
 		
@@ -132,8 +132,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmGameObject storeHitObject;
 
 		
-		[Tooltip("Get the world position of the ray hit point and store it in a variable.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Get the world position of the ray hit point and store it in a variable.")]
 		public FsmVector3 storeHitPoint;
 
 		
@@ -147,13 +147,13 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat storeHitDistance;
 
 		
-		[Tooltip("Set how often to cast a ray. 0 = once, don't repeat; 1 = everyFrame; 2 = every other frame... \nSince raycasts can get expensive use the highest repeat interval you can get away with.")]
 		[ActionSection("Filter")]
+		[Tooltip("Set how often to cast a ray. 0 = once, don't repeat; 1 = everyFrame; 2 = every other frame... \nSince raycasts can get expensive use the highest repeat interval you can get away with.")]
 		public FsmInt repeatInterval;
 
 		
-		[Tooltip("Pick only from these layers.")]
 		[UIHint(UIHint.Layer)]
+		[Tooltip("Pick only from these layers.")]
 		public FsmInt[] layerMask;
 
 		
@@ -161,8 +161,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmBool invertMask;
 
 		
-		[Tooltip("The color to use for the debug line.")]
 		[ActionSection("Debug")]
+		[Tooltip("The color to use for the debug line.")]
 		public FsmColor debugColor;
 
 		

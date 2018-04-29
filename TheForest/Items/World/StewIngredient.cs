@@ -16,14 +16,27 @@ namespace TheForest.Items.World
 			{
 				yield return null;
 			}
-			foreach (object obj in base.transform.parent)
+			IEnumerator enumerator = base.transform.parent.GetEnumerator();
+			try
 			{
-				Transform sibbling = (Transform)obj;
-				EatStew es = sibbling.GetComponent<EatStew>();
-				if (es)
+				while (enumerator.MoveNext())
 				{
-					this.AddEffectTo(es);
-					break;
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					EatStew component = transform.GetComponent<EatStew>();
+					if (component)
+					{
+						this.AddEffectTo(component);
+						break;
+					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
 				}
 			}
 			yield break;

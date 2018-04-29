@@ -154,8 +154,8 @@ namespace HutongGames.PlayMaker.Actions
 		public Space space;
 
 		
-		[Tooltip("Whether or not the GameObject will orient to its direction of travel. False by default.")]
 		[ActionSection("LookAt")]
+		[Tooltip("Whether or not the GameObject will orient to its direction of travel. False by default.")]
 		public FsmBool orientToPath;
 
 		

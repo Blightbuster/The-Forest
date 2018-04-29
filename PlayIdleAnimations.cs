@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -17,19 +18,32 @@ public class PlayIdleAnimations : MonoBehaviour
 		}
 		else
 		{
-			foreach (object obj in this.mAnim)
+			IEnumerator enumerator = this.mAnim.GetEnumerator();
+			try
 			{
-				AnimationState animationState = (AnimationState)obj;
-				if (animationState.clip.name == "idle")
+				while (enumerator.MoveNext())
 				{
-					animationState.layer = 0;
-					this.mIdle = animationState.clip;
-					this.mAnim.Play(this.mIdle.name);
+					object obj = enumerator.Current;
+					AnimationState animationState = (AnimationState)obj;
+					if (animationState.clip.name == "idle")
+					{
+						animationState.layer = 0;
+						this.mIdle = animationState.clip;
+						this.mAnim.Play(this.mIdle.name);
+					}
+					else if (animationState.clip.name.StartsWith("idle"))
+					{
+						animationState.layer = 1;
+						this.mBreaks.Add(animationState.clip);
+					}
 				}
-				else if (animationState.clip.name.StartsWith("idle"))
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
 				{
-					animationState.layer = 1;
-					this.mBreaks.Add(animationState.clip);
+					disposable.Dispose();
 				}
 			}
 			if (this.mBreaks.Count == 0)

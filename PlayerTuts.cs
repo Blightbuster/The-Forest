@@ -49,34 +49,20 @@ public class PlayerTuts : MonoBehaviour
 		{
 			this.HideMolotovTut();
 		}
-		if (!this.craftingTutDone || !this.receipeTutDone)
+		if (!this.craftingTutDone)
 		{
-			if (LocalPlayer.Inventory._craftingCog.HasValideRecipe || LocalPlayer.Inventory._craftingCog.Ingredients.Count > 0)
+			bool flag2 = true;
+			for (int i = 0; i < this._craftTutReceiepeItemId.Length; i++)
 			{
-				this.CloseRecipeTut();
+				if (!LocalPlayer.Inventory.Owns(this._craftTutReceiepeItemId[i], true))
+				{
+					flag2 = false;
+					break;
+				}
 			}
-			else
+			if (flag2 && !this.craftingTutDone && LocalPlayer.IsInWorld)
 			{
-				bool flag2 = true;
-				for (int i = 0; i < this._craftTutReceiepeItemId.Length; i++)
-				{
-					if (!LocalPlayer.Inventory.Owns(this._craftTutReceiepeItemId[i], true))
-					{
-						flag2 = false;
-						break;
-					}
-				}
-				if (flag2)
-				{
-					if (!this.craftingTutDone && LocalPlayer.Inventory.CurrentView == PlayerInventory.PlayerViews.World)
-					{
-						this.CraftingTut();
-					}
-					else if (!this.receipeTutDone && LocalPlayer.Inventory.CurrentView == PlayerInventory.PlayerViews.Inventory)
-					{
-						this.ShowReceipeTut();
-					}
-				}
+				this.CraftingTut();
 			}
 		}
 		if (!this.axeTutDone)
@@ -89,6 +75,10 @@ public class PlayerTuts : MonoBehaviour
 					break;
 				}
 			}
+		}
+		if (!this.sleddingTutDone && !this.Showing && LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.RightHand, this._turtleShellItemId))
+		{
+			this.ShowSleddingTut();
 		}
 	}
 
@@ -116,25 +106,6 @@ public class PlayerTuts : MonoBehaviour
 		else
 		{
 			base.Invoke("GotBook", 5f);
-		}
-	}
-
-	
-	public void ShowBookTut()
-	{
-		if (!this.bookTutDone)
-		{
-			this.bookTutDone = true;
-			Scene.HudGui.bookTutorial.SetActive(true);
-		}
-	}
-
-	
-	public void HideBookTut()
-	{
-		if (Scene.HudGui.bookTutorial.activeSelf)
-		{
-			Scene.HudGui.bookTutorial.SetActive(false);
 		}
 	}
 
@@ -188,33 +159,66 @@ public class PlayerTuts : MonoBehaviour
 	
 	public void ShowStep1Tut()
 	{
-		if (!this.bookStep1Done && this.Book.InitShowStep1())
+		if (!this.bookStep1Done)
 		{
-			this.bookStep1Done = true;
-			Scene.HudGui.Tut_BookStage1.SetActive(true);
-			Scene.HudGui.Grid.Reposition();
+			if (!this.Showing && LocalPlayer.IsInWorld)
+			{
+				this.Showing = true;
+				if (this.Book.InitShowStep1())
+				{
+					this.bookStep1Done = true;
+					Scene.HudGui.Tut_BookStage1.SetActive(true);
+					Scene.HudGui.Grid.Reposition();
+				}
+			}
+			else
+			{
+				base.Invoke("ShowStep1Tut", 10f);
+			}
 		}
 	}
 
 	
 	public void ShowStep2Tut()
 	{
-		if (!this.bookStep2Done && this.Book.InitShowStep2())
+		if (!this.bookStep2Done)
 		{
-			this.bookStep2Done = true;
-			Scene.HudGui.Tut_BookStage2.SetActive(true);
-			Scene.HudGui.Grid.Reposition();
+			if (!this.Showing && LocalPlayer.IsInWorld)
+			{
+				this.Showing = true;
+				if (this.Book.InitShowStep2())
+				{
+					this.bookStep2Done = true;
+					Scene.HudGui.Tut_BookStage2.SetActive(true);
+					Scene.HudGui.Grid.Reposition();
+				}
+			}
+			else
+			{
+				base.Invoke("ShowStep2Tut", 10f);
+			}
 		}
 	}
 
 	
 	public void ShowStep3Tut()
 	{
-		if (!this.bookStep3Done && this.Book.InitShowStep3())
+		if (!this.bookStep3Done)
 		{
-			this.bookStep3Done = true;
-			Scene.HudGui.Tut_BookStage3.SetActive(true);
-			Scene.HudGui.Grid.Reposition();
+			if (!this.Showing && LocalPlayer.IsInWorld)
+			{
+				this.Showing = true;
+				if (this.Book.InitShowStep3())
+				{
+					this.bookStep3Done = true;
+					Scene.HudGui.Tut_BookStage3.SetActive(true);
+					Scene.HudGui.Grid.Reposition();
+				}
+			}
+			else
+			{
+				base.Invoke("ShowStep3Tut", 10f);
+			}
 		}
 	}
 
@@ -477,13 +481,11 @@ public class PlayerTuts : MonoBehaviour
 	
 	private void CraftingTut()
 	{
-		if (!this.Showing)
+		if (!this.craftingTutDone && !this.Showing && !Scene.HudGui.Tut_Crafting.activeSelf)
 		{
 			this.Showing = true;
-			this.craftingTutDone = true;
 			Scene.HudGui.Tut_Crafting.SetActive(true);
 			Scene.HudGui.Grid.Reposition();
-			base.Invoke("CloseCraftingTut", 10f);
 		}
 	}
 
@@ -493,48 +495,11 @@ public class PlayerTuts : MonoBehaviour
 		if (Scene.HudGui.Tut_Crafting.activeSelf)
 		{
 			this.Showing = false;
+			this.craftingTutDone = true;
 			Scene.HudGui.Tut_Crafting.SetActive(false);
 			Scene.HudGui.Grid.Reposition();
-		}
-	}
-
-	
-	private void ShowReceipeTut()
-	{
-		if (!Scene.HudGui.CraftingMessage.activeSelf)
-		{
-			Scene.HudGui.CraftingMessage.SetActive(true);
-			base.Invoke("CloseRecipeTut", 6f);
-		}
-	}
-
-	
-	public void CloseRecipeTut()
-	{
-		if (Scene.HudGui.CraftingMessage.activeSelf)
-		{
-			this.receipeTutDone = true;
-			Scene.HudGui.CraftingMessage.SetActive(false);
-		}
-	}
-
-	
-	public void ShowTreeStructureTut()
-	{
-		if (Scene.HudGui.Tut_AnchorAccessibleBuildings && !this.treeStructureTutDone && !Scene.HudGui.Tut_AnchorAccessibleBuildings.activeSelf)
-		{
-			this.treeStructureTutDone = true;
-			Scene.HudGui.Tut_AnchorAccessibleBuildings.SetActive(true);
-			base.Invoke("CloseTreeStructureTut", 6f);
-		}
-	}
-
-	
-	public void CloseTreeStructureTut()
-	{
-		if (Scene.HudGui.Tut_AnchorAccessibleBuildings.activeSelf)
-		{
-			Scene.HudGui.Tut_AnchorAccessibleBuildings.SetActive(false);
+			this._craftingPageLink.TurnOffAllPages();
+			this._craftingPageLink.OnClick();
 		}
 	}
 
@@ -582,6 +547,49 @@ public class PlayerTuts : MonoBehaviour
 			this.Showing = false;
 			Scene.HudGui.Tut_Axe.SetActive(false);
 			Scene.HudGui.Grid.Reposition();
+		}
+	}
+
+	
+	public void ShowNewBuildingsAvailableTut()
+	{
+		if (!Scene.HudGui.Tut_NewBuildingsAvailable.activeSelf)
+		{
+			Scene.HudGui.Tut_NewBuildingsAvailable.SetActive(true);
+			Scene.HudGui.Grid.Reposition();
+			base.Invoke("CloseNewBuildingsAvailableTut", 15f);
+		}
+	}
+
+	
+	private void CloseNewBuildingsAvailableTut()
+	{
+		if (Scene.HudGui.Tut_NewBuildingsAvailable.activeSelf)
+		{
+			Scene.HudGui.Tut_NewBuildingsAvailable.SetActive(false);
+			Scene.HudGui.Grid.Reposition();
+		}
+	}
+
+	
+	public void ShowSleddingTut()
+	{
+		if (!this.Showing && !this.sleddingTutDone)
+		{
+			this.Showing = true;
+			this.sleddingTutDone = true;
+			Scene.HudGui.Tut_Sledding.SetActive(true);
+			base.Invoke("CloseSleddingTut", 15f);
+		}
+	}
+
+	
+	public void CloseSleddingTut()
+	{
+		if (Scene.HudGui.Tut_Sledding.activeSelf)
+		{
+			this.Showing = false;
+			Scene.HudGui.Tut_Sledding.SetActive(false);
 		}
 	}
 
@@ -700,6 +708,7 @@ public class PlayerTuts : MonoBehaviour
 		this.StarvationTutOff();
 		this.Showing = true;
 		this.ColdDamageTutOff();
+		this.CloseNewBuildingsAvailableTut();
 	}
 
 	
@@ -718,7 +727,17 @@ public class PlayerTuts : MonoBehaviour
 	public int[] _worldMapPiecesItemIds;
 
 	
+	[ItemIdPicker(Item.Types.Equipment)]
+	public int _turtleShellItemId;
+
+	
 	public float _lighterTutDelay = 60f;
+
+	
+	public SelectPageNumber _craftingPageLink;
+
+	
+	public Renderer _bookInventoryView;
 
 	
 	private float NextLightTutTime;
@@ -776,4 +795,8 @@ public class PlayerTuts : MonoBehaviour
 	
 	[SerializeThis]
 	private bool molotovTutDone;
+
+	
+	[SerializeThis]
+	private bool sleddingTutDone;
 }

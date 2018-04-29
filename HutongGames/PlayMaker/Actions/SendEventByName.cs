@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sends an Event by name after an optional delay. NOTE: Use this over Send Event if you store events as string variables.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Sends an Event by name after an optional delay. NOTE: Use this over Send Event if you store events as string variables.")]
 	public class SendEventByName : FsmStateAction
 	{
 		

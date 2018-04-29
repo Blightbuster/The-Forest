@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Set the value of a variable in another FSM.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Set the value of a variable in another FSM.")]
 	public class SetFsmVariable : FsmStateAction
 	{
 		
@@ -49,7 +49,7 @@ namespace HutongGames.PlayMaker.Actions
 				this.setValue.Type = FsmUtility.GetVariableType(this.targetVariable);
 				if (!string.IsNullOrEmpty(this.setValue.variableName) && this.sourceVariable == null)
 				{
-					this.LogWarning("Missing Variable: " + this.setValue.variableName);
+					base.LogWarning("Missing Variable: " + this.setValue.variableName);
 				}
 				this.cachedGO = ownerDefaultTarget;
 			}
@@ -81,8 +81,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString variableName;
 
 		
-		[HideTypeFilter]
 		[RequiredField]
+		[HideTypeFilter]
 		public FsmVar setValue;
 
 		

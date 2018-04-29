@@ -47,8 +47,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Rigidbody))]
 		[RequiredField]
+		[CheckForComponent(typeof(Rigidbody))]
 		public FsmOwnerDefault gameObject;
 
 		

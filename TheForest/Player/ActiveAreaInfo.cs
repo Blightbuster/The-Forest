@@ -1,4 +1,5 @@
 ﻿using System;
+using TheForest.Tools;
 using TheForest.Utils;
 using TheForest.World.Areas;
 using UnityEngine;
@@ -26,6 +27,10 @@ namespace TheForest.Player
 				}
 				UnityEngine.Object.Destroy(base.gameObject);
 			}
+			if (this._currentCave == CaveNames.SnowCave)
+			{
+				EventRegistry.Player.Publish(TfEvent.EnterSnowCave, null);
+			}
 		}
 
 		
@@ -42,6 +47,14 @@ namespace TheForest.Player
 		
 		public void SetCurrentCave(CaveNames cave)
 		{
+			this.IsLeavingCaves = (this._currentCave != CaveNames.NotInCaves && cave == CaveNames.NotInCaves);
+			this._currentCave = cave;
+		}
+
+		
+		public void EnterSnowCaveHelper()
+		{
+			this.SetCurrentCave(CaveNames.SnowCave);
 		}
 
 		

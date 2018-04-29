@@ -29,9 +29,6 @@ public class Ball : MonoBehaviour
 	}
 
 	
-	private const float GroundRayLength = 1f;
-
-	
 	[SerializeField]
 	private float movePower = 5f;
 
@@ -46,4 +43,7 @@ public class Ball : MonoBehaviour
 	
 	[SerializeField]
 	private float jumpPower = 2f;
+
+	
+	private const float GroundRayLength = 1f;
 }

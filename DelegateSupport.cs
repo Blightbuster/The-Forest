@@ -216,7 +216,7 @@ public static class DelegateSupport
 			get
 			{
 				TR result;
-				if (!this.TryGetValue(index, out result))
+				if (!base.TryGetValue(index, out result))
 				{
 					result = (base[index] = Activator.CreateInstance<TR>());
 				}

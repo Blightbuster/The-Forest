@@ -13,9 +13,9 @@ namespace TheForest.UI
 			yield return null;
 			if (this._refreshOnStart != null)
 			{
-				foreach (GameObject go in this._refreshOnStart)
+				foreach (GameObject gameObject in this._refreshOnStart)
 				{
-					go.SetActive(false);
+					gameObject.SetActive(false);
 				}
 			}
 			yield return null;
@@ -24,9 +24,9 @@ namespace TheForest.UI
 			yield return null;
 			if (this._refreshOnStart != null)
 			{
-				foreach (GameObject go2 in this._refreshOnStart)
+				foreach (GameObject gameObject2 in this._refreshOnStart)
 				{
-					go2.SetActive(true);
+					gameObject2.SetActive(true);
 				}
 			}
 			yield break;
@@ -36,15 +36,12 @@ namespace TheForest.UI
 		public GameObject[] _refreshOnStart;
 
 		
-		public UIPlayTween _forwardTweener;
+		public UIPlayTween[] _forwardTweener;
 
 		
-		public UIPlayTween _backwardTweener;
+		public UIPlayTween[] _backwardTweener;
 
 		
-		public UIPlayTween _controlSettingsForwardTweener;
-
-		
-		public UIPlayTween _controlSettingsBackwardTweener;
+		public bool _centerOnScreen;
 	}
 }

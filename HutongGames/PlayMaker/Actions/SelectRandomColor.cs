@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Select a random Color from an array of Colors.")]
 	[ActionCategory(ActionCategory.Color)]
+	[Tooltip("Select a random Color from an array of Colors.")]
 	public class SelectRandomColor : FsmStateAction
 	{
 		
@@ -58,8 +58,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat[] weights;
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmColor storeColor;
 	}
 }

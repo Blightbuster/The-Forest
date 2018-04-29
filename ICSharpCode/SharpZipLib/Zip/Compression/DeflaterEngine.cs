@@ -182,36 +182,40 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 			this.max_chain = DeflaterConstants.MAX_CHAIN[level];
 			if (DeflaterConstants.COMPR_FUNC[level] != this.compressionFunction)
 			{
-				switch (this.compressionFunction)
+				int num = this.compressionFunction;
+				if (num != 0)
 				{
-				case 0:
+					if (num != 1)
+					{
+						if (num == 2)
+						{
+							if (this.prevAvailable)
+							{
+								this.huffman.TallyLit((int)(this.window[this.strstart - 1] & byte.MaxValue));
+							}
+							if (this.strstart > this.blockStart)
+							{
+								this.huffman.FlushBlock(this.window, this.blockStart, this.strstart - this.blockStart, false);
+								this.blockStart = this.strstart;
+							}
+							this.prevAvailable = false;
+							this.matchLen = 2;
+						}
+					}
+					else if (this.strstart > this.blockStart)
+					{
+						this.huffman.FlushBlock(this.window, this.blockStart, this.strstart - this.blockStart, false);
+						this.blockStart = this.strstart;
+					}
+				}
+				else
+				{
 					if (this.strstart > this.blockStart)
 					{
 						this.huffman.FlushStoredBlock(this.window, this.blockStart, this.strstart - this.blockStart, false);
 						this.blockStart = this.strstart;
 					}
 					this.UpdateHash();
-					break;
-				case 1:
-					if (this.strstart > this.blockStart)
-					{
-						this.huffman.FlushBlock(this.window, this.blockStart, this.strstart - this.blockStart, false);
-						this.blockStart = this.strstart;
-					}
-					break;
-				case 2:
-					if (this.prevAvailable)
-					{
-						this.huffman.TallyLit((int)(this.window[this.strstart - 1] & byte.MaxValue));
-					}
-					if (this.strstart > this.blockStart)
-					{
-						this.huffman.FlushBlock(this.window, this.blockStart, this.strstart - this.blockStart, false);
-						this.blockStart = this.strstart;
-					}
-					this.prevAvailable = false;
-					this.matchLen = 2;
-					break;
 				}
 				this.compressionFunction = DeflaterConstants.COMPR_FUNC[level];
 			}

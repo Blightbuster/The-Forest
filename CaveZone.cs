@@ -25,10 +25,8 @@ public class CaveZone : MonoBehaviour
 		}
 		else
 		{
-			Dictionary<Collider, int> dictionary2;
-			Dictionary<Collider, int> dictionary = dictionary2 = this.colliderTracker;
-			int num = dictionary2[collider];
-			dictionary[collider] = num + 1;
+			Dictionary<Collider, int> dictionary;
+			(dictionary = this.colliderTracker)[collider] = dictionary[collider] + 1;
 		}
 		if (this.colliderTracker[collider] == 1)
 		{
@@ -50,10 +48,8 @@ public class CaveZone : MonoBehaviour
 		{
 			return;
 		}
-		Dictionary<Collider, int> dictionary2;
-		Dictionary<Collider, int> dictionary = dictionary2 = this.colliderTracker;
-		int num = dictionary2[collider];
-		dictionary[collider] = num - 1;
+		Dictionary<Collider, int> dictionary;
+		(dictionary = this.colliderTracker)[collider] = dictionary[collider] - 1;
 		if (this.colliderTracker[collider] <= 0)
 		{
 			foreach (TerrainCollider collider2 in this.terrainColliders)

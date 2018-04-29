@@ -4,9 +4,9 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[HelpUrl("https:
 	[ActionCategory("Animator")]
 	[Tooltip("Sets the position, rotation and weights of an IK goal. A GameObject can be set to control the position and rotation, or it can be manually expressed.")]
+	[HelpUrl("https:
 	public class SetAnimatorIKGoal : FsmStateAction
 	{
 		
@@ -129,9 +129,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(PlayMakerAnimatorIKProxy))]
-		[CheckForComponent(typeof(Animator))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animator))]
+		[CheckForComponent(typeof(PlayMakerAnimatorIKProxy))]
 		[Tooltip("The target. An Animator component and a PlayMakerAnimatorIKProxy component are required")]
 		public FsmOwnerDefault gameObject;
 
@@ -157,8 +157,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat positionWeight;
 
 		
-		[Tooltip("Sets the rotational weight of an IK goal (0 = rotation before IK, 1 = rotation at the IK goal)")]
 		[HasFloatSlider(0f, 1f)]
+		[Tooltip("Sets the rotational weight of an IK goal (0 = rotation before IK, 1 = rotation at the IK goal)")]
 		public FsmFloat rotationWeight;
 
 		

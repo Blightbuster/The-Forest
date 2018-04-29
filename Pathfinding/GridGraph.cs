@@ -498,12 +498,12 @@ namespace Pathfinding
 					yield return new Progress(Mathf.Lerp(0.1f, 0.7f, (float)z / (float)this.depth), "Calculating positions");
 				}
 				progressCounter += this.width;
-				for (int x = 0; x < this.width; x++)
+				for (int j = 0; j < this.width; j++)
 				{
-					GridNode node = this.nodes[z * this.width + x];
-					node.NodeInGridIndex = z * this.width + x;
-					this.UpdateNodePositionCollision(node, x, z, true);
-					this.textureData.Apply(node, x, z);
+					GridNode gridNode = this.nodes[z * this.width + j];
+					gridNode.NodeInGridIndex = z * this.width + j;
+					this.UpdateNodePositionCollision(gridNode, j, z, true);
+					this.textureData.Apply(gridNode, j, z);
 				}
 			}
 			for (int z2 = 0; z2 < this.depth; z2++)
@@ -513,10 +513,10 @@ namespace Pathfinding
 					progressCounter = 0;
 					yield return new Progress(Mathf.Lerp(0.1f, 0.7f, (float)z2 / (float)this.depth), "Calculating connections");
 				}
-				for (int x2 = 0; x2 < this.width; x2++)
+				for (int k = 0; k < this.width; k++)
 				{
-					GridNode node2 = this.nodes[z2 * this.width + x2];
-					this.CalculateConnections(x2, z2, node2);
+					GridNode node = this.nodes[z2 * this.width + k];
+					this.CalculateConnections(k, z2, node);
 				}
 			}
 			yield return new Progress(0.95f, "Calculating erosion");
@@ -1423,9 +1423,6 @@ namespace Pathfinding
 		}
 
 		
-		public const int getNearestForceOverlap = 2;
-
-		
 		public int width;
 
 		
@@ -1563,6 +1560,9 @@ namespace Pathfinding
 		};
 
 		
+		public const int getNearestForceOverlap = 2;
+
+		
 		public GridNode[] nodes;
 
 		
@@ -1616,24 +1616,30 @@ namespace Pathfinding
 			
 			private void ApplyChannel(GridNode node, int x, int z, int value, GridGraph.TextureData.ChannelUse channelUse, float factor)
 			{
-				switch (channelUse)
+				if (channelUse != GridGraph.TextureData.ChannelUse.Penalty)
 				{
-				case GridGraph.TextureData.ChannelUse.Penalty:
-					node.Penalty += (uint)Mathf.RoundToInt((float)value * factor);
-					break;
-				case GridGraph.TextureData.ChannelUse.Position:
-					node.position = GridNode.GetGridGraph(node.GraphIndex).GraphPointToWorld(x, z, (float)value);
-					break;
-				case GridGraph.TextureData.ChannelUse.WalkablePenalty:
-					if (value == 0)
+					if (channelUse != GridGraph.TextureData.ChannelUse.Position)
 					{
-						node.Walkable = false;
+						if (channelUse == GridGraph.TextureData.ChannelUse.WalkablePenalty)
+						{
+							if (value == 0)
+							{
+								node.Walkable = false;
+							}
+							else
+							{
+								node.Penalty += (uint)Mathf.RoundToInt((float)(value - 1) * factor);
+							}
+						}
 					}
 					else
 					{
-						node.Penalty += (uint)Mathf.RoundToInt((float)(value - 1) * factor);
+						node.position = GridNode.GetGridGraph(node.GraphIndex).GraphPointToWorld(x, z, (float)value);
 					}
-					break;
+				}
+				else
+				{
+					node.Penalty += (uint)Mathf.RoundToInt((float)value * factor);
 				}
 			}
 

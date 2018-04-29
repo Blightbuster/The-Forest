@@ -105,15 +105,6 @@ public class playerAnimatorControl : MonoBehaviour
 		this.setup.pmControl.FsmVariables.GetFsmInt("shellRideHash").Value = Animator.StringToHash("shellRide");
 		this.setup.pmControl.FsmVariables.GetFsmGameObject("inventoryGo").Value = this.player._inventoryGO;
 		this.layerMask = 69345280;
-		if (this.oculusDemo)
-		{
-			this.animator.SetBoolReflected("oculusDemoBool", true);
-			this.reactions.StartCoroutine("setControllerSpeed", 0f);
-			this.animator.SetLayerWeightReflected(2, 1f);
-			this.animator.SetLayerWeightReflected(4, 0f);
-			this.animator.SetLayerWeightReflected(5, 1f);
-			base.transform.parent.GetComponent<SimpleMouseRotator>().enabled = false;
-		}
 		base.InvokeRepeating("checkPlaneDistance", 5f, 5f);
 	}
 
@@ -140,16 +131,19 @@ public class playerAnimatorControl : MonoBehaviour
 	
 	private void Update()
 	{
-		if ((this.fullBodyState3.tagHash == this.idleHash || (this.nextFullBodyState3.tagHash == this.idleHash && this.animator.IsInTransition(3))) && !this.skinningAnimal && !this.endGameCutScene)
+		if (!ForestVR.Enabled)
 		{
-			if (this.setup.leftHandHeld.gameObject.activeSelf)
+			if ((this.fullBodyState3.tagHash == this.idleHash || (this.nextFullBodyState3.tagHash == this.idleHash && this.animator.IsInTransition(3))) && !this.skinningAnimal && !this.endGameCutScene)
 			{
-				this.setup.leftHandHeld.gameObject.SetActive(false);
+				if (this.setup.leftHandHeld.gameObject.activeSelf)
+				{
+					this.setup.leftHandHeld.gameObject.SetActive(false);
+				}
 			}
-		}
-		else if (!this.setup.leftHandHeld.gameObject.activeSelf)
-		{
-			this.setup.leftHandHeld.gameObject.SetActive(true);
+			else if (!this.setup.leftHandHeld.gameObject.activeSelf)
+			{
+				this.setup.leftHandHeld.gameObject.SetActive(true);
+			}
 		}
 		if (this.currLayerState1.shortNameHash == this.eatMeatHash)
 		{
@@ -246,8 +240,8 @@ public class playerAnimatorControl : MonoBehaviour
 		this.nextFullBodyState2 = this.animator.GetNextAnimatorStateInfo(2);
 		this.nextFullBodyState3 = this.animator.GetNextAnimatorStateInfo(3);
 		this.animator.SetBoolReflected("movingBool", false);
-		float to = Mathf.Clamp(this.normCamX * 12f, 0f, 10f);
-		this.lookDownBlendVal = Mathf.Lerp(this.lookDownBlendVal, to, Time.deltaTime * 5f);
+		float b = Mathf.Clamp(this.normCamX * 12f, 0f, 10f);
+		this.lookDownBlendVal = Mathf.Lerp(this.lookDownBlendVal, b, Time.deltaTime * 5f);
 		this.animator.SetFloat("lookDownBlend", this.lookDownBlendVal);
 		if (this.IsLeftHandBusy())
 		{
@@ -272,7 +266,7 @@ public class playerAnimatorControl : MonoBehaviour
 		{
 			this.coldOffsetBool = false;
 		}
-		if (!LocalPlayer.Inventory.IsRightHandEmpty() || this.onRockThrower || LocalPlayer.Animator.GetBool("lookAtPhoto") || LocalPlayer.Animator.GetBool("zipLineAttach") || this.coldOffsetBool)
+		if (!LocalPlayer.Inventory.IsRightHandEmpty() || this.onRockThrower || LocalPlayer.Animator.GetBool("lookAtPhoto") || LocalPlayer.Animator.GetBool("zipLineAttach") || LocalPlayer.Animator.GetBool("logHeld") || this.coldOffsetBool)
 		{
 			this.animator.SetBoolReflected("blockColdBool", true);
 		}
@@ -486,13 +480,13 @@ public class playerAnimatorControl : MonoBehaviour
 		}
 		if (this.oculusDemo)
 		{
-			this.camX = this.setup.playerCam.eulerAngles.x;
-			this.camForward = this.setup.playerCam.forward;
+			this.camX = LocalPlayer.MainCamTr.eulerAngles.x;
+			this.camForward = LocalPlayer.MainCamTr.forward;
 		}
 		else
 		{
-			this.camX = this.setup.playerCam.eulerAngles.x;
-			this.camForward = this.setup.playerCam.forward;
+			this.camX = LocalPlayer.MainCamTr.eulerAngles.x;
+			this.camForward = LocalPlayer.MainCamTr.forward;
 		}
 		Vector3 forward = this.tr.forward;
 		forward.y = 0f;
@@ -658,7 +652,7 @@ public class playerAnimatorControl : MonoBehaviour
 				{
 					LocalPlayer.Inventory.StashLeftHand();
 				}
-				if ((this.absCamX > 0.65f && TheForest.Utils.Input.GetAxis("Vertical") > 0f) || this.rootTr.position.y + 3f < this.buoyancy.WaterLevel)
+				if ((this.absCamX > 0.65f && TheForest.Utils.Input.GetAxis("Vertical") > 0f) || LocalPlayer.WaterViz.WaterLevelSensor.position.y + 0.25f < this.buoyancy.WaterLevel)
 				{
 					if (!this.doShellRideMode)
 					{
@@ -667,8 +661,12 @@ public class playerAnimatorControl : MonoBehaviour
 					this.animator.SetBoolReflected("swimDiveBool", true);
 					LocalPlayer.FpCharacter.Diving = true;
 					LocalPlayer.FpCharacter.CanJump = false;
+					if (LocalPlayer.Inventory.Owns(this._rebreatherId, true) && !LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.Chest, this._rebreatherId) && LocalPlayer.IsInCaves)
+					{
+						LocalPlayer.Inventory.Equip(this._rebreatherId, false);
+					}
 				}
-				else
+				else if (LocalPlayer.FpCharacter.Diving && LocalPlayer.WaterViz.WaterLevelSensor.position.y > this.buoyancy.WaterLevel)
 				{
 					if (!this.doShellRideMode)
 					{
@@ -720,7 +718,7 @@ public class playerAnimatorControl : MonoBehaviour
 		{
 			this.animator.SetFloatReflected("inWaterBlend", 10f, 1f, Time.deltaTime * 3f);
 		}
-		else if (this.doShellRideMode || LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.RightHand, this._shellId) || LocalPlayer.FpCharacter.crouch)
+		else if (this.doShellRideMode || LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.RightHand, this._shellId) || LocalPlayer.FpCharacter.crouch || LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.RightHand, this._mapId))
 		{
 			this.animator.SetFloatReflected("inWaterBlend", -10f, 1f, Time.deltaTime * 3f);
 		}
@@ -885,22 +883,22 @@ public class playerAnimatorControl : MonoBehaviour
 				}
 				else
 				{
-					float to = 0f;
-					float to2 = 1f;
+					float b = 0f;
+					float b2 = 1f;
 					if (this.fullBodyState3.shortNameHash != this.flashLightIdlehash)
 					{
-						to2 = 0f;
+						b2 = 0f;
 					}
-					this.leftArmDamp = Mathf.Lerp(this.leftArmDamp, to2, Time.deltaTime * 5f);
+					this.leftArmDamp = Mathf.Lerp(this.leftArmDamp, b2, Time.deltaTime * 5f);
 					if (LocalPlayer.FpCharacter.crouch && LocalPlayer.Inventory.IsRightHandEmpty())
 					{
-						to = -1f;
+						b = -1f;
 					}
 					else if (LocalPlayer.FpCharacter.crouch)
 					{
-						to = -0.4f;
+						b = -0.4f;
 					}
-					this.torchCrouchOffset = Mathf.Lerp(this.torchCrouchOffset, to, Time.deltaTime * 10f);
+					this.torchCrouchOffset = Mathf.Lerp(this.torchCrouchOffset, b, Time.deltaTime * 10f);
 					quaternion = Quaternion.AngleAxis((this.normCamX + this.torchCrouchOffset) * this.armMultiplyer * 0.8f * this.animator.GetLayerWeight(4) * this.leftArmDamp, LocalPlayer.Transform.right) * quaternion;
 				}
 				this.setup.leftArm.rotation = quaternion;
@@ -912,17 +910,22 @@ public class playerAnimatorControl : MonoBehaviour
 		}
 		if (this.animator.GetBool("shellHeld") && !this.doShellRideMode)
 		{
-			float to3;
+			float to;
 			if (this.animator.GetBool("lighterHeld") || this.animator.GetBool("flashLightHeld") || this.animator.GetBool("pedHeld") || this.animator.GetBool("walkmanHeld"))
 			{
-				to3 = 1f;
+				to = 1f;
 			}
 			else
 			{
-				to3 = 0f;
+				to = 0f;
 			}
-			this.smoothShellBlend = Mathf.SmoothStep(this.smoothShellBlend, to3, Time.deltaTime * 10f);
+			this.smoothShellBlend = Mathf.SmoothStep(this.smoothShellBlend, to, Time.deltaTime * 10f);
 			this.animator.SetFloatReflected("shellBlend", this.smoothShellBlend);
+		}
+		if (BoltNetwork.isRunning && LocalPlayer.Entity != null && LocalPlayer.Entity.isAttached && Time.time > this.frozenUpdateTimer && this.overallSpeed < 0.1f)
+		{
+			this.animator.SetFloatReflected("pullCraneSpeed", (float)((this.animator.GetFloat("pullCraneSpeed") <= 0f) ? 1 : 0));
+			this.frozenUpdateTimer = Time.time + 5f;
 		}
 		Quaternion quaternion6 = this.setup.neckJnt.rotation;
 		vector = this.tr.InverseTransformDirection(LocalPlayer.MainCamTr.forward);
@@ -934,10 +937,6 @@ public class playerAnimatorControl : MonoBehaviour
 		if (this.normCamX > 0f)
 		{
 			quaternion6 = Quaternion.AngleAxis(this.normCamX * num, LocalPlayer.Transform.right) * quaternion6;
-		}
-		if (this.onRaft)
-		{
-			quaternion6 = Quaternion.AngleAxis(this.normCamY * num * -10f, LocalPlayer.Transform.forward) * quaternion6;
 		}
 		this.setup.neckJnt.rotation = quaternion6;
 		Vector3 center = this.playerCollider.center;
@@ -1164,7 +1163,7 @@ public class playerAnimatorControl : MonoBehaviour
 		else if (this.fullBodyState2.shortNameHash == this.axeGround1Hash || this.fullBodyState2.shortNameHash == this.axeGround2Hash || this.fullBodyState2.shortNameHash == this.axeAttackHash)
 		{
 			this.doingGroundChop = true;
-			if (this.setup && this.setup.headJnt)
+			if (this.setup && this.setup.headJnt && this.rootTr)
 			{
 				Vector3 center2 = this.rootTr.InverseTransformPoint(this.setup.headJnt.position);
 				this.playerHeadCollider.center = center2;
@@ -1216,10 +1215,16 @@ public class playerAnimatorControl : MonoBehaviour
 				this.rb.isKinematic = true;
 			}
 			Vector3 position = this.rootTr.position;
-			RaycastHit raycastHit;
-			if (Physics.SphereCast(position, 0.2f, Vector3.down, out raycastHit, 6f, this.layerMask) && this.onRopeHeightCheck && this.currLayerState0.shortNameHash != this.enterClimbTopHash && this.currLayerState0.tagHash != this.climbOutHash && this.nextLayerState0.shortNameHash != this.enterClimbTopHash && !this.blockHeightCheck)
+			if (this.onRopeHeightCheck && this.currLayerState0.shortNameHash != this.enterClimbTopHash && this.currLayerState0.tagHash != this.climbOutHash && this.nextLayerState0.shortNameHash != this.enterClimbTopHash && !this.blockHeightCheck)
 			{
-				this.onRopeWithGroundBelow = true;
+				if (Physics.SphereCast(position, 0.2f, Vector3.down, out this.ropeHit, 6f, this.layerMask))
+				{
+					this.onRopeWithGroundBelow = true;
+				}
+				else
+				{
+					this.onRopeWithGroundBelow = false;
+				}
 			}
 			else
 			{
@@ -1245,7 +1250,7 @@ public class playerAnimatorControl : MonoBehaviour
 						float num2 = 4.6f;
 						if (num < num2 && num > 0f && this.lockGravity && !flag3)
 						{
-							if (this.onRopeWithGroundBelow && raycastHit.distance < 5f)
+							if (this.onRopeWithGroundBelow && this.ropeHit.distance < 5f)
 							{
 								if (this.closePlayerYVel < -8f)
 								{
@@ -1270,6 +1275,10 @@ public class playerAnimatorControl : MonoBehaviour
 					}
 				}
 				this.rootTr.position += deltaPosition;
+				if (this.useRootRotation)
+				{
+					this.rootTr.rotation = this.animator.rootRotation;
+				}
 			}
 			if (this.onRope || this.injured)
 			{
@@ -1323,11 +1332,10 @@ public class playerAnimatorControl : MonoBehaviour
 			if (this.onRopeWithGroundBelow && !flag3 && this.onRopeHeightCheck && !this.cliffClimb)
 			{
 				float num3 = this.playerCollider.height / 2f;
-				if (raycastHit.distance < num3 && flag2)
+				if (this.ropeHit.distance >= num3 || flag2)
 				{
-					LocalPlayer.Transform.position = new Vector3(LocalPlayer.Transform.position.x, raycastHit.point.y + num3, LocalPlayer.Transform.position.z);
 				}
-				if (raycastHit.distance < 5.5f && (TheForest.Utils.Input.GetAxis("Vertical") < -0.1f || flag2 || flag) && this.animator.GetBool("setClimbBool") && (this.currLayerState0.tagHash == this.climbingHash || this.currLayerState0.tagHash == this.climbIdleHash))
+				if (this.ropeHit.distance < 5.5f && (TheForest.Utils.Input.GetAxis("Vertical") < -0.1f || flag2 || flag) && this.animator.GetBool("setClimbBool") && (this.currLayerState0.tagHash == this.climbingHash || this.currLayerState0.tagHash == this.climbIdleHash))
 				{
 					int integer = this.animator.GetInteger("climbTypeInt");
 					if (integer == 0)
@@ -1360,9 +1368,9 @@ public class playerAnimatorControl : MonoBehaviour
 			t += Time.deltaTime;
 			if (LocalPlayer.Transform.position.y - this.playerCollider.height / 2f < groundPos.y)
 			{
-				Vector3 newPos = LocalPlayer.Transform.position;
-				newPos.y = groundPos.y + this.playerCollider.height / 2f;
-				LocalPlayer.Transform.position = newPos;
+				Vector3 position = LocalPlayer.Transform.position;
+				position.y = groundPos.y + this.playerCollider.height / 2f;
+				LocalPlayer.Transform.position = position;
 			}
 			yield return null;
 		}
@@ -1545,6 +1553,7 @@ public class playerAnimatorControl : MonoBehaviour
 			Scene.HudGui.DropButton.SetActive(true);
 			this.player.MemorizeItem(Item.EquipmentSlot.RightHand);
 			this.player.StashEquipedWeapon(false);
+			dummyAnimatorControl component = go.GetComponent<dummyAnimatorControl>();
 			this.placedBodyGo = go;
 			if (BoltNetwork.isRunning && go.GetComponentInChildren<BoltEntity>())
 			{
@@ -1563,6 +1572,11 @@ public class playerAnimatorControl : MonoBehaviour
 				this.placedBodyGo.SetActive(false);
 			}
 			this.heldBodyGo.SetActive(true);
+			if (component)
+			{
+				component.BodyCollider.enabled = true;
+				component.burnTrigger.gameObject.SetActive(true);
+			}
 			base.Invoke("setCarryBool", 0.5f);
 			this.animator.SetBoolReflected("bodyHeld", true);
 		}
@@ -1602,7 +1616,7 @@ public class playerAnimatorControl : MonoBehaviour
 		Vector3 origin = vector;
 		origin.y += 5f;
 		RaycastHit raycastHit;
-		if (Physics.Raycast(origin, Vector3.down, out raycastHit, 15f, num))
+		if (Physics.Raycast(origin, Vector3.down, out raycastHit, 15f, num, QueryTriggerInteraction.Ignore))
 		{
 			this.placedBodyGo.transform.position = raycastHit.point;
 			this.placedBodyGo.transform.rotation = Quaternion.LookRotation(Vector3.Cross(this.placedBodyGo.transform.right, raycastHit.normal), raycastHit.normal);
@@ -1881,7 +1895,7 @@ public class playerAnimatorControl : MonoBehaviour
 	private void enableBirdOnHand()
 	{
 		this.setup.smallBirdGo.SetActive(true);
-		this.bird = (GameObject)UnityEngine.Object.Instantiate((GameObject)Resources.Load("CutScene/smallBird_ANIM_landOnFinger_prefab"), this.setup.smallBirdGo.transform.position, this.setup.smallBirdGo.transform.rotation);
+		this.bird = UnityEngine.Object.Instantiate<GameObject>((GameObject)Resources.Load("CutScene/smallBird_ANIM_landOnFinger_prefab"), this.setup.smallBirdGo.transform.position, this.setup.smallBirdGo.transform.rotation);
 		this.bird.transform.parent = this.setup.smallBirdGo.transform;
 		this.bird.transform.localPosition = Vector3.zero;
 		this.bird.transform.localRotation = Quaternion.identity;
@@ -1971,9 +1985,17 @@ public class playerAnimatorControl : MonoBehaviour
 	{
 		for (int i = 0; i < Scene.SceneTracker.allPlayers.Count; i++)
 		{
-			if (Scene.SceneTracker.allPlayers[i] && Scene.SceneTracker.allPlayers[i].CompareTag("PlayerNet") && Scene.SceneTracker.allPlayers[i].GetComponent<Collider>().bounds.Intersects(this.playerCollider.bounds))
+			if (Scene.SceneTracker.allPlayers[i] && Scene.SceneTracker.allPlayers[i].CompareTag("PlayerNet") && LocalPlayer.GameObject.activeSelf)
 			{
-				return Scene.SceneTracker.allPlayers[i].transform;
+				Collider component = Scene.SceneTracker.allPlayers[i].GetComponent<Collider>();
+				if (this.playerHeadCollider.enabled && component.gameObject.activeSelf && component.enabled)
+				{
+					Physics.IgnoreCollision(this.playerHeadCollider, component, true);
+				}
+				if (this.playerCollider.enabled && component.gameObject.activeSelf && component.enabled)
+				{
+					Physics.IgnoreCollision(this.playerCollider, component, true);
+				}
 			}
 		}
 		return null;
@@ -2154,7 +2176,7 @@ public class playerAnimatorControl : MonoBehaviour
 		float num = 0f;
 		Vector3 vector = Vector3.up;
 		RaycastHit raycastHit;
-		if (Physics.Raycast(origin, Vector3.down, out raycastHit, 2f, this.layerMask))
+		if (Physics.Raycast(origin, Vector3.down, out raycastHit, 2f, this.layerMask, QueryTriggerInteraction.Ignore))
 		{
 			vector = raycastHit.normal;
 			num = Vector3.Angle(raycastHit.normal, LocalPlayer.Transform.forward);
@@ -2215,6 +2237,12 @@ public class playerAnimatorControl : MonoBehaviour
 		{
 			this.setup.pmControl.SendEvent("toResetSpear");
 		}
+	}
+
+	
+	public bool PlayerIsAttacking()
+	{
+		return this.currLayerState1.tagHash == this.attackingHash || this.fullBodyState2.tagHash == this.axeCombo1Hash || this.fullBodyState2.shortNameHash == this.axeAttackGround10Hash || this.fullBodyState2.shortNameHash == this.axeToAxeAttackHash || this.fullBodyState2.shortNameHash == this.flyingAxeAttachHash;
 	}
 
 	
@@ -2491,6 +2519,18 @@ public class playerAnimatorControl : MonoBehaviour
 	public bool standingOnRaft;
 
 	
+	public bool blockInventoryOpen;
+
+	
+	public bool doneOutOfWorldRoutine;
+
+	
+	public bool exitingACave;
+
+	
+	public bool enteringACave;
+
+	
 	public GameObject placedTimmyGo;
 
 	
@@ -2501,6 +2541,12 @@ public class playerAnimatorControl : MonoBehaviour
 
 	
 	public GameObject heldBodyGo;
+
+	
+	public GameObject heldTimmyPhotoGo;
+
+	
+	public GameObject inventoryNapkin;
 
 	
 	private Quaternion armAngle;
@@ -2609,6 +2655,22 @@ public class playerAnimatorControl : MonoBehaviour
 	
 	[ItemIdPicker]
 	public int _slingShotId;
+
+	
+	[ItemIdPicker]
+	public int _timmyPhotoId;
+
+	
+	[ItemIdPicker]
+	public int _mapId;
+
+	
+	[ItemIdPicker]
+	public int _pedometerId;
+
+	
+	[ItemIdPicker]
+	public int _artifactHeldId;
 
 	
 	private int stickAttackHash;
@@ -2752,6 +2814,21 @@ public class playerAnimatorControl : MonoBehaviour
 	private int eatMeatHash = Animator.StringToHash("eatMeat");
 
 	
+	public int attackingHash = Animator.StringToHash("attacking");
+
+	
+	public int axeCombo1Hash = Animator.StringToHash("axeCombo1");
+
+	
+	public int flyingAxeAttachHash = Animator.StringToHash("flyingAxeAttack");
+
+	
+	public int axeAttackGround10Hash = Animator.StringToHash("axeAttackGround1 0");
+
+	
+	public int axeToAxeAttackHash = Animator.StringToHash("axeToAxeAttack");
+
+	
 	private FsmFloat fsmPlayerAngle;
 
 	
@@ -2875,6 +2952,9 @@ public class playerAnimatorControl : MonoBehaviour
 	private float storeActualFovValue;
 
 	
+	private float frozenUpdateTimer;
+
+	
 	public float leftArmDamp;
 
 	
@@ -2912,6 +2992,9 @@ public class playerAnimatorControl : MonoBehaviour
 
 	
 	public bool blockHeightCheck;
+
+	
+	private RaycastHit ropeHit;
 
 	
 	private GameObject bird;

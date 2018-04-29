@@ -40,19 +40,19 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
+		[RequiredField]
 		[CheckForComponent(typeof(Animation))]
 		[Tooltip("The GameObject playing the animation.")]
-		[RequiredField]
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("The name of the animation.")]
 		[RequiredField]
+		[Tooltip("The name of the animation.")]
 		public FsmString animationName;
 
 		
-		[Tooltip("The mixing transform to remove. E.g., root/upper_body/left_shoulder")]
 		[RequiredField]
+		[Tooltip("The mixing transform to remove. E.g., root/upper_body/left_shoulder")]
 		public FsmString transfrom;
 	}
 }

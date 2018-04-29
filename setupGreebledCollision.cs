@@ -30,20 +30,20 @@ public class setupGreebledCollision : MonoBehaviour
 			}
 			if (this.rocksGo)
 			{
-				Transform[] allTr = this.rocksGo.GetComponentsInChildren<Transform>();
-				foreach (Transform tr in allTr)
+				Transform[] componentsInChildren = this.rocksGo.GetComponentsInChildren<Transform>();
+				foreach (Transform transform in componentsInChildren)
 				{
-					if (tr.GetComponent<MeshFilter>())
+					if (transform.GetComponent<MeshFilter>())
 					{
-						MeshCollider col = null;
-						if (!tr.GetComponent<MeshCollider>())
+						MeshCollider meshCollider = null;
+						if (!transform.GetComponent<MeshCollider>())
 						{
-							col = tr.gameObject.AddComponent<MeshCollider>();
+							meshCollider = transform.gameObject.AddComponent<MeshCollider>();
 						}
-						if (col && !CoopPeerStarter.DedicatedHost)
+						if (meshCollider && !CoopPeerStarter.DedicatedHost)
 						{
-							Physics.IgnoreCollision(LocalPlayer.AnimControl.playerCollider, col, true);
-							Physics.IgnoreCollision(LocalPlayer.AnimControl.playerHeadCollider, col, true);
+							Physics.IgnoreCollision(LocalPlayer.AnimControl.playerCollider, meshCollider, true);
+							Physics.IgnoreCollision(LocalPlayer.AnimControl.playerHeadCollider, meshCollider, true);
 						}
 					}
 				}

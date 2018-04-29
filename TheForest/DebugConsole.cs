@@ -4,9 +4,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Bolt;
 using PathologicalGames;
+using Rewired.Dev.Tools;
 using Steamworks;
 using TheForest.Buildings.Creation;
 using TheForest.Buildings.World;
@@ -17,11 +19,15 @@ using TheForest.Items.Inventory;
 using TheForest.Items.Utils;
 using TheForest.Items.World;
 using TheForest.Player;
+using TheForest.Player.Clothing;
 using TheForest.Utils;
 using TheForest.World;
 using TheForest.World.Areas;
 using UniLinq;
 using UnityEngine;
+using UnityEngine.PostProcessing;
+using UnityEngine.Profiling;
+using UnityEngine.SceneManagement;
 
 namespace TheForest
 {
@@ -33,7 +39,7 @@ namespace TheForest
 		{
 			if (string.IsNullOrEmpty(param) || param == "toggle")
 			{
-				param = ((!Scene.WorkScheduler.enabled) ? "on" : "off");
+				param = ((!TheForest.Utils.Scene.WorkScheduler.enabled) ? "on" : "off");
 			}
 			else
 			{
@@ -41,12 +47,12 @@ namespace TheForest
 			}
 			if (param == "on")
 			{
-				Scene.WorkScheduler.enabled = true;
+				TheForest.Utils.Scene.WorkScheduler.enabled = true;
 				Debug.Log("$> Turned Work Scheduler ON");
 			}
 			else if (param == "off")
 			{
-				Scene.WorkScheduler.enabled = false;
+				TheForest.Utils.Scene.WorkScheduler.enabled = false;
 				Debug.Log("$> Turned Work Scheduler OFF");
 			}
 			else
@@ -87,11 +93,11 @@ namespace TheForest
 		{
 			if (onoff == "off")
 			{
-				if (Scene.WorkScheduler.ScaleWithFPS)
+				if (TheForest.Utils.Scene.WorkScheduler.ScaleWithFPS)
 				{
-					this.wsMaxMsValue = Scene.WorkScheduler.MaxMilliseconds;
-					Scene.WorkScheduler.ScaleWithFPS = false;
-					Scene.WorkScheduler.MaxMilliseconds = 1f;
+					this.wsMaxMsValue = TheForest.Utils.Scene.WorkScheduler.MaxMilliseconds;
+					TheForest.Utils.Scene.WorkScheduler.ScaleWithFPS = false;
+					TheForest.Utils.Scene.WorkScheduler.MaxMilliseconds = 1f;
 					Debug.Log("$> Disabled WS fps scaling");
 				}
 				else
@@ -101,8 +107,8 @@ namespace TheForest
 			}
 			else if (onoff == "on")
 			{
-				Scene.WorkScheduler.ScaleWithFPS = true;
-				Scene.WorkScheduler.MaxMilliseconds = this.wsMaxMsValue;
+				TheForest.Utils.Scene.WorkScheduler.ScaleWithFPS = true;
+				TheForest.Utils.Scene.WorkScheduler.MaxMilliseconds = this.wsMaxMsValue;
 				Debug.Log("$> Enabled WS fps scaling");
 			}
 			else
@@ -146,6 +152,134 @@ namespace TheForest
 			else
 			{
 				Debug.Log("$> usage: LODManagerScaling <on|off>");
+			}
+		}
+
+		
+		private void _deviceDebugInformation(string param)
+		{
+			if (!this.deviceDebugInformationGo)
+			{
+				DebugInformation debugInformation = UnityEngine.Object.FindObjectOfType<DebugInformation>();
+				if (debugInformation)
+				{
+					this.deviceDebugInformationGo = debugInformation.gameObject;
+				}
+			}
+			if (param == "on")
+			{
+				if (!this.deviceDebugInformationGo)
+				{
+					if (Prefabs.Instance && Prefabs.Instance.DeviceDebugInformation)
+					{
+						this.deviceDebugInformationGo = UnityEngine.Object.Instantiate<GameObject>(Prefabs.Instance.DeviceDebugInformation);
+						UnityEngine.Object.DontDestroyOnLoad(this.deviceDebugInformationGo);
+						Debug.Log("$> Device Debug Information ON");
+					}
+					else
+					{
+						DebugInformation[] array = Resources.FindObjectsOfTypeAll<DebugInformation>();
+						if (array != null && array.Length > 0)
+						{
+							this.deviceDebugInformationGo = UnityEngine.Object.Instantiate<GameObject>(array[0].gameObject);
+							UnityEngine.Object.DontDestroyOnLoad(this.deviceDebugInformationGo);
+							Debug.Log("$> Device Debug Information ON");
+						}
+						else
+						{
+							Debug.Log("$> Failed to locate debug object, cancelling. Try again from or after going in main scene");
+						}
+					}
+				}
+				else
+				{
+					Debug.Log("$> Device Debug Information already on, cancelling");
+				}
+			}
+			else if (param == "off")
+			{
+				if (this.deviceDebugInformationGo)
+				{
+					UnityEngine.Object.Destroy(this.deviceDebugInformationGo);
+					this.deviceDebugInformationGo = null;
+					Debug.Log("$> Device Debug Information OFF");
+				}
+				else
+				{
+					Debug.Log("$> Device Debug Information not found, cancelling");
+				}
+			}
+			else
+			{
+				Debug.Log("$> usage: deviceDebugInformation <on|off>");
+			}
+		}
+
+		
+		private void _instancingTestSpawn(string param)
+		{
+			string[] array = (!string.IsNullOrEmpty(param)) ? param.Split(new char[]
+			{
+				' '
+			}) : null;
+			if (array != null && array.Length == 4)
+			{
+				Vector3 zero = Vector3.zero;
+				int num;
+				if (int.TryParse(array[0], out num) && float.TryParse(array[1], out zero.x) && float.TryParse(array[2], out zero.y) && float.TryParse(array[3], out zero.z))
+				{
+					int num2 = Mathf.RoundToInt(Mathf.Sqrt((float)num));
+					int num3 = num / num2;
+					for (int i = 0; i < num2; i++)
+					{
+						for (int j = 0; j < num3; j++)
+						{
+							Vector3 position = LocalPlayer.Transform.position + LocalPlayer.Transform.right * (float)(-(float)num2 / 2) + (float)i * zero.x * LocalPlayer.Transform.right + LocalPlayer.Transform.forward * 2f + LocalPlayer.Transform.forward * ((float)j * 5f * zero.z);
+							Transform transform = UnityEngine.Object.Instantiate<Transform>(Prefabs.Instance.LogBuiltPrefab, position, Quaternion.identity);
+							transform.name = "InstancingTestLog";
+							transform.localScale = zero;
+							if (--num <= 0)
+							{
+								return;
+							}
+						}
+					}
+					return;
+				}
+			}
+			Debug.Log("$> usage: instancingTestSpawn <amount> <scaleX> <scaleY> <scaleZ>");
+		}
+
+		
+		private void _caveLight(string param)
+		{
+			param = ((!string.IsNullOrEmpty(param)) ? param.ToLower() : "on");
+			if (param == "on")
+			{
+				if (!this._caveLightGo)
+				{
+					this._caveLightGo = new GameObject("CaveLight");
+					this._caveLightGo.transform.parent = LocalPlayer.Transform;
+					this._caveLightGo.transform.position = LocalPlayer.Transform.position + Vector3.up * 2f;
+					Light light = this._caveLightGo.AddComponent<Light>();
+					light.intensity = 1f;
+					light.range = 100f;
+				}
+				else
+				{
+					this._caveLightGo.SetActive(true);
+				}
+			}
+			else if (param == "off")
+			{
+				if (this._caveLightGo)
+				{
+					this._caveLightGo.SetActive(false);
+				}
+			}
+			else
+			{
+				Debug.Log("$> usage: cavelight <on|off>");
 			}
 		}
 
@@ -245,13 +379,13 @@ namespace TheForest
 			{
 				this._fps = 1f;
 			}
-			if (TheForest.Utils.Input.GetButtonDown("Debug") || this.CheckPS4Debug())
-			{
-				this.ToggleGamePadWheel();
-			}
-			if (TheForest.Utils.Input.GetKeyDown(KeyCode.F4))
+			if (UnityEngine.Input.GetKeyDown(KeyCode.F4))
 			{
 				Debug.Break();
+			}
+			if (UnityEngine.Input.GetKeyDown(KeyCode.F6))
+			{
+				TheForest.Utils.Input.LogDebugInfo();
 			}
 		}
 
@@ -304,7 +438,31 @@ namespace TheForest
 					GUILayout.Height(24f)
 				});
 				GUILayout.FlexibleSpace();
+				GUILayout.BeginVertical(new GUILayoutOption[0]);
+				GUILayout.Label("IsGPad: " + TheForest.Utils.Input.IsGamePad, GUI.skin.button, new GUILayoutOption[0]);
+				GUILayout.Label("WasGPad: " + TheForest.Utils.Input.WasGamePad, GUI.skin.button, new GUILayoutOption[0]);
+				GUILayout.Label("AnyKey: " + TheForest.Utils.Input.anyKeyDown, GUI.skin.button, new GUILayoutOption[0]);
+				GUILayout.Label("MouseLoc: " + TheForest.Utils.Input.IsMouseLocked, GUI.skin.button, new GUILayoutOption[0]);
+				GUILayout.EndVertical();
+				GUILayout.BeginVertical(new GUILayoutOption[0]);
 				GUILayout.Label("FPS: " + (int)this._fps, GUI.skin.button, new GUILayoutOption[0]);
+				GUILayout.Label("DXType: " + SystemInfo.graphicsDeviceType + string.Empty, GUI.skin.button, new GUILayoutOption[]
+				{
+					GUILayout.MinWidth(100f)
+				});
+				GUILayout.Label("DX11: " + (SystemInfo.graphicsShaderLevel >= 50 && SystemInfo.supportsComputeShaders) + string.Empty, GUI.skin.button, new GUILayoutOption[]
+				{
+					GUILayout.MinWidth(100f)
+				});
+				GUILayout.Label("GSL: " + SystemInfo.graphicsShaderLevel + string.Empty, GUI.skin.button, new GUILayoutOption[]
+				{
+					GUILayout.MinWidth(100f)
+				});
+				GUILayout.Label("CompSh: " + SystemInfo.supportsComputeShaders + string.Empty, GUI.skin.button, new GUILayoutOption[]
+				{
+					GUILayout.MinWidth(100f)
+				});
+				GUILayout.EndVertical();
 				GUILayout.BeginVertical(new GUILayoutOption[0]);
 				GUILayout.Label("Total Alloc: " + Profiler.GetTotalAllocatedMemory() / 1000u / 1000u + "MB", GUI.skin.button, new GUILayoutOption[]
 				{
@@ -446,38 +604,41 @@ namespace TheForest
 		}
 
 		
+		public static DebugConsole GetInstance()
+		{
+			return DebugConsole.Instance;
+		}
+
+		
 		private void ToggleConsole()
 		{
-			if (Scene.HudGui && Scene.HudGui.Chatbox)
-			{
-				Scene.HudGui.Chatbox.enabled = this._showConsole;
-			}
-			this._showConsole = !this._showConsole;
-			if (LocalPlayer.Inventory)
-			{
-				LocalPlayer.Inventory.enabled = !this._showConsole;
-			}
-			if (this._showConsole)
-			{
-				this._focusConsoleField = true;
-			}
-			this._consoleInput = string.Empty;
-			this.CheckDisplayState();
+			this.ShowConsole(!this._showConsole);
 		}
 
 		
 		private void FinalizeConsoleInput()
 		{
-			if (Scene.HudGui && Scene.HudGui.Chatbox)
+			this.HandleConsoleInput(this._consoleInput);
+			this.ShowConsole(false);
+		}
+
+		
+		private void ShowConsole(bool showConsole)
+		{
+			this._showConsole = showConsole;
+			if (TheForest.Utils.Scene.HudGui && TheForest.Utils.Scene.HudGui.Chatbox)
 			{
-				Scene.HudGui.Chatbox.enabled = true;
+				TheForest.Utils.Scene.HudGui.Chatbox.enabled = !showConsole;
 			}
 			if (LocalPlayer.Inventory)
 			{
-				LocalPlayer.Inventory.enabled = true;
+				LocalPlayer.Inventory.enabled = !showConsole;
 			}
-			this._showConsole = false;
-			this.HandleConsoleInput();
+			TheForest.Utils.Input.SetDefaultMapping(!showConsole);
+			if (showConsole)
+			{
+				this._focusConsoleField = true;
+			}
 			this._consoleInput = string.Empty;
 			this.CheckDisplayState();
 		}
@@ -563,7 +724,7 @@ namespace TheForest
 				if (flag && TheForest.Utils.Input.GetButtonDown("Take"))
 				{
 					this._consoleInput = keyValuePair.Value;
-					this.HandleConsoleInput();
+					this.HandleConsoleInput(this._consoleInput);
 					this.ToggleGamePadWheel();
 				}
 			}
@@ -603,7 +764,7 @@ namespace TheForest
 							this._consoleInput = this._history[this._historyCurrent];
 						}
 					}
-					return true;
+					break;
 				case KeyCode.DownArrow:
 					if (this._showConsole)
 					{
@@ -617,43 +778,48 @@ namespace TheForest
 						}
 						this._selectConsoleText = true;
 					}
-					return true;
+					break;
 				case KeyCode.RightArrow:
 					if (!string.IsNullOrEmpty(this._autocomplete))
 					{
 						this._consoleInput = this._autocomplete;
 						this._selectConsoleText = true;
 					}
-					return true;
+					break;
 				default:
-					if (keyCode == KeyCode.Return)
+					switch (keyCode)
 					{
-						if (this._showConsole)
-						{
-							this.FinalizeConsoleInput();
-						}
+					case KeyCode.F1:
+						this.ToggleConsole();
 						return true;
-					}
-					if (keyCode != KeyCode.Quote && keyCode != KeyCode.BackQuote)
-					{
-						if (keyCode != KeyCode.RightControl)
-						{
-							return false;
-						}
-						this._logs.Clear();
+					case KeyCode.F2:
+						break;
+					case KeyCode.F3:
+						this.TogglePlayerStats();
 						return true;
+					default:
+						if (keyCode == KeyCode.Return)
+						{
+							if (this._showConsole)
+							{
+								this.FinalizeConsoleInput();
+							}
+							return true;
+						}
+						if (keyCode != KeyCode.Quote && keyCode != KeyCode.BackQuote)
+						{
+							if (keyCode != KeyCode.RightControl)
+							{
+								return false;
+							}
+							this._logs.Clear();
+							return true;
+						}
+						break;
 					}
+					this.ToggleOverlay();
 					break;
-				case KeyCode.F1:
-					this.ToggleConsole();
-					return true;
-				case KeyCode.F2:
-					break;
-				case KeyCode.F3:
-					this.TogglePlayerStats();
-					return true;
 				}
-				this.ToggleOverlay();
 				return true;
 			}
 			if (UnityEngine.Event.current.type == EventType.KeyUp)
@@ -743,9 +909,7 @@ namespace TheForest
 			else
 			{
 				Dictionary<Type, int> counters;
-				Dictionary<Type, int> dictionary = counters = DebugConsole.Counters;
-				int num = counters[t];
-				dictionary[t] = num + 1;
+				(counters = DebugConsole.Counters)[t] = counters[t] + 1;
 			}
 		}
 
@@ -762,9 +926,7 @@ namespace TheForest
 				else
 				{
 					Dictionary<Type, int> counters;
-					Dictionary<Type, int> dictionary = counters = DebugConsole.Counters;
-					int num = counters[t];
-					dictionary[t] = num - 1;
+					(counters = DebugConsole.Counters)[t] = counters[t] - 1;
 				}
 			}
 		}
@@ -844,20 +1006,20 @@ namespace TheForest
 		}
 
 		
-		private void HandleConsoleInput()
+		public void HandleConsoleInput(string consoleInput)
 		{
 			if (this._historyEnd == -1)
 			{
 				this._historyEnd = 0;
-				this._history[0] = this._consoleInput;
+				this._history[0] = consoleInput;
 			}
-			else if (this._consoleInput != this._history[this._historyEnd])
+			else if (consoleInput != this._history[this._historyEnd])
 			{
 				this._historyEnd = (this._historyEnd + 1) % this._history.Length;
-				this._history[this._historyEnd] = this._consoleInput;
+				this._history[this._historyEnd] = consoleInput;
 			}
 			this._historyCurrent = -1;
-			List<string> list = this._consoleInput.Split(new char[]
+			List<string> list = consoleInput.Split(new char[]
 			{
 				' '
 			}).ToList<string>();
@@ -999,21 +1161,37 @@ namespace TheForest
 		}
 
 		
-		private void _spawnitem(string id)
+		private void _spawnitem(string nameOrId)
 		{
-			int num = 0;
-			if (!int.TryParse(id, out num))
+			if (!string.IsNullOrEmpty(nameOrId))
 			{
-				Debug.Log("$> usage: invalid item id. Must be an integer number!");
-				return;
+				Item item;
+				int itemId;
+				if (int.TryParse(nameOrId, out itemId))
+				{
+					item = ItemDatabase.Items.FirstOrDefault((Item i) => i._id == itemId);
+				}
+				else
+				{
+					string lowerName = nameOrId.ToLower();
+					item = ItemDatabase.Items.FirstOrDefault((Item i) => i._name.ToLower() == lowerName);
+					itemId = item._id;
+				}
+				if (item != null)
+				{
+					Debug.Log(string.Format("$> Found item {0} ({1}), spawning", item._name, itemId));
+					Vector3 position = LocalPlayer.Transform.position + 2f * LocalPlayer.Transform.forward;
+					ItemUtils.SpawnItem(itemId, position, Quaternion.identity, false);
+				}
+				else
+				{
+					Debug.Log("$> Item " + nameOrId + " not found, please check command 'listitems'");
+				}
 			}
-			if (!ItemDatabase.IsItemidValid(num))
+			else
 			{
-				Debug.Log("$> usage: no item number (" + id + ") found!");
-				return;
+				Debug.Log("$> usage: spawnitem <itemName|itemId>");
 			}
-			Vector3 position = LocalPlayer.Transform.position + 2f * LocalPlayer.Transform.forward;
-			ItemUtils.SpawnItem(num, position, Quaternion.identity, false);
 		}
 
 		
@@ -1080,7 +1258,7 @@ namespace TheForest
 		
 		private void _spawnmutant(string type)
 		{
-			GameObject gameObject = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("instantMutantSpawner"), LocalPlayer.Transform.position + new Vector3(0f, 1f, 2f), Quaternion.identity) as GameObject;
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(Resources.Load<GameObject>("instantMutantSpawner"), LocalPlayer.Transform.position + new Vector3(0f, 1f, 2f), Quaternion.identity);
 			switch (type)
 			{
 			case "male":
@@ -1139,7 +1317,7 @@ namespace TheForest
 			{
 				target = LocalPlayer.Transform;
 			}
-			GameObject gameObject = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("instantMutantSpawner"), target.position + new Vector3(0f, 1f, 2f), Quaternion.identity) as GameObject;
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(Resources.Load<GameObject>("instantMutantSpawner"), target.position + new Vector3(0f, 1f, 2f), Quaternion.identity);
 			spawnMutants component = gameObject.GetComponent<spawnMutants>();
 			component.amount_armsy = 0;
 			component.amount_baby = 0;
@@ -1171,7 +1349,7 @@ namespace TheForest
 			{
 				target = LocalPlayer.Transform;
 			}
-			GameObject gameObject = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("instantMutantSpawner"), target.position + new Vector3(0f, 1f, 2f), Quaternion.identity) as GameObject;
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(Resources.Load<GameObject>("instantMutantSpawner"), target.position + new Vector3(0f, 1f, 2f), Quaternion.identity);
 			spawnMutants component = gameObject.GetComponent<spawnMutants>();
 			component.amount_armsy = 0;
 			component.amount_baby = 0;
@@ -1204,7 +1382,7 @@ namespace TheForest
 			{
 				target = LocalPlayer.Transform;
 			}
-			GameObject gameObject = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("instantMutantSpawner"), target.position + new Vector3(0f, 1f, 2f), Quaternion.identity) as GameObject;
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(Resources.Load<GameObject>("instantMutantSpawner"), target.position + new Vector3(0f, 1f, 2f), Quaternion.identity);
 			spawnMutants component = gameObject.GetComponent<spawnMutants>();
 			component.amount_armsy = 0;
 			component.amount_baby = 0;
@@ -1239,7 +1417,7 @@ namespace TheForest
 			{
 				target = LocalPlayer.Transform;
 			}
-			GameObject gameObject = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("instantMutantSpawner"), target.position + new Vector3(0f, 1f, 2f), Quaternion.identity) as GameObject;
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(Resources.Load<GameObject>("instantMutantSpawner"), target.position + new Vector3(0f, 1f, 2f), Quaternion.identity);
 			spawnMutants component = gameObject.GetComponent<spawnMutants>();
 			component.amount_armsy = 0;
 			component.amount_baby = 0;
@@ -1482,7 +1660,7 @@ namespace TheForest
 				if (item != null)
 				{
 					Debug.Log("$> Found item " + item._name + ", removing now");
-					LocalPlayer.Inventory.RemoveItem(item._id, 100000, true, true);
+					LocalPlayer.Inventory.RemoveItem(item._id, LocalPlayer.Inventory.AmountOfNF(item._id, false), true, true);
 				}
 				else
 				{
@@ -1491,7 +1669,7 @@ namespace TheForest
 			}
 			else
 			{
-				Debug.Log("$> usage: additem <itemName|itemId>");
+				Debug.Log("$> usage: removeitem <itemName|itemId>");
 			}
 		}
 
@@ -1573,6 +1751,38 @@ namespace TheForest
 		}
 
 		
+		private void _listClothing(string param)
+		{
+			string text = string.Empty;
+			foreach (ClothingItem clothingItem in from item in ClothingItemDatabase.Items
+			orderby item._id
+			select item)
+			{
+				text += string.Format("[{0:000}] {1}    [types: {2}]\n", clothingItem._id, clothingItem._name.IfNull("NULL"), clothingItem._displayType);
+			}
+			Debug.Log("$>All Clothing:\n" + text);
+		}
+
+		
+		private void _removeAllItems(object o)
+		{
+			foreach (Item item in ItemDatabase.Items)
+			{
+				try
+				{
+					if (item._maxAmount >= 0 && !item.MatchType(Item.Types.Story) && LocalPlayer.Inventory.InventoryItemViewsCache.ContainsKey(item._id))
+					{
+						LocalPlayer.Inventory.RemoveItem(item._id, LocalPlayer.Inventory.AmountOfNF(item._id, false), true, true);
+					}
+				}
+				catch (Exception ex)
+				{
+				}
+			}
+			Debug.Log("$> Removed all non-story items");
+		}
+
+		
 		private void _addAllStoryItems(object o)
 		{
 			foreach (Item item in ItemDatabase.Items)
@@ -1589,6 +1799,79 @@ namespace TheForest
 				}
 			}
 			Debug.Log("$> Added all story items");
+		}
+
+		
+		private void _removeAllStoryItems(object o)
+		{
+			foreach (Item item in ItemDatabase.Items)
+			{
+				try
+				{
+					if (item._maxAmount >= 0 && item.MatchType(Item.Types.Story) && LocalPlayer.Inventory.InventoryItemViewsCache.ContainsKey(item._id))
+					{
+						LocalPlayer.Inventory.RemoveItem(item._id, LocalPlayer.Inventory.AmountOfNF(item._id, false), true, true);
+					}
+				}
+				catch (Exception ex)
+				{
+				}
+			}
+			Debug.Log("$> Removed all story items");
+		}
+
+		
+		private void _sheenAllItems(object o)
+		{
+			foreach (Item item in ItemDatabase.Items)
+			{
+				try
+				{
+					LocalPlayer.Inventory.SheenItem(item._id, ItemProperties.Any, true);
+				}
+				catch (Exception ex)
+				{
+				}
+			}
+			Debug.Log("$> Toggled sheen on for all items");
+		}
+
+		
+		private void _infection(string onoff)
+		{
+			if (onoff == "on")
+			{
+				LocalPlayer.Stats.BloodInfection.GetInfected();
+				Debug.Log("$> Added blood infection");
+			}
+			else if (onoff == "off")
+			{
+				LocalPlayer.Stats.BloodInfection.Cure();
+				Debug.Log("$> Removed blood infection");
+			}
+			else
+			{
+				Debug.Log("$> usage: bloodInfection <on|off>");
+			}
+		}
+
+		
+		private void _fastStart(string onoff)
+		{
+			if (onoff == "on")
+			{
+				TriggerCutScene.FastStart = true;
+				Debug.Log("$> Fast start on");
+			}
+			else if (onoff == "off")
+			{
+				TriggerCutScene.FastStart = false;
+				Debug.Log("$> Fast start off");
+			}
+			else
+			{
+				Debug.Log("$> usage: faststart <on|off>");
+			}
 		}
 
 		
@@ -1693,6 +1976,90 @@ namespace TheForest
 		}
 
 		
+		private void _antialiasing(string onoff)
+		{
+			PostProcessingBehaviour component = Camera.main.GetComponent<PostProcessingBehaviour>();
+			if (component == null || component.profile == null)
+			{
+				return;
+			}
+			PostProcessingProfile postProcessingProfile = UnityEngine.Object.Instantiate<PostProcessingProfile>(component.profile);
+			if (onoff == "toggle")
+			{
+				postProcessingProfile.antialiasing.enabled = !component.profile.antialiasing.enabled;
+			}
+			if (onoff == "on")
+			{
+				postProcessingProfile.antialiasing.enabled = true;
+			}
+			else if (onoff == "off")
+			{
+				postProcessingProfile.antialiasing.enabled = false;
+			}
+			else
+			{
+				Debug.Log("$> usage: antialiasing <on|off|toggle>");
+			}
+			component.profile = postProcessingProfile;
+		}
+
+		
+		private void _ambientocclusion(string onoff)
+		{
+			PostProcessingBehaviour component = Camera.main.GetComponent<PostProcessingBehaviour>();
+			if (component == null || component.profile == null)
+			{
+				return;
+			}
+			PostProcessingProfile postProcessingProfile = UnityEngine.Object.Instantiate<PostProcessingProfile>(component.profile);
+			if (onoff == "toggle")
+			{
+				postProcessingProfile.ambientOcclusion.enabled = !component.profile.ambientOcclusion.enabled;
+			}
+			if (onoff == "on")
+			{
+				postProcessingProfile.ambientOcclusion.enabled = true;
+			}
+			else if (onoff == "off")
+			{
+				postProcessingProfile.ambientOcclusion.enabled = false;
+			}
+			else
+			{
+				Debug.Log("$> usage: ambientocclusion <on|off|toggle>");
+			}
+			component.profile = postProcessingProfile;
+		}
+
+		
+		private void _motionblur(string onoff)
+		{
+			PostProcessingBehaviour component = Camera.main.GetComponent<PostProcessingBehaviour>();
+			if (component == null || component.profile == null)
+			{
+				return;
+			}
+			PostProcessingProfile postProcessingProfile = UnityEngine.Object.Instantiate<PostProcessingProfile>(component.profile);
+			if (onoff == "toggle")
+			{
+				postProcessingProfile.motionBlur.enabled = !component.profile.motionBlur.enabled;
+			}
+			if (onoff == "on")
+			{
+				postProcessingProfile.motionBlur.enabled = true;
+			}
+			else if (onoff == "off")
+			{
+				postProcessingProfile.motionBlur.enabled = false;
+			}
+			else
+			{
+				Debug.Log("$> usage: motionblur <on|off|toggle>");
+			}
+			component.profile = postProcessingProfile;
+		}
+
+		
 		private void _godmode(string onoff)
 		{
 			if (onoff == "toggle")
@@ -1736,7 +2103,7 @@ namespace TheForest
 		
 		private void _buildallghosts(object o)
 		{
-			Scene.ActiveMB.StartCoroutine(this.BuildAllGhostsRoutine());
+			TheForest.Utils.Scene.ActiveMB.StartCoroutine(this.BuildAllGhostsRoutine());
 		}
 
 		
@@ -1757,7 +2124,7 @@ namespace TheForest
 						{
 							Craft_Structure.BuildIngredients needed = requiredAll[i];
 							ReceipeIngredient present = presentAll[i];
-							for (int j = needed._amount - present._amount; j > 0; j--)
+							for (int k = needed._amount - present._amount; k > 0; k--)
 							{
 								cs.SendMessage("AddIngredient", i);
 							}
@@ -1798,7 +2165,7 @@ namespace TheForest
 				Debug.Log("$> Usage: placebuiltobjects [name] [number]");
 				return;
 			}
-			Scene.ActiveMB.StartCoroutine(this.PlaceBuiltObjectsRoutine(name, num));
+			TheForest.Utils.Scene.ActiveMB.StartCoroutine(this.PlaceBuiltObjectsRoutine(name, num));
 		}
 
 		
@@ -1819,6 +2186,7 @@ namespace TheForest
 			LOD_Trees[] treeLods = UnityEngine.Object.FindObjectsOfType<LOD_Trees>();
 			bool foundObject = false;
 			pos += playerForward * spread - playerRight * (gridSize / 2f * spread);
+			RaycastHit hit;
 			for (int i = 0; i < Prefabs.Instance.Constructions._blueprints.Count; i++)
 			{
 				BuildingBlueprint bp = Prefabs.Instance.Constructions._blueprints[i];
@@ -1827,20 +2195,19 @@ namespace TheForest
 					foundObject = true;
 					for (int j = 0; j < num; j++)
 					{
-						RaycastHit hit;
 						if (Physics.SphereCast(pos + Vector3.up * 500f, spread / 2f, Vector3.down, out hit, 1000f, layers))
 						{
 							try
 							{
 								(from tl in treeLods
-								where Vector3.Distance(tl.transform.position, this.<hit>__11.point) < this.<spread>__1 * 2f
+								where Vector3.Distance(tl.transform.position, hit.point) < spread * 2f
 								select tl).ForEach(delegate(LOD_Trees tl)
 								{
 									tl.enabled = false;
 								});
-								GameObject built = UnityEngine.Object.Instantiate<GameObject>(bp._builtPrefab);
-								built.transform.position = hit.point;
-								built.transform.rotation = ((!bp._allowInTree) ? Quaternion.FromToRotation(Vector3.up, hit.normal) : Quaternion.identity);
+								GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(bp._builtPrefab);
+								gameObject.transform.position = hit.point;
+								gameObject.transform.rotation = ((!bp._allowInTree) ? Quaternion.FromToRotation(Vector3.up, hit.normal) : Quaternion.identity);
 							}
 							catch
 							{
@@ -1870,7 +2237,7 @@ namespace TheForest
 		
 		private void _placeallghosts(object o)
 		{
-			Scene.ActiveMB.StartCoroutine(this.PlaceAllGhostsRoutine());
+			TheForest.Utils.Scene.ActiveMB.StartCoroutine(this.PlaceAllGhostsRoutine());
 		}
 
 		
@@ -1891,36 +2258,36 @@ namespace TheForest
 			LOD_Trees[] treeLods = UnityEngine.Object.FindObjectsOfType<LOD_Trees>();
 			pos += playerForward * spread - playerRight * (gridSize / 2f * spread);
 			Debug.Log("$> Begin place all " + Prefabs.Instance.Constructions._blueprints.Count + " blueprint ghosts");
+			RaycastHit hit;
 			for (int i = 0; i < Prefabs.Instance.Constructions._blueprints.Count; i++)
 			{
 				BuildingBlueprint bp = Prefabs.Instance.Constructions._blueprints[i];
 				if (bp._ghostPrefab && bp._ghostPrefab.GetComponent<ICoopStructure>() == null && !bp._ghostPrefab.GetComponent<WallArchitect>() && !bp._ghostPrefab.GetComponent<WallDefensiveChunkReinforcement>())
 				{
-					RaycastHit hit;
 					if (Physics.SphereCast(pos + Vector3.up * 500f, spread / 2f, Vector3.down, out hit, 1000f, layers))
 					{
 						try
 						{
 							(from tl in treeLods
-							where Vector3.Distance(tl.transform.position, this.<hit>__9.point) < this.<spread>__1 * 2f
+							where Vector3.Distance(tl.transform.position, hit.point) < spread * 2f
 							select tl).ForEach(delegate(LOD_Trees tl)
 							{
 								tl.enabled = false;
 							});
-							GameObject ghost = UnityEngine.Object.Instantiate<GameObject>(bp._ghostPrefab);
-							Craft_Structure cs = ghost.GetComponentInChildren<Craft_Structure>();
-							if (cs)
+							GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(bp._ghostPrefab);
+							Craft_Structure componentInChildren = gameObject.GetComponentInChildren<Craft_Structure>();
+							if (componentInChildren)
 							{
 								LocalPlayer.Create.InitPlacer(bp);
-								ghost.transform.position = hit.point + LocalPlayer.Create.GetGhostOffsetWithPlacer(ghost);
-								ghost.transform.rotation = ((!bp._allowInTree) ? Quaternion.FromToRotation(Vector3.up, hit.normal) : Quaternion.identity);
-								ghost.SendMessage("OnPlaced", SendMessageOptions.DontRequireReceiver);
-								cs.Initialize();
-								cs.GrabExit();
+								gameObject.transform.position = hit.point + LocalPlayer.Create.GetGhostOffsetWithPlacer(gameObject);
+								gameObject.transform.rotation = ((!bp._allowInTree) ? Quaternion.FromToRotation(Vector3.up, hit.normal) : Quaternion.identity);
+								gameObject.SendMessage("OnPlaced", SendMessageOptions.DontRequireReceiver);
+								componentInChildren.Initialize();
+								componentInChildren.GrabExit();
 							}
 							else
 							{
-								UnityEngine.Object.Destroy(ghost);
+								UnityEngine.Object.Destroy(gameObject);
 							}
 						}
 						catch
@@ -1983,6 +2350,25 @@ namespace TheForest
 			else
 			{
 				Debug.Log("$> usage: survival <on|off>");
+			}
+		}
+
+		
+		private void _unlimitedHairspray(string onoff)
+		{
+			if (onoff == "on")
+			{
+				Debug.Log("$> Unlimited hairspray enabled");
+				Cheats.UnlimitedHairspray = true;
+			}
+			else if (onoff == "off")
+			{
+				Cheats.UnlimitedHairspray = false;
+				Debug.Log("$> Unlimited hairspray disabled");
+			}
+			else
+			{
+				Debug.Log("$> usage: unlimitedHairspray <on|off>");
 			}
 		}
 
@@ -2148,6 +2534,67 @@ namespace TheForest
 		}
 
 		
+		private void _setExitedEndGame(string param)
+		{
+			param = ((!string.IsNullOrEmpty(param)) ? param.ToLower() : "on");
+			if (param == "on")
+			{
+				LocalPlayer.SavedData.ExitedEndgame.SetValue(true);
+			}
+			else if (param == "off")
+			{
+				LocalPlayer.SavedData.ExitedEndgame.SetValue(false);
+			}
+			else
+			{
+				Debug.Log("$> usage: setExitedEndGame <on|off>");
+			}
+		}
+
+		
+		private void _setSkill(string arg)
+		{
+			if (!arg.NullOrEmpty())
+			{
+				string[] array = arg.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+				float num = 0f;
+				if (array.SafeCount<string>() == 2 && !array[0].NullOrEmpty() && float.TryParse(array[1], out num))
+				{
+					string text = array[0].ToLowerInvariant();
+					if (text != null)
+					{
+						if (!(text == "runtime"))
+						{
+							if (!(text == "lungtime"))
+							{
+								if (text == "ath")
+								{
+									LocalPlayer.Stats.Skills.TotalRunDuration = LocalPlayer.Stats.Skills.RunSkillLevelDuration * num;
+									LocalPlayer.Stats.Skills.TotalLungBreathingDuration = 0f;
+									LocalPlayer.Stats.Skills.CalcSkills();
+									Debug.Log("$> AthleticismSkillLevel = " + LocalPlayer.Stats.Skills.AthleticismSkillLevel);
+								}
+							}
+							else
+							{
+								LocalPlayer.Stats.Skills.TotalLungBreathingDuration = num;
+								LocalPlayer.Stats.Skills.CalcSkills();
+								Debug.Log("$> AthleticismSkillLevel = " + LocalPlayer.Stats.Skills.AthleticismSkillLevel);
+							}
+						}
+						else
+						{
+							LocalPlayer.Stats.Skills.TotalRunDuration = num;
+							LocalPlayer.Stats.Skills.CalcSkills();
+							Debug.Log("$> AthleticismSkillLevel = " + LocalPlayer.Stats.Skills.AthleticismSkillLevel);
+						}
+					}
+				}
+			}
+			Debug.Log("$> usage: setSkill <runTime/lungTime/ath> <amount>");
+		}
+
+		
 		private void _setstat(string arg)
 		{
 			if (arg.ToLower() == "full")
@@ -2167,46 +2614,94 @@ namespace TheForest
 				});
 				if (!string.IsNullOrEmpty(arg) && array.Length == 2)
 				{
-					Type typeFromHandle = typeof(PlayerStats);
-					FieldInfo field = typeFromHandle.GetField(array[0], BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-					float num;
-					if (float.TryParse(array[1], out num) && field != null)
+					if (array[0].ToLower() == "sanity")
 					{
-						if (field.FieldType == typeof(float))
+						float num;
+						if (float.TryParse(array[1], out num))
 						{
-							field.SetValue(LocalPlayer.Stats, num);
+							LocalPlayer.Stats.Sanity.SanityChange(num - LocalPlayer.Stats.Sanity.CurrentSanity);
+							Debug.Log(string.Concat(new object[]
+							{
+								"$> Local player's ",
+								array[0],
+								" set to ",
+								num
+							}));
 						}
-						else if (field.FieldType == typeof(int))
-						{
-							field.SetValue(LocalPlayer.Stats, (int)num);
-						}
-						Debug.Log(string.Concat(new object[]
-						{
-							"$> Local player's ",
-							array[0],
-							" set to ",
-							num
-						}));
 					}
-					else if (field != null)
+					else if (array[0].ToLower() == "strength")
 					{
-						Debug.Log(string.Concat(new object[]
+						float num;
+						if (float.TryParse(array[1], out num))
 						{
-							"$> '",
-							num,
-							"' is not a valid value for player stat '",
-							array[0],
-							"'"
-						}));
+							LocalPlayer.Stats.PhysicalStrength.CurrentStrength = num;
+							Debug.Log(string.Concat(new object[]
+							{
+								"$> Local player's ",
+								array[0],
+								" set to ",
+								num
+							}));
+						}
+					}
+					else if (array[0].ToLower() == "weight")
+					{
+						float num;
+						if (float.TryParse(array[1], out num))
+						{
+							LocalPlayer.Stats.PhysicalStrength.CurrentWeight = num;
+							Debug.Log(string.Concat(new object[]
+							{
+								"$> Local player's ",
+								array[0],
+								" set to ",
+								num
+							}));
+						}
 					}
 					else
 					{
-						Debug.Log("$> '" + array[0] + "' is not a valid stat, should be one of: Health/Stamina/Energy/Fullness/BatteryCharge (Case Sensistive)");
+						Type typeFromHandle = typeof(PlayerStats);
+						FieldInfo field = typeFromHandle.GetField(array[0], BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+						float num;
+						if (float.TryParse(array[1], out num) && field != null)
+						{
+							if (field.FieldType == typeof(float))
+							{
+								field.SetValue(LocalPlayer.Stats, num);
+							}
+							else if (field.FieldType == typeof(int))
+							{
+								field.SetValue(LocalPlayer.Stats, (int)num);
+							}
+							Debug.Log(string.Concat(new object[]
+							{
+								"$> Local player's ",
+								array[0],
+								" set to ",
+								num
+							}));
+						}
+						else if (field != null)
+						{
+							Debug.Log(string.Concat(new object[]
+							{
+								"$> '",
+								num,
+								"' is not a valid value for player stat '",
+								array[0],
+								"'"
+							}));
+						}
+						else
+						{
+							Debug.Log("$> '" + array[0] + "' is not a valid stat, should be one of: Health/Stamina/Energy/Fullness/BatteryCharge (Case Sensistive)");
+						}
 					}
 				}
 				else
 				{
-					Debug.Log("$> usage: setstat <Health/Stamina/Energy/Fullness/BatteryCharge> <amount>");
+					Debug.Log("$> usage: setstat <Health/Stamina/Energy/Fullness/BatteryCharge/Sanity> <amount>");
 				}
 			}
 		}
@@ -2253,33 +2748,37 @@ namespace TheForest
 		}
 
 		
+		private void _getGameMode(string arg)
+		{
+			Debug.Log("$> gameMode = " + GameSetup.Game.ToString() + " ");
+		}
+
+		
 		private void _setGameMode(string arg)
 		{
-			if (!string.IsNullOrEmpty(arg))
+			string text = (arg != null) ? arg.ToLower() : string.Empty;
+			if (text != null)
 			{
-				string text = arg.ToLower();
-				switch (text)
+				if (text == "standard")
 				{
-				case "standard":
 					GameSetup.SetGameType(GameTypes.Standard);
 					Debug.Log("$> start game mode set to Standard");
-					goto IL_CA;
-				case "mod":
-					GameSetup.SetGameType(GameTypes.Mod);
-					Debug.Log("$> start game mode set to horde");
-					goto IL_CA;
-				case "creative":
-					GameSetup.SetGameType(GameTypes.Creative);
-					Debug.Log("$> start game mode set to horde");
-					goto IL_CA;
+					return;
 				}
-				Debug.Log("$> usage: setgamemode <standard|creative|mod>");
-				IL_CA:;
+				if (text == "mod")
+				{
+					GameSetup.SetGameType(GameTypes.Mod);
+					Debug.Log("$> start game mode set to Mod");
+					return;
+				}
+				if (text == "creative")
+				{
+					GameSetup.SetGameType(GameTypes.Creative);
+					Debug.Log("$> start game mode set to Creative");
+					return;
+				}
 			}
-			else
-			{
-				Debug.Log("$> usage: setgamemode <standard|creative|mod>");
-			}
+			Debug.Log("$> usage: setgamemode <standard|creative|mod>");
 		}
 
 		
@@ -2288,27 +2787,35 @@ namespace TheForest
 			if (!string.IsNullOrEmpty(arg))
 			{
 				string text = arg.ToLower();
-				switch (text)
+				if (text != null)
 				{
-				case "peaceful":
-					GameSetup.SetDifficulty(DifficultyModes.Peaceful);
-					Debug.Log("$> Difficulty mode set to Peaceful");
-					goto IL_EF;
-				case "normal":
-					GameSetup.SetDifficulty(DifficultyModes.Normal);
-					Debug.Log("$> Difficulty mode set to Normal");
-					goto IL_EF;
-				case "hard":
-					GameSetup.SetDifficulty(DifficultyModes.Hard);
-					Debug.Log("$> Difficulty mode set to Hard");
-					goto IL_EF;
-				case "hardsurvival":
-					GameSetup.SetDifficulty(DifficultyModes.HardSurvival);
-					Debug.Log("$> Difficulty mode set to HardSurvival");
-					goto IL_EF;
+					if (text == "peaceful")
+					{
+						GameSetup.SetDifficulty(DifficultyModes.Peaceful);
+						Debug.Log("$> Difficulty mode set to Peaceful");
+						goto IL_C0;
+					}
+					if (text == "normal")
+					{
+						GameSetup.SetDifficulty(DifficultyModes.Normal);
+						Debug.Log("$> Difficulty mode set to Normal");
+						goto IL_C0;
+					}
+					if (text == "hard")
+					{
+						GameSetup.SetDifficulty(DifficultyModes.Hard);
+						Debug.Log("$> Difficulty mode set to Hard");
+						goto IL_C0;
+					}
+					if (text == "hardsurvival")
+					{
+						GameSetup.SetDifficulty(DifficultyModes.HardSurvival);
+						Debug.Log("$> Difficulty mode set to HardSurvival");
+						goto IL_C0;
+					}
 				}
 				Debug.Log("$> usage: setdifficultymode <peaceful|normal|hard|hardsurvival>");
-				IL_EF:;
+				IL_C0:;
 			}
 			else
 			{
@@ -2322,20 +2829,15 @@ namespace TheForest
 			int num;
 			if (int.TryParse(s, out num))
 			{
-				CoopPlayerVariations component = LocalPlayer.GameObject.GetComponent<CoopPlayerVariations>();
 				try
 				{
 					LocalPlayer.Stats.PlayerVariation = num;
-					component.SetVariation(LocalPlayer.Stats.PlayerVariation, LocalPlayer.Stats.PlayerVariationTShirtType, LocalPlayer.Stats.PlayerVariationTShirtMat, LocalPlayer.Stats.PlayerVariationPantsType, LocalPlayer.Stats.PlayerVariationPantsMat, LocalPlayer.Stats.PlayerVariationHair, LocalPlayer.Stats.PlayerVariationExtras, LocalPlayer.Stats.PlayerClothingVariation);
-					component.UpdateSkinVariation(LocalPlayer.Stats.IsBloody, LocalPlayer.Stats.IsMuddy, LocalPlayer.Stats.IsRed, LocalPlayer.Stats.IsCold);
+					LocalPlayer.Clothing.RefreshVisibleClothing();
 					if (BoltNetwork.isRunning)
 					{
 						IPlayerState state = LocalPlayer.Entity.GetState<IPlayerState>();
 						state.PlayerVariation = LocalPlayer.Stats.PlayerVariation;
-						state.PlayerVariationTShirtType = LocalPlayer.Stats.PlayerVariationTShirtType;
-						state.PlayerVariationTShirtMat = LocalPlayer.Stats.PlayerVariationTShirtMat;
-						state.PlayerVariationPantsType = LocalPlayer.Stats.PlayerVariationPantsType;
-						state.PlayerVariationPantsMat = LocalPlayer.Stats.PlayerVariationPantsMat;
+						LocalPlayer.Clothing.MpSync();
 					}
 					Debug.Log("$> Player variation set to variation #" + num);
 				}
@@ -2356,20 +2858,15 @@ namespace TheForest
 			int num;
 			if (int.TryParse(s, out num))
 			{
-				CoopPlayerVariations component = LocalPlayer.GameObject.GetComponent<CoopPlayerVariations>();
 				try
 				{
 					LocalPlayer.Stats.PlayerVariationTShirtMat = num;
-					component.SetVariation(LocalPlayer.Stats.PlayerVariation, LocalPlayer.Stats.PlayerVariationTShirtType, LocalPlayer.Stats.PlayerVariationTShirtMat, LocalPlayer.Stats.PlayerVariationPantsType, LocalPlayer.Stats.PlayerVariationPantsMat, LocalPlayer.Stats.PlayerVariationHair, LocalPlayer.Stats.PlayerVariationExtras, LocalPlayer.Stats.PlayerClothingVariation);
-					component.UpdateSkinVariation(LocalPlayer.Stats.IsBloody, LocalPlayer.Stats.IsMuddy, LocalPlayer.Stats.IsRed, LocalPlayer.Stats.IsCold);
+					LocalPlayer.Clothing.RefreshVisibleClothing();
 					if (BoltNetwork.isRunning)
 					{
 						IPlayerState state = LocalPlayer.Entity.GetState<IPlayerState>();
 						state.PlayerVariation = LocalPlayer.Stats.PlayerVariation;
-						state.PlayerVariationTShirtType = LocalPlayer.Stats.PlayerVariationTShirtType;
-						state.PlayerVariationTShirtMat = LocalPlayer.Stats.PlayerVariationTShirtMat;
-						state.PlayerVariationPantsType = LocalPlayer.Stats.PlayerVariationPantsType;
-						state.PlayerVariationPantsMat = LocalPlayer.Stats.PlayerVariationPantsMat;
+						LocalPlayer.Clothing.MpSync();
 					}
 					Debug.Log("$> Player tshirt set to mat #" + num);
 				}
@@ -2389,23 +2886,16 @@ namespace TheForest
 		{
 			try
 			{
-				PlayerCloting playerCloting = (PlayerCloting)((int)Enum.Parse(typeof(PlayerCloting), s));
-				CoopPlayerVariations component = LocalPlayer.GameObject.GetComponent<CoopPlayerVariations>();
+				PlayerCloting playerCloting = (PlayerCloting)Enum.Parse(typeof(PlayerCloting), s);
 				try
 				{
-					component.SetVariation(LocalPlayer.Stats.PlayerVariation, LocalPlayer.Stats.PlayerVariationTShirtType, LocalPlayer.Stats.PlayerVariationTShirtMat, LocalPlayer.Stats.PlayerVariationPantsType, LocalPlayer.Stats.PlayerVariationPantsMat, LocalPlayer.Stats.PlayerVariationHair, playerCloting, LocalPlayer.Stats.PlayerClothingVariation);
-					component.UpdateSkinVariation(LocalPlayer.Stats.IsBloody, LocalPlayer.Stats.IsMuddy, LocalPlayer.Stats.IsRed, LocalPlayer.Stats.IsCold);
+					LocalPlayer.Clothing.RefreshVisibleClothing();
 					LocalPlayer.Stats.PlayerVariationExtras = playerCloting;
 					if (BoltNetwork.isRunning)
 					{
 						IPlayerState state = LocalPlayer.Entity.GetState<IPlayerState>();
 						state.PlayerVariation = LocalPlayer.Stats.PlayerVariation;
-						state.PlayerVariationTShirtType = LocalPlayer.Stats.PlayerVariationTShirtType;
-						state.PlayerVariationTShirtMat = LocalPlayer.Stats.PlayerVariationTShirtMat;
-						state.PlayerVariationPantsType = LocalPlayer.Stats.PlayerVariationPantsType;
-						state.PlayerVariationPantsMat = LocalPlayer.Stats.PlayerVariationPantsMat;
-						state.PlayerClothing = (int)LocalPlayer.Stats.PlayerVariationExtras;
-						state.PlayerClothingVariation = LocalPlayer.Stats.PlayerClothingVariation;
+						LocalPlayer.Clothing.MpSync();
 					}
 					Debug.Log("$> Player extra variation set to #" + playerCloting);
 				}
@@ -2417,6 +2907,50 @@ namespace TheForest
 			catch
 			{
 				Debug.Log("$> usage: setVariationExtra <None|Jacket>");
+			}
+		}
+
+		
+		private void _addClothingById(string param)
+		{
+			string[] array = param.Split(new char[]
+			{
+				' '
+			});
+			List<int> list = new List<int>();
+			foreach (string s in array)
+			{
+				int id;
+				if (int.TryParse(s, out id))
+				{
+					ClothingItem addingCloth = ClothingItemDatabase.ClothingItemById(id);
+					ClothingItemDatabase.CombineClothingItemWithOutfit(list, addingCloth);
+				}
+				else
+				{
+					Debug.Log("$> usage: addClothingById <ID>");
+				}
+			}
+			if (list.Count > 0 && LocalPlayer.Clothing.AddClothingOutfit(list, true))
+			{
+				LocalPlayer.Clothing.RefreshVisibleClothing();
+				LocalPlayer.Stats.CheckArmsStart();
+				Debug.Log("$> Added outfit successfully");
+			}
+			else
+			{
+				Debug.Log("$> Add outfit failed");
+			}
+		}
+
+		
+		private void _addClothingOutfitRandom(string param)
+		{
+			if (LocalPlayer.Clothing.AddClothingOutfit(ClothingItemDatabase.GetRandomOutfit(LocalPlayer.Stats.PlayerVariation == 0), true))
+			{
+				LocalPlayer.Clothing.RefreshVisibleClothing();
+				LocalPlayer.Clothing.ToggleClothingInventoryViews();
+				Debug.Log("$> Added random clothing outfit");
 			}
 		}
 
@@ -2466,15 +3000,34 @@ namespace TheForest
 		}
 
 		
+		private void _runMacro(string arg)
+		{
+			DebugMacro[] array = UnityEngine.Object.FindObjectsOfType<DebugMacro>();
+			foreach (DebugMacro debugMacro in array)
+			{
+				if (debugMacro._macroName.Equals(arg, StringComparison.InvariantCultureIgnoreCase))
+				{
+					debugMacro.Trigger();
+					return;
+				}
+			}
+			Debug.Log("$> usage: runMacro <macro name>");
+		}
+
+		
 		private void _goto(string arg)
 		{
 			if (!string.IsNullOrEmpty(arg))
 			{
-				GameObject gameObject = GameObject.Find(arg);
+				GameObject gameObject = DebugConsole.FindObjectAdvanced(arg, StringComparison.InvariantCultureIgnoreCase);
 				if (gameObject)
 				{
 					bool flag = Terrain.activeTerrain.SampleHeight(gameObject.transform.position) - gameObject.transform.position.y > (float)((!LocalPlayer.IsInCaves) ? 7 : 3);
 					Area componentInParent = gameObject.GetComponentInParent<Area>();
+					if (componentInParent)
+					{
+						flag = true;
+					}
 					if (!flag && !LocalPlayer.IsInCaves)
 					{
 						RaycastHit raycastHit;
@@ -2524,9 +3077,7 @@ namespace TheForest
 							Vector3 vector = new Vector3(float.Parse(array[0]), Mathf.Ceil(float.Parse(array[1])), float.Parse(array[2]));
 							bool inCave = Terrain.activeTerrain.SampleHeight(vector) - vector.y > (float)((!LocalPlayer.IsInCaves) ? 6 : 3);
 							this.GotoCave(inCave);
-							LocalPlayer.Rigidbody.velocity = Vector3.zero;
-							LocalPlayer.Transform.position = vector;
-							Debug.Log("$> going to " + vector);
+							this.GotoPosition(vector);
 							return;
 						}
 					}
@@ -2537,6 +3088,38 @@ namespace TheForest
 			{
 				Debug.Log("$> usage: goto <GameObjectName>");
 			}
+		}
+
+		
+		private void GotoPosition(Vector3 targetPos)
+		{
+			LocalPlayer.Rigidbody.velocity = Vector3.zero;
+			LocalPlayer.Transform.position = targetPos;
+			Debug.Log("$> going to " + targetPos);
+		}
+
+		
+		private static GameObject FindObjectAdvanced(string arg, StringComparison comparisonType = StringComparison.InvariantCultureIgnoreCase)
+		{
+			GameObject[] array = UnityEngine.Object.FindObjectsOfType<GameObject>();
+			if (array.NullOrEmpty())
+			{
+				return null;
+			}
+			foreach (GameObject gameObject in array)
+			{
+				if (!(gameObject == null))
+				{
+					if (!gameObject.name.NullOrEmpty())
+					{
+						if (gameObject.name.Equals(arg, comparisonType))
+						{
+							return gameObject;
+						}
+					}
+				}
+			}
+			return null;
 		}
 
 		
@@ -2563,9 +3146,9 @@ namespace TheForest
 		
 		private void _gotoEnemy(object o)
 		{
-			if (Scene.MutantControler && Scene.MutantControler.activeCannibals.Count > 0)
+			if (TheForest.Utils.Scene.MutantControler && TheForest.Utils.Scene.MutantControler.activeCannibals.Count > 0)
 			{
-				this._goto(Scene.MutantControler.activeCannibals[0].name);
+				this._goto(TheForest.Utils.Scene.MutantControler.activeCannibals[0].name);
 			}
 			else
 			{
@@ -2634,13 +3217,55 @@ namespace TheForest
 		private void _profilersnapshot(object arg)
 		{
 			Debug.Log("----------[ Profiler Snapshot ]----------");
-			string format = "{0}: {1:N0} MB";
-			Debug.Log(string.Format(format, "Textures", Resources.FindObjectsOfTypeAll(typeof(Texture)).Sum((UnityEngine.Object r) => Profiler.GetRuntimeMemorySize(r)) / 1048576));
-			Debug.Log(string.Format(format, "AudioClip", Resources.FindObjectsOfTypeAll(typeof(AudioClip)).Sum((UnityEngine.Object r) => Profiler.GetRuntimeMemorySize(r)) / 1048576));
-			Debug.Log(string.Format(format, "Mesh", Resources.FindObjectsOfTypeAll(typeof(Mesh)).Sum((UnityEngine.Object r) => Profiler.GetRuntimeMemorySize(r)) / 1048576));
-			Debug.Log(string.Format(format, "Material", Resources.FindObjectsOfTypeAll(typeof(Material)).Sum((UnityEngine.Object r) => Profiler.GetRuntimeMemorySize(r)) / 1048576));
-			Debug.Log(string.Format(format, "GameObject", Resources.FindObjectsOfTypeAll(typeof(GameObject)).Sum((UnityEngine.Object r) => Profiler.GetRuntimeMemorySize(r)) / 1048576));
-			Debug.Log(string.Format(format, "Component", Resources.FindObjectsOfTypeAll(typeof(Component)).Sum((UnityEngine.Object r) => Profiler.GetRuntimeMemorySize(r)) / 1048576));
+			string text = "{0}: {1:N0} MB";
+			string format = text;
+			object arg2 = "Textures";
+			IEnumerable<UnityEngine.Object> source = Resources.FindObjectsOfTypeAll(typeof(Texture));
+			if (DebugConsole.<>f__mg$cache0 == null)
+			{
+				DebugConsole.<>f__mg$cache0 = new Func<UnityEngine.Object, int>(Profiler.GetRuntimeMemorySize);
+			}
+			Debug.Log(string.Format(format, arg2, source.Sum(DebugConsole.<>f__mg$cache0) / 1048576));
+			string format2 = text;
+			object arg3 = "AudioClip";
+			IEnumerable<UnityEngine.Object> source2 = Resources.FindObjectsOfTypeAll(typeof(AudioClip));
+			if (DebugConsole.<>f__mg$cache1 == null)
+			{
+				DebugConsole.<>f__mg$cache1 = new Func<UnityEngine.Object, int>(Profiler.GetRuntimeMemorySize);
+			}
+			Debug.Log(string.Format(format2, arg3, source2.Sum(DebugConsole.<>f__mg$cache1) / 1048576));
+			string format3 = text;
+			object arg4 = "Mesh";
+			IEnumerable<UnityEngine.Object> source3 = Resources.FindObjectsOfTypeAll(typeof(Mesh));
+			if (DebugConsole.<>f__mg$cache2 == null)
+			{
+				DebugConsole.<>f__mg$cache2 = new Func<UnityEngine.Object, int>(Profiler.GetRuntimeMemorySize);
+			}
+			Debug.Log(string.Format(format3, arg4, source3.Sum(DebugConsole.<>f__mg$cache2) / 1048576));
+			string format4 = text;
+			object arg5 = "Material";
+			IEnumerable<UnityEngine.Object> source4 = Resources.FindObjectsOfTypeAll(typeof(Material));
+			if (DebugConsole.<>f__mg$cache3 == null)
+			{
+				DebugConsole.<>f__mg$cache3 = new Func<UnityEngine.Object, int>(Profiler.GetRuntimeMemorySize);
+			}
+			Debug.Log(string.Format(format4, arg5, source4.Sum(DebugConsole.<>f__mg$cache3) / 1048576));
+			string format5 = text;
+			object arg6 = "GameObject";
+			IEnumerable<UnityEngine.Object> source5 = Resources.FindObjectsOfTypeAll(typeof(GameObject));
+			if (DebugConsole.<>f__mg$cache4 == null)
+			{
+				DebugConsole.<>f__mg$cache4 = new Func<UnityEngine.Object, int>(Profiler.GetRuntimeMemorySize);
+			}
+			Debug.Log(string.Format(format5, arg6, source5.Sum(DebugConsole.<>f__mg$cache4) / 1048576));
+			string format6 = text;
+			object arg7 = "Component";
+			IEnumerable<UnityEngine.Object> source6 = Resources.FindObjectsOfTypeAll(typeof(Component));
+			if (DebugConsole.<>f__mg$cache5 == null)
+			{
+				DebugConsole.<>f__mg$cache5 = new Func<UnityEngine.Object, int>(Profiler.GetRuntimeMemorySize);
+			}
+			Debug.Log(string.Format(format6, arg7, source6.Sum(DebugConsole.<>f__mg$cache5) / 1048576));
 			Debug.Log("----------[ EoS ]----------");
 		}
 
@@ -2785,13 +3410,12 @@ namespace TheForest
 			{
 				vector = this.lastLocalTarget.position + this.lastLocalTarget.forward * 4f;
 			}
-			GameObject gameObject = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("instantMutantSpawner"), vector + new Vector3(0f, 1f, 2f), Quaternion.identity) as GameObject;
-			string text = mutantName;
-			if (text != null)
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(Resources.Load<GameObject>("instantMutantSpawner"), vector + new Vector3(0f, 1f, 2f), Quaternion.identity);
+			if (mutantName != null)
 			{
-				if (DebugConsole.<>f__switch$map20 == null)
+				if (DebugConsole.<>f__switch$mapE == null)
 				{
-					DebugConsole.<>f__switch$map20 = new Dictionary<string, int>(12)
+					DebugConsole.<>f__switch$mapE = new Dictionary<string, int>(12)
 					{
 						{
 							"male_skinny",
@@ -2844,7 +3468,7 @@ namespace TheForest
 					};
 				}
 				int num;
-				if (DebugConsole.<>f__switch$map20.TryGetValue(text, out num))
+				if (DebugConsole.<>f__switch$mapE.TryGetValue(mutantName, out num))
 				{
 					if (num == 0)
 					{
@@ -2866,20 +3490,20 @@ namespace TheForest
 						FieldInfo field = spawnMutants.GetType().GetField("amount_" + mutantName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 						field.SetValue(spawnMutants, 1);
 						Debug.Log("$> spawned 1 " + mutantName);
-						goto IL_266;
+						goto IL_255;
 					}
 				}
 			}
 			Debug.Log("$> usage: spawnenemy <male_skinny | female_skinny | skinny_pale | male | female | fireman | pale | armsy | vags | baby | fat>");
-			IL_266:
+			IL_255:
 			this.lastLocalTarget = null;
 		}
 
 		
 		private void _killclosestenemy(string onoff)
 		{
-			List<GameObject> list = new List<GameObject>(Scene.MutantControler.activeCannibals);
-			foreach (GameObject item in Scene.MutantControler.activeInstantSpawnedCannibals)
+			List<GameObject> list = new List<GameObject>(TheForest.Utils.Scene.MutantControler.activeCannibals);
+			foreach (GameObject item in TheForest.Utils.Scene.MutantControler.activeInstantSpawnedCannibals)
 			{
 				if (!list.Contains(item))
 				{
@@ -2903,8 +3527,8 @@ namespace TheForest
 		
 		private void _knockDownclosestenemy(string onoff)
 		{
-			List<GameObject> list = new List<GameObject>(Scene.MutantControler.activeCannibals);
-			foreach (GameObject item in Scene.MutantControler.activeInstantSpawnedCannibals)
+			List<GameObject> list = new List<GameObject>(TheForest.Utils.Scene.MutantControler.activeCannibals);
+			foreach (GameObject item in TheForest.Utils.Scene.MutantControler.activeInstantSpawnedCannibals)
 			{
 				if (!list.Contains(item))
 				{
@@ -3010,9 +3634,9 @@ namespace TheForest
 		
 		private IEnumerator doKillAllEnemies()
 		{
-			List<GameObject> allEnemy = new List<GameObject>(Scene.MutantControler.activeCannibals);
-			List<GameObject> allBaby = new List<GameObject>(Scene.MutantControler.activeBabies);
-			List<GameObject> allInstant = new List<GameObject>(Scene.MutantControler.activeInstantSpawnedCannibals);
+			List<GameObject> allEnemy = new List<GameObject>(TheForest.Utils.Scene.MutantControler.activeCannibals);
+			List<GameObject> allBaby = new List<GameObject>(TheForest.Utils.Scene.MutantControler.activeBabies);
+			List<GameObject> allInstant = new List<GameObject>(TheForest.Utils.Scene.MutantControler.activeInstantSpawnedCannibals);
 			allEnemy.RemoveAll((GameObject o) => o == null);
 			allBaby.RemoveAll((GameObject o) => o == null);
 			allInstant.RemoveAll((GameObject o) => o == null);
@@ -3086,14 +3710,14 @@ namespace TheForest
 		{
 			base.StartCoroutine(this.doKillAllEnemies());
 			yield return YieldPresets.WaitSevenSeconds;
-			Scene.MutantControler.spawnManager.offsetCreepy = 0;
-			Scene.MutantControler.spawnManager.offsetPainted = 0;
-			Scene.MutantControler.spawnManager.offsetPale = 0;
-			Scene.MutantControler.spawnManager.offsetRegular = 0;
-			Scene.MutantControler.spawnManager.offsetSkinned = 0;
-			Scene.MutantControler.spawnManager.offsetSkinny = 0;
-			Scene.MutantControler.spawnManager.offsetSkinnyPale = 0;
-			Scene.SceneTracker.updateMutantSpawners();
+			TheForest.Utils.Scene.MutantControler.spawnManager.offsetCreepy = 0;
+			TheForest.Utils.Scene.MutantControler.spawnManager.offsetPainted = 0;
+			TheForest.Utils.Scene.MutantControler.spawnManager.offsetPale = 0;
+			TheForest.Utils.Scene.MutantControler.spawnManager.offsetRegular = 0;
+			TheForest.Utils.Scene.MutantControler.spawnManager.offsetSkinned = 0;
+			TheForest.Utils.Scene.MutantControler.spawnManager.offsetSkinny = 0;
+			TheForest.Utils.Scene.MutantControler.spawnManager.offsetSkinnyPale = 0;
+			TheForest.Utils.Scene.SceneTracker.updateMutantSpawners();
 			Debug.Log("$> all enemies now respawned based on current day amounts..");
 			yield break;
 		}
@@ -3109,6 +3733,7 @@ namespace TheForest
 			{
 				base.StopCoroutine("setFastRun");
 				LocalPlayer.FpCharacter.runSpeed = 9f;
+				LocalPlayer.FpCharacter.swimmingSpeed = 3f;
 			}
 		}
 
@@ -3118,6 +3743,7 @@ namespace TheForest
 			for (;;)
 			{
 				LocalPlayer.FpCharacter.runSpeed = 60f;
+				LocalPlayer.FpCharacter.swimmingSpeed = 20f;
 				yield return null;
 			}
 			yield break;
@@ -3133,26 +3759,109 @@ namespace TheForest
 		
 		private void _enemies(string onoff)
 		{
-			if (Scene.MutantControler && onoff == "toggle")
+			if (TheForest.Utils.Scene.MutantControler && onoff == "toggle")
 			{
-				onoff = ((!Scene.MutantControler.enabled) ? "on" : "off");
+				onoff = ((!TheForest.Utils.Scene.MutantControler.enabled) ? "on" : "off");
 			}
 			if (onoff == "off")
 			{
-				Scene.MutantControler.StartCoroutine("removeAllEnemies");
+				TheForest.Utils.Scene.MutantControler.StartCoroutine("removeAllEnemies");
 				base.Invoke("disableMutantController", 0.5f);
 				Debug.Log("$> Disabled all enemies");
 			}
 			else if (onoff == "on")
 			{
-				Scene.MutantControler.enabled = true;
-				Scene.MutantControler.startSetupFamilies();
+				TheForest.Utils.Scene.MutantControler.enabled = true;
+				TheForest.Utils.Scene.MutantControler.startSetupFamilies();
 				Debug.Log("$> Enabled enemies");
 			}
 			else
 			{
 				Debug.Log("$> usage: enemies <on|off>");
 			}
+		}
+
+		
+		private void _debugVignetteController(string onoff)
+		{
+			Debug.Log("$> post processing profile = " + LocalPlayer.vrVignette.PostProcessingProfile);
+			Debug.Log("$> vignette controller enabled = " + LocalPlayer.vrVignette.enabled);
+			Debug.Log("$> vignetteModel = " + LocalPlayer.vrVignette._vignetteModel);
+		}
+
+		
+		private void _refreshVignetteController(string onoff)
+		{
+			LocalPlayer.vrVignette.enabled = true;
+			LocalPlayer.vrVignette._vignetteModel = LocalPlayer.vrVignette.PostProcessingProfile.vignette;
+		}
+
+		
+		private void _resetInputAxes()
+		{
+			UnityEngine.Input.ResetInputAxes();
+		}
+
+		
+		private void _profile(string onoff)
+		{
+			if (onoff == "a")
+			{
+				this._lightingTimeOfDayOverride("10:00");
+				this._goto("300 50 1200");
+				base.StartCoroutine(this.ProfileSetup());
+				Debug.Log("$> Enabled profile mode");
+			}
+			else if (onoff == "off")
+			{
+				this._lightingTimeOfDayOverride("off");
+				this._enemies("on");
+				this._animals("on");
+				this._birds("on");
+				this._godmode("off");
+				Time.timeScale = 1f;
+				LocalPlayer.FpCharacter.UnLockView();
+				LocalPlayer.MainRotator.lockRotation = false;
+				LocalPlayer.FpCharacter.MovementLocked = false;
+				Debug.Log("$> Disabled profile mode");
+			}
+			else
+			{
+				Debug.Log("$> usage: profile <A|off>");
+			}
+		}
+
+		
+		private IEnumerator ProfileSetup()
+		{
+			this._godmode("on");
+			this._enemies("off");
+			this._animals("off");
+			this._birds("off");
+			LocalPlayer.Transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+			LocalPlayer.MainCamTr.rotation = Quaternion.Euler(0f, 180f, 0f);
+			LocalPlayer.MainRotator.lockRotation = true;
+			yield return new WaitForSeconds(3f);
+			LocalPlayer.FpCharacter.MovementLocked = true;
+			LocalPlayer.FpCharacter.LockView(true);
+			Time.timeScale = 0f;
+			yield break;
+		}
+
+		
+		private void _motionblurSamples(string val)
+		{
+			PostProcessingBehaviour component = Camera.main.GetComponent<PostProcessingBehaviour>();
+			if (component == null || component.profile == null)
+			{
+				return;
+			}
+			PostProcessingProfile postProcessingProfile = UnityEngine.Object.Instantiate<PostProcessingProfile>(component.profile);
+			MotionBlurModel.Settings settings = postProcessingProfile.motionBlur.settings;
+			settings.sampleCount = int.Parse(val);
+			postProcessingProfile.motionBlur.settings = settings;
+			component.profile = postProcessingProfile;
+			Debug.Log("$> motion blur sample count  = " + val);
 		}
 
 		
@@ -3330,7 +4039,7 @@ namespace TheForest
 		
 		private void disableMutantController()
 		{
-			Scene.MutantControler.enabled = false;
+			TheForest.Utils.Scene.MutantControler.enabled = false;
 		}
 
 		
@@ -3569,13 +4278,13 @@ namespace TheForest
 		{
 			if (!Clock.Dark)
 			{
-				Scene.Atmosphere.TimeOfDay = 155f;
+				TheForest.Utils.Scene.Atmosphere.TimeOfDay = 155f;
 			}
 			else
 			{
-				Scene.Atmosphere.TimeOfDay = 269f;
+				TheForest.Utils.Scene.Atmosphere.TimeOfDay = 269f;
 			}
-			Scene.Atmosphere.ForceSunRotationUpdate = true;
+			TheForest.Utils.Scene.Atmosphere.ForceSunRotationUpdate = true;
 			base.Invoke("_checkDay", 1f);
 		}
 
@@ -3623,7 +4332,7 @@ namespace TheForest
 				}
 			}
 			Debug.Log("$> forcing rain with rainDice=" + num);
-			Scene.WeatherSystem.ForceRain(num);
+			TheForest.Utils.Scene.WeatherSystem.ForceRain(num);
 		}
 
 		
@@ -3776,15 +4485,28 @@ namespace TheForest
 										if (value is IList && !(value is string))
 										{
 											sb.AppendLine(text3.PadLeft(text3.Length + depth + 1, '\t'));
-											foreach (object obj in ((IList)value))
+											IEnumerator enumerator = ((IList)value).GetEnumerator();
+											try
 											{
-												if (obj == null)
+												while (enumerator.MoveNext())
 												{
-													sb.AppendLine("null".PadLeft("null".Length + depth + 2, '\t'));
+													object obj = enumerator.Current;
+													if (obj == null)
+													{
+														sb.AppendLine("null".PadLeft("null".Length + depth + 2, '\t'));
+													}
+													else
+													{
+														sb.AppendLine(obj.ToString().PadLeft(obj.ToString().Length + depth + 2, '\t'));
+													}
 												}
-												else
+											}
+											finally
+											{
+												IDisposable disposable;
+												if ((disposable = (enumerator as IDisposable)) != null)
 												{
-													sb.AppendLine(obj.ToString().PadLeft(obj.ToString().Length + depth + 2, '\t'));
+													disposable.Dispose();
 												}
 											}
 										}
@@ -3795,10 +4517,23 @@ namespace TheForest
 										}
 									}
 								}
-								foreach (object obj2 in t)
+								IEnumerator enumerator2 = t.GetEnumerator();
+								try
 								{
-									Transform obj3 = (Transform)obj2;
-									browseRec(obj3);
+									while (enumerator2.MoveNext())
+									{
+										object obj2 = enumerator2.Current;
+										Transform obj3 = (Transform)obj2;
+										browseRec(obj3);
+									}
+								}
+								finally
+								{
+									IDisposable disposable2;
+									if ((disposable2 = (enumerator2 as IDisposable)) != null)
+									{
+										disposable2.Dispose();
+									}
 								}
 								depth--;
 							}
@@ -4006,11 +4741,24 @@ namespace TheForest
 			{
 				if (slotNumArg == "all")
 				{
-					foreach (object obj in Enum.GetValues(typeof(Slots)))
+					IEnumerator enumerator = Enum.GetValues(typeof(Slots)).GetEnumerator();
+					try
 					{
-						Slots slot = (Slots)((int)obj);
-						SaveSlotUtils.DeleteSlot(PlayerModes.SinglePlayer, slot);
-						SaveSlotUtils.DeleteSlot(PlayerModes.Multiplayer, slot);
+						while (enumerator.MoveNext())
+						{
+							object obj = enumerator.Current;
+							Slots slot = (Slots)obj;
+							SaveSlotUtils.DeleteSlot(PlayerModes.SinglePlayer, slot);
+							SaveSlotUtils.DeleteSlot(PlayerModes.Multiplayer, slot);
+						}
+					}
+					finally
+					{
+						IDisposable disposable;
+						if ((disposable = (enumerator as IDisposable)) != null)
+						{
+							disposable.Dispose();
+						}
 					}
 					Debug.Log("$> Cleared all save slots");
 					return;
@@ -4126,16 +4874,29 @@ namespace TheForest
 								list4[index].lod.DontSpawn = true;
 								list4[index].entity.Freeze(false);
 							}
-							foreach (object obj in list4[index].transform)
+							IEnumerator enumerator = list4[index].transform.GetEnumerator();
+							try
 							{
-								Transform transform = (Transform)obj;
-								LOD_Stump component = transform.GetComponent<LOD_Stump>();
-								if (component)
+								while (enumerator.MoveNext())
 								{
-									component.DespawnCurrent();
-									component.CurrentView = null;
+									object obj = enumerator.Current;
+									Transform transform = (Transform)obj;
+									LOD_Stump component = transform.GetComponent<LOD_Stump>();
+									if (component)
+									{
+										component.DespawnCurrent();
+										component.CurrentView = null;
+									}
+									UnityEngine.Object.Destroy(transform.gameObject);
 								}
-								UnityEngine.Object.Destroy(transform.gameObject);
+							}
+							finally
+							{
+								IDisposable disposable;
+								if ((disposable = (enumerator as IDisposable)) != null)
+								{
+									disposable.Dispose();
+								}
 							}
 							list4[index].lod.DespawnCurrent();
 							list4[index].lod.enabled = false;
@@ -4185,16 +4946,29 @@ namespace TheForest
 						{
 							treeLodGrid.RegisterTreeRegrowth(list3[index2].transform.position);
 						}
-						foreach (object obj2 in list3[index2].transform)
+						IEnumerator enumerator2 = list3[index2].transform.GetEnumerator();
+						try
 						{
-							Transform transform2 = (Transform)obj2;
-							LOD_Stump component2 = transform2.GetComponent<LOD_Stump>();
-							if (component2)
+							while (enumerator2.MoveNext())
 							{
-								component2.DespawnCurrent();
-								component2.CurrentView = null;
+								object obj2 = enumerator2.Current;
+								Transform transform2 = (Transform)obj2;
+								LOD_Stump component2 = transform2.GetComponent<LOD_Stump>();
+								if (component2)
+								{
+									component2.DespawnCurrent();
+									component2.CurrentView = null;
+								}
+								UnityEngine.Object.Destroy(transform2.gameObject);
 							}
-							UnityEngine.Object.Destroy(transform2.gameObject);
+						}
+						finally
+						{
+							IDisposable disposable2;
+							if ((disposable2 = (enumerator2 as IDisposable)) != null)
+							{
+								disposable2.Dispose();
+							}
 						}
 						num10++;
 					}
@@ -4271,7 +5045,8 @@ namespace TheForest
 		{
 			PlayerPrefs.DeleteAll();
 			PlayerPrefs.Save();
-			Debug.Log("$> Cleared all settings, restarting game without opening options is required to be fully effective");
+			PlayerPreferences.PreventSaving = true;
+			Debug.Log("$> Cleared all settings, restarting game is required");
 		}
 
 		
@@ -4314,6 +5089,22 @@ namespace TheForest
 		}
 
 		
+		private void _logTextures(string intervalArg)
+		{
+			float num = 0f;
+			if (!float.TryParse(intervalArg, out num) || num <= 0f)
+			{
+				Debug.Log("$> disabling IntervalTextureLogger");
+				IntervalTextureLogger.Stop();
+			}
+			else
+			{
+				IntervalTextureLogger.Start(num);
+			}
+			Debug.Log("$> logTextures [interval in seconds] i.e. logTextures 2");
+		}
+
+		
 		private void _loadlevel(string levelNumS)
 		{
 			if (!string.IsNullOrEmpty(levelNumS))
@@ -4322,7 +5113,7 @@ namespace TheForest
 				if (int.TryParse(levelNumS, out num))
 				{
 					Debug.Log("$> Loading level " + num);
-					Application.LoadLevel(num);
+					SceneManager.LoadScene(num, LoadSceneMode.Single);
 				}
 				else
 				{
@@ -4357,20 +5148,27 @@ namespace TheForest
 				AccountInfo.ResetAllAchievements();
 				Debug.Log("$> Reseted all account stats & achievements info");
 			}
-			else if (param.All((char c) => char.IsUpper(c)))
+			else
 			{
-				if (AccountInfo.ResetAchievement(param))
+				if (DebugConsole.<>f__mg$cache6 == null)
 				{
-					Debug.Log("$> Reseted the " + param + " achievement");
+					DebugConsole.<>f__mg$cache6 = new Func<char, bool>(char.IsUpper);
+				}
+				if (param.All(DebugConsole.<>f__mg$cache6))
+				{
+					if (AccountInfo.ResetAchievement(param))
+					{
+						Debug.Log("$> Reseted the " + param + " achievement");
+					}
+					else
+					{
+						Debug.Log("$> Error reseting the " + param + " achievement");
+					}
 				}
 				else
 				{
-					Debug.Log("$> Error reseting the " + param + " achievement");
+					Debug.Log("$> usage: resetStatsAndAchievements <all|ACHIEVEMENT_NAME>");
 				}
-			}
-			else
-			{
-				Debug.Log("$> usage: resetStatsAndAchievements <all|ACHIEVEMENT_NAME>");
 			}
 		}
 
@@ -4447,18 +5245,18 @@ namespace TheForest
 		{
 			if (string.IsNullOrEmpty(param))
 			{
-				Scene.Atmosphere.LowerShadowsAtExtremeLightAngles = !Scene.Atmosphere.LowerShadowsAtExtremeLightAngles;
-				Debug.Log("$> Toggled LowerShadowsAtExtremeLightAngles " + ((!Scene.Atmosphere.LowerShadowsAtExtremeLightAngles) ? "off" : "on"));
+				TheForest.Utils.Scene.Atmosphere.LowerShadowsAtExtremeLightAngles = !TheForest.Utils.Scene.Atmosphere.LowerShadowsAtExtremeLightAngles;
+				Debug.Log("$> Toggled LowerShadowsAtExtremeLightAngles " + ((!TheForest.Utils.Scene.Atmosphere.LowerShadowsAtExtremeLightAngles) ? "off" : "on"));
 			}
 			else if (param.ToLower() == "on")
 			{
-				Scene.Atmosphere.LowerShadowsAtExtremeLightAngles = true;
-				Debug.Log("$> Toggled LowerShadowsAtExtremeLightAngles " + ((!Scene.Atmosphere.LowerShadowsAtExtremeLightAngles) ? "off" : "on"));
+				TheForest.Utils.Scene.Atmosphere.LowerShadowsAtExtremeLightAngles = true;
+				Debug.Log("$> Toggled LowerShadowsAtExtremeLightAngles " + ((!TheForest.Utils.Scene.Atmosphere.LowerShadowsAtExtremeLightAngles) ? "off" : "on"));
 			}
 			else if (param.ToLower() == "off")
 			{
-				Scene.Atmosphere.LowerShadowsAtExtremeLightAngles = false;
-				Debug.Log("$> Toggled LowerShadowsAtExtremeLightAngles " + ((!Scene.Atmosphere.LowerShadowsAtExtremeLightAngles) ? "off" : "on"));
+				TheForest.Utils.Scene.Atmosphere.LowerShadowsAtExtremeLightAngles = false;
+				Debug.Log("$> Toggled LowerShadowsAtExtremeLightAngles " + ((!TheForest.Utils.Scene.Atmosphere.LowerShadowsAtExtremeLightAngles) ? "off" : "on"));
 			}
 			else
 			{
@@ -4467,91 +5265,137 @@ namespace TheForest
 		}
 
 		
+		private void _scionEyeAdaption(string onoff)
+		{
+			PostProcessingBehaviour component = Camera.main.GetComponent<PostProcessingBehaviour>();
+			if (component == null)
+			{
+				return;
+			}
+			if (onoff == "on")
+			{
+				component.EnableScionEyeAdaption(true);
+			}
+			else if (onoff == "off")
+			{
+				component.EnableScionEyeAdaption(false);
+			}
+			Debug.Log("$> scioneyeadaption <on|off>");
+		}
+
+		
 		private void _lightingTimeOfDayOverride(string param)
 		{
 			param = ((!string.IsNullOrEmpty(param)) ? param.ToLower() : string.Empty);
 			Func<string> func = delegate
 			{
-				float num2 = (Scene.Atmosphere.LightingTimeOfDayOverrideValue + 180f) % 360f * 0.06666667f;
-				return (int)num2 + "h" + (int)((num2 - (float)((int)num2)) * 60f);
+				float num3 = (TheForest.Utils.Scene.Atmosphere.LightingTimeOfDayOverrideValue + 180f) % 360f * 0.06666667f;
+				return (int)num3 + "h" + (int)((num3 - (float)((int)num3)) * 60f);
 			};
-			string text = param;
-			if (text != null)
+			if (param != null)
 			{
-				if (DebugConsole.<>f__switch$map21 == null)
+				if (!(param == "off"))
 				{
-					DebugConsole.<>f__switch$map21 = new Dictionary<string, int>(5)
+					if (!(param == "morning"))
 					{
+						if (!(param == "noon"))
 						{
-							"off",
-							0
-						},
-						{
-							"morning",
-							1
-						},
-						{
-							"noon",
-							2
-						},
-						{
-							"sunset",
-							3
-						},
-						{
-							"night",
-							4
-						}
-					};
-				}
-				int num;
-				if (DebugConsole.<>f__switch$map21.TryGetValue(text, out num))
-				{
-					switch (num)
-					{
-					case 0:
-						if (Scene.Atmosphere.OverrideLightingTimeOfDay)
-						{
-							Scene.Atmosphere.OverrideLightingTimeOfDay = false;
-							Debug.Log("$> Disabled lighting time of Day override");
+							if (!(param == "sunset"))
+							{
+								if (!(param == "night"))
+								{
+									goto IL_1AE;
+								}
+								TheForest.Utils.Scene.Atmosphere.OverrideLightingTimeOfDay = true;
+								TheForest.Utils.Scene.Atmosphere.LightingTimeOfDayOverrideValue = 180f;
+								Debug.Log("$> Enabled lighting time of Day override at: night [" + func() + "]");
+							}
+							else
+							{
+								TheForest.Utils.Scene.Atmosphere.OverrideLightingTimeOfDay = true;
+								TheForest.Utils.Scene.Atmosphere.LightingTimeOfDayOverrideValue = 90f;
+								Debug.Log("$> Enabled lighting time of Day override at: sunset [" + func() + "]");
+							}
 						}
 						else
 						{
-							Debug.Log("$> Lighting time of Day override is already disabled");
+							TheForest.Utils.Scene.Atmosphere.OverrideLightingTimeOfDay = true;
+							TheForest.Utils.Scene.Atmosphere.LightingTimeOfDayOverrideValue = 0f;
+							Debug.Log("$> Enabled lighting time of Day override at: noon [" + func() + "]");
 						}
-						return;
-					case 1:
-						Scene.Atmosphere.OverrideLightingTimeOfDay = true;
-						Scene.Atmosphere.LightingTimeOfDayOverrideValue = 275f;
+					}
+					else
+					{
+						TheForest.Utils.Scene.Atmosphere.OverrideLightingTimeOfDay = true;
+						TheForest.Utils.Scene.Atmosphere.LightingTimeOfDayOverrideValue = 275f;
 						Debug.Log("$> Enabled lighting time of Day override at: morning [" + func() + "]");
-						break;
-					case 2:
-						Scene.Atmosphere.OverrideLightingTimeOfDay = true;
-						Scene.Atmosphere.LightingTimeOfDayOverrideValue = 0f;
-						Debug.Log("$> Enabled lighting time of Day override at: noon [" + func() + "]");
-						break;
-					case 3:
-						Scene.Atmosphere.OverrideLightingTimeOfDay = true;
-						Scene.Atmosphere.LightingTimeOfDayOverrideValue = 90f;
-						Debug.Log("$> Enabled lighting time of Day override at: sunset [" + func() + "]");
-						break;
-					case 4:
-						Scene.Atmosphere.OverrideLightingTimeOfDay = true;
-						Scene.Atmosphere.LightingTimeOfDayOverrideValue = 180f;
-						Debug.Log("$> Enabled lighting time of Day override at: night [" + func() + "]");
-						break;
-					default:
-						goto IL_1DF;
 					}
 					return;
 				}
+				if (TheForest.Utils.Scene.Atmosphere.OverrideLightingTimeOfDay)
+				{
+					TheForest.Utils.Scene.Atmosphere.OverrideLightingTimeOfDay = false;
+					Debug.Log("$> Disabled lighting time of Day override");
+				}
+				else
+				{
+					Debug.Log("$> Lighting time of Day override is already disabled");
+				}
+				return;
 			}
-			IL_1DF:
-			Debug.Log("$> usage: lightingTimeOfDayOverride <off|morning|noon|sunset|night> (currently=" + ((!Scene.Atmosphere.OverrideLightingTimeOfDay) ? "off" : "on") + ")");
+			IL_1AE:
+			string[] array = param.Split(new char[]
+			{
+				':'
+			});
+			int num;
+			int num2;
+			if (int.TryParse(array[0], out num) && int.TryParse(array[1], out num2))
+			{
+				TheForest.Utils.Scene.Atmosphere.OverrideLightingTimeOfDay = true;
+				TheForest.Utils.Scene.Atmosphere.LightingTimeOfDayOverrideValue = ((float)num - 12f + (float)num2 / 60f) * 360f / 24f;
+				Debug.Log("$> Enabled lighting time of Day override at: [" + func() + "]");
+			}
+			else
+			{
+				Debug.Log("$> usage: lightingTimeOfDayOverride <off|morning|noon|sunset|night|HH:MM> (currently=" + ((!TheForest.Utils.Scene.Atmosphere.OverrideLightingTimeOfDay) ? "off" : "on") + ")");
+			}
+		}
+
+		
+		private void _buildermode(string onoff)
+		{
+			if (onoff == "on")
+			{
+				Debug.Log("$> Builder mode enabled");
+				this._buildhack("on");
+				this._enemies("off");
+				this._godmode("on");
+				this._survival("off");
+				this._addAllItems(null);
+			}
+			else if (onoff == "off")
+			{
+				this._buildhack("off");
+				this._enemies("on");
+				this._godmode("off");
+				this._survival("on");
+				Debug.Log("$> Builder mode disabled");
+			}
+			else
+			{
+				Debug.Log("$> usage: buildermode <on|off>");
+			}
 		}
 
 		
 		private float wsMaxMsValue;
+
+		
+		private GameObject deviceDebugInformationGo;
+
+		
+		private GameObject _caveLightGo;
 
 		
 		public bool _showOverlay;
@@ -4664,5 +5508,33 @@ namespace TheForest
 
 		
 		private GameObject CoopAnimalController;
+
+		
+		[CompilerGenerated]
+		private static Func<UnityEngine.Object, int> <>f__mg$cache0;
+
+		
+		[CompilerGenerated]
+		private static Func<UnityEngine.Object, int> <>f__mg$cache1;
+
+		
+		[CompilerGenerated]
+		private static Func<UnityEngine.Object, int> <>f__mg$cache2;
+
+		
+		[CompilerGenerated]
+		private static Func<UnityEngine.Object, int> <>f__mg$cache3;
+
+		
+		[CompilerGenerated]
+		private static Func<UnityEngine.Object, int> <>f__mg$cache4;
+
+		
+		[CompilerGenerated]
+		private static Func<UnityEngine.Object, int> <>f__mg$cache5;
+
+		
+		[CompilerGenerated]
+		private static Func<char, bool> <>f__mg$cache6;
 	}
 }

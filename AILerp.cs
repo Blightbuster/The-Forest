@@ -6,8 +6,8 @@ using UnityEngine;
 
 
 [RequireComponent(typeof(Seeker))]
-[HelpURL("http:
 [AddComponentMenu("Pathfinding/AI/AISimpleLerp (2D,3D generic)")]
+[HelpURL("http:
 public class AILerp : MonoBehaviour
 {
 	
@@ -232,8 +232,8 @@ public class AILerp : MonoBehaviour
 				else
 				{
 					Quaternion rotation = this.tr.rotation;
-					Quaternion to = Quaternion.LookRotation(vector);
-					this.tr.rotation = Quaternion.Slerp(rotation, to, Time.deltaTime * this.rotationSpeed);
+					Quaternion b2 = Quaternion.LookRotation(vector);
+					this.tr.rotation = Quaternion.Slerp(rotation, b2, Time.deltaTime * this.rotationSpeed);
 				}
 			}
 			this.tr.position = position;
@@ -285,8 +285,8 @@ public class AILerp : MonoBehaviour
 		direction = vector;
 		if (this.interpolatePathSwitches)
 		{
-			Vector3 from = this.previousMovementOrigin + Vector3.ClampMagnitude(this.previousMovementDirection, this.speed * (Time.time - this.previousMovementStartTime));
-			return Vector3.Lerp(from, vector3, this.switchPathInterpolationSpeed * (Time.time - this.previousMovementStartTime));
+			Vector3 a = this.previousMovementOrigin + Vector3.ClampMagnitude(this.previousMovementDirection, this.speed * (Time.time - this.previousMovementStartTime));
+			return Vector3.Lerp(a, vector3, this.switchPathInterpolationSpeed * (Time.time - this.previousMovementStartTime));
 		}
 		return vector3;
 	}

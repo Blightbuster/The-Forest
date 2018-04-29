@@ -189,30 +189,6 @@ namespace Ceto.Common.Containers.Interpolation
 		}
 
 		
-		virtual bool get_HalfPixelOffset()
-		{
-			return base.HalfPixelOffset;
-		}
-
-		
-		virtual void set_HalfPixelOffset(bool value)
-		{
-			base.HalfPixelOffset = value;
-		}
-
-		
-		virtual bool get_Wrap()
-		{
-			return base.Wrap;
-		}
-
-		
-		virtual void set_Wrap(bool value)
-		{
-			base.Wrap = value;
-		}
-
-		
 		private float[] m_data;
 
 		

@@ -32,8 +32,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("Number of connected players.")]
+		[UIHint(UIHint.Variable)]
 		public FsmInt connectionsCount;
 
 		

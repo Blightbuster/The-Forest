@@ -157,39 +157,44 @@ namespace Pathfinding
 			Color result;
 			switch (debugMode)
 			{
-			case GraphDebugMode.Areas:
-				result = AstarColor.GetAreaColor(node.Area);
-				goto IL_11F;
 			case GraphDebugMode.Penalty:
 				result = Color.Lerp(AstarColor.ConnectionLowLerp, AstarColor.ConnectionHighLerp, (node.Penalty - AstarPath.active.debugFloor) / (AstarPath.active.debugRoof - AstarPath.active.debugFloor));
-				goto IL_11F;
+				break;
 			case GraphDebugMode.Connections:
 				result = AstarColor.NodeConnection;
-				goto IL_11F;
+				break;
 			case GraphDebugMode.Tags:
 				result = AstarColor.GetAreaColor(node.Tag);
-				goto IL_11F;
+				break;
+			default:
+				if (debugMode != GraphDebugMode.Areas)
+				{
+					if (data == null)
+					{
+						return AstarColor.NodeConnection;
+					}
+					PathNode pathNode = data.GetPathNode(node);
+					float num;
+					if (debugMode == GraphDebugMode.G)
+					{
+						num = pathNode.G;
+					}
+					else if (debugMode == GraphDebugMode.H)
+					{
+						num = pathNode.H;
+					}
+					else
+					{
+						num = pathNode.F;
+					}
+					result = Color.Lerp(AstarColor.ConnectionLowLerp, AstarColor.ConnectionHighLerp, (num - AstarPath.active.debugFloor) / (AstarPath.active.debugRoof - AstarPath.active.debugFloor));
+				}
+				else
+				{
+					result = AstarColor.GetAreaColor(node.Area);
+				}
+				break;
 			}
-			if (data == null)
-			{
-				return AstarColor.NodeConnection;
-			}
-			PathNode pathNode = data.GetPathNode(node);
-			float num;
-			if (debugMode == GraphDebugMode.G)
-			{
-				num = pathNode.G;
-			}
-			else if (debugMode == GraphDebugMode.H)
-			{
-				num = pathNode.H;
-			}
-			else
-			{
-				num = pathNode.F;
-			}
-			result = Color.Lerp(AstarColor.ConnectionLowLerp, AstarColor.ConnectionHighLerp, (num - AstarPath.active.debugFloor) / (AstarPath.active.debugRoof - AstarPath.active.debugFloor));
-			IL_11F:
 			result.a *= 0.5f;
 			return result;
 		}

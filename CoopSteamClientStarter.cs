@@ -7,6 +7,7 @@ using TheForest.Save;
 using TheForest.Utils;
 using UdpKit;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 internal class CoopSteamClientStarter : CoopPeerStarter
@@ -69,7 +70,7 @@ internal class CoopSteamClientStarter : CoopPeerStarter
 			CoopPlayerCallbacks.WasDisconnectedFromServer = true;
 			BoltLauncher.Shutdown();
 			UnityEngine.Object.Destroy(base.gameObject);
-			Application.LoadLevel("TitleScene");
+			SceneManager.LoadScene("TitleScene", LoadSceneMode.Single);
 		}
 	}
 
@@ -172,7 +173,7 @@ internal class CoopSteamClientStarter : CoopPeerStarter
 		BoltLauncher.Shutdown();
 		SteamClientConfig.KickMessage = ((!SteamClientDSConfig.isDedicatedClient) ? "Server timeout. Could not connect to this server." : "Server does not seem to be set up correctly");
 		UnityEngine.Object.Destroy(base.gameObject);
-		Application.LoadLevel("TitleScene");
+		SceneManager.LoadScene("TitleScene", LoadSceneMode.Single);
 	}
 
 	

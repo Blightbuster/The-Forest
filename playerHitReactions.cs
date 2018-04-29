@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections;
 using Bolt;
-using ModAPI;
 using TheForest.Items.Inventory;
 using TheForest.Utils;
-using UltimateCheatmenu;
 using UnityEngine;
 
 
@@ -61,6 +59,10 @@ public class playerHitReactions : MonoBehaviour
 	
 	public void enableHitState()
 	{
+		if (ForestVR.Enabled)
+		{
+			return;
+		}
 		this.camAnimation.Play("camShake1", PlayMode.StopAll);
 	}
 
@@ -140,8 +142,12 @@ public class playerHitReactions : MonoBehaviour
 	}
 
 	
-	public void __enableExplodeShake__Original(float dist)
+	public void enableExplodeShake(float dist)
 	{
+		if (ForestVR.Enabled)
+		{
+			return;
+		}
 		base.CancelInvoke("resetExplodeShake");
 		this.doingExplodeShake = true;
 		if (dist > 100f)
@@ -168,6 +174,10 @@ public class playerHitReactions : MonoBehaviour
 	
 	public void enableFootShake(float dist, float mag)
 	{
+		if (ForestVR.Enabled)
+		{
+			return;
+		}
 		base.CancelInvoke("resetExplodeShake");
 		if (LocalPlayer.AnimControl.swimming)
 		{
@@ -196,6 +206,10 @@ public class playerHitReactions : MonoBehaviour
 	
 	public void enableWeaponHitState()
 	{
+		if (ForestVR.Enabled)
+		{
+			return;
+		}
 		this.camAnimation.Play("camShake2", PlayMode.StopAll);
 	}
 
@@ -352,23 +366,6 @@ public class playerHitReactions : MonoBehaviour
 	private IEnumerator disableMpRenderers()
 	{
 		yield break;
-	}
-
-	
-	public void enableExplodeShake(float dist)
-	{
-		try
-		{
-			if (!UCheatmenu.GodMode)
-			{
-				this.__enableExplodeShake__Original(dist);
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__enableExplodeShake__Original(dist);
-		}
 	}
 
 	

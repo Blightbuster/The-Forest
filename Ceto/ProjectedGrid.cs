@@ -7,9 +7,9 @@ using UnityEngine.Rendering;
 namespace Ceto
 {
 	
-	[RequireComponent(typeof(Ocean))]
 	[AddComponentMenu("Ceto/Components/ProjectedGrid")]
 	[DisallowMultipleComponent]
+	[RequireComponent(typeof(Ocean))]
 	public class ProjectedGrid : OceanGridBase
 	{
 		
@@ -666,14 +666,14 @@ namespace Ceto
 					array3[num2++] = k + 1 + l * numVertsX;
 				}
 			}
-			Mesh mesh = new Mesh();
-			mesh.vertices = array;
-			mesh.uv = array2;
-			mesh.triangles = array3;
-			mesh.name = "Ceto Projected Grid Mesh";
-			mesh.hideFlags = HideFlags.HideAndDontSave;
-			mesh.Optimize();
-			return mesh;
+			return new Mesh
+			{
+				vertices = array,
+				uv = array2,
+				triangles = array3,
+				name = "Ceto Projected Grid Mesh",
+				hideFlags = HideFlags.HideAndDontSave
+			};
 		}
 
 		

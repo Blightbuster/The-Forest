@@ -40,7 +40,11 @@ namespace TheForest.Player
 			{
 				if (this._weaponFire[k])
 				{
-					this._weaponFireStates[k] = this._weaponFire[k]._inventoryMirror.transform.parent.GetComponent<InventoryItemView>().ActiveBonus;
+					InventoryItemView inventoryItemView = this._weaponFire[k]._inventoryMirror.transform.parent.parent.GetComponent<InventoryItemView>() ?? this._weaponFire[k]._inventoryMirror.transform.parent.GetComponent<InventoryItemView>();
+					if (inventoryItemView)
+					{
+						this._weaponFireStates[k] = inventoryItemView.ActiveBonus;
+					}
 				}
 			}
 		}
@@ -74,8 +78,12 @@ namespace TheForest.Player
 				{
 					if (this._weaponFire[k])
 					{
-						this._weaponFire[k]._inventoryMirror.transform.parent.GetComponent<InventoryItemView>().ActiveBonus = this._weaponFireStates[k];
-						this._weaponFire[k].OnDeserialized();
+						InventoryItemView inventoryItemView = this._weaponFire[k]._inventoryMirror.transform.parent.parent.GetComponent<InventoryItemView>() ?? this._weaponFire[k]._inventoryMirror.transform.parent.GetComponent<InventoryItemView>();
+						if (inventoryItemView)
+						{
+							inventoryItemView.ActiveBonus = this._weaponFireStates[k];
+							this._weaponFire[k].OnDeserialized();
+						}
 					}
 				}
 			}

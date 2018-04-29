@@ -112,6 +112,7 @@ namespace TheForest.Items.Special
 			if (this._lightingHeldFireRoutine != null)
 			{
 				LocalPlayer.Animator.SetBoolReflected("lightWeaponBool", false);
+				LocalPlayer.Animator.SetBoolReflected("leftLightWeaponBool", false);
 				LocalPlayer.Inventory.UnlockEquipmentSlot(Item.EquipmentSlot.LeftHand);
 				base.StopCoroutine(this._lightingHeldFireRoutine);
 				this._lightingHeldFireRoutine = null;
@@ -167,14 +168,16 @@ namespace TheForest.Items.Special
 				float timer = 0f;
 				while (!timeout)
 				{
-					if (LocalPlayer.Animator.GetCurrentAnimatorStateInfo(3).IsName("lighterIdle"))
+					LocalPlayer.Animator.SetBool("leftLightWeaponBool", true);
+					if (LocalPlayer.Animator.GetCurrentAnimatorStateInfo(3).shortNameHash == this._lightWeaponHash)
 					{
 						timeout = true;
 					}
 					timer += Time.deltaTime;
 					if (timer > 4f)
 					{
-						timeout = true;
+						this.CancelLightHeldFire();
+						yield break;
 					}
 					yield return null;
 				}
@@ -188,6 +191,7 @@ namespace TheForest.Items.Special
 					LocalPlayer.Inventory.LockEquipmentSlot(Item.EquipmentSlot.LeftHand);
 					yield return new WaitForSeconds(2.35f);
 					LocalPlayer.Animator.SetBoolReflected("lightWeaponBool", false);
+					LocalPlayer.Animator.SetBool("leftLightWeaponBool", false);
 					if (!this._breakRoutine && !LocalPlayer.AnimControl.onRope && LocalPlayer.Inventory.RightHand && LocalPlayer.Inventory.RightHand._held.activeSelf)
 					{
 						LocalPlayer.Inventory.RightHand._held.SendMessage("enableFire", SendMessageOptions.DontRequireReceiver);
@@ -254,7 +258,10 @@ namespace TheForest.Items.Special
 				LighterControler.IsBusy = true;
 				LocalPlayer.Inventory.LockEquipmentSlot(Item.EquipmentSlot.LeftHand);
 				base.CancelInvoke();
-				LocalPlayer.Sfx.PlayWhoosh();
+				if (this.IsReallyActive)
+				{
+					LocalPlayer.Sfx.PlayWhoosh();
+				}
 				LocalPlayer.Animator.SetBoolReflected("lighterIgnite", false);
 				LocalPlayer.Animator.SetBoolReflected("lighterHeld", false);
 				this.TurnLighterOff();
@@ -352,6 +359,7 @@ namespace TheForest.Items.Special
 			LighterControler.IsBusy = false;
 			base.StopCoroutine("LightingHeldFireRoutine");
 			LocalPlayer.Animator.SetBoolReflected("lightWeaponBool", false);
+			LocalPlayer.Animator.SetBoolReflected("leftLightWeaponBool", false);
 			base.StartCoroutine(this.StashLighterRoutine());
 		}
 
@@ -362,6 +370,7 @@ namespace TheForest.Items.Special
 			base.StopCoroutine("LightingHeldFireRoutine");
 			base.StopCoroutine("LightingHeldFireRoutine");
 			LocalPlayer.Animator.SetBoolReflected("lightWeaponBool", false);
+			LocalPlayer.Animator.SetBoolReflected("leftLightWeaponBool", false);
 		}
 
 		
@@ -378,6 +387,9 @@ namespace TheForest.Items.Special
 
 		
 		public bool _breakRoutine;
+
+		
+		private int _lightWeaponHash = Animator.StringToHash("lightWeapon");
 
 		
 		public static bool HasLightableItem;

@@ -13,15 +13,15 @@ namespace Pathfinding
 		}
 
 		
+		
+		
+		public bool workItemsInProgress { get; private set; }
+
+		
 		void IWorkItemContext.QueueFloodFill()
 		{
 			this.queuedWorkItemFloodFill = true;
 		}
-
-		
-		
-		
-		public bool workItemsInProgress { get; private set; }
 
 		
 		public void EnsureValidFloodFill()

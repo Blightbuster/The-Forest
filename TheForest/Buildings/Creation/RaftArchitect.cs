@@ -11,9 +11,9 @@ using UnityEngine;
 namespace TheForest.Buildings.Creation
 {
 	
-	[DoNotSerializePublic]
 	[AddComponentMenu("Buildings/Creation/Raft Architect")]
-	public class RaftArchitect : EntityBehaviour, IHoleStructure, IStructureSupport, ICoopStructure
+	[DoNotSerializePublic]
+	public class RaftArchitect : EntityBehaviour, IStructureSupport, IHoleStructure, ICoopStructure
 	{
 		
 		private void Awake()
@@ -284,13 +284,26 @@ namespace TheForest.Buildings.Creation
 				this._raftRoot = new GameObject("RaftRootBuilt").transform;
 				this._raftRoot.position = this._multiPointsPositions[0];
 				this.SpawnFloor();
-				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.<>f__this._logItemId);
+				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.$this._logItemId);
 				List<GameObject> logStacks = new List<GameObject>();
-				foreach (object obj in this._raftRoot)
+				IEnumerator enumerator = this._raftRoot.GetEnumerator();
+				try
 				{
-					Transform logStack = (Transform)obj;
-					logStack.gameObject.SetActive(false);
-					logStacks.Add(logStack.gameObject);
+					while (enumerator.MoveNext())
+					{
+						object obj = enumerator.Current;
+						Transform transform2 = (Transform)obj;
+						transform2.gameObject.SetActive(false);
+						logStacks.Add(transform2.gameObject);
+					}
+				}
+				finally
+				{
+					IDisposable disposable;
+					if ((disposable = (enumerator as IDisposable)) != null)
+					{
+						disposable.Dispose();
+					}
 				}
 				if (ri._renderers != null)
 				{
@@ -750,7 +763,7 @@ namespace TheForest.Buildings.Creation
 				transform.rotation = rotation;
 				return transform;
 			}
-			Transform transform2 = (Transform)UnityEngine.Object.Instantiate(this._logPrefab, position, rotation);
+			Transform transform2 = UnityEngine.Object.Instantiate<Transform>(this._logPrefab, position, rotation);
 			if (!this._wasBuilt)
 			{
 				if (!this._wasPlaced)
@@ -890,10 +903,10 @@ namespace TheForest.Buildings.Creation
 		
 		public override void Attached()
 		{
-			if (!this.entity.isOwner)
+			if (!base.entity.isOwner)
 			{
 				IBuildingDestructibleState buildingDestructibleState;
-				if (this.entity.TryFindState<IBuildingDestructibleState>(out buildingDestructibleState))
+				if (base.entity.TryFindState<IBuildingDestructibleState>(out buildingDestructibleState))
 				{
 					buildingDestructibleState.AddCallback("Token", new PropertyCallbackSimple(this.OnTokenUpdated));
 				}
@@ -919,7 +932,7 @@ namespace TheForest.Buildings.Creation
 		private void OnTokenUpdated()
 		{
 			IBuildingDestructibleState buildingDestructibleState;
-			if (this.entity.TryFindState<IBuildingDestructibleState>(out buildingDestructibleState))
+			if (base.entity.TryFindState<IBuildingDestructibleState>(out buildingDestructibleState))
 			{
 				this.CustomToken = buildingDestructibleState.Token;
 			}

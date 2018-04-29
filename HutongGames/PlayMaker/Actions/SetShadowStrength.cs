@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the strength of the shadows cast by a Light.")]
 	[ActionCategory(ActionCategory.Lights)]
+	[Tooltip("Sets the strength of the shadows cast by a Light.")]
 	public class SetShadowStrength : ComponentAction<Light>
 	{
 		

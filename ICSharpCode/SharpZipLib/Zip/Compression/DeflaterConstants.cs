@@ -60,6 +60,9 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 		public const int PENDING_BUF_SIZE = 65536;
 
 		
+		public static int MAX_BLOCK_SIZE = Math.Min(65535, 65531);
+
+		
 		public const int DEFLATE_STORED = 0;
 
 		
@@ -67,9 +70,6 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 
 		
 		public const int DEFLATE_SLOW = 2;
-
-		
-		public static int MAX_BLOCK_SIZE = Math.Min(65535, 65531);
 
 		
 		public static int[] GOOD_LENGTH = new int[]

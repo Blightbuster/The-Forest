@@ -33,7 +33,7 @@ namespace Pathfinding
 			if (Physics.Raycast(ray, out raycastHit, float.PositiveInfinity))
 			{
 				Vector3 point = raycastHit.point;
-				GameObject gameObject = (GameObject)UnityEngine.Object.Instantiate(this.go, point, Quaternion.identity);
+				GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.go, point, Quaternion.identity);
 				if (this.issueGUOs)
 				{
 					Bounds bounds = gameObject.GetComponent<Collider>().bounds;

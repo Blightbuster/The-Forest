@@ -4,8 +4,8 @@ using UnityEngine;
 namespace Pathfinding.RVO
 {
 	
-	[HelpURL("http:
 	[AddComponentMenu("Pathfinding/Local Avoidance/RVO Controller")]
+	[HelpURL("http:
 	public class RVOController : MonoBehaviour
 	{
 		

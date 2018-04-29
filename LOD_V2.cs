@@ -144,17 +144,23 @@ public class LOD_V2 : MonoBehaviour
 		this.ToggleComponents(this.High, false);
 		this.ToggleComponents(this.Mid, false);
 		this.ToggleComponents(this.Low, false);
-		switch (lod)
+		if (lod != 0)
 		{
-		case 0:
+			if (lod != 1)
+			{
+				if (lod == 2)
+				{
+					this.ToggleComponents(this.Low, true);
+				}
+			}
+			else
+			{
+				this.ToggleComponents(this.Mid, true);
+			}
+		}
+		else
+		{
 			this.ToggleComponents(this.High, true);
-			break;
-		case 1:
-			this.ToggleComponents(this.Mid, true);
-			break;
-		case 2:
-			this.ToggleComponents(this.Low, true);
-			break;
 		}
 		this.currentLOD = lod;
 	}

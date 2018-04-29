@@ -4,12 +4,12 @@ using Serialization;
 using UnityEngine;
 
 
-[Serializer(typeof(AudioClip))]
-[Serializer(typeof(AnimationClip))]
-[Serializer(typeof(Font))]
-[SubTypeSerializer(typeof(Mesh))]
-[Serializer(typeof(TextAsset))]
 [SubTypeSerializer(typeof(Texture))]
+[Serializer(typeof(Font))]
+[Serializer(typeof(AudioClip))]
+[Serializer(typeof(TextAsset))]
+[SubTypeSerializer(typeof(Mesh))]
+[Serializer(typeof(AnimationClip))]
 public class SerializeAssetReference : SerializerExtensionBase<object>
 {
 	

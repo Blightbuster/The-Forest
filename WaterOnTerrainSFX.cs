@@ -462,6 +462,15 @@ public class WaterOnTerrainSFX : MonoBehaviour
 	}
 
 	
+	public static float Wetness = 0f;
+
+	
+	public int targetSourceCount = 3;
+
+	
+	public float sourceSpeed = 50f;
+
+	
 	private const int MAXIMUM_GRID_DISTANCE = 10;
 
 	
@@ -475,24 +484,6 @@ public class WaterOnTerrainSFX : MonoBehaviour
 
 	
 	private const float MAXIMUM_GRADIENT = 60f;
-
-	
-	private const float MAXIMUM_SCORE_RATIO = 5f;
-
-	
-	private const int SOURCE_EFFECT_RADIUS = 5;
-
-	
-	private const float SOURCE_EFFECT_AMOUNT = 0.1f;
-
-	
-	public static float Wetness = 0f;
-
-	
-	public int targetSourceCount = 3;
-
-	
-	public float sourceSpeed = 50f;
 
 	
 	private static readonly WaterOnTerrainSFX.IntVector SAMPLE_GRID_CENTRE = new WaterOnTerrainSFX.IntVector(10, 10);
@@ -525,6 +516,9 @@ public class WaterOnTerrainSFX : MonoBehaviour
 	private float gridCellSize = 10f;
 
 	
+	private const float MAXIMUM_SCORE_RATIO = 5f;
+
+	
 	private float maximumScore;
 
 	
@@ -539,6 +533,12 @@ public class WaterOnTerrainSFX : MonoBehaviour
 		new WaterOnTerrainSFX.IntVector(0, 1),
 		new WaterOnTerrainSFX.IntVector(1, 1)
 	};
+
+	
+	private const int SOURCE_EFFECT_RADIUS = 5;
+
+	
+	private const float SOURCE_EFFECT_AMOUNT = 0.1f;
 
 	
 	private static Texture2D cellTexture = null;
@@ -557,26 +557,6 @@ public class WaterOnTerrainSFX : MonoBehaviour
 		{
 			this.x = x;
 			this.y = y;
-		}
-
-		
-		
-		public int squareMagnitude
-		{
-			get
-			{
-				return this.x * this.x + this.y * this.y;
-			}
-		}
-
-		
-		
-		public float magnitude
-		{
-			get
-			{
-				return Mathf.Sqrt((float)this.squareMagnitude);
-			}
 		}
 
 		
@@ -607,6 +587,26 @@ public class WaterOnTerrainSFX : MonoBehaviour
 		public static WaterOnTerrainSFX.IntVector operator +(WaterOnTerrainSFX.IntVector a, WaterOnTerrainSFX.IntVector b)
 		{
 			return new WaterOnTerrainSFX.IntVector(a.x + b.x, a.y + b.y);
+		}
+
+		
+		
+		public int squareMagnitude
+		{
+			get
+			{
+				return this.x * this.x + this.y * this.y;
+			}
+		}
+
+		
+		
+		public float magnitude
+		{
+			get
+			{
+				return Mathf.Sqrt((float)this.squareMagnitude);
+			}
 		}
 
 		

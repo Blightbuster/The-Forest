@@ -34,44 +34,46 @@ public class CoopRaftPusher2 : EntityBehaviour<IRaftState>
 				this.forcePlayerExit();
 			}
 		}
-		if (this.enteredTransform)
+		if (this.enteredTransform && LocalPlayer.AnimControl && !LocalPlayer.AnimControl.swimming && !Grabber.IsFocused && !this.IsUpsideDown)
 		{
 			if (BoltNetwork.isRunning)
 			{
 				if (base.state.GrabbedBy.Any((BoltEntity g) => g))
 				{
-					goto IL_1A6;
+					goto IL_1B8;
 				}
 			}
-			if (!LocalPlayer.AnimControl.swimming)
+			if (!this.billboardIconPush.activeSelf)
 			{
-				if (!this.billboardIcon.activeSelf)
-				{
-					this.billboardIcon.SetActive(true);
-				}
-				if (TheForest.Utils.Input.GetButtonDown("Take"))
-				{
-					Vector3 vector = this.raftMainTransform.position - this.enteredTransform.position;
-					if (BoltNetwork.isRunning)
-					{
-						PushRaft pushRaft = global::PushRaft.Create(GlobalTargets.OnlyServer);
-						pushRaft.Direction = vector;
-						pushRaft.Raft = this.entity;
-						pushRaft.Send();
-					}
-					else
-					{
-						this.PushRaft(vector);
-					}
-				}
-				return;
+				this.billboardIconPush.SetActive(true);
 			}
+			if (TheForest.Utils.Input.GetButtonDown("Take"))
+			{
+				if (BoltNetwork.isRunning)
+				{
+					PushRaft pushRaft = global::PushRaft.Create(GlobalTargets.OnlyServer);
+					pushRaft.Direction = this.GetPushDirection();
+					pushRaft.Raft = base.entity;
+					pushRaft.Send();
+				}
+				else
+				{
+					this.PushRaft(this.GetPushDirection());
+				}
+			}
+			return;
 		}
-		IL_1A6:
-		if (this.billboardIcon.activeSelf)
+		IL_1B8:
+		if (this.billboardIconPush.activeSelf)
 		{
-			this.billboardIcon.SetActive(false);
+			this.billboardIconPush.SetActive(false);
 		}
+	}
+
+	
+	private Vector3 GetPushDirection()
+	{
+		return this.raftMainTransform.position - this.enteredTransform.position;
 	}
 
 	
@@ -83,7 +85,7 @@ public class CoopRaftPusher2 : EntityBehaviour<IRaftState>
 			{
 				this.enteredTransform = collider.transform;
 				this.enteredCollider = collider;
-				this.billboardIcon.transform.position = Vector3.Lerp(base.transform.position, collider.transform.position, this.iconPositionAlpha);
+				this.billboardIconPush.transform.position = Vector3.Lerp(base.transform.position, collider.transform.position, this.iconPositionAlpha);
 			}
 			if ((collider.gameObject.CompareTag("Player") || collider.gameObject.CompareTag("PlayerNet")) && !BoltNetwork.isClient && ++this.playersClose > 0)
 			{
@@ -101,7 +103,7 @@ public class CoopRaftPusher2 : EntityBehaviour<IRaftState>
 			{
 				this.enteredTransform = null;
 				this.enteredCollider = null;
-				this.billboardIcon.SetActive(false);
+				this.billboardIconPush.SetActive(false);
 			}
 			if ((collider.gameObject.CompareTag("Player") || collider.gameObject.CompareTag("PlayerNet")) && !BoltNetwork.isClient && --this.playersClose < 1)
 			{
@@ -115,7 +117,7 @@ public class CoopRaftPusher2 : EntityBehaviour<IRaftState>
 	{
 		this.enteredTransform = null;
 		this.enteredCollider = null;
-		this.billboardIcon.SetActive(false);
+		this.billboardIconPush.SetActive(false);
 		if (!BoltNetwork.isClient && --this.playersClose < 1)
 		{
 			this.raftMainBody.constraints = RigidbodyConstraints.None;
@@ -125,17 +127,47 @@ public class CoopRaftPusher2 : EntityBehaviour<IRaftState>
 	
 	public void PushRaft(Vector3 worldDirection)
 	{
-		this.raftMainBody.constraints = RigidbodyConstraints.None;
-		if (BoltNetwork.isRunning && this.entity.isAttached)
+		if (this.IsRaftGrabbed)
 		{
-			if (base.state.GrabbedBy.Any((BoltEntity g) => g))
-			{
-				return;
-			}
+			return;
 		}
+		this.raftMainBody.constraints = RigidbodyConstraints.None;
 		this.raftMainBody.AddForce(worldDirection.normalized * this.pushForce * (0.016666f / Time.fixedDeltaTime), this.pushForceMode);
-		bool onWater = base.GetComponentInParent<Buoyancy>() != null && base.GetComponentInParent<Buoyancy>().InWater;
-		LocalPlayer.Sfx.PlayPushRaft(onWater, base.gameObject);
+		Buoyancy componentInParent = base.GetComponentInParent<Buoyancy>();
+		bool onWater = componentInParent != null && componentInParent.InWater;
+		if (LocalPlayer.Transform)
+		{
+			LocalPlayer.Sfx.PlayPushRaft(onWater, base.gameObject);
+		}
+	}
+
+	
+	
+	private bool IsRaftGrabbed
+	{
+		get
+		{
+			bool result;
+			if (BoltNetwork.isRunning && base.entity.isAttached)
+			{
+				result = base.state.GrabbedBy.Any((BoltEntity g) => g);
+			}
+			else
+			{
+				result = false;
+			}
+			return result;
+		}
+	}
+
+	
+	
+	private bool IsUpsideDown
+	{
+		get
+		{
+			return Vector3.Angle(this.raftMainTransform.transform.up, Vector3.up) > 90f;
+		}
 	}
 
 	
@@ -149,7 +181,7 @@ public class CoopRaftPusher2 : EntityBehaviour<IRaftState>
 
 	
 	[SerializeField]
-	private GameObject billboardIcon;
+	private GameObject billboardIconPush;
 
 	
 	[SerializeField]

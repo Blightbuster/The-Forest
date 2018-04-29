@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Get the current resolution")]
 	[ActionCategory(ActionCategory.Application)]
+	[Tooltip("Get the current resolution")]
 	public class GetCurrentResolution : FsmStateAction
 	{
 		
@@ -33,13 +33,13 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat width;
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("The current resolution height")]
+		[UIHint(UIHint.Variable)]
 		public FsmFloat height;
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("The current resolution refrehs rate")]
+		[UIHint(UIHint.Variable)]
 		public FsmFloat refreshRate;
 
 		

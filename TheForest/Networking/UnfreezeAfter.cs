@@ -10,7 +10,7 @@ namespace TheForest.Networking
 		
 		private void Update()
 		{
-			if (!this.frozenOnce && this.entity.isAttached && this.entity.isFrozen)
+			if (!this.frozenOnce && base.entity.isAttached && base.entity.isFrozen)
 			{
 				this.frozenOnce = true;
 				Debug.Log("Hell gate first frozen on at " + Time.realtimeSinceStartup + "s");
@@ -20,7 +20,7 @@ namespace TheForest.Networking
 		
 		public override void Attached()
 		{
-			if (this.entity.isOwner)
+			if (base.entity.isOwner)
 			{
 				base.Invoke("Unfreeze", this._delay);
 			}
@@ -30,7 +30,7 @@ namespace TheForest.Networking
 		private void Unfreeze()
 		{
 			Debug.Log("Unfreezing (" + Time.realtimeSinceStartup + "s)");
-			this.entity.Freeze(false);
+			base.entity.Freeze(false);
 		}
 
 		

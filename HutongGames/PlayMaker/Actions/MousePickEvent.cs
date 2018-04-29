@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sends Events based on mouse interactions with a Game Object: MouseOver, MouseDown, MouseUp, MouseOff. Use Ray Distance to set how close the camera must be to pick the object.")]
 	[ActionCategory(ActionCategory.Input)]
+	[Tooltip("Sends Events based on mouse interactions with a Game Object: MouseOver, MouseDown, MouseUp, MouseOff. Use Ray Distance to set how close the camera must be to pick the object.")]
 	public class MousePickEvent : FsmStateAction
 	{
 		
@@ -104,8 +104,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmEvent mouseOff;
 
 		
-		[UIHint(UIHint.Layer)]
 		[Tooltip("Pick only from these layers.")]
+		[UIHint(UIHint.Layer)]
 		public FsmInt[] layerMask;
 
 		

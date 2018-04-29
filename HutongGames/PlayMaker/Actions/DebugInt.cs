@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Logs the value of an Integer Variable in the PlayMaker Log Window.")]
 	[ActionCategory(ActionCategory.Debug)]
+	[Tooltip("Logs the value of an Integer Variable in the PlayMaker Log Window.")]
 	public class DebugInt : FsmStateAction
 	{
 		

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections;
+using TheForest.Items.Inventory;
+using TheForest.Utils;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 [Serializable]
@@ -9,21 +12,17 @@ public class CaveData
 	
 	public GameObject GetLoadedSceneRoot()
 	{
-		if (!this.LoadedCaveGo)
-		{
-			this.LoadedCaveGo = GameObject.Find(this.RootName);
-		}
 		return this.LoadedCaveGo;
 	}
 
 	
 	public void Unload()
 	{
-		if (this.LoadedCaveGo)
+		if (this.LoadedCaveGo && this.Async == null)
 		{
-			UnityEngine.Object.Destroy(this.LoadedCaveGo);
+			SceneManager.sceneUnloaded += this.SceneManager_sceneUnloaded;
+			this.Async = SceneManager.UnloadSceneAsync(this.SceneName);
 		}
-		this.Async = null;
 	}
 
 	
@@ -32,20 +31,56 @@ public class CaveData
 		if (!this.LoadedOrLoading && !this.GetLoadedSceneRoot())
 		{
 			this.Loading = true;
-			this.Async = Application.LoadLevelAdditiveAsync(this.SceneName);
-			yield return this.Async;
-			if (this.Async != null)
+			SceneManager.sceneLoaded += this.SceneManager_sceneLoaded;
+			this.Async = SceneManager.LoadSceneAsync(this.SceneName, LoadSceneMode.Additive);
+			if (LocalPlayer.Inventory && LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Loading && !TheForest.Utils.Scene.HudGui.LoadingCavesInfo.activeSelf)
 			{
-				this.Async = null;
-				this.LoadedCaveGo = GameObject.Find(this.RootName);
-				if (this.LoadedCaveGo)
+				TheForest.Utils.Scene.HudGui.LoadingCavesInfo.SetActive(true);
+				TheForest.Utils.Scene.HudGui.LoadingCavesFill.fillAmount = 0.1f;
+				while (this.Async != null && !this.Async.isDone)
 				{
-					Debug.Log(this.LoadedCaveGo + " loading complete");
+					TheForest.Utils.Scene.HudGui.LoadingCavesFill.fillAmount = Mathf.Max(0.1f, this.Async.progress / 2f);
+					yield return null;
 				}
+				yield return null;
+				TheForest.Utils.Scene.HudGui.LoadingCavesInfo.SetActive(false);
+				TheForest.Utils.Scene.HudGui.Grid.repositionNow = true;
 			}
-			this.Loading = false;
+			yield break;
 		}
 		yield break;
+	}
+
+	
+	private void SceneManager_sceneLoaded(UnityEngine.SceneManagement.Scene arg0, LoadSceneMode arg1)
+	{
+		if (arg0.name == this.SceneName)
+		{
+			SceneManager.sceneLoaded -= this.SceneManager_sceneLoaded;
+			if (arg0.rootCount == 1)
+			{
+				this.LoadedCaveGo = arg0.GetRootGameObjects()[0];
+			}
+			else
+			{
+				Debug.Log("More than one root object in cave scene: " + this.SceneName);
+				this.LoadedCaveGo = GameObject.Find(this.RootName);
+			}
+			this.Loading = false;
+			this.Async = null;
+		}
+	}
+
+	
+	private void SceneManager_sceneUnloaded(UnityEngine.SceneManagement.Scene arg0)
+	{
+		if (arg0.name == this.SceneName)
+		{
+			SceneManager.sceneUnloaded -= this.SceneManager_sceneUnloaded;
+			this.LoadedCaveGo = null;
+			this.Loading = false;
+			this.Async = null;
+		}
 	}
 
 	
@@ -72,4 +107,7 @@ public class CaveData
 
 	
 	public bool Loading;
+
+	
+	public bool AllowInEndgame;
 }

@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Add an key/value pair to a PlayMaker HashTable Proxy component (PlayMakerHashTableProxy).")]
 	[ActionCategory("ArrayMaker/HashTable")]
+	[Tooltip("Add an key/value pair to a PlayMaker HashTable Proxy component (PlayMakerHashTableProxy).")]
 	public class HashTableAdd : HashTableActions
 	{
 		
@@ -48,9 +48,9 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[ActionSection("Set up")]
-		[CheckForComponent(typeof(PlayMakerHashTableProxy))]
-		[Tooltip("The gameObject with the PlayMaker HashTable Proxy component")]
 		[RequiredField]
+		[Tooltip("The gameObject with the PlayMaker HashTable Proxy component")]
+		[CheckForComponent(typeof(PlayMakerHashTableProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -58,21 +58,21 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString reference;
 
 		
-		[Tooltip("The Key value for that hash set")]
+		[ActionSection("Data")]
 		[RequiredField]
 		[UIHint(UIHint.FsmString)]
-		[ActionSection("Data")]
+		[Tooltip("The Key value for that hash set")]
 		public FsmString key;
 
 		
-		[Tooltip("The variable to add.")]
 		[RequiredField]
+		[Tooltip("The variable to add.")]
 		public FsmVar variable;
 
 		
-		[Tooltip("The event to trigger when element is added")]
 		[ActionSection("Result")]
 		[UIHint(UIHint.FsmEvent)]
+		[Tooltip("The event to trigger when element is added")]
 		public FsmEvent successEvent;
 
 		

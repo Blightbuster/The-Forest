@@ -18,5 +18,8 @@ namespace TheForest.Utils
 
 		
 		public ActionElementMap _actionElementMap;
+
+		
+		public UIKeyNavigation _UiKeyNavigation;
 	}
 }

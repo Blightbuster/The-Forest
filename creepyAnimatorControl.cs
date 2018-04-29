@@ -73,6 +73,11 @@ public class creepyAnimatorControl : MonoBehaviour
 		this.ai.girlFullyTransformed = true;
 		this.ai.animSpeed = 1.2f;
 		this.animator.speed = 1.2f;
+		this.ast = base.transform.parent.GetComponentInChildren<arrowStickToTarget>();
+		if (this.ast)
+		{
+			this.ast.enabled = true;
+		}
 		if (LocalPlayer.Stats)
 		{
 			LocalPlayer.Stats.IsFightingBoss = true;
@@ -323,7 +328,7 @@ public class creepyAnimatorControl : MonoBehaviour
 			Vector3 position = this.setup.search.worldPositionTr.position;
 			position.y = this.terrainPosY;
 			this.setup.search.worldPositionTr.position = position + wantedDir * this.offScreenSpeed * Time.deltaTime;
-			if (!BoltNetwork.isRunning)
+			if (!BoltNetwork.isRunning && (this.setup.vis.animReduced || this.setup.vis.animDisabled))
 			{
 				if (Time.time > this.offScreenUpdateTimer)
 				{
@@ -445,6 +450,9 @@ public class creepyAnimatorControl : MonoBehaviour
 
 	
 	private creepyAnimEvents events;
+
+	
+	private arrowStickToTarget ast;
 
 	
 	public RuntimeAnimatorController runTimeController;

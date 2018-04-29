@@ -24,7 +24,7 @@ public class DamageCorpse : EntityBehaviour
 		{
 			return;
 		}
-		UnityEngine.Object.Destroy(UnityEngine.Object.Instantiate(this.BloodSplat, base.transform.position, Quaternion.identity), 0.5f);
+		UnityEngine.Object.Destroy(UnityEngine.Object.Instantiate<GameObject>(this.BloodSplat, base.transform.position, Quaternion.identity), 0.5f);
 		this.MyGore.SetActive(true);
 		if (this.MyGoreSkinny)
 		{
@@ -63,14 +63,14 @@ public class DamageCorpse : EntityBehaviour
 		{
 			LocalPlayer.Stats.BloodInfection.TryGetInfected();
 		}
-		if (this.entity.IsAttached())
+		if (base.entity.IsAttached())
 		{
 			HitCorpse hitCorpse = HitCorpse.Create(GlobalTargets.OnlyServer);
-			hitCorpse.Entity = this.entity;
+			hitCorpse.Entity = base.entity;
 			hitCorpse.Damage = damage;
 			hitCorpse.BodyPartIndex = base.GetComponentInParent<CoopSliceAndDiceMutant>().GetBodyPartIndex(this);
 			hitCorpse.Send();
-			if (!this.entity.isOwner)
+			if (!base.entity.isOwner)
 			{
 				this.DoLocalCut(this.Health - damage);
 			}
@@ -128,11 +128,11 @@ public class DamageCorpse : EntityBehaviour
 			{
 				if (flag)
 				{
-					gameObject = (UnityEngine.Object.Instantiate(this.spawnSkinny, position, rotation) as GameObject);
+					gameObject = UnityEngine.Object.Instantiate<GameObject>(this.spawnSkinny, position, rotation);
 				}
 				else
 				{
-					gameObject = (UnityEngine.Object.Instantiate(this.spawnRegular, position, rotation) as GameObject);
+					gameObject = UnityEngine.Object.Instantiate<GameObject>(this.spawnRegular, position, rotation);
 				}
 				if (component && component._type == EnemyType.paleMale)
 				{
@@ -176,7 +176,7 @@ public class DamageCorpse : EntityBehaviour
 		}
 		if (BoltNetwork.isClient && this.storePrefab && this.instantiateCutPrefab)
 		{
-			GameObject gameObject2 = UnityEngine.Object.Instantiate(this.storePrefab, position, base.transform.rotation) as GameObject;
+			GameObject gameObject2 = UnityEngine.Object.Instantiate<GameObject>(this.storePrefab, position, base.transform.rotation);
 			storeLocalMutantInfo2 component3 = gameObject2.GetComponent<storeLocalMutantInfo2>();
 			Scene.SceneTracker.storedRagDollPrefabs.Add(gameObject2);
 			component3.mat = this.sourceMat;
@@ -207,24 +207,37 @@ public class DamageCorpse : EntityBehaviour
 		SkinnedMeshRenderer component5 = this.MyPart.GetComponent<SkinnedMeshRenderer>();
 		foreach (Transform transform in component5.bones)
 		{
-			foreach (object obj in transform)
+			IEnumerator enumerator = transform.GetEnumerator();
+			try
 			{
-				Transform transform2 = (Transform)obj;
-				if (transform2.GetComponent<arrowTrajectory>())
+				while (enumerator.MoveNext())
 				{
-					transform2.parent = null;
-					Rigidbody component6 = transform2.GetComponent<Rigidbody>();
-					if (component6)
+					object obj = enumerator.Current;
+					Transform transform2 = (Transform)obj;
+					if (transform2.GetComponent<arrowTrajectory>())
 					{
-						component6.isKinematic = false;
-						component6.useGravity = true;
+						transform2.parent = null;
+						Rigidbody component6 = transform2.GetComponent<Rigidbody>();
+						if (component6)
+						{
+							component6.isKinematic = false;
+							component6.useGravity = true;
+						}
+						Collider component7 = transform2.GetComponent<Collider>();
+						if (component7)
+						{
+							component7.isTrigger = false;
+							component7.enabled = true;
+						}
 					}
-					Collider component7 = transform2.GetComponent<Collider>();
-					if (component7)
-					{
-						component7.isTrigger = false;
-						component7.enabled = true;
-					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
 				}
 			}
 		}
@@ -273,10 +286,10 @@ public class DamageCorpse : EntityBehaviour
 		MeshRenderer r = null;
 		if (go)
 		{
-			getMesh gm = go.GetComponentInChildren<getMesh>();
-			if (gm)
+			getMesh componentInChildren = go.GetComponentInChildren<getMesh>();
+			if (componentInChildren)
 			{
-				r = gm.transform.GetComponent<MeshRenderer>();
+				r = componentInChildren.transform.GetComponent<MeshRenderer>();
 			}
 		}
 		if (r)
@@ -338,24 +351,24 @@ public class DamageCorpse : EntityBehaviour
 		}
 		else
 		{
-			MeshRenderer mr2 = source.GetComponent<MeshRenderer>();
-			if (mr2)
+			MeshRenderer component = source.GetComponent<MeshRenderer>();
+			if (component)
 			{
-				this.sourceMat = mr2.material;
+				this.sourceMat = component.material;
 			}
-			SkinnedMeshRenderer sm2 = source.GetComponent<SkinnedMeshRenderer>();
-			if (sm2)
+			SkinnedMeshRenderer component2 = source.GetComponent<SkinnedMeshRenderer>();
+			if (component2)
 			{
-				this.sourceMat = sm2.material;
+				this.sourceMat = component2.material;
 			}
-			MaterialPropertyBlock sourceBlock2 = new MaterialPropertyBlock();
+			MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
 			if (this.propManager)
 			{
-				sourceBlock2 = this.propManager.bloodPropertyBlock;
+				materialPropertyBlock = this.propManager.bloodPropertyBlock;
 			}
 			else if (this.setupManager)
 			{
-				sourceBlock2 = this.setupManager.bloodPropertyBlock;
+				materialPropertyBlock = this.setupManager.bloodPropertyBlock;
 			}
 		}
 		yield return null;

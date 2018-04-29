@@ -5,8 +5,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Concat joins two or more arrayList proxy components. if a target is specified, the method use the target store the concatenation, else the ")]
 	[ActionCategory("ArrayMaker/ArrayList")]
+	[Tooltip("Concat joins two or more arrayList proxy components. if a target is specified, the method use the target store the concatenation, else the ")]
 	public class ArrayListConcat : ArrayListActions
 	{
 		
@@ -39,10 +39,23 @@ namespace HutongGames.PlayMaker.Actions
 			{
 				if (base.SetUpArrayListProxyPointer(base.Fsm.GetOwnerDefaultTarget(this.arrayListGameObjectTargets[i]), this.referenceTargets[i].Value) && base.isProxyValid())
 				{
-					foreach (object value in this.proxy.arrayList)
+					IEnumerator enumerator = this.proxy.arrayList.GetEnumerator();
+					try
 					{
-						source.Add(value);
-						Debug.Log("count " + source.Count);
+						while (enumerator.MoveNext())
+						{
+							object value = enumerator.Current;
+							source.Add(value);
+							Debug.Log("count " + source.Count);
+						}
+					}
+					finally
+					{
+						IDisposable disposable;
+						if ((disposable = (enumerator as IDisposable)) != null)
+						{
+							disposable.Dispose();
+						}
 					}
 				}
 			}
@@ -50,8 +63,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[ActionSection("Storage")]
-		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
 		[RequiredField]
+		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
 		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 
@@ -60,11 +73,11 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString reference;
 
 		
-		[ObjectType(typeof(PlayMakerArrayListProxy))]
 		[ActionSection("ArrayLists to concatenate")]
 		[CompoundArray("ArrayLists", "ArrayList GameObject", "Reference")]
 		[RequiredField]
 		[Tooltip("The GameObject with the PlayMaker ArrayList Proxy component to copy to")]
+		[ObjectType(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault[] arrayListGameObjectTargets;
 
 		

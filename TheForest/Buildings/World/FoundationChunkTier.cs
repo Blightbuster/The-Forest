@@ -1,10 +1,8 @@
 ﻿using System;
 using Bolt;
-using ModAPI;
 using TheForest.Buildings.Creation;
 using TheForest.Utils;
 using TheForest.World;
-using UltimateCheatmenu;
 using UnityEngine;
 
 namespace TheForest.Buildings.World
@@ -41,7 +39,7 @@ namespace TheForest.Buildings.World
 		}
 
 		
-		public void __LocalizedHit__Original(LocalizedHitData data)
+		public void LocalizedHit(LocalizedHitData data)
 		{
 			if (!PlayerPreferences.NoDestruction)
 			{
@@ -93,20 +91,6 @@ namespace TheForest.Buildings.World
 				{
 					this.OnWillDestroy(position);
 				}
-			}
-		}
-
-		
-		public void LocalizedHit(LocalizedHitData data)
-		{
-			try
-			{
-				this.__LocalizedHit__Original(DestroyBuildings.GetLocalizedHitData(data));
-			}
-			catch (Exception ex)
-			{
-				Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-				this.__LocalizedHit__Original(data);
 			}
 		}
 

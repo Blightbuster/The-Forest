@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace HutongGames.PlayMaker.Actions
 {
@@ -55,11 +56,11 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Animator))]
-		[Tooltip("The Agent target. An Animator component and a PlayMakerAnimatorMoveProxy component are required")]
-		[CheckForComponent(typeof(PlayMakerAnimatorMoveProxy))]
 		[RequiredField]
 		[CheckForComponent(typeof(NavMeshAgent))]
+		[CheckForComponent(typeof(Animator))]
+		[CheckForComponent(typeof(PlayMakerAnimatorMoveProxy))]
+		[Tooltip("The Agent target. An Animator component and a PlayMakerAnimatorMoveProxy component are required")]
 		public FsmOwnerDefault gameObject;
 
 		

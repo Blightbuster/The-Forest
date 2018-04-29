@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the Intensity of a Light.")]
 	[ActionCategory(ActionCategory.Lights)]
+	[Tooltip("Sets the Intensity of a Light.")]
 	public class SetLightIntensity : ComponentAction<Light>
 	{
 		

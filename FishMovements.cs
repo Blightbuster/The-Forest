@@ -18,8 +18,8 @@ public class FishMovements : MonoBehaviour
 		if (Vector3.Distance(base.transform.position, this.rndShift) > 0.1f)
 		{
 			base.transform.position = Vector3.MoveTowards(base.transform.position, this.rndShift, Time.deltaTime);
-			Quaternion to = Quaternion.LookRotation(this.rndShift - base.transform.position);
-			base.transform.rotation = Quaternion.Lerp(base.transform.rotation, to, Time.deltaTime);
+			Quaternion b = Quaternion.LookRotation(this.rndShift - base.transform.position);
+			base.transform.rotation = Quaternion.Lerp(base.transform.rotation, b, Time.deltaTime);
 		}
 		else
 		{

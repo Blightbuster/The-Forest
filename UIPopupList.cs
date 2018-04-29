@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-[AddComponentMenu("NGUI/Interaction/Popup List")]
 [ExecuteInEditMode]
+[AddComponentMenu("NGUI/Interaction/Popup List")]
 public class UIPopupList : UIWidgetContainer
 {
 	
@@ -711,7 +711,12 @@ public class UIPopupList : UIWidgetContainer
 				uilabel.trueTypeFont = this.trueTypeFont;
 				uilabel.fontSize = this.fontSize;
 				uilabel.fontStyle = this.fontStyle;
-				uilabel.text = ((!this.isLocalized) ? text : Localization.Get(text));
+				string text2 = (!this.isLocalized) ? text : Localization.Get(text);
+				if (this.toUpper)
+				{
+					text2 = text2.ToUpper();
+				}
+				uilabel.text = text2;
 				uilabel.color = this.textColor;
 				uilabel.cachedTransform.localPosition = new Vector3(border.x + this.padding.x - uilabel.pivotOffset.x, num5, -1f);
 				uilabel.overflowMethod = UILabel.Overflow.ResizeFreely;
@@ -836,9 +841,6 @@ public class UIPopupList : UIWidgetContainer
 	}
 
 	
-	private const float animSpeed = 0.15f;
-
-	
 	public static UIPopupList current;
 
 	
@@ -846,6 +848,9 @@ public class UIPopupList : UIWidgetContainer
 
 	
 	private static float mFadeOutComplete;
+
+	
+	private const float animSpeed = 0.15f;
 
 	
 	public UIAtlas atlas;
@@ -899,29 +904,32 @@ public class UIPopupList : UIWidgetContainer
 	public bool isLocalized;
 
 	
+	public bool toUpper;
+
+	
 	public UIPopupList.OpenOn openOn;
 
 	
 	public List<EventDelegate> onChange = new List<EventDelegate>();
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private string mSelectedItem;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private UIPanel mPanel;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private UISprite mBackground;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private UISprite mHighlight;
 
 	
@@ -930,13 +938,13 @@ public class UIPopupList : UIWidgetContainer
 	private UILabel mHighlightedLabel;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private List<UILabel> mLabelList = new List<UILabel>();
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private float mBgBorder;
 
 	
@@ -958,8 +966,8 @@ public class UIPopupList : UIWidgetContainer
 	private string functionName = "OnSelectionChange";
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private float textScale;
 
 	
@@ -968,8 +976,8 @@ public class UIPopupList : UIWidgetContainer
 	private UIFont font;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private UILabel textLabel;
 
 	

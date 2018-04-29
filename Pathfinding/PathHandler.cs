@@ -123,15 +123,6 @@ namespace Pathfinding
 		}
 
 		
-		private const int BucketSizeLog2 = 10;
-
-		
-		private const int BucketSize = 1024;
-
-		
-		private const int BucketIndexMask = 1023;
-
-		
 		private ushort pathID;
 
 		
@@ -142,6 +133,15 @@ namespace Pathfinding
 
 		
 		public readonly BinaryHeap heap = new BinaryHeap(128);
+
+		
+		private const int BucketSizeLog2 = 10;
+
+		
+		private const int BucketSize = 1024;
+
+		
+		private const int BucketIndexMask = 1023;
 
 		
 		public PathNode[][] nodes = new PathNode[0][];

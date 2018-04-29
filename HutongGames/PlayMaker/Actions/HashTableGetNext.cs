@@ -5,8 +5,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Each time this action is called it gets the next item from a PlayMaker HashTable Proxy component. \nThis lets you quickly loop through all the children of an object to perform actions on them.\nNOTE: To get to specific item use HashTableGet instead.")]
 	[ActionCategory("ArrayMaker/HashTable")]
+	[Tooltip("Each time this action is called it gets the next item from a PlayMaker HashTable Proxy component. \nThis lets you quickly loop through all the children of an object to perform actions on them.\nNOTE: To get to specific item use HashTableGet instead.")]
 	public class HashTableGetNext : HashTableActions
 	{
 		
@@ -94,10 +94,10 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The gameObject with the PlayMaker HashTable Proxy component")]
-		[CheckForComponent(typeof(PlayMakerHashTableProxy))]
 		[ActionSection("Set up")]
 		[RequiredField]
+		[Tooltip("The gameObject with the PlayMaker HashTable Proxy component")]
+		[CheckForComponent(typeof(PlayMakerHashTableProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -121,8 +121,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmEvent finishedEvent;
 
 		
-		[Tooltip("The event to trigger if the action fails ( likely and index is out of range exception)")]
 		[UIHint(UIHint.FsmEvent)]
+		[Tooltip("The event to trigger if the action fails ( likely and index is out of range exception)")]
 		public FsmEvent failureEvent;
 
 		

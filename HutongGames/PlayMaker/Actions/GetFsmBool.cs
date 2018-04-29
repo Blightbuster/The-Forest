@@ -71,8 +71,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString fsmName;
 
 		
-		[UIHint(UIHint.FsmBool)]
 		[RequiredField]
+		[UIHint(UIHint.FsmBool)]
 		public FsmString variableName;
 
 		

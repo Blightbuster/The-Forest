@@ -31,6 +31,12 @@ namespace TheForest.UI
 		}
 
 		
+		public void SetLobby(CoopLobbyInfo lobby)
+		{
+			this._lobby = lobby;
+		}
+
+		
 		public UILabel _gameName;
 
 		

@@ -153,16 +153,16 @@ public class AnimateTiledTexture : MonoBehaviour
 	
 	private void ApplyOffset()
 	{
-		Vector2 offset = new Vector2((float)this._index / (float)this._columns - (float)(this._index / this._columns), 1f - (float)(this._index / this._columns) / (float)this._rows);
-		if (offset.y == 1f)
+		Vector2 value = new Vector2((float)this._index / (float)this._columns - (float)(this._index / this._columns), 1f - (float)(this._index / this._columns) / (float)this._rows);
+		if (value.y == 1f)
 		{
-			offset.y = 0f;
+			value.y = 0f;
 		}
-		offset.x += (1f / (float)this._columns - this._textureSize.x) / 2f;
-		offset.y += (1f / (float)this._rows - this._textureSize.y) / 2f;
-		offset.x += this._offset.x;
-		offset.y += this._offset.y;
-		base.GetComponent<Renderer>().sharedMaterial.SetTextureOffset("_MainTex", offset);
+		value.x += (1f / (float)this._columns - this._textureSize.x) / 2f;
+		value.y += (1f / (float)this._rows - this._textureSize.y) / 2f;
+		value.x += this._offset.x;
+		value.y += this._offset.y;
+		base.GetComponent<Renderer>().sharedMaterial.SetTextureOffset("_MainTex", value);
 	}
 
 	

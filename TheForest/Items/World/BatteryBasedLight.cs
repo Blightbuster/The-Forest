@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections;
 using Bolt;
-using ModAPI;
 using TheForest.Utils;
-using UltimateCheatmenu;
 using UnityEngine;
 
 namespace TheForest.Items.World
@@ -21,9 +19,9 @@ namespace TheForest.Items.World
 		
 		private void OnEnable()
 		{
-			if (!BoltNetwork.isRunning || (BoltNetwork.isRunning && this.entity && this.entity.isAttached))
+			if (!BoltNetwork.isRunning || (BoltNetwork.isRunning && base.entity && base.entity.isAttached))
 			{
-				if (!BoltNetwork.isRunning || this.entity.isOwner)
+				if (!BoltNetwork.isRunning || base.entity.isOwner)
 				{
 					base.StartCoroutine(this.DelayedLightOn());
 					this._doingStash = false;
@@ -50,9 +48,9 @@ namespace TheForest.Items.World
 		}
 
 		
-		private void __Update__Original()
+		private void Update()
 		{
-			if (!BoltNetwork.isRunning || (BoltNetwork.isRunning && this.entity && this.entity.isAttached && this.entity.isOwner))
+			if (!BoltNetwork.isRunning || (BoltNetwork.isRunning && base.entity && base.entity.isAttached && base.entity.isOwner))
 			{
 				LocalPlayer.Stats.BatteryCharge -= this._batterieCostPerSecond * Time.deltaTime;
 				if (LocalPlayer.Stats.BatteryCharge > 50f)
@@ -213,100 +211,6 @@ namespace TheForest.Items.World
 			}
 			LocalPlayer.Inventory.StashLeftHand();
 			yield break;
-		}
-
-		
-		private void Update()
-		{
-			try
-			{
-				if (!BoltNetwork.isRunning || (BoltNetwork.isRunning && base.entity.isAttached && base.entity.isOwner))
-				{
-					if (UCheatmenu.TorchToggle)
-					{
-						LocalPlayer.Stats.BatteryCharge = 100f;
-						Color color = new Color((float)UCheatmenu.TorchR, (float)UCheatmenu.TorchG, (float)UCheatmenu.TorchB);
-						if (!BoltNetwork.isRunning || (BoltNetwork.isRunning && base.entity.isAttached && base.entity.isOwner))
-						{
-							this.SetIntensity(Convert.ToSingle(UCheatmenu.TorchI));
-							this.SetColor(color);
-							if (BoltNetwork.isRunning)
-							{
-								base.state.BatteryTorchIntensity = UCheatmenu.TorchI;
-								base.state.BatteryTorchEnabled = this._mainLight.enabled;
-								base.state.BatteryTorchColor = color;
-								return;
-							}
-						}
-					}
-					else
-					{
-						Color color2 = new Color(1f, 1f, 1f);
-						this.SetColor(color2);
-						LocalPlayer.Stats.BatteryCharge -= this._batterieCostPerSecond * Time.deltaTime;
-						if (LocalPlayer.Stats.BatteryCharge > 50f)
-						{
-							this.SetIntensity(0.45f);
-						}
-						else if (LocalPlayer.Stats.BatteryCharge < 20f)
-						{
-							if (LocalPlayer.Stats.BatteryCharge < 10f)
-							{
-								if (LocalPlayer.Stats.BatteryCharge < 5f)
-								{
-									if (LocalPlayer.Stats.BatteryCharge < 3f && Time.time > this._animCoolDown && !this._skipNoBatteryRoutine)
-									{
-										LocalPlayer.Animator.SetBool("noBattery", true);
-										this._animCoolDown = Time.time + (float)UnityEngine.Random.Range(30, 60);
-										base.Invoke("resetBatteryBool", 1.5f);
-									}
-									if (LocalPlayer.Stats.BatteryCharge <= 0f)
-									{
-										if (this._skipNoBatteryRoutine)
-										{
-											this.SetEnabled(false);
-										}
-										else
-										{
-											if (!this._doingStash)
-											{
-												base.StartCoroutine("stashNoBatteryRoutine");
-											}
-											this._doingStash = true;
-										}
-									}
-									else
-									{
-										this.TorchLowerLightEvenMore();
-										this.SetEnabled(true);
-									}
-								}
-								else
-								{
-									this.TorchLowerLightMore();
-									this.SetEnabled(true);
-								}
-							}
-							else
-							{
-								this.TorchLowerLight();
-								this.SetEnabled(true);
-							}
-						}
-						if (BoltNetwork.isRunning)
-						{
-							base.state.BatteryTorchIntensity = this._mainLight.intensity;
-							base.state.BatteryTorchEnabled = this._mainLight.enabled;
-							base.state.BatteryTorchColor = this._mainLight.color;
-						}
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-				this.__Update__Original();
-			}
 		}
 
 		

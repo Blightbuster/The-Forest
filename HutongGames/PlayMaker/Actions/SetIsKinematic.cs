@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Controls whether physics affects the Game Object.")]
 	[ActionCategory(ActionCategory.Physics)]
+	[Tooltip("Controls whether physics affects the Game Object.")]
 	public class SetIsKinematic : ComponentAction<Rigidbody>
 	{
 		

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Applies a jolt of force to a GameObject's position and wobbles it back to its initial position.")]
 	[ActionCategory("iTween")]
+	[Tooltip("Applies a jolt of force to a GameObject's position and wobbles it back to its initial position.")]
 	public class iTweenPunchPosition : iTweenFsmAction
 	{
 		

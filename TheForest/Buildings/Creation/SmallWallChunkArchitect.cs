@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using TheForest.Buildings.World;
 using UnityEngine;
 
@@ -55,10 +56,23 @@ namespace TheForest.Buildings.Creation
 					{
 						float num3 = this._logWidth * (float)(this._wallRoot.childCount - 1) + 1.5f;
 						vector = Vector3.zero;
-						foreach (object obj in this._wallRoot)
+						IEnumerator enumerator = this._wallRoot.GetEnumerator();
+						try
 						{
-							Transform transform = (Transform)obj;
-							vector += transform.position;
+							while (enumerator.MoveNext())
+							{
+								object obj = enumerator.Current;
+								Transform transform = (Transform)obj;
+								vector += transform.position;
+							}
+						}
+						finally
+						{
+							IDisposable disposable;
+							if ((disposable = (enumerator as IDisposable)) != null)
+							{
+								disposable.Dispose();
+							}
 						}
 						vector /= (float)this._wallRoot.childCount;
 						vector.y += this.GetHeight() / 2f;

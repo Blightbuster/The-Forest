@@ -12,16 +12,10 @@ using UnityEngine;
 namespace TheForest.Buildings.Creation
 {
 	
-	[DoNotSerializePublic]
 	[AddComponentMenu("Buildings/Creation/Wall Chunk Architect")]
-	public class WallChunkArchitect : EntityBehaviour, IEntityReplicationFilter, IProceduralStructure, IStructureSupport, ICoopStructure
+	[DoNotSerializePublic]
+	public class WallChunkArchitect : EntityBehaviour, IStructureSupport, ICoopStructure, IProceduralStructure, IEntityReplicationFilter
 	{
-		
-		bool IEntityReplicationFilter.AllowReplicationTo(BoltConnection connection)
-		{
-			return this.CurrentSupport == null || connection.ExistsOnRemote((this.CurrentSupport as MonoBehaviour).GetComponent<BoltEntity>()) == ExistsResult.Yes;
-		}
-
 		
 		protected virtual void Awake()
 		{
@@ -91,52 +85,42 @@ namespace TheForest.Buildings.Creation
 						parentStructure = parentStructure.parent;
 						yield return null;
 					}
-					IStructureSupport structureSupport;
-					if (base.transform.parent)
-					{
-						IStructureSupport component = base.transform.parent.GetComponent<IStructureSupport>();
-						structureSupport = component;
-					}
-					else
-					{
-						structureSupport = null;
-					}
-					IStructureSupport support = structureSupport;
+					IStructureSupport support = (!base.transform.parent) ? null : base.transform.parent.GetComponent<IStructureSupport>();
 					if (support != null)
 					{
 						this.CurrentSupport = support;
-						List<Vector3> supportPoints = support.GetMultiPointsPositions(true);
-						if (supportPoints != null && supportPoints.Count > 1)
+						List<Vector3> multiPointsPositions = support.GetMultiPointsPositions(true);
+						if (multiPointsPositions != null && multiPointsPositions.Count > 1)
 						{
-							Vector3 testPos = this._p1;
-							testPos.y = supportPoints[0].y;
-							int p2i = -1;
-							int p1i;
-							for (p1i = 1; p1i < supportPoints.Count; p1i++)
+							Vector3 p = this._p1;
+							p.y = multiPointsPositions[0].y;
+							int num = -1;
+							int i;
+							for (i = 1; i < multiPointsPositions.Count; i++)
 							{
-								Vector3 projection = MathEx.ProjectPointOnLineSegment(supportPoints[p1i], supportPoints[p1i - 1], testPos);
-								float distance = Vector3.Distance(projection, testPos);
-								if (distance < 0.025f)
+								Vector3 a = MathEx.ProjectPointOnLineSegment(multiPointsPositions[i], multiPointsPositions[i - 1], p);
+								float num2 = Vector3.Distance(a, p);
+								if (num2 < 0.025f)
 								{
-									if (Vector3.Dot(supportPoints[p1i] - supportPoints[p1i - 1], base.transform.forward) > 0.98f)
+									if (Vector3.Dot(multiPointsPositions[i] - multiPointsPositions[i - 1], base.transform.forward) > 0.98f)
 									{
-										p2i = p1i - 1;
+										num = i - 1;
 										break;
 									}
-									if (Vector3.Dot(supportPoints[p1i] - supportPoints[(p1i + 1) % supportPoints.Count], base.transform.forward) > 0.98f)
+									if (Vector3.Dot(multiPointsPositions[i] - multiPointsPositions[(i + 1) % multiPointsPositions.Count], base.transform.forward) > 0.98f)
 									{
-										p2i = (p1i - 1) % supportPoints.Count;
+										num = (i - 1) % multiPointsPositions.Count;
 										break;
 									}
 								}
 							}
-							if (p2i > -1)
+							if (num > -1)
 							{
-								Vector3 edge = supportPoints[p1i] - supportPoints[p2i];
-								float edgeLength = Vector3.Scale(edge, new Vector3(1f, 0f, 1f)).magnitude;
-								int chunkCount = Mathf.CeilToInt(edgeLength / this._architect.MaxSegmentHorizontalLength);
-								float chunkLength = edgeLength / (float)chunkCount;
-								this._p2 = this._p1 + base.transform.forward * chunkLength;
+								Vector3 a2 = multiPointsPositions[i] - multiPointsPositions[num];
+								float magnitude = Vector3.Scale(a2, new Vector3(1f, 0f, 1f)).magnitude;
+								int num3 = Mathf.CeilToInt(magnitude / this._architect.MaxSegmentHorizontalLength);
+								float d = magnitude / (float)num3;
+								this._p2 = this._p1 + base.transform.forward * d;
 							}
 						}
 					}
@@ -200,10 +184,9 @@ namespace TheForest.Buildings.Creation
 			{
 				this._craftStructure.GetComponent<Collider>().enabled = false;
 			}
-			catch (Exception ex)
+			catch (Exception message)
 			{
-				Exception exn = ex;
-				Debug.LogError(exn);
+				Debug.LogError(message);
 			}
 			yield return null;
 			if (this._craftStructure)
@@ -211,12 +194,8 @@ namespace TheForest.Buildings.Creation
 				Transform ghostRoot = this._wallRoot;
 				Transform transform = ghostRoot;
 				transform.name += "Ghost";
-				Transform logGhostPrefab = this._logPrefab;
-				this._logPrefab = this.BuiltLogPrefab;
-				Transform wallBuiltTr = this.SpawnStructure();
-				wallBuiltTr.parent = base.transform;
 				this.InitAdditionTrigger();
-				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.<>f__this._logItemId);
+				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.$this._logItemId);
 				if (ri == null)
 				{
 					ri = new Craft_Structure.BuildIngredients();
@@ -225,10 +204,13 @@ namespace TheForest.Buildings.Creation
 					ri._renderers = new GameObject[0];
 					this._craftStructure._requiredIngredients.Insert(0, ri);
 				}
-				ri._amount += this.GetLogCost();
-				List<GameObject> builtRenderers = this.GetBuiltRenderers(wallBuiltTr);
-				ri._renderers = builtRenderers.ToArray();
-				this._logPrefab = logGhostPrefab;
+				else
+				{
+					ri._subIngredients.Clear();
+				}
+				ri._amount = this.GetLogCost();
+				List<GameObject> builtRenderers = this.GetBuiltRenderers(this._wallRoot);
+				ri.AddRuntimeObjects(builtRenderers, this.BuiltLogPrefab.GetComponentInChildren<Renderer>().sharedMaterial);
 				this._craftStructure.GetComponent<Collider>().enabled = true;
 				BoxCollider bc;
 				if (this._craftStructure.GetComponent<Collider>() is BoxCollider)
@@ -413,7 +395,6 @@ namespace TheForest.Buildings.Creation
 			if (BoltNetwork.isRunning)
 			{
 				this.HideToggleAdditionIcon();
-				this.ShowToggleAdditionIcon();
 				ToggleWallAddition toggleWallAddition = ToggleWallAddition.Create(GlobalTargets.OnlyServer);
 				toggleWallAddition.Wall = base.GetComponent<BoltEntity>();
 				toggleWallAddition.Send();
@@ -431,7 +412,7 @@ namespace TheForest.Buildings.Creation
 		{
 			if (BoltNetwork.isRunning)
 			{
-				this.entity.GetState<IWallChunkConstructionState>().Addition = (int)(this._addition = this.SegmentNextAddition(this._addition));
+				base.entity.GetState<IWallChunkConstructionState>().Addition = (int)(this._addition = this.SegmentNextAddition(this._addition));
 			}
 			else
 			{
@@ -446,13 +427,27 @@ namespace TheForest.Buildings.Creation
 			UnityEngine.Object.Destroy(this._wallRoot.gameObject);
 			this._wallRoot = this.SpawnStructure();
 			this._wallRoot.parent = base.transform;
+			Craft_Structure.BuildIngredients buildIngredients = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this._logItemId);
+			if (buildIngredients == null)
+			{
+				buildIngredients = new Craft_Structure.BuildIngredients();
+				buildIngredients._itemID = this._logItemId;
+				buildIngredients._amount = 0;
+				this._craftStructure._requiredIngredients.Insert(0, buildIngredients);
+			}
+			buildIngredients._subIngredients.Clear();
+			buildIngredients._renderers = null;
+			buildIngredients._amount = this.GetLogCost();
+			List<GameObject> builtRenderers = this.GetBuiltRenderers(this._wallRoot);
+			buildIngredients.AddRuntimeObjects(builtRenderers, this.BuiltLogPrefab.GetComponentInChildren<Renderer>().sharedMaterial);
+			this._craftStructure.UpdateNeededRenderers();
 			if (!this._wasBuilt && this._addition >= WallChunkArchitect.Additions.Door1 && this._addition <= WallChunkArchitect.Additions.LockedDoor2)
 			{
 				Vector3 position = Vector3.Lerp(this._p1, this._p2, 0.5f);
 				position.y -= this._logWidth / 2f;
 				Vector3 worldPosition = (this._addition != WallChunkArchitect.Additions.Door1) ? this._p1 : this._p2;
 				worldPosition.y = position.y;
-				Transform transform = (Transform)UnityEngine.Object.Instantiate(Prefabs.Instance.DoorGhostPrefab, position, this._wallRoot.rotation);
+				Transform transform = UnityEngine.Object.Instantiate<Transform>(Prefabs.Instance.DoorGhostPrefab, position, this._wallRoot.rotation);
 				transform.LookAt(worldPosition);
 				transform.parent = this._wallRoot;
 			}
@@ -488,11 +483,6 @@ namespace TheForest.Buildings.Creation
 				this._lods = new GameObject("lods").AddComponent<WallChunkLods>();
 				this._lods.transform.parent = base.transform;
 				this._lods.DefineChunk(this._p1, this._p2, 4.44f * this._logWidth, this._wallRoot, this.Addition);
-				BuildingHealth component = base.GetComponent<BuildingHealth>();
-				if (component)
-				{
-					component._renderersRoot = this._wallRoot.gameObject;
-				}
 				if (!this._wallCollision)
 				{
 					GameObject gameObject = new GameObject("collision");
@@ -524,10 +514,23 @@ namespace TheForest.Buildings.Creation
 						num3 = this._logWidth * (float)(this._wallRoot.childCount - 1) + 1.5f;
 						num4 = 0f;
 						vector = Vector3.zero;
-						foreach (object obj in this._wallRoot)
+						IEnumerator enumerator = this._wallRoot.GetEnumerator();
+						try
 						{
-							Transform transform = (Transform)obj;
-							vector += transform.position;
+							while (enumerator.MoveNext())
+							{
+								object obj = enumerator.Current;
+								Transform transform = (Transform)obj;
+								vector += transform.position;
+							}
+						}
+						finally
+						{
+							IDisposable disposable;
+							if ((disposable = (enumerator as IDisposable)) != null)
+							{
+								disposable.Dispose();
+							}
 						}
 						size = new Vector3(1.75f, 0.92f * this._height * this._logWidth, num3);
 						vector /= (float)this._wallRoot.childCount;
@@ -540,10 +543,15 @@ namespace TheForest.Buildings.Creation
 					boxCollider.center = vector;
 					boxCollider.size = size;
 					boxCollider.isTrigger = true;
+					BuildingHealth component = base.GetComponent<BuildingHealth>();
+					if (component)
+					{
+						component._renderersRoot = this._wallRoot.gameObject;
+					}
 					WallChunkArchitect.Additions addition = this._addition;
 					if (addition != WallChunkArchitect.Additions.Wall)
 					{
-						BoxCollider boxCollider2;
+						BoxCollider boxCollider2 = null;
 						if (this._height > 4f)
 						{
 							vector.y += this._logWidth * 2f;
@@ -557,22 +565,22 @@ namespace TheForest.Buildings.Creation
 						size.z = num4;
 						vector.y = size.y / 2f - this._logWidth / 2f;
 						vector.z = num3 - num4 / 2f;
-						boxCollider2 = gameObject.AddComponent<BoxCollider>();
-						boxCollider2.center = vector;
-						boxCollider2.size = size;
+						BoxCollider boxCollider3 = gameObject.AddComponent<BoxCollider>();
+						boxCollider3.center = vector;
+						boxCollider3.size = size;
 						vector.z = num4 / 2f;
-						boxCollider2 = gameObject.AddComponent<BoxCollider>();
-						boxCollider2.center = vector;
-						boxCollider2.size = size;
+						BoxCollider boxCollider4 = gameObject.AddComponent<BoxCollider>();
+						boxCollider4.center = vector;
+						boxCollider4.size = size;
 						if (this._addition == WallChunkArchitect.Additions.Window)
 						{
 							size.y = this._logWidth * 1.9f;
 							size.z = num3 - num4 * 2f;
 							vector.z += num4 / 2f + size.z / 2f;
 							vector.y = size.y / 2f - this._logWidth / 2f;
-							boxCollider2 = gameObject.AddComponent<BoxCollider>();
-							boxCollider2.center = vector;
-							boxCollider2.size = size;
+							BoxCollider boxCollider5 = gameObject.AddComponent<BoxCollider>();
+							boxCollider5.center = vector;
+							boxCollider5.size = size;
 							GameObject gameObject3 = new GameObject("PerchTarget");
 							SphereCollider sphereCollider = gameObject3.AddComponent<SphereCollider>();
 							sphereCollider.isTrigger = true;
@@ -580,13 +588,51 @@ namespace TheForest.Buildings.Creation
 							gameObject3.transform.parent = this._wallRoot;
 							vector.y += size.y / 2f;
 							gameObject3.transform.localPosition = vector;
+							if (BoltNetwork.isRunning)
+							{
+								if (boxCollider2)
+								{
+									component.SetMpRandomDistortColliders(new Collider[]
+									{
+										boxCollider2,
+										boxCollider4,
+										boxCollider3,
+										boxCollider5
+									});
+								}
+								else
+								{
+									component.SetMpRandomDistortColliders(new Collider[]
+									{
+										boxCollider4,
+										boxCollider3,
+										boxCollider5
+									});
+								}
+							}
+						}
+						else if (BoltNetwork.isRunning)
+						{
+							component.SetMpRandomDistortColliders(new Collider[]
+							{
+								boxCollider2,
+								boxCollider4,
+								boxCollider3
+							});
 						}
 					}
 					else
 					{
-						BoxCollider boxCollider2 = gameObject.AddComponent<BoxCollider>();
-						boxCollider2.center = vector;
-						boxCollider2.size = size;
+						BoxCollider boxCollider6 = gameObject.AddComponent<BoxCollider>();
+						boxCollider6.center = vector;
+						boxCollider6.size = size;
+						if (BoltNetwork.isRunning)
+						{
+							component.SetMpRandomDistortColliders(new Collider[]
+							{
+								boxCollider6
+							});
+						}
 					}
 					gridObjectBlocker gridObjectBlocker = gameObject.AddComponent<gridObjectBlocker>();
 					gridObjectBlocker.ignoreOnDisable = true;
@@ -600,7 +646,7 @@ namespace TheForest.Buildings.Creation
 					position.y -= this._logWidth / 2f;
 					Vector3 worldPosition = (this._addition != WallChunkArchitect.Additions.Door1 && this._addition != WallChunkArchitect.Additions.LockedDoor1) ? this._p1 : this._p2;
 					worldPosition.y = position.y;
-					Transform transform2 = (Transform)UnityEngine.Object.Instantiate(Prefabs.Instance.DoorPrefab, position, this._wallRoot.rotation);
+					Transform transform2 = UnityEngine.Object.Instantiate<Transform>(Prefabs.Instance.DoorPrefab, position, this._wallRoot.rotation);
 					transform2.LookAt(worldPosition);
 					transform2.parent = base.transform;
 				}
@@ -730,7 +776,7 @@ namespace TheForest.Buildings.Creation
 		
 		protected Transform NewLog(Vector3 position, Quaternion rotation)
 		{
-			return (Transform)UnityEngine.Object.Instantiate(this._logPrefab, position, (!this._wasBuilt) ? rotation : this.RandomizeLogRotation(rotation));
+			return UnityEngine.Object.Instantiate<Transform>(this._logPrefab, position, (!this._wasBuilt) ? rotation : this.RandomizeLogRotation(rotation));
 		}
 
 		
@@ -743,11 +789,23 @@ namespace TheForest.Buildings.Creation
 		protected virtual List<GameObject> GetBuiltRenderers(Transform wallRoot)
 		{
 			List<GameObject> list = new List<GameObject>(5);
-			foreach (object obj in wallRoot)
+			IEnumerator enumerator = wallRoot.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				list.Add(transform.gameObject);
-				transform.gameObject.SetActive(false);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					list.Add(transform.GetComponentInChildren<Renderer>().gameObject);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 			return list;
 		}
@@ -960,15 +1018,15 @@ namespace TheForest.Buildings.Creation
 		{
 			get
 			{
-				if (BoltNetwork.isServer && this.entity.isAttached)
+				if (BoltNetwork.isServer && base.entity.isAttached)
 				{
-					if (this.entity.StateIs<IWallChunkBuildingState>())
+					if (base.entity.StateIs<IWallChunkBuildingState>())
 					{
-						this.entity.GetState<IWallChunkBuildingState>().Addition = (int)this._addition;
+						base.entity.GetState<IWallChunkBuildingState>().Addition = (int)this._addition;
 					}
 					else
 					{
-						this.entity.GetState<IWallChunkConstructionState>().Addition = (int)this._addition;
+						base.entity.GetState<IWallChunkConstructionState>().Addition = (int)this._addition;
 					}
 				}
 				CoopWallChunkToken coopWallChunkToken = new CoopWallChunkToken
@@ -999,6 +1057,12 @@ namespace TheForest.Buildings.Creation
 		public override void Detached()
 		{
 			this.HideToggleAdditionIcon();
+		}
+
+		
+		bool IEntityReplicationFilter.AllowReplicationTo(BoltConnection connection)
+		{
+			return this.CurrentSupport == null || connection.ExistsOnRemote((this.CurrentSupport as MonoBehaviour).GetComponent<BoltEntity>()) == ExistsResult.Yes;
 		}
 
 		

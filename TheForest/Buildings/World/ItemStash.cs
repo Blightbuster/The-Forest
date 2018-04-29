@@ -6,8 +6,8 @@ using UnityEngine;
 namespace TheForest.Buildings.World
 {
 	
-	[AddComponentMenu("Buildings/World/Item Stash")]
 	[DoNotSerializePublic]
+	[AddComponentMenu("Buildings/World/Item Stash")]
 	public class ItemStash : ItemStorage
 	{
 		

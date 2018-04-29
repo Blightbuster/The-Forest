@@ -11,7 +11,7 @@ public class RabbitCage : EntityBehaviour<IRabbitCage>
 	
 	public override void Attached()
 	{
-		if (this.entity && this.entity.isAttached && this.entity.isOwner)
+		if (base.entity && base.entity.isAttached && base.entity.isOwner)
 		{
 			base.state.RabbitCount = this.Rabbits;
 		}
@@ -39,7 +39,7 @@ public class RabbitCage : EntityBehaviour<IRabbitCage>
 	{
 		get
 		{
-			if (BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+			if (BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 			{
 				return base.state.RabbitCount;
 			}
@@ -47,7 +47,7 @@ public class RabbitCage : EntityBehaviour<IRabbitCage>
 		}
 		set
 		{
-			if (BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+			if (BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 			{
 				base.state.RabbitCount = value;
 			}
@@ -100,7 +100,7 @@ public class RabbitCage : EntityBehaviour<IRabbitCage>
 		bool flag3 = this.RabbitsReal > 0 && !flag && !flag2 && !LocalPlayer.Inventory.IsSlotLocked(Item.EquipmentSlot.RightHand);
 		if (flag3 && TheForest.Utils.Input.GetButtonDown("Take"))
 		{
-			LocalPlayer.Sfx.PlayWhoosh();
+			LocalPlayer.Sfx.PlayItemCustomSfx(this._rabbitAliveItemId, true);
 			this.TakeRabbit();
 		}
 		bool flag4 = this.RabbitsReal < 7 && flag;
@@ -119,7 +119,7 @@ public class RabbitCage : EntityBehaviour<IRabbitCage>
 		if (BoltNetwork.isRunning)
 		{
 			RabbitTake rabbitTake = RabbitTake.Create(GlobalTargets.OnlyServer);
-			rabbitTake.Cage = this.entity;
+			rabbitTake.Cage = base.entity;
 			rabbitTake.Send();
 		}
 		else
@@ -135,7 +135,7 @@ public class RabbitCage : EntityBehaviour<IRabbitCage>
 		if (BoltNetwork.isRunning)
 		{
 			RabbitAdd rabbitAdd = RabbitAdd.Create(GlobalTargets.OnlyServer);
-			rabbitAdd.Cage = this.entity;
+			rabbitAdd.Cage = base.entity;
 			rabbitAdd.Send();
 		}
 		else

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Get the value of a Color Variable from another FSM.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Get the value of a Color Variable from another FSM.")]
 	public class GetFsmColor : FsmStateAction
 	{
 		

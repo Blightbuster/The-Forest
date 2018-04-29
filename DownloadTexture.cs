@@ -14,11 +14,11 @@ public class DownloadTexture : MonoBehaviour
 		this.mTex = www.texture;
 		if (this.mTex != null)
 		{
-			UITexture ut = base.GetComponent<UITexture>();
-			ut.mainTexture = this.mTex;
+			UITexture component = base.GetComponent<UITexture>();
+			component.mainTexture = this.mTex;
 			if (this.pixelPerfect)
 			{
-				ut.MakePixelPerfect();
+				component.MakePixelPerfect();
 			}
 		}
 		www.Dispose();

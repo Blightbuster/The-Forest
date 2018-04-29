@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets Field of View used by the Camera.")]
 	[ActionCategory(ActionCategory.Camera)]
+	[Tooltip("Sets Field of View used by the Camera.")]
 	public class SetCameraFOV : ComponentAction<Camera>
 	{
 		
@@ -43,8 +43,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Camera))]
 		[RequiredField]
+		[CheckForComponent(typeof(Camera))]
 		public FsmOwnerDefault gameObject;
 
 		

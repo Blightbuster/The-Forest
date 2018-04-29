@@ -83,8 +83,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Animator))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animator))]
 		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
 		public FsmOwnerDefault gameObject;
 

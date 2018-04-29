@@ -2,8 +2,8 @@
 using UnityEngine;
 
 
-[RequireComponent(typeof(Camera))]
 [ExecuteInEditMode]
+[RequireComponent(typeof(Camera))]
 public class AFSSunshineSceneCamerPos : MonoBehaviour
 {
 	

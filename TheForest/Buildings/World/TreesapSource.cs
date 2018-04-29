@@ -7,8 +7,8 @@ using UnityEngine;
 namespace TheForest.Buildings.World
 {
 	
-	[AddComponentMenu("Buildings/World/Treesap Source")]
 	[DoNotSerializePublic]
+	[AddComponentMenu("Buildings/World/Treesap Source")]
 	public class TreesapSource : EntityBehaviour<IWaterSourceState>
 	{
 		
@@ -26,7 +26,7 @@ namespace TheForest.Buildings.World
 			bool canGather = this.CanGather;
 			if (canGather && TheForest.Utils.Input.GetButtonDown("Take"))
 			{
-				LocalPlayer.Sfx.PlayWhoosh();
+				LocalPlayer.Sfx.PlayItemCustomSfx(this._treesapItemId, true);
 				LocalPlayer.Inventory.AddItem(this._treesapItemId, this._amount, false, false, null);
 				this.RemoveTreesap((float)this._amount);
 			}
@@ -68,7 +68,7 @@ namespace TheForest.Buildings.World
 		public void AddTreesap(float amount)
 		{
 			this._amount = (int)Mathf.Min((float)this._amount + amount, this._maxAmount);
-			if (BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+			if (BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 			{
 				base.state.amount = (float)this._amount;
 			}
@@ -80,7 +80,7 @@ namespace TheForest.Buildings.World
 		public void RemoveTreesap(float amount)
 		{
 			this._amount = (int)Mathf.Max((float)this._amount - amount, 0f);
-			if (BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+			if (BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 			{
 				base.state.amount = (float)this._amount;
 			}

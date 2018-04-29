@@ -40,6 +40,11 @@ public class animClipMemoryManager : MonoBehaviour
 	}
 
 	
+	public void loadOperatePanelAlternate()
+	{
+	}
+
+	
 	public void unloadCustomAnimation(string anim)
 	{
 		this.animationLoadManager.StartCoroutine(this.animationLoadManager.UnloadAnimation(anim, true));

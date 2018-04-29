@@ -1,14 +1,12 @@
 ﻿using System;
-using ModAPI;
 using TheForest.Graphics;
 using TheForest.Utils;
-using UltimateCheatmenu;
 using UnityEngine;
 
 
-[RequireComponent(typeof(WaterViz))]
 [ExecuteInEditMode]
 [AddComponentMenu("Image Effects/Blur/WaterBlur")]
+[RequireComponent(typeof(WaterViz))]
 public class WaterBlurEffect : MonoBehaviour
 {
 	
@@ -84,7 +82,7 @@ public class WaterBlurEffect : MonoBehaviour
 	}
 
 	
-	private void __OnRenderImage__Original(RenderTexture source, RenderTexture destination)
+	private void OnRenderImage(RenderTexture source, RenderTexture destination)
 	{
 		if (WaterEngine.Ocean == null && LocalPlayer.Buoyancy.IsOcean)
 		{
@@ -93,11 +91,11 @@ public class WaterBlurEffect : MonoBehaviour
 		}
 		int width = source.width / 4;
 		int height = source.height / 4;
-		RenderTexture renderTexture = RenderTexture.GetTemporary(width, height, 0);
+		RenderTexture renderTexture = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.Default);
 		this.DownSample4x(source, renderTexture);
 		for (int i = 0; i < this.iterations; i++)
 		{
-			RenderTexture temporary = RenderTexture.GetTemporary(width, height, 0);
+			RenderTexture temporary = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.Default);
 			this.FourTapCone(renderTexture, temporary, i);
 			RenderTexture.ReleaseTemporary(renderTexture);
 			renderTexture = temporary;
@@ -123,28 +121,6 @@ public class WaterBlurEffect : MonoBehaviour
 			this.heightBlitMaterial.SetTexture("_LowerTex", renderTexture);
 			Graphics.Blit(source, destination, this.heightBlitMaterial, 0);
 			RenderTexture.ReleaseTemporary(renderTexture);
-		}
-	}
-
-	
-	private void OnRenderImage(RenderTexture source, RenderTexture destination)
-	{
-		try
-		{
-			if (UCheatmenu.NoUnderwaterBlur)
-			{
-				this.iterations = 0;
-			}
-			else
-			{
-				this.iterations = 3;
-			}
-			this.__OnRenderImage__Original(source, destination);
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__OnRenderImage__Original(source, destination);
 		}
 	}
 

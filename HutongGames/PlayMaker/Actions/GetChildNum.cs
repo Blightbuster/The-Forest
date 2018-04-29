@@ -40,9 +40,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmInt childIndex;
 
 		
-		[Tooltip("Store the child in a GameObject variable.")]
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the child in a GameObject variable.")]
 		public FsmGameObject store;
 	}
 }

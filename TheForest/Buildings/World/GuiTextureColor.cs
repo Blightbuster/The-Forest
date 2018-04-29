@@ -18,6 +18,10 @@ namespace TheForest.Buildings.World
 				yield return null;
 				base.enabled = false;
 			}
+			else if (BoltNetwork.isRunning)
+			{
+				base.enabled = false;
+			}
 			yield break;
 		}
 
@@ -40,16 +44,21 @@ namespace TheForest.Buildings.World
 		
 		private IEnumerator OnDeserialized()
 		{
+			if (base.GetComponent<EmptyObjectIdentifier>())
+			{
+				UnityEngine.Object.Destroy(base.gameObject);
+				yield break;
+			}
 			if (BoltNetwork.isRunning)
 			{
-				while (!this.entity || !this.entity.isAttached)
+				while (!base.entity || !base.entity.isAttached)
 				{
 					yield return null;
 				}
 			}
 			if (this._color.a > 0f)
 			{
-				int color = ColorEx.ClosestColorIndex(this._color, new Color[]
+				int a = ColorEx.ClosestColorIndex(this._color, new Color[]
 				{
 					Color.white,
 					Color.yellow,
@@ -59,7 +68,7 @@ namespace TheForest.Buildings.World
 					Color.blue
 				});
 				this._color.a = -1f;
-				this._overlayIcon.SetColorIndex(Mathf.Max(color, 1));
+				this._overlayIcon.SetColorIndex(Mathf.Max(a, 1));
 			}
 			this.SetTargetColor();
 			yield break;
@@ -70,7 +79,7 @@ namespace TheForest.Buildings.World
 		{
 			if (this._targetRenderer)
 			{
-				if (BoltNetwork.isRunning)
+				if (BoltNetwork.isRunning && base.entity.isAttached)
 				{
 					this._overlayIcon._color = base.state.Flag;
 				}
@@ -84,7 +93,7 @@ namespace TheForest.Buildings.World
 		
 		public override void Attached()
 		{
-			if (!this.entity.isOwner)
+			if (!base.entity.isOwner)
 			{
 				this.SetTargetColor();
 			}

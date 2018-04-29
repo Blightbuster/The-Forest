@@ -127,11 +127,13 @@ public class SelectPageNumber : MonoBehaviour
 	private void Update()
 	{
 		this.SelfOvered = this.IsOverCollider();
+		this.PageIsActive = (this.MyPageNew && this.MyPageNew.activeSelf);
 		if ((TheForest.Utils.Input.GetButtonDown("Fire1") || (TheForest.Utils.Input.IsGamePad && TheForest.Utils.Input.GetButtonDown("Take"))) && this.SelfOvered)
 		{
+			this.SelfOvered = false;
+			this.PageIsActive = false;
 			this.OnClick();
 		}
-		this.PageIsActive = (this.MyPageNew && this.MyPageNew.activeSelf);
 		if (this.Highlighted && ((this.HighlightedPage && this.HighlightedPage.activeSelf) || (!this.HighlightedPage && this.PageIsActive)))
 		{
 			this.Unhighlight();
@@ -167,13 +169,13 @@ public class SelectPageNumber : MonoBehaviour
 	}
 
 	
-	private void OnClick()
+	public void OnClick()
 	{
 		LocalPlayer.Sfx.PlayTurnPage();
 		if (!this.Index && !this.Tab)
 		{
 			base.SendMessage("SetHovered", false, SendMessageOptions.DontRequireReceiver);
-			base.transform.parent.gameObject.SetActive(false);
+			((!this.ThisPageOverride) ? base.transform.parent : this.ThisPageOverride).gameObject.SetActive(false);
 			this.MyPageNew.SetActive(true);
 			LocalPlayer.AnimatedBook.sharedMaterial = this.MyPageNew.GetComponent<Renderer>().sharedMaterial;
 		}
@@ -239,13 +241,16 @@ public class SelectPageNumber : MonoBehaviour
 	}
 
 	
-	private void TurnOffAllPages()
+	public void TurnOffAllPages()
 	{
 		for (int i = this.Pages.transform.childCount - 1; i >= 0; i--)
 		{
 			this.Pages.transform.GetChild(i).gameObject.SetActive(false);
 		}
 	}
+
+	
+	public Transform ThisPageOverride;
 
 	
 	public Renderer TargetRenderer;

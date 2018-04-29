@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Tests if all the given Bool Variables are True.")]
 	[ActionCategory(ActionCategory.Logic)]
+	[Tooltip("Tests if all the given Bool Variables are True.")]
 	public class BoolAllTrue : FsmStateAction
 	{
 		
@@ -56,8 +56,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		[Tooltip("The Bool variables to check.")]
 		public FsmBool[] boolVariables;
 

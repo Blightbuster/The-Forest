@@ -231,12 +231,12 @@ public class mutantScriptSetup : MonoBehaviour
 	{
 		if (!this.disableAiForDebug)
 		{
-			foreach (PlayMakerFSM pm in this.actionFSM)
+			foreach (PlayMakerFSM playMakerFSM in this.actionFSM)
 			{
-				if (pm.FsmName != name)
+				if (playMakerFSM.FsmName != name)
 				{
-					pm.SendEvent("toDisableFSM");
-					pm.enabled = false;
+					playMakerFSM.SendEvent("toDisableFSM");
+					playMakerFSM.enabled = false;
 				}
 			}
 			if (name != "action_searchFSM")

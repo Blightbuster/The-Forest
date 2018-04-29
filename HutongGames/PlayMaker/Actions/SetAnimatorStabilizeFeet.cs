@@ -4,9 +4,9 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[HelpUrl("https:
-	[Tooltip("If true, automaticaly stabilize feet during transition and blending")]
 	[ActionCategory("Animator")]
+	[Tooltip("If true, automaticaly stabilize feet during transition and blending")]
+	[HelpUrl("https:
 	public class SetAnimatorStabilizeFeet : FsmStateAction
 	{
 		
@@ -46,8 +46,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Animator))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animator))]
 		[Tooltip("The Target. An Animator component is required")]
 		public FsmOwnerDefault gameObject;
 

@@ -556,30 +556,6 @@ public class FMOD_StudioEventEmitter : MonoBehaviour, IThreadSafeTask
 	}
 
 	
-	private const float LOAD_DISTANCE_FACTOR = 1.5f;
-
-	
-	private const float UNLOAD_DISTANCE_FACTOR = 2f;
-
-	
-	private const float ENABLE_DISTANCE_FACTOR = 2.1f;
-
-	
-	private const float DISABLE_DISTANCE_FACTOR = 2.2f;
-
-	
-	private const float LOAD_DISTANCE_FACTOR_SQUARED = 2.25f;
-
-	
-	private const float UNLOAD_DISTANCE_FACTOR_SQUARED = 4f;
-
-	
-	private const float ENABLE_DISTANCE_FACTOR_SQUARED = 4.40999937f;
-
-	
-	private const float DISABLE_DISTANCE_FACTOR_SQUARED = 4.84f;
-
-	
 	public static float HoursSinceMidnight = 0f;
 
 	
@@ -668,6 +644,30 @@ public class FMOD_StudioEventEmitter : MonoBehaviour, IThreadSafeTask
 
 	
 	private static bool isShuttingDown = false;
+
+	
+	private const float LOAD_DISTANCE_FACTOR = 1.5f;
+
+	
+	private const float UNLOAD_DISTANCE_FACTOR = 2f;
+
+	
+	private const float ENABLE_DISTANCE_FACTOR = 2.1f;
+
+	
+	private const float DISABLE_DISTANCE_FACTOR = 2.2f;
+
+	
+	private const float LOAD_DISTANCE_FACTOR_SQUARED = 2.25f;
+
+	
+	private const float UNLOAD_DISTANCE_FACTOR_SQUARED = 4f;
+
+	
+	private const float ENABLE_DISTANCE_FACTOR_SQUARED = 4.40999937f;
+
+	
+	private const float DISABLE_DISTANCE_FACTOR_SQUARED = 4.84f;
 
 	
 	public enum TriggerType

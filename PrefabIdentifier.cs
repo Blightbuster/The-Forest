@@ -3,9 +3,9 @@ using UniLinq;
 using UnityEngine;
 
 
-[ExecuteInEditMode]
 [DontStore]
 [AddComponentMenu("Storage/Prefab Identifier")]
+[ExecuteInEditMode]
 public class PrefabIdentifier : StoreInformation
 {
 	

@@ -9,7 +9,7 @@ public class CoopConstructionRope : EntityBehaviour<IBuildingState>
 	public override void Attached()
 	{
 		SingleAnchorStructure componentInChildren = base.GetComponentInChildren<SingleAnchorStructure>();
-		CoopSingleAnchorToken coopSingleAnchorToken = (CoopSingleAnchorToken)this.entity.attachToken;
+		CoopSingleAnchorToken coopSingleAnchorToken = (CoopSingleAnchorToken)base.entity.attachToken;
 		ICoopAnchorStructure coopAnchorStructure = coopSingleAnchorToken.Anchor.GetComponent(typeof(ICoopAnchorStructure)) as ICoopAnchorStructure;
 		componentInChildren._wasPlaced = true;
 		componentInChildren._wasBuilt = this.wasBuilt;

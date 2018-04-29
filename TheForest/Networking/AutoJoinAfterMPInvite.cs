@@ -30,19 +30,19 @@ namespace TheForest.Networking
 				string[] commandLineArgs = Environment.GetCommandLineArgs();
 				if (commandLineArgs.Contains("+connect_lobby"))
 				{
-					int connectIndex = commandLineArgs.IndexOf("+connect_lobby");
-					this.invitedTo = ulong.Parse(commandLineArgs[connectIndex + 1]);
+					int num = commandLineArgs.IndexOf("+connect_lobby");
+					this.invitedTo = ulong.Parse(commandLineArgs[num + 1]);
 					this.SetInvitedToGameId(this.invitedTo);
 					yield break;
 				}
 				if (commandLineArgs.Contains("+connect"))
 				{
-					int connectIndex2 = commandLineArgs.IndexOf("+connect");
-					this.invitedToIP = commandLineArgs[connectIndex2 + 1];
+					int num2 = commandLineArgs.IndexOf("+connect");
+					this.invitedToIP = commandLineArgs[num2 + 1];
 					if (commandLineArgs.Contains("+password"))
 					{
-						int passwordIndex = commandLineArgs.IndexOf("+password");
-						this.invitedToPassword = commandLineArgs[passwordIndex + 1];
+						int num3 = commandLineArgs.IndexOf("+password");
+						this.invitedToPassword = commandLineArgs[num3 + 1];
 					}
 					else
 					{

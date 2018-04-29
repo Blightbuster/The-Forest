@@ -100,11 +100,11 @@ public class mutantFamilyFunctions : MonoBehaviour
 		}
 		if (this.spawnSetup.spawner)
 		{
-			foreach (GameObject go in this.spawnSetup.spawner.allMembers)
+			foreach (GameObject gameObject in this.spawnSetup.spawner.allMembers)
 			{
-				if (go)
+				if (gameObject)
 				{
-					go.SendMessage("switchToAmbush", SendMessageOptions.DontRequireReceiver);
+					gameObject.SendMessage("switchToAmbush", SendMessageOptions.DontRequireReceiver);
 				}
 			}
 		}
@@ -488,7 +488,7 @@ public class mutantFamilyFunctions : MonoBehaviour
 				this.setup.pmCombat.FsmVariables.GetFsmBool("fearBOOL").Value = false;
 				this.setup.pmBrain.FsmVariables.GetFsmBool("fearOverrideBool").Value = true;
 				this.timeout1 = true;
-				base.Invoke("resetFearOverride", 15f);
+				base.Invoke("resetFearOverride", 8f);
 			}
 		}
 	}

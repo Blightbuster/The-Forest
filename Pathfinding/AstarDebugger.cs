@@ -7,8 +7,8 @@ namespace Pathfinding
 {
 	
 	[AddComponentMenu("Pathfinding/Pathfinding Debugger")]
-	[HelpURL("http:
 	[ExecuteInEditMode]
+	[HelpURL("http:
 	public class AstarDebugger : MonoBehaviour
 	{
 		
@@ -231,14 +231,14 @@ namespace Pathfinding
 				}
 				GUI.color = Color.blue;
 				float num7 = (float)Mathf.RoundToInt(num4 / 100000f);
-				GUI.Label(new Rect(5f, (float)Screen.height - AstarMath.MapTo(num3, num4, 0f + this.graphOffset, this.graphHeight + this.graphOffset, num7 * 1000f * 100f) - 10f, 100f, 20f), (num7 / 10f).ToString("0.0 MB"));
+				GUI.Label(new Rect(5f, (float)Screen.height - AstarMath.MapTo(num3, num4, this.graphOffset, this.graphHeight + this.graphOffset, num7 * 1000f * 100f) - 10f, 100f, 20f), (num7 / 10f).ToString("0.0 MB"));
 				num7 = Mathf.Round(num3 / 100000f);
-				GUI.Label(new Rect(5f, (float)Screen.height - AstarMath.MapTo(num3, num4, 0f + this.graphOffset, this.graphHeight + this.graphOffset, num7 * 1000f * 100f) - 10f, 100f, 20f), (num7 / 10f).ToString("0.0 MB"));
+				GUI.Label(new Rect(5f, (float)Screen.height - AstarMath.MapTo(num3, num4, this.graphOffset, this.graphHeight + this.graphOffset, num7 * 1000f * 100f) - 10f, 100f, 20f), (num7 / 10f).ToString("0.0 MB"));
 				GUI.color = Color.green;
 				num7 = Mathf.Round(num6);
-				GUI.Label(new Rect(55f, (float)Screen.height - AstarMath.MapTo(num5, num6, 0f + this.graphOffset, this.graphHeight + this.graphOffset, num7) - 10f, 100f, 20f), num7.ToString("0 FPS"));
+				GUI.Label(new Rect(55f, (float)Screen.height - AstarMath.MapTo(num5, num6, this.graphOffset, this.graphHeight + this.graphOffset, num7) - 10f, 100f, 20f), num7.ToString("0 FPS"));
 				num7 = Mathf.Round(num5);
-				GUI.Label(new Rect(55f, (float)Screen.height - AstarMath.MapTo(num5, num6, 0f + this.graphOffset, this.graphHeight + this.graphOffset, num7) - 10f, 100f, 20f), num7.ToString("0 FPS"));
+				GUI.Label(new Rect(55f, (float)Screen.height - AstarMath.MapTo(num5, num6, this.graphOffset, this.graphHeight + this.graphOffset, num7) - 10f, 100f, 20f), num7.ToString("0 FPS"));
 			}
 		}
 

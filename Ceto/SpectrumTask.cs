@@ -166,7 +166,7 @@ namespace Ceto
 			{
 				for (int j = 0; j < size; j++)
 				{
-					if (this.Cancelled)
+					if (base.Cancelled)
 					{
 						return;
 					}
@@ -223,7 +223,7 @@ namespace Ceto
 			{
 				for (int j = 0; j < size; j++)
 				{
-					if (this.Cancelled)
+					if (base.Cancelled)
 					{
 						return;
 					}

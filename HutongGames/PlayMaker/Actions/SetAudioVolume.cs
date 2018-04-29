@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the Volume of the Audio Clip played by the AudioSource component on a Game Object.")]
 	[ActionCategory(ActionCategory.Audio)]
+	[Tooltip("Sets the Volume of the Audio Clip played by the AudioSource component on a Game Object.")]
 	public class SetAudioVolume : ComponentAction<AudioSource>
 	{
 		
@@ -43,8 +43,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(AudioSource))]
 		[RequiredField]
+		[CheckForComponent(typeof(AudioSource))]
 		public FsmOwnerDefault gameObject;
 
 		

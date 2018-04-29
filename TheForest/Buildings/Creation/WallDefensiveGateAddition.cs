@@ -153,7 +153,7 @@ namespace TheForest.Buildings.Creation
 				coopWallChunkToken.PointsPositions = null;
 				coopWallChunkToken.Additions = addition;
 				coopWallChunkToken.Height = height;
-				placeWallChunk.parent = base.transform.GetComponentInParent<BoltEntity>();
+				placeWallChunk.parent = ((!base.transform.parent) ? base.transform.GetComponentInParent<BoltEntity>() : base.transform.parent.GetComponentInParent<BoltEntity>());
 				placeWallChunk.token = coopWallChunkToken;
 				placeWallChunk.prefab = Prefabs.Instance.WallDefensiveGateGhostPrefab.GetComponent<BoltEntity>().prefabId;
 				placeWallChunk.support = null;
@@ -161,10 +161,11 @@ namespace TheForest.Buildings.Creation
 			}
 			else
 			{
-				WallDefensiveGateArchitect wallDefensiveGateArchitect = (WallDefensiveGateArchitect)UnityEngine.Object.Instantiate(Prefabs.Instance.WallDefensiveGateGhostPrefab, p1, Quaternion.LookRotation(p2 - p1));
+				WallDefensiveGateArchitect wallDefensiveGateArchitect = UnityEngine.Object.Instantiate<WallDefensiveGateArchitect>(Prefabs.Instance.WallDefensiveGateGhostPrefab, p1, Quaternion.LookRotation(p2 - p1));
 				wallDefensiveGateArchitect.P1 = p1;
 				wallDefensiveGateArchitect.P2 = p2;
 				wallDefensiveGateArchitect.Addition = addition;
+				wallDefensiveGateArchitect.transform.parent = base.transform.parent;
 			}
 		}
 	}

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Multiplies a GameObject's scale over time.")]
 	[ActionCategory("iTween")]
+	[Tooltip("Multiplies a GameObject's scale over time.")]
 	public class iTweenScaleBy : iTweenFsmAction
 	{
 		

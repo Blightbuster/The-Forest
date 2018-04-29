@@ -315,27 +315,32 @@ public class sceneTracker : MonoBehaviour
 					base.Invoke("EnableCombatMusic", 180f);
 				}
 				this.CurrentEnemyPresence = enemyPresence;
-				switch (this.CurrentEnemyPresence)
+				sceneTracker.EnemyPresence currentEnemyPresence = this.CurrentEnemyPresence;
+				if (currentEnemyPresence != sceneTracker.EnemyPresence.Attacking)
 				{
-				case sceneTracker.EnemyPresence.None:
-					UnityUtil.ERRCHECK(this.TransitionParameter.setValue(0f));
-					break;
-				case sceneTracker.EnemyPresence.Nearby:
-				{
-					float num2 = (!LocalPlayer.IsInCaves) ? this.SurfaceStressMusicChance : this.CaveStressMusicChance;
-					if (UnityEngine.Random.Range(0f, 100f) < num2)
+					if (currentEnemyPresence != sceneTracker.EnemyPresence.Nearby)
 					{
-						UnityUtil.ERRCHECK(this.TransitionParameter.setValue(2.5f));
+						if (currentEnemyPresence == sceneTracker.EnemyPresence.None)
+						{
+							UnityUtil.ERRCHECK(this.TransitionParameter.setValue(0f));
+						}
 					}
 					else
 					{
-						UnityUtil.ERRCHECK(this.TransitionParameter.setValue(0f));
+						float num2 = (!LocalPlayer.IsInCaves) ? this.SurfaceStressMusicChance : this.CaveStressMusicChance;
+						if (UnityEngine.Random.Range(0f, 100f) < num2)
+						{
+							UnityUtil.ERRCHECK(this.TransitionParameter.setValue(2.5f));
+						}
+						else
+						{
+							UnityUtil.ERRCHECK(this.TransitionParameter.setValue(0f));
+						}
 					}
-					break;
 				}
-				case sceneTracker.EnemyPresence.Attacking:
+				else
+				{
 					UnityUtil.ERRCHECK(this.TransitionParameter.setValue(3.5f));
-					break;
 				}
 			}
 			if (this.closeEnemies.Count <= 0)
@@ -606,40 +611,40 @@ public class sceneTracker : MonoBehaviour
 			{
 				if (this.climbableStructures[i])
 				{
-					bool validDistance = true;
+					bool flag = true;
 					if (distanceCheck)
 					{
-						validDistance = ((this.climbableStructures[i].transform.position - LocalPlayer.Transform.position).sqrMagnitude < 2500f);
+						flag = ((this.climbableStructures[i].transform.position - LocalPlayer.Transform.position).sqrMagnitude < 2500f);
 					}
-					if (validDistance)
+					if (flag)
 					{
-						Vector3 castPos = this.climbableStructures[i].transform.position;
-						castPos.y = Terrain.activeTerrain.SampleHeight(castPos) + Terrain.activeTerrain.transform.position.y;
+						Vector3 vector = this.climbableStructures[i].transform.position;
+						vector.y = Terrain.activeTerrain.SampleHeight(vector) + Terrain.activeTerrain.transform.position.y;
 						if (switchSide)
 						{
-							castPos -= this.climbableStructures[i].transform.right * 5.5f;
+							vector -= this.climbableStructures[i].transform.right * 5.5f;
 						}
 						else
 						{
-							castPos += this.climbableStructures[i].transform.right * 5.5f;
+							vector += this.climbableStructures[i].transform.right * 5.5f;
 						}
-						Vector3 storePos = castPos;
-						castPos.y += 100f;
+						Vector3 runToPosition = vector;
+						vector.y += 100f;
 						switchSide = !switchSide;
-						RaycastHit hit;
-						if (Physics.SphereCast(castPos, 4f, Vector3.down, out hit, 110f, this.climbLayerMask))
+						RaycastHit raycastHit;
+						if (Physics.SphereCast(vector, 4f, Vector3.down, out raycastHit, 110f, this.climbLayerMask))
 						{
 							removeMe.Add(this.climbableStructures[i].gameObject);
 						}
 						else
 						{
-							climbableWallSetup cws = this.climbableStructures[i].GetComponent<climbableWallSetup>();
-							if (!cws)
+							climbableWallSetup climbableWallSetup = this.climbableStructures[i].GetComponent<climbableWallSetup>();
+							if (!climbableWallSetup)
 							{
-								cws = this.climbableStructures[i].AddComponent<climbableWallSetup>();
+								climbableWallSetup = this.climbableStructures[i].AddComponent<climbableWallSetup>();
 							}
-							cws.runToPosition = storePos;
-							Debug.DrawRay(castPos, Vector3.down * 100f, Color.red, 15f);
+							climbableWallSetup.runToPosition = runToPosition;
+							Debug.DrawRay(vector, Vector3.down * 100f, Color.red, 15f);
 						}
 					}
 				}
@@ -652,11 +657,11 @@ public class sceneTracker : MonoBehaviour
 				this.validatingClimbingWalls = false;
 				yield break;
 			}
-			for (int x = 0; x < removeMe.Count; x++)
+			for (int j = 0; j < removeMe.Count; j++)
 			{
-				if (this.climbableStructures.Contains(removeMe[x]))
+				if (this.climbableStructures.Contains(removeMe[j]))
 				{
-					this.climbableStructures.Remove(removeMe[x]);
+					this.climbableStructures.Remove(removeMe[j]);
 				}
 			}
 			this.validatingClimbingWalls = false;
@@ -693,15 +698,15 @@ public class sceneTracker : MonoBehaviour
 		}
 		Bounds combinedBounds = startBounds;
 		List<Collider> allCol = new List<Collider>();
-		for (int x = 0; x < this.currentNavStructures.Count; x++)
+		for (int i = 0; i < this.currentNavStructures.Count; i++)
 		{
-			Collider[] getCol = this.currentNavStructures[x].GetComponentsInChildren<Collider>();
-			for (int y = 0; y < getCol.Length; y++)
+			Collider[] componentsInChildren = this.currentNavStructures[i].GetComponentsInChildren<Collider>();
+			for (int j = 0; j < componentsInChildren.Length; j++)
 			{
-				gridObjectBlocker st = getCol[y].transform.GetComponent<gridObjectBlocker>();
-				if (st)
+				gridObjectBlocker component = componentsInChildren[j].transform.GetComponent<gridObjectBlocker>();
+				if (component)
 				{
-					allCol.Add(getCol[y]);
+					allCol.Add(componentsInChildren[j]);
 				}
 			}
 		}
@@ -710,9 +715,9 @@ public class sceneTracker : MonoBehaviour
 		{
 			allCol.Add(rootCol);
 		}
-		for (int i = 0; i < allCol.Count; i++)
+		for (int k = 0; k < allCol.Count; k++)
 		{
-			combinedBounds.Encapsulate(allCol[i].bounds);
+			combinedBounds.Encapsulate(allCol[k].bounds);
 		}
 		GraphUpdateObject guo = new GraphUpdateObject(combinedBounds);
 		while (this.graphsBeingUpdated)
@@ -767,82 +772,82 @@ public class sceneTracker : MonoBehaviour
 			yield break;
 		}
 		int globalNavStructureCount = this.globalNavStructures.Count;
-		for (int y = 0; y < globalNavStructureCount; y++)
+		for (int i = 0; i < globalNavStructureCount; i++)
 		{
-			Transform startTr = this.globalNavStructures[y].transform;
-			globalNavId id = startTr.GetComponent<globalNavId>();
-			if (!id)
+			Transform transform = this.globalNavStructures[i].transform;
+			globalNavId globalNavId = transform.GetComponent<globalNavId>();
+			if (!globalNavId)
 			{
-				id = startTr.gameObject.AddComponent<globalNavId>();
-				id.navId = y;
-				for (int b = y + 1; b < globalNavStructureCount; b++)
+				globalNavId = transform.gameObject.AddComponent<globalNavId>();
+				globalNavId.navId = i;
+				for (int j = i + 1; j < globalNavStructureCount; j++)
 				{
-					globalNavId addId = this.globalNavStructures[b].GetComponent<globalNavId>();
-					if (!addId && (startTr.position - this.globalNavStructures[b].transform.position).sqrMagnitude < 10000f)
+					globalNavId globalNavId2 = this.globalNavStructures[j].GetComponent<globalNavId>();
+					if (!globalNavId2 && (transform.position - this.globalNavStructures[j].transform.position).sqrMagnitude < 10000f)
 					{
-						addId = this.globalNavStructures[b].AddComponent<globalNavId>();
-						addId.navId = y;
+						globalNavId2 = this.globalNavStructures[j].AddComponent<globalNavId>();
+						globalNavId2.navId = i;
 					}
 				}
 			}
 		}
 		int countUpdates = 0;
 		List<GameObject> processedStructures = new List<GameObject>();
-		for (int c = 0; c < globalNavStructureCount; c++)
+		for (int k = 0; k < globalNavStructureCount; k++)
 		{
-			globalNavId id2 = this.globalNavStructures[c].GetComponent<globalNavId>();
-			int startId = id2.navId;
-			if (!processedStructures.Contains(this.globalNavStructures[c]))
+			globalNavId component = this.globalNavStructures[k].GetComponent<globalNavId>();
+			int navId = component.navId;
+			if (!processedStructures.Contains(this.globalNavStructures[k]))
 			{
-				List<Collider> allCol = new List<Collider>();
-				for (int x = 0; x < globalNavStructureCount; x++)
+				List<Collider> list = new List<Collider>();
+				for (int l = 0; l < globalNavStructureCount; l++)
 				{
-					globalNavId getId = this.globalNavStructures[x].GetComponent<globalNavId>();
-					if (getId.navId == startId)
+					globalNavId component2 = this.globalNavStructures[l].GetComponent<globalNavId>();
+					if (component2.navId == navId)
 					{
-						processedStructures.Add(this.globalNavStructures[x]);
-						Collider[] getCol = this.globalNavStructures[x].GetComponentsInChildren<Collider>();
-						for (int y2 = 0; y2 < getCol.Length; y2++)
+						processedStructures.Add(this.globalNavStructures[l]);
+						Collider[] componentsInChildren = this.globalNavStructures[l].GetComponentsInChildren<Collider>();
+						for (int m = 0; m < componentsInChildren.Length; m++)
 						{
-							gridObjectBlocker st = getCol[y2].transform.GetComponent<gridObjectBlocker>();
-							if (st)
+							gridObjectBlocker component3 = componentsInChildren[m].transform.GetComponent<gridObjectBlocker>();
+							if (component3)
 							{
-								allCol.Add(getCol[y2]);
+								list.Add(componentsInChildren[m]);
 							}
 						}
-						Collider rootCol = this.globalNavStructures[x].GetComponent<Collider>();
-						if (rootCol && rootCol.GetComponent<gridObjectBlocker>())
+						Collider component4 = this.globalNavStructures[l].GetComponent<Collider>();
+						if (component4 && component4.GetComponent<gridObjectBlocker>())
 						{
-							allCol.Add(rootCol);
+							list.Add(component4);
 						}
 					}
 				}
-				Bounds combinedBounds = allCol[0].bounds;
-				for (int i = 1; i < allCol.Count; i++)
+				Bounds bounds = list[0].bounds;
+				for (int n = 1; n < list.Count; n++)
 				{
-					combinedBounds.Encapsulate(allCol[i].bounds);
+					bounds.Encapsulate(list[n].bounds);
 				}
 				countUpdates++;
-				GraphUpdateObject guo = new GraphUpdateObject(combinedBounds);
+				GraphUpdateObject graphUpdateObject = new GraphUpdateObject(bounds);
 				this.graphsBeingUpdated = true;
 				AstarPath.active.astarData.recastGraph.rasterizeColliders = false;
-				int indexOfGraph = (int)AstarPath.active.astarData.recastGraph.graphIndex;
-				guo.nnConstraint.graphMask = 1 << indexOfGraph;
-				AstarPath.active.UpdateGraphs(guo, 0f);
+				int graphIndex = (int)AstarPath.active.astarData.recastGraph.graphIndex;
+				graphUpdateObject.nnConstraint.graphMask = 1 << graphIndex;
+				AstarPath.active.UpdateGraphs(graphUpdateObject, 0f);
 			}
 		}
 		float startNavTime = Time.realtimeSinceStartup;
 		this.astarGuo.GetComponent<TileHandlerHelper>().ForceUpdate();
 		AstarPath.active.FlushWorkItems();
 		this.doingGlobalNavUpdate = false;
-		foreach (GameObject go in this.globalNavStructures)
+		foreach (GameObject gameObject in this.globalNavStructures)
 		{
-			if (go)
+			if (gameObject)
 			{
-				globalNavId id3 = go.GetComponent<globalNavId>();
-				if (id3)
+				globalNavId component5 = gameObject.GetComponent<globalNavId>();
+				if (component5)
 				{
-					UnityEngine.Object.Destroy(id3);
+					UnityEngine.Object.Destroy(component5);
 				}
 			}
 		}
@@ -876,7 +881,7 @@ public class sceneTracker : MonoBehaviour
 		{
 			combinedBounds.Encapsulate(this.dummyNavBounds[i]);
 		}
-		GameObject nav = (GameObject)UnityEngine.Object.Instantiate((GameObject)Resources.Load("dummyRootNavRemove"), pos, Quaternion.identity);
+		GameObject nav = UnityEngine.Object.Instantiate<GameObject>((GameObject)Resources.Load("dummyRootNavRemove"), pos, Quaternion.identity);
 		nav.SendMessage("doRootNavRemove", combinedBounds);
 		this.doingDummyNavUpdate = false;
 		this.dummyNavStructures.Clear();
@@ -917,6 +922,10 @@ public class sceneTracker : MonoBehaviour
 		int i = 0;
 		int y = 0;
 		bool flip = false;
+		if (CoopPeerStarter.DedicatedHost)
+		{
+			yield break;
+		}
 		for (;;)
 		{
 			try
@@ -947,7 +956,7 @@ public class sceneTracker : MonoBehaviour
 				}
 				if (this.placedDynamicObjectsAllPlayers.Count > 0 && y <= this.placedDynamicObjectsAllPlayers.Count)
 				{
-					if (CoopPeerStarter.DedicatedHost)
+					if (CoopPeerStarter.DedicatedHost && !this.placedDynamicObjectsAllPlayers[y].enableOnDedicatedServer)
 					{
 						if (this.placedDynamicObjectsAllPlayers[y] && this.placedDynamicObjectsAllPlayers[y].gameObject.activeSelf)
 						{
@@ -956,7 +965,7 @@ public class sceneTracker : MonoBehaviour
 					}
 					else if (this.placedDynamicObjectsAllPlayers[y] && LocalPlayer.Transform)
 					{
-						if (this.GetClosestPlayerDistanceFromPos(this.placedDynamicObjectsAllPlayers[y].position) < 75f)
+						if (this.GetClosestPlayerDistanceFromPos(this.placedDynamicObjectsAllPlayers[y].transform.position) < 75f)
 						{
 							if (!this.placedDynamicObjectsAllPlayers[y].gameObject.activeSelf)
 							{
@@ -1049,16 +1058,36 @@ public class sceneTracker : MonoBehaviour
 	}
 
 	
-	private const float MUSIC_PREAMBIENT = 0f;
-
-	
-	private const float MUSIC_AMBIENT = 1.5f;
-
-	
-	private const float MUSIC_STRESS = 2.5f;
-
-	
-	private const float MUSIC_COMBAT = 3.5f;
+	public IEnumerator swooshObjectRoutine(GameObject go)
+	{
+		if (!go.GetComponent<MeshRenderer>())
+		{
+			yield break;
+		}
+		Debug.Log("starting move");
+		GameObject meshTargetGo = new GameObject();
+		meshTargetGo.name = go.name + "_SWOOSH";
+		meshTargetGo.transform.parent = go.transform.parent;
+		meshTargetGo.transform.localPosition = go.transform.localPosition;
+		meshTargetGo.transform.localRotation = go.transform.localRotation;
+		meshTargetGo.transform.localScale = go.transform.localScale;
+		MeshFilter mf = meshTargetGo.AddComponent<MeshFilter>();
+		MeshRenderer mr = meshTargetGo.AddComponent<MeshRenderer>();
+		mf.sharedMesh = go.transform.GetComponent<MeshFilter>().sharedMesh;
+		mr.sharedMaterials = go.transform.GetComponent<MeshRenderer>().sharedMaterials;
+		meshTargetGo.layer = go.transform.gameObject.layer;
+		Vector3 targetPos = LocalPlayer.AnimControl.inventoryNapkin.transform.position;
+		float t = 0f;
+		while (t < 1f)
+		{
+			meshTargetGo.transform.position = Vector3.Lerp(meshTargetGo.transform.position, targetPos, t);
+			t += Time.unscaledDeltaTime * 7.5f;
+			yield return null;
+		}
+		UnityEngine.Object.Destroy(meshTargetGo);
+		yield return null;
+		yield break;
+	}
 
 	
 	public lb_BirdController birdController;
@@ -1082,13 +1111,13 @@ public class sceneTracker : MonoBehaviour
 	public PlayMakerArrayListProxy proxyAttackers;
 
 	
-	[Range(0f, 100f)]
 	[Tooltip("Percentage chance that stress music will play when above ground and enemies are nearby")]
+	[Range(0f, 100f)]
 	public float SurfaceStressMusicChance = 50f;
 
 	
-	[Range(0f, 100f)]
 	[Tooltip("Percentage chance that stress music will play when in a cave and enemies are nearby")]
+	[Range(0f, 100f)]
 	public float CaveStressMusicChance = 50f;
 
 	
@@ -1122,7 +1151,13 @@ public class sceneTracker : MonoBehaviour
 	public GameObject[] timmyCaveMarkers;
 
 	
+	public GameObject[] oceanCollision;
+
+	
 	public GameObject closeStructureTarget;
+
+	
+	public List<caveEntranceManager> caveEntrances = new List<caveEntranceManager>();
 
 	
 	public List<Transform> spawnedLogs = new List<Transform>();
@@ -1131,7 +1166,7 @@ public class sceneTracker : MonoBehaviour
 	public List<Transform> placedDynamicObjects = new List<Transform>();
 
 	
-	public List<Transform> placedDynamicObjectsAllPlayers = new List<Transform>();
+	public List<placedDynamicObjectDisabler> placedDynamicObjectsAllPlayers = new List<placedDynamicObjectDisabler>();
 
 	
 	public List<GameObject> storedRagDollPrefabs = new List<GameObject>();
@@ -1359,6 +1394,9 @@ public class sceneTracker : MonoBehaviour
 	public bool endBossSpawned;
 
 	
+	public bool goodbyeTimmyWeatherDone;
+
+	
 	private int maxSpawnedLogs;
 
 	
@@ -1369,6 +1407,18 @@ public class sceneTracker : MonoBehaviour
 
 	
 	private EventInstance CaveMusic;
+
+	
+	private const float MUSIC_PREAMBIENT = 0f;
+
+	
+	private const float MUSIC_AMBIENT = 1.5f;
+
+	
+	private const float MUSIC_STRESS = 2.5f;
+
+	
+	private const float MUSIC_COMBAT = 3.5f;
 
 	
 	private EventInstance ActiveMusic;

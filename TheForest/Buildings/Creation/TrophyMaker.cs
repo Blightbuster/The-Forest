@@ -32,7 +32,7 @@ namespace TheForest.Buildings.Creation
 					if (BoltNetwork.isRunning)
 					{
 						PlaceTrophy placeTrophy = global::PlaceTrophy.Create(GlobalTargets.OnlyServer);
-						placeTrophy.Maker = this.entity;
+						placeTrophy.Maker = base.entity;
 						placeTrophy.ItemId = itemId;
 						placeTrophy.Send();
 						EventRegistry.Achievements.Publish(TfEvent.Achievements.CreatedTrophy, itemId);
@@ -69,7 +69,7 @@ namespace TheForest.Buildings.Creation
 		
 		public void PlaceTrophy(int itemId)
 		{
-			Transform transform = (Transform)UnityEngine.Object.Instantiate(Prefabs.Instance.TrophyPrefabs.First((Prefabs.TrophyPrefab tp) => tp._itemId == itemId)._prefab, base.transform.parent.position, base.transform.parent.rotation);
+			Transform transform = UnityEngine.Object.Instantiate<Transform>(Prefabs.Instance.TrophyPrefabs.First((Prefabs.TrophyPrefab tp) => tp._itemId == itemId)._prefab, base.transform.parent.position, base.transform.parent.rotation);
 			transform.parent = base.transform.parent.parent;
 			if (BoltNetwork.isRunning)
 			{

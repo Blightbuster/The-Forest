@@ -164,10 +164,16 @@ public class lb_BirdController : MonoBehaviour
 	
 	private void Start()
 	{
+		base.StartCoroutine(this.StartBirdsRoutine());
+	}
+
+	
+	private IEnumerator StartBirdsRoutine()
+	{
 		base.InvokeRepeating("checkHandConditions", 1f, 8f);
 		if (BoltNetwork.isClient)
 		{
-			return;
+			yield break;
 		}
 		this.rg = AstarPath.active.astarData.recastGraph;
 		this.layerMask = 513;
@@ -185,43 +191,26 @@ public class lb_BirdController : MonoBehaviour
 		{
 			this.idealNumberOfBirds = this.maximumNumberOfBirds - 1;
 		}
-		if (this.seagull)
-		{
-			this.myBirdTypes.Add("lb_seagull");
-		}
-		if (this.blueBird)
-		{
-			this.myBirdTypes.Add("lb_blueBird");
-		}
-		if (this.redBird)
-		{
-			this.myBirdTypes.Add("lb_redBird");
-		}
-		if (this.chickadee)
-		{
-			this.myBirdTypes.Add("lb_chickadee");
-		}
-		if (this.sparrow)
-		{
-			this.myBirdTypes.Add("lb_sparrow");
-		}
-		if (this.crow)
-		{
-			this.myBirdTypes.Add("lb_crow");
-		}
 		this.myBirds = new GameObject[this.maximumNumberOfBirds];
-		int num = 0;
+		int nextVal = 0;
 		for (int i = 0; i < this.myBirds.Length; i++)
 		{
-			GameObject original = Resources.Load(this.myBirdTypes[num], typeof(GameObject)) as GameObject;
-			this.myBirds[i] = (UnityEngine.Object.Instantiate(original, Vector3.zero, Quaternion.identity) as GameObject);
-			this.myBirds[i].SendMessage("SetController", this);
-			this.myBirds[i].SetActive(false);
-			num++;
-			if (num == this.myBirdTypes.Count)
+			GameObject bird = UnityEngine.Object.Instantiate<GameObject>(this.birdPrefabs[nextVal], Vector3.zero, Quaternion.identity);
+			this.myBirds[i] = bird;
+			nextVal++;
+			if (nextVal == this.birdPrefabs.Length)
 			{
-				num = 0;
+				nextVal = 0;
 			}
+		}
+		for (int j = 0; j < this.myBirds.Length; j++)
+		{
+			lb_Bird component = this.myBirds[j].GetComponent<lb_Bird>();
+			if (component)
+			{
+				component.SetController(this);
+			}
+			this.myBirds[j].SetActive(false);
 		}
 		if (!base.IsInvoking("UpdateBirds"))
 		{
@@ -238,6 +227,8 @@ public class lb_BirdController : MonoBehaviour
 		this.birdPerchTargets.Clear();
 		this.birdGroundTargets.Clear();
 		base.StartCoroutine("UpdateTargets");
+		yield return null;
+		yield break;
 	}
 
 	
@@ -419,13 +410,13 @@ public class lb_BirdController : MonoBehaviour
 					this.ptRemove.Add(this.birdPerchTargets[j]);
 				}
 			}
-			foreach (GameObject entry in this.gtRemove)
+			foreach (GameObject item in this.gtRemove)
 			{
-				this.birdGroundTargets.Remove(entry);
+				this.birdGroundTargets.Remove(item);
 			}
-			foreach (GameObject entry2 in this.ptRemove)
+			foreach (GameObject item2 in this.ptRemove)
 			{
-				this.birdPerchTargets.Remove(entry2);
+				this.birdPerchTargets.Remove(item2);
 			}
 			yield return null;
 			yield return null;
@@ -435,15 +426,15 @@ public class lb_BirdController : MonoBehaviour
 			for (int x = 0; x < Scene.SceneTracker.allPlayers.Count; x++)
 			{
 				Collider[] hits = Physics.OverlapSphere(Scene.SceneTracker.allPlayers[x].transform.position, this.unspawnDistance, this.layerMask);
-				for (int y = 0; y < hits.Length; y++)
+				for (int k = 0; k < hits.Length; k++)
 				{
-					if (hits[y].tag == "lb_groundTarget" && !this.birdGroundTargets.Contains(hits[y].gameObject))
+					if (hits[k].tag == "lb_groundTarget" && !this.birdGroundTargets.Contains(hits[k].gameObject))
 					{
-						this.birdGroundTargets.Add(hits[y].gameObject);
+						this.birdGroundTargets.Add(hits[k].gameObject);
 					}
-					if (hits[y].tag == "lb_perchTarget" && !this.birdPerchTargets.Contains(hits[y].gameObject))
+					if (hits[k].tag == "lb_perchTarget" && !this.birdPerchTargets.Contains(hits[k].gameObject))
 					{
-						this.birdPerchTargets.Add(hits[y].gameObject);
+						this.birdPerchTargets.Add(hits[k].gameObject);
 					}
 				}
 				yield return null;
@@ -734,7 +725,7 @@ public class lb_BirdController : MonoBehaviour
 	public GameObject[] myBirds;
 
 	
-	private List<string> myBirdTypes = new List<string>();
+	public GameObject[] birdPrefabs;
 
 	
 	public List<GameObject> birdGroundTargets = new List<GameObject>();

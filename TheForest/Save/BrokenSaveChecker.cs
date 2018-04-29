@@ -3,6 +3,7 @@ using System.Collections;
 using TheForest.Items.Inventory;
 using TheForest.Utils;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace TheForest.Save
 {
@@ -43,7 +44,7 @@ namespace TheForest.Save
 			GUI.Label(new Rect((float)(Screen.width / 2 - 125), (float)(Screen.height / 2 + 40), 250f, 40f), this._brokenSaveText, GUI.skin.box);
 			if (GUI.Button(new Rect((float)(Screen.width / 2 - 180), (float)(Screen.height / 2 + 100), 360f, 60f), this._backToTitleSceneButtonText))
 			{
-				Application.LoadLevel(0);
+				SceneManager.LoadScene(0, LoadSceneMode.Single);
 			}
 			if (this._playAnywaysTimer < Time.time && GUI.Button(new Rect((float)(Screen.width / 2 - 180), (float)(Screen.height / 2 + 200), 360f, 60f), this._playAnywaysButtonText))
 			{
@@ -60,7 +61,7 @@ namespace TheForest.Save
 		
 		private bool CheckSceneComponents()
 		{
-			if (!Scene.Atmosphere || !Scene.Yacht || !Scene.Clock || Scene.Clock.Atmos == null || Scene.Atmosphere.Sun == null)
+			if (!TheForest.Utils.Scene.Atmosphere || !TheForest.Utils.Scene.Yacht || !TheForest.Utils.Scene.Clock || TheForest.Utils.Scene.Clock.Atmos == null || TheForest.Utils.Scene.Atmosphere.Sun == null)
 			{
 				Debug.LogError("*****************************************");
 				Debug.LogError("*****************************************");

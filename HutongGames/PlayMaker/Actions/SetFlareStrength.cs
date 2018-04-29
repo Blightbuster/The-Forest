@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the intensity of all Flares in the scene.")]
 	[ActionCategory(ActionCategory.RenderSettings)]
+	[Tooltip("Sets the intensity of all Flares in the scene.")]
 	public class SetFlareStrength : FsmStateAction
 	{
 		

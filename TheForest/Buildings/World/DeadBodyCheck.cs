@@ -4,8 +4,8 @@ using UnityEngine;
 namespace TheForest.Buildings.World
 {
 	
-	[AddComponentMenu("Buildings/World/Dead Body Check")]
 	[DoNotSerializePublic]
+	[AddComponentMenu("Buildings/World/Dead Body Check")]
 	public class DeadBodyCheck : MonoBehaviour
 	{
 		

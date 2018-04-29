@@ -8,9 +8,9 @@ public class Molotov : EntityBehaviour<IMolotovState>
 	
 	private void Start()
 	{
-		if (BoltNetwork.isRunning && this.entity && !this.entity.isAttached)
+		if (BoltNetwork.isRunning && base.entity && !base.entity.isAttached)
 		{
-			BoltNetwork.Attach(this.entity);
+			BoltNetwork.Attach(base.entity);
 		}
 	}
 
@@ -27,7 +27,7 @@ public class Molotov : EntityBehaviour<IMolotovState>
 	public override void Attached()
 	{
 		Rigidbody componentInParent = base.GetComponentInParent<Rigidbody>();
-		if (!this.entity.isOwner)
+		if (!base.entity.isOwner)
 		{
 			if (componentInParent)
 			{
@@ -43,7 +43,7 @@ public class Molotov : EntityBehaviour<IMolotovState>
 	
 	private void OnTriggerEnter(Collider other)
 	{
-		if (BoltNetwork.isRunning && this.entity && (!this.entity.isAttached || !this.entity.isOwner))
+		if (BoltNetwork.isRunning && base.entity && (!base.entity.isAttached || !base.entity.isOwner))
 		{
 			return;
 		}
@@ -53,7 +53,7 @@ public class Molotov : EntityBehaviour<IMolotovState>
 		}
 		else if (other.CompareTag("enemyCollide"))
 		{
-			this.doBreak();
+			this.doBreak(true);
 			if (this.canDouse && !this.alreadyDoused)
 			{
 				other.gameObject.SendMessageUpwards("douseEnemy", SendMessageOptions.DontRequireReceiver);
@@ -62,12 +62,12 @@ public class Molotov : EntityBehaviour<IMolotovState>
 				other.transform.SendMessageUpwards("Hit", 1, SendMessageOptions.DontRequireReceiver);
 				this.alreadyDoused = true;
 			}
-			base.Invoke("CleanUp", 1f);
+			base.Invoke("CleanUp", 5f);
 		}
 		else if (other.CompareTag("FireTrigger"))
 		{
 			this.Wet = true;
-			this.doBreak();
+			this.doBreak(false);
 			if (BoltNetwork.isRunning)
 			{
 				FireAddFuelEvent fireAddFuelEvent = FireAddFuelEvent.Raise(GlobalTargets.OnlyServer);
@@ -86,10 +86,10 @@ public class Molotov : EntityBehaviour<IMolotovState>
 		}
 		else if (this.DousedMolotovPrefab && other.CompareTag("BrokenMolotovUnlit"))
 		{
-			this.doBreak();
+			this.doBreak(false);
 			if (!BoltNetwork.isRunning)
 			{
-				UnityEngine.Object.Instantiate(this.DousedMolotovPrefab, other.transform.position, other.transform.rotation);
+				UnityEngine.Object.Instantiate<GameObject>(this.DousedMolotovPrefab, other.transform.position, other.transform.rotation);
 				UnityEngine.Object.Destroy(other.gameObject);
 			}
 			else
@@ -102,7 +102,7 @@ public class Molotov : EntityBehaviour<IMolotovState>
 	}
 
 	
-	private void OnCollisionEnter(Collision collision)
+	public void OnCollisionEnter(Collision collision)
 	{
 		this.doMolotovCollision(collision);
 	}
@@ -110,7 +110,7 @@ public class Molotov : EntityBehaviour<IMolotovState>
 	
 	public void doMolotovCollision(Collision collision)
 	{
-		if (BoltNetwork.isRunning && !this.entity.isOwner)
+		if (BoltNetwork.isRunning && !base.entity.isOwner)
 		{
 			return;
 		}
@@ -118,7 +118,7 @@ public class Molotov : EntityBehaviour<IMolotovState>
 		{
 			if (!this.Wet)
 			{
-				this.doBreak();
+				this.doBreak(false);
 			}
 			this.StartCleanUp();
 		}
@@ -128,11 +128,18 @@ public class Molotov : EntityBehaviour<IMolotovState>
 	private void OnArrowHit()
 	{
 		base.transform.parent = null;
-		this.doBreak();
+		this.doBreak(false);
 	}
 
 	
-	private void doBreak()
+	public void IncendiaryBreak()
+	{
+		base.transform.parent = null;
+		this.doBreak(false);
+	}
+
+	
+	private void doBreak(bool shortFire = false)
 	{
 		if (BoltNetwork.isRunning && base.state != null)
 		{
@@ -142,6 +149,7 @@ public class Molotov : EntityBehaviour<IMolotovState>
 		else
 		{
 			base.transform.root.SendMessage("setStateBroken", true, SendMessageOptions.DontRequireReceiver);
+			this.setShortFire = shortFire;
 			this.doBreakReal();
 		}
 	}
@@ -151,12 +159,20 @@ public class Molotov : EntityBehaviour<IMolotovState>
 	{
 		if (!this._broken)
 		{
-			UnityEngine.Object.Instantiate(this.soundGo, base.transform.position, base.transform.rotation);
+			UnityEngine.Object.Instantiate<GameObject>(this.soundGo, base.transform.position, base.transform.rotation);
 			this._broken = true;
 			base.gameObject.GetComponentInParent<Rigidbody>().isKinematic = true;
 			this.Bottle.SetActive(false);
+			if (this.setShortFire)
+			{
+				MasterFireSpread component = this.BottleBroken.GetComponent<MasterFireSpread>();
+				if (component)
+				{
+					component.useShortFire = true;
+				}
+			}
 			this.BottleBroken.SetActive(true);
-			if (!BoltNetwork.isRunning || this.entity.isOwner)
+			if (!BoltNetwork.isRunning || base.entity.isOwner)
 			{
 				this.StartCleanUp();
 			}
@@ -180,7 +196,7 @@ public class Molotov : EntityBehaviour<IMolotovState>
 	{
 		if (BoltNetwork.isRunning)
 		{
-			if (!this.entity.isAttached || this.entity.isOwner)
+			if (!base.entity.isAttached || base.entity.isOwner)
 			{
 				UnityEngine.Object.Destroy(base.GetComponentInParent<Rigidbody>().gameObject);
 			}
@@ -208,6 +224,9 @@ public class Molotov : EntityBehaviour<IMolotovState>
 
 	
 	private bool alreadyDoused;
+
+	
+	private bool setShortFire;
 
 	
 	public GameObject Bottle;

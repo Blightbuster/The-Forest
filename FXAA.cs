@@ -2,9 +2,9 @@
 using UnityEngine;
 
 
-[AddComponentMenu("Image Effects/FXAA")]
 [ExecuteInEditMode]
 [RequireComponent(typeof(Camera))]
+[AddComponentMenu("Image Effects/FXAA")]
 public class FXAA : FXAAPostEffectsBase
 {
 	

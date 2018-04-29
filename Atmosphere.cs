@@ -3,8 +3,8 @@ using UnityEngine;
 
 
 [ExecuteInEditMode]
-[AddComponentMenu("Image Effects/Atmosphere")]
 [RequireComponent(typeof(Camera))]
+[AddComponentMenu("Image Effects/Atmosphere")]
 public class Atmosphere : MonoBehaviour
 {
 	

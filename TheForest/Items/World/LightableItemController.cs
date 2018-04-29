@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections;
-using ModAPI;
 using TheForest.Items.Inventory;
 using TheForest.Items.Special;
 using TheForest.Items.World.Interfaces;
 using TheForest.Utils;
-using UltimateCheatmenu;
 using UnityEngine;
 
 namespace TheForest.Items.World
@@ -19,7 +17,17 @@ namespace TheForest.Items.World
 		public bool isLighting { get; private set; }
 
 		
-		private void __OnEnable__Original()
+		private void Start()
+		{
+			FMOD_StudioEventEmitter component = base.GetComponent<FMOD_StudioEventEmitter>();
+			if (component)
+			{
+				component.enabled = true;
+			}
+		}
+
+		
+		private void OnEnable()
 		{
 			if (!this.checkForEquipped && LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.LeftHand, this._lighterId))
 			{
@@ -41,36 +49,19 @@ namespace TheForest.Items.World
 		}
 
 		
-		private void __Update__Original()
+		private void Update()
 		{
-			if (!LighterControler.IsBusy)
+			if (!LighterControler.IsBusy && TheForest.Utils.Input.GetButtonAfterDelay("Lighter", 0.5f, false) && !this.isLighting)
 			{
-				if (TheForest.Utils.Input.GetButton("Lighter") && !this.isLighting)
+				if (!LocalPlayer.Inventory.DefaultLight.IsReallyActive)
 				{
-					Scene.HudGui.SetDelayedIconController(this);
+					LocalPlayer.Inventory.LastLight = LocalPlayer.Inventory.DefaultLight;
+					LocalPlayer.Inventory.TurnOnLastLight();
 				}
-				else
-				{
-					Scene.HudGui.UnsetDelayedIconController(this);
-				}
-				if (TheForest.Utils.Input.GetButtonAfterDelay("Lighter", 0.5f, false) && !this.isLighting)
-				{
-					if (!LocalPlayer.Inventory.DefaultLight.IsReallyActive)
-					{
-						LocalPlayer.Inventory.LastLight = LocalPlayer.Inventory.DefaultLight;
-						LocalPlayer.Inventory.TurnOnLastLight();
-					}
-					base.CancelInvoke("ResetIsLighting");
-					base.Invoke("ResetIsLighting", 4f);
-					this.isLighting = true;
-					LocalPlayer.SpecialItems.SendMessage("LightHeldFire");
-					Scene.HudGui.UnsetDelayedIconController(this);
-				}
-			}
-			if (TheForest.Utils.Input.GetButtonUp("Lighter"))
-			{
-				TheForest.Utils.Input.ResetDelayedAction();
-				Scene.HudGui.UnsetDelayedIconController(this);
+				base.CancelInvoke("ResetIsLighting");
+				base.Invoke("ResetIsLighting", 4f);
+				this.isLighting = true;
+				LocalPlayer.SpecialItems.SendMessage("LightHeldFire");
 			}
 		}
 
@@ -83,13 +74,6 @@ namespace TheForest.Items.World
 		
 		private void GotClean()
 		{
-			if (this.isLit)
-			{
-				FMODCommon.PlayOneshotNetworked("event:/player/actions/molotov_quench", base.transform, FMODCommon.NetworkRole.Any);
-			}
-			this.isLit = false;
-			base.StartCoroutine("forceFireOff");
-			LighterControler.HasLightableItem = true;
 		}
 
 		
@@ -115,6 +99,10 @@ namespace TheForest.Items.World
 			if (LocalPlayer.Inventory)
 			{
 				LocalPlayer.Inventory.SpecialItems.SendMessage("disableBreakRoutine", SendMessageOptions.DontRequireReceiver);
+			}
+			if (this.Equals(LocalPlayer.ActiveBurnableItem))
+			{
+				LocalPlayer.ActiveBurnableItem = null;
 			}
 		}
 
@@ -202,49 +190,6 @@ namespace TheForest.Items.World
 		public bool IsUnlit()
 		{
 			return !this.isLighting && !this.isLit;
-		}
-
-		
-		private void OnEnable()
-		{
-			try
-			{
-				this.__OnEnable__Original();
-				if (!this.isLit && UCheatmenu.InstLighter)
-				{
-					base.CancelInvoke("ResetIsLighting");
-					this.isLighting = true;
-					LocalPlayer.SpecialItems.SendMessage("LightHeldFire");
-				}
-			}
-			catch (Exception ex)
-			{
-				Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-				this.__OnEnable__Original();
-			}
-		}
-
-		
-		private void Update()
-		{
-			try
-			{
-				if (!this.isLit && UCheatmenu.InstLighter)
-				{
-					base.CancelInvoke("ResetIsLighting");
-					this.isLighting = true;
-					LocalPlayer.SpecialItems.SendMessage("LightHeldFire");
-				}
-				if (!UCheatmenu.InstLighter)
-				{
-					this.__Update__Original();
-				}
-			}
-			catch (Exception ex)
-			{
-				Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-				this.__Update__Original();
-			}
 		}
 
 		

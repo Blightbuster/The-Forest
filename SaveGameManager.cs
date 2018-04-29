@@ -5,8 +5,8 @@ using UniLinq;
 using UnityEngine;
 
 
-[AddComponentMenu("Storage/Save Game Manager")]
 [ExecuteInEditMode]
+[AddComponentMenu("Storage/Save Game Manager")]
 public class SaveGameManager : MonoBehaviour
 {
 	
@@ -18,9 +18,7 @@ public class SaveGameManager : MonoBehaviour
 		{
 			if (SaveGameManager.instance == null)
 			{
-				SaveGameManager.instance = (from GameObject g in UnityEngine.Object.FindObjectsOfType(typeof(GameObject))
-				where g.GetComponent<SaveGameManager>() != null
-				select g.GetComponent<SaveGameManager>()).FirstOrDefault<SaveGameManager>();
+				SaveGameManager.instance = UnityEngine.Object.FindObjectOfType<SaveGameManager>();
 				if (SaveGameManager.instance == null)
 				{
 					GameObject gameObject = new GameObject("Save Game Manager");
@@ -229,6 +227,11 @@ public class SaveGameManager : MonoBehaviour
 		}
 		if (SaveGameManager.Instance != null && SaveGameManager.Instance != this)
 		{
+			if (SaveGameManager.Instance.requiredObjects.Length >= this.requiredObjects.Length)
+			{
+				UnityEngine.Object.Destroy(base.gameObject);
+				return;
+			}
 			UnityEngine.Object.Destroy(SaveGameManager.Instance.gameObject);
 		}
 		SaveGameManager.Instance = this;

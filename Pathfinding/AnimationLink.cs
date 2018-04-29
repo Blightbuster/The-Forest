@@ -37,7 +37,7 @@ namespace Pathfinding
 			{
 				return;
 			}
-			GameObject gameObject = UnityEngine.Object.Instantiate(this.referenceMesh, base.transform.position, base.transform.rotation) as GameObject;
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.referenceMesh, base.transform.position, base.transform.rotation);
 			gameObject.hideFlags = HideFlags.HideAndDontSave;
 			Transform transform = AnimationLink.SearchRec(gameObject.transform, this.boneRoot);
 			if (transform == null)

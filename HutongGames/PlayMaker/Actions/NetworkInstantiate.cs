@@ -77,8 +77,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmVector3 rotation;
 
 		
-		[Tooltip("Optionally store the created object.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Optionally store the created object.")]
 		public FsmGameObject storeObject;
 
 		

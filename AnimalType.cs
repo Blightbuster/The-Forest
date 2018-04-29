@@ -44,5 +44,51 @@ public enum AnimalType
 	
 	Squirrel,
 	
-	Tortoise
+	Tortoise,
+	
+	Cod,
+	
+	Carp,
+	
+	RockBeauty,
+	
+	YellowTail,
+	
+	Surgeon,
+	
+	FireWeed,
+	
+	Dandelion,
+	
+	Horsetail,
+	
+	Thistle,
+	
+	Aloe,
+	
+	BlueBerry,
+	
+	TwinBerry,
+	
+	Chicory,
+	
+	ConeFlower,
+	
+	Marigold,
+	
+	SnowBerry,
+	
+	BlackBerry,
+	
+	MushroomAman,
+	
+	MushroomChant,
+	
+	MushroomDeer,
+	
+	MushroomJack,
+	
+	MushroomLibertyCap,
+	
+	MuhshroomPuff
 }

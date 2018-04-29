@@ -20,7 +20,7 @@ public class LOD_GroupToggle : MonoBehaviour, IThreadSafeTask
 	{
 		try
 		{
-			WorkScheduler.Unregister(this, this._wsToken);
+			this.OnDisable();
 		}
 		catch
 		{
@@ -31,7 +31,7 @@ public class LOD_GroupToggle : MonoBehaviour, IThreadSafeTask
 	private void OnEnable()
 	{
 		this._position = base.transform.position;
-		if (!LevelSerializer.IsDeserializing)
+		if (!LevelSerializer.IsDeserializing && this._levels != null)
 		{
 			this.WSRegistration(this._doEnableRefresh);
 		}
@@ -44,15 +44,11 @@ public class LOD_GroupToggle : MonoBehaviour, IThreadSafeTask
 	
 	private void OnDisable()
 	{
-		if (this._wsToken > -1)
-		{
-			WorkScheduler.Unregister(this, this._wsToken);
-			this._wsToken = -1;
-		}
+		this.WSUnregister();
 	}
 
 	
-	public void CheckWsToken()
+	public virtual void CheckWsToken()
 	{
 		if (this._wsToken > -1 && !WorkScheduler.CheckTokenForPosition(this._position, this._wsToken))
 		{
@@ -68,7 +64,7 @@ public class LOD_GroupToggle : MonoBehaviour, IThreadSafeTask
 	}
 
 	
-	private void WSRegistration(bool doEnableRefresh)
+	protected virtual void WSRegistration(bool doEnableRefresh)
 	{
 		if (this._wsToken != -1)
 		{
@@ -84,7 +80,24 @@ public class LOD_GroupToggle : MonoBehaviour, IThreadSafeTask
 	}
 
 	
-	private void RefreshVisibility(bool force)
+	protected virtual void WSUnregister()
+	{
+		if (this._wsToken > -1)
+		{
+			WorkScheduler.Unregister(this, this._wsToken);
+			this._wsToken = -1;
+		}
+	}
+
+	
+	public void ForceVisibility(byte level)
+	{
+		this._nextVisibility = level;
+		this.RefreshVisibility(true);
+	}
+
+	
+	public virtual void RefreshVisibility(bool force)
 	{
 		this._position = base.transform.position;
 		if (force)
@@ -116,7 +129,7 @@ public class LOD_GroupToggle : MonoBehaviour, IThreadSafeTask
 	public bool ShouldDoMainThreadRefresh { get; set; }
 
 	
-	public void ThreadedRefresh()
+	public virtual void ThreadedRefresh()
 	{
 		float num = 0f;
 		if (this._mpCheckAllPlayers)
@@ -160,16 +173,16 @@ public class LOD_GroupToggle : MonoBehaviour, IThreadSafeTask
 	public bool _doEnableRefresh = true;
 
 	
-	private int _wsToken = -1;
+	protected int _wsToken = -1;
 
 	
-	private byte _nextVisibility;
+	protected byte _nextVisibility;
 
 	
-	private byte _currentVisibility;
+	protected byte _currentVisibility;
 
 	
-	private Vector3 _position;
+	protected Vector3 _position;
 
 	
 	[Serializable]

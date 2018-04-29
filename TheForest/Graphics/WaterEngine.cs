@@ -13,14 +13,6 @@ namespace TheForest.Graphics
 	public class WaterEngine : MonoBehaviour
 	{
 		
-		public WaterEngine()
-		{
-			this.depthCameras = new List<Camera>();
-			this.depthTextures = new List<RenderTexture>();
-			base..ctor();
-		}
-
-		
 		private void EnableDepth()
 		{
 			if (this.depthShader == null)
@@ -72,7 +64,7 @@ namespace TheForest.Graphics
 		
 		private void RenderDepth(Camera camera)
 		{
-			if (camera.name != "SceneCamera" && DepthBufferGrabCommand.HasCamera(camera) && this.usingSharedDepthGrab)
+			if (DepthBufferGrabCommand.HasCamera(camera) && this.usingSharedDepthGrab)
 			{
 				DepthBufferGrabCommand.AddBinding(camera, "CameraDepthTexture");
 				this.ReleaseDepthTexture(camera);
@@ -146,7 +138,6 @@ namespace TheForest.Graphics
 		
 		private void EnableReflection()
 		{
-			this.reflectionCamera = this.CreateReflectionCamera();
 		}
 
 		
@@ -191,7 +182,6 @@ namespace TheForest.Graphics
 		
 		private void RenderReflection(Water water, Camera camera, Transform cameraTransform)
 		{
-			this.RenderReflection(water.transform, camera, cameraTransform);
 		}
 
 		
@@ -246,6 +236,7 @@ namespace TheForest.Graphics
 			gameObject.transform.Reset();
 			gameObject.hideFlags = HideFlags.HideAndDontSave;
 			Camera camera = gameObject.AddComponent<Camera>();
+			camera.name = "Reflection Camera";
 			camera.enabled = false;
 			return camera;
 		}
@@ -415,9 +406,9 @@ namespace TheForest.Graphics
 				Shader.SetGlobalTexture("UnderWaterScreenTexture", source);
 				if (this.sunLight && this.sunLight.enabled)
 				{
-					Vector4 vec = -this.sunLight.transform.forward;
-					vec.w = this.sunLight.intensity;
-					Shader.SetGlobalVector("UnderWaterSunParams", vec);
+					Vector4 value = -this.sunLight.transform.forward;
+					value.w = this.sunLight.intensity;
+					Shader.SetGlobalVector("UnderWaterSunParams", value);
 					Shader.SetGlobalColor("UnderWaterSunColor", this.sunLight.color);
 				}
 				else
@@ -427,9 +418,9 @@ namespace TheForest.Graphics
 				}
 				if (this.moonLight && this.moonLight.enabled)
 				{
-					Vector4 vec2 = -this.moonLight.transform.forward;
-					vec2.w = this.moonLight.intensity;
-					Shader.SetGlobalVector("UnderWaterMoonParams", vec2);
+					Vector4 value2 = -this.moonLight.transform.forward;
+					value2.w = this.moonLight.intensity;
+					Shader.SetGlobalVector("UnderWaterMoonParams", value2);
 					Shader.SetGlobalColor("UnderWaterMoonColor", this.moonLight.color);
 				}
 				else
@@ -586,7 +577,6 @@ namespace TheForest.Graphics
 			WaterEngine.currentTransform = base.transform;
 			this.EnableDepth();
 			this.EnableReflection();
-			this.EnableUnderWater();
 			this.DebugFlags();
 		}
 
@@ -649,7 +639,6 @@ namespace TheForest.Graphics
 		}
 
 		
-		[ImageEffectOpaque]
 		private void OnRenderImage(RenderTexture source, RenderTexture destination)
 		{
 			Camera camera = WaterEngine.Camera;
@@ -659,12 +648,22 @@ namespace TheForest.Graphics
 				this.UpdateCurrentWater(cameraTransform.position);
 				this.RenderDepth(camera);
 			}
-			if (WaterEngine.currentWater && camera && LocalPlayer.WaterViz && LocalPlayer.WaterViz.InWater && LocalPlayer.IsInCaves)
+			if (WaterEngine.currentWater && camera && LocalPlayer.WaterViz && LocalPlayer.WaterViz.InWater)
 			{
-				this.RenderUnderWater(WaterEngine.currentWater, camera, cameraTransform, source, destination);
+				if (WaterEngine.currentWater != WaterEngine.ocean)
+				{
+					Shader.SetGlobalFloat("ignoreSunshine", 1f);
+				}
+				else
+				{
+					Shader.SetGlobalFloat("ignoreSunshine", 0f);
+				}
+				Shader.SetGlobalFloat("UnderWaterWaterLevel", WaterEngine.currentWater.transform.position.y);
+				Graphics.Blit(source, destination);
 			}
 			else
 			{
+				Shader.SetGlobalFloat("ignoreSunshine", 0f);
 				Graphics.Blit(source, destination);
 			}
 		}
@@ -700,10 +699,10 @@ namespace TheForest.Graphics
 		private Material depthMaterial;
 
 		
-		private List<Camera> depthCameras;
+		private List<Camera> depthCameras = new List<Camera>();
 
 		
-		private List<RenderTexture> depthTextures;
+		private List<RenderTexture> depthTextures = new List<RenderTexture>();
 
 		
 		public Utility.TextureResolution reflectionResolution = Utility.TextureResolution._512;

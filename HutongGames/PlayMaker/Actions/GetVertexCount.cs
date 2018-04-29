@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the number of vertices in a GameObject's mesh. Useful in conjunction with GetVertexPosition.")]
 	[ActionCategory("Mesh")]
+	[Tooltip("Gets the number of vertices in a GameObject's mesh. Useful in conjunction with GetVertexPosition.")]
 	public class GetVertexCount : FsmStateAction
 	{
 		
@@ -41,7 +41,7 @@ namespace HutongGames.PlayMaker.Actions
 				MeshFilter component = ownerDefaultTarget.GetComponent<MeshFilter>();
 				if (component == null)
 				{
-					this.LogError("Missing MeshFilter!");
+					base.LogError("Missing MeshFilter!");
 					return;
 				}
 				this.storeCount.Value = component.mesh.vertexCount;
@@ -49,9 +49,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject to check.")]
-		[CheckForComponent(typeof(MeshFilter))]
 		[RequiredField]
+		[CheckForComponent(typeof(MeshFilter))]
+		[Tooltip("The GameObject to check.")]
 		public FsmOwnerDefault gameObject;
 
 		

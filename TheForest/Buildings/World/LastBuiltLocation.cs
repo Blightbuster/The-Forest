@@ -6,8 +6,8 @@ using UnityEngine;
 namespace TheForest.Buildings.World
 {
 	
-	[RequireComponent(typeof(GUITexture))]
 	[DoNotSerializePublic]
+	[RequireComponent(typeof(GUITexture))]
 	public class LastBuiltLocation : MonoBehaviour
 	{
 		

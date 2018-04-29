@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Restarts current level.")]
 	[ActionCategory(ActionCategory.Level)]
+	[Tooltip("Restarts current level.")]
 	public class RestartLevel : FsmStateAction
 	{
 		

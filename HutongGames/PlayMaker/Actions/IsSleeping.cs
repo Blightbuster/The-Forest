@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Tests if a Game Object's Rigid Body is sleeping.")]
 	[ActionCategory(ActionCategory.Physics)]
+	[Tooltip("Tests if a Game Object's Rigid Body is sleeping.")]
 	public class IsSleeping : ComponentAction<Rigidbody>
 	{
 		
@@ -47,8 +47,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Rigidbody))]
 		[RequiredField]
+		[CheckForComponent(typeof(Rigidbody))]
 		public FsmOwnerDefault gameObject;
 
 		

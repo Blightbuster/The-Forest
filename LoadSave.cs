@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using Bolt;
 using PathologicalGames;
-using Rewired;
 using TheForest.Buildings.Utils;
 using TheForest.Items.Inventory;
 using TheForest.Modding;
@@ -89,6 +88,11 @@ public class LoadSave : MonoBehaviour
 	
 	public IEnumerator Activation(bool activate)
 	{
+		if (ForestVR.Prototype)
+		{
+			base.enabled = false;
+			yield break;
+		}
 		if (!this.startedSequence)
 		{
 			this.startedSequence = true;
@@ -111,11 +115,11 @@ public class LoadSave : MonoBehaviour
 				{
 					CoopServerInfo.Instance.state.PlanePosition = Scene.PlaneCrash.savePos.position;
 					CoopServerInfo.Instance.state.PlaneRotation = Scene.PlaneCrash.savePos.rotation;
-					foreach (BoltConnection client in BoltNetwork.clients)
+					foreach (BoltConnection connection in BoltNetwork.clients)
 					{
-						SetJoiningTimeOfDay evnt = SetJoiningTimeOfDay.Create(client);
-						evnt.TimeOfDay = Scene.Atmosphere.TimeOfDay;
-						evnt.Send();
+						SetJoiningTimeOfDay setJoiningTimeOfDay = SetJoiningTimeOfDay.Create(connection);
+						setJoiningTimeOfDay.TimeOfDay = ((!Scene.Atmosphere) ? 302f : Scene.Atmosphere.TimeOfDay);
+						setJoiningTimeOfDay.Send();
 					}
 				}
 				else
@@ -132,8 +136,7 @@ public class LoadSave : MonoBehaviour
 			yield return null;
 			if (TheForest.Utils.Input.player != null)
 			{
-				TheForest.Utils.Input.player.controllers.maps.SetMapsEnabled(false, ControllerType.Keyboard, "Menu");
-				TheForest.Utils.Input.player.controllers.maps.SetMapsEnabled(false, ControllerType.Joystick, "Menu");
+				TheForest.Utils.Input.SetMenuMapping(false);
 			}
 			this.SetStartSequenceStep(1, 1f);
 			if (AstarPath.active)
@@ -141,15 +144,15 @@ public class LoadSave : MonoBehaviour
 				Debug.Log("Game Activation Sequence step 1 : enable Astar");
 				if (BoltNetwork.isClient)
 				{
-					GameObject astar = GameObject.Find("Astar");
-					GameObject guo = GameObject.Find("AstarGUOGo");
-					if (guo)
+					GameObject gameObject = GameObject.Find("Astar");
+					GameObject gameObject2 = GameObject.Find("AstarGUOGo");
+					if (gameObject2)
 					{
-						UnityEngine.Object.Destroy(guo);
+						UnityEngine.Object.Destroy(gameObject2);
 					}
-					if (astar)
+					if (gameObject)
 					{
-						UnityEngine.Object.Destroy(astar);
+						UnityEngine.Object.Destroy(gameObject);
 					}
 				}
 				else
@@ -170,11 +173,11 @@ public class LoadSave : MonoBehaviour
 				list = (num = list) + 1;
 				Debug.Log(arg + num);
 				this.SetStartSequenceStep(2, (float)list / (float)this._activateAfterLoading.Count);
-				foreach (GameObject go in frameActivationList._frameJobs)
+				foreach (GameObject gameObject3 in frameActivationList._frameJobs)
 				{
-					if (go)
+					if (gameObject3)
 					{
-						go.SetActive(activate);
+						gameObject3.SetActive(activate);
 					}
 					else
 					{
@@ -192,18 +195,18 @@ public class LoadSave : MonoBehaviour
 				GameObject endgameLoader = GameObject.FindWithTag("EndgameLoader");
 				if (endgameLoader)
 				{
-					SceneLoadTrigger slt = endgameLoader.GetComponent<SceneLoadTrigger>();
+					SceneLoadTrigger component = endgameLoader.GetComponent<SceneLoadTrigger>();
 					if (LocalPlayer.ActiveAreaInfo.HasActiveEndgameArea)
 					{
-						slt.SetCanLoad(true);
-						slt.ForceLoad();
+						component.SetCanLoad(true);
+						component.ForceLoad();
 					}
 					else
 					{
-						Vector3 offsetToEndgameLoader = LocalPlayer.Transform.position - slt.transform.position;
-						if (Vector3.Dot(slt.transform.forward, offsetToEndgameLoader) > 0f && offsetToEndgameLoader.magnitude < 150f)
+						Vector3 rhs = LocalPlayer.Transform.position - component.transform.position;
+						if (Vector3.Dot(component.transform.forward, rhs) > 0f && rhs.magnitude < 150f)
 						{
-							slt._onCrossingForwards.Invoke();
+							component._onCrossingForwards.Invoke();
 						}
 					}
 				}
@@ -275,19 +278,19 @@ public class LoadSave : MonoBehaviour
 			if (!md.GetComponent<GlobalDataSaver>())
 			{
 				md.gameObject.AddComponent<GlobalDataSaver>();
-				StoreInformation si = md.GetComponent<StoreInformation>();
-				if (!si.Components.Contains("TheForest.Utils.GlobalDataSaver"))
+				StoreInformation component2 = md.GetComponent<StoreInformation>();
+				if (!component2.Components.Contains("TheForest.Utils.GlobalDataSaver"))
 				{
-					si.Components.Add("TheForest.Utils.GlobalDataSaver");
+					component2.Components.Add("TheForest.Utils.GlobalDataSaver");
 				}
 			}
 			if (!md.GetComponent<GreebleZonesManager>())
 			{
 				md.gameObject.AddComponent<GreebleZonesManager>();
-				StoreInformation si2 = md.GetComponent<StoreInformation>();
-				if (!si2.Components.Contains("GreebleZonesManager"))
+				StoreInformation component3 = md.GetComponent<StoreInformation>();
+				if (!component3.Components.Contains("GreebleZonesManager"))
 				{
-					si2.Components.Add("GreebleZonesManager");
+					component3.Components.Add("GreebleZonesManager");
 				}
 				UnityEngine.Object.FindObjectOfType<GreebleZonesManager>().RefreshGreebleZones();
 			}
@@ -295,9 +298,9 @@ public class LoadSave : MonoBehaviour
 			{
 				md.gameObject.AddComponent<SpawnMutantsSerializerMessageProxy>();
 			}
-			foreach (Camera cam in UnityEngine.Object.FindObjectsOfType<Camera>())
+			foreach (Camera camera in UnityEngine.Object.FindObjectsOfType<Camera>())
 			{
-				cam.eventMask = 0;
+				camera.eventMask = 0;
 			}
 			Scene.LoadSave = null;
 			Scene.Atmosphere.ForceSunRotationUpdate = true;
@@ -345,19 +348,22 @@ public class LoadSave : MonoBehaviour
 			}
 			Scene.HudGui.Loading._cam.SetActive(false);
 			Debug.Log("Game Activation Sequence step 7 : End of Sequence");
-			if (LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.PlaneCrash)
+			if (LocalPlayer.Inventory)
 			{
-				LocalPlayer.Inventory.enabled = true;
+				if (LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.PlaneCrash)
+				{
+					LocalPlayer.Inventory.enabled = true;
+				}
+				LocalPlayer.Transform.SendMessage("enableMpRenderers", SendMessageOptions.DontRequireReceiver);
+				LocalPlayer.Transform.SendMessage("forceMecanimSync", SendMessageOptions.DontRequireReceiver);
 			}
-			LocalPlayer.Transform.SendMessage("enableMpRenderers", SendMessageOptions.DontRequireReceiver);
-			LocalPlayer.Transform.SendMessage("forceMecanimSync", SendMessageOptions.DontRequireReceiver);
 			if (BoltNetwork.isClient)
 			{
-				foreach (GameObject go2 in Scene.MutantControler.activeNetCannibals)
+				foreach (GameObject gameObject4 in Scene.MutantControler.activeNetCannibals)
 				{
-					if (go2.activeSelf)
+					if (gameObject4.activeSelf)
 					{
-						go2.SendMessage("forceSkinColor", SendMessageOptions.DontRequireReceiver);
+						gameObject4.SendMessage("forceSkinColor", SendMessageOptions.DontRequireReceiver);
 					}
 				}
 			}
@@ -368,10 +374,17 @@ public class LoadSave : MonoBehaviour
 			}
 			if (LocalPlayer.IsInCaves && BoltNetwork.isClient)
 			{
-				playerInCave ev = playerInCave.Create(GlobalTargets.OnlyServer);
-				ev.target = LocalPlayer.Transform.GetComponent<BoltEntity>();
-				ev.inCave = true;
-				ev.Send();
+				playerInCave playerInCave = playerInCave.Create(GlobalTargets.OnlyServer);
+				playerInCave.target = LocalPlayer.Transform.GetComponent<BoltEntity>();
+				playerInCave.inCave = true;
+				playerInCave.Send();
+			}
+			if (LocalPlayer.IsInCaves || LocalPlayer.IsInEndgame)
+			{
+				for (int j = 0; j < Scene.SceneTracker.caveEntrances.Count; j++)
+				{
+					Scene.SceneTracker.caveEntrances[j].disableCaveBlack();
+				}
 			}
 			UnityEngine.Object.Destroy(this);
 			BridgeAnchorHelper.Clear();

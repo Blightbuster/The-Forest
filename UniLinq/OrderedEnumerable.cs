@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace UniLinq
 {
 	
-	internal abstract class OrderedEnumerable<TElement> : IEnumerable, IEnumerable<TElement>, IOrderedEnumerable<TElement>
+	internal abstract class OrderedEnumerable<TElement> : IOrderedEnumerable<TElement>, IEnumerable<TElement>, IEnumerable
 	{
 		
 		protected OrderedEnumerable(IEnumerable<TElement> source)

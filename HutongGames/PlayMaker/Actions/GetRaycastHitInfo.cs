@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets info on the last Raycast and store in variables.")]
 	[ActionCategory(ActionCategory.Physics)]
+	[Tooltip("Gets info on the last Raycast and store in variables.")]
 	public class GetRaycastHitInfo : FsmStateAction
 	{
 		
@@ -51,9 +51,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmGameObject gameObjectHit;
 
 		
-		[Title("Hit Point")]
-		[Tooltip("Get the world position of the ray hit point and store it in a variable.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Get the world position of the ray hit point and store it in a variable.")]
+		[Title("Hit Point")]
 		public FsmVector3 point;
 
 		

@@ -6,8 +6,8 @@ using UnityEngine;
 namespace TheForest.Items.Craft
 {
 	
-	[AddComponentMenu("Items/Craft/Receipe Book")]
 	[DoNotSerializePublic]
+	[AddComponentMenu("Items/Craft/Receipe Book")]
 	public class ReceipeBook : MonoBehaviour
 	{
 		

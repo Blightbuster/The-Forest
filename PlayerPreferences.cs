@@ -1,13 +1,30 @@
 ﻿using System;
+using System.Collections.Generic;
 using FMOD.Studio;
 using TheForest.Tools;
 using TheForest.UI;
 using TheForest.Utils;
 using UnityEngine;
+using UnityEngine.VR;
 
 
 public class PlayerPreferences : MonoBehaviour
 {
+	
+	
+	
+	public static bool CanUpdateFov
+	{
+		get
+		{
+			return PlayerPreferences._canUpdateFOV && !ForestVR.Enabled;
+		}
+		set
+		{
+			PlayerPreferences._canUpdateFOV = value;
+		}
+	}
+
 	
 	
 	
@@ -66,16 +83,35 @@ public class PlayerPreferences : MonoBehaviour
 	{
 		if (!SteamDSConfig.isDedicatedServer)
 		{
-			if (FMOD_StudioSystem.instance)
+			if (FMOD_StudioSystem.instance && FMOD_StudioSystem.instance.System != null)
 			{
 				UnityUtil.ERRCHECK(FMOD_StudioSystem.instance.System.getVCA("vca:/SFX", out this.SFXControl));
 				UnityUtil.ERRCHECK(FMOD_StudioSystem.instance.System.getBus("bus:/Music", out this.MusicBus));
+				this.GetExtraMusicBuses();
 			}
 			else
 			{
-				Debug.LogError("FMOD_StudioSystem.instance is null, failed to initialize SFXControl & MusicBus");
+				Debug.LogError("FMOD_StudioSystem.instance or FMOD_StudioSystem.instance.System is null, failed to initialize SFXControl & MusicBus");
 			}
 			UiTranslationDatabase.SetLanguage(PlayerPreferences.Language);
+		}
+	}
+
+	
+	private void GetExtraMusicBuses()
+	{
+		this.SecondaryMusicBuses = new Dictionary<string, Bus>();
+		foreach (string text in this.SecondaryMusicBusPaths)
+		{
+			Bus value;
+			if (!UnityUtil.ERRCHECK(FMOD_StudioSystem.instance.System.getBus(text, out value)))
+			{
+				Debug.LogError(string.Format("Failed to find secondary music bus at path \"{0}\"", text));
+			}
+			else
+			{
+				this.SecondaryMusicBuses.Add(text, value);
+			}
 		}
 	}
 
@@ -99,6 +135,16 @@ public class PlayerPreferences : MonoBehaviour
 		if (this.MusicBus != null)
 		{
 			UnityUtil.ERRCHECK(this.MusicBus.setFaderLevel(Mathf.Max(PlayerPreferences.MusicVolume, 0.5f)));
+		}
+		if (this.SecondaryMusicBuses != null)
+		{
+			foreach (KeyValuePair<string, Bus> keyValuePair in this.SecondaryMusicBuses)
+			{
+				if (!(keyValuePair.Value == null))
+				{
+					UnityUtil.ERRCHECK(keyValuePair.Value.setFaderLevel(Mathf.Max(PlayerPreferences.MusicVolume, 0.5f)));
+				}
+			}
 		}
 		if (PlayerPreferences.Instance == this)
 		{
@@ -135,7 +181,7 @@ public class PlayerPreferences : MonoBehaviour
 		PlayerPreferences.Brightness = PlayerPrefs.GetFloat("Brightness", 0.5f);
 		PlayerPreferences.Volume = PlayerPrefs.GetFloat("Volume", 0.5f);
 		PlayerPreferences.MusicVolume = PlayerPrefs.GetFloat("MusicVolume", 1f);
-		PlayerPreferences.MicrophoneVolume = PlayerPrefs.GetFloat("MicrophoneVolume", 1f);
+		PlayerPreferences.MicrophoneVolume = PlayerPrefs.GetFloat("MicrophoneVolume", 5f);
 		PlayerPreferences.VoiceCount = PlayerPrefs.GetInt("VoiceCount", 128);
 		PlayerPreferences.MouseInvert = (PlayerPrefs.GetInt("MouseInvert", 0) > 0);
 		PlayerPreferences.MouseSensitivityX = PlayerPrefs.GetFloat("MouseSensitivity", 0.5f);
@@ -153,7 +199,7 @@ public class PlayerPreferences : MonoBehaviour
 		PlayerPreferences.ShowOverlayIcons = (PlayerPrefs.GetInt("ShowOverlayIcons", 1) > 0);
 		PlayerPreferences.OverlayIconsGrouping = (PlayerPrefs.GetInt("OverlayIconsGroupingV2", 1) > 0);
 		PlayerPreferences.ShowProjectileReticle = (PlayerPrefs.GetInt("ShowProjectileReticle", 1) > 0);
-		PlayerPreferences.UseXInput = (PlayerPrefs.GetInt("UseXInput", 0) > 0);
+		PlayerPreferences.UseXInput = (PlayerPrefs.GetInt("UseXInputV2", 1) > 0);
 		PlayerPreferences.ShowPlayerNamesMP = (PlayerPrefs.GetInt("ShowPlayerNamesMP", 1) > 0);
 		PlayerPreferences.ShowStealthMeter = (PlayerPrefs.GetInt("ShowStealthMeter", 1) > 0);
 		PlayerPreferences.UseCrouchToggle = (PlayerPrefs.GetInt("UseCrouchToggle", 0) > 0);
@@ -183,6 +229,10 @@ public class PlayerPreferences : MonoBehaviour
 	
 	public static void Save()
 	{
+		if (PlayerPreferences.PreventSaving)
+		{
+			return;
+		}
 		Debug.Log("Saving Preferences");
 		PlayerPrefs.SetInt("Preset_v16", PlayerPreferences.Preset);
 		PlayerPrefs.SetInt("LowMemoryMode", (!PlayerPreferences.LowMemoryMode) ? 0 : 1);
@@ -208,7 +258,7 @@ public class PlayerPreferences : MonoBehaviour
 		PlayerPrefs.SetInt("ShowOverlayIcons", (!PlayerPreferences.ShowOverlayIcons) ? 0 : 1);
 		PlayerPrefs.SetInt("OverlayIconsGroupingV2", (!PlayerPreferences.OverlayIconsGrouping) ? 0 : 1);
 		PlayerPrefs.SetInt("ShowProjectileReticle", (!PlayerPreferences.ShowProjectileReticle) ? 0 : 1);
-		PlayerPrefs.SetInt("UseXInput", (!PlayerPreferences.UseXInput) ? 0 : 1);
+		PlayerPrefs.SetInt("UseXInputV2", (!PlayerPreferences.UseXInput) ? 0 : 1);
 		PlayerPrefs.SetInt("ShowPlayerNamesMP", (!PlayerPreferences.ShowPlayerNamesMP) ? 0 : 1);
 		PlayerPrefs.SetInt("ShowStealthMeter", (!PlayerPreferences.ShowStealthMeter) ? 0 : 1);
 		PlayerPrefs.SetInt("MaxFrameRate2", PlayerPreferences.MaxFrameRate);
@@ -264,7 +314,17 @@ public class PlayerPreferences : MonoBehaviour
 		{
 			UnityUtil.ERRCHECK(this.MusicBus.setFaderLevel(PlayerPreferences.MusicVolume));
 		}
-		if (!this.TitleScene && PlayerPreferences.CanUpdateFov && LocalPlayer.MainCam && LocalPlayer.MainCam.fieldOfView != PlayerPreferences.Fov)
+		if (this.SecondaryMusicBuses != null)
+		{
+			foreach (KeyValuePair<string, Bus> keyValuePair in this.SecondaryMusicBuses)
+			{
+				if (!(keyValuePair.Value == null))
+				{
+					UnityUtil.ERRCHECK(keyValuePair.Value.setFaderLevel(PlayerPreferences.MusicVolume));
+				}
+			}
+		}
+		if (!this.TitleScene && PlayerPreferences.CanUpdateFov && LocalPlayer.MainCam && LocalPlayer.MainCam.fieldOfView != PlayerPreferences.Fov && !VRDevice.isPresent)
 		{
 			LocalPlayer.MainCam.fieldOfView = PlayerPreferences.Fov;
 		}
@@ -300,18 +360,19 @@ public class PlayerPreferences : MonoBehaviour
 	public static void SetGhostTint(int num, float opacity)
 	{
 		PlayerPreferences.GhostTintNum = Mathf.Max(num, 0);
-		PlayerPreferences.GhostTintOpacity = Mathf.Clamp(opacity, 0.0784f, 1f);
+		PlayerPreferences.GhostTintOpacity = Mathf.Clamp(opacity, 0.0784f, 0.75f);
 		if (PlayerPreferences.Instance && PlayerPreferences.Instance.Prefabs)
 		{
 			if (PlayerPreferences.GhostTintNum >= PlayerPreferences.Instance.Prefabs.GhostTints.Length)
 			{
 				PlayerPreferences.GhostTintNum = 0;
 			}
-			Color color = PlayerPreferences.Instance.Prefabs.GhostTints[PlayerPreferences.GhostTintNum];
-			PlayerPreferences.Instance.Prefabs.GhostClearColor.SetColor("_TintColor", color);
-			color.a = opacity;
-			PlayerPreferences.Instance.Prefabs.GhostClear.SetColor("_TintColor", color);
-			PlayerPreferences.Instance.Prefabs.GhostClearGround.SetColor("_TintColor", color);
+			Color value = PlayerPreferences.Instance.Prefabs.GhostTints[PlayerPreferences.GhostTintNum];
+			PlayerPreferences.Instance.Prefabs.GetGhostClearColorMenu().SetColor("_TintColor", value);
+			value.a = opacity;
+			PlayerPreferences.Instance.Prefabs.GetGhostClearAlphaMenu().SetColor("_TintColor", value);
+			PlayerPreferences.Instance.Prefabs.GetGhostClear().SetColor("_TintColor", value);
+			PlayerPreferences.Instance.Prefabs.GetGhostClearGround().SetColor("_TintColor", value);
 		}
 		else if (Prefabs.Instance)
 		{
@@ -319,11 +380,12 @@ public class PlayerPreferences : MonoBehaviour
 			{
 				PlayerPreferences.GhostTintNum = 0;
 			}
-			Color color2 = Prefabs.Instance.GhostTints[PlayerPreferences.GhostTintNum];
-			Prefabs.Instance.GhostClearColor.SetColor("_TintColor", color2);
-			color2.a = opacity;
-			Prefabs.Instance.GhostClear.SetColor("_TintColor", color2);
-			Prefabs.Instance.GhostClearGround.SetColor("_TintColor", color2);
+			Color value2 = Prefabs.Instance.GhostTints[PlayerPreferences.GhostTintNum];
+			Prefabs.Instance.GetGhostClearColorMenu().SetColor("_TintColor", value2);
+			value2.a = opacity;
+			Prefabs.Instance.GetGhostClearAlphaMenu().SetColor("_TintColor", value2);
+			Prefabs.Instance.GetGhostClear().SetColor("_TintColor", value2);
+			Prefabs.Instance.GetGhostClearGround().SetColor("_TintColor", value2);
 		}
 	}
 
@@ -358,6 +420,12 @@ public class PlayerPreferences : MonoBehaviour
 	public static float GammaWorldAndDay = 2f;
 
 	
+	public const float MinGamma = 2f;
+
+	
+	public const float MaxGamma = 2.2f;
+
+	
 	public static float Volume = 0.5f;
 
 	
@@ -365,6 +433,15 @@ public class PlayerPreferences : MonoBehaviour
 
 	
 	public static float MicrophoneVolume = 1f;
+
+	
+	public const float MicrophoneVolDef = 5f;
+
+	
+	public const float MicrophoneVolMin = 0f;
+
+	
+	public const float MicrophoneVolMax = 10f;
 
 	
 	public static int VoiceCount = 128;
@@ -385,7 +462,7 @@ public class PlayerPreferences : MonoBehaviour
 	public static float Fov = 75f;
 
 	
-	public static bool CanUpdateFov = true;
+	private static bool _canUpdateFOV = true;
 
 	
 	public static int MaxFrameRate = -1;
@@ -401,6 +478,15 @@ public class PlayerPreferences : MonoBehaviour
 
 	
 	public static float GhostTintOpacity = 0.0784f;
+
+	
+	public const float GhostTintOpacityDef = 0.0784f;
+
+	
+	public const float GhostTintOpacityMin = 0.0784f;
+
+	
+	public const float GhostTintOpacityMax = 0.75f;
 
 	
 	public static float BuildingSnapAngle = 45f;
@@ -427,7 +513,7 @@ public class PlayerPreferences : MonoBehaviour
 	public static bool ShowProjectileReticle = true;
 
 	
-	public static bool UseXInput;
+	public static bool UseXInput = true;
 
 	
 	public static bool LowMemoryMode;
@@ -466,6 +552,9 @@ public class PlayerPreferences : MonoBehaviour
 	public static bool ExFloorsAutofill;
 
 	
+	public static bool PreventSaving;
+
+	
 	public static bool is32bit;
 
 	
@@ -482,4 +571,13 @@ public class PlayerPreferences : MonoBehaviour
 
 	
 	private Bus MusicBus;
+
+	
+	private Dictionary<string, Bus> SecondaryMusicBuses;
+
+	
+	private string[] SecondaryMusicBusPaths = new string[]
+	{
+		"bus:/main_menu/menu"
+	};
 }

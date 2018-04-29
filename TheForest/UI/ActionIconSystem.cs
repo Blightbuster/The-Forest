@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using TheForest.Items.Inventory;
 using TheForest.Utils;
@@ -20,7 +21,7 @@ namespace TheForest.UI
 		{
 			if (LocalPlayer.Inventory)
 			{
-				bool flag = LocalPlayer.Inventory.CurrentView == PlayerInventory.PlayerViews.World || (LocalPlayer.Inventory.CurrentView >= PlayerInventory.PlayerViews.Sleep && LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.PlayerList);
+				bool flag = LocalPlayer.Inventory.CurrentView == PlayerInventory.PlayerViews.World || (LocalPlayer.Inventory.CurrentView >= PlayerInventory.PlayerViews.Sleep && LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.PlayerList) || LocalPlayer.Inventory.CurrentView == PlayerInventory.PlayerViews.PlaneCrash;
 				if (flag != this._iconHolderTr.gameObject.activeSelf)
 				{
 					this._iconHolderTr.gameObject.SetActive(flag);
@@ -50,54 +51,123 @@ namespace TheForest.UI
 		}
 
 		
-		public static UISprite RegisterIcon(Transform target, InputMappingIcons.Actions action, ActionIcon.SideIconTypes sideIcon, ActionIconSystem.CurrentViewOptions currentViewOption = ActionIconSystem.CurrentViewOptions.AllowInWorld)
+		private ActionIcon GetActionIconSprite(bool big)
+		{
+			ActionIcon actionIcon;
+			if (big)
+			{
+				if (ActionIconSystem.Instance._spriteIconPoolBig.Count > 0)
+				{
+					actionIcon = ActionIconSystem.Instance._spriteIconPoolBig.Dequeue();
+					actionIcon.gameObject.SetActive(true);
+				}
+				else
+				{
+					actionIcon = UnityEngine.Object.Instantiate<ActionIcon>(ActionIconSystem.Instance._spriteIconPrefabBig);
+					actionIcon.transform.parent = base.transform.parent;
+					actionIcon.transform.localScale = ActionIconSystem.Instance._spriteIconPrefabBig.transform.localScale;
+				}
+			}
+			else if (ActionIconSystem.Instance._spriteIconPool.Count > 0)
+			{
+				actionIcon = ActionIconSystem.Instance._spriteIconPool.Dequeue();
+				actionIcon.gameObject.SetActive(true);
+			}
+			else
+			{
+				actionIcon = UnityEngine.Object.Instantiate<ActionIcon>(ActionIconSystem.Instance._spriteIconPrefab);
+				actionIcon.transform.parent = base.transform.parent;
+				actionIcon.transform.localScale = ActionIconSystem.Instance._spriteIconPrefab.transform.localScale;
+			}
+			return actionIcon;
+		}
+
+		
+		private ActionIcon GetActionIconLabel(bool alt, bool big)
+		{
+			ActionIcon actionIcon;
+			if (big)
+			{
+				if (((!alt) ? ActionIconSystem.Instance._textIconPoolBig : ActionIconSystem.Instance._textIconPoolAltBig).Count > 0)
+				{
+					actionIcon = ((!alt) ? ActionIconSystem.Instance._textIconPoolBig : ActionIconSystem.Instance._textIconPoolAltBig).Dequeue();
+					actionIcon.gameObject.SetActive(true);
+				}
+				else
+				{
+					actionIcon = UnityEngine.Object.Instantiate<ActionIcon>((!alt) ? ActionIconSystem.Instance._textIconPrefabBig : ActionIconSystem.Instance._textIconPrefabAltBig);
+					actionIcon.transform.parent = base.transform.parent;
+					actionIcon.transform.localScale = ActionIconSystem.Instance._textIconPrefabBig.transform.localScale;
+				}
+			}
+			else if (((!alt) ? ActionIconSystem.Instance._textIconPool : ActionIconSystem.Instance._textIconPoolAlt).Count > 0)
+			{
+				actionIcon = ((!alt) ? ActionIconSystem.Instance._textIconPool : ActionIconSystem.Instance._textIconPoolAlt).Dequeue();
+				actionIcon.gameObject.SetActive(true);
+			}
+			else
+			{
+				actionIcon = UnityEngine.Object.Instantiate<ActionIcon>((!alt) ? ActionIconSystem.Instance._textIconPrefab : ActionIconSystem.Instance._textIconPrefabAlt);
+				actionIcon.transform.parent = base.transform.parent;
+				actionIcon.transform.localScale = ActionIconSystem.Instance._textIconPrefab.transform.localScale;
+			}
+			return actionIcon;
+		}
+
+		
+		public static ActionIcon RegisterIcon(Transform target, InputMappingIcons.Actions action, ActionIcon.SideIconTypes sideIcon, ActionIconSystem.CurrentViewOptions currentViewOption = ActionIconSystem.CurrentViewOptions.AllowInWorld, bool useAltTextIcon = false, bool useBigIcon = false)
 		{
 			if (ActionIconSystem.Instance && !ActionIconSystem.Instance._activeIcons.ContainsKey(target))
 			{
 				ActionIcon actionIcon;
 				if (!InputMappingIcons.UsesText(action))
 				{
-					if (ActionIconSystem.Instance._spriteIconPool.Count > 0)
-					{
-						actionIcon = ActionIconSystem.Instance._spriteIconPool.Dequeue();
-						actionIcon.gameObject.SetActive(true);
-						ActionIconSystem.Instance.SetIconHolderTr(actionIcon.transform, currentViewOption);
-					}
-					else
-					{
-						actionIcon = UnityEngine.Object.Instantiate<ActionIcon>(ActionIconSystem.Instance._spriteIconPrefab);
-						ActionIconSystem.Instance.SetIconHolderTr(actionIcon.transform, currentViewOption);
-						actionIcon.transform.localScale = ActionIconSystem.Instance._spriteIconPrefab.transform.localScale;
-					}
+					actionIcon = ActionIconSystem.Instance.GetActionIconSprite(useBigIcon);
 					actionIcon._sprite.spriteName = InputMappingIcons.GetMappingFor(action);
 					UISpriteData atlasSprite = actionIcon._sprite.GetAtlasSprite();
 					if (atlasSprite == null)
 					{
-						ActionIconSystem.Instance.DisableActionIcon(actionIcon);
+						ActionIconSystem.Instance.DisableActionIcon(actionIcon, useAltTextIcon, useBigIcon);
 						return null;
 					}
 					actionIcon._sprite.width = Mathf.RoundToInt((float)atlasSprite.width / (float)atlasSprite.height * (float)actionIcon._sprite.height);
 				}
 				else
 				{
-					if (ActionIconSystem.Instance._textIconPool.Count > 0)
-					{
-						actionIcon = ActionIconSystem.Instance._textIconPool.Dequeue();
-						actionIcon.gameObject.SetActive(true);
-						ActionIconSystem.Instance.SetIconHolderTr(actionIcon.transform, currentViewOption);
-					}
-					else
-					{
-						actionIcon = UnityEngine.Object.Instantiate<ActionIcon>(ActionIconSystem.Instance._textIconPrefab);
-						ActionIconSystem.Instance.SetIconHolderTr(actionIcon.transform, currentViewOption);
-						actionIcon.transform.localScale = ActionIconSystem.Instance._textIconPrefab.transform.localScale;
-					}
+					actionIcon = ActionIconSystem.Instance.GetActionIconLabel(useAltTextIcon, useBigIcon);
 					actionIcon._label.text = InputMappingIcons.GetMappingFor(action);
+					if (!useAltTextIcon)
+					{
+						if (actionIcon._sprite == null)
+						{
+							Debug.LogError(string.Concat(new object[]
+							{
+								"[ActionIcon] Invalid sprite for \"",
+								action,
+								"\" on ",
+								actionIcon.gameObject.GetFullName()
+							}));
+							return null;
+						}
+						actionIcon._sprite.spriteName = InputMappingIcons.GetBackingFor(action);
+						actionIcon._sprite.enabled = true;
+						float num = (float)actionIcon._label.width * actionIcon._label.transform.localScale.x / (float)actionIcon.StartHeight;
+						if (num > 1.5f)
+						{
+							actionIcon._sprite.width = Mathf.RoundToInt((float)actionIcon.StartHeight * (num * 1.2f));
+						}
+						else
+						{
+							actionIcon._sprite.width = actionIcon.StartHeight;
+						}
+					}
 				}
 				actionIcon._follow._target = target;
 				actionIcon._fillSprite.gameObject.SetActive(false);
+				actionIcon._follow._inHud = (currentViewOption == ActionIconSystem.CurrentViewOptions.HudIcon || currentViewOption == ActionIconSystem.CurrentViewOptions.DeathScreen);
 				actionIcon._follow._inBook = (currentViewOption == ActionIconSystem.CurrentViewOptions.AllowInBook);
 				actionIcon._follow._inInventory = (currentViewOption == ActionIconSystem.CurrentViewOptions.AllowInInventory);
+				actionIcon._follow._inPlane = (currentViewOption == ActionIconSystem.CurrentViewOptions.AllowInPlane);
 				if (actionIcon._sideUpArrowIcon)
 				{
 					actionIcon._sideUpArrowIcon.enabled = (sideIcon == ActionIcon.SideIconTypes.UpArrow);
@@ -106,32 +176,48 @@ namespace TheForest.UI
 				{
 					actionIcon._middleUpArrowIcon.enabled = (sideIcon == ActionIcon.SideIconTypes.MiddleUpArrow);
 				}
+				ActionIconSystem.Instance.SetIconHolderTr(actionIcon.transform, currentViewOption);
 				ActionIconSystem.Instance._activeIcons.Add(target, actionIcon);
-				return actionIcon._fillSprite;
-			}
-			return null;
-		}
-
-		
-		public static ActionIcon UnregisterIcon(Transform target)
-		{
-			ActionIcon actionIcon;
-			if (ActionIconSystem.Instance && ActionIconSystem.Instance._activeIcons.TryGetValue(target, out actionIcon))
-			{
-				actionIcon._follow._target2 = null;
-				ActionIconSystem.Instance._activeIcons.Remove(target);
-				ActionIconSystem.Instance.DisableActionIcon(actionIcon);
 				return actionIcon;
 			}
 			return null;
 		}
 
 		
-		private void DisableActionIcon(ActionIcon ai)
+		public static ActionIcon UnregisterIcon(Transform target, bool useAltTextIcon = false, bool useBigIcon = false)
 		{
-			if (ai._label != null)
+			ActionIcon actionIcon;
+			if (ActionIconSystem.Instance && ActionIconSystem.Instance._activeIcons.TryGetValue(target, out actionIcon))
 			{
-				ActionIconSystem.Instance._textIconPool.Enqueue(ai);
+				actionIcon._follow._target2 = null;
+				if (actionIcon._fillSpriteAction)
+				{
+					actionIcon._fillSpriteAction._actionName = null;
+				}
+				ActionIconSystem.Instance._activeIcons.Remove(target);
+				ActionIconSystem.Instance.DisableActionIcon(actionIcon, useAltTextIcon, useBigIcon);
+				return actionIcon;
+			}
+			return null;
+		}
+
+		
+		private void DisableActionIcon(ActionIcon ai, bool useAltTextIcon, bool useBigIcon)
+		{
+			if (useBigIcon)
+			{
+				if (ai._label != null)
+				{
+					((!useAltTextIcon) ? ActionIconSystem.Instance._textIconPoolBig : ActionIconSystem.Instance._textIconPoolAltBig).Enqueue(ai);
+				}
+				else
+				{
+					ActionIconSystem.Instance._spriteIconPoolBig.Enqueue(ai);
+				}
+			}
+			else if (ai._label != null)
+			{
+				((!useAltTextIcon) ? ActionIconSystem.Instance._textIconPool : ActionIconSystem.Instance._textIconPoolAlt).Enqueue(ai);
 			}
 			else
 			{
@@ -157,17 +243,81 @@ namespace TheForest.UI
 			switch (currentViewOption)
 			{
 			case ActionIconSystem.CurrentViewOptions.AllowInWorld:
-				t.parent = this._iconHolderTr;
+				this.SetParentAndLayer(t, this._iconHolderTr);
 				break;
 			case ActionIconSystem.CurrentViewOptions.AllowInBook:
-				t.parent = this._iconHolderBookTr;
+				this.SetParentAndLayer(t, this._iconHolderBookTr);
 				break;
 			case ActionIconSystem.CurrentViewOptions.AllowInPlane:
-				t.parent = this._iconHolderPlaneTr;
+			case ActionIconSystem.CurrentViewOptions.DeathScreen:
+				this.SetParentAndLayer(t, this._iconHolderPlaneTr);
 				break;
 			case ActionIconSystem.CurrentViewOptions.AllowInInventory:
-				t.parent = this._iconHolderInventoryTr;
+				this.SetParentAndLayer(t, this._iconHolderInventoryTr);
 				break;
+			case ActionIconSystem.CurrentViewOptions.HudIcon:
+				if (LocalPlayer.Inventory)
+				{
+					PlayerInventory.PlayerViews currentView = LocalPlayer.Inventory.CurrentView;
+					switch (currentView)
+					{
+					case PlayerInventory.PlayerViews.Inventory:
+						this.SetParentAndLayer(t, this._iconHolderInventoryTr);
+						break;
+					default:
+						if (currentView != PlayerInventory.PlayerViews.PlaneCrash)
+						{
+							this.SetParentAndLayer(t, this._iconHolderTr);
+						}
+						else
+						{
+							this.SetParentAndLayer(t, this._iconHolderPlaneHudTr);
+						}
+						break;
+					case PlayerInventory.PlayerViews.Book:
+						this.SetParentAndLayer(t, this._iconHolderBookTr);
+						break;
+					case PlayerInventory.PlayerViews.Pause:
+						this.SetParentAndLayer(t, this._iconHolderPauseTr);
+						break;
+					}
+				}
+				else
+				{
+					t.parent = base.transform;
+				}
+				break;
+			}
+		}
+
+		
+		private void SetParentAndLayer(Transform tr, Transform parent)
+		{
+			this.SetLayerRec(tr, parent.gameObject.layer);
+			tr.parent = parent;
+		}
+
+		
+		private void SetLayerRec(Transform t, int layer)
+		{
+			t.gameObject.layer = layer;
+			IEnumerator enumerator = t.GetEnumerator();
+			try
+			{
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform t2 = (Transform)obj;
+					this.SetLayerRec(t2, layer);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 
@@ -175,7 +325,19 @@ namespace TheForest.UI
 		public ActionIcon _textIconPrefab;
 
 		
+		public ActionIcon _textIconPrefabAlt;
+
+		
 		public ActionIcon _spriteIconPrefab;
+
+		
+		public ActionIcon _textIconPrefabBig;
+
+		
+		public ActionIcon _textIconPrefabAltBig;
+
+		
+		public ActionIcon _spriteIconPrefabBig;
 
 		
 		public Transform _iconHolderTr;
@@ -187,7 +349,13 @@ namespace TheForest.UI
 		public Transform _iconHolderPlaneTr;
 
 		
+		public Transform _iconHolderPlaneHudTr;
+
+		
 		public Transform _iconHolderInventoryTr;
+
+		
+		public Transform _iconHolderPauseTr;
 
 		
 		public float _gamepadMasterDepthRatio = 0.5f;
@@ -202,7 +370,19 @@ namespace TheForest.UI
 		private Queue<ActionIcon> _textIconPool = new Queue<ActionIcon>();
 
 		
+		private Queue<ActionIcon> _textIconPoolAlt = new Queue<ActionIcon>();
+
+		
 		private Queue<ActionIcon> _spriteIconPool = new Queue<ActionIcon>();
+
+		
+		private Queue<ActionIcon> _textIconPoolBig = new Queue<ActionIcon>();
+
+		
+		private Queue<ActionIcon> _textIconPoolAltBig = new Queue<ActionIcon>();
+
+		
+		private Queue<ActionIcon> _spriteIconPoolBig = new Queue<ActionIcon>();
 
 		
 		private Dictionary<Transform, ActionIcon> _activeIcons = new Dictionary<Transform, ActionIcon>();
@@ -220,7 +400,11 @@ namespace TheForest.UI
 			
 			AllowInPlane,
 			
-			AllowInInventory
+			AllowInInventory,
+			
+			HudIcon,
+			
+			DeathScreen
 		}
 	}
 }

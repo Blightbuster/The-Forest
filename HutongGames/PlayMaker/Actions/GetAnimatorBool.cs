@@ -96,10 +96,10 @@ namespace HutongGames.PlayMaker.Actions
 		public bool everyFrame;
 
 		
-		[UIHint(UIHint.Variable)]
-		[Tooltip("The bool value of the animator parameter")]
 		[ActionSection("Results")]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("The bool value of the animator parameter")]
 		public FsmBool result;
 
 		

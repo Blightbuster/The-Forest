@@ -9,7 +9,7 @@ namespace Pathfinding
 	
 	[JsonOptIn]
 	[Serializable]
-	public class NavMeshGraph : NavGraph, IUpdatableGraph, IRaycastableGraph, INavmesh, INavmeshHolder
+	public class NavMeshGraph : NavGraph, INavmesh, IUpdatableGraph, INavmeshHolder, IRaycastableGraph
 	{
 		
 		

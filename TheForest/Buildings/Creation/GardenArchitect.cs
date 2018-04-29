@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using Bolt;
-using ModAPI;
 using TheForest.Buildings.World;
 using TheForest.Items;
 using TheForest.Utils;
@@ -85,7 +84,7 @@ namespace TheForest.Buildings.Creation
 		}
 
 		
-		private void __LateUpdate__Original()
+		private void LateUpdate()
 		{
 			if (this._logMat)
 			{
@@ -93,7 +92,7 @@ namespace TheForest.Buildings.Creation
 				bool flag2 = false;
 				if (this._lockMode == GardenArchitect.LockModes.Position)
 				{
-					flag = LocalPlayer.Create.BuildingPlacer.ClearOfCollision;
+					flag = (LocalPlayer.Create.BuildingPlacer.ClearOfCollision && LocalPlayer.Create.BuildingPlacer.OnDynamicClear);
 					LocalPlayer.Create.BuildingPlacer.SetNotclear();
 					if (flag && TheForest.Utils.Input.GetButtonDown("Fire1"))
 					{
@@ -209,14 +208,8 @@ namespace TheForest.Buildings.Creation
 				Transform ghostRoot = this._gardenRoot;
 				Transform transform = ghostRoot;
 				transform.name += "Ghost";
-				Transform logGhostPrefab = this._logPrefab;
-				this._logPrefab = Prefabs.Instance.LogFloorBuiltPrefab;
-				this._logPool = new Stack<Transform>();
-				this._newPool = new Stack<Transform>();
-				this._gardenRoot = null;
-				this.CreateStructure(false);
 				int totalLogs = this._gardenRoot.childCount;
-				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.<>f__this._logItemId);
+				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.$this._logItemId);
 				if (ri == null)
 				{
 					ri = new Craft_Structure.BuildIngredients();
@@ -225,16 +218,27 @@ namespace TheForest.Buildings.Creation
 					ri._renderers = new GameObject[0];
 					this._craftStructure._requiredIngredients.Insert(0, ri);
 				}
-				List<GameObject> logStacks = new List<GameObject>();
-				foreach (object obj in this._gardenRoot)
+				List<GameObject> logs = new List<GameObject>();
+				IEnumerator enumerator = this._gardenRoot.GetEnumerator();
+				try
 				{
-					Transform log = (Transform)obj;
-					logStacks.Add(log.gameObject);
-					log.gameObject.SetActive(false);
+					while (enumerator.MoveNext())
+					{
+						object obj = enumerator.Current;
+						Transform transform2 = (Transform)obj;
+						logs.Add(transform2.GetComponentInChildren<Renderer>().gameObject);
+					}
 				}
-				ri._amount += logStacks.Count;
-				ri._renderers = logStacks.AsEnumerable<GameObject>().Reverse<GameObject>().Union(ri._renderers).ToArray<GameObject>();
-				this._logPrefab = logGhostPrefab;
+				finally
+				{
+					IDisposable disposable;
+					if ((disposable = (enumerator as IDisposable)) != null)
+					{
+						disposable.Dispose();
+					}
+				}
+				ri._amount += logs.Count;
+				ri.AddRuntimeObjects(logs.AsEnumerable<GameObject>(), Prefabs.Instance.LogFloorBuiltPrefab.GetComponentInChildren<Renderer>().sharedMaterial);
 				this._gardenRoot.transform.parent = base.transform;
 				ghostRoot.transform.parent = base.transform;
 				this._craftStructure.GetComponent<Collider>().enabled = true;
@@ -440,7 +444,7 @@ namespace TheForest.Buildings.Creation
 				transform.rotation = rotation;
 				return transform;
 			}
-			Transform transform2 = (Transform)UnityEngine.Object.Instantiate(this._logPrefab, position, rotation);
+			Transform transform2 = UnityEngine.Object.Instantiate<Transform>(this._logPrefab, position, rotation);
 			if (!this._wasBuilt && !this._wasPlaced)
 			{
 				transform2.GetComponentInChildren<Renderer>().sharedMaterial = this._logMat;
@@ -481,7 +485,7 @@ namespace TheForest.Buildings.Creation
 		
 		public override void Attached()
 		{
-			this.CustomToken = this.entity.attachToken;
+			this.CustomToken = base.entity.attachToken;
 		}
 
 		
@@ -504,21 +508,6 @@ namespace TheForest.Buildings.Creation
 				{
 					this._wasPlaced = true;
 				}
-			}
-		}
-
-		
-		private void LateUpdate()
-		{
-			try
-			{
-				this._maxSize = 2000f;
-				this.__LateUpdate__Original();
-			}
-			catch (Exception ex)
-			{
-				Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-				this.__LateUpdate__Original();
 			}
 		}
 

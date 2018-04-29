@@ -235,11 +235,11 @@ public class spawnMutants : MonoBehaviour, IMutantSpawner
 	
 	private IEnumerator despawnAll()
 	{
-		foreach (GameObject go in this.allMembers)
+		foreach (GameObject gameObject in this.allMembers)
 		{
-			if (go)
+			if (gameObject)
 			{
-				PoolManager.Pools["enemies"].Despawn(go.transform);
+				PoolManager.Pools["enemies"].Despawn(gameObject.transform);
 			}
 		}
 		this.allMembers.Clear();
@@ -274,16 +274,16 @@ public class spawnMutants : MonoBehaviour, IMutantSpawner
 		bool doName = false;
 		while (count < this.amount_male)
 		{
-			Vector2 pos = this.Circle2(UnityEngine.Random.Range(2f, this.range));
-			Vector3 spawnPos = new Vector3(pos.x + base.transform.position.x, base.transform.position.y, pos.y + base.transform.position.z);
-			this.clone = PoolManager.Pools["enemies"].Spawn(this.mutant.transform, spawnPos, Quaternion.identity);
+			Vector2 vector = this.Circle2(UnityEngine.Random.Range(2f, this.range));
+			Vector3 vector2 = new Vector3(vector.x + base.transform.position.x, base.transform.position.y, vector.y + base.transform.position.z);
+			this.clone = PoolManager.Pools["enemies"].Spawn(this.mutant.transform, vector2, Quaternion.identity);
 			if (!doName)
 			{
 				this.clone.gameObject.name = this.clone.gameObject.name + this.nameCount;
 				doName = true;
 				this.nameCount++;
 			}
-			base.StartCoroutine(this.fixMutantPosition(this.clone, spawnPos));
+			base.StartCoroutine(this.fixMutantPosition(this.clone, vector2));
 			this.clone.GetChild(0).eulerAngles = new Vector3(0f, (float)UnityEngine.Random.Range(0, 360), 0f);
 			this.clone.SendMessage("setInstantSpawn", this.instantSpawn);
 			if (this.leader && this.doLeader)
@@ -327,21 +327,20 @@ public class spawnMutants : MonoBehaviour, IMutantSpawner
 		bool doName = false;
 		while (count < this.amount_female)
 		{
-			Transform clonef = null;
-			Vector2 pos = this.Circle2(UnityEngine.Random.Range(2f, this.range));
-			Vector3 spawnPos = new Vector3(pos.x + base.transform.position.x, base.transform.position.y, pos.y + base.transform.position.z);
-			clonef = PoolManager.Pools["enemies"].Spawn(this.mutant_female.transform, spawnPos, Quaternion.identity);
+			Vector2 vector = this.Circle2(UnityEngine.Random.Range(2f, this.range));
+			Vector3 vector2 = new Vector3(vector.x + base.transform.position.x, base.transform.position.y, vector.y + base.transform.position.z);
+			Transform transform = PoolManager.Pools["enemies"].Spawn(this.mutant_female.transform, vector2, Quaternion.identity);
 			if (!doName)
 			{
-				clonef.gameObject.name = clonef.gameObject.name + this.nameCount;
+				transform.gameObject.name = transform.gameObject.name + this.nameCount;
 				doName = true;
 				this.nameCount++;
 			}
-			base.StartCoroutine(this.fixMutantPosition(clonef, spawnPos));
+			base.StartCoroutine(this.fixMutantPosition(transform, vector2));
 			if (this.leader && this.doLeader)
 			{
-				this.leaderGo = clonef.gameObject;
-				clonef.SendMessage("setFemale");
+				this.leaderGo = transform.gameObject;
+				transform.SendMessage("setFemale");
 				this.leaderGo.SendMessage("setLeader", this.paintedTribe);
 				this.leaderGo.SendMessage("setInCave", this.spawnInCave);
 				if (this.sinkholeSpawn)
@@ -354,20 +353,20 @@ public class spawnMutants : MonoBehaviour, IMutantSpawner
 			}
 			else
 			{
-				clonef.transform.GetChild(0).eulerAngles = new Vector3(0f, (float)UnityEngine.Random.Range(0, 360), 0f);
-				clonef.SendMessage("setInstantSpawn", this.instantSpawn);
+				transform.transform.GetChild(0).eulerAngles = new Vector3(0f, (float)UnityEngine.Random.Range(0, 360), 0f);
+				transform.SendMessage("setInstantSpawn", this.instantSpawn);
 				if (this.leaderGo)
 				{
-					clonef.SendMessage("setFollower", this.leaderGo);
+					transform.SendMessage("setFollower", this.leaderGo);
 				}
-				clonef.SendMessage("setInCave", this.spawnInCave);
+				transform.SendMessage("setInCave", this.spawnInCave);
 				if (this.sinkholeSpawn)
 				{
-					clonef.SendMessage("setInCave", true);
+					transform.SendMessage("setInCave", true);
 				}
-				clonef.SendMessage("setFemale", this.paintedTribe);
-				clonef.SendMessage("addToSpawn", base.gameObject);
-				clonef.SendMessage("eatingOnSpawn", this.eatingOnSpawn);
+				transform.SendMessage("setFemale", this.paintedTribe);
+				transform.SendMessage("addToSpawn", base.gameObject);
+				transform.SendMessage("eatingOnSpawn", this.eatingOnSpawn);
 			}
 			count++;
 		}
@@ -382,31 +381,30 @@ public class spawnMutants : MonoBehaviour, IMutantSpawner
 		bool doName = false;
 		while (count < this.amount_fireman)
 		{
-			Transform cloneFM = null;
-			Vector2 pos = this.Circle2(UnityEngine.Random.Range(2f, this.range));
-			Vector3 spawnPos = new Vector3(pos.x + base.transform.position.x, base.transform.position.y, pos.y + base.transform.position.z);
-			cloneFM = PoolManager.Pools["enemies"].Spawn(this.mutant.transform, spawnPos, Quaternion.identity);
+			Vector2 vector = this.Circle2(UnityEngine.Random.Range(2f, this.range));
+			Vector3 vector2 = new Vector3(vector.x + base.transform.position.x, base.transform.position.y, vector.y + base.transform.position.z);
+			Transform transform = PoolManager.Pools["enemies"].Spawn(this.mutant.transform, vector2, Quaternion.identity);
 			if (!doName)
 			{
-				cloneFM.gameObject.name = cloneFM.gameObject.name + this.nameCount;
+				transform.gameObject.name = transform.gameObject.name + this.nameCount;
 				this.nameCount++;
 			}
-			base.StartCoroutine(this.fixMutantPosition(cloneFM, spawnPos));
-			cloneFM.transform.GetChild(0).eulerAngles = new Vector3(0f, (float)UnityEngine.Random.Range(0, 360), 0f);
-			cloneFM.SendMessage("setInstantSpawn", this.instantSpawn);
+			base.StartCoroutine(this.fixMutantPosition(transform, vector2));
+			transform.transform.GetChild(0).eulerAngles = new Vector3(0f, (float)UnityEngine.Random.Range(0, 360), 0f);
+			transform.SendMessage("setInstantSpawn", this.instantSpawn);
 			if (this.leaderGo)
 			{
-				cloneFM.SendMessage("setFollower", this.leaderGo);
+				transform.SendMessage("setFollower", this.leaderGo);
 			}
-			cloneFM.SendMessage("forceDynamiteMan", this.useDynamiteMan);
-			cloneFM.SendMessage("setFireman", this.paintedTribe);
-			cloneFM.SendMessage("setInCave", this.spawnInCave);
+			transform.SendMessage("forceDynamiteMan", this.useDynamiteMan);
+			transform.SendMessage("setFireman", this.paintedTribe);
+			transform.SendMessage("setInCave", this.spawnInCave);
 			if (this.sinkholeSpawn)
 			{
-				cloneFM.SendMessage("setInCave", true);
+				transform.SendMessage("setInCave", true);
 			}
-			cloneFM.SendMessage("addToSpawn", base.gameObject);
-			cloneFM.SendMessage("eatingOnSpawn", this.eatingOnSpawn);
+			transform.SendMessage("addToSpawn", base.gameObject);
+			transform.SendMessage("eatingOnSpawn", this.eatingOnSpawn);
 			count++;
 		}
 		yield return null;
@@ -420,29 +418,28 @@ public class spawnMutants : MonoBehaviour, IMutantSpawner
 		bool doName = false;
 		while (count < this.amount_pale)
 		{
-			Transform cloneP = null;
-			Vector3 spawnPos = new Vector3(0f, 0f, 0f);
-			Vector2 pos = this.Circle2(UnityEngine.Random.Range(2f, this.range));
-			spawnPos = new Vector3(pos.x + base.transform.position.x, base.transform.position.y, pos.y + base.transform.position.z);
-			cloneP = PoolManager.Pools["enemies"].Spawn(this.mutant.transform, spawnPos, Quaternion.identity);
+			Vector3 vector = new Vector3(0f, 0f, 0f);
+			Vector2 vector2 = this.Circle2(UnityEngine.Random.Range(2f, this.range));
+			vector = new Vector3(vector2.x + base.transform.position.x, base.transform.position.y, vector2.y + base.transform.position.z);
+			Transform transform = PoolManager.Pools["enemies"].Spawn(this.mutant.transform, vector, Quaternion.identity);
 			if (!this.paleOnCeiling)
 			{
-				cloneP.transform.GetChild(0).eulerAngles = new Vector3(0f, (float)UnityEngine.Random.Range(0, 360), 0f);
+				transform.transform.GetChild(0).eulerAngles = new Vector3(0f, (float)UnityEngine.Random.Range(0, 360), 0f);
 			}
 			if (!this.PaleOnCeiling)
 			{
-				base.StartCoroutine(this.fixMutantPosition(cloneP, spawnPos));
+				base.StartCoroutine(this.fixMutantPosition(transform, vector));
 			}
 			if (!doName)
 			{
-				cloneP.gameObject.name = cloneP.gameObject.name + this.nameCount;
+				transform.gameObject.name = transform.gameObject.name + this.nameCount;
 				this.nameCount++;
 				doName = true;
 			}
-			cloneP.SendMessage("setInstantSpawn", this.instantSpawn);
+			transform.SendMessage("setInstantSpawn", this.instantSpawn);
 			if (this.leader && this.doLeader)
 			{
-				this.leaderGo = cloneP.gameObject;
+				this.leaderGo = transform.gameObject;
 				this.leaderGo.SendMessage("setSkinnedTribe", this.skinnedTribe);
 				this.leaderGo.SendMessage("setPaleLeader");
 				this.leaderGo.SendMessage("setInCave", this.spawnInCave);
@@ -461,20 +458,20 @@ public class spawnMutants : MonoBehaviour, IMutantSpawner
 			{
 				if (this.leaderGo)
 				{
-					cloneP.SendMessage("setFollower", this.leaderGo);
+					transform.SendMessage("setFollower", this.leaderGo);
 				}
-				cloneP.SendMessage("setSkinnedTribe", this.skinnedTribe);
-				cloneP.SendMessage("setPale");
-				cloneP.SendMessage("setInCave", this.spawnInCave);
+				transform.SendMessage("setSkinnedTribe", this.skinnedTribe);
+				transform.SendMessage("setPale");
+				transform.SendMessage("setInCave", this.spawnInCave);
 				if (this.sinkholeSpawn)
 				{
-					cloneP.SendMessage("setInCave", true);
+					transform.SendMessage("setInCave", true);
 				}
-				cloneP.SendMessage("setPaleOnCeiling", this.paleOnCeiling);
-				cloneP.SendMessage("setPatrolling", this.patrolling);
-				cloneP.SendMessage("setWakeUpInCave", this.wakeUpOnSpawn);
-				cloneP.SendMessage("addToSpawn", base.gameObject);
-				cloneP.SendMessage("eatingOnSpawn", this.eatingOnSpawn);
+				transform.SendMessage("setPaleOnCeiling", this.paleOnCeiling);
+				transform.SendMessage("setPatrolling", this.patrolling);
+				transform.SendMessage("setWakeUpInCave", this.wakeUpOnSpawn);
+				transform.SendMessage("addToSpawn", base.gameObject);
+				transform.SendMessage("eatingOnSpawn", this.eatingOnSpawn);
 			}
 			count++;
 		}
@@ -489,42 +486,41 @@ public class spawnMutants : MonoBehaviour, IMutantSpawner
 		bool doName = false;
 		while (count < this.amount_armsy)
 		{
-			Transform cloneARM = null;
-			Vector2 pos = this.Circle2(UnityEngine.Random.Range(2f, this.range));
-			Vector3 spawnPos = new Vector3(pos.x + base.transform.position.x, base.transform.position.y, pos.y + base.transform.position.z);
-			Quaternion spawnRot = Quaternion.identity;
+			Vector2 vector = this.Circle2(UnityEngine.Random.Range(2f, this.range));
+			Vector3 vector2 = new Vector3(vector.x + base.transform.position.x, base.transform.position.y, vector.y + base.transform.position.z);
+			Quaternion rot = Quaternion.identity;
 			if (this.alignRotationToSpawn)
 			{
-				spawnRot = base.transform.rotation;
+				rot = base.transform.rotation;
 			}
-			cloneARM = PoolManager.Pools["enemies"].Spawn(this.armsy.transform, spawnPos, spawnRot);
+			Transform transform = PoolManager.Pools["enemies"].Spawn(this.armsy.transform, vector2, rot);
 			if (!doName)
 			{
-				cloneARM.gameObject.name = cloneARM.gameObject.name + this.nameCount;
+				transform.gameObject.name = transform.gameObject.name + this.nameCount;
 				doName = true;
 				this.nameCount++;
 			}
-			base.StartCoroutine(this.fixMutantPosition(cloneARM, spawnPos));
+			base.StartCoroutine(this.fixMutantPosition(transform, vector2));
 			if (this.leader && this.doLeader && this.creepySpawner)
 			{
-				this.leaderGo = cloneARM.gameObject;
+				this.leaderGo = transform.gameObject;
 				this.doLeader = false;
 			}
 			else if (this.leaderGo)
 			{
-				cloneARM.SendMessage("setFollower", this.leaderGo);
+				transform.SendMessage("setFollower", this.leaderGo);
 			}
-			cloneARM.SendMessage("setOldMutant", this.oldMutant);
-			cloneARM.SendMessage("setCreepyPale", this.pale);
-			cloneARM.SendMessage("setInstantSpawn", this.instantSpawn);
-			cloneARM.SendMessage("setArmsy", base.gameObject);
-			cloneARM.SendMessage("setInCave", this.spawnInCave);
+			transform.SendMessage("setOldMutant", this.oldMutant);
+			transform.SendMessage("setCreepyPale", this.pale);
+			transform.SendMessage("setInstantSpawn", this.instantSpawn);
+			transform.SendMessage("setArmsy", base.gameObject);
+			transform.SendMessage("setInCave", this.spawnInCave);
 			if (this.sinkholeSpawn)
 			{
-				cloneARM.SendMessage("setInCave", true);
+				transform.SendMessage("setInCave", true);
 			}
-			cloneARM.SendMessage("setSleeping", this.sleepingSpawn);
-			cloneARM.SendMessage("addToSpawn", base.gameObject);
+			transform.SendMessage("setSleeping", this.sleepingSpawn);
+			transform.SendMessage("addToSpawn", base.gameObject);
 			count++;
 		}
 		yield return null;
@@ -538,41 +534,40 @@ public class spawnMutants : MonoBehaviour, IMutantSpawner
 		bool doName = false;
 		while (count < this.amount_vags)
 		{
-			Transform cloneVAG = null;
-			Vector2 pos = this.Circle2(UnityEngine.Random.Range(2f, this.range));
-			Vector3 spawnPos = new Vector3(pos.x + base.transform.position.x, base.transform.position.y, pos.y + base.transform.position.z);
-			Quaternion spawnRot = Quaternion.identity;
+			Vector2 vector = this.Circle2(UnityEngine.Random.Range(2f, this.range));
+			Vector3 vector2 = new Vector3(vector.x + base.transform.position.x, base.transform.position.y, vector.y + base.transform.position.z);
+			Quaternion rot = Quaternion.identity;
 			if (this.alignRotationToSpawn)
 			{
-				spawnRot = base.transform.rotation;
+				rot = base.transform.rotation;
 			}
-			cloneVAG = PoolManager.Pools["enemies"].Spawn(this.vags.transform, spawnPos, spawnRot);
+			Transform transform = PoolManager.Pools["enemies"].Spawn(this.vags.transform, vector2, rot);
 			if (!doName)
 			{
-				cloneVAG.gameObject.name = cloneVAG.gameObject.name + this.nameCount;
+				transform.gameObject.name = transform.gameObject.name + this.nameCount;
 				doName = true;
 				this.nameCount++;
 			}
-			base.StartCoroutine(this.fixMutantPosition(cloneVAG, spawnPos));
+			base.StartCoroutine(this.fixMutantPosition(transform, vector2));
 			if (this.leader && this.doLeader && this.creepySpawner)
 			{
-				this.leaderGo = cloneVAG.gameObject;
+				this.leaderGo = transform.gameObject;
 				this.doLeader = false;
 			}
 			else if (this.leaderGo)
 			{
-				cloneVAG.SendMessage("setFollower", this.leaderGo);
+				transform.SendMessage("setFollower", this.leaderGo);
 			}
-			cloneVAG.SendMessage("setCreepyPale", this.pale);
-			cloneVAG.SendMessage("setInstantSpawn", this.instantSpawn);
-			cloneVAG.SendMessage("setVags", base.gameObject);
-			cloneVAG.SendMessage("setInCave", this.spawnInCave);
+			transform.SendMessage("setCreepyPale", this.pale);
+			transform.SendMessage("setInstantSpawn", this.instantSpawn);
+			transform.SendMessage("setVags", base.gameObject);
+			transform.SendMessage("setInCave", this.spawnInCave);
 			if (this.sinkholeSpawn)
 			{
-				cloneVAG.SendMessage("setInCave", true);
+				transform.SendMessage("setInCave", true);
 			}
-			cloneVAG.SendMessage("setSleeping", this.sleepingSpawn);
-			cloneVAG.SendMessage("addToSpawn", base.gameObject);
+			transform.SendMessage("setSleeping", this.sleepingSpawn);
+			transform.SendMessage("addToSpawn", base.gameObject);
 			count++;
 		}
 		yield return null;
@@ -586,48 +581,47 @@ public class spawnMutants : MonoBehaviour, IMutantSpawner
 		bool doName = false;
 		while (count < this.amount_fat)
 		{
-			Transform clone = null;
-			Vector2 pos;
+			Vector2 vector;
 			if (this.range < 2f)
 			{
-				pos = this.Circle2(this.range);
+				vector = this.Circle2(this.range);
 			}
 			else
 			{
-				pos = this.Circle2(UnityEngine.Random.Range(2f, this.range));
+				vector = this.Circle2(UnityEngine.Random.Range(2f, this.range));
 			}
-			Vector3 spawnPos = new Vector3(pos.x + base.transform.position.x, base.transform.position.y, pos.y + base.transform.position.z);
-			Quaternion spawnRot = Quaternion.identity;
+			Vector3 vector2 = new Vector3(vector.x + base.transform.position.x, base.transform.position.y, vector.y + base.transform.position.z);
+			Quaternion rot = Quaternion.identity;
 			if (this.alignRotationToSpawn)
 			{
-				spawnRot = base.transform.rotation;
+				rot = base.transform.rotation;
 			}
-			clone = PoolManager.Pools["enemies"].Spawn(this.fat.transform, spawnPos, spawnRot);
+			Transform transform = PoolManager.Pools["enemies"].Spawn(this.fat.transform, vector2, rot);
 			if (!doName)
 			{
-				clone.gameObject.name = clone.gameObject.name + this.nameCount;
+				transform.gameObject.name = transform.gameObject.name + this.nameCount;
 				doName = true;
 				this.nameCount++;
 			}
-			base.StartCoroutine(this.fixMutantPosition(clone, spawnPos));
+			base.StartCoroutine(this.fixMutantPosition(transform, vector2));
 			if (this.leader && this.doLeader && this.creepySpawner)
 			{
-				this.leaderGo = clone.gameObject;
+				this.leaderGo = transform.gameObject;
 				this.doLeader = false;
 			}
 			else if (this.leaderGo)
 			{
-				clone.SendMessage("setFollower", this.leaderGo);
+				transform.SendMessage("setFollower", this.leaderGo);
 			}
-			clone.SendMessage("setInstantSpawn", this.instantSpawn);
-			clone.SendMessage("setFatCreepy", base.gameObject);
-			clone.SendMessage("setInCave", this.spawnInCave);
+			transform.SendMessage("setInstantSpawn", this.instantSpawn);
+			transform.SendMessage("setFatCreepy", base.gameObject);
+			transform.SendMessage("setInCave", this.spawnInCave);
 			if (this.sinkholeSpawn)
 			{
-				clone.SendMessage("setInCave", true);
+				transform.SendMessage("setInCave", true);
 			}
-			clone.SendMessage("setSleeping", this.sleepingSpawn);
-			clone.SendMessage("addToSpawn", base.gameObject);
+			transform.SendMessage("setSleeping", this.sleepingSpawn);
+			transform.SendMessage("addToSpawn", base.gameObject);
 			count++;
 		}
 		yield return null;
@@ -641,37 +635,36 @@ public class spawnMutants : MonoBehaviour, IMutantSpawner
 		bool doName = false;
 		while (count < this.amount_baby)
 		{
-			Transform cloneBaby = null;
-			Vector2 pos = this.Circle2(UnityEngine.Random.Range(2f, this.range));
-			Vector3 spawnPos = new Vector3(pos.x + base.transform.position.x, base.transform.position.y, pos.y + base.transform.position.z);
-			Quaternion spawnRot = Quaternion.identity;
+			Vector2 vector = this.Circle2(UnityEngine.Random.Range(2f, this.range));
+			Vector3 vector2 = new Vector3(vector.x + base.transform.position.x, base.transform.position.y, vector.y + base.transform.position.z);
+			Quaternion rot = Quaternion.identity;
 			if (this.alignRotationToSpawn)
 			{
-				spawnRot = base.transform.rotation;
+				rot = base.transform.rotation;
 			}
-			cloneBaby = PoolManager.Pools["enemies"].Spawn(this.baby.transform, spawnPos, spawnRot);
+			Transform transform = PoolManager.Pools["enemies"].Spawn(this.baby.transform, vector2, rot);
 			if (!doName)
 			{
-				cloneBaby.gameObject.name = cloneBaby.gameObject.name + this.nameCount;
+				transform.gameObject.name = transform.gameObject.name + this.nameCount;
 				doName = true;
 				this.nameCount++;
 			}
-			base.StartCoroutine(this.fixMutantPosition(cloneBaby, spawnPos));
+			base.StartCoroutine(this.fixMutantPosition(transform, vector2));
 			if (this.leaderGo)
 			{
-				cloneBaby.SendMessage("setFollower", this.leaderGo);
+				transform.SendMessage("setFollower", this.leaderGo);
 			}
-			cloneBaby.SendMessage("setInstantSpawn", this.instantSpawn);
-			cloneBaby.SendMessage("setBossBaby", this.bossBabySpawn);
-			cloneBaby.SendMessage("setOldMutant", this.oldMutant);
-			cloneBaby.SendMessage("setBaby", base.gameObject);
-			cloneBaby.SendMessage("setInCave", this.spawnInCave);
+			transform.SendMessage("setInstantSpawn", this.instantSpawn);
+			transform.SendMessage("setBossBaby", this.bossBabySpawn);
+			transform.SendMessage("setOldMutant", this.oldMutant);
+			transform.SendMessage("setBaby", base.gameObject);
+			transform.SendMessage("setInCave", this.spawnInCave);
 			if (this.sinkholeSpawn)
 			{
-				cloneBaby.SendMessage("setInCave", true);
+				transform.SendMessage("setInCave", true);
 			}
-			cloneBaby.SendMessage("setSleeping", this.sleepingSpawn);
-			cloneBaby.SendMessage("addToSpawn", base.gameObject);
+			transform.SendMessage("setSleeping", this.sleepingSpawn);
+			transform.SendMessage("addToSpawn", base.gameObject);
 			count++;
 		}
 		yield return null;
@@ -685,21 +678,20 @@ public class spawnMutants : MonoBehaviour, IMutantSpawner
 		bool doName = false;
 		while (count < this.amount_male_skinny)
 		{
-			Transform cloneMaleSkinny = null;
-			Vector2 pos = this.Circle2(UnityEngine.Random.Range(2f, this.range));
-			Vector3 spawnPos = new Vector3(pos.x + base.transform.position.x, base.transform.position.y, pos.y + base.transform.position.z);
-			cloneMaleSkinny = PoolManager.Pools["enemies"].Spawn(this.mutant.transform, spawnPos, Quaternion.identity);
+			Vector2 vector = this.Circle2(UnityEngine.Random.Range(2f, this.range));
+			Vector3 vector2 = new Vector3(vector.x + base.transform.position.x, base.transform.position.y, vector.y + base.transform.position.z);
+			Transform transform = PoolManager.Pools["enemies"].Spawn(this.mutant.transform, vector2, Quaternion.identity);
 			if (!doName)
 			{
-				cloneMaleSkinny.gameObject.name = cloneMaleSkinny.gameObject.name + this.nameCount;
+				transform.gameObject.name = transform.gameObject.name + this.nameCount;
 				this.nameCount++;
 				doName = true;
 			}
-			base.StartCoroutine(this.fixMutantPosition(cloneMaleSkinny, spawnPos));
-			cloneMaleSkinny.SendMessage("setInstantSpawn", this.instantSpawn);
+			base.StartCoroutine(this.fixMutantPosition(transform, vector2));
+			transform.SendMessage("setInstantSpawn", this.instantSpawn);
 			if (this.leader && this.doLeader)
 			{
-				this.leaderGo = cloneMaleSkinny.gameObject;
+				this.leaderGo = transform.gameObject;
 				this.leaderGo.SendMessage("setSkinnyLeader");
 				this.leaderGo.SendMessage("setMaleSkinny");
 				this.leaderGo.SendMessage("setInCave", this.spawnInCave);
@@ -715,16 +707,16 @@ public class spawnMutants : MonoBehaviour, IMutantSpawner
 			{
 				if (this.leaderGo)
 				{
-					cloneMaleSkinny.SendMessage("setFollower", this.leaderGo);
+					transform.SendMessage("setFollower", this.leaderGo);
 				}
-				cloneMaleSkinny.SendMessage("setMaleSkinny");
-				cloneMaleSkinny.SendMessage("setInCave", this.spawnInCave);
+				transform.SendMessage("setMaleSkinny");
+				transform.SendMessage("setInCave", this.spawnInCave);
 				if (this.sinkholeSpawn)
 				{
-					cloneMaleSkinny.SendMessage("setInCave", true);
+					transform.SendMessage("setInCave", true);
 				}
-				cloneMaleSkinny.SendMessage("addToSpawn", base.gameObject);
-				cloneMaleSkinny.SendMessage("eatingOnSpawn", this.eatingOnSpawn);
+				transform.SendMessage("addToSpawn", base.gameObject);
+				transform.SendMessage("eatingOnSpawn", this.eatingOnSpawn);
 			}
 			count++;
 		}
@@ -739,30 +731,29 @@ public class spawnMutants : MonoBehaviour, IMutantSpawner
 		bool doName = false;
 		while (count < this.amount_female_skinny)
 		{
-			Transform cloneFemaleSkinny = null;
-			Vector2 pos = this.Circle2(UnityEngine.Random.Range(2f, this.range));
-			Vector3 spawnPos = new Vector3(pos.x + base.transform.position.x, base.transform.position.y, pos.y + base.transform.position.z);
-			cloneFemaleSkinny = PoolManager.Pools["enemies"].Spawn(this.mutant_female.transform, spawnPos, Quaternion.identity);
+			Vector2 vector = this.Circle2(UnityEngine.Random.Range(2f, this.range));
+			Vector3 vector2 = new Vector3(vector.x + base.transform.position.x, base.transform.position.y, vector.y + base.transform.position.z);
+			Transform transform = PoolManager.Pools["enemies"].Spawn(this.mutant_female.transform, vector2, Quaternion.identity);
 			if (!doName)
 			{
-				cloneFemaleSkinny.gameObject.name = cloneFemaleSkinny.gameObject.name + this.nameCount;
+				transform.gameObject.name = transform.gameObject.name + this.nameCount;
 				this.nameCount++;
 				doName = true;
 			}
-			base.StartCoroutine(this.fixMutantPosition(cloneFemaleSkinny, spawnPos));
-			cloneFemaleSkinny.SendMessage("setInstantSpawn", this.instantSpawn);
-			cloneFemaleSkinny.SendMessage("setFemaleSkinny");
+			base.StartCoroutine(this.fixMutantPosition(transform, vector2));
+			transform.SendMessage("setInstantSpawn", this.instantSpawn);
+			transform.SendMessage("setFemaleSkinny");
 			if (this.leaderGo)
 			{
-				cloneFemaleSkinny.SendMessage("setFollower", this.leaderGo);
+				transform.SendMessage("setFollower", this.leaderGo);
 			}
-			cloneFemaleSkinny.SendMessage("setInCave", this.spawnInCave);
+			transform.SendMessage("setInCave", this.spawnInCave);
 			if (this.sinkholeSpawn)
 			{
-				cloneFemaleSkinny.SendMessage("setInCave", true);
+				transform.SendMessage("setInCave", true);
 			}
-			cloneFemaleSkinny.SendMessage("addToSpawn", base.gameObject);
-			cloneFemaleSkinny.SendMessage("eatingOnSpawn", this.eatingOnSpawn);
+			transform.SendMessage("addToSpawn", base.gameObject);
+			transform.SendMessage("eatingOnSpawn", this.eatingOnSpawn);
 			count++;
 		}
 		yield return null;
@@ -780,29 +771,28 @@ public class spawnMutants : MonoBehaviour, IMutantSpawner
 		}
 		while (count < this.amount_skinny_pale)
 		{
-			Transform cloneP = null;
-			Vector3 spawnPos = new Vector3(0f, 0f, 0f);
-			Vector2 pos = this.Circle2(UnityEngine.Random.Range(2f, this.range));
-			spawnPos = new Vector3(pos.x + base.transform.position.x, base.transform.position.y, pos.y + base.transform.position.z);
-			cloneP = PoolManager.Pools["enemies"].Spawn(this.mutant.transform, spawnPos, Quaternion.identity);
+			Vector3 vector = new Vector3(0f, 0f, 0f);
+			Vector2 vector2 = this.Circle2(UnityEngine.Random.Range(2f, this.range));
+			vector = new Vector3(vector2.x + base.transform.position.x, base.transform.position.y, vector2.y + base.transform.position.z);
+			Transform transform = PoolManager.Pools["enemies"].Spawn(this.mutant.transform, vector, Quaternion.identity);
 			if (!this.PaleOnCeiling)
 			{
-				base.StartCoroutine(this.fixMutantPosition(cloneP, spawnPos));
+				base.StartCoroutine(this.fixMutantPosition(transform, vector));
 			}
 			if (!this.paleOnCeiling)
 			{
-				cloneP.transform.GetChild(0).eulerAngles = new Vector3(0f, (float)UnityEngine.Random.Range(0, 360), 0f);
+				transform.transform.GetChild(0).eulerAngles = new Vector3(0f, (float)UnityEngine.Random.Range(0, 360), 0f);
 			}
 			if (!doName)
 			{
-				cloneP.gameObject.name = cloneP.gameObject.name + this.nameCount;
+				transform.gameObject.name = transform.gameObject.name + this.nameCount;
 				this.nameCount++;
 				doName = true;
 			}
-			cloneP.SendMessage("setInstantSpawn", this.instantSpawn);
+			transform.SendMessage("setInstantSpawn", this.instantSpawn);
 			if (this.leader && this.doLeader && !this.creepySpawner)
 			{
-				this.leaderGo = cloneP.gameObject;
+				this.leaderGo = transform.gameObject;
 				this.leaderGo.SendMessage("setSkinnedTribe", this.skinnedTribe);
 				this.leaderGo.SendMessage("setPaleLeader");
 				this.leaderGo.SendMessage("setMaleSkinny");
@@ -822,21 +812,21 @@ public class spawnMutants : MonoBehaviour, IMutantSpawner
 			{
 				if (this.leaderGo)
 				{
-					cloneP.SendMessage("setFollower", this.leaderGo);
+					transform.SendMessage("setFollower", this.leaderGo);
 				}
-				cloneP.SendMessage("setSkinnedTribe", this.skinnedTribe);
-				cloneP.SendMessage("setPale");
-				cloneP.SendMessage("setMaleSkinny");
-				cloneP.SendMessage("setInCave", this.spawnInCave);
+				transform.SendMessage("setSkinnedTribe", this.skinnedTribe);
+				transform.SendMessage("setPale");
+				transform.SendMessage("setMaleSkinny");
+				transform.SendMessage("setInCave", this.spawnInCave);
 				if (this.sinkholeSpawn)
 				{
-					cloneP.SendMessage("setInCave", true);
+					transform.SendMessage("setInCave", true);
 				}
-				cloneP.SendMessage("setPaleOnCeiling", this.paleOnCeiling);
-				cloneP.SendMessage("setPatrolling", this.patrolling);
-				cloneP.SendMessage("setWakeUpInCave", this.wakeUpOnSpawn);
-				cloneP.SendMessage("addToSpawn", base.gameObject);
-				cloneP.SendMessage("eatingOnSpawn", this.eatingOnSpawn);
+				transform.SendMessage("setPaleOnCeiling", this.paleOnCeiling);
+				transform.SendMessage("setPatrolling", this.patrolling);
+				transform.SendMessage("setWakeUpInCave", this.wakeUpOnSpawn);
+				transform.SendMessage("addToSpawn", base.gameObject);
+				transform.SendMessage("eatingOnSpawn", this.eatingOnSpawn);
 			}
 			count++;
 		}

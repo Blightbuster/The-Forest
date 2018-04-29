@@ -16,6 +16,8 @@ namespace TheForest.Items.World
 		{
 			this._layerMask = 2097152;
 			base.enabled = false;
+			this._placeIconSheen.SendMessage("OnDestroy");
+			this._placeIconSheen.GetComponent<SheenBillboard>().enabled = true;
 			this._placeIconSheen.SetActive(false);
 		}
 
@@ -26,7 +28,7 @@ namespace TheForest.Items.World
 			{
 				if (LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.RightHand, this._itemId))
 				{
-					if (Physics.Raycast(LocalPlayer.MainCamTr.position, LocalPlayer.MainCamTr.forward, out this._hit, 10f, this._layerMask.value))
+					if (Physics.Raycast(LocalPlayer.MainCamTr.position + Vector3.up, LocalPlayer.MainCamTr.forward, out this._hit, 10f, this._layerMask.value))
 					{
 						DynamicBuilding componentInParent = this._hit.collider.GetComponentInParent<DynamicBuilding>();
 						if (!componentInParent || componentInParent._allowParenting)
@@ -36,7 +38,7 @@ namespace TheForest.Items.World
 								this._placeIconSheen.transform.parent = null;
 								this._placeIconSheen.SetActive(true);
 							}
-							this._placeIconSheen.transform.position = this._hit.point + LocalPlayer.MainCamTr.forward * -0.1f;
+							this._placeIconSheen.transform.position = this._hit.point + Vector3.down * 0.5f;
 							if (TheForest.Utils.Input.GetButtonDown("Craft") && LocalPlayer.Inventory.ShuffleRemoveRightHandItem())
 							{
 								int num = this._diiv.PopLast();
@@ -44,7 +46,7 @@ namespace TheForest.Items.World
 								Vector3 point = this._hit.point;
 								if (!BoltNetwork.isRunning)
 								{
-									Transform transform = (Transform)UnityEngine.Object.Instantiate(Prefabs.Instance.TimmyDrawingsPrefab[num], point, Quaternion.LookRotation(normal));
+									Transform transform = UnityEngine.Object.Instantiate<Transform>(Prefabs.Instance.TimmyDrawingsPrefab[num], point, Quaternion.LookRotation(normal));
 									transform.parent = this._targetObjectRoot;
 								}
 								else
@@ -59,6 +61,7 @@ namespace TheForest.Items.World
 								this._placeIconSheen.SetActive(false);
 								this._placeIconSheen.transform.parent = base.transform;
 								this.Deactivate();
+								LocalPlayer.Grabber.RefreshCollider();
 							}
 						}
 					}

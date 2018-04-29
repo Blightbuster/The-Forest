@@ -62,5 +62,8 @@ namespace TheForest.UI
 
 		
 		public UIWidget _craftIcon;
+
+		
+		public bool _useFillSprite;
 	}
 }

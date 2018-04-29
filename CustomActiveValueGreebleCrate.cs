@@ -36,13 +36,13 @@ public class CustomActiveValueGreebleCrate : CustomActiveValueGreeble
 		yield return null;
 		if (base.Data != null)
 		{
-			ISuitcaseState iss = null;
+			ISuitcaseState suitcaseState = null;
 			if (BoltNetwork.isRunning)
 			{
-				BoltEntity be = base.GetComponent<BoltEntity>();
-				if (be.isAttached && be.isOwner)
+				BoltEntity component = base.GetComponent<BoltEntity>();
+				if (component.isAttached && component.isOwner)
 				{
-					iss = be.GetState<ISuitcaseState>();
+					suitcaseState = component.GetState<ISuitcaseState>();
 				}
 			}
 			byte b = base.Data._instancesState[base.Index];
@@ -53,43 +53,43 @@ public class CustomActiveValueGreebleCrate : CustomActiveValueGreeble
 					this._lid.Play();
 					this._interior.SetActive(true);
 					this._trigger.SetActive(false);
-					if (iss != null)
+					if (suitcaseState != null)
 					{
-						iss.Open = true;
+						suitcaseState.Open = true;
 					}
-					goto IL_2D7;
+					goto IL_257;
 				}
 				if (b != 252)
 				{
 					this._lid.Play();
 					this._interior.SetActive(true);
 					this._trigger.SetActive(false);
-					int state = base.Data._instancesState[base.Index] >> 1;
-					int mpstate = 0;
+					int num = base.Data._instancesState[base.Index] >> 1;
+					int num2 = 0;
 					for (int i = 0; i < this._pickups.Length; i++)
 					{
-						bool isActive = (state & 1 << i) == 0;
-						if (this._pickups[i] && isActive != this._pickups[i].activeSelf)
+						bool flag = (num & 1 << i) == 0;
+						if (this._pickups[i] && flag != this._pickups[i].activeSelf)
 						{
-							this._pickups[i].SetActive(isActive);
-							if (iss != null)
+							this._pickups[i].SetActive(flag);
+							if (suitcaseState != null)
 							{
-								mpstate |= 1 << this._pickups[i].transform.GetSiblingIndex();
+								num2 |= 1 << this._pickups[i].transform.GetSiblingIndex();
 							}
 						}
 					}
-					if (iss != null)
+					if (suitcaseState != null)
 					{
-						iss.Open = true;
-						iss.FlaresPickedUp = mpstate;
+						suitcaseState.Open = true;
+						suitcaseState.FlaresPickedUp = num2;
 					}
-					goto IL_2D7;
+					goto IL_257;
 				}
 			}
 			this._lid.transform.localRotation = this.LidDefaultRotation;
 			this._interior.SetActive(false);
 			this._trigger.SetActive(true);
-			IL_2D7:;
+			IL_257:;
 		}
 		else
 		{

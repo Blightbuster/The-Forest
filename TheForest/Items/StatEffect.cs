@@ -90,6 +90,12 @@ namespace TheForest.Items
 			
 			EatenCalories,
 			
+			VisibleWarmsuit,
+			
+			hairSprayFuelRecharge,
+			
+			VisibleCreepyArmor,
+			
 			MaxAmountBonus = 1000001
 		}
 	}

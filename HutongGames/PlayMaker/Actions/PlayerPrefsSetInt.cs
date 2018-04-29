@@ -29,8 +29,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("Case sensitive key.")]
 		[CompoundArray("Count", "Key", "Value")]
+		[Tooltip("Case sensitive key.")]
 		public FsmString[] keys;
 
 		

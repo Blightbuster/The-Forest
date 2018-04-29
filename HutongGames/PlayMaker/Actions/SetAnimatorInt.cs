@@ -4,9 +4,9 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
+	[ActionCategory("Animator")]
 	[Tooltip("Sets the value of a int parameter")]
 	[HelpUrl("https:
-	[ActionCategory("Animator")]
 	public class SetAnimatorInt : FsmStateAction
 	{
 		
@@ -94,8 +94,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
 		[CheckForComponent(typeof(Animator))]
+		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
 		public FsmOwnerDefault gameObject;
 
 		

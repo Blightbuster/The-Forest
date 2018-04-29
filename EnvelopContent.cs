@@ -2,8 +2,8 @@
 using UnityEngine;
 
 
-[AddComponentMenu("NGUI/Examples/Envelop Content")]
 [RequireComponent(typeof(UIWidget))]
+[AddComponentMenu("NGUI/Examples/Envelop Content")]
 public class EnvelopContent : MonoBehaviour
 {
 	
@@ -36,14 +36,22 @@ public class EnvelopContent : MonoBehaviour
 		}
 		else
 		{
-			Bounds bounds = NGUIMath.CalculateRelativeWidgetBounds(base.transform.parent, this.targetRoot, false, true);
-			float num = bounds.min.x + (float)this.padLeft;
-			float num2 = bounds.min.y + (float)this.padBottom;
-			float num3 = bounds.max.x + (float)this.padRight;
-			float num4 = bounds.max.y + (float)this.padTop;
 			UIWidget component = base.GetComponent<UIWidget>();
-			component.SetRect(num, num2, num3 - num, num4 - num2);
-			base.BroadcastMessage("UpdateAnchors", SendMessageOptions.DontRequireReceiver);
+			Bounds bounds = NGUIMath.CalculateRelativeWidgetBounds(base.transform.parent, this.targetRoot, false, true);
+			if (bounds.size.sqrMagnitude == 0f)
+			{
+				component.enabled = false;
+			}
+			else
+			{
+				float num = bounds.min.x + (float)this.padLeft;
+				float num2 = bounds.min.y + (float)this.padBottom;
+				float num3 = bounds.max.x + (float)this.padRight;
+				float num4 = bounds.max.y + (float)this.padTop;
+				component.SetRect(num, num2, num3 - num, num4 - num2);
+				component.enabled = true;
+				base.BroadcastMessage("UpdateAnchors", SendMessageOptions.DontRequireReceiver);
+			}
 		}
 	}
 

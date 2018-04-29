@@ -13,6 +13,8 @@ using TheForest.Modding.Bridge;
 using TheForest.Modding.Bridge.Interfaces;
 using TheForest.Player;
 using TheForest.Player.Actions;
+using TheForest.Player.Clothing;
+using TheForest.Player.Data;
 using TheForest.World;
 using TheForest.World.Areas;
 using UnityEngine;
@@ -69,6 +71,46 @@ namespace TheForest.Utils
 		}
 
 		
+		
+		public static bool IsInWorld
+		{
+			get
+			{
+				return LocalPlayer.CurrentView == PlayerInventory.PlayerViews.World;
+			}
+		}
+
+		
+		
+		public static bool IsInInventory
+		{
+			get
+			{
+				return LocalPlayer.CurrentView == PlayerInventory.PlayerViews.Inventory;
+			}
+		}
+
+		
+		
+		public static bool IsInBook
+		{
+			get
+			{
+				return LocalPlayer.CurrentView == PlayerInventory.PlayerViews.Book;
+			}
+		}
+
+		
+		
+		public static PlayerInventory.PlayerViews CurrentView
+		{
+			get
+			{
+				return (!LocalPlayer.Inventory) ? PlayerInventory.PlayerViews.Loading : LocalPlayer.Inventory.CurrentView;
+			}
+		}
+
+		
 		private void Awake()
 		{
 			LocalPlayer.Transform = this._transform;
@@ -82,9 +124,9 @@ namespace TheForest.Utils
 			LocalPlayer.ReceipeBook = this._receipeBook;
 			LocalPlayer.SpecialActions = this._specialActions;
 			LocalPlayer.SpecialItems = this._specialItems;
-			LocalPlayer.MainCamTr = this._mainCamTr;
-			LocalPlayer.MainCam = this._mainCam;
-			LocalPlayer.InventoryCam = this._inventoryCam;
+			LocalPlayer.MainCamTr = ((!ForestVR.Enabled) ? this._mainCamTr : this._mainCamTrVR);
+			LocalPlayer.MainCam = ((!ForestVR.Enabled) ? this._mainCam : this._mainCamVR);
+			LocalPlayer.InventoryCam = ((!ForestVR.Enabled) ? this._inventoryCam : this._inventoryCamVR);
 			LocalPlayer.ImageEffectOptimizer = this._imageEffectOptimizer;
 			LocalPlayer.CamFollowHead = this._camFollowHead;
 			LocalPlayer.Animator = this._animator;
@@ -94,6 +136,7 @@ namespace TheForest.Utils
 			LocalPlayer.Tuts = this._tuts;
 			LocalPlayer.Sfx = this._sfx;
 			LocalPlayer.Stats = this._stats;
+			LocalPlayer.Clothing = this._clothing;
 			LocalPlayer.FpCharacter = this._fpc;
 			LocalPlayer.FpHeadBob = this._fphb;
 			LocalPlayer.CamRotator = this._camRotator;
@@ -113,6 +156,9 @@ namespace TheForest.Utils
 			LocalPlayer.PlayerDeadCam = this._PlayerDeadCam;
 			LocalPlayer.PauseMenuBlur = this._pauseMenuBlur;
 			LocalPlayer.PauseMenuBlurPsCam = this._pauseMenuBlurPsCam;
+			LocalPlayer.LeftHandTrVR = this._leftHandTrVR;
+			LocalPlayer.RightHandTrVR = this._rightHandTrVR;
+			LocalPlayer.InventoryPositionVR = this._inventoryPositionVR;
 			LocalPlayer.HeldItemsData = this._heldItemsData;
 			LocalPlayer.Vis = this._vis;
 			LocalPlayer.ActiveAreaInfo = this._activeAreaInfo;
@@ -123,6 +169,11 @@ namespace TheForest.Utils
 			LocalPlayer.QuickSelectViews = this._quickSelectViews;
 			LocalPlayer.MapDrawer = this._mapDrawer;
 			LocalPlayer.ItemSlots = this._itemSlots;
+			LocalPlayer.vrAdapter = this._vrAdapter;
+			LocalPlayer.vrPlayerControl = this._vrPlayerControl;
+			LocalPlayer.vrVignette = this._vrVignette;
+			LocalPlayer.InventoryMouseEventsVR = this._inventoryMouseEventsVR;
+			LocalPlayer.SavedData = this._savedData;
 			LocalPlayer.IsInEndgame = false;
 			LocalPlayer.IsInOverlookArea = false;
 			base.StartCoroutine(this.OldSaveCompat());
@@ -176,6 +227,9 @@ namespace TheForest.Utils
 				LocalPlayer.PlayerDeadCam = null;
 				LocalPlayer.PauseMenuBlur = null;
 				LocalPlayer.PauseMenuBlurPsCam = null;
+				LocalPlayer.LeftHandTrVR = null;
+				LocalPlayer.RightHandTrVR = null;
+				LocalPlayer.InventoryPositionVR = null;
 				LocalPlayer.HeldItemsData = null;
 				LocalPlayer.Vis = null;
 				LocalPlayer.ActiveAreaInfo = null;
@@ -186,6 +240,11 @@ namespace TheForest.Utils
 				LocalPlayer.QuickSelectViews = null;
 				LocalPlayer.MapDrawer = null;
 				LocalPlayer.ItemSlots = null;
+				LocalPlayer.vrAdapter = null;
+				LocalPlayer.vrPlayerControl = null;
+				LocalPlayer.vrVignette = null;
+				LocalPlayer.InventoryMouseEventsVR = null;
+				LocalPlayer.SavedData = null;
 				LocalPlayer.ActiveBurnableItem = null;
 				LocalPlayer.IsInEndgame = false;
 				LocalPlayer.IsInOverlookArea = false;
@@ -225,17 +284,17 @@ namespace TheForest.Utils
 				}
 				if (!LocalPlayer.GameObject.GetComponent<targetStats>())
 				{
-					targetStats ts = LocalPlayer.GameObject.AddComponent<targetStats>();
-					ts.setPlayerType = true;
+					targetStats targetStats = LocalPlayer.GameObject.AddComponent<targetStats>();
+					targetStats.setPlayerType = true;
 				}
 				if (!LocalPlayer.GameObject.GetComponent<visRangeSetup>())
 				{
-					visRangeSetup vrs = LocalPlayer.GameObject.AddComponent<visRangeSetup>();
-					vrs.host = true;
-					vrs.testDist = 32f;
-					vrs.offsetFactor = 1.05f;
-					this._vis = vrs;
-					LocalPlayer.Vis = vrs;
+					visRangeSetup visRangeSetup = LocalPlayer.GameObject.AddComponent<visRangeSetup>();
+					visRangeSetup.host = true;
+					visRangeSetup.testDist = 32f;
+					visRangeSetup.offsetFactor = 1.05f;
+					this._vis = visRangeSetup;
+					LocalPlayer.Vis = visRangeSetup;
 				}
 				while (!LocalPlayer.Inventory.enabled)
 				{
@@ -243,9 +302,9 @@ namespace TheForest.Utils
 				}
 				if (!LocalPlayer.GameObject.GetComponent<CoopVoice>())
 				{
-					CoopVoice cv = LocalPlayer.GameObject.AddComponent<CoopVoice>();
-					int itemId = ItemDatabase.ItemByName("WalkyTalky")._id;
-					cv.WalkieTalkie = LocalPlayer.Inventory.InventoryItemViewsCache[itemId][0]._held.GetComponent<BatteryBasedTalkyWalky>();
+					CoopVoice coopVoice = LocalPlayer.GameObject.AddComponent<CoopVoice>();
+					int id = ItemDatabase.ItemByName("WalkyTalky")._id;
+					coopVoice.WalkieTalkie = LocalPlayer.Inventory.InventoryItemViewsCache[id][0]._held.GetComponent<BatteryBasedTalkyWalky>();
 				}
 			}
 			yield break;
@@ -369,6 +428,7 @@ namespace TheForest.Utils
 		}
 
 		
+		[Header("Core")]
 		public Transform _transform;
 
 		
@@ -393,33 +453,6 @@ namespace TheForest.Utils
 		public ReceipeBook _receipeBook;
 
 		
-		public GameObject _specialActions;
-
-		
-		public GameObject _specialItems;
-
-		
-		public Transform _mainCamTr;
-
-		
-		public Camera _mainCam;
-
-		
-		public Camera _inventoryCam;
-
-		
-		public ImageEffectOptimizer _imageEffectOptimizer;
-
-		
-		public camFollowHead _camFollowHead;
-
-		
-		public Animator _animator;
-
-		
-		public playerAnimatorControl _animControl;
-
-		
 		public Grabber _grabber;
 
 		
@@ -435,52 +468,44 @@ namespace TheForest.Utils
 		public PlayerStats _stats;
 
 		
-		public FirstPersonCharacter _fpc;
+		public PlayerClothing _clothing;
 
 		
-		public FirstPersonHeadBob _fphb;
+		public GameObject _specialActions;
+
+		
+		public GameObject _specialItems;
+
+		
+		public LocalPlayer.SavedDataFields _savedData;
+
+		
+		[Header("Cameras / Visuals / VR")]
+		public Transform _mainCamTr;
+
+		
+		public Transform _mainCamTrVR;
+
+		
+		public Camera _mainCam;
+
+		
+		public Camera _mainCamVR;
+
+		
+		public Camera _inventoryCam;
+
+		
+		public Camera _inventoryCamVR;
+
+		
+		public ImageEffectOptimizer _imageEffectOptimizer;
+
+		
+		public camFollowHead _camFollowHead;
 
 		
 		public SimpleMouseRotator _camRotator;
-
-		
-		public playerScriptSetup _scriptSetup;
-
-		
-		public playerTargetFunctions _targetFunctions;
-
-		
-		public playerHitReactions _hitReactions;
-
-		
-		public Buoyancy _buoyancy;
-
-		
-		public SimpleMouseRotator _mainRotator;
-
-		
-		public WaterViz _waterViz;
-
-		
-		public playerAiInfo _aiInfo;
-
-		
-		public WaterEngine _waterEngine;
-
-		
-		public ItemDecayMachine _itemDecayMachine;
-
-		
-		public SkinnedMeshRenderer _animatedBook;
-
-		
-		public PassengerManifest _passengerManifest;
-
-		
-		public GameObject _greebleRoot;
-
-		
-		public GreebleLayer _mudGreeble;
 
 		
 		public GameObject _PlayerDeadCam;
@@ -492,16 +517,90 @@ namespace TheForest.Utils
 		public Blur _pauseMenuBlurPsCam;
 
 		
-		public HeldItemsData _heldItemsData;
+		public Transform _leftHandTrVR;
+
+		
+		public Transform _rightHandTrVR;
+
+		
+		public Transform _inventoryPositionVR;
+
+		
+		public VRPlayerAdapter _vrAdapter;
+
+		
+		public VRPlayerControl _vrPlayerControl;
+
+		
+		public VRVignetteController _vrVignette;
+
+		
+		public CameraMouseEvents _inventoryMouseEventsVR;
+
+		
+		[Header("Animation / AI Targeting")]
+		public Animator _animator;
+
+		
+		public playerAnimatorControl _animControl;
+
+		
+		public FirstPersonCharacter _fpc;
+
+		
+		public FirstPersonHeadBob _fphb;
+
+		
+		public playerScriptSetup _scriptSetup;
+
+		
+		public playerTargetFunctions _targetFunctions;
+
+		
+		public playerHitReactions _hitReactions;
+
+		
+		public SimpleMouseRotator _mainRotator;
+
+		
+		public SkinnedMeshRenderer _animatedBook;
 
 		
 		public visRangeSetup _vis;
 
 		
-		public ActiveAreaInfo _activeAreaInfo;
+		public playerAiInfo _aiInfo;
 
 		
 		public PlayerPushSledAction _playerPushSledAction;
+
+		
+		[Header("Unsorted")]
+		public Buoyancy _buoyancy;
+
+		
+		public WaterViz _waterViz;
+
+		
+		public WaterEngine _waterEngine;
+
+		
+		public ItemDecayMachine _itemDecayMachine;
+
+		
+		public PassengerManifest _passengerManifest;
+
+		
+		public GameObject _greebleRoot;
+
+		
+		public GreebleLayer _mudGreeble;
+
+		
+		public HeldItemsData _heldItemsData;
+
+		
+		public ActiveAreaInfo _activeAreaInfo;
 
 		
 		public UnderfootSurfaceDetector _surfaceDetector;
@@ -588,6 +687,9 @@ namespace TheForest.Utils
 		public static PlayerStats Stats;
 
 		
+		public static PlayerClothing Clothing;
+
+		
 		public static FirstPersonCharacter FpCharacter;
 
 		
@@ -651,6 +753,15 @@ namespace TheForest.Utils
 		public static Blur PauseMenuBlurPsCam;
 
 		
+		public static Transform LeftHandTrVR;
+
+		
+		public static Transform RightHandTrVR;
+
+		
+		public static Transform InventoryPositionVR;
+
+		
 		public static HeldItemsData HeldItemsData;
 
 		
@@ -679,5 +790,31 @@ namespace TheForest.Utils
 
 		
 		public static itemConstrainToHand[] ItemSlots;
+
+		
+		public static VRPlayerAdapter vrAdapter;
+
+		
+		public static VRPlayerControl vrPlayerControl;
+
+		
+		public static VRVignetteController vrVignette;
+
+		
+		public static CameraMouseEvents InventoryMouseEventsVR;
+
+		
+		public static LocalPlayer.SavedDataFields SavedData;
+
+		
+		[Serializable]
+		public class SavedDataFields
+		{
+			
+			public BoolData ReachedLowSanityThreshold;
+
+			
+			public BoolData ExitedEndgame;
+		}
 	}
 }

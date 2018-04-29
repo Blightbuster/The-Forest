@@ -24,11 +24,11 @@ public class ObjectResetter : MonoBehaviour
 	private IEnumerator ResetCoroutine(float delay)
 	{
 		yield return new WaitForSeconds(delay);
-		foreach (Transform t in base.GetComponentsInChildren<Transform>())
+		foreach (Transform transform in base.GetComponentsInChildren<Transform>())
 		{
-			if (!this.originalStructure.Contains(t))
+			if (!this.originalStructure.Contains(transform))
 			{
-				t.parent = null;
+				transform.parent = null;
 			}
 		}
 		base.transform.position = this.originalPosition;

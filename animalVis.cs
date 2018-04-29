@@ -32,9 +32,12 @@ public class animalVis : MonoBehaviour
 		{
 			if (this.ai.fsmPlayerDist.Value > this.lodDistance)
 			{
-				this.skin.sharedMesh = this.Lod1;
+				if (this.skin.sharedMesh != this.Lod1)
+				{
+					this.skin.sharedMesh = this.Lod1;
+				}
 			}
-			else
+			else if (this.Lod0 && this.skin.sharedMesh != this.Lod0)
 			{
 				this.skin.sharedMesh = this.Lod0;
 			}
@@ -74,7 +77,7 @@ public class animalVis : MonoBehaviour
 	
 	private IEnumerator fixMotionBlur()
 	{
-		yield return YieldPresets.WaitForEndOfFrame;
+		yield return null;
 		yield break;
 	}
 

@@ -10,8 +10,8 @@ using UnityEngine;
 namespace TheForest.Items.Core
 {
 	
-	[AddComponentMenu("Buildings/World/Item Stash")]
 	[DoNotSerializePublic]
+	[AddComponentMenu("Buildings/World/Item Stash")]
 	public class ItemStorage : MonoBehaviour, IItemStorage
 	{
 		
@@ -47,26 +47,6 @@ namespace TheForest.Items.Core
 
 		
 		
-		public Item.Types AcceptedTypes
-		{
-			get
-			{
-				return this._acceptedTypes;
-			}
-		}
-
-		
-		
-		public Item.Types BlackListedTypes
-		{
-			get
-			{
-				return this._blackListedTypes;
-			}
-		}
-
-		
-		
 		public bool IsEmpty
 		{
 			get
@@ -78,34 +58,66 @@ namespace TheForest.Items.Core
 		
 		public int Add(int itemId, int amount = 1, ItemProperties properties = null)
 		{
-			if (!this._blacklist.Contains(itemId))
+			if (!this.IsValidItem(itemId))
 			{
-				float num = 0f;
-				int maxAmount = (num != 0f) ? Mathf.FloorToInt(1f / num) : int.MaxValue;
-				ItemStorage.InventoryItemX inventoryItemX = this._usedSlots.LastOrDefault((ItemStorage.InventoryItemX s) => s._itemId == itemId && s._properties.Match(properties));
-				if (inventoryItemX != null)
-				{
-					this.UpdateContentVersion();
-					amount = inventoryItemX.Add(amount, false);
-				}
-				while (amount > 0 && (this._usedSlots.Count < this._slotCount || this._slotCount == 0))
-				{
-					inventoryItemX = new ItemStorage.InventoryItemX
-					{
-						_itemId = itemId,
-						_maxAmount = maxAmount,
-						_properties = ((properties == null) ? new ItemProperties
-						{
-							ActiveBonus = (WeaponStatUpgrade.Types)(-1)
-						} : properties.Clone())
-					};
-					amount = inventoryItemX.Add(amount, false);
-					this._usedSlots.Add(inventoryItemX);
-					this.UpdateContentVersion();
-				}
-				this.UpdateFillIcon();
+				return amount;
 			}
+			float num = 0f;
+			int maxAmount = (num != 0f) ? Mathf.FloorToInt(1f / num) : int.MaxValue;
+			ItemStorage.InventoryItemX inventoryItemX = this._usedSlots.LastOrDefault((ItemStorage.InventoryItemX s) => s._itemId == itemId && s._properties.Match(properties));
+			if (inventoryItemX != null)
+			{
+				this.UpdateContentVersion();
+				amount = inventoryItemX.Add(amount, false);
+			}
+			while (amount > 0 && (this._usedSlots.Count < this._slotCount || this._slotCount == 0))
+			{
+				inventoryItemX = new ItemStorage.InventoryItemX
+				{
+					_itemId = itemId,
+					_maxAmount = maxAmount,
+					_properties = ((properties == null) ? new ItemProperties
+					{
+						ActiveBonus = (WeaponStatUpgrade.Types)(-1)
+					} : properties.Clone())
+				};
+				amount = inventoryItemX.Add(amount, false);
+				this._usedSlots.Add(inventoryItemX);
+				this.UpdateContentVersion();
+			}
+			this.UpdateFillIcon();
 			return amount;
+		}
+
+		
+		public bool IsValidItem(int itemId)
+		{
+			Item item = ItemDatabase.ItemById(itemId);
+			return item != null && this.IsValidItem(item);
+		}
+
+		
+		public bool IsValidItem(Item item)
+		{
+			return this._whiteList.Contains(item._id) || (!this._blacklist.Contains(item._id) && this.IsWhiteListedType(item) && !this.IsBlackListedType(item));
+		}
+
+		
+		private bool IsWhiteListedType(Item item)
+		{
+			return this.MatchType(this._acceptedTypes, item._type);
+		}
+
+		
+		private bool IsBlackListedType(Item item)
+		{
+			return this.MatchType(this._blackListedTypes, item._type);
+		}
+
+		
+		private bool MatchType(Item.Types mask, Item.Types type)
+		{
+			return (mask & type) != (Item.Types)0;
 		}
 
 		
@@ -174,6 +186,9 @@ namespace TheForest.Items.Core
 		
 		[ItemIdPicker]
 		public int[] _blacklist = new int[0];
+
+		
+		public int[] _whiteList = new int[0];
 
 		
 		[SerializeThis]

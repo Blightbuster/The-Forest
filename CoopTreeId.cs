@@ -10,28 +10,6 @@ using UnityEngine;
 public class CoopTreeId : EntityBehaviour<ITreeCutState>, IPriorityCalculator
 {
 	
-	
-	bool IPriorityCalculator.Always
-	{
-		get
-		{
-			return false;
-		}
-	}
-
-	
-	float IPriorityCalculator.CalculateEventPriority(BoltConnection connection, Bolt.Event evnt)
-	{
-		return (float)((base.state.State != 2) ? 256 : 8192);
-	}
-
-	
-	float IPriorityCalculator.CalculateStatePriority(BoltConnection connection, int skipped)
-	{
-		return (float)((base.state.State != 2) ? 256 : 8192);
-	}
-
-	
 	private void Awake()
 	{
 		this.lod = base.GetComponent<LOD_Trees>();
@@ -46,19 +24,6 @@ public class CoopTreeId : EntityBehaviour<ITreeCutState>, IPriorityCalculator
 		{
 			if (base.state.Fuel >= this.lod.High.GetComponent<FireDamage>().FuelSeconds)
 			{
-				Debug.Log(string.Concat(new object[]
-				{
-					"Update (fuel done) ",
-					base.name,
-					" (lodview=",
-					this.lod.CurrentView,
-					")"
-				}));
-				if (this.lod.CurrentLOD != 0)
-				{
-					GameObject trunk = (GameObject)UnityEngine.Object.Instantiate(this.lod.High.GetComponent<FireDamage>().MyBurnt, base.transform.position, base.transform.rotation);
-					this.Burnt(trunk);
-				}
 				base.enabled = false;
 			}
 		}
@@ -146,7 +111,7 @@ public class CoopTreeId : EntityBehaviour<ITreeCutState>, IPriorityCalculator
 	
 	private void Damage()
 	{
-		if (base.state.Damage >= 16f && this.entity.isOwner && base.state.State == 1)
+		if (base.state.Damage >= 16f && base.entity.isOwner && base.state.State == 1)
 		{
 			base.state.State = 2;
 		}
@@ -161,9 +126,9 @@ public class CoopTreeId : EntityBehaviour<ITreeCutState>, IPriorityCalculator
 	
 	public void Goto_Removed()
 	{
-		if (this.entity.isAttached)
+		if (base.entity.isAttached)
 		{
-			this.entity.Freeze(false);
+			base.entity.Freeze(false);
 			base.state.State = 4;
 		}
 	}
@@ -196,10 +161,23 @@ public class CoopTreeId : EntityBehaviour<ITreeCutState>, IPriorityCalculator
 	{
 		this.lod.enabled = true;
 		this.lod.DontSpawn = false;
-		foreach (object obj in base.transform)
+		IEnumerator enumerator = base.transform.GetEnumerator();
+		try
 		{
-			Transform transform = (Transform)obj;
-			UnityEngine.Object.Destroy(transform.gameObject);
+			while (enumerator.MoveNext())
+			{
+				object obj = enumerator.Current;
+				Transform transform = (Transform)obj;
+				UnityEngine.Object.Destroy(transform.gameObject);
+			}
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = (enumerator as IDisposable)) != null)
+			{
+				disposable.Dispose();
+			}
 		}
 	}
 
@@ -207,7 +185,7 @@ public class CoopTreeId : EntityBehaviour<ITreeCutState>, IPriorityCalculator
 	private void State_Destroyed()
 	{
 		base.state.FallingTransform.SetTransforms(null);
-		if (this.entity.isOwner)
+		if (base.entity.isOwner)
 		{
 			if (this.lod)
 			{
@@ -234,9 +212,13 @@ public class CoopTreeId : EntityBehaviour<ITreeCutState>, IPriorityCalculator
 			{
 				this.lod.SpawnStumpLod();
 			}
-			else
+			else if (this.cut != null)
 			{
-				this.cut.GetComponent<TreeHealth>().DestroyTrunk();
+				TreeHealth component = this.cut.GetComponent<TreeHealth>();
+				if (component)
+				{
+					component.DestroyTrunk();
+				}
 			}
 		}
 		this.FinalCleanup();
@@ -246,10 +228,23 @@ public class CoopTreeId : EntityBehaviour<ITreeCutState>, IPriorityCalculator
 	private void State_Removed()
 	{
 		base.state.FallingTransform.SetTransforms(null);
-		foreach (object obj in base.transform)
+		IEnumerator enumerator = base.transform.GetEnumerator();
+		try
 		{
-			Transform transform = (Transform)obj;
-			UnityEngine.Object.Destroy(transform.gameObject);
+			while (enumerator.MoveNext())
+			{
+				object obj = enumerator.Current;
+				Transform transform = (Transform)obj;
+				UnityEngine.Object.Destroy(transform.gameObject);
+			}
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = (enumerator as IDisposable)) != null)
+			{
+				disposable.Dispose();
+			}
 		}
 		if (this.lod)
 		{
@@ -261,7 +256,7 @@ public class CoopTreeId : EntityBehaviour<ITreeCutState>, IPriorityCalculator
 			UnityEngine.Object.Destroy(this.lod);
 			this.lod = null;
 		}
-		if (this.entity.isOwner)
+		if (base.entity.isOwner)
 		{
 			return;
 		}
@@ -281,7 +276,7 @@ public class CoopTreeId : EntityBehaviour<ITreeCutState>, IPriorityCalculator
 	
 	private void FinalCleanup()
 	{
-		if (!this.entity.IsOwner())
+		if (!base.entity.IsOwner())
 		{
 			this.cut_chunks = null;
 			if (!PlayerPreferences.TreeRegrowth)
@@ -308,9 +303,9 @@ public class CoopTreeId : EntityBehaviour<ITreeCutState>, IPriorityCalculator
 		{
 			return;
 		}
-		this.cut = (GameObject)UnityEngine.Object.Instantiate(this.NetworkPrefab, base.transform.position, base.transform.rotation);
+		this.cut = UnityEngine.Object.Instantiate<GameObject>(this.NetworkPrefab, base.transform.position, base.transform.rotation);
 		TreeHealth component = this.cut.GetComponent<TreeHealth>();
-		component.LodEntity = this.entity;
+		component.LodEntity = base.entity;
 		component.SetLodBase(this.lod);
 		this.cut_chunks = (from x in this.cut.GetComponentsInChildren<TreeCutChunk>()
 		orderby int.Parse(x.transform.parent.gameObject.name)
@@ -419,7 +414,7 @@ public class CoopTreeId : EntityBehaviour<ITreeCutState>, IPriorityCalculator
 	
 	private void OnDestroyCallback()
 	{
-		if (this && this.entity && this.entity.isOwner)
+		if (this && base.entity && base.entity.isOwner)
 		{
 			base.state.State = 3;
 		}
@@ -428,7 +423,7 @@ public class CoopTreeId : EntityBehaviour<ITreeCutState>, IPriorityCalculator
 	
 	private void LodChanged(int newLOD)
 	{
-		if (newLOD == 0 && this.entity.IsAttached() && base.state.Damage > 0f)
+		if (newLOD == 0 && base.entity.IsAttached() && base.state.Damage > 0f)
 		{
 			this.State_Damaged();
 		}
@@ -515,9 +510,9 @@ public class CoopTreeId : EntityBehaviour<ITreeCutState>, IPriorityCalculator
 	
 	public void RegrowTree()
 	{
-		if (this.entity.isAttached)
+		if (base.entity.isAttached)
 		{
-			this.entity.Freeze(false);
+			base.entity.Freeze(false);
 			base.state.State = 0;
 			base.state.Damage = 0f;
 			base.state.Chunk1 = 0f;
@@ -525,6 +520,28 @@ public class CoopTreeId : EntityBehaviour<ITreeCutState>, IPriorityCalculator
 			base.state.Chunk3 = 0f;
 			base.state.Chunk4 = 0f;
 		}
+	}
+
+	
+	
+	bool IPriorityCalculator.Always
+	{
+		get
+		{
+			return false;
+		}
+	}
+
+	
+	float IPriorityCalculator.CalculateEventPriority(BoltConnection connection, Bolt.Event evnt)
+	{
+		return (float)((base.state.State != 2) ? 256 : 8192);
+	}
+
+	
+	float IPriorityCalculator.CalculateStatePriority(BoltConnection connection, int skipped)
+	{
+		return (float)((base.state.State != 2) ? 256 : 8192);
 	}
 
 	

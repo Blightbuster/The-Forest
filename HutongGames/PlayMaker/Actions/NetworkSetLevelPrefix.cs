@@ -19,7 +19,7 @@ namespace HutongGames.PlayMaker.Actions
 		{
 			if (this.levelPrefix.IsNone)
 			{
-				this.LogError("Network LevelPrefix not set");
+				base.LogError("Network LevelPrefix not set");
 				return;
 			}
 			Network.SetLevelPrefix(this.levelPrefix.Value);

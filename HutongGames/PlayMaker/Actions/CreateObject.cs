@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Creates a Game Object, usually from a Prefab.")]
 	[ActionCategory(ActionCategory.GameObject)]
+	[Tooltip("Creates a Game Object, usually from a Prefab.")]
 	public class CreateObject : FsmStateAction
 	{
 		
@@ -57,7 +57,7 @@ namespace HutongGames.PlayMaker.Actions
 				GameObject value2;
 				if (!this.networkInstantiate.Value)
 				{
-					value2 = (GameObject)UnityEngine.Object.Instantiate(value, a, Quaternion.Euler(euler));
+					value2 = UnityEngine.Object.Instantiate<GameObject>(value, a, Quaternion.Euler(euler));
 				}
 				else
 				{

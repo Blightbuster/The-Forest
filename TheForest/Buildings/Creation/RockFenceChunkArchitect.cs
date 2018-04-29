@@ -41,7 +41,7 @@ namespace TheForest.Buildings.Creation
 			}
 			if (this._wallRoot)
 			{
-				UnityEngine.Object.DestroyImmediate(this._wallRoot.gameObject);
+				UnityEngine.Object.Destroy(this._wallRoot.gameObject);
 				this._wallRoot = null;
 			}
 			base.OnBeginCollapse();
@@ -60,7 +60,7 @@ namespace TheForest.Buildings.Creation
 				{
 					this._p2 = base.transform.position + base.transform.forward * (this._offset * 7f);
 				}
-				yield return base.StartCoroutine(base.OnDeserialized());
+				yield return base.StartCoroutine(this.<OnDeserialized>__BaseCallProxy0());
 			}
 			yield break;
 		}
@@ -68,8 +68,14 @@ namespace TheForest.Buildings.Creation
 		
 		protected override void CreateStructure(bool isRepair = false)
 		{
+			Renderer renderer = null;
 			if (isRepair)
 			{
+				LOD_GroupToggle component = this._wallRoot.GetComponent<LOD_GroupToggle>();
+				if (component)
+				{
+					renderer = component._levels[1].Renderers[0];
+				}
 				base.Clear();
 				base.StartCoroutine(base.DelayedAwake(true));
 			}
@@ -93,10 +99,53 @@ namespace TheForest.Buildings.Creation
 				this._wallRoot.gameObject.AddComponent<WeaponHitSfxInfo>()._sfx = SfxInfo.SfxTypes.HitRock;
 				this._wallRoot.gameObject.AddComponent<BuildingHealthHitRelay>();
 				this._wallRoot.gameObject.AddComponent<gridObjectBlocker>();
-				foreach (Renderer renderer in this._wallRoot.gameObject.GetComponentsInChildren<Renderer>())
+				foreach (Renderer renderer2 in this._wallRoot.GetComponentsInChildren<Renderer>())
 				{
-					renderer.transform.rotation *= Quaternion.Euler(UnityEngine.Random.Range(-this._randomFactor, this._randomFactor), UnityEngine.Random.Range(-this._randomFactor, this._randomFactor), UnityEngine.Random.Range(-this._randomFactor, this._randomFactor));
+					renderer2.transform.rotation *= Quaternion.Euler(UnityEngine.Random.Range(-this._randomFactor, this._randomFactor), UnityEngine.Random.Range(-this._randomFactor, this._randomFactor), UnityEngine.Random.Range(-this._randomFactor, this._randomFactor));
 				}
+				BuildingHealth component2 = base.GetComponent<BuildingHealth>();
+				if (component2)
+				{
+					component2._renderersRoot = this._wallRoot.gameObject;
+					if (BoltNetwork.isRunning)
+					{
+						component2.SetMpRandomDistortColliders(new Collider[]
+						{
+							boxCollider
+						});
+					}
+				}
+				if (!renderer)
+				{
+					Transform transform = new GameObject("RockWall LOD").transform;
+					transform.gameObject.layer = 21;
+					transform.parent = base.transform;
+					transform.localRotation = Quaternion.identity;
+					transform.localPosition = Vector3.zero;
+					renderer = transform.gameObject.AddComponent<MeshRenderer>();
+					renderer.sharedMaterial = Prefabs.Instance.RockFenceChunksBuiltPrefabsLOD1[0].sharedMaterial;
+					MeshFilter meshFilter = transform.gameObject.AddComponent<MeshFilter>();
+					int value = Mathf.RoundToInt(Vector3.Distance(this._p1, this._p2) / this._offset);
+					int num = Mathf.Clamp(value, 0, Prefabs.Instance.RockFenceChunksBuiltPrefabsLOD1.Length - 1);
+					meshFilter.sharedMesh = Prefabs.Instance.RockFenceChunksBuiltPrefabsLOD1[num].GetComponent<MeshFilter>().sharedMesh;
+				}
+				LOD_GroupToggle lod_GroupToggle = this._wallRoot.gameObject.AddComponent<LOD_GroupToggle>();
+				lod_GroupToggle.enabled = false;
+				lod_GroupToggle._levels = new LOD_GroupToggle.LodLevel[2];
+				Renderer[] componentsInChildren;
+				lod_GroupToggle._levels[0] = new LOD_GroupToggle.LodLevel
+				{
+					Renderers = componentsInChildren,
+					VisibleDistance = 50f
+				};
+				lod_GroupToggle._levels[1] = new LOD_GroupToggle.LodLevel
+				{
+					Renderers = new Renderer[]
+					{
+						renderer
+					},
+					VisibleDistance = 10000f
+				};
 			}
 		}
 
@@ -132,18 +181,11 @@ namespace TheForest.Buildings.Creation
 				Transform transform2;
 				if (!this._wasBuilt)
 				{
-					if (!this._wallRoot)
-					{
-						transform2 = (Transform)UnityEngine.Object.Instantiate(Prefabs.Instance.RockFenceChunksGhostPrefabs[num2 - 1], vector, rotation);
-					}
-					else
-					{
-						transform2 = (Transform)UnityEngine.Object.Instantiate(Prefabs.Instance.RockFenceChunksGhostFillPrefabs[num2 - 1], vector, rotation);
-					}
+					transform2 = UnityEngine.Object.Instantiate<Transform>(Prefabs.Instance.RockFenceChunksGhostFillPrefabs[num2 - 1], vector, rotation);
 				}
 				else
 				{
-					transform2 = (Transform)UnityEngine.Object.Instantiate(Prefabs.Instance.RockFenceChunksBuiltPrefabs[num2 - 1], vector, rotation);
+					transform2 = UnityEngine.Object.Instantiate<Transform>(Prefabs.Instance.RockFenceChunksBuiltPrefabs[num2 - 1], vector, rotation);
 				}
 				transform2.parent = transform;
 				vector += a * (float)num2;
@@ -201,13 +243,8 @@ namespace TheForest.Buildings.Creation
 		
 		protected override List<GameObject> GetBuiltRenderers(Transform wallRoot)
 		{
-			List<GameObject> list = (from r in wallRoot.GetComponentsInChildren<Renderer>()
+			return (from r in wallRoot.GetComponentsInChildren<Renderer>()
 			select r.gameObject).ToList<GameObject>();
-			for (int i = 0; i < list.Count; i++)
-			{
-				list[i].SetActive(false);
-			}
-			return list;
 		}
 
 		
@@ -221,7 +258,7 @@ namespace TheForest.Buildings.Creation
 		{
 			get
 			{
-				return null;
+				return Prefabs.Instance.RockFenceChunksBuiltPrefabs[0];
 			}
 		}
 

@@ -56,9 +56,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
+		[RequiredField]
 		[UIHint(UIHint.Variable)]
 		[Tooltip("The Bool variables to check.")]
-		[RequiredField]
 		public FsmBool[] boolVariables;
 
 		
@@ -66,8 +66,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmEvent sendEvent;
 
 		
-		[Tooltip("Store the result in a Bool variable.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the result in a Bool variable.")]
 		public FsmBool storeResult;
 
 		

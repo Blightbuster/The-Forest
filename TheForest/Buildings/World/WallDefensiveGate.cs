@@ -36,7 +36,7 @@ namespace TheForest.Buildings.World
 			}
 			if (BoltNetwork.isRunning)
 			{
-				while (!this.entity.isAttached)
+				while (!base.entity.isAttached)
 				{
 					yield return null;
 				}
@@ -61,14 +61,6 @@ namespace TheForest.Buildings.World
 					else
 					{
 						WallDoor.Actions currentAction = base.ToggleDoorStatusAction(true);
-					}
-					if (this._currentAction == WallDoor.Actions.Closing)
-					{
-						LocalPlayer.Sfx.PlayStructureBreak(base.gameObject, 0.4f);
-					}
-					else
-					{
-						LocalPlayer.Sfx.PlayStructureBreak(base.gameObject, 0.4f);
 					}
 				}
 				base.RefreshIcons();
@@ -120,6 +112,19 @@ namespace TheForest.Buildings.World
 					base.RefreshIcons();
 					base.enabled = (Grabber.FocusedItemGO == base.gameObject);
 				}
+			}
+		}
+
+		
+		protected override void PlaySfx(WallDoor.Actions action)
+		{
+			if (action == WallDoor.Actions.Closing)
+			{
+				LocalPlayer.Sfx.PlayStructureBreak(base.gameObject, 0.4f);
+			}
+			else
+			{
+				LocalPlayer.Sfx.PlayStructureBreak(base.gameObject, 0.4f);
 			}
 		}
 

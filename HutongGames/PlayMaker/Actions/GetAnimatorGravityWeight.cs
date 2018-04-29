@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Returns The current gravity weight based on current animations that are played")]
 	[ActionCategory("Animator")]
+	[Tooltip("Returns The current gravity weight based on current animations that are played")]
 	public class GetAnimatorGravityWeight : FsmStateAction
 	{
 		
@@ -81,9 +81,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
-		[CheckForComponent(typeof(Animator))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animator))]
+		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
 		public FsmOwnerDefault gameObject;
 
 		

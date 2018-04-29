@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Compares 2 Strings and sends Events based on the result.")]
 	[ActionCategory(ActionCategory.Logic)]
+	[Tooltip("Compares 2 Strings and sends Events based on the result.")]
 	public class StringCompare : FsmStateAction
 	{
 		
@@ -72,8 +72,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmEvent notEqualEvent;
 
 		
-		[Tooltip("Store the true/false result in a bool variable.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the true/false result in a bool variable.")]
 		public FsmBool storeResult;
 
 		

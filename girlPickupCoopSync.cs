@@ -116,9 +116,9 @@ public class girlPickupCoopSync : MonoBehaviour
 			yield return null;
 		}
 		Renderer[] ren = base.transform.GetComponentsInChildren<Renderer>(true);
-		foreach (Renderer r in ren)
+		foreach (Renderer renderer in ren)
 		{
-			r.enabled = true;
+			renderer.enabled = true;
 		}
 		playerState = this.playerAnimator.GetCurrentAnimatorStateInfo(2);
 		this.animator.Play(this.putDownGirlHash, 0, playerState.normalizedTime);

@@ -89,7 +89,7 @@ namespace HutongGames.PlayMaker.Actions
 				{
 					if (!silent)
 					{
-						this.LogError("ArrayList Proxy not found for reference <" + nameReference + ">");
+						base.LogError("ArrayList Proxy not found for reference <" + nameReference + ">");
 					}
 					return null;
 				}
@@ -108,7 +108,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			if (!silent)
 			{
-				this.LogError("ArrayList proxy not found");
+				base.LogError("ArrayList proxy not found");
 			}
 			return null;
 		}

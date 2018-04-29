@@ -96,9 +96,6 @@ public class ImpactSfx : MonoBehaviour
 	}
 
 	
-	private const float SPEED_THRESHOLD = 2.5f;
-
-	
 	[Header("Impact Events")]
 	public string tree;
 
@@ -119,6 +116,9 @@ public class ImpactSfx : MonoBehaviour
 
 	
 	private Rigidbody rigidBody;
+
+	
+	private const float SPEED_THRESHOLD = 2.5f;
 
 	
 	private int inWaterCount;

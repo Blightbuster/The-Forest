@@ -157,7 +157,7 @@ public class clsshowcasehelper : MonoBehaviour
 	
 	public void metspawn()
 	{
-		this.vartarget = (UnityEngine.Object.Instantiate(this.vargamactor, base.transform.position, Quaternion.identity) as GameObject);
+		this.vartarget = UnityEngine.Object.Instantiate<GameObject>(this.vargamactor, base.transform.position, Quaternion.identity);
 		this.vartarget.SendMessage("metactivate");
 	}
 

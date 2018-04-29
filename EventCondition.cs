@@ -18,9 +18,41 @@ public class EventCondition
 			EventConditionEntry eventConditionEntry = this.conditions[i];
 			if (!string.IsNullOrEmpty(eventConditionEntry.conditionParam))
 			{
-				switch (eventConditionEntry.conditionParamType)
+				EventConditionParamTypes conditionParamType = eventConditionEntry.conditionParamType;
+				if (conditionParamType != EventConditionParamTypes.Int)
 				{
-				case EventConditionParamTypes.Int:
+					if (conditionParamType != EventConditionParamTypes.Float)
+					{
+						if (conditionParamType == EventConditionParamTypes.Boolean)
+						{
+							bool @bool = animator.GetBool(eventConditionEntry.conditionParam);
+							if (@bool != eventConditionEntry.boolValue)
+							{
+								return false;
+							}
+						}
+					}
+					else
+					{
+						float @float = animator.GetFloat(eventConditionEntry.conditionParam);
+						EventConditionModes conditionMode = eventConditionEntry.conditionMode;
+						if (conditionMode != EventConditionModes.GreaterThan)
+						{
+							if (conditionMode == EventConditionModes.LessThan)
+							{
+								if (@float >= eventConditionEntry.floatValue)
+								{
+									return false;
+								}
+							}
+						}
+						else if (@float <= eventConditionEntry.floatValue)
+						{
+							return false;
+						}
+					}
+				}
+				else
 				{
 					int integer = animator.GetInteger(eventConditionEntry.conditionParam);
 					switch (eventConditionEntry.conditionMode)
@@ -62,37 +94,6 @@ public class EventCondition
 						}
 						break;
 					}
-					break;
-				}
-				case EventConditionParamTypes.Float:
-				{
-					float @float = animator.GetFloat(eventConditionEntry.conditionParam);
-					EventConditionModes conditionMode = eventConditionEntry.conditionMode;
-					if (conditionMode != EventConditionModes.GreaterThan)
-					{
-						if (conditionMode == EventConditionModes.LessThan)
-						{
-							if (@float >= eventConditionEntry.floatValue)
-							{
-								return false;
-							}
-						}
-					}
-					else if (@float <= eventConditionEntry.floatValue)
-					{
-						return false;
-					}
-					break;
-				}
-				case EventConditionParamTypes.Boolean:
-				{
-					bool @bool = animator.GetBool(eventConditionEntry.conditionParam);
-					if (@bool != eventConditionEntry.boolValue)
-					{
-						return false;
-					}
-					break;
-				}
 				}
 			}
 		}

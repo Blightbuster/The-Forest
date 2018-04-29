@@ -6,39 +6,8 @@ using UnityEngine;
 public class CoopMapReplicator : EntityBehaviour<IPlayerState>
 {
 	
-	public override void Attached()
+	private void Start()
 	{
-		if (!this.entity.isOwner)
-		{
-			base.state.AddCallback("MapPieces", new PropertyCallbackSimple(this.MapPiecesChanged));
-		}
+		UnityEngine.Object.Destroy(this);
 	}
-
-	
-	private void Update()
-	{
-		if (BoltNetwork.isRunning && this.entity && this.entity.isAttached && this.entity.isOwner)
-		{
-			for (int i = 0; i < this.MapPieces.Length; i++)
-			{
-				int num = (!this.MapPieces[i].activeInHierarchy) ? 0 : 1;
-				if (num != base.state.MapPieces[i])
-				{
-					base.state.MapPieces[i] = num;
-				}
-			}
-		}
-	}
-
-	
-	private void MapPiecesChanged()
-	{
-		for (int i = 0; i < this.MapPieces.Length; i++)
-		{
-			this.MapPieces[i].SetActive(base.state.MapPieces[i] == 1);
-		}
-	}
-
-	
-	public GameObject[] MapPieces;
 }

@@ -29,7 +29,7 @@ namespace TheForest.TaskSystem
 			bool flag = true;
 			if (this._buildings != null)
 			{
-				BuildingTypes buildingTypes = (BuildingTypes)((int)o);
+				BuildingTypes buildingTypes = (BuildingTypes)o;
 				for (int i = 0; i < this._buildings.Length; i++)
 				{
 					BuildingTypeList buildingTypeList = this._buildings[i];

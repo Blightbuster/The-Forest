@@ -11,17 +11,10 @@ using UnityEngine;
 namespace TheForest.Buildings.Creation
 {
 	
-	[DoNotSerializePublic]
 	[AddComponentMenu("Buildings/Creation/Wall Defensive Chunk Reinforcement")]
+	[DoNotSerializePublic]
 	public class WallDefensiveChunkReinforcement : EntityBehaviour, IEntityReplicationFilter
 	{
-		
-		bool IEntityReplicationFilter.AllowReplicationTo(BoltConnection connection)
-		{
-			BoltEntity parentHack = this.GetParentHack();
-			return parentHack && connection.ExistsOnRemote(parentHack) == ExistsResult.Yes;
-		}
-
 		
 		private void Awake()
 		{
@@ -35,7 +28,7 @@ namespace TheForest.Buildings.Creation
 			yield return null;
 			if ((this._wasBuilt || this._wasPlaced) && ((BoltNetwork.isServer && isDeserializing) || BoltNetwork.isClient))
 			{
-				while (!this.entity || !this.entity.isAttached)
+				while (!base.entity || !base.entity.isAttached)
 				{
 					yield return null;
 				}
@@ -112,7 +105,7 @@ namespace TheForest.Buildings.Creation
 		
 		protected void OnDeserialized()
 		{
-			if (!this._initialized && (!BoltNetwork.isRunning || (this.entity && this.entity.isAttached)))
+			if (!this._initialized && (!BoltNetwork.isRunning || (base.entity && base.entity.isAttached)))
 			{
 				if (!this._chunk)
 				{
@@ -217,10 +210,9 @@ namespace TheForest.Buildings.Creation
 			{
 				this._craftStructure.GetComponent<Collider>().enabled = false;
 			}
-			catch (Exception ex)
+			catch (Exception message)
 			{
-				Exception exn = ex;
-				Debug.LogError(exn);
+				Debug.LogError(message);
 			}
 			yield return null;
 			if (this._craftStructure)
@@ -233,13 +225,7 @@ namespace TheForest.Buildings.Creation
 				Transform ghostRoot = this._wallRoot;
 				Transform transform = ghostRoot;
 				transform.name += "Ghost";
-				Transform perLogGhostPrefab = this._perLogPrefab;
-				this._perLogPrefab = Prefabs.Instance.PerLogWDReinforcementBuiltPrefab;
-				Transform wallBuiltTr = this.SpawnEdge();
-				wallBuiltTr.parent = base.transform;
-				this._wallRoot.parent = base.transform;
-				this._perLogPrefab = perLogGhostPrefab;
-				Craft_Structure.BuildIngredients sri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.<>f__this._stickItemId);
+				Craft_Structure.BuildIngredients sri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.$this._stickItemId);
 				if (sri == null)
 				{
 					sri = new Craft_Structure.BuildIngredients();
@@ -249,7 +235,7 @@ namespace TheForest.Buildings.Creation
 					this._craftStructure._requiredIngredients.Insert(0, sri);
 				}
 				sri._amount += this.GetStickCost();
-				Craft_Structure.BuildIngredients rri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.<>f__this._rockItemId);
+				Craft_Structure.BuildIngredients rri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.$this._rockItemId);
 				if (rri == null)
 				{
 					rri = new Craft_Structure.BuildIngredients();
@@ -261,20 +247,19 @@ namespace TheForest.Buildings.Creation
 				rri._amount += this.GetRockCost();
 				List<GameObject> builtStickRenderers = new List<GameObject>(20);
 				List<GameObject> builtRockRenderers = new List<GameObject>(20);
-				foreach (Renderer r in wallBuiltTr.GetComponentsInChildren<Renderer>())
+				foreach (Renderer renderer in this._wallRoot.GetComponentsInChildren<Renderer>())
 				{
-					if (r.name.Equals("s"))
+					if (renderer.name.Equals("s"))
 					{
-						builtStickRenderers.Add(r.gameObject);
+						builtStickRenderers.Add(renderer.gameObject);
 					}
 					else
 					{
-						builtRockRenderers.Add(r.gameObject);
+						builtRockRenderers.Add(renderer.gameObject);
 					}
-					r.gameObject.SetActive(false);
 				}
-				sri._renderers = builtStickRenderers.ToArray();
-				rri._renderers = builtRockRenderers.ToArray();
+				sri.AddRuntimeObjects(builtStickRenderers, Prefabs.Instance.PerLogWDReinforcementBuiltPrefab.Find("s").GetComponent<Renderer>().sharedMaterial);
+				rri.AddRuntimeObjects(builtRockRenderers, Prefabs.Instance.PerLogWDReinforcementBuiltPrefab.Find("r").GetComponent<Renderer>().sharedMaterial);
 				this._craftStructure.GetComponent<Collider>().enabled = true;
 				Collider c = this._craftStructure.GetComponent<Collider>();
 				yield return null;
@@ -316,8 +301,14 @@ namespace TheForest.Buildings.Creation
 		
 		protected void CreateStructure(bool isRepair = false)
 		{
+			Renderer renderer = null;
 			if (isRepair)
 			{
+				LOD_GroupToggle component = this._wallRoot.GetComponent<LOD_GroupToggle>();
+				if (component)
+				{
+					renderer = component._levels[1].Renderers[0];
+				}
 				this.Clear();
 			}
 			int num = LayerMask.NameToLayer("Prop");
@@ -328,15 +319,15 @@ namespace TheForest.Buildings.Creation
 			}
 			if (this._wasBuilt)
 			{
-				foreach (Renderer renderer in this._wallRoot.gameObject.GetComponentsInChildren<Renderer>())
+				foreach (Renderer renderer2 in this._wallRoot.GetComponentsInChildren<Renderer>())
 				{
-					if (renderer.name.Equals("s"))
+					if (renderer2.name.Equals("s"))
 					{
-						renderer.transform.rotation *= Quaternion.Euler(UnityEngine.Random.Range(-this._stickRandomFactor, this._stickRandomFactor), UnityEngine.Random.Range(-this._stickRandomFactor, this._stickRandomFactor), UnityEngine.Random.Range(-this._stickRandomFactor, this._stickRandomFactor));
+						renderer2.transform.rotation *= Quaternion.Euler(UnityEngine.Random.Range(-this._stickRandomFactor, this._stickRandomFactor), UnityEngine.Random.Range(-this._stickRandomFactor, this._stickRandomFactor), UnityEngine.Random.Range(-this._stickRandomFactor, this._stickRandomFactor));
 					}
 					else
 					{
-						renderer.transform.rotation *= Quaternion.Euler(UnityEngine.Random.Range(-this._rockRandomFactor, this._rockRandomFactor), UnityEngine.Random.Range(-this._rockRandomFactor, this._rockRandomFactor), UnityEngine.Random.Range(-this._rockRandomFactor, this._rockRandomFactor));
+						renderer2.transform.rotation *= Quaternion.Euler(UnityEngine.Random.Range(-this._rockRandomFactor, this._rockRandomFactor), UnityEngine.Random.Range(-this._rockRandomFactor, this._rockRandomFactor), UnityEngine.Random.Range(-this._rockRandomFactor, this._rockRandomFactor));
 					}
 				}
 				if (!this._collision)
@@ -351,6 +342,37 @@ namespace TheForest.Buildings.Creation
 					boxCollider.center = new Vector3(2f, 0f, boxCollider.size.z / 2f - 0.5f);
 					this._collision.parent = base.transform;
 				}
+				if (!renderer)
+				{
+					int logCount = this._logCount;
+					bool flag = Mathf.Abs(base.transform.localEulerAngles.y) > 10f && Mathf.Abs(base.transform.localEulerAngles.y) < 350f;
+					Transform transform = new GameObject("DWR LOD").transform;
+					transform.gameObject.layer = 21;
+					transform.parent = base.transform;
+					transform.position = ((!flag) ? this._chunk.P1 : this._chunk.P2);
+					transform.localRotation = ((!flag) ? this._wallRoot.localRotation : Quaternion.Euler(this._wallRoot.localEulerAngles.x, this._wallRoot.localEulerAngles.y + 180f, this._wallRoot.localEulerAngles.z));
+					renderer = transform.gameObject.AddComponent<MeshRenderer>();
+					renderer.sharedMaterials = Prefabs.Instance.DefensiveWallReinforcementBuiltPrefabLOD1[0].sharedMaterials;
+					MeshFilter meshFilter = transform.gameObject.AddComponent<MeshFilter>();
+					meshFilter.sharedMesh = Prefabs.Instance.DefensiveWallReinforcementBuiltPrefabLOD1[Mathf.Clamp(logCount, 0, Prefabs.Instance.DefensiveWallReinforcementBuiltPrefabLOD1.Length - 1)].GetComponent<MeshFilter>().sharedMesh;
+				}
+				LOD_GroupToggle lod_GroupToggle = this._wallRoot.gameObject.AddComponent<LOD_GroupToggle>();
+				lod_GroupToggle.enabled = false;
+				lod_GroupToggle._levels = new LOD_GroupToggle.LodLevel[2];
+				Renderer[] componentsInChildren;
+				lod_GroupToggle._levels[0] = new LOD_GroupToggle.LodLevel
+				{
+					Renderers = componentsInChildren,
+					VisibleDistance = 60f
+				};
+				lod_GroupToggle._levels[1] = new LOD_GroupToggle.LodLevel
+				{
+					Renderers = new Renderer[]
+					{
+						renderer
+					},
+					VisibleDistance = 250f
+				};
 			}
 		}
 
@@ -387,7 +409,7 @@ namespace TheForest.Buildings.Creation
 		
 		private Transform NewLog(Vector3 position, Quaternion rotation)
 		{
-			return (Transform)UnityEngine.Object.Instantiate(this._perLogPrefab, position, (!this._wasBuilt) ? rotation : this.RandomizeLogRotation(rotation));
+			return UnityEngine.Object.Instantiate<Transform>(this._perLogPrefab, position, (!this._wasBuilt) ? rotation : this.RandomizeLogRotation(rotation));
 		}
 
 		
@@ -419,6 +441,13 @@ namespace TheForest.Buildings.Creation
 		}
 
 		
+		bool IEntityReplicationFilter.AllowReplicationTo(BoltConnection connection)
+		{
+			BoltEntity parentHack = this.GetParentHack();
+			return parentHack && connection.ExistsOnRemote(parentHack) == ExistsResult.Yes;
+		}
+
+		
 		public override void Attached()
 		{
 			if (BoltNetwork.isServer && !this.GetParentHack() && this._chunk)
@@ -430,17 +459,17 @@ namespace TheForest.Buildings.Creation
 		
 		private BoltEntity GetParentHack()
 		{
-			if (!this.entity || !this.entity.isAttached)
+			if (!base.entity || !base.entity.isAttached)
 			{
 				return null;
 			}
-			if (this.entity.StateIs<IBuildingState>())
+			if (base.entity.StateIs<IBuildingState>())
 			{
-				return this.entity.GetState<IBuildingState>().ParentHack;
+				return base.entity.GetState<IBuildingState>().ParentHack;
 			}
-			if (this.entity.StateIs<IConstructionState>())
+			if (base.entity.StateIs<IConstructionState>())
 			{
-				return this.entity.GetState<IConstructionState>().ParentHack;
+				return base.entity.GetState<IConstructionState>().ParentHack;
 			}
 			throw new Exception("invalid state type");
 		}
@@ -448,21 +477,21 @@ namespace TheForest.Buildings.Creation
 		
 		private IEnumerator SetParentHack(BoltEntity parent)
 		{
-			while (!this.entity.isAttached || !parent.isAttached)
+			while (!base.entity.isAttached || !parent.isAttached)
 			{
 				yield return null;
 			}
-			if (this.entity.StateIs<IBuildingState>())
+			if (base.entity.StateIs<IBuildingState>())
 			{
-				this.entity.GetState<IBuildingState>().ParentHack = parent;
+				base.entity.GetState<IBuildingState>().ParentHack = parent;
 			}
 			else
 			{
-				if (!this.entity.StateIs<IConstructionState>())
+				if (!base.entity.StateIs<IConstructionState>())
 				{
 					throw new Exception("invalid state type");
 				}
-				this.entity.GetState<IConstructionState>().ParentHack = parent;
+				base.entity.GetState<IConstructionState>().ParentHack = parent;
 			}
 			yield break;
 		}

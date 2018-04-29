@@ -55,11 +55,11 @@ public class gridObjectBlockerManager : MonoBehaviour
 			{
 				yield return null;
 			}
-			foreach (gridObjectBlocker gob in this._callbacks)
+			foreach (gridObjectBlocker gridObjectBlocker in this._callbacks)
 			{
-				if (gob)
+				if (gridObjectBlocker)
 				{
-					gob.doNavCut();
+					gridObjectBlocker.doNavCut();
 				}
 			}
 			this._callbacks = new HashSet<gridObjectBlocker>();

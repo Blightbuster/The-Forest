@@ -10,13 +10,22 @@ public class activateClimbTop : MonoBehaviour
 	
 	private void Start()
 	{
+		if (base.transform.parent)
+		{
+			this._bottomClimb = base.transform.parent.GetComponentInChildren<activateClimb>(true);
+		}
+		if (this.CheckShortRope())
+		{
+			this.Sheen.SetActive(false);
+			this.MyPickUp.SetActive(false);
+		}
 		base.enabled = false;
 	}
 
 	
 	private void GrabEnter(GameObject grabber)
 	{
-		if (!LocalPlayer.FpCharacter.Sitting && !this.PlayerIsBellowTop)
+		if (!LocalPlayer.FpCharacter.Sitting && !this.PlayerIsBellowTop && !this.CheckShortRope())
 		{
 			base.enabled = true;
 			this.Sheen.SetActive(false);
@@ -45,7 +54,7 @@ public class activateClimbTop : MonoBehaviour
 			base.enabled = false;
 			return;
 		}
-		if (this.checkForCloseWall())
+		if (this.checkForCloseWall() || LocalPlayer.AnimControl.onRope || this.CheckShortRope())
 		{
 			this.Sheen.SetActive(false);
 			this.MyPickUp.SetActive(false);
@@ -94,18 +103,6 @@ public class activateClimbTop : MonoBehaviour
 	
 	private bool validateTriggerForCoop()
 	{
-		for (int i = 0; i < Scene.SceneTracker.allPlayers.Count; i++)
-		{
-			targetStats component = Scene.SceneTracker.allPlayers[i].GetComponent<targetStats>();
-			if (component && component.onRope)
-			{
-				float sqrMagnitude = (Scene.SceneTracker.allPlayers[i].transform.position - base.transform.position).sqrMagnitude;
-				if (sqrMagnitude < 20.25f)
-				{
-					return false;
-				}
-			}
-		}
 		return true;
 	}
 
@@ -116,7 +113,21 @@ public class activateClimbTop : MonoBehaviour
 		position.y += 2.3f;
 		Vector3 direction = LocalPlayer.MainCamTr.position - position;
 		RaycastHit raycastHit;
-		return Physics.Raycast(position, direction, out raycastHit, direction.magnitude, this.wallMask);
+		return Physics.Raycast(position, direction, out raycastHit, direction.magnitude, this.wallMask, QueryTriggerInteraction.Ignore);
+	}
+
+	
+	private bool CheckShortRope()
+	{
+		if (this._bottomClimb)
+		{
+			float num = Vector3.Distance(base.transform.position, this._bottomClimb.transform.position);
+			if (num < this.closeTriggerThreshhold)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	
@@ -144,6 +155,12 @@ public class activateClimbTop : MonoBehaviour
 
 	
 	public GameObject exitTop;
+
+	
+	public float closeTriggerThreshhold = 3f;
+
+	
+	private activateClimb _bottomClimb;
 
 	
 	public activateClimbTop.Types climbType;

@@ -39,8 +39,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("The Bool variable to watch for changes.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The Bool variable to watch for changes.")]
 		public FsmBool boolVariable;
 
 		

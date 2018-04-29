@@ -79,7 +79,7 @@ public class coopDeadSharkSetup : EntityBehaviour<IDeadSharkState>
 	
 	private void generateStorePrefab()
 	{
-		GameObject gameObject = UnityEngine.Object.Instantiate(this.storePrefab, base.transform.position, base.transform.rotation) as GameObject;
+		GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.storePrefab, base.transform.position, base.transform.rotation);
 		storeLocalMutantInfo2 component = gameObject.GetComponent<storeLocalMutantInfo2>();
 		for (int i = 0; i < this.jointsToSync.Length; i++)
 		{

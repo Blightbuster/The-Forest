@@ -48,10 +48,10 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
-		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
-		[RequiredField]
 		[ActionSection("Set up")]
+		[RequiredField]
+		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
+		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -59,9 +59,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString reference;
 
 		
-		[CheckForComponent(typeof(MeshFilter))]
 		[ActionSection("Source")]
 		[Tooltip("the GameObject to get the mesh from")]
+		[CheckForComponent(typeof(MeshFilter))]
 		public FsmGameObject mesh;
 	}
 }

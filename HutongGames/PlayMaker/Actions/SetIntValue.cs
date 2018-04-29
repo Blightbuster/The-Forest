@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the value of an Integer Variable.")]
 	[ActionCategory(ActionCategory.Math)]
+	[Tooltip("Sets the value of an Integer Variable.")]
 	public class SetIntValue : FsmStateAction
 	{
 		
@@ -32,8 +32,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmInt intVariable;
 
 		

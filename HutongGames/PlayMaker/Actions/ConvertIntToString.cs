@@ -46,9 +46,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The Int variable to convert.")]
 		[RequiredField]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The Int variable to convert.")]
 		public FsmInt intVariable;
 
 		

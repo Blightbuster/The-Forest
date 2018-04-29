@@ -1,5 +1,4 @@
 ﻿using System;
-using ModAPI;
 using TheForest.Items.Craft;
 using TheForest.Items.Inventory;
 using TheForest.Items.Special;
@@ -7,7 +6,6 @@ using TheForest.Items.World.Interfaces;
 using TheForest.Player;
 using TheForest.Tools;
 using TheForest.Utils;
-using UltimateCheatmenu;
 using UnityEngine;
 
 namespace TheForest.Items.World
@@ -81,7 +79,7 @@ namespace TheForest.Items.World
 		}
 
 		
-		private void __Update__Original()
+		private void Update()
 		{
 			if (this._player.CurrentView == PlayerInventory.PlayerViews.World)
 			{
@@ -137,14 +135,6 @@ namespace TheForest.Items.World
 				}
 				WeaponStatUpgrade.Types activeBonus = this.CurrentArrowItemView.ActiveBonus;
 				bool canSetArrowOnFire = this.CanSetArrowOnFire;
-				if (canSetArrowOnFire && TheForest.Utils.Input.GetButton("Lighter"))
-				{
-					Scene.HudGui.SetDelayedIconController(this);
-				}
-				else
-				{
-					Scene.HudGui.UnsetDelayedIconController(this);
-				}
 				if (canSetArrowOnFire)
 				{
 					if (TheForest.Utils.Input.GetButtonAfterDelay("Lighter", 0.5f, false))
@@ -194,6 +184,10 @@ namespace TheForest.Items.World
 						LocalPlayer.SpecialItems.SendMessage("cancelLightingFromBow");
 						LocalPlayer.Inventory.UnlockEquipmentSlot(Item.EquipmentSlot.LeftHand);
 						this._player.StashLeftHand();
+					}
+					if (currentAnimatorStateInfo.shortNameHash == this._drawBowHash)
+					{
+						this._bowAnimator.Play(this._drawBowHash, 0, currentAnimatorStateInfo.normalizedTime);
 					}
 					if (TheForest.Utils.Input.GetButtonUp("Fire1") || LocalPlayer.Animator.GetBool("ballHeld"))
 					{
@@ -395,14 +389,12 @@ namespace TheForest.Items.World
 				this._ammoAnimationRenderer.enabled = false;
 				this._boneAmmoAnimationRenderer.enabled = true;
 				this._modernAmmoAnimationRenderer.enabled = false;
-				this.fixAmplify(this._boneAmmoAnimationRenderer.transform);
 			}
 			else if (this.CurrentArrowItemView.Properties.ActiveBonus == WeaponStatUpgrade.Types.ModernAmmo)
 			{
 				this._ammoAnimationRenderer.enabled = false;
 				this._boneAmmoAnimationRenderer.enabled = false;
 				this._modernAmmoAnimationRenderer.enabled = true;
-				this.fixAmplify(this._modernAmmoAnimationRenderer.transform);
 			}
 			else
 			{
@@ -537,179 +529,6 @@ namespace TheForest.Items.World
 			get
 			{
 				return LocalPlayer.Inventory.InventoryItemViewsCache[this._ammoItemId][Mathf.Max(LocalPlayer.Inventory.AmountOf(this._ammoItemId, false) - 1, 0)];
-			}
-		}
-
-		
-		private void fixAmplify(Transform tr)
-		{
-			AmplifyMotionObjectBase component = tr.GetComponent<AmplifyMotionObjectBase>();
-			if (component)
-			{
-				component.enabled = false;
-				component.enabled = true;
-			}
-		}
-
-		
-		private void Update()
-		{
-			try
-			{
-				if (UCheatmenu.FastFlint)
-				{
-					if (this._player.CurrentView == PlayerInventory.PlayerViews.World)
-					{
-						if (this._player.AmountOf(this._ammoItemId, true) > 0)
-						{
-							LocalPlayer.Animator.SetBool("noAmmo", false);
-						}
-						else
-						{
-							LocalPlayer.Animator.SetBool("noAmmo", true);
-						}
-						if (!LocalPlayer.Create.Grabber.Target && LocalPlayer.MainCamTr.forward.y < -0.85f)
-						{
-							WeaponStatUpgrade.Types types = this.NextAvailableArrowBonus(this.BowItemView.ActiveBonus);
-							if (types != this.BowItemView.ActiveBonus)
-							{
-								this._showRotateArrowType = true;
-								if (!Scene.HudGui.ToggleArrowBonusIcon.activeSelf)
-								{
-									Scene.HudGui.ToggleArrowBonusIcon.SetActive(true);
-								}
-								if (TheForest.Utils.Input.GetButtonDown("Rotate"))
-								{
-									LocalPlayer.Sfx.PlayWhoosh();
-									this.SetActiveBowBonus(types);
-									Scene.HudGui.ToggleArrowBonusIcon.SetActive(false);
-								}
-							}
-							else if (this._showRotateArrowType)
-							{
-								this._showRotateArrowType = false;
-								Scene.HudGui.ToggleArrowBonusIcon.SetActive(false);
-							}
-						}
-						else if (this._showRotateArrowType)
-						{
-							this._showRotateArrowType = false;
-							Scene.HudGui.ToggleArrowBonusIcon.SetActive(false);
-						}
-						if (this.CurrentArrowItemView.ActiveBonus != this.BowItemView.ActiveBonus)
-						{
-							LocalPlayer.Inventory.SortInventoryViewsByBonus(this.CurrentArrowItemView, this.BowItemView.ActiveBonus, false);
-							if (this.CurrentArrowItemView.ActiveBonus != this.BowItemView.ActiveBonus)
-							{
-								this.SetActiveBowBonus(this.CurrentArrowItemView.ActiveBonus);
-							}
-							this.UpdateArrowRenderer();
-						}
-						WeaponStatUpgrade.Types activeBonus = this.CurrentArrowItemView.ActiveBonus;
-						bool canSetArrowOnFire = this.CanSetArrowOnFire;
-						if (canSetArrowOnFire && TheForest.Utils.Input.GetButton("Lighter"))
-						{
-							Scene.HudGui.SetDelayedIconController(this);
-						}
-						else
-						{
-							Scene.HudGui.UnsetDelayedIconController(this);
-						}
-						if (canSetArrowOnFire)
-						{
-							if (TheForest.Utils.Input.GetButtonAfterDelay("Lighter", 0.5f, false))
-							{
-								this.SetArrowOnFire();
-							}
-						}
-						else if (activeBonus != WeaponStatUpgrade.Types.BurningAmmo && this._activeAmmoBonus != activeBonus)
-						{
-							this.SetActiveArrowBonus(activeBonus);
-						}
-						if (this._lightingArrow)
-						{
-							LocalPlayer.Inventory.CancelNextChargedAttack = true;
-							return;
-						}
-						if (TheForest.Utils.Input.GetButtonDown("Fire1") && !LocalPlayer.Animator.GetBool("ballHeld"))
-						{
-							this._animator.speed = 20f;
-							this._bowAnimator.speed = 20f;
-							LocalPlayer.Inventory.CancelNextChargedAttack = false;
-							if (this._aimingReticle)
-							{
-								this._aimingReticle.enabled = true;
-							}
-							this.ReArm();
-							this._animator.SetBoolReflected("drawBowBool", true);
-							this._bowAnimator.SetBoolReflected("drawBool", true);
-							this._bowAnimator.SetBoolReflected("bowFireBool", false);
-							this._animator.SetBoolReflected("bowFireBool", false);
-							this._player.StashLeftHand();
-							this._animator.SetBoolReflected("checkArms", false);
-							this._animator.SetBoolReflected("onHand", false);
-						}
-						else if (TheForest.Utils.Input.GetButtonDown("AltFire") || LocalPlayer.Animator.GetBool("ballHeld"))
-						{
-							LocalPlayer.AnimControl.animEvents.enableSpine();
-							this._player.CancelNextChargedAttack = true;
-							this._animator.SetBool("drawBowBool", false);
-							this._bowAnimator.SetBool("drawBool", false);
-							this.ShutDown(false);
-						}
-						if (TheForest.Utils.Input.GetButtonUp("Fire1") || LocalPlayer.Animator.GetBool("ballHeld"))
-						{
-							this._currentAmmo = this.CurrentArrowItemView;
-							if (this._aimingReticle)
-							{
-								this._aimingReticle.enabled = false;
-							}
-							base.CancelInvoke();
-							if (this._animator.GetCurrentAnimatorStateInfo(1).tagHash == this._attackHash && this._animator.GetBool("drawBowBool") && !LocalPlayer.Animator.GetBool("ballHeld") && !LocalPlayer.Inventory.blockRangedAttack)
-							{
-								this._animator.SetBoolReflected("bowFireBool", true);
-								this._bowAnimator.SetBoolReflected("bowFireBool", true);
-								this._animator.SetBoolReflected("drawBowBool", false);
-								this._bowAnimator.SetBoolReflected("drawBool", false);
-								LocalPlayer.TargetFunctions.sendPlayerAttacking();
-								this.InitReArm();
-							}
-							else if (LocalPlayer.Animator.GetBool("ballHeld"))
-							{
-								LocalPlayer.AnimControl.animEvents.enableSpine();
-								this._player.CancelNextChargedAttack = true;
-								this._animator.SetBoolReflected("drawBowBool", false);
-								this._bowAnimator.SetBoolReflected("drawBool", false);
-								this.ShutDown(false);
-							}
-							else if (LocalPlayer.Inventory.blockRangedAttack)
-							{
-								this.ShutDown(false);
-							}
-							else
-							{
-								this.ShutDown(true);
-							}
-							this._animator.speed = 1f;
-							this._bowAnimator.speed = 1f;
-							return;
-						}
-						if (Time.time + 0.1f < Time.time)
-						{
-							this.ReArm();
-							return;
-						}
-					}
-				}
-				else
-				{
-					this.__Update__Original();
-				}
-			}
-			catch (Exception ex)
-			{
-				Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-				this.__Update__Original();
 			}
 		}
 

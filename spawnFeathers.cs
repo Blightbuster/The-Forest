@@ -32,7 +32,7 @@ public class spawnFeathers : MonoBehaviour
 				this.counter = UnityEngine.Random.Range(this.minFeathers, this.maxFeathers);
 				while (this.amount < this.counter)
 				{
-					GameObject gameObject = UnityEngine.Object.Instantiate(this.feather[UnityEngine.Random.Range(0, this.feather.Length)], base.transform.position, Quaternion.identity) as GameObject;
+					GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.feather[UnityEngine.Random.Range(0, this.feather.Length)], base.transform.position, Quaternion.identity);
 					if (this.spawnWithPopFoce)
 					{
 						gameObject.GetComponent<Rigidbody>().AddForce(UnityEngine.Random.Range(-200f * this.popForceMult, 200f * this.popForceMult), UnityEngine.Random.Range(500f * this.popForceMult, 800f * this.popForceMult), UnityEngine.Random.Range(-200f * this.popForceMult, 200f * this.popForceMult));

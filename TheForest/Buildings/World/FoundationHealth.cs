@@ -99,7 +99,7 @@ namespace TheForest.Buildings.World
 				}
 				else
 				{
-					if (BoltNetwork.isServer && this.entity && this.entity.isAttached)
+					if (BoltNetwork.isServer && base.entity && base.entity.isAttached)
 					{
 						this.CalcTotalRepairMaterial();
 					}
@@ -133,7 +133,7 @@ namespace TheForest.Buildings.World
 		{
 			if (BoltNetwork.isRunning)
 			{
-				if (this.entity.isAttached && this.entity.isOwner && base.state != null)
+				if (base.entity.isAttached && base.entity.isOwner && base.state != null)
 				{
 					base.state.BuildingCollapsePoint = collapsePoint;
 				}
@@ -170,18 +170,18 @@ namespace TheForest.Buildings.World
 					if (num3 > 0f)
 					{
 						int num4 = Mathf.Min(num + Mathf.RoundToInt(num3 / 500f * (float)num2), 20);
-						if (BoltNetwork.isServer && this.entity && this.entity.isAttached)
+						if (BoltNetwork.isServer && base.entity && base.entity.isAttached)
 						{
 							base.state.RepairMaterialTotal = num4;
 						}
 						return num4;
 					}
-					if (BoltNetwork.isServer && this.entity && this.entity.isAttached)
+					if (BoltNetwork.isServer && base.entity && base.entity.isAttached)
 					{
 						base.state.RepairMaterialTotal = 0;
 					}
 				}
-				else if (BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+				else if (BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 				{
 					return base.state.RepairMaterialTotal;
 				}
@@ -201,7 +201,7 @@ namespace TheForest.Buildings.World
 			if (BoltNetwork.isRunning)
 			{
 				AddRepairMaterial addRepairMaterial = global::AddRepairMaterial.Create(GlobalTargets.OnlyServer);
-				addRepairMaterial.Building = this.entity;
+				addRepairMaterial.Building = base.entity;
 				addRepairMaterial.IsLog = isLog;
 				addRepairMaterial.Send();
 			}
@@ -343,7 +343,7 @@ namespace TheForest.Buildings.World
 						};
 					}
 				}
-				if (BoltNetwork.isClient && this.entity.isAttached)
+				if (BoltNetwork.isClient && base.entity.isAttached)
 				{
 					foreach (int num in base.state.DestroyedTiers)
 					{
@@ -359,7 +359,7 @@ namespace TheForest.Buildings.World
 			{
 				this.CheckSpawnRepairTrigger();
 			}
-			if (BoltNetwork.isServer && this.entity.isAttached)
+			if (BoltNetwork.isServer && base.entity.isAttached)
 			{
 				this.PublishDestroyedTierData(this.LightWeightExport());
 			}
@@ -529,51 +529,64 @@ namespace TheForest.Buildings.World
 					float startTime = Time.time;
 					for (int i = 0; i < logs.Length; i++)
 					{
-						Transform tierTr = logs[i];
-						if (tierTr && tierTr.CompareTag(tierTag))
+						Transform transform = logs[i];
+						if (transform && transform.CompareTag(tierTag))
 						{
-							foreach (object obj in tierTr)
+							IEnumerator enumerator = transform.GetEnumerator();
+							try
 							{
-								Transform tr = (Transform)obj;
-								GameObject go = tr.gameObject;
-								tr.parent = null;
-								logs[i] = null;
-								if (t == 1 && nbPickupSpawned < totalPickupSpawned && (float)i / (float)logs.Length > (float)nbPickupSpawned / (float)totalPickupSpawned && !BoltNetwork.isClient)
+								while (enumerator.MoveNext())
 								{
-									nbPickupSpawned++;
-									Transform logPickup = UnityEngine.Object.Instantiate<Transform>(Prefabs.Instance.LogPickupPrefab);
-									logPickup.position = tr.position;
-									logPickup.rotation = tr.rotation;
-									Rigidbody rb = logPickup.GetComponent<Rigidbody>();
-									if (rb)
+									object obj = enumerator.Current;
+									Transform transform2 = (Transform)obj;
+									GameObject gameObject = transform2.gameObject;
+									transform2.parent = null;
+									logs[i] = null;
+									if (t == 1 && nbPickupSpawned < totalPickupSpawned && (float)i / (float)logs.Length > (float)nbPickupSpawned / (float)totalPickupSpawned && !BoltNetwork.isClient)
 									{
-										rb.AddForce(logPickup.right * -UnityEngine.Random.Range(2.5f, 10f), ForceMode.Impulse);
-										rb.AddRelativeTorque(Vector3.up * (float)UnityEngine.Random.Range(1, 10), ForceMode.Impulse);
-									}
-									if (BoltNetwork.isRunning)
-									{
-										BoltNetwork.Attach(logPickup.gameObject);
-									}
-									UnityEngine.Object.Destroy(go);
-								}
-								else
-								{
-									if (!go.GetComponent<Rigidbody>())
-									{
-										go.layer = 31;
-										CapsuleCollider cc = go.AddComponent<CapsuleCollider>();
-										cc.radius = 0.5f;
-										cc.height = 4.5f;
-										cc.direction = 2;
-										Rigidbody rb2 = go.AddComponent<Rigidbody>();
-										if (rb2)
+										nbPickupSpawned++;
+										Transform transform3 = UnityEngine.Object.Instantiate<Transform>(Prefabs.Instance.LogPickupPrefab);
+										transform3.position = transform2.position;
+										transform3.rotation = transform2.rotation;
+										Rigidbody component = transform3.GetComponent<Rigidbody>();
+										if (component)
 										{
-											rb2.AddForce(tr.right * -UnityEngine.Random.Range(2.5f, 10f), ForceMode.Impulse);
-											rb2.AddRelativeTorque(Vector3.up * (float)UnityEngine.Random.Range(-10, 10), ForceMode.Impulse);
+											component.AddForce(transform3.right * -UnityEngine.Random.Range(2.5f, 10f), ForceMode.Impulse);
+											component.AddRelativeTorque(Vector3.up * (float)UnityEngine.Random.Range(1, 10), ForceMode.Impulse);
 										}
+										if (BoltNetwork.isRunning)
+										{
+											BoltNetwork.Attach(transform3.gameObject);
+										}
+										UnityEngine.Object.Destroy(gameObject);
 									}
-									destroyAfter da = go.AddComponent<destroyAfter>();
-									da.destroyTime = tierDuration + 2f;
+									else
+									{
+										if (!gameObject.GetComponent<Rigidbody>())
+										{
+											gameObject.layer = 31;
+											CapsuleCollider capsuleCollider = gameObject.AddComponent<CapsuleCollider>();
+											capsuleCollider.radius = 0.5f;
+											capsuleCollider.height = 4.5f;
+											capsuleCollider.direction = 2;
+											Rigidbody rigidbody = gameObject.AddComponent<Rigidbody>();
+											if (rigidbody)
+											{
+												rigidbody.AddForce(transform2.right * -UnityEngine.Random.Range(2.5f, 10f), ForceMode.Impulse);
+												rigidbody.AddRelativeTorque(Vector3.up * (float)UnityEngine.Random.Range(-10, 10), ForceMode.Impulse);
+											}
+										}
+										destroyAfter destroyAfter = gameObject.AddComponent<destroyAfter>();
+										destroyAfter.destroyTime = tierDuration + 2f;
+									}
+								}
+							}
+							finally
+							{
+								IDisposable disposable;
+								if ((disposable = (enumerator as IDisposable)) != null)
+								{
+									disposable.Dispose();
 								}
 							}
 						}
@@ -591,21 +604,21 @@ namespace TheForest.Buildings.World
 					fallprogress += tierFallGoal;
 					if (t == 2 && this._foundation._mode != FoundationArchitect.Modes.Auto)
 					{
-						Transform dust = UnityEngine.Object.Instantiate<Transform>(Prefabs.Instance.BuildingCollapsingDust);
-						Vector3 dustPosition = centerPosition;
-						dustPosition.y = endPos.y + 2.5f;
-						dust.position = dustPosition;
+						Transform transform4 = UnityEngine.Object.Instantiate<Transform>(Prefabs.Instance.BuildingCollapsingDust);
+						Vector3 position = centerPosition;
+						position.y = endPos.y + 2.5f;
+						transform4.position = position;
 					}
 					else if (t == 1 && BoltNetwork.isClient)
 					{
 						for (int j = base.transform.childCount - 1; j >= 0; j--)
 						{
 							Transform child = base.transform.GetChild(j);
-							BoltEntity be = child.GetComponent<BoltEntity>();
-							if (be)
+							BoltEntity component2 = child.GetComponent<BoltEntity>();
+							if (component2)
 							{
 								child.parent = null;
-								if (!be.GetComponent<destroyAfter>())
+								if (!component2.GetComponent<destroyAfter>())
 								{
 									child.gameObject.AddComponent<destroyAfter>().destroyTime = 1f;
 								}
@@ -620,32 +633,32 @@ namespace TheForest.Buildings.World
 					for (int k = base.transform.childCount - 1; k >= 0; k--)
 					{
 						Transform child2 = base.transform.GetChild(k);
-						BuildingHealth bh = child2.GetComponent<BuildingHealth>();
-						if (bh)
+						BuildingHealth component3 = child2.GetComponent<BuildingHealth>();
+						if (component3)
 						{
 							child2.parent = null;
-							bh.Collapse(child2.position);
+							component3.Collapse(child2.position);
 						}
 						else
 						{
-							FoundationHealth fh = child2.GetComponent<FoundationHealth>();
-							if (fh)
+							FoundationHealth component4 = child2.GetComponent<FoundationHealth>();
+							if (component4)
 							{
 								child2.parent = null;
-								fh.Collapse(child2.position);
+								component4.Collapse(child2.position);
 							}
 							else if (BoltNetwork.isRunning && child2.GetComponent<BoltEntity>())
 							{
 								child2.parent = null;
-								destroyAfter da2 = child2.gameObject.AddComponent<destroyAfter>();
-								da2.destroyTime = 3f;
+								destroyAfter destroyAfter2 = child2.gameObject.AddComponent<destroyAfter>();
+								destroyAfter2.destroyTime = 3f;
 							}
 						}
 					}
 					if (this._foundation._mode == FoundationArchitect.Modes.Auto)
 					{
-						BuildingHealth bh2 = base.GetComponent<BuildingHealth>();
-						bh2.Collapse(base.transform.position);
+						BuildingHealth bh = base.GetComponent<BuildingHealth>();
+						bh.Collapse(base.transform.position);
 						yield return YieldPresets.WaitPointFiveSeconds;
 					}
 					if (!BoltNetwork.isRunning)
@@ -667,7 +680,7 @@ namespace TheForest.Buildings.World
 			if (!this._repairTrigger && this._foundation._mode != FoundationArchitect.Modes.Auto && (this.CalcMissingRepairMaterial() > 0 || this.CalcMissingRepairLogs() > 0))
 			{
 				this.SpawnRepairTrigger();
-				if (BoltNetwork.isServer && this.entity.isAttached)
+				if (BoltNetwork.isServer && base.entity.isAttached)
 				{
 					base.state.repairTrigger = true;
 				}
@@ -722,7 +735,7 @@ namespace TheForest.Buildings.World
 					});
 				}
 			}
-			else if (BoltNetwork.isServer && this.entity.isAttached)
+			else if (BoltNetwork.isServer && base.entity.isAttached)
 			{
 				this.PublishDestroyedTierData(this.LightWeightExport());
 			}
@@ -796,7 +809,7 @@ namespace TheForest.Buildings.World
 		
 		private void PublishDestroyedTierData(int[] data)
 		{
-			if (this.entity.isAttached)
+			if (base.entity.isAttached)
 			{
 				for (int i = 0; i < data.Length; i++)
 				{
@@ -821,7 +834,7 @@ namespace TheForest.Buildings.World
 		{
 			get
 			{
-				if (BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+				if (BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 				{
 					return Mathf.Clamp(base.state.repairMaterial, 0, base.state.RepairMaterialTotal);
 				}
@@ -829,7 +842,7 @@ namespace TheForest.Buildings.World
 			}
 			set
 			{
-				if (BoltNetwork.isRunning && this.entity && this.entity.isAttached && this.entity.isOwner)
+				if (BoltNetwork.isRunning && base.entity && base.entity.isAttached && base.entity.isOwner)
 				{
 					base.state.repairMaterial = value;
 				}
@@ -844,7 +857,7 @@ namespace TheForest.Buildings.World
 		{
 			get
 			{
-				if (BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+				if (BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 				{
 					return base.state.repairLogs;
 				}
@@ -852,7 +865,7 @@ namespace TheForest.Buildings.World
 			}
 			set
 			{
-				if (BoltNetwork.isRunning && this.entity && this.entity.isAttached && this.entity.isOwner)
+				if (BoltNetwork.isRunning && base.entity && base.entity.isAttached && base.entity.isOwner)
 				{
 					base.state.repairLogs = value;
 				}

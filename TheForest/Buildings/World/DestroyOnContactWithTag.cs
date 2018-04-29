@@ -53,7 +53,7 @@ namespace TheForest.Buildings.World
 				base.enabled = false;
 				if (this._replaceByPrefab)
 				{
-					GameObject gameObject = (GameObject)UnityEngine.Object.Instantiate(this._replaceByPrefab, this._destroyTarget.transform.position, this._destroyTarget.transform.rotation);
+					GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this._replaceByPrefab, this._destroyTarget.transform.position, this._destroyTarget.transform.rotation);
 					if (this._destroyTarget.transform.parent)
 					{
 						gameObject.transform.parent = this._destroyTarget.transform.parent;

@@ -61,9 +61,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject the Material is applied to.")]
 		[RequiredField]
 		[CheckForComponent(typeof(Renderer))]
+		[Tooltip("The GameObject the Material is applied to.")]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -76,9 +76,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString namedTexture;
 
 		
+		[RequiredField]
 		[UIHint(UIHint.Variable)]
 		[Title("StoreTexture")]
-		[RequiredField]
 		[Tooltip("Store the texture in a variable.")]
 		public FsmTexture storedTexture;
 

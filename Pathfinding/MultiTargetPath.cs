@@ -320,7 +320,7 @@ namespace Pathfinding
 			case MultiTargetPath.HeuristicMode.None:
 				this.heuristic = Heuristic.None;
 				this.heuristicScale = 0f;
-				goto IL_269;
+				goto IL_26C;
 			case MultiTargetPath.HeuristicMode.Average:
 				if (!firstTime)
 				{
@@ -334,9 +334,9 @@ namespace Pathfinding
 				{
 					return;
 				}
-				goto IL_EF;
+				goto IL_ED;
 			case MultiTargetPath.HeuristicMode.MovingMidpoint:
-				goto IL_EF;
+				goto IL_ED;
 			case MultiTargetPath.HeuristicMode.Sequential:
 			{
 				if (!firstTime && !this.targetsFound[this.sequentialTarget])
@@ -357,10 +357,10 @@ namespace Pathfinding
 						}
 					}
 				}
-				goto IL_269;
+				goto IL_26C;
 			}
 			default:
-				goto IL_269;
+				goto IL_26C;
 			}
 			Vector3 vector = Vector3.zero;
 			int num2 = 0;
@@ -378,8 +378,8 @@ namespace Pathfinding
 			}
 			vector /= (float)num2;
 			this.hTarget = (Int3)vector;
-			goto IL_269;
-			IL_EF:
+			goto IL_26C;
+			IL_ED:
 			Vector3 vector2 = Vector3.zero;
 			Vector3 vector3 = Vector3.zero;
 			bool flag = false;
@@ -402,7 +402,7 @@ namespace Pathfinding
 			}
 			Int3 hTarget = (Int3)((vector2 + vector3) * 0.5f);
 			this.hTarget = hTarget;
-			IL_269:
+			IL_26C:
 			if (!firstTime)
 			{
 				this.RebuildOpenList();
@@ -573,7 +573,9 @@ namespace Pathfinding
 									debugStringBuilder.Append("\n\t\t\tF: ");
 									debugStringBuilder.Append(pathNode.F);
 									debugStringBuilder.Append("\n\t\t\tPoint: ");
-									debugStringBuilder.Append(this.endPoint.ToString());
+									StringBuilder stringBuilder = debugStringBuilder;
+									Vector3 endPoint = this.endPoint;
+									stringBuilder.Append(endPoint.ToString());
 									debugStringBuilder.Append("\n\t\t\tGraph: ");
 									debugStringBuilder.Append(this.endNode.GraphIndex);
 								}
@@ -586,7 +588,9 @@ namespace Pathfinding
 					}
 					debugStringBuilder.Append("\nStart Node");
 					debugStringBuilder.Append("\n\tPoint: ");
-					debugStringBuilder.Append(this.endPoint.ToString());
+					StringBuilder stringBuilder2 = debugStringBuilder;
+					Vector3 endPoint2 = this.endPoint;
+					stringBuilder2.Append(endPoint2.ToString());
 					debugStringBuilder.Append("\n\tGraph: ");
 					debugStringBuilder.Append(this.startNode.GraphIndex);
 					debugStringBuilder.Append("\nBinary Heap size at completion: ");

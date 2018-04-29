@@ -370,7 +370,6 @@ public class clscameratarget : MonoBehaviour
 		}
 		else
 		{
-			int num2 = this.vargamcurrentscenario;
 			GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 			GUILayout.Label(" ", new GUILayoutOption[]
 			{
@@ -421,24 +420,6 @@ public class clscameratarget : MonoBehaviour
 	}
 
 	
-	private const int cnsbuttonwidthmenu = 250;
-
-	
-	private const int cnsbuttonwidth = 100;
-
-	
-	private const string cnsdemostagename = "__URG_Demo";
-
-	
-	private const string cnsdemodismemberatorstage = "__URG_Dismemberator Tester";
-
-	
-	private const string cnsdemoresetname = "__URG_Empty_scene";
-
-	
-	private const string cnssoldier = "Soldier";
-
-	
 	public Transform vargamtarget;
 
 	
@@ -455,6 +436,24 @@ public class clscameratarget : MonoBehaviour
 
 	
 	public int vargamcurrentscenario = -2;
+
+	
+	private const int cnsbuttonwidthmenu = 250;
+
+	
+	private const int cnsbuttonwidth = 100;
+
+	
+	private const string cnsdemostagename = "__URG_Demo";
+
+	
+	private const string cnsdemodismemberatorstage = "__URG_Dismemberator Tester";
+
+	
+	private const string cnsdemoresetname = "__URG_Empty_scene";
+
+	
+	private const string cnssoldier = "Soldier";
 
 	
 	private bool vardisplaymoreinfo;

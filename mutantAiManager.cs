@@ -280,7 +280,7 @@ public class mutantAiManager : MonoBehaviour
 	{
 		this.fsmRunAwayAfterAttack.Value = 0.4f;
 		this.fsmfollowUpAfterAttack.Value = 1f * GameSettings.Ai.aiFollowUpAfterAttackRatio;
-		this.fsmClimbTreeAfterAttack.Value = 0.15f;
+		this.fsmClimbTreeAfterAttack.Value = 0.2f;
 		this.fsmRunHideAfterAttack.Value = 0.15f;
 		this.fsmToStalkAfterAttack.Value = 0.2f;
 		this.fsmRunTowardsFlank.Value = 0.3f;
@@ -299,7 +299,7 @@ public class mutantAiManager : MonoBehaviour
 		{
 			this.fsmTreeAttack.Value = 0f;
 		}
-		this.fsmTreeClimb.Value = 0.15f;
+		this.fsmTreeClimb.Value = 0.25f;
 		this.fsmBackAway.Value = 0.3f;
 		if (this.runAwayOverride)
 		{
@@ -387,7 +387,7 @@ public class mutantAiManager : MonoBehaviour
 		this.fsmStepRight.Value = 0f;
 		this.fsmScream.Value = 0.5f;
 		this.fsmTreeAttack.Value = 0.05f;
-		this.fsmTreeClimb.Value = 0.3f;
+		this.fsmTreeClimb.Value = 0.2f;
 		this.fsmBackAway.Value = 0.2f;
 		if (this.setup.typeSetup.spawner)
 		{
@@ -435,7 +435,7 @@ public class mutantAiManager : MonoBehaviour
 		this.fsmStepRight.Value = 0f;
 		this.fsmScream.Value = 0.5f;
 		this.fsmTreeAttack.Value = 0.05f;
-		this.fsmTreeClimb.Value = 0.1f;
+		this.fsmTreeClimb.Value = 0.2f;
 		this.fsmBackAway.Value = 0f;
 		if (this.setup.typeSetup.spawner)
 		{
@@ -527,7 +527,7 @@ public class mutantAiManager : MonoBehaviour
 	{
 		this.fsmRunAwayAfterAttack.Value = 0.4f;
 		this.fsmfollowUpAfterAttack.Value = 0.7f * GameSettings.Ai.aiFollowUpAfterAttackRatio;
-		this.fsmClimbTreeAfterAttack.Value = 0.15f;
+		this.fsmClimbTreeAfterAttack.Value = 0.2f;
 		this.fsmRunHideAfterAttack.Value = 0.1f;
 		this.fsmToStalkAfterAttack.Value = 0.3f;
 		this.fsmRunTowardsFlank.Value = 0.3f;
@@ -546,7 +546,7 @@ public class mutantAiManager : MonoBehaviour
 		{
 			this.fsmTreeAttack.Value = 0f;
 		}
-		this.fsmTreeClimb.Value = 0.15f;
+		this.fsmTreeClimb.Value = 0.25f;
 		this.fsmBackAway.Value = 0.3f;
 		if (this.runAwayOverride)
 		{
@@ -580,7 +580,7 @@ public class mutantAiManager : MonoBehaviour
 	{
 		this.fsmRunAwayAfterAttack.Value = 1f * GameSettings.Ai.aiFollowUpAfterAttackRatio;
 		this.fsmfollowUpAfterAttack.Value = 0.3f;
-		this.fsmClimbTreeAfterAttack.Value = 0.5f;
+		this.fsmClimbTreeAfterAttack.Value = 0.4f;
 		this.fsmRunHideAfterAttack.Value = 1f;
 		this.fsmRunTowardsFlank.Value = 1f;
 		this.fsmRunTowardsScream.Value = 0.5f;
@@ -590,7 +590,7 @@ public class mutantAiManager : MonoBehaviour
 		this.fsmStepRight.Value = 0.5f;
 		this.fsmScream.Value = 0.5f;
 		this.fsmTreeAttack.Value = 0.5f;
-		this.fsmTreeClimb.Value = 0.5f;
+		this.fsmTreeClimb.Value = 0.4f;
 		this.fsmBackAway.Value = 1f;
 		if (this.runAwayOverride)
 		{
@@ -623,7 +623,7 @@ public class mutantAiManager : MonoBehaviour
 	{
 		this.fsmRunAwayAfterAttack.Value = 1f * GameSettings.Ai.aiFollowUpAfterAttackRatio;
 		this.fsmfollowUpAfterAttack.Value = 0.1f;
-		this.fsmClimbTreeAfterAttack.Value = 0.15f;
+		this.fsmClimbTreeAfterAttack.Value = 0.2f;
 		this.fsmRunHideAfterAttack.Value = 1f;
 		this.fsmRunTowardsFlank.Value = 1f;
 		this.fsmRunTowardsScream.Value = 0.5f;
@@ -633,7 +633,7 @@ public class mutantAiManager : MonoBehaviour
 		this.fsmStepRight.Value = 0.5f;
 		this.fsmScream.Value = 0.5f;
 		this.fsmTreeAttack.Value = 0.35f;
-		this.fsmTreeClimb.Value = 0.15f;
+		this.fsmTreeClimb.Value = 0.2f;
 		this.fsmBackAway.Value = 1f;
 		if (this.runAwayOverride)
 		{
@@ -664,7 +664,7 @@ public class mutantAiManager : MonoBehaviour
 	{
 		this.fsmRunAwayAfterAttack.Value = 0f;
 		this.fsmfollowUpAfterAttack.Value = 1f * GameSettings.Ai.aiFollowUpAfterAttackRatio;
-		this.fsmClimbTreeAfterAttack.Value = 0.1f;
+		this.fsmClimbTreeAfterAttack.Value = 0.15f;
 		this.fsmRunHideAfterAttack.Value = 0.1f;
 		this.fsmToStalkAfterAttack.Value = 0.05f;
 		this.fsmRunTowardsFlank.Value = 0.24f;
@@ -710,10 +710,10 @@ public class mutantAiManager : MonoBehaviour
 		this.fsmRunForwardToTree.Value = 0.2f;
 		this.fsmSneakBack.Value = 0.5f;
 		this.fsmRunBack.Value = 1f;
-		this.fsmStalkToTree.Value = 0.1f;
+		this.fsmStalkToTree.Value = 0.2f;
 		this.fsmStalkToFlank.Value = 1f;
 		this.fsmStalkRunTowards.Value = 0.2f;
-		this.fsmStalkLeaveArea.Value = 0.4f;
+		this.fsmStalkLeaveArea.Value = 0.2f;
 		this.fsmStalkToSneakForward.Value = 0.5f;
 		this.fsmStalkToRock.Value = 0.75f;
 	}
@@ -731,7 +731,7 @@ public class mutantAiManager : MonoBehaviour
 		this.fsmRunForwardToTree.Value = 0.2f;
 		this.fsmSneakBack.Value = 0.7f;
 		this.fsmRunBack.Value = 1f;
-		this.fsmStalkToTree.Value = 0.15f;
+		this.fsmStalkToTree.Value = 0.25f;
 		this.fsmStalkToFlank.Value = 1f;
 		this.fsmStalkRunTowards.Value = 0.2f;
 		if (this.runAwayOverride)
@@ -747,7 +747,7 @@ public class mutantAiManager : MonoBehaviour
 			this.fsmStalkLeaveArea.Value = 0.05f;
 		}
 		this.fsmStalkToSneakForward.Value = 0.5f;
-		this.fsmStalkToRock.Value = 0.75f;
+		this.fsmStalkToRock.Value = 0.55f;
 		this.fsmStalkToAmbush.Value = 0.1f;
 	}
 
@@ -785,7 +785,7 @@ public class mutantAiManager : MonoBehaviour
 		this.fsmRunForwardToTree.Value = 0.1f;
 		this.fsmSneakBack.Value = 0.25f;
 		this.fsmRunBack.Value = 1f;
-		this.fsmStalkToTree.Value = 0.1f;
+		this.fsmStalkToTree.Value = 0.5f;
 		this.fsmStalkToFlank.Value = 1f;
 		this.fsmStalkRunTowards.Value = 0.2f;
 		this.fsmStalkLeaveArea.Value = 0.05f;
@@ -806,7 +806,7 @@ public class mutantAiManager : MonoBehaviour
 		this.fsmRunForwardToTree.Value = 0.25f;
 		this.fsmSneakBack.Value = 0.7f;
 		this.fsmRunBack.Value = 1f;
-		this.fsmStalkToTree.Value = 0.15f;
+		this.fsmStalkToTree.Value = 0.35f;
 		this.fsmStalkToFlank.Value = 1f;
 		this.fsmStalkRunTowards.Value = 0.05f;
 		if (this.runAwayOverride)

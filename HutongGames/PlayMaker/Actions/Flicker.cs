@@ -66,13 +66,13 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("The frequency of the flicker in seconds.")]
 		[HasFloatSlider(0f, 1f)]
+		[Tooltip("The frequency of the flicker in seconds.")]
 		public FsmFloat frequency;
 
 		
-		[Tooltip("Amount of time flicker is On (0-1). E.g. Use 0.95 for an occasional flicker.")]
 		[HasFloatSlider(0f, 1f)]
+		[Tooltip("Amount of time flicker is On (0-1). E.g. Use 0.95 for an occasional flicker.")]
 		public FsmFloat amountOn;
 
 		

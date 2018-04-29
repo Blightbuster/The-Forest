@@ -28,25 +28,30 @@ public class CarAIControl : MonoBehaviour
 				to = base.GetComponent<Rigidbody>().velocity;
 			}
 			float num = this.carController.MaxSpeed;
-			switch (this.brakeCondition)
+			CarAIControl.BrakeCondition brakeCondition = this.brakeCondition;
+			if (brakeCondition != CarAIControl.BrakeCondition.TargetDirectionDifference)
 			{
-			case CarAIControl.BrakeCondition.TargetDirectionDifference:
+				if (brakeCondition != CarAIControl.BrakeCondition.TargetDistance)
+				{
+					if (brakeCondition != CarAIControl.BrakeCondition.NeverBrake)
+					{
+					}
+				}
+				else
+				{
+					Vector3 vector = this.target.position - base.transform.position;
+					float b = Mathf.InverseLerp(this.cautiousMaxDistance, 0f, vector.magnitude);
+					float value = base.GetComponent<Rigidbody>().angularVelocity.magnitude * this.cautiousAngularVelocityFactor;
+					float t = Mathf.Max(Mathf.InverseLerp(0f, this.cautiousMaxAngle, value), b);
+					num = Mathf.Lerp(this.carController.MaxSpeed, this.carController.MaxSpeed * this.cautiousSpeedFactor, t);
+				}
+			}
+			else
 			{
-				float b = Vector3.Angle(this.target.forward, to);
+				float b2 = Vector3.Angle(this.target.forward, to);
 				float a = base.GetComponent<Rigidbody>().angularVelocity.magnitude * this.cautiousAngularVelocityFactor;
-				float t = Mathf.InverseLerp(0f, this.cautiousMaxAngle, Mathf.Max(a, b));
-				num = Mathf.Lerp(this.carController.MaxSpeed, this.carController.MaxSpeed * this.cautiousSpeedFactor, t);
-				break;
-			}
-			case CarAIControl.BrakeCondition.TargetDistance:
-			{
-				Vector3 vector = this.target.position - base.transform.position;
-				float b2 = Mathf.InverseLerp(this.cautiousMaxDistance, 0f, vector.magnitude);
-				float value = base.GetComponent<Rigidbody>().angularVelocity.magnitude * this.cautiousAngularVelocityFactor;
-				float t2 = Mathf.Max(Mathf.InverseLerp(0f, this.cautiousMaxAngle, value), b2);
+				float t2 = Mathf.InverseLerp(0f, this.cautiousMaxAngle, Mathf.Max(a, b2));
 				num = Mathf.Lerp(this.carController.MaxSpeed, this.carController.MaxSpeed * this.cautiousSpeedFactor, t2);
-				break;
-			}
 			}
 			Vector3 vector2 = this.target.position;
 			if (Time.time < this.avoidOtherCarTime)
@@ -104,13 +109,13 @@ public class CarAIControl : MonoBehaviour
 	}
 
 	
-	[Range(0f, 1f)]
 	[SerializeField]
+	[Range(0f, 1f)]
 	private float cautiousSpeedFactor = 0.05f;
 
 	
-	[Range(0f, 180f)]
 	[SerializeField]
+	[Range(0f, 180f)]
 	private float cautiousMaxAngle = 50f;
 
 	

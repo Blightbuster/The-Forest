@@ -27,7 +27,7 @@ public class quickBuild : MonoBehaviour
 		}
 		else
 		{
-			gameObject = (GameObject)UnityEngine.Object.Instantiate(this.buildThis, base.transform.position, base.transform.rotation);
+			gameObject = UnityEngine.Object.Instantiate<GameObject>(this.buildThis, base.transform.position, base.transform.rotation);
 		}
 		if (gameObject && this.newBuildingDamage > 0f)
 		{

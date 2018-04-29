@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the Background Color used by the Camera.")]
 	[ActionCategory(ActionCategory.Camera)]
+	[Tooltip("Sets the Background Color used by the Camera.")]
 	public class SetBackgroundColor : ComponentAction<Camera>
 	{
 		

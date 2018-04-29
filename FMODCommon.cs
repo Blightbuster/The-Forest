@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Bolt;
 using FMOD;
 using FMOD.Studio;
@@ -63,17 +64,23 @@ public class FMODCommon
 		if (BoltNetwork.isRunning)
 		{
 			bool flag = false;
-			switch (role)
+			if (role != FMODCommon.NetworkRole.None)
 			{
-			case FMODCommon.NetworkRole.None:
+				if (role != FMODCommon.NetworkRole.Server)
+				{
+					if (role == FMODCommon.NetworkRole.Any)
+					{
+						flag = true;
+					}
+				}
+				else
+				{
+					flag = BoltNetwork.isServer;
+				}
+			}
+			else
+			{
 				flag = false;
-				break;
-			case FMODCommon.NetworkRole.Any:
-				flag = true;
-				break;
-			case FMODCommon.NetworkRole.Server:
-				flag = BoltNetwork.isServer;
-				break;
 			}
 			if (flag)
 			{
@@ -260,7 +267,11 @@ public class FMODCommon
 				FMODCommon.adoptedEvents.Add(item);
 			}
 			oneshotEvents.Clear();
-			FMOD_Listener.FMODCommonUpdate = new Action(FMODCommon.CleanupAdoptedEvents);
+			if (FMODCommon.<>f__mg$cache0 == null)
+			{
+				FMODCommon.<>f__mg$cache0 = new Action(FMODCommon.CleanupAdoptedEvents);
+			}
+			FMOD_Listener.FMODCommonUpdate = FMODCommon.<>f__mg$cache0;
 		}
 	}
 
@@ -340,13 +351,17 @@ public class FMODCommon
 	private const float ONESHOT_MAXIMUM_AGE = 10f;
 
 	
-	private const float CLEANUP_PERIOD = 1f;
-
-	
 	private static List<FMODCommon.OneshotEventInfo> adoptedEvents = new List<FMODCommon.OneshotEventInfo>();
 
 	
 	private static float lastCleanupTime = 0f;
+
+	
+	private const float CLEANUP_PERIOD = 1f;
+
+	
+	[CompilerGenerated]
+	private static Action <>f__mg$cache0;
 
 	
 	public enum NetworkRole

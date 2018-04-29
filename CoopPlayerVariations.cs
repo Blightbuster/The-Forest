@@ -1,206 +1,208 @@
 ﻿using System;
-using UniLinq;
+using System.Collections.Generic;
+using Bolt;
+using TheForest.Player.Clothing;
+using TheForest.Utils;
 using UnityEngine;
 
 
-public class CoopPlayerVariations : MonoBehaviour
+public class CoopPlayerVariations : EntityBehaviour<IPlayerState>
 {
 	
-	public void SetVariation(int variation, int tShirtType, int tShirtMat, int pantsType, int pantsMat, int hair, PlayerCloting clothing, int clothingVariation)
+	
+	private CoopPlayerVariation ActiveVariation
 	{
-		SkinnedMeshRenderer tShirtMesh = null;
-		Material tShirtClean = null;
-		Material tShirtRed = null;
+		get
+		{
+			return this.Variations[this._activeVariationIndex];
+		}
+	}
+
+	
+	public void SetVariation(int variation, int hair, List<int> clothingItemIdList)
+	{
+		Material[] tShirtClean = null;
+		Material[] tShirtRed = null;
+		Mesh hatMesh = null;
+		Material[] hatClean = null;
+		Material[] hatRed = null;
+		ClothingItem.BoneGroup index = ClothingItem.BoneGroup.Tops;
+		Mesh topMesh = null;
+		Material[] array = null;
+		Material[] topRed = null;
+		Mesh pantsMesh = null;
+		Material[] pantsClean = null;
+		Material[] pantsRed = null;
 		bool flag = false;
-		BodyOptions pants = BodyOptions.Default;
 		BodyOptions tshirt = BodyOptions.Default;
 		BodyOptions arms = BodyOptions.Default;
-		this._variation = variation;
-		this._clothing = clothing;
-		this._clothingVariation = clothingVariation;
+		BodyOptions pants = BodyOptions.Default;
+		BodyOptions shoes = BodyOptions.Default;
+		this._activeVariationIndex = variation;
 		for (int i = 0; i < this.Variations.Length; i++)
 		{
-			if (i != this._variation)
+			if (i != this._activeVariationIndex)
 			{
 				this.Variations[i].Toggle(false);
 			}
 		}
-		this.Variations[this._variation].Toggle(true);
-		if (tShirtType >= this.TShirts.Length)
+		for (int j = clothingItemIdList.Count - 1; j >= 0; j--)
 		{
-			tShirtType = 0;
-		}
-		if (tShirtMat >= this.TShirts[tShirtType].Materials.Length)
-		{
-			tShirtMat = 0;
-		}
-		if (tShirtType < 0)
-		{
-			this._clothing = PlayerCloting.Blacksuit;
-		}
-		else
-		{
-			tShirtMesh = this.TShirts[tShirtType].Model;
-			tShirtClean = this.TShirts[tShirtType].Materials[tShirtMat];
-			tShirtRed = this.TShirts[tShirtType].MaterialRed;
-		}
-		for (int j = 0; j < this.TShirts.Length; j++)
-		{
-			if (this.TShirts[j].Model.gameObject.activeSelf != (j == tShirtType))
+			if (clothingItemIdList[j] <= 0)
 			{
-				this.TShirts[j].Model.gameObject.SetActive(j == tShirtType);
-			}
-		}
-		for (int k = 0; k < this.Pants.Length; k++)
-		{
-			if (this.Pants[k].Model.gameObject.activeSelf != (k == pantsType))
-			{
-				this.Pants[k].Model.gameObject.SetActive(k == pantsType);
-			}
-		}
-		if (pantsType >= this.Pants.Length)
-		{
-			pantsType = 0;
-		}
-		if (pantsMat >= this.Pants[pantsType].Materials.Length)
-		{
-			pantsMat = 0;
-		}
-		SkinnedMeshRenderer model = this.Pants[pantsType].Model;
-		Material pantsClean = this.Pants[pantsType].Materials[pantsMat];
-		Material materialRed = this.Pants[pantsType].MaterialRed;
-		if (this.BlackSuit)
-		{
-			bool flag2 = (this._clothing & PlayerCloting.Blacksuit) != PlayerCloting.Default;
-			this.BlackSuit.SetActive(flag2);
-			if (flag2)
-			{
+				tshirt = BodyOptions.None;
+				arms = BodyOptions.JustHands;
 				pants = BodyOptions.None;
-				tshirt = BodyOptions.None;
-				arms = BodyOptions.JustHands;
 			}
-		}
-		if (this.Jacket)
-		{
-			bool flag3 = (this._clothing & PlayerCloting.Jacket) != PlayerCloting.Default;
-			this.Jacket.SetActive(flag3);
-			if (flag3)
+			else
 			{
-				arms = BodyOptions.JustHands;
-			}
-		}
-		if (this.Vest)
-		{
-			bool flag4 = (this._clothing & PlayerCloting.Vest) != PlayerCloting.Default;
-			this.Vest.gameObject.SetActive(flag4);
-			if (flag4)
-			{
-				this.Vest.sharedMaterial = this.VestVariations[this._clothingVariation];
-			}
-		}
-		if (this.Hoodie)
-		{
-			bool flag5 = (this._clothing & PlayerCloting.Hoodie) != PlayerCloting.Default;
-			this.Hoodie.gameObject.SetActive(flag5);
-			if (flag5)
-			{
-				this.Hoodie.sharedMaterial = this.HoodieVariations[this._clothingVariation];
-				tshirt = BodyOptions.None;
-				arms = BodyOptions.JustHands;
-			}
-		}
-		if (this.ShirtOpen)
-		{
-			bool flag6 = (this._clothing & PlayerCloting.ShirtOpen) != PlayerCloting.Default;
-			this.ShirtOpen.gameObject.SetActive(flag6);
-			if (flag6)
-			{
-				tshirt = BodyOptions.NoArms;
-				arms = BodyOptions.JustHands;
-			}
-		}
-		if (this.ShirtClosed)
-		{
-			bool flag7 = (this._clothing & PlayerCloting.ShirtClosed) != PlayerCloting.Default;
-			this.ShirtClosed.gameObject.SetActive(flag7);
-			if (flag7)
-			{
-				tshirt = BodyOptions.None;
-				arms = BodyOptions.JustHands;
-			}
-		}
-		if (this.JacketLow)
-		{
-			bool flag8 = (this._clothing & PlayerCloting.JacketLow) != PlayerCloting.Default;
-			this.JacketLow.gameObject.SetActive(flag8);
-			if (flag8)
-			{
-				tshirt = BodyOptions.NoArms;
-				arms = BodyOptions.JustHands;
-			}
-		}
-		if (this.HoodieUp)
-		{
-			bool flag9 = (this._clothing & PlayerCloting.HoodieUp) != PlayerCloting.Default;
-			this.HoodieUp.gameObject.SetActive(flag9);
-			if (flag9)
-			{
-				flag = true;
-				tshirt = BodyOptions.None;
-				arms = BodyOptions.JustHands;
-			}
-		}
-		if (this.Beanies != null)
-		{
-			for (int l = 0; l < this.Beanies.Length; l++)
-			{
-				if (this.Beanies[l])
+				ClothingItem clothingItem = ClothingItemDatabase.ClothingItemById(clothingItemIdList[j]);
+				if (clothingItem._displayType == ClothingItem.DisplayTypes.FullBody)
 				{
-					if (this.Beanies[l].gameObject.activeSelf != ((this._clothing & (PlayerCloting)(16 << l)) != PlayerCloting.Default))
+					tshirt = BodyOptions.None;
+					arms = BodyOptions.JustHands;
+					pants = BodyOptions.None;
+					shoes = BodyOptions.None;
+					index = clothingItem._boneGroup;
+					topMesh = clothingItem._meshLods[0];
+					array = this.GetMaterials(clothingItem);
+					topRed = ((clothingItem._materialsRed == null || clothingItem._materialsRed.Length <= 0) ? array : clothingItem._materialsRed);
+					pantsMesh = null;
+				}
+				else if (clothingItem._displayType == ClothingItem.DisplayTypes.Pants)
+				{
+					pantsMesh = clothingItem._meshLods[0];
+					pantsClean = this.GetMaterials(clothingItem);
+					pantsRed = clothingItem._materialsRed;
+				}
+				else if (clothingItem._displayType == ClothingItem.DisplayTypes.TShirt)
+				{
+					tShirtClean = this.GetMaterials(clothingItem);
+					tShirtRed = clothingItem._materialsRed;
+				}
+				else if (clothingItem._displayType == ClothingItem.DisplayTypes.Hat)
+				{
+					if (this.AllowHats())
 					{
-						bool active = !this.Beanies[l].gameObject.activeSelf;
-						this.Beanies[l].gameObject.SetActive(active);
-					}
-					if (this.Beanies[l].gameObject.activeSelf)
-					{
+						hatMesh = clothingItem._meshLods[0];
+						hatClean = this.GetMaterials(clothingItem);
+						hatRed = clothingItem._materialsRed;
 						flag = true;
 					}
 				}
+				else
+				{
+					index = clothingItem._boneGroup;
+					topMesh = clothingItem._meshLods[0];
+					array = this.GetMaterials(clothingItem);
+					topRed = ((clothingItem._materialsRed == null || clothingItem._materialsRed.Length <= 0) ? array : clothingItem._materialsRed);
+					switch (clothingItem._displayType)
+					{
+					case ClothingItem.DisplayTypes.TopPartial_Hands:
+						tshirt = BodyOptions.NoArms;
+						arms = BodyOptions.JustHands;
+						break;
+					case ClothingItem.DisplayTypes.TopPartial_Arms:
+						tshirt = BodyOptions.Default;
+						arms = BodyOptions.Default;
+						break;
+					case ClothingItem.DisplayTypes.TopFull_Hands:
+						tshirt = BodyOptions.None;
+						arms = BodyOptions.JustHands;
+						break;
+					case ClothingItem.DisplayTypes.TopFull_Arms:
+						tshirt = BodyOptions.None;
+						arms = BodyOptions.Default;
+						break;
+					}
+				}
+				if (clothingItem._hidePants)
+				{
+					pants = BodyOptions.None;
+				}
+				if (clothingItem._hideShoes)
+				{
+					shoes = BodyOptions.None;
+				}
 			}
 		}
-		this.Variations[this._variation].SetMeshes(tShirtMesh, model);
-		this.Variations[this._variation].SetMaterials(tShirtClean, tShirtRed, pantsClean, materialRed);
-		this.Variations[this._variation].SetBodyOptions(pants, tshirt, arms);
-		this.Variations[this._variation].SetHair((!flag) ? hair : -1);
+		this.ActiveVariation.Toggle(true);
+		this.ActiveVariation.SetMeshes(hatMesh, topMesh, this.BoneGroups[(int)index].Bones, pantsMesh);
+		this.ActiveVariation.SetMaterials(hatClean, hatRed, array, topRed, tShirtClean, tShirtRed, pantsClean, pantsRed);
+		this.ActiveVariation.SetBodyOptions(tshirt, arms, pants, shoes);
+		this.ActiveVariation.SetHair((!flag) ? hair : -1);
+	}
+
+	
+	private bool AllowHats()
+	{
+		return this._activeVariationIndex == 0;
+	}
+
+	
+	private Material[] GetMaterials(ClothingItem eachItem)
+	{
+		if (eachItem._materialVariations.NullOrEmpty())
+		{
+			return eachItem._materials;
+		}
+		string value = "skinType_" + this._activeVariationIndex;
+		foreach (MaterialSet materialSet in eachItem._materialVariations)
+		{
+			if (materialSet != null && !materialSet._id.NullOrEmpty())
+			{
+				if (materialSet._id.Equals(value))
+				{
+					return materialSet._materials;
+				}
+			}
+		}
+		return eachItem._materials;
 	}
 
 	
 	public void UpdateSkinVariation(bool blood, bool mud, bool red, bool cold)
 	{
-		this.Variations[this._variation].UpdateSkinVariation(blood, mud, red, cold);
+		this.ActiveVariation.UpdateSkinVariation(blood, mud, red, cold);
 	}
 
 	
 	public void ResetSkinColor()
 	{
-		if (this.Variations[this._variation].NormalSkin.a > 0f)
+		if (this.ActiveVariation.NormalSkin.a > 0f)
 		{
-			this.Variations[this._variation].ResetSkinColor();
+			this.ActiveVariation.ResetSkinColor();
 		}
+	}
+
+	
+	public void resetSkinBlood()
+	{
+		this.ActiveVariation.SetArmSkinBlood(0f);
 	}
 
 	
 	private void Awake()
 	{
+		if (ForestVR.Prototype)
+		{
+			base.enabled = false;
+			return;
+		}
+		if (this.Database)
+		{
+			this.Database.OnEnable();
+		}
 		for (int i = 0; i < this.Variations.Length; i++)
 		{
-			this.Variations[i].Init();
+			this.Variations[i].Init(this.Hat, this.Top, this.Pants);
 		}
 	}
 
 	
 	private void OnDestroy()
 	{
+		this.resetSkinBlood();
 		this.ResetSkinColor();
 	}
 
@@ -210,7 +212,7 @@ public class CoopPlayerVariations : MonoBehaviour
 	{
 		get
 		{
-			return this.Variations.Length * this.TShirts.Sum((CoopPlayerVariations.ClothVariations ts) => ts.Materials.Length) * this.Pants.Sum((CoopPlayerVariations.ClothVariations ts) => ts.Materials.Length);
+			return this.Variations.Length * 4 * 5;
 		}
 	}
 
@@ -220,60 +222,39 @@ public class CoopPlayerVariations : MonoBehaviour
 	{
 		get
 		{
-			return 2 + this.VestVariations.Length + this.HoodieVariations.Length + 1 + 1 + 1 + 1 + 3;
+			return 15;
 		}
 	}
+
+	
+	public ClothingItemDatabase Database;
+
+	
+	public SkinnedMeshRenderer Hat;
+
+	
+	public SkinnedMeshRenderer Top;
+
+	
+	public SkinnedMeshRenderer Pants;
+
+	
+	public SkinnedMeshRenderer FullBody;
 
 	
 	public CoopPlayerVariation[] Variations;
 
 	
-	public CoopPlayerVariations.ClothVariations[] TShirts;
+	public SkinnedMeshRenderer[] BoneSources;
 
 	
-	public CoopPlayerVariations.ClothVariations[] Pants;
+	public bool ImportBonesArrays;
 
 	
-	public GameObject BlackSuit;
+	public List<CoopPlayerVariations.BoneGroup> BoneGroups;
 
 	
-	public GameObject Jacket;
-
-	
-	public SkinnedMeshRenderer Vest;
-
-	
-	public Material[] VestVariations;
-
-	
-	public SkinnedMeshRenderer Hoodie;
-
-	
-	public Material[] HoodieVariations;
-
-	
-	public SkinnedMeshRenderer ShirtOpen;
-
-	
-	public SkinnedMeshRenderer ShirtClosed;
-
-	
-	public SkinnedMeshRenderer JacketLow;
-
-	
-	public SkinnedMeshRenderer HoodieUp;
-
-	
-	public SkinnedMeshRenderer[] Beanies;
-
-	
-	private int _variation;
-
-	
-	private PlayerCloting _clothing;
-
-	
-	private int _clothingVariation;
+	private int _activeVariationIndex;
 
 	
 	[Serializable]
@@ -287,5 +268,13 @@ public class CoopPlayerVariations : MonoBehaviour
 
 		
 		public Material MaterialRed;
+	}
+
+	
+	[Serializable]
+	public class BoneGroup
+	{
+		
+		public Transform[] Bones;
 	}
 }

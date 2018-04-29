@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Rotates a Vector3 direction from Current towards Target.")]
 	[ActionCategory(ActionCategory.Vector3)]
+	[Tooltip("Rotates a Vector3 direction from Current towards Target.")]
 	public class Vector3RotateTowards : FsmStateAction
 	{
 		

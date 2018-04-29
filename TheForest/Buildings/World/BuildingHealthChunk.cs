@@ -45,7 +45,7 @@ namespace TheForest.Buildings.World
 					LocalizedHit localizedHit = global::LocalizedHit.Create(GlobalTargets.OnlyServer);
 					localizedHit.Damage = data._damage;
 					localizedHit.Position = data._position;
-					localizedHit.Building = this.entity;
+					localizedHit.Building = base.entity;
 					if (base.transform.parent)
 					{
 						localizedHit.Chunk = this._bh.GetChunkIndex(this);
@@ -137,11 +137,8 @@ namespace TheForest.Buildings.World
 			{
 				int chunkIndex = this._bh.GetChunkIndex(this);
 				NetworkArray_Integer chunkHits;
-				NetworkArray_Values<int> networkArray_Values = chunkHits = base.state.ChunkHits;
-				int num;
-				int index = num = chunkIndex;
-				num = chunkHits[num];
-				networkArray_Values[index] = num + 1;
+				int index;
+				(chunkHits = base.state.ChunkHits)[index = chunkIndex] = chunkHits[index] + 1;
 			}
 			else
 			{
@@ -155,7 +152,10 @@ namespace TheForest.Buildings.World
 			if (base.transform.parent && base.transform.parent.parent)
 			{
 				LODGroup component = base.transform.parent.parent.GetComponent<LODGroup>();
-				component.ForceLOD(0);
+				if (component)
+				{
+					component.ForceLOD(0);
+				}
 			}
 			int num = 0;
 			foreach (Renderer renderer in (!this._destroyTarget) ? base.GetComponentsInChildren<Renderer>() : this._destroyTarget.GetComponentsInChildren<Renderer>())
@@ -186,7 +186,7 @@ namespace TheForest.Buildings.World
 			}
 			if (this._dustPrefab)
 			{
-				UnityEngine.Object.Instantiate(this._dustPrefab, base.transform.position, base.transform.rotation);
+				UnityEngine.Object.Instantiate<GameObject>(this._dustPrefab, base.transform.position, base.transform.rotation);
 			}
 			UnityEngine.Object.Destroy((!this._destroyTarget) ? base.gameObject : this._destroyTarget);
 			return num;

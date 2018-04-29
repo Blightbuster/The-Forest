@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Get the value of an Integer Variable from another FSM.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Get the value of an Integer Variable from another FSM.")]
 	public class GetFsmInt : FsmStateAction
 	{
 		
@@ -66,18 +66,18 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("Optional name of FSM on Game Object")]
 		[UIHint(UIHint.FsmName)]
+		[Tooltip("Optional name of FSM on Game Object")]
 		public FsmString fsmName;
 
 		
-		[UIHint(UIHint.FsmInt)]
 		[RequiredField]
+		[UIHint(UIHint.FsmInt)]
 		public FsmString variableName;
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmInt storeValue;
 
 		

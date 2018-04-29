@@ -67,8 +67,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat moveLength;
 
 		
-		[Tooltip("Useful for triggering different effects. Audio, particles...")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Useful for triggering different effects. Audio, particles...")]
 		public FsmString physicsMaterialName;
 	}
 }

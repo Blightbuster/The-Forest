@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using TheForest.Utils;
 using UnityEngine;
 
@@ -69,7 +70,11 @@ public class TreeWindSfxManager : MonoBehaviour
 		if (!CoopPeerStarter.DedicatedHost)
 		{
 			base.InvokeRepeating("UpdateVirtualisation", 0f, this.UpdatePeriod);
-			FMOD_Listener.DrawTreeDebug = new Action(TreeWindSfxManager.DrawDebug);
+			if (TreeWindSfxManager.<>f__mg$cache0 == null)
+			{
+				TreeWindSfxManager.<>f__mg$cache0 = new Action(TreeWindSfxManager.DrawDebug);
+			}
+			FMOD_Listener.DrawTreeDebug = TreeWindSfxManager.<>f__mg$cache0;
 		}
 		else
 		{
@@ -218,13 +223,16 @@ public class TreeWindSfxManager : MonoBehaviour
 		else
 		{
 			List<TreeWindSfxManager.TreeInfo> list = TreeWindSfxManager.sTreeInfoList;
-			Vector3 position = LocalPlayer.Transform.position;
-			for (int i = 0; i < list.Count; i++)
+			if (LocalPlayer.Transform != null)
 			{
-				TreeWindSfxManager.TreeInfo treeInfo = list[i];
-				Vector3 vector = treeInfo.position - position;
-				treeInfo.sqrDistance = vector.sqrMagnitude;
-				treeInfo.direction = Mathf.Atan2(vector.z, vector.x);
+				Vector3 position = LocalPlayer.Transform.position;
+				for (int i = 0; i < list.Count; i++)
+				{
+					TreeWindSfxManager.TreeInfo treeInfo = list[i];
+					Vector3 vector = treeInfo.position - position;
+					treeInfo.sqrDistance = vector.sqrMagnitude;
+					treeInfo.direction = Mathf.Atan2(vector.z, vector.x);
+				}
 			}
 			for (int j = 0; j < this.TargetActiveCount; j++)
 			{
@@ -246,9 +254,6 @@ public class TreeWindSfxManager : MonoBehaviour
 			}
 		}
 	}
-
-	
-	private const float TWO_PI = 6.28318548f;
 
 	
 	[Tooltip("The target number of active trees")]
@@ -283,6 +288,13 @@ public class TreeWindSfxManager : MonoBehaviour
 
 	
 	private static Texture2D playerTexture = null;
+
+	
+	private const float TWO_PI = 6.28318548f;
+
+	
+	[CompilerGenerated]
+	private static Action <>f__mg$cache0;
 
 	
 	private class TreeInfo

@@ -137,15 +137,6 @@ namespace Ceto
 		}
 
 		
-		private const float MAX_ACCELERATION = 1f;
-
-		
-		private const float ACCELERATION_RATE = 1f;
-
-		
-		private const float DECELERATION_RATE = 0.25f;
-
-		
 		public bool disableInterpolation;
 
 		
@@ -182,6 +173,15 @@ namespace Ceto
 
 		
 		private ShipCamera.Position m_target;
+
+		
+		private const float MAX_ACCELERATION = 1f;
+
+		
+		private const float ACCELERATION_RATE = 1f;
+
+		
+		private const float DECELERATION_RATE = 0.25f;
 
 		
 		private float m_acceleration;

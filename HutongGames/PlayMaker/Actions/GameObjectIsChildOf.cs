@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Tests if a GameObject is a Child of another GameObject.")]
 	[ActionCategory(ActionCategory.Logic)]
+	[Tooltip("Tests if a GameObject is a Child of another GameObject.")]
 	public class GameObjectIsChildOf : FsmStateAction
 	{
 		
@@ -43,8 +43,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("Is it a child of this GameObject?")]
 		[RequiredField]
+		[Tooltip("Is it a child of this GameObject?")]
 		public FsmGameObject isChildOf;
 
 		

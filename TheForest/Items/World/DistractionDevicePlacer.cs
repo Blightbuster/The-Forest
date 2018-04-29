@@ -93,11 +93,11 @@ namespace TheForest.Items.World
 									GameObject gameObject;
 									if (flag)
 									{
-										gameObject = (GameObject)UnityEngine.Object.Instantiate(this._distractionDevicePrefab, position, Quaternion.LookRotation(forward));
+										gameObject = UnityEngine.Object.Instantiate<GameObject>(this._distractionDevicePrefab, position, Quaternion.LookRotation(forward));
 									}
 									else
 									{
-										gameObject = (GameObject)UnityEngine.Object.Instantiate(this._distractionDevicePrefabUnlit, position, Quaternion.LookRotation(forward));
+										gameObject = UnityEngine.Object.Instantiate<GameObject>(this._distractionDevicePrefabUnlit, position, Quaternion.LookRotation(forward));
 									}
 									if (this._targetObject.CompareTag("Tree") || this._targetObject.transform.root.CompareTag("Tree"))
 									{
@@ -106,7 +106,7 @@ namespace TheForest.Items.World
 										{
 											component2 = this._targetObject.transform.root.GetComponent<TreeHealth>();
 										}
-										if (component2)
+										if (component2 && component2.LodTree)
 										{
 											component2.LodTree.AddTreeCutDownTarget(gameObject);
 										}

@@ -11,17 +11,24 @@ namespace TheForest.Tools
 		
 		public void DoPositionningTest()
 		{
-			switch (this._test)
+			PlayerPositionTester.Tests test = this._test;
+			if (test != PlayerPositionTester.Tests.Proximity)
 			{
-			case PlayerPositionTester.Tests.Proximity:
+				if (test != PlayerPositionTester.Tests.InFront)
+				{
+					if (test == PlayerPositionTester.Tests.Behind)
+					{
+						this.BehindTest();
+					}
+				}
+				else
+				{
+					this.InFrontTest();
+				}
+			}
+			else
+			{
 				this.ProximityTest();
-				break;
-			case PlayerPositionTester.Tests.InFront:
-				this.InFrontTest();
-				break;
-			case PlayerPositionTester.Tests.Behind:
-				this.BehindTest();
-				break;
 			}
 		}
 

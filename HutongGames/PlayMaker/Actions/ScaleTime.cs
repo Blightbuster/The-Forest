@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Scales time: 1 = normal, 0.5 = half speed, 2 = double speed.")]
 	[ActionCategory(ActionCategory.Time)]
+	[Tooltip("Scales time: 1 = normal, 0.5 = half speed, 2 = double speed.")]
 	public class ScaleTime : FsmStateAction
 	{
 		
@@ -40,9 +40,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("Scales time: 1 = normal, 0.5 = half speed, 2 = double speed.")]
-		[HasFloatSlider(0f, 4f)]
 		[RequiredField]
+		[HasFloatSlider(0f, 4f)]
+		[Tooltip("Scales time: 1 = normal, 0.5 = half speed, 2 = double speed.")]
 		public FsmFloat timeScale;
 
 		

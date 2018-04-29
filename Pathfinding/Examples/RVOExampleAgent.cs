@@ -142,8 +142,8 @@ namespace Pathfinding.Examples
 			if (Time.deltaTime > 0f && vector4.magnitude / Time.deltaTime > 0.01f)
 			{
 				Quaternion rotation = base.transform.rotation;
-				Quaternion to = Quaternion.LookRotation(vector4);
-				base.transform.rotation = Quaternion.Slerp(rotation, to, Time.deltaTime * 5f);
+				Quaternion b = Quaternion.LookRotation(vector4);
+				base.transform.rotation = Quaternion.Slerp(rotation, b, Time.deltaTime * 5f);
 			}
 			RaycastHit raycastHit;
 			if (Physics.Raycast(vector + Vector3.up, Vector3.down, out raycastHit, 2f, this.groundMask))

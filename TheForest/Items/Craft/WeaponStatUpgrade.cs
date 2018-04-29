@@ -7,12 +7,6 @@ namespace TheForest.Items.Craft
 	public class WeaponStatUpgrade
 	{
 		
-		public const WeaponStatUpgrade.Types NoBonus = (WeaponStatUpgrade.Types)(-1);
-
-		
-		public const WeaponStatUpgrade.Types UnspecifiedBonus = (WeaponStatUpgrade.Types)(-2);
-
-		
 		public WeaponStatUpgrade.Types _type;
 
 		
@@ -21,6 +15,12 @@ namespace TheForest.Items.Craft
 		
 		[ItemIdPicker]
 		public int _itemId;
+
+		
+		public const WeaponStatUpgrade.Types NoBonus = (WeaponStatUpgrade.Types)(-1);
+
+		
+		public const WeaponStatUpgrade.Types UnspecifiedBonus = (WeaponStatUpgrade.Types)(-2);
 
 		
 		public enum Types

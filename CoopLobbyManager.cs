@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Steamworks;
 using TheForest.Utils;
 using UniLinq;
@@ -19,7 +20,7 @@ public static class CoopLobbyManager
 	}
 
 	
-	public static void QueryList()
+	public static void QueryList(bool friendsOnly)
 	{
 		CoopLobbyManager.Initialize();
 		CoopLobbyManager.LobbyMatchList_Result = (from x in CoopLobbyManager.LobbyMatchList_Result
@@ -155,11 +156,12 @@ public static class CoopLobbyManager
 						{
 							CoopLobbyManager.createCallback();
 						}
-						catch (Exception ex)
+						catch (Exception exception)
 						{
+							BoltLog.Exception(exception);
 						}
 					}
-					goto IL_106;
+					goto IL_112;
 				}
 			}
 			if (CoopLobbyManager.createFailCallback != null)
@@ -168,11 +170,12 @@ public static class CoopLobbyManager
 				{
 					CoopLobbyManager.createFailCallback();
 				}
-				catch (Exception ex2)
+				catch (Exception exception2)
 				{
+					BoltLog.Exception(exception2);
 				}
 			}
-			IL_106:;
+			IL_112:;
 		}
 		finally
 		{
@@ -225,10 +228,26 @@ public static class CoopLobbyManager
 		if (CoopLobbyManager.runInit)
 		{
 			CoopLobbyManager.runInit = false;
-			CoopLobbyManager.LobbyMatchList_Callback = Callback<LobbyMatchList_t>.Create(new Callback<LobbyMatchList_t>.DispatchDelegate(CoopLobbyManager.LobbyMatchList));
-			CoopLobbyManager.LobbyDataUpdate_Callback = Callback<LobbyDataUpdate_t>.Create(new Callback<LobbyDataUpdate_t>.DispatchDelegate(CoopLobbyManager.LobbyDataUpdate));
-			CoopLobbyManager.LobbyCreated_Callback = Callback<LobbyCreated_t>.Create(new Callback<LobbyCreated_t>.DispatchDelegate(CoopLobbyManager.LobbyCreated));
-			CoopLobbyManager.LobbyEnter_Callback = Callback<LobbyEnter_t>.Create(new Callback<LobbyEnter_t>.DispatchDelegate(CoopLobbyManager.LobbyEnter));
+			if (CoopLobbyManager.<>f__mg$cache0 == null)
+			{
+				CoopLobbyManager.<>f__mg$cache0 = new Callback<LobbyMatchList_t>.DispatchDelegate(CoopLobbyManager.LobbyMatchList);
+			}
+			CoopLobbyManager.LobbyMatchList_Callback = Callback<LobbyMatchList_t>.Create(CoopLobbyManager.<>f__mg$cache0);
+			if (CoopLobbyManager.<>f__mg$cache1 == null)
+			{
+				CoopLobbyManager.<>f__mg$cache1 = new Callback<LobbyDataUpdate_t>.DispatchDelegate(CoopLobbyManager.LobbyDataUpdate);
+			}
+			CoopLobbyManager.LobbyDataUpdate_Callback = Callback<LobbyDataUpdate_t>.Create(CoopLobbyManager.<>f__mg$cache1);
+			if (CoopLobbyManager.<>f__mg$cache2 == null)
+			{
+				CoopLobbyManager.<>f__mg$cache2 = new Callback<LobbyCreated_t>.DispatchDelegate(CoopLobbyManager.LobbyCreated);
+			}
+			CoopLobbyManager.LobbyCreated_Callback = Callback<LobbyCreated_t>.Create(CoopLobbyManager.<>f__mg$cache2);
+			if (CoopLobbyManager.<>f__mg$cache3 == null)
+			{
+				CoopLobbyManager.<>f__mg$cache3 = new Callback<LobbyEnter_t>.DispatchDelegate(CoopLobbyManager.LobbyEnter);
+			}
+			CoopLobbyManager.LobbyEnter_Callback = Callback<LobbyEnter_t>.Create(CoopLobbyManager.<>f__mg$cache3);
 		}
 	}
 
@@ -280,4 +299,20 @@ public static class CoopLobbyManager
 
 	
 	private static List<CoopLobbyInfo> LobbyMatchList_Result = new List<CoopLobbyInfo>();
+
+	
+	[CompilerGenerated]
+	private static Callback<LobbyMatchList_t>.DispatchDelegate <>f__mg$cache0;
+
+	
+	[CompilerGenerated]
+	private static Callback<LobbyDataUpdate_t>.DispatchDelegate <>f__mg$cache1;
+
+	
+	[CompilerGenerated]
+	private static Callback<LobbyCreated_t>.DispatchDelegate <>f__mg$cache2;
+
+	
+	[CompilerGenerated]
+	private static Callback<LobbyEnter_t>.DispatchDelegate <>f__mg$cache3;
 }

@@ -26,25 +26,36 @@ public class CoopMutantSetup : EntityEventListener<IMutantState>
 		}
 		if (this.creepy && BoltNetwork.isClient)
 		{
-			GameObject gameObject = UnityEngine.Object.Instantiate(this.storePrefab, base.transform.position, base.transform.rotation) as GameObject;
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.storePrefab, base.transform.position, base.transform.rotation);
 			storeLocalMutantInfo2 component = gameObject.GetComponent<storeLocalMutantInfo2>();
 			Scene.SceneTracker.storedRagDollPrefabs.Add(gameObject);
 			component.identifier = this.storedRagDollName;
 			component.rootRotation = this.rootTr.rotation;
 			component.rootPosition = this.rootTr.position;
-			CoopMutantFX component2 = base.transform.GetComponent<CoopMutantFX>();
-			if (component2 && component2.FX_Fire1 && component2.FX_Fire1.activeSelf)
+			mutantTransferFire component2 = base.transform.GetComponent<mutantTransferFire>();
+			if (component2)
 			{
-				component.onFire = true;
+				for (int i = 0; i < component2.clientFireGo.Count; i++)
+				{
+					spawnParticleController component3 = component2.clientFireGo[i].GetComponent<spawnParticleController>();
+					if (component3 && component3.spawnedPrefab)
+					{
+						int value = component2.allBones.IndexOf(component2.clientFireGo[i].transform.parent);
+						component.fireIndex.Add(component3.spawnedPrefab.transform, value);
+						component.firePos.Add(component2.clientFireGo[i].transform.localPosition);
+						component.fireRot.Add(component2.clientFireGo[i].transform.localRotation);
+						component3.spawnedPrefab.SendMessage("disableFollowTarget");
+					}
+				}
 			}
-			CoopMutantMaterialSync component3 = base.transform.GetComponent<CoopMutantMaterialSync>();
-			if (component3)
+			CoopMutantMaterialSync component4 = base.transform.GetComponent<CoopMutantMaterialSync>();
+			if (component4)
 			{
-				component.matColor = component3.storedColor;
+				component.matColor = component4.storedColor;
 			}
-			for (int i = 0; i < this.storedCreepyJoints.Length; i++)
+			for (int j = 0; j < this.storedCreepyJoints.Length; j++)
 			{
-				component.jointAngles.Add(this.storedCreepyJoints[i].localRotation);
+				component.jointAngles.Add(this.storedCreepyJoints[j].localRotation);
 			}
 			if (this.ast)
 			{

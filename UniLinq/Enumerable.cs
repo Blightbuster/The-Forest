@@ -155,8 +155,7 @@ namespace UniLinq
 			long num2 = 0L;
 			foreach (double num3 in source)
 			{
-				double num4 = num3;
-				num += num4;
+				num += num3;
 				num2 += 1L;
 			}
 			if (num2 == 0L)
@@ -174,8 +173,7 @@ namespace UniLinq
 			long num2 = 0L;
 			foreach (float num3 in source)
 			{
-				float num4 = num3;
-				num += num4;
+				num += num3;
 				num2 += 1L;
 			}
 			if (num2 == 0L)
@@ -553,10 +551,23 @@ namespace UniLinq
 		
 		private static IEnumerable<TResult> CreateCastIterator<TResult>(IEnumerable source)
 		{
-			foreach (object obj in source)
+			IEnumerator enumerator = source.GetEnumerator();
+			try
 			{
-				TResult element = (TResult)((object)obj);
-				yield return element;
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					TResult element = (TResult)((object)obj);
+					yield return element;
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 			yield break;
 		}
@@ -893,12 +904,12 @@ namespace UniLinq
 			List<TSource> nullList = new List<TSource>();
 			int counter = 0;
 			int nullCounter = -1;
-			foreach (TSource element in source)
+			foreach (TSource tsource in source)
 			{
-				TKey key = keySelector(element);
-				if (key == null)
+				TKey tkey = keySelector(tsource);
+				if (tkey == null)
 				{
-					nullList.Add(element);
+					nullList.Add(tsource);
 					if (nullCounter == -1)
 					{
 						nullCounter = counter;
@@ -907,25 +918,25 @@ namespace UniLinq
 				}
 				else
 				{
-					List<TSource> group;
-					if (!groups.TryGetValue(key, out group))
+					List<TSource> list;
+					if (!groups.TryGetValue(tkey, out list))
 					{
-						group = new List<TSource>();
-						groups.Add(key, group);
+						list = new List<TSource>();
+						groups.Add(tkey, list);
 						counter++;
 					}
-					group.Add(element);
+					list.Add(tsource);
 				}
 			}
 			counter = 0;
-			foreach (KeyValuePair<TKey, List<TSource>> group2 in groups)
+			foreach (KeyValuePair<TKey, List<TSource>> group in groups)
 			{
 				if (counter == nullCounter)
 				{
 					yield return new Grouping<TKey, TSource>(default(TKey), nullList);
 					counter++;
 				}
-				yield return new Grouping<TKey, TSource>(group2.Key, group2.Value);
+				yield return new Grouping<TKey, TSource>(group.Key, group.Value);
 				counter++;
 			}
 			if (counter == nullCounter)
@@ -956,13 +967,13 @@ namespace UniLinq
 			List<TElement> nullList = new List<TElement>();
 			int counter = 0;
 			int nullCounter = -1;
-			foreach (TSource item in source)
+			foreach (TSource arg in source)
 			{
-				TKey key = keySelector(item);
-				TElement element = elementSelector(item);
-				if (key == null)
+				TKey tkey = keySelector(arg);
+				TElement item = elementSelector(arg);
+				if (tkey == null)
 				{
-					nullList.Add(element);
+					nullList.Add(item);
 					if (nullCounter == -1)
 					{
 						nullCounter = counter;
@@ -971,25 +982,25 @@ namespace UniLinq
 				}
 				else
 				{
-					List<TElement> group;
-					if (!groups.TryGetValue(key, out group))
+					List<TElement> list;
+					if (!groups.TryGetValue(tkey, out list))
 					{
-						group = new List<TElement>();
-						groups.Add(key, group);
+						list = new List<TElement>();
+						groups.Add(tkey, list);
 						counter++;
 					}
-					group.Add(element);
+					list.Add(item);
 				}
 			}
 			counter = 0;
-			foreach (KeyValuePair<TKey, List<TElement>> group2 in groups)
+			foreach (KeyValuePair<TKey, List<TElement>> group in groups)
 			{
 				if (counter == nullCounter)
 				{
 					yield return new Grouping<TKey, TElement>(default(TKey), nullList);
 					counter++;
 				}
-				yield return new Grouping<TKey, TElement>(group2.Key, group2.Value);
+				yield return new Grouping<TKey, TElement>(group.Key, group.Value);
 				counter++;
 			}
 			if (counter == nullCounter)
@@ -1316,9 +1327,8 @@ namespace UniLinq
 			Check.Source(source);
 			bool flag = true;
 			double num = double.MinValue;
-			foreach (double num2 in source)
+			foreach (double val in source)
 			{
-				double val = num2;
 				num = Math.Max(val, num);
 				flag = false;
 			}
@@ -1335,9 +1345,8 @@ namespace UniLinq
 			Check.Source(source);
 			bool flag = true;
 			float num = float.MinValue;
-			foreach (float num2 in source)
+			foreach (float val in source)
 			{
-				float val = num2;
 				num = Math.Max(val, num);
 				flag = false;
 			}
@@ -1624,17 +1633,17 @@ namespace UniLinq
 		{
 			Check.SourceAndSelector(source, selector);
 			bool flag = true;
-			int? result = null;
+			int? num = null;
 			foreach (TSource arg in source)
 			{
-				int? num = selector(arg);
-				if (result == null)
+				int? num2 = selector(arg);
+				if (num == null)
 				{
-					result = num;
+					num = num2;
 				}
-				else if (num != null && result != null && num.Value > result.Value)
+				else if (num2 > num)
 				{
-					result = num;
+					num = num2;
 				}
 				flag = false;
 			}
@@ -1642,7 +1651,7 @@ namespace UniLinq
 			{
 				return null;
 			}
-			return result;
+			return num;
 		}
 
 		
@@ -1650,17 +1659,17 @@ namespace UniLinq
 		{
 			Check.SourceAndSelector(source, selector);
 			bool flag = true;
-			long? result = null;
+			long? num = null;
 			foreach (TSource arg in source)
 			{
-				long? num = selector(arg);
-				if (result == null)
+				long? num2 = selector(arg);
+				if (num == null)
 				{
-					result = num;
+					num = num2;
 				}
-				else if (num != null && result != null && num.Value > result.Value)
+				else if (num2 > num)
 				{
-					result = num;
+					num = num2;
 				}
 				flag = false;
 			}
@@ -1668,7 +1677,7 @@ namespace UniLinq
 			{
 				return null;
 			}
-			return result;
+			return num;
 		}
 
 		
@@ -1676,17 +1685,17 @@ namespace UniLinq
 		{
 			Check.SourceAndSelector(source, selector);
 			bool flag = true;
-			double? result = null;
+			double? num = null;
 			foreach (TSource arg in source)
 			{
-				double? num = selector(arg);
-				if (result == null)
+				double? num2 = selector(arg);
+				if (num == null)
 				{
-					result = num;
+					num = num2;
 				}
-				else if (num != null && result != null && num.Value > result.Value)
+				else if (num2 > num)
 				{
-					result = num;
+					num = num2;
 				}
 				flag = false;
 			}
@@ -1694,7 +1703,7 @@ namespace UniLinq
 			{
 				return null;
 			}
-			return result;
+			return num;
 		}
 
 		
@@ -1702,17 +1711,17 @@ namespace UniLinq
 		{
 			Check.SourceAndSelector(source, selector);
 			bool flag = true;
-			float? result = null;
+			float? num = null;
 			foreach (TSource arg in source)
 			{
-				float? num = selector(arg);
-				if (result == null)
+				float? num2 = selector(arg);
+				if (num == null)
 				{
-					result = num;
+					num = num2;
 				}
-				else if (num != null && result != null && num.Value > result.Value)
+				else if (num2 > num)
 				{
-					result = num;
+					num = num2;
 				}
 				flag = false;
 			}
@@ -1720,7 +1729,7 @@ namespace UniLinq
 			{
 				return null;
 			}
-			return result;
+			return num;
 		}
 
 		
@@ -1728,17 +1737,17 @@ namespace UniLinq
 		{
 			Check.SourceAndSelector(source, selector);
 			bool flag = true;
-			decimal? result = null;
+			decimal? num = null;
 			foreach (TSource arg in source)
 			{
-				decimal? num = selector(arg);
-				if (result == null)
+				decimal? num2 = selector(arg);
+				if (num == null)
 				{
-					result = num;
+					num = num2;
 				}
-				else if (num != null && result != null && num.Value > result.Value)
+				else if (num2 > num)
 				{
-					result = num;
+					num = num2;
 				}
 				flag = false;
 			}
@@ -1746,7 +1755,7 @@ namespace UniLinq
 			{
 				return null;
 			}
-			return result;
+			return num;
 		}
 
 		
@@ -1798,9 +1807,8 @@ namespace UniLinq
 			Check.Source(source);
 			bool flag = true;
 			double num = double.MaxValue;
-			foreach (double num2 in source)
+			foreach (double val in source)
 			{
-				double val = num2;
 				num = Math.Min(val, num);
 				flag = false;
 			}
@@ -1817,9 +1825,8 @@ namespace UniLinq
 			Check.Source(source);
 			bool flag = true;
 			float num = float.MaxValue;
-			foreach (float num2 in source)
+			foreach (float val in source)
 			{
-				float val = num2;
 				num = Math.Min(val, num);
 				flag = false;
 			}
@@ -2090,17 +2097,17 @@ namespace UniLinq
 		{
 			Check.SourceAndSelector(source, selector);
 			bool flag = true;
-			int? result = null;
+			int? num = null;
 			foreach (TSource arg in source)
 			{
-				int? num = selector(arg);
-				if (result == null)
+				int? num2 = selector(arg);
+				if (num == null)
 				{
-					result = num;
+					num = num2;
 				}
-				else if (num != null && result != null && num.Value < result.Value)
+				else if (num2 < num)
 				{
-					result = num;
+					num = num2;
 				}
 				flag = false;
 			}
@@ -2108,7 +2115,7 @@ namespace UniLinq
 			{
 				return null;
 			}
-			return result;
+			return num;
 		}
 
 		
@@ -2116,17 +2123,17 @@ namespace UniLinq
 		{
 			Check.SourceAndSelector(source, selector);
 			bool flag = true;
-			long? result = null;
+			long? num = null;
 			foreach (TSource arg in source)
 			{
-				long? num = selector(arg);
-				if (result == null)
+				long? num2 = selector(arg);
+				if (num == null)
 				{
-					result = num;
+					num = num2;
 				}
-				else if (num != null && result != null && num.Value < result.Value)
+				else if (num2 < num)
 				{
-					result = num;
+					num = num2;
 				}
 				flag = false;
 			}
@@ -2134,7 +2141,7 @@ namespace UniLinq
 			{
 				return null;
 			}
-			return result;
+			return num;
 		}
 
 		
@@ -2142,17 +2149,17 @@ namespace UniLinq
 		{
 			Check.SourceAndSelector(source, selector);
 			bool flag = true;
-			float? result = null;
+			float? num = null;
 			foreach (TSource arg in source)
 			{
-				float? num = selector(arg);
-				if (result == null)
+				float? num2 = selector(arg);
+				if (num == null)
 				{
-					result = num;
+					num = num2;
 				}
-				else if (num != null && result != null && num.Value < result.Value)
+				else if (num2 < num)
 				{
-					result = num;
+					num = num2;
 				}
 				flag = false;
 			}
@@ -2160,7 +2167,7 @@ namespace UniLinq
 			{
 				return null;
 			}
-			return result;
+			return num;
 		}
 
 		
@@ -2168,17 +2175,17 @@ namespace UniLinq
 		{
 			Check.SourceAndSelector(source, selector);
 			bool flag = true;
-			double? result = null;
+			double? num = null;
 			foreach (TSource arg in source)
 			{
-				double? num = selector(arg);
-				if (result == null)
+				double? num2 = selector(arg);
+				if (num == null)
 				{
-					result = num;
+					num = num2;
 				}
-				else if (num != null && result != null && num.Value < result.Value)
+				else if (num2 < num)
 				{
-					result = num;
+					num = num2;
 				}
 				flag = false;
 			}
@@ -2186,7 +2193,7 @@ namespace UniLinq
 			{
 				return null;
 			}
-			return result;
+			return num;
 		}
 
 		
@@ -2194,17 +2201,17 @@ namespace UniLinq
 		{
 			Check.SourceAndSelector(source, selector);
 			bool flag = true;
-			decimal? result = null;
+			decimal? num = null;
 			foreach (TSource arg in source)
 			{
-				decimal? num = selector(arg);
-				if (result == null)
+				decimal? num2 = selector(arg);
+				if (num == null)
 				{
-					result = num;
+					num = num2;
 				}
-				else if (num != null && result != null && num.Value < result.Value)
+				else if (num2 < num)
 				{
-					result = num;
+					num = num2;
 				}
 				flag = false;
 			}
@@ -2212,7 +2219,7 @@ namespace UniLinq
 			{
 				return null;
 			}
-			return result;
+			return num;
 		}
 
 		
@@ -2232,11 +2239,24 @@ namespace UniLinq
 		
 		private static IEnumerable<TResult> CreateOfTypeIterator<TResult>(IEnumerable source)
 		{
-			foreach (object element in source)
+			IEnumerator enumerator = source.GetEnumerator();
+			try
 			{
-				if (element is TResult)
+				while (enumerator.MoveNext())
 				{
-					yield return (TResult)((object)element);
+					object element = enumerator.Current;
+					if (element is TResult)
+					{
+						yield return (TResult)((object)element);
+					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
 				}
 			}
 			yield break;
@@ -2763,8 +2783,7 @@ namespace UniLinq
 			double num = 0.0;
 			foreach (double num2 in source)
 			{
-				double num3 = num2;
-				num += num3;
+				num += num2;
 			}
 			return num;
 		}
@@ -2819,8 +2838,7 @@ namespace UniLinq
 			float num = 0f;
 			foreach (float num2 in source)
 			{
-				float num3 = num2;
-				num += num3;
+				num += num2;
 			}
 			return num;
 		}

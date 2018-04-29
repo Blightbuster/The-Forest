@@ -51,9 +51,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmVector3 axis;
 
 		
-		[Tooltip("Store the rotation of this quaternion variable.")]
 		[RequiredField]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the rotation of this quaternion variable.")]
 		public FsmQuaternion result;
 
 		

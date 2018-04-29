@@ -47,9 +47,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
+		[RequiredField]
 		[UIHint(UIHint.Variable)]
 		[Tooltip("The Float variable to add to.")]
-		[RequiredField]
 		public FsmFloat floatVariable;
 
 		

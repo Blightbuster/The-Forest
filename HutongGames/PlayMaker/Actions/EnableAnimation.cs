@@ -34,7 +34,7 @@ namespace HutongGames.PlayMaker.Actions
 			Animation component = go.GetComponent<Animation>();
 			if (component == null)
 			{
-				this.LogError("Missing animation component!");
+				base.LogError("Missing animation component!");
 				return;
 			}
 			this.anim = component[this.animName.Value];
@@ -54,15 +54,15 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject playing the animation.")]
-		[CheckForComponent(typeof(Animation))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animation))]
+		[Tooltip("The GameObject playing the animation.")]
 		public FsmOwnerDefault gameObject;
 
 		
+		[RequiredField]
 		[UIHint(UIHint.Animation)]
 		[Tooltip("The name of the animation to enable/disable.")]
-		[RequiredField]
 		public FsmString animName;
 
 		

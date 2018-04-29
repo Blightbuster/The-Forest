@@ -121,8 +121,9 @@ public class AnimalSpawnController : MonoBehaviour
 				}
 			}
 		}
-		catch (Exception ex)
+		catch (Exception exception)
 		{
+			BoltLog.Exception(exception);
 		}
 	}
 

@@ -11,7 +11,6 @@ public class mutantVis : MonoBehaviour
 	
 	private void Awake()
 	{
-		this.adh = base.transform.root.GetComponentsInChildren<amplifyDisableHook>();
 	}
 
 	
@@ -61,7 +60,6 @@ public class mutantVis : MonoBehaviour
 				this.fsmAnimatorActive = this.setup.pmCombat.FsmVariables.GetFsmBool("animatorActive");
 			}
 		}
-		base.Invoke("getAmplifyObj", 0.1f);
 		if (this.netPrefab)
 		{
 			base.InvokeRepeating("updatePlayerTargets", 0.5f, 0.2f);
@@ -95,7 +93,6 @@ public class mutantVis : MonoBehaviour
 		this.animDisabled = false;
 		this.animReduced = false;
 		this.animEnabled = false;
-		this.amplifyTrigger = false;
 		this.encounterCheck = false;
 		this.refreshAmplify = false;
 	}
@@ -127,13 +124,6 @@ public class mutantVis : MonoBehaviour
 		{
 			this.playerTr = this.allPlayers[0].transform;
 		}
-	}
-
-	
-	private void getAmplifyObj()
-	{
-		this.amplifyBase = base.transform.root.GetComponentsInChildren<AmplifyMotionObjectBase>(true);
-		this.doAmplify = true;
 	}
 
 	
@@ -176,7 +166,6 @@ public class mutantVis : MonoBehaviour
 						{
 							if (!this.lowSkinnyGo.activeSelf)
 							{
-								base.StartCoroutine(this.fixMotionBlur(this.thisLowSkinnyRenderer));
 								this.lowSkinnyGo.SetActive(true);
 							}
 							if (this.lowRendererGo.activeSelf)
@@ -192,7 +181,6 @@ public class mutantVis : MonoBehaviour
 						{
 							if (!this.lowRendererGo.active)
 							{
-								base.StartCoroutine(this.fixMotionBlur(this.thisLowRenderer));
 								this.lowRendererGo.SetActive(true);
 							}
 							if (this.lowSkinnyGo.activeSelf)
@@ -217,7 +205,6 @@ public class mutantVis : MonoBehaviour
 						}
 						if (!this.thisRenderer.enabled)
 						{
-							base.StartCoroutine(this.fixMotionBlur(this.thisRenderer));
 							this.thisRenderer.enabled = true;
 						}
 					}
@@ -325,21 +312,6 @@ public class mutantVis : MonoBehaviour
 				this.reduceAnimation();
 				this.trigger = true;
 			}
-			if (this.playerDist > 25f && this.doAmplify)
-			{
-				this.disableAmplifyMotion();
-				this.amplifyTrigger = true;
-			}
-			else if (this.playerDist < 25f && this.doAmplify)
-			{
-				this.enableAmplifyMotion();
-				this.amplifyTrigger = false;
-			}
-			if (this.thisRenderer && this.thisRenderer.enabled && !this.refreshAmplify)
-			{
-				this.refreshAmplifyObject();
-				this.refreshAmplify = true;
-			}
 		}
 		if (this.mecanimEmitter)
 		{
@@ -367,55 +339,6 @@ public class mutantVis : MonoBehaviour
 			else if (!this.displacementGo.activeSelf)
 			{
 				this.displacementGo.SetActive(true);
-			}
-		}
-	}
-
-	
-	private void disableAmplifyMotion()
-	{
-		if (this.adh != null)
-		{
-			for (int i = 0; i < this.adh.Length; i++)
-			{
-				this.adh[i].skipUpdate = true;
-			}
-		}
-	}
-
-	
-	private void enableAmplifyMotion()
-	{
-		if (this.adh != null)
-		{
-			for (int i = 0; i < this.adh.Length; i++)
-			{
-				this.adh[i].skipUpdate = false;
-			}
-		}
-	}
-
-	
-	private void refreshAmplifyObject()
-	{
-		if (this.amplifyBase != null)
-		{
-			for (int i = 0; i < this.amplifyBase.Length; i++)
-			{
-				if (this.amplifyBase[i])
-				{
-					this.amplifyBase[i].enabled = false;
-				}
-			}
-		}
-		if (this.amplifyBase != null)
-		{
-			for (int j = 0; j < this.amplifyBase.Length; j++)
-			{
-				if (this.amplifyBase[j])
-				{
-					this.amplifyBase[j].enabled = true;
-				}
 			}
 		}
 	}
@@ -633,12 +556,6 @@ public class mutantVis : MonoBehaviour
 
 	
 	private mutantScriptSetup setup;
-
-	
-	public AmplifyMotionObjectBase[] amplifyBase;
-
-	
-	public amplifyDisableHook[] adh;
 
 	
 	public bool trigger;

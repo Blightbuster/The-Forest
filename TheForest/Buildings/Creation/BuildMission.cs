@@ -130,7 +130,7 @@ namespace TheForest.Buildings.Creation
 		
 		public override void Attached()
 		{
-			if (!this.entity.isOwner)
+			if (!base.entity.isOwner)
 			{
 				base.state.AddCallback("ItemId", delegate
 				{

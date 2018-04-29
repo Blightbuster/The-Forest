@@ -22,8 +22,12 @@ namespace TheForest.Items.Inventory
 			bool hasValidTargetView = this._targetView && this._targetView.gameObject.activeInHierarchy;
 			if (hasValidTargetView)
 			{
+				this._exited = false;
 				yield return null;
-				this._targetView.OnMouseEnterCollider();
+				if (this._targetView && !this._exited)
+				{
+					this._targetView.OnMouseEnterCollider();
+				}
 			}
 			yield break;
 		}
@@ -32,6 +36,7 @@ namespace TheForest.Items.Inventory
 		private void OnMouseExitCollider()
 		{
 			bool flag = this._targetView && this._targetView.gameObject.activeInHierarchy;
+			this._exited = true;
 			if (flag)
 			{
 				this._targetView.OnMouseExitCollider();
@@ -51,5 +56,8 @@ namespace TheForest.Items.Inventory
 
 		
 		public InventoryItemView _targetView;
+
+		
+		private bool _exited;
 	}
 }

@@ -557,7 +557,7 @@ public class mutantSearchFunctions : MonoBehaviour
 		}
 		if (this.sceneInfo.waypointMarkers.Count > 0)
 		{
-			this.sceneInfo.waypointMarkers.Sort((GameObject c1, GameObject c2) => Vector3.Distance(this.<>f__this.sceneInfo.allPlayers[0].transform.position, c1.transform.position).CompareTo(Vector3.Distance(this.<>f__this.sceneInfo.allPlayers[0].transform.position, c2.transform.position)));
+			this.sceneInfo.waypointMarkers.Sort((GameObject c1, GameObject c2) => Vector3.Distance(this.$this.sceneInfo.allPlayers[0].transform.position, c1.transform.position).CompareTo(Vector3.Distance(this.$this.sceneInfo.allPlayers[0].transform.position, c2.transform.position)));
 			this.currentWaypointGo = this.sceneInfo.waypointMarkers[UnityEngine.Random.Range(2, 5)];
 			this.updateCurrentWaypoint(this.currentWaypointGo.transform.position);
 			if (this.setup.pmSearchScript)
@@ -638,10 +638,10 @@ public class mutantSearchFunctions : MonoBehaviour
 		GameObject closestStructure = null;
 		while (structureCount < 30)
 		{
-			float thisDist = (this.sceneInfo.structuresBuilt[randStruc].transform.position - this.tr.position).sqrMagnitude;
-			if (thisDist < closestDist && dist < 40000f)
+			float sqrMagnitude = (this.sceneInfo.structuresBuilt[randStruc].transform.position - this.tr.position).sqrMagnitude;
+			if (sqrMagnitude < closestDist && dist < 40000f)
 			{
-				closestDist = thisDist;
+				closestDist = sqrMagnitude;
 				closestStructure = this.sceneInfo.structuresBuilt[randStruc];
 			}
 			randStruc = UnityEngine.Random.Range(0, this.sceneInfo.structuresBuilt.Count);
@@ -663,24 +663,24 @@ public class mutantSearchFunctions : MonoBehaviour
 			bool onValidArea = false;
 			if (node != null)
 			{
-				bool validArea = false;
+				bool flag = false;
 				using (List<uint>.Enumerator enumerator = Scene.MutantControler.mostCommonArea.GetEnumerator())
 				{
 					while (enumerator.MoveNext())
 					{
-						int a = (int)enumerator.Current;
-						if ((long)a == (long)((ulong)node.Area))
+						int num = (int)enumerator.Current;
+						if ((long)num == (long)((ulong)node.Area))
 						{
-							validArea = true;
+							flag = true;
 						}
 					}
 				}
-				onValidArea = validArea;
+				onValidArea = flag;
 			}
 			if (node.Walkable && onValidArea)
 			{
-				Vector3 newWaypoint = new Vector3((float)(node.position[0] / 1000), (float)(node.position[1] / 1000), (float)(node.position[2] / 1000));
-				this.updateCurrentWaypoint(newWaypoint);
+				Vector3 vect = new Vector3((float)(node.position[0] / 1000), (float)(node.position[1] / 1000), (float)(node.position[2] / 1000));
+				this.updateCurrentWaypoint(vect);
 				if (this.setup.pmSearchScript)
 				{
 					this.setup.pmSearchScript._doSearchAction = true;
@@ -733,37 +733,37 @@ public class mutantSearchFunctions : MonoBehaviour
 		else
 		{
 			this.layerMask = 102760448;
-			Collider[] allStruc = Physics.OverlapSphere(this.tr.position, 60f, this.layerMask);
-			int length = allStruc.Length;
-			if (allStruc.Length > 50)
+			Collider[] array = Physics.OverlapSphere(this.tr.position, 60f, this.layerMask);
+			int num = array.Length;
+			if (array.Length > 50)
 			{
-				length = 50;
+				num = 50;
 			}
-			float playerDist = 50f;
-			for (int i = 0; i < length; i++)
+			float num2 = 50f;
+			for (int i = 0; i < num; i++)
 			{
-				if (allStruc[i].gameObject.CompareTag("structure") || allStruc[i].gameObject.CompareTag("SLTier1") || allStruc[i].gameObject.CompareTag("SLTier2") || allStruc[i].gameObject.CompareTag("SLTier3"))
+				if (array[i].gameObject.CompareTag("structure") || array[i].gameObject.CompareTag("SLTier1") || array[i].gameObject.CompareTag("SLTier2") || array[i].gameObject.CompareTag("SLTier3"))
 				{
 					counter++;
 					if (this.setup.ai.allPlayers[0] != null)
 					{
-						playerDist = (this.setup.ai.allPlayers[0].transform.position - allStruc[i].transform.position).sqrMagnitude;
+						num2 = (this.setup.ai.allPlayers[0].transform.position - array[i].transform.position).sqrMagnitude;
 					}
-					float dist = (allStruc[i].transform.position - this.tr.position).magnitude;
-					float height = Terrain.activeTerrain.SampleHeight(allStruc[i].bounds.center) + Terrain.activeTerrain.transform.position.y;
-					float diff = allStruc[i].bounds.center.y - height;
-					if (dist > 16f && dist < closestDist && diff < 6f && diff > -1f && playerDist > 144f && playerDist < 40000f)
+					float magnitude = (array[i].transform.position - this.tr.position).magnitude;
+					float num3 = Terrain.activeTerrain.SampleHeight(array[i].bounds.center) + Terrain.activeTerrain.transform.position.y;
+					float num4 = array[i].bounds.center.y - num3;
+					if (magnitude > 16f && magnitude < closestDist && num4 < 6f && num4 > -1f && num2 > 144f && num2 < 40000f)
 					{
-						closestDist = dist;
-						closestColl = allStruc[i];
+						closestDist = magnitude;
+						closestColl = array[i];
 					}
 				}
 			}
 		}
 		if (closestColl)
 		{
-			getStructureStrength _getStrength = closestColl.gameObject.GetComponent<getStructureStrength>();
-			if (_getStrength == null)
+			getStructureStrength component = closestColl.gameObject.GetComponent<getStructureStrength>();
+			if (component == null)
 			{
 				if (this.setup.pmCombatScript)
 				{
@@ -772,22 +772,22 @@ public class mutantSearchFunctions : MonoBehaviour
 				this.setup.pmCombat.SendEvent("noValidTarget");
 				yield break;
 			}
-			Vector3 dir = (this.tr.position - closestColl.bounds.center).normalized;
-			Vector3 runPos = closestColl.bounds.center + dir * 7.5f;
-			runPos.y = Terrain.activeTerrain.SampleHeight(runPos) + Terrain.activeTerrain.transform.position.y;
-			GraphNode node = null;
+			Vector3 normalized = (this.tr.position - closestColl.bounds.center).normalized;
+			Vector3 vector = closestColl.bounds.center + normalized * 7.5f;
+			vector.y = Terrain.activeTerrain.SampleHeight(vector) + Terrain.activeTerrain.transform.position.y;
+			GraphNode node;
 			if (this.fsmInCave.Value)
 			{
-				node = this.nmg.GetNearest(runPos).node;
+				node = this.nmg.GetNearest(vector).node;
 			}
 			else
 			{
-				node = this.rg.GetNearest(runPos).node;
+				node = this.rg.GetNearest(vector).node;
 			}
 			if (node.Walkable)
 			{
-				runPos = new Vector3((float)(node.position[0] / 1000), (float)(node.position[1] / 1000), (float)(node.position[2] / 1000));
-				this.updateCurrentWaypoint(runPos);
+				vector = new Vector3((float)(node.position[0] / 1000), (float)(node.position[1] / 1000), (float)(node.position[2] / 1000));
+				this.updateCurrentWaypoint(vector);
 				this.setup.pmCombat.FsmVariables.GetFsmGameObject("structureGo").Value = closestColl.gameObject;
 				if (this.setup.pmCombatScript)
 				{
@@ -853,41 +853,41 @@ public class mutantSearchFunctions : MonoBehaviour
 		}
 		for (int i = 0; i < this.sceneInfo.structuresBuilt.Count; i++)
 		{
-			GameObject temp = this.sceneInfo.structuresBuilt[i];
-			int randomIndex = UnityEngine.Random.Range(i, this.sceneInfo.structuresBuilt.Count);
-			this.sceneInfo.structuresBuilt[i] = this.sceneInfo.structuresBuilt[randomIndex];
-			this.sceneInfo.structuresBuilt[randomIndex] = temp;
+			GameObject value = this.sceneInfo.structuresBuilt[i];
+			int index = UnityEngine.Random.Range(i, this.sceneInfo.structuresBuilt.Count);
+			this.sceneInfo.structuresBuilt[i] = this.sceneInfo.structuresBuilt[index];
+			this.sceneInfo.structuresBuilt[index] = value;
 		}
-		float closestDist = float.PositiveInfinity;
-		GameObject closestObj = null;
-		int length = this.sceneInfo.structuresBuilt.Count;
-		if (length > 60)
+		float num = float.PositiveInfinity;
+		GameObject gameObject = null;
+		int num2 = this.sceneInfo.structuresBuilt.Count;
+		if (num2 > 60)
 		{
-			length = 60;
+			num2 = 60;
 		}
-		for (int j = 0; j < length; j++)
+		for (int j = 0; j < num2; j++)
 		{
 			if (this.sceneInfo.structuresBuilt[j] != null)
 			{
-				float dist = (this.sceneInfo.structuresBuilt[j].transform.position - this.tr.position).magnitude;
-				if (dist < closestDist && dist < 80f)
+				float magnitude = (this.sceneInfo.structuresBuilt[j].transform.position - this.tr.position).magnitude;
+				if (magnitude < num && magnitude < 80f)
 				{
-					closestObj = this.sceneInfo.structuresBuilt[j];
-					closestDist = dist;
+					gameObject = this.sceneInfo.structuresBuilt[j];
+					num = magnitude;
 				}
 			}
 		}
-		if (closestObj != null)
+		if (gameObject != null)
 		{
-			FireDamage _fire = closestObj.GetComponent<FireDamage>();
-			if (_fire && !_fire.isBurning)
+			FireDamage component = gameObject.GetComponent<FireDamage>();
+			if (component && !component.isBurning)
 			{
-				this.updateCurrentWaypoint(closestObj.transform.position);
+				this.updateCurrentWaypoint(gameObject.transform.position);
 				this.setToWaypoint();
 				this.setup.pmCombatScript.doAction = true;
-				this.setup.pmCombatScript.structureGo = closestObj;
+				this.setup.pmCombatScript.structureGo = gameObject;
 				this.setup.pmCombat.SendEvent("toBurn");
-				this.setup.pmCombat.FsmVariables.GetFsmGameObject("structureGo").Value = closestObj;
+				this.setup.pmCombat.FsmVariables.GetFsmGameObject("structureGo").Value = gameObject;
 				yield break;
 			}
 		}
@@ -910,37 +910,37 @@ public class mutantSearchFunctions : MonoBehaviour
 		{
 			this.sceneInfo.structuresBuilt.RemoveAll((GameObject o) => o == null);
 		}
-		float closestDist = float.PositiveInfinity;
-		GameObject closestObj = null;
-		int length = this.sceneInfo.structuresBuilt.Count;
-		if (length > 60)
+		float num = float.PositiveInfinity;
+		GameObject gameObject = null;
+		int num2 = this.sceneInfo.structuresBuilt.Count;
+		if (num2 > 60)
 		{
-			length = 60;
+			num2 = 60;
 		}
-		for (int i = 0; i < length; i++)
+		for (int i = 0; i < num2; i++)
 		{
 			if (this.sceneInfo.structuresBuilt[i] != null)
 			{
-				float dist = (this.sceneInfo.structuresBuilt[i].transform.position - this.tr.position).magnitude;
-				if (dist < closestDist && dist < 100f)
+				float magnitude = (this.sceneInfo.structuresBuilt[i].transform.position - this.tr.position).magnitude;
+				if (magnitude < num && magnitude < 100f)
 				{
-					getStructureStrength struc = this.sceneInfo.structuresBuilt[i].GetComponent<getStructureStrength>();
-					if (struc && struc._type == getStructureStrength.structureType.foodRack)
+					getStructureStrength component = this.sceneInfo.structuresBuilt[i].GetComponent<getStructureStrength>();
+					if (component && component._type == getStructureStrength.structureType.foodRack)
 					{
-						closestObj = this.sceneInfo.structuresBuilt[i];
-						closestDist = dist;
+						gameObject = this.sceneInfo.structuresBuilt[i];
+						num = magnitude;
 					}
 				}
 			}
 		}
-		if (closestObj != null)
+		if (gameObject != null)
 		{
-			this.updateCurrentWaypoint(closestObj.transform.position);
+			this.updateCurrentWaypoint(gameObject.transform.position);
 			this.setToWaypoint();
 			this.setup.pmCombat.SendEvent("goToAction");
-			this.setup.pmCombat.FsmVariables.GetFsmGameObject("structureGo").Value = closestObj;
-			this.setup.pmSearchScript._structureGo = closestObj;
-			this.setup.pmCombatScript.structureGo = closestObj;
+			this.setup.pmCombat.FsmVariables.GetFsmGameObject("structureGo").Value = gameObject;
+			this.setup.pmSearchScript._structureGo = gameObject;
+			this.setup.pmCombatScript.structureGo = gameObject;
 			this.setup.pmCombatScript.doAction = true;
 			this.setup.pmSearchScript._doSearchAction = true;
 			yield break;
@@ -974,37 +974,37 @@ public class mutantSearchFunctions : MonoBehaviour
 		}
 		for (int i = 0; i < Scene.SceneTracker.allPlayerFires.Count; i++)
 		{
-			GameObject temp = Scene.SceneTracker.allPlayerFires[i];
-			int randomIndex = UnityEngine.Random.Range(i, this.sceneInfo.allPlayerFires.Count);
-			Scene.SceneTracker.allPlayerFires[i] = this.sceneInfo.allPlayerFires[randomIndex];
-			Scene.SceneTracker.allPlayerFires[randomIndex] = temp;
+			GameObject value = Scene.SceneTracker.allPlayerFires[i];
+			int index = UnityEngine.Random.Range(i, this.sceneInfo.allPlayerFires.Count);
+			Scene.SceneTracker.allPlayerFires[i] = this.sceneInfo.allPlayerFires[index];
+			Scene.SceneTracker.allPlayerFires[index] = value;
 		}
-		float alertDist = 320f;
+		float num = 320f;
 		if (!Clock.Dark)
 		{
-			alertDist = 70f;
+			num = 70f;
 		}
-		GameObject closestObj = null;
-		foreach (GameObject go in Scene.SceneTracker.allPlayerFires)
+		GameObject gameObject = null;
+		foreach (GameObject gameObject2 in Scene.SceneTracker.allPlayerFires)
 		{
-			if (go != null)
+			if (gameObject2 != null)
 			{
-				Fire2 _fire = go.GetComponentInChildren<Fire2>();
-				if (_fire && _fire.CurrentLit)
+				Fire2 componentInChildren = gameObject2.GetComponentInChildren<Fire2>();
+				if (componentInChildren && componentInChildren.CurrentLit)
 				{
-					float dist = (go.transform.position - this.tr.position).magnitude;
-					if (dist < alertDist && this.ai.allPlayers[0] && Vector3.Distance(this.ai.allPlayers[0].transform.position, go.transform.position) < 170f)
+					float magnitude = (gameObject2.transform.position - this.tr.position).magnitude;
+					if (magnitude < num && this.ai.allPlayers[0] && Vector3.Distance(this.ai.allPlayers[0].transform.position, gameObject2.transform.position) < 170f)
 					{
-						closestObj = go;
+						gameObject = gameObject2;
 					}
 				}
 			}
 		}
-		if (closestObj != null)
+		if (gameObject != null)
 		{
 			this.randomPoint = this.Circle2(40f);
-			this.pos = new Vector3(closestObj.transform.position.x + this.randomPoint.x, closestObj.transform.position.y, closestObj.transform.position.z + this.randomPoint.y);
-			GraphNode node = null;
+			this.pos = new Vector3(gameObject.transform.position.x + this.randomPoint.x, gameObject.transform.position.y, gameObject.transform.position.z + this.randomPoint.y);
+			GraphNode node;
 			if (this.fsmInCave.Value)
 			{
 				node = this.nmg.GetNearest(this.pos).node;
@@ -1015,8 +1015,8 @@ public class mutantSearchFunctions : MonoBehaviour
 			}
 			if (node.Walkable)
 			{
-				Vector3 newWaypoint = new Vector3((float)(node.position[0] / 1000), (float)(node.position[1] / 1000), (float)(node.position[2] / 1000));
-				this.updateCurrentWaypoint(newWaypoint);
+				Vector3 vect = new Vector3((float)(node.position[0] / 1000), (float)(node.position[1] / 1000), (float)(node.position[2] / 1000));
+				this.updateCurrentWaypoint(vect);
 				this.setToWaypoint();
 				if (this.setup.pmSearchScript)
 				{
@@ -1048,8 +1048,8 @@ public class mutantSearchFunctions : MonoBehaviour
 				{
 					this.randomPoint = this.Circle2(UnityEngine.Random.Range(dist, dist + 15f));
 					testPoint = new Vector3(this.randomPoint.x + this.tr.position.x, this.tr.position.y, this.randomPoint.y + this.tr.position.z);
-					Vector3 lookAtPos = new Vector3(this.currentTarget.transform.position.x, this.lookatTr.position.y, this.currentTarget.transform.position.z);
-					this.lookatTr.LookAt(lookAtPos);
+					Vector3 worldPosition = new Vector3(this.currentTarget.transform.position.x, this.lookatTr.position.y, this.currentTarget.transform.position.z);
+					this.lookatTr.LookAt(worldPosition);
 					relativePos = this.lookatTr.InverseTransformPoint(testPoint);
 					angle = Mathf.Atan2(relativePos.x, relativePos.z) * 57.29578f;
 					if (!this.fsmInCave.Value)
@@ -1067,7 +1067,7 @@ public class mutantSearchFunctions : MonoBehaviour
 			Debug.DrawRay(testPoint, Vector3.up * 20f, Color.green, 1f);
 			if (this.searchCount < 5)
 			{
-				GraphNode node = null;
+				GraphNode node;
 				if (this.fsmInCave.Value)
 				{
 					node = this.nmg.GetNearest(testPoint, NNConstraint.Default).node;
@@ -1095,22 +1095,22 @@ public class mutantSearchFunctions : MonoBehaviour
 					}
 					else if (node.Area != this.setup.ai.groundNode.Area)
 					{
-						NNConstraint nn = new NNConstraint();
-						nn.constrainArea = true;
-						int areaIDint = (int)this.setup.ai.groundNode.Area;
-						nn.area = areaIDint;
-						GraphNode newNode = null;
+						NNConstraint nnconstraint = new NNConstraint();
+						nnconstraint.constrainArea = true;
+						int area = (int)this.setup.ai.groundNode.Area;
+						nnconstraint.area = area;
+						GraphNode node2;
 						if (this.fsmInCave.Value)
 						{
-							newNode = this.nmg.GetNearest(testPoint, nn).node;
+							node2 = this.nmg.GetNearest(testPoint, nnconstraint).node;
 						}
 						else
 						{
-							newNode = this.rg.GetNearest(testPoint, nn).node;
+							node2 = this.rg.GetNearest(testPoint, nnconstraint).node;
 						}
-						if (newNode != null)
+						if (node2 != null)
 						{
-							this.newWaypoint = new Vector3((float)(newNode.position[0] / 1000), (float)(newNode.position[1] / 1000), (float)(newNode.position[2] / 1000));
+							this.newWaypoint = new Vector3((float)(node2.position[0] / 1000), (float)(node2.position[1] / 1000), (float)(node2.position[2] / 1000));
 						}
 						else
 						{
@@ -1191,10 +1191,10 @@ public class mutantSearchFunctions : MonoBehaviour
 			Vector3 target = LocalPlayer.Transform.position;
 			if (BoltNetwork.isRunning)
 			{
-				GameObject temp = this.ai.allPlayers[UnityEngine.Random.Range(0, this.ai.allPlayers.Count)];
-				if (temp)
+				GameObject gameObject = this.ai.allPlayers[UnityEngine.Random.Range(0, this.ai.allPlayers.Count)];
+				if (gameObject)
 				{
-					target = temp.transform.position;
+					target = gameObject.transform.position;
 				}
 			}
 			lookAtDir.y = target.y;
@@ -1310,6 +1310,62 @@ public class mutantSearchFunctions : MonoBehaviour
 	}
 
 	
+	public IEnumerator findPointAwayFromArtifact()
+	{
+		this.setup.pmCombat.FsmVariables.GetFsmBool("toAttractArtifact").Value = false;
+		this.setup.pmCombat.FsmVariables.GetFsmBool("toRepelArtifact").Value = false;
+		this.search = true;
+		while (this.search)
+		{
+			float angle = 0f;
+			Vector3 testPoint = Vector3.zero;
+			Vector3 relativePos;
+			relativePos.z = 1f;
+			while (angle < 100f && angle > -100f)
+			{
+				Vector2 randomPoint = this.Circle2((float)UnityEngine.Random.Range(250, 500));
+				testPoint = new Vector3(randomPoint.x + this.tr.position.x, this.tr.position.y, randomPoint.y + this.tr.position.z);
+				Vector3 lookAtPos = new Vector3(this._lastArtifactPos.x, this.lookatTr.position.y, this._lastArtifactPos.z);
+				this.lookatTr.LookAt(lookAtPos);
+				relativePos = this.lookatTr.InverseTransformPoint(testPoint);
+				angle = Mathf.Atan2(relativePos.x, relativePos.z) * 57.29578f;
+				if (!this.fsmInCave.Value)
+				{
+					testPoint.y = Terrain.activeTerrain.SampleHeight(testPoint) + Terrain.activeTerrain.transform.position.y;
+				}
+				yield return null;
+			}
+			GraphNode node = null;
+			if (this.fsmInCave.Value)
+			{
+				node = this.nmg.GetNearest(testPoint).node;
+			}
+			else
+			{
+				node = this.rg.GetNearest(testPoint).node;
+			}
+			if (node.Walkable)
+			{
+				this.newWaypoint = new Vector3((float)(node.position[0] / 1000), (float)(node.position[1] / 1000), (float)(node.position[2] / 1000));
+				this.updateCurrentWaypoint(this.newWaypoint);
+				this.setup.pmCombat.SendEvent("doAction");
+				if (this.setup.pmCombatScript)
+				{
+					this.setup.pmCombatScript.doAction = true;
+				}
+				if (this.setup.pmEncounter)
+				{
+					this.setup.pmEncounter.SendEvent("doAction");
+				}
+				this.search = false;
+			}
+			yield return null;
+		}
+		yield return null;
+		yield break;
+	}
+
+	
 	private IEnumerator findAmbushPoint(float dist)
 	{
 		bool foundBush = false;
@@ -1353,8 +1409,8 @@ public class mutantSearchFunctions : MonoBehaviour
 			float minFlankDist = this.currentTargetDist / 3f;
 			while (testDist < minFlankDist || (testDist > this.currentTargetDist && this.currentTarget && count < 20))
 			{
-				Vector2 randomPoint = this.Circle2(this.currentTargetDist);
-				testPoint = new Vector3(randomPoint.x + this.currentTarget.transform.position.x, this.tr.position.y, randomPoint.y + this.currentTarget.transform.position.z);
+				Vector2 vector = this.Circle2(this.currentTargetDist);
+				testPoint = new Vector3(vector.x + this.currentTarget.transform.position.x, this.tr.position.y, vector.y + this.currentTarget.transform.position.z);
 				testDist = Vector3.Distance(this.tr.position, testPoint);
 				count++;
 			}
@@ -1499,13 +1555,13 @@ public class mutantSearchFunctions : MonoBehaviour
 			float angle = 0f;
 			float closestDist = float.PositiveInfinity;
 			GameObject tempBush = null;
-			foreach (Collider coll in allBushes)
+			foreach (Collider collider in allBushes)
 			{
-				Vector3 relativePos = this.tr.InverseTransformPoint(coll.transform.position);
+				Vector3 relativePos = this.tr.InverseTransformPoint(collider.transform.position);
 				angle = Mathf.Atan2(relativePos.x, relativePos.z) * 57.29578f;
 				if (dist < closestDist && angle < 90f && angle > -90f)
 				{
-					tempBush = coll.gameObject;
+					tempBush = collider.gameObject;
 					closestDist = dist;
 				}
 			}
@@ -1533,21 +1589,21 @@ public class mutantSearchFunctions : MonoBehaviour
 		this.setup.pmCombat.FsmVariables.GetFsmGameObject("treeGO").Value = null;
 		for (int i = 0; i < allTrees.Length; i++)
 		{
-			Collider temp = allTrees[i];
-			int randomIndex = UnityEngine.Random.Range(i, allTrees.Length);
-			allTrees[i] = allTrees[randomIndex];
-			allTrees[randomIndex] = temp;
+			Collider collider = allTrees[i];
+			int num = UnityEngine.Random.Range(i, allTrees.Length);
+			allTrees[i] = allTrees[num];
+			allTrees[num] = collider;
 		}
 		float closestDist = 0f;
-		for (int x = 0; x < allTrees.Length; x++)
+		for (int j = 0; j < allTrees.Length; j++)
 		{
-			closestDist = (allTrees[x].transform.position - this.tr.position).magnitude;
-			if (closestDist > 25f && closestDist < 45f && allTrees[x].transform.GetComponent<climbable>())
+			closestDist = (allTrees[j].transform.position - this.tr.position).magnitude;
+			if (closestDist > 25f && closestDist < 45f && allTrees[j].transform.GetComponent<climbable>())
 			{
-				this.updateCurrentWaypoint(allTrees[x].bounds.center);
+				this.updateCurrentWaypoint(allTrees[j].bounds.center);
 				this.currentWaypoint.transform.position = new Vector3(this.currentWaypoint.transform.position.x, this.tr.position.y, this.currentWaypoint.transform.position.z);
-				this.setup.pmCombat.FsmVariables.GetFsmGameObject("treeGO").Value = allTrees[x].gameObject;
-				this.setup.pmCombat.FsmVariables.GetFsmVector3("treePos").Value = allTrees[x].bounds.center;
+				this.setup.pmCombat.FsmVariables.GetFsmGameObject("treeGO").Value = allTrees[j].gameObject;
+				this.setup.pmCombat.FsmVariables.GetFsmVector3("treePos").Value = allTrees[j].bounds.center;
 				this.nearestTree = this.currentWaypoint;
 				yield break;
 			}
@@ -1562,17 +1618,17 @@ public class mutantSearchFunctions : MonoBehaviour
 		this.layerMask = 33556480;
 		Collider[] allTrees = Physics.OverlapSphere(this.tr.position, dist, this.layerMask);
 		float closestDist = 0f;
-		foreach (Collider coll in allTrees)
+		foreach (Collider collider in allTrees)
 		{
-			if (coll.gameObject.CompareTag("Tree"))
+			if (collider.gameObject.CompareTag("Tree"))
 			{
-				closestDist = (coll.transform.position - this.tr.position).magnitude;
-				if (closestDist > 9f && closestDist < 30f && (coll.transform.GetComponent<climbable>() || coll.gameObject.CompareTag("structure")))
+				closestDist = (collider.transform.position - this.tr.position).magnitude;
+				if (closestDist > 9f && closestDist < 30f && (collider.transform.GetComponent<climbable>() || collider.gameObject.CompareTag("structure")))
 				{
-					this.updateCurrentWaypoint(coll.bounds.center);
+					this.updateCurrentWaypoint(collider.bounds.center);
 					this.currentWaypoint.transform.position = new Vector3(this.currentWaypoint.transform.position.x, this.tr.position.y, this.currentWaypoint.transform.position.z);
-					this.setup.pmCombat.FsmVariables.GetFsmGameObject("treeGo").Value = coll.gameObject;
-					this.setup.pmCombat.FsmVariables.GetFsmVector3("treePos").Value = coll.bounds.center;
+					this.setup.pmCombat.FsmVariables.GetFsmGameObject("treeGo").Value = collider.gameObject;
+					this.setup.pmCombat.FsmVariables.GetFsmVector3("treePos").Value = collider.bounds.center;
 					this.nearestTree = this.currentWaypoint;
 					this.setup.pmCombat.SendEvent("goToTree");
 					yield break;
@@ -1591,32 +1647,32 @@ public class mutantSearchFunctions : MonoBehaviour
 		Collider[] allTrees = Physics.OverlapSphere(this.tr.position, 50f, this.layerMask);
 		for (int i = 0; i < allTrees.Length; i++)
 		{
-			Collider temp = allTrees[i];
-			int randomIndex = UnityEngine.Random.Range(i, allTrees.Length);
-			allTrees[i] = allTrees[randomIndex];
-			allTrees[randomIndex] = temp;
+			Collider collider = allTrees[i];
+			int num = UnityEngine.Random.Range(i, allTrees.Length);
+			allTrees[i] = allTrees[num];
+			allTrees[num] = collider;
 		}
 		float closestDist = 0f;
-		foreach (Collider coll in allTrees)
+		foreach (Collider collider2 in allTrees)
 		{
-			Vector3 pos = new Vector3(coll.bounds.center.x, this.tr.position.y, coll.bounds.center.z);
-			closestDist = (pos - this.tr.position).magnitude;
-			if (closestDist > 20f && closestDist < 32f && coll.transform.GetComponent<climbable>())
+			Vector3 vector = new Vector3(collider2.bounds.center.x, this.tr.position.y, collider2.bounds.center.z);
+			closestDist = (vector - this.tr.position).magnitude;
+			if (closestDist > 20f && closestDist < 32f && collider2.transform.GetComponent<climbable>())
 			{
-				float playerToTreeDist = (this.currentTarget.transform.position - coll.bounds.center).magnitude;
-				float playerToEnemyDist = this.currentTargetDist;
-				if (playerToTreeDist < playerToEnemyDist && towards)
+				float magnitude = (this.currentTarget.transform.position - collider2.bounds.center).magnitude;
+				float num2 = this.currentTargetDist;
+				if (magnitude < num2 && towards)
 				{
-					this.updateCurrentWaypoint(pos);
+					this.updateCurrentWaypoint(vector);
 					this.setup.pmCombat.FsmVariables.GetFsmGameObject("nextTreeGO").Value = this.currentWaypoint;
-					this.setup.pmCombat.FsmVariables.GetFsmVector3("nextTreePos").Value = pos;
+					this.setup.pmCombat.FsmVariables.GetFsmVector3("nextTreePos").Value = vector;
 					this.nearestTree = this.currentWaypoint;
 				}
 				else if (!towards)
 				{
-					this.updateCurrentWaypoint(pos);
+					this.updateCurrentWaypoint(vector);
 					this.setup.pmCombat.FsmVariables.GetFsmGameObject("nextTreeGO").Value = this.currentWaypoint;
-					this.setup.pmCombat.FsmVariables.GetFsmVector3("nextTreePos").Value = pos;
+					this.setup.pmCombat.FsmVariables.GetFsmVector3("nextTreePos").Value = vector;
 					this.nearestTree = this.currentWaypoint;
 				}
 			}
@@ -1683,16 +1739,16 @@ public class mutantSearchFunctions : MonoBehaviour
 		{
 			yield break;
 		}
-		for (int i = 0; i < this.sceneInfo.jumpObjects.Count; i++)
+		for (int j = 0; j < this.sceneInfo.jumpObjects.Count; j++)
 		{
-			Transform temp = this.sceneInfo.jumpObjects[i];
-			int randomIndex = UnityEngine.Random.Range(i, this.sceneInfo.jumpObjects.Count);
-			this.sceneInfo.jumpObjects[i] = this.sceneInfo.jumpObjects[randomIndex];
-			this.sceneInfo.jumpObjects[randomIndex] = temp;
+			Transform value = this.sceneInfo.jumpObjects[j];
+			int index = UnityEngine.Random.Range(j, this.sceneInfo.jumpObjects.Count);
+			this.sceneInfo.jumpObjects[j] = this.sceneInfo.jumpObjects[index];
+			this.sceneInfo.jumpObjects[index] = value;
 		}
-		for (int j = this.sceneInfo.jumpObjects.Count - 1; j >= 0; j = Mathf.Min(j - 1, this.sceneInfo.jumpObjects.Count - 1))
+		for (int i = this.sceneInfo.jumpObjects.Count - 1; i >= 0; i = Mathf.Min(i - 1, this.sceneInfo.jumpObjects.Count - 1))
 		{
-			Transform objTr = this.sceneInfo.jumpObjects[j];
+			Transform objTr = this.sceneInfo.jumpObjects[i];
 			if (searching && objTr != null)
 			{
 				Vector3 tempPos = objTr.position;
@@ -2037,6 +2093,18 @@ public class mutantSearchFunctions : MonoBehaviour
 	}
 
 	
+	public void setToClosestArtifact()
+	{
+		this.followingLeader = false;
+		this.ai.targetOffset = Vector3.zero;
+		this.currentWaypoint.transform.position = this._lastArtifactPos;
+		this.ai.target = this.currentWaypoint.transform;
+		this.ai.SearchPath();
+		this.setup.pmCombat.FsmVariables.GetFsmBool("toAttractArtifact").Value = false;
+		this.setup.pmCombat.FsmVariables.GetFsmBool("toRepelArtifact").Value = false;
+	}
+
+	
 	public void refreshCurrentTarget()
 	{
 		if (this.currentTarget == null)
@@ -2366,9 +2434,16 @@ public class mutantSearchFunctions : MonoBehaviour
 			this.animator.SetIntegerReflected("randInt1", UnityEngine.Random.Range(4, 6));
 			this.animator.SetBoolReflected("screamBOOL", true);
 			this.screamCooldown = true;
-			UnityEngine.Object.Instantiate(this.setup.soundGo, base.transform.position, base.transform.rotation);
+			UnityEngine.Object.Instantiate<GameObject>(this.setup.soundGo, base.transform.position, base.transform.rotation);
 			base.Invoke("resetScreamCooldown", 10f);
+			base.Invoke("ForceDisableScream", 1f);
 		}
+	}
+
+	
+	private void ForceDisableScream()
+	{
+		this.animator.SetBoolReflected("screamBOOL", false);
 	}
 
 	
@@ -3377,6 +3452,9 @@ public class mutantSearchFunctions : MonoBehaviour
 
 	
 	public bool followingLeader;
+
+	
+	public Vector3 _lastArtifactPos;
 
 	
 	private mutantAI ai;

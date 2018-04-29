@@ -8,7 +8,7 @@ public class arrowTrajectory : EntityBehaviour<IRigidbodyState>
 	
 	private void Awake()
 	{
-		this.col = base.transform.GetComponent<CapsuleCollider>();
+		this.col = base.transform.GetComponent<Collider>();
 		this.rb = base.GetComponent<Rigidbody>();
 		this._spearType = false;
 		this.ad = base.transform.GetComponentInChildren<ArrowDamage>();
@@ -23,7 +23,7 @@ public class arrowTrajectory : EntityBehaviour<IRigidbodyState>
 	
 	public override void Attached()
 	{
-		this._boltEntity = this.entity;
+		this._boltEntity = base.entity;
 	}
 
 	
@@ -64,7 +64,7 @@ public class arrowTrajectory : EntityBehaviour<IRigidbodyState>
 	{
 		if (!this._spearType)
 		{
-			CapsuleCollider component = base.transform.GetComponent<CapsuleCollider>();
+			Collider component = base.transform.GetComponent<Collider>();
 			if (component && this.rb.isKinematic)
 			{
 				component.isTrigger = true;
@@ -112,7 +112,7 @@ public class arrowTrajectory : EntityBehaviour<IRigidbodyState>
 	public bool forceDisable;
 
 	
-	public CapsuleCollider col;
+	public Collider col;
 
 	
 	public bool _spearType;

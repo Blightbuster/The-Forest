@@ -4,32 +4,12 @@ using System.Collections.Generic;
 using Serialization;
 using UniLinq;
 using UnityEngine;
+using UnityEngine.AI;
 
 
 [AddComponentMenu("Storage/Internal/Level Loader (Internal use only, do not add this to your objects!)")]
 public class LevelLoader : MonoBehaviour
 {
-	
-	static LevelLoader()
-	{
-		
-		LevelLoader.CreateGameObject = delegate
-		{
-		};
-		LevelLoader.OnDestroyObject = delegate
-		{
-		};
-		LevelLoader.LoadData = delegate
-		{
-		};
-		LevelLoader.LoadComponent = delegate
-		{
-		};
-		LevelLoader.LoadedComponent = delegate
-		{
-		};
-	}
-
 	
 	
 	
@@ -129,27 +109,28 @@ public class LevelLoader : MonoBehaviour
 		LevelSerializer.RaiseProgress("Initializing", 0f);
 		if (this.Data.rootObject != null)
 		{
-			Debug.Log((!this.Data.StoredObjectNames.Any((LevelSerializer.StoredItem sn) => sn.Name == this.<>f__this.Data.rootObject)) ? ("Not found " + this.Data.rootObject) : ("Located " + this.Data.rootObject));
+			Debug.Log((!this.Data.StoredObjectNames.Any((LevelSerializer.StoredItem sn) => sn.Name == this.$this.Data.rootObject)) ? ("Not found " + this.Data.rootObject) : ("Located " + this.Data.rootObject));
 		}
 		if (!this.DontDelete)
 		{
-			foreach (UniqueIdentifier go in (from n in UniqueIdentifier.AllIdentifiers
-			where this.<>f__this.Data.StoredObjectNames.All((LevelSerializer.StoredItem sn) => sn.Name != i.Id)
-			select n).ToList<UniqueIdentifier>())
+			foreach (UniqueIdentifier uniqueIdentifier in UniqueIdentifier.AllIdentifiers.Where(delegate(UniqueIdentifier n)
+			{
+				LevelLoader $this = this.$this;
+				return this.$this.Data.StoredObjectNames.All((LevelSerializer.StoredItem sn) => sn.Name != n.Id);
+			}).ToList<UniqueIdentifier>())
 			{
 				try
 				{
-					bool cancel = false;
-					LevelLoader.OnDestroyObject(go.gameObject, ref cancel);
-					if (!cancel)
+					bool flag = false;
+					LevelLoader.OnDestroyObject(uniqueIdentifier.gameObject, ref flag);
+					if (!flag)
 					{
-						UnityEngine.Object.Destroy(go.gameObject);
+						UnityEngine.Object.Destroy(uniqueIdentifier.gameObject);
 					}
 				}
 				catch (Exception ex)
 				{
-					Exception e = ex;
-					Radical.LogWarning("Problem destroying object " + go.name + " " + e.ToString());
+					Radical.LogWarning("Problem destroying object " + uniqueIdentifier.name + " " + ex.ToString());
 				}
 			}
 		}
@@ -160,129 +141,128 @@ public class LevelLoader : MonoBehaviour
 		select c.GetComponent<UniqueIdentifier>());
 		LevelSerializer.RaiseProgress("Initializing", 0.25f);
 		Vector3 position = new Vector3(0f, 2000f, 2000f);
-		foreach (LevelSerializer.StoredItem sto in from c in this.Data.StoredObjectNames
+		foreach (LevelSerializer.StoredItem storedItem in from c in this.Data.StoredObjectNames
 		where UniqueIdentifier.GetByName(c.Name) == null
 		select c)
 		{
 			try
 			{
-				if (sto.createEmptyObject || sto.ClassId == null || !LevelSerializer.AllPrefabs.ContainsKey(sto.ClassId))
+				if (storedItem.createEmptyObject || storedItem.ClassId == null || !LevelSerializer.AllPrefabs.ContainsKey(storedItem.ClassId))
 				{
-					sto.GameObject = new GameObject("CreatedObject");
-					sto.GameObject.transform.position = position;
-					EmptyObjectIdentifier emptyObjectMarker = sto.GameObject.AddComponent<EmptyObjectIdentifier>();
-					sto.GameObject.AddComponent<StoreMaterials>();
-					sto.GameObject.AddComponent<StoreMesh>();
-					emptyObjectMarker.IsDeserializing = true;
-					emptyObjectMarker.Id = sto.Name;
-					if (emptyObjectMarker.Id == this.Data.rootObject)
+					storedItem.GameObject = new GameObject("CreatedObject");
+					storedItem.GameObject.transform.position = position;
+					EmptyObjectIdentifier emptyObjectIdentifier = storedItem.GameObject.AddComponent<EmptyObjectIdentifier>();
+					storedItem.GameObject.AddComponent<StoreMaterials>();
+					storedItem.GameObject.AddComponent<StoreMesh>();
+					emptyObjectIdentifier.IsDeserializing = true;
+					emptyObjectIdentifier.Id = storedItem.Name;
+					if (emptyObjectIdentifier.Id == this.Data.rootObject)
 					{
 						Debug.Log("Set the root object on an empty");
 					}
-					flaggedObjects.Add(emptyObjectMarker);
+					flaggedObjects.Add(emptyObjectIdentifier);
 				}
 				else
 				{
-					GameObject pf = LevelSerializer.AllPrefabs[sto.ClassId];
-					bool cancel2 = false;
-					LevelLoader.CreateGameObject(pf, ref cancel2);
-					if (cancel2)
+					GameObject gameObject = LevelSerializer.AllPrefabs[storedItem.ClassId];
+					bool flag2 = false;
+					LevelLoader.CreateGameObject(gameObject, ref flag2);
+					if (flag2)
 					{
 						Debug.LogWarning("Cancelled");
 						continue;
 					}
-					UniqueIdentifier[] uis = pf.GetComponentsInChildren<UniqueIdentifier>();
-					foreach (UniqueIdentifier ui in uis)
+					UniqueIdentifier[] componentsInChildren = gameObject.GetComponentsInChildren<UniqueIdentifier>();
+					foreach (UniqueIdentifier uniqueIdentifier2 in componentsInChildren)
 					{
-						ui.IsDeserializing = true;
+						uniqueIdentifier2.IsDeserializing = true;
 					}
-					sto.GameObject = (UnityEngine.Object.Instantiate(pf, position, Quaternion.identity) as GameObject);
-					sto.GameObject.GetComponent<UniqueIdentifier>().Id = sto.Name;
-					if (sto.GameObject.GetComponent<UniqueIdentifier>().Id == this.Data.rootObject)
+					storedItem.GameObject = UnityEngine.Object.Instantiate<GameObject>(gameObject, position, Quaternion.identity);
+					storedItem.GameObject.GetComponent<UniqueIdentifier>().Id = storedItem.Name;
+					if (storedItem.GameObject.GetComponent<UniqueIdentifier>().Id == this.Data.rootObject)
 					{
 						Debug.Log("Set the root object on a prefab");
 					}
-					foreach (UniqueIdentifier ui2 in uis)
+					foreach (UniqueIdentifier uniqueIdentifier3 in componentsInChildren)
 					{
-						ui2.IsDeserializing = false;
+						uniqueIdentifier3.IsDeserializing = false;
 					}
-					flaggedObjects.AddRange(sto.GameObject.GetComponentsInChildren<UniqueIdentifier>());
+					flaggedObjects.AddRange(storedItem.GameObject.GetComponentsInChildren<UniqueIdentifier>());
 				}
 				position += Vector3.right * 50f;
-				sto.GameObject.GetComponent<UniqueIdentifier>().Id = sto.Name;
-				sto.GameObject.name = sto.GameObjectName;
-				if (sto.ChildIds.Count > 0)
+				storedItem.GameObject.GetComponent<UniqueIdentifier>().Id = storedItem.Name;
+				storedItem.GameObject.name = storedItem.GameObjectName;
+				if (storedItem.ChildIds.Count > 0)
 				{
-					List<UniqueIdentifier> list = sto.GameObject.GetComponentsInChildren<UniqueIdentifier>().ToList<UniqueIdentifier>();
-					int m = 0;
-					while (m < list.Count && m < sto.ChildIds.Count)
+					List<UniqueIdentifier> list4 = storedItem.GameObject.GetComponentsInChildren<UniqueIdentifier>().ToList<UniqueIdentifier>();
+					int num2 = 0;
+					while (num2 < list4.Count && num2 < storedItem.ChildIds.Count)
 					{
-						list[m].Id = sto.ChildIds[m];
-						m++;
+						list4[num2].Id = storedItem.ChildIds[num2];
+						num2++;
 					}
 				}
-				if (sto.Children.Count > 0)
+				if (storedItem.Children.Count > 0)
 				{
-					List<StoreInformation> list2 = LevelSerializer.GetComponentsInChildrenWithClause(sto.GameObject);
+					List<StoreInformation> componentsInChildrenWithClause = LevelSerializer.GetComponentsInChildrenWithClause(storedItem.GameObject);
 					this._indexDictionary.Clear();
-					foreach (StoreInformation c2 in list2)
+					foreach (StoreInformation storeInformation in componentsInChildrenWithClause)
 					{
-						if (sto.Children.ContainsKey(c2.ClassId))
+						if (storedItem.Children.ContainsKey(storeInformation.ClassId))
 						{
-							if (!this._indexDictionary.ContainsKey(c2.ClassId))
+							if (!this._indexDictionary.ContainsKey(storeInformation.ClassId))
 							{
-								this._indexDictionary[c2.ClassId] = 0;
+								this._indexDictionary[storeInformation.ClassId] = 0;
 							}
-							c2.Id = sto.Children[c2.ClassId][this._indexDictionary[c2.ClassId]];
-							this._indexDictionary[c2.ClassId] = this._indexDictionary[c2.ClassId] + 1;
+							storeInformation.Id = storedItem.Children[storeInformation.ClassId][this._indexDictionary[storeInformation.ClassId]];
+							this._indexDictionary[storeInformation.ClassId] = this._indexDictionary[storeInformation.ClassId] + 1;
 						}
 					}
 				}
 			}
 			catch (Exception ex2)
 			{
-				Exception e2 = ex2;
 				Radical.LogWarning(string.Concat(new object[]
 				{
 					"Problem creating an object ",
-					sto.GameObjectName,
+					storedItem.GameObjectName,
 					" with classID ",
-					sto.ClassId,
+					storedItem.ClassId,
 					" ",
-					e2
+					ex2
 				}));
 			}
 		}
 		HashSet<GameObject> loadedGameObjects = new HashSet<GameObject>();
 		LevelSerializer.RaiseProgress("Initializing", 0.75f);
-		foreach (LevelSerializer.StoredItem so in this.Data.StoredObjectNames)
+		foreach (LevelSerializer.StoredItem storedItem2 in this.Data.StoredObjectNames)
 		{
-			GameObject go2 = UniqueIdentifier.GetByName(so.Name);
-			if (go2 == null)
+			GameObject byName = UniqueIdentifier.GetByName(storedItem2.Name);
+			if (byName == null)
 			{
-				Radical.LogNow("Could not find " + so.GameObjectName + " " + so.Name, new object[0]);
+				Radical.LogNow("Could not find " + storedItem2.GameObjectName + " " + storedItem2.Name, new object[0]);
 			}
 			else
 			{
-				loadedGameObjects.Add(go2);
-				if (so.Components != null && so.Components.Count > 0)
+				loadedGameObjects.Add(byName);
+				if (storedItem2.Components != null && storedItem2.Components.Count > 0)
 				{
-					List<Component> all = (from c in go2.GetComponents<Component>()
+					List<Component> list2 = (from c in byName.GetComponents<Component>()
 					where !typeof(UniqueIdentifier).IsAssignableFrom(c.GetType())
 					select c).ToList<Component>();
-					foreach (Component comp in all)
+					foreach (Component component in list2)
 					{
-						if (!so.Components.ContainsKey(comp.GetType().FullName))
+						if (!storedItem2.Components.ContainsKey(component.GetType().FullName))
 						{
-							UnityEngine.Object.Destroy(comp);
+							UnityEngine.Object.Destroy(component);
 						}
 					}
 				}
-				LevelLoader.SetActive(go2, so.Active);
-				if (so.setExtraData)
+				LevelLoader.SetActive(byName, storedItem2.Active);
+				if (storedItem2.setExtraData)
 				{
-					go2.layer = so.layer;
-					go2.tag = so.tag;
+					byName.layer = storedItem2.layer;
+					byName.tag = storedItem2.tag;
 				}
 			}
 		}
@@ -291,15 +271,15 @@ public class LevelLoader : MonoBehaviour
 		{
 			Debug.Log("No root object has been configured");
 		}
-		foreach (LevelSerializer.StoredItem go3 in from c in this.Data.StoredObjectNames
+		foreach (LevelSerializer.StoredItem storedItem3 in from c in this.Data.StoredObjectNames
 		where !string.IsNullOrEmpty(c.ParentName)
 		select c)
 		{
-			GameObject parent = UniqueIdentifier.GetByName(go3.ParentName);
-			GameObject item = UniqueIdentifier.GetByName(go3.Name);
-			if (item != null && parent != null)
+			GameObject byName2 = UniqueIdentifier.GetByName(storedItem3.ParentName);
+			GameObject byName3 = UniqueIdentifier.GetByName(storedItem3.Name);
+			if (byName3 != null && byName2 != null)
 			{
-				item.transform.parent = parent.transform;
+				byName3.transform.parent = byName2.transform;
 			}
 		}
 		Time.timeScale = timeScale;
@@ -317,9 +297,7 @@ public class LevelLoader : MonoBehaviour
 			{
 				using (new UnitySerializer.SerializationScope())
 				{
-					var cp;
-					Type type;
-					foreach (var item2 in this.Data.StoredItems.GroupBy((LevelSerializer.StoredData i) => i.Name, (string name, IEnumerable<LevelSerializer.StoredData> cps) => new
+					foreach (var <>__AnonType in this.Data.StoredItems.GroupBy((LevelSerializer.StoredData i) => i.Name, (string name, IEnumerable<LevelSerializer.StoredData> cps) => new
 					{
 						Name = name,
 						Components = (from cp in cps
@@ -332,121 +310,118 @@ public class LevelLoader : MonoBehaviour
 					}))
 					{
 						count++;
-						GameObject go4 = UniqueIdentifier.GetByName(item2.Name);
-						if (go4 == null)
+						GameObject byName4 = UniqueIdentifier.GetByName(<>__AnonType.Name);
+						if (byName4 == null)
 						{
-							Radical.LogWarning(item2.Name + " was null");
+							Radical.LogWarning(<>__AnonType.Name + " was null");
 						}
 						else
 						{
-							using (var enumerator8 = item2.Components.GetEnumerator())
+							foreach (var <>__AnonType2 in <>__AnonType.Components)
 							{
-								while (enumerator8.MoveNext())
+								try
 								{
-									cp = enumerator8.Current;
-									try
+									if (++currentProgress % 100 == 0)
 									{
-										if (++currentProgress % 100 == 0)
+										LevelSerializer.RaiseProgress("Loading", (float)currentProgress / (float)this.Data.StoredItems.Count);
+									}
+									Type type = UnitySerializer.GetTypeEx(<>__AnonType2.Type);
+									if (type != null)
+									{
+										this.Last = byName4;
+										bool flag3 = false;
+										LevelLoader.LoadData(byName4, ref flag3);
+										LevelLoader.LoadComponent(byName4, type.Name, ref flag3);
+										if (!flag3)
 										{
-											LevelSerializer.RaiseProgress("Loading", (float)currentProgress / (float)this.Data.StoredItems.Count);
-										}
-										type = UnitySerializer.GetTypeEx(cp.Type);
-										if (type != null)
-										{
-											this.Last = go4;
-											bool cancel3 = false;
-											LevelLoader.LoadData(go4, ref cancel3);
-											LevelLoader.LoadComponent(go4, type.Name, ref cancel3);
-											if (!cancel3)
+											List<Component> list = (from c in byName4.GetComponents(type)
+											where c.GetType() == type
+											select c).ToList<Component>();
+											while (list.Count > <>__AnonType2.List.Count)
 											{
-												List<Component> list3 = (from c in go4.GetComponents(type)
-												where c.GetType() == this.<type>__45
-												select c).ToList<Component>();
-												while (list3.Count > cp.List.Count)
+												UnityEngine.Object.DestroyImmediate(list.Last<Component>());
+												list.Remove(list.Last<Component>());
+											}
+											if (type == typeof(NavMeshAgent))
+											{
+												<>__AnonType2<string, List<LevelSerializer.StoredData>> cp1 = <>__AnonType2;
+												<>__AnonType3<string, List<<>__AnonType2<string, List<LevelSerializer.StoredData>>>> item1 = <>__AnonType;
+												int l;
+												Action action = delegate
 												{
-													UnityEngine.Object.DestroyImmediate(list3.Last<Component>());
-													list3.Remove(list3.Last<Component>());
-												}
-												if (type == typeof(NavMeshAgent))
-												{
-													int l;
-													Component comp;
-													Action perform = delegate
+													<>__AnonType2<string, List<LevelSerializer.StoredData>> comp = cp1;
+													Type tp = type;
+													string tname = item1.Name;
+													UnitySerializer.AddFinalAction(delegate
 													{
-														<>__AnonType2<string, List<LevelSerializer.StoredData>> comp = this.<cp1>__48;
-														Type tp = this.<type>__45;
-														string tname = this.<item1>__49.Name;
-														UnitySerializer.AddFinalAction(delegate
+														GameObject byName5 = UniqueIdentifier.GetByName(tname);
+														List<Component> list3 = (from c in byName5.GetComponents(tp)
+														where c.GetType() == tp
+														select c).ToList<Component>();
+														while (list3.Count < comp.List.Count)
 														{
-															GameObject byName = UniqueIdentifier.GetByName(tname);
-															List<Component> list4 = (from c in byName.GetComponents(tp)
-															where c.GetType() == tp
-															select c).ToList<Component>();
-															while (list4.Count < comp.List.Count)
+															try
 															{
-																try
-																{
-																	list4.Add(byName.AddComponent(tp));
-																}
-																catch
-																{
-																}
+																list3.Add(byName5.AddComponent(tp));
 															}
-															this.<list>__47 = (from l in this.<list>__47
-															where l != null
-															select l).ToList<Component>();
-															for (int i = 0; i < list4.Count; i++)
+															catch
 															{
-																if (LevelSerializer.CustomSerializers.ContainsKey(tp))
-																{
-																	LevelSerializer.CustomSerializers[tp].Deserialize(comp.List[i].Data, list4[i]);
-																}
-																else
-																{
-																	UnitySerializer.DeserializeInto(comp.List[i].Data, list4[i]);
-																}
-																LevelLoader.LoadedComponent(list4[i]);
 															}
-														});
-													};
-													perform();
-												}
-												else
+														}
+														list = (from l in list
+														where l != null
+														select l).ToList<Component>();
+														for (int i = 0; i < list3.Count; i++)
+														{
+															if (LevelSerializer.CustomSerializers.ContainsKey(tp))
+															{
+																LevelSerializer.CustomSerializers[tp].Deserialize(comp.List[i].Data, list3[i]);
+															}
+															else
+															{
+																UnitySerializer.DeserializeInto(comp.List[i].Data, list3[i]);
+															}
+															LevelLoader.LoadedComponent(list3[i]);
+														}
+													});
+												};
+												action();
+											}
+											else
+											{
+												while (list.Count < <>__AnonType2.List.Count)
 												{
-													while (list3.Count < cp.List.Count)
+													try
 													{
-														try
-														{
-															list3.Add(go4.AddComponent(type));
-														}
-														catch
-														{
-														}
+														list.Add(byName4.AddComponent(type));
 													}
-													int l;
-													list3 = (from l in list3
-													where l != null
-													select l).ToList<Component>();
-													for (int j = 0; j < list3.Count; j++)
+													catch
 													{
-														if (LevelSerializer.CustomSerializers.ContainsKey(type))
-														{
-															LevelSerializer.CustomSerializers[type].Deserialize(cp.List[j].Data, list3[j]);
-														}
-														else
-														{
-															UnitySerializer.DeserializeInto(cp.List[j].Data, list3[j]);
-														}
-														LevelLoader.LoadedComponent(list3[j]);
 													}
+												}
+												int l;
+												list = (from l in list
+												where l != null
+												select l).ToList<Component>();
+												for (int k = 0; k < list.Count; k++)
+												{
+													if (LevelSerializer.CustomSerializers.ContainsKey(type))
+													{
+														LevelSerializer.CustomSerializers[type].Deserialize(<>__AnonType2.List[k].Data, list[k]);
+													}
+													else
+													{
+														UnitySerializer.DeserializeInto(<>__AnonType2.List[k].Data, list[k]);
+													}
+													LevelLoader.LoadedComponent(list[k]);
 												}
 											}
 										}
 									}
-									catch
-									{
-										Debug.LogWarning("Problem deserializing " + cp.Type + " for " + go4.name);
-									}
+								}
+								catch
+								{
+									Debug.LogWarning("Problem deserializing " + <>__AnonType2.Type + " for " + byName4.name);
 								}
 							}
 							if (count % 3000 == 0)
@@ -490,12 +465,12 @@ public class LevelLoader : MonoBehaviour
 		if (this.rootObject == null && this.Data.rootObject != null)
 		{
 			Debug.LogError("Could not find the root object");
-			Debug.Log(this.Data.rootObject + " not found " + (this.Data.StoredObjectNames.Any((LevelSerializer.StoredItem n) => n.Name == this.<>f__this.Data.rootObject) ? "was in the stored names" : "not in the stored names"));
+			Debug.Log(this.Data.rootObject + " not found " + (this.Data.StoredObjectNames.Any((LevelSerializer.StoredItem n) => n.Name == this.$this.Data.rootObject) ? "was in the stored names" : "not in the stored names"));
 		}
-		foreach (UniqueIdentifier obj in flaggedObjects)
+		foreach (UniqueIdentifier uniqueIdentifier4 in flaggedObjects)
 		{
-			obj.IsDeserializing = false;
-			obj.SendMessage("OnDeserialized", SendMessageOptions.DontRequireReceiver);
+			uniqueIdentifier4.IsDeserializing = false;
+			uniqueIdentifier4.SendMessage("OnDeserialized", SendMessageOptions.DontRequireReceiver);
 		}
 		LevelSerializer.IsDeserializing = false;
 		this._loading = false;
@@ -504,6 +479,28 @@ public class LevelLoader : MonoBehaviour
 		LevelSerializer.RaiseProgress("Done", 1f);
 		UnityEngine.Object.Destroy(base.gameObject, 0.1f);
 		yield break;
+	}
+
+	
+	static LevelLoader()
+	{
+		
+		LevelLoader.CreateGameObject = delegate
+		{
+		};
+		LevelLoader.OnDestroyObject = delegate
+		{
+		};
+		LevelLoader.LoadData = delegate
+		{
+		};
+		LevelLoader.LoadComponent = delegate
+		{
+		};
+		LevelLoader.LoadedComponent = delegate
+		{
+		};
+		LevelLoader.loadingCount = 0;
 	}
 
 	
@@ -551,7 +548,7 @@ public class LevelLoader : MonoBehaviour
 	private bool wasLoaded;
 
 	
-	private static int loadingCount = 0;
+	private static int loadingCount;
 
 	
 	

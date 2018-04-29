@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 
@@ -26,10 +27,23 @@ public class DisableMobileContent : MonoBehaviour
 	
 	private void SetMobileControlsStatus(bool activeStatus)
 	{
-		foreach (object obj in base.transform)
+		IEnumerator enumerator = base.transform.GetEnumerator();
+		try
 		{
-			Transform transform = (Transform)obj;
-			transform.transform.gameObject.SetActive(activeStatus);
+			while (enumerator.MoveNext())
+			{
+				object obj = enumerator.Current;
+				Transform transform = (Transform)obj;
+				transform.transform.gameObject.SetActive(activeStatus);
+			}
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = (enumerator as IDisposable)) != null)
+			{
+				disposable.Dispose();
+			}
 		}
 	}
 

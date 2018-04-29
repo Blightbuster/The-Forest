@@ -89,7 +89,7 @@ namespace TheForest.Items.Special
 		}
 
 		
-		private void EmptyToInventory()
+		public void EmptyToInventory()
 		{
 			for (int i = 0; i < this._storage.UsedSlots.Count; i++)
 			{

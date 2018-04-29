@@ -521,10 +521,10 @@ namespace Pathfinding.RVO
 		internal class WorkerContext
 		{
 			
-			public const int KeepCount = 3;
+			public Agent.VOBuffer vos = new Agent.VOBuffer(16);
 
 			
-			public Agent.VOBuffer vos = new Agent.VOBuffer(16);
+			public const int KeepCount = 3;
 
 			
 			public Vector2[] bestPos = new Vector2[3];

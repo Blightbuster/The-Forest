@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 namespace HutongGames.PlayMaker.Actions
@@ -34,10 +35,23 @@ namespace HutongGames.PlayMaker.Actions
 				return;
 			}
 			AnimationClip animationClip = new AnimationClip();
-			foreach (object obj in ownerDefaultTarget.transform)
+			IEnumerator enumerator = ownerDefaultTarget.transform.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				this.CaptureTransform(transform, string.Empty, animationClip);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					this.CaptureTransform(transform, string.Empty, animationClip);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 			this.storeAnimationClip.Value = animationClip;
 		}
@@ -58,10 +72,23 @@ namespace HutongGames.PlayMaker.Actions
 			{
 				this.CaptureScale(transform, path, clip);
 			}
-			foreach (object obj in transform)
+			IEnumerator enumerator = transform.GetEnumerator();
+			try
 			{
-				Transform transform2 = (Transform)obj;
-				this.CaptureTransform(transform2, path + "/", clip);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform2 = (Transform)obj;
+					this.CaptureTransform(transform2, path + "/", clip);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 
@@ -99,9 +126,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject root of the hierarchy to capture.")]
-		[CheckForComponent(typeof(Animation))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animation))]
+		[Tooltip("The GameObject root of the hierarchy to capture.")]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -117,10 +144,10 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmBool scale;
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
-		[Tooltip("Store the result in an Object variable of type AnimationClip.")]
+		[UIHint(UIHint.Variable)]
 		[ObjectType(typeof(AnimationClip))]
+		[Tooltip("Store the result in an Object variable of type AnimationClip.")]
 		public FsmObject storeAnimationClip;
 	}
 }

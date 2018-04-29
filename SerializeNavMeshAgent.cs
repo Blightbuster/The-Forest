@@ -1,6 +1,7 @@
 ﻿using System;
 using Serialization;
 using UnityEngine;
+using UnityEngine.AI;
 
 
 [ComponentSerializerFor(typeof(NavMeshAgent))]

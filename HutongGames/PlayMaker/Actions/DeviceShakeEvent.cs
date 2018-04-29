@@ -25,13 +25,13 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("Amount of acceleration required to trigger the event. Higher numbers require a harder shake.")]
 		[RequiredField]
+		[Tooltip("Amount of acceleration required to trigger the event. Higher numbers require a harder shake.")]
 		public FsmFloat shakeThreshold;
 
 		
-		[Tooltip("Event to send when Shake Threshold is exceded.")]
 		[RequiredField]
+		[Tooltip("Event to send when Shake Threshold is exceded.")]
 		public FsmEvent sendEvent;
 	}
 }

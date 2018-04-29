@@ -150,11 +150,11 @@ namespace Pathfinding
 		
 		private static Rect ExpandToContain(Rect r, Rect r2)
 		{
-			float left = Mathf.Min(r.xMin, r2.xMin);
-			float right = Mathf.Max(r.xMax, r2.xMax);
-			float top = Mathf.Min(r.yMin, r2.yMin);
-			float bottom = Mathf.Max(r.yMax, r2.yMax);
-			return Rect.MinMaxRect(left, top, right, bottom);
+			float xmin = Mathf.Min(r.xMin, r2.xMin);
+			float xmax = Mathf.Max(r.xMax, r2.xMax);
+			float ymin = Mathf.Min(r.yMin, r2.yMin);
+			float ymax = Mathf.Max(r.yMax, r2.yMax);
+			return Rect.MinMaxRect(xmin, ymin, xmax, ymax);
 		}
 
 		

@@ -4,9 +4,9 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[HelpUrl("https:
 	[ActionCategory("Animator")]
 	[Tooltip("Sets look at position and weights. A GameObject can be set to control the look at position, or it can be manually expressed.")]
+	[HelpUrl("https:
 	public class SetAnimatorLookAt : FsmStateAction
 	{
 		
@@ -131,8 +131,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
 		[CheckForComponent(typeof(Animator))]
+		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -149,13 +149,13 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat weight;
 
 		
-		[Tooltip("determines how much the body is involved in the LookAt. Range from 0 to 1")]
 		[HasFloatSlider(0f, 1f)]
+		[Tooltip("determines how much the body is involved in the LookAt. Range from 0 to 1")]
 		public FsmFloat bodyWeight;
 
 		
-		[Tooltip("determines how much the head is involved in the LookAt. Range from 0 to 1")]
 		[HasFloatSlider(0f, 1f)]
+		[Tooltip("determines how much the head is involved in the LookAt. Range from 0 to 1")]
 		public FsmFloat headWeight;
 
 		

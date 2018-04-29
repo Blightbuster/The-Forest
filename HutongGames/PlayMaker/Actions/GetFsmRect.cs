@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Get the value of a Rect Variable from another FSM.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Get the value of a Rect Variable from another FSM.")]
 	public class GetFsmRect : FsmStateAction
 	{
 		
@@ -69,8 +69,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString fsmName;
 
 		
-		[UIHint(UIHint.FsmRect)]
 		[RequiredField]
+		[UIHint(UIHint.FsmRect)]
 		public FsmString variableName;
 
 		

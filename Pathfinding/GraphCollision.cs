@@ -28,36 +28,38 @@ namespace Pathfinding
 			if (this.use2D)
 			{
 				ColliderType colliderType = this.type;
-				if (colliderType == ColliderType.Sphere)
+				if (colliderType == ColliderType.Capsule)
 				{
-					return Physics2D.OverlapCircle(position, this.finalRadius, this.mask) == null;
+					throw new Exception("Capsule mode cannot be used with 2D since capsules don't exist in 2D. Please change the Physics Testing -> Collider Type setting.");
 				}
-				if (colliderType != ColliderType.Capsule)
+				if (colliderType != ColliderType.Sphere)
 				{
 					return Physics2D.OverlapPoint(position, this.mask) == null;
 				}
-				throw new Exception("Capsule mode cannot be used with 2D since capsules don't exist in 2D. Please change the Physics Testing -> Collider Type setting.");
+				return Physics2D.OverlapCircle(position, this.finalRadius, this.mask) == null;
 			}
 			else
 			{
 				position += this.up * this.collisionOffset;
-				ColliderType colliderType = this.type;
-				if (colliderType == ColliderType.Sphere)
+				ColliderType colliderType2 = this.type;
+				if (colliderType2 == ColliderType.Capsule)
+				{
+					return !Physics.CheckCapsule(position, position + this.upheight, this.finalRadius, this.mask);
+				}
+				if (colliderType2 == ColliderType.Sphere)
 				{
 					return !Physics.CheckSphere(position, this.finalRadius, this.mask);
 				}
-				if (colliderType != ColliderType.Capsule)
+				RayDirection rayDirection = this.rayDirection;
+				if (rayDirection == RayDirection.Both)
 				{
-					switch (this.rayDirection)
-					{
-					case RayDirection.Up:
-						return !Physics.Raycast(position, this.up, this.height, this.mask);
-					case RayDirection.Both:
-						return !Physics.Raycast(position, this.up, this.height, this.mask) && !Physics.Raycast(position + this.upheight, -this.up, this.height, this.mask);
-					}
+					return !Physics.Raycast(position, this.up, this.height, this.mask) && !Physics.Raycast(position + this.upheight, -this.up, this.height, this.mask);
+				}
+				if (rayDirection != RayDirection.Up)
+				{
 					return !Physics.Raycast(position + this.upheight, -this.up, this.height, this.mask);
 				}
-				return !Physics.CheckCapsule(position, position + this.upheight, this.finalRadius, this.mask);
+				return !Physics.Raycast(position, this.up, this.height, this.mask);
 			}
 		}
 
@@ -208,9 +210,6 @@ namespace Pathfinding
 		}
 
 		
-		public const float RaycastErrorMargin = 0.005f;
-
-		
 		public ColliderType type = ColliderType.Capsule;
 
 		
@@ -263,5 +262,8 @@ namespace Pathfinding
 
 		
 		private float finalRaycastRadius;
+
+		
+		public const float RaycastErrorMargin = 0.005f;
 	}
 }

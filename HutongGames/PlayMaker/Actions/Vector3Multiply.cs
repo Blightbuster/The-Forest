@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Multiplies a Vector3 variable by a Float.")]
 	[ActionCategory(ActionCategory.Vector3)]
+	[Tooltip("Multiplies a Vector3 variable by a Float.")]
 	public class Vector3Multiply : FsmStateAction
 	{
 		
@@ -32,8 +32,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmVector3 vector3Variable;
 
 		

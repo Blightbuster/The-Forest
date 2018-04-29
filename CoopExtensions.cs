@@ -1,4 +1,5 @@
 ﻿using System;
+using Bolt;
 
 
 public static class CoopExtensions
@@ -13,5 +14,11 @@ public static class CoopExtensions
 	public static bool IsOwner(this BoltEntity entity)
 	{
 		return entity.IsAttached() && entity.isOwner;
+	}
+
+	
+	public static bool ValidateSender(this GlobalEventListener listener, Event evnt, SenderTypes senderType = SenderTypes.Any)
+	{
+		return true;
 	}
 }

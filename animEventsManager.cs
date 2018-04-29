@@ -31,6 +31,7 @@ public class animEventsManager : EntityEventListener
 		this.headBob = base.transform.parent.GetComponent<FirstPersonHeadBob>();
 		this.animator = base.gameObject.GetComponent<Animator>();
 		this.hitTrigger = base.transform.GetComponentInChildren<treeHitTrigger>();
+		this.aiInfo = base.transform.GetComponentInParent<playerAiInfo>();
 		if (this.Remote)
 		{
 			this.vis = base.transform.parent.GetComponent<netPlayerVis>();
@@ -57,6 +58,7 @@ public class animEventsManager : EntityEventListener
 	
 	private void Start()
 	{
+		this._enableWeaponTimer = 0f;
 		this._stats = base.transform.parent.GetComponent<targetStats>();
 		this.water = Scene.Clock.GetComponent<WaterOnTerrain>();
 		if (Terrain.activeTerrain && Terrain.activeTerrain.materialTemplate)
@@ -95,6 +97,31 @@ public class animEventsManager : EntityEventListener
 		else if (!CoopPeerStarter.DedicatedHost)
 		{
 			Debug.LogError("FMOD_StudioSystem.instance is null, could not initialize animEventManager audio");
+		}
+	}
+
+	
+	private void FixedUpdate()
+	{
+		if (ForestVR.Enabled)
+		{
+			if (!LocalPlayer.Inventory.IsSlotEmpty(Item.EquipmentSlot.RightHand))
+			{
+				float num = (this._weaponVelocityTr.position - this._prevWepPos).magnitude * 100f;
+				this._prevWepPos = this._weaponVelocityTr.position;
+				if (num > this._vrEnableWeaponVelocity)
+				{
+					this._enableWeaponTimer = Time.time + this._vrWeaponAttackWindow;
+				}
+			}
+			if (Time.time < this._enableWeaponTimer)
+			{
+				this.enableSmashWeapon();
+			}
+			else
+			{
+				this.disableSmashWeapon();
+			}
 		}
 	}
 
@@ -331,6 +358,17 @@ public class animEventsManager : EntityEventListener
 		{
 			this.heldWeaponCollider.enabled = true;
 		}
+	}
+
+	
+	private void enableWeaponMP()
+	{
+		if (!BoltNetwork.isClient)
+		{
+			return;
+		}
+		Debug.Log("doing enable weapon MP");
+		this.enableWeapon();
 	}
 
 	
@@ -682,7 +720,7 @@ public class animEventsManager : EntityEventListener
 		}
 		if (BoltNetwork.isRunning)
 		{
-			SfxFallLight.Raise(this.entity, EntityTargets.EveryoneExceptOwner).Send();
+			SfxFallLight.Raise(base.entity, EntityTargets.EveryoneExceptOwner).Send();
 		}
 		this.PlayFallEvent(0f);
 	}
@@ -702,9 +740,19 @@ public class animEventsManager : EntityEventListener
 		}
 		if (BoltNetwork.isRunning)
 		{
-			SfxFallHeavy.Raise(this.entity, EntityTargets.EveryoneExceptOwner).Send();
+			SfxFallHeavy.Raise(base.entity, EntityTargets.EveryoneExceptOwner).Send();
 		}
 		this.PlayFallEvent(1f);
+	}
+
+	
+	private void PlayLighterSpark()
+	{
+		if (this.Remote)
+		{
+			return;
+		}
+		LocalPlayer.Sfx.PlayLighterSound();
 	}
 
 	
@@ -764,6 +812,10 @@ public class animEventsManager : EntityEventListener
 	
 	private void skinnedBloodBurst()
 	{
+		if (this.Remote)
+		{
+			return;
+		}
 		Vector3 vector = this.axePlaneCollider.transform.position;
 		vector += LocalPlayer.MainCamTr.transform.right * 0.4f + LocalPlayer.MainCamTr.forward * 0.2f;
 		Prefabs.Instance.SpawnBloodHitPS(0, vector, LocalPlayer.MainCamTr.transform.rotation);
@@ -934,18 +986,26 @@ public class animEventsManager : EntityEventListener
 		{
 			if (LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.RightHand, this._spearId))
 			{
-				GameObject gameObject = UnityEngine.Object.Instantiate(this.spearSpawn, this.spearThrowPos.position, this.spearThrowPos.rotation) as GameObject;
+				GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.spearSpawn, this.spearThrowPos.position, this.spearThrowPos.rotation);
 				Rigidbody component = gameObject.GetComponent<Rigidbody>();
 				component.AddForce(gameObject.transform.up * this.throwForce * (0.016666f / Time.fixedDeltaTime), ForceMode.Force);
 				LocalPlayer.Inventory.RightHand._held.SendMessage("OnProjectileThrown", gameObject, SendMessageOptions.DontRequireReceiver);
+				if (LocalPlayer.Inventory.AmountOf(this._spearId, true) > 1)
+				{
+					LocalPlayer.Inventory.MemorizeOverrideItem(Item.EquipmentSlot.RightHand);
+				}
 				LocalPlayer.Inventory.UnequipItemAtSlot(Item.EquipmentSlot.RightHand, false, false, true);
 			}
 			else if (LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.RightHand, this._spearUpgradedId))
 			{
-				GameObject gameObject2 = UnityEngine.Object.Instantiate(this.spearSpawn_upgraded, this.spearThrowPos_upgraded.position, this.spearThrowPos_upgraded.rotation) as GameObject;
+				GameObject gameObject2 = UnityEngine.Object.Instantiate<GameObject>(this.spearSpawn_upgraded, this.spearThrowPos_upgraded.position, this.spearThrowPos_upgraded.rotation);
 				Rigidbody component2 = gameObject2.GetComponent<Rigidbody>();
 				component2.AddForce(gameObject2.transform.up * this.throwForce * 1.25f * (0.016666f / Time.fixedDeltaTime), ForceMode.Force);
 				LocalPlayer.Inventory.RightHand._held.SendMessage("OnProjectileThrown", gameObject2, SendMessageOptions.DontRequireReceiver);
+				if (LocalPlayer.Inventory.AmountOf(this._spearUpgradedId, true) > 1)
+				{
+					LocalPlayer.Inventory.MemorizeOverrideItem(Item.EquipmentSlot.RightHand);
+				}
 				LocalPlayer.Inventory.UnequipItemAtSlot(Item.EquipmentSlot.RightHand, false, false, true);
 			}
 		}
@@ -1239,7 +1299,7 @@ public class animEventsManager : EntityEventListener
 		}
 		Vector3 position = this.leftArmSplashPos.transform.position;
 		bool flag = this.buoyancy.InWater && this.buoyancy.WaterLevel - base.transform.position.y < 3.9f;
-		if (flag)
+		if (flag && this.buoyancy.WaterCollider != null)
 		{
 			position.y = this.buoyancy.WaterCollider.bounds.center.y + this.buoyancy.WaterCollider.bounds.extents.y;
 			PoolManager.Pools["Particles"].Spawn(this.waterArmParticle.transform, position, Quaternion.identity);
@@ -1255,7 +1315,7 @@ public class animEventsManager : EntityEventListener
 		}
 		Vector3 position = this.rightArmSplashPos.transform.position;
 		bool flag = this.buoyancy.InWater && this.buoyancy.WaterLevel - base.transform.position.y < 3.9f;
-		if (flag)
+		if (flag && this.buoyancy.WaterCollider != null)
 		{
 			position.y = this.buoyancy.WaterCollider.bounds.center.y + this.buoyancy.WaterCollider.bounds.extents.y;
 			PoolManager.Pools["Particles"].Spawn(this.waterArmParticle.transform, position, Quaternion.identity);
@@ -1367,6 +1427,14 @@ public class animEventsManager : EntityEventListener
 		{
 			if (this.IsOnSnow())
 			{
+				if (!this.Remote && LocalPlayer.IsInCaves)
+				{
+					return;
+				}
+				if (this.Remote && this.aiInfo && this.aiInfo.netInCave)
+				{
+					return;
+				}
 				position.y = Terrain.activeTerrain.SampleHeight(this.leftFootSpawnPos.position) + Terrain.activeTerrain.transform.position.y;
 				float f = position.y - this.leftFootSpawnPos.position.y;
 				bool flag2 = Mathf.Abs(f) <= 1f;
@@ -1390,9 +1458,12 @@ public class animEventsManager : EntityEventListener
 		{
 			return;
 		}
-		position.y = this.buoyancy.WaterCollider.bounds.center.y + this.buoyancy.WaterCollider.bounds.extents.y;
-		PoolManager.Pools["Particles"].Spawn(this.waterFootParticle.transform, position, Quaternion.identity);
-		PoolManager.Pools["Particles"].Spawn(this.waterLegParticle.transform, position, Quaternion.identity);
+		if (this.buoyancy.WaterCollider != null)
+		{
+			position.y = this.buoyancy.WaterCollider.bounds.center.y + this.buoyancy.WaterCollider.bounds.extents.y;
+			PoolManager.Pools["Particles"].Spawn(this.waterFootParticle.transform, position, Quaternion.identity);
+			PoolManager.Pools["Particles"].Spawn(this.waterLegParticle.transform, position, Quaternion.identity);
+		}
 	}
 
 	
@@ -1408,6 +1479,14 @@ public class animEventsManager : EntityEventListener
 		{
 			if (this.IsOnSnow())
 			{
+				if (!this.Remote && LocalPlayer.IsInCaves)
+				{
+					return;
+				}
+				if (this.Remote && this.aiInfo && this.aiInfo.netInCave)
+				{
+					return;
+				}
 				position.y = Terrain.activeTerrain.SampleHeight(this.rightFootSpawnPos.position) + Terrain.activeTerrain.transform.position.y;
 				float f = position.y - this.rightFootSpawnPos.position.y;
 				bool flag2 = Mathf.Abs(f) <= 1f;
@@ -1431,9 +1510,12 @@ public class animEventsManager : EntityEventListener
 		{
 			return;
 		}
-		position.y = this.buoyancy.WaterCollider.bounds.center.y + this.buoyancy.WaterCollider.bounds.extents.y;
-		PoolManager.Pools["Particles"].Spawn(this.waterFootParticle.transform, position, Quaternion.identity);
-		PoolManager.Pools["Particles"].Spawn(this.waterLegParticle.transform, position, Quaternion.identity);
+		if (this.buoyancy.WaterCollider != null)
+		{
+			position.y = this.buoyancy.WaterCollider.bounds.center.y + this.buoyancy.WaterCollider.bounds.extents.y;
+			PoolManager.Pools["Particles"].Spawn(this.waterFootParticle.transform, position, Quaternion.identity);
+			PoolManager.Pools["Particles"].Spawn(this.waterLegParticle.transform, position, Quaternion.identity);
+		}
 	}
 
 	
@@ -1546,14 +1628,15 @@ public class animEventsManager : EntityEventListener
 		{
 			return "event:/player/foots/foot_jump_snow";
 		}
-		switch (terrainNumber)
+		if (terrainNumber == 1)
 		{
-		case 1:
 			return "event:/player/foots/foot_jump_mud";
-		case 4:
-			return "event:/player/foots/foot_jump_sand";
 		}
-		return "event:/player/foots/foot_jump_default";
+		if (terrainNumber != 4)
+		{
+			return "event:/player/foots/foot_jump_default";
+		}
+		return "event:/player/foots/foot_jump_sand";
 	}
 
 	
@@ -1609,55 +1692,10 @@ public class animEventsManager : EntityEventListener
 	}
 
 	
-	private const string FOOTSTEP_DEFAULT = "event:/player/foots/foot_default";
-
-	
-	private const string FOOTSTEP_SAND = "event:/player/foots/foot_sand";
-
-	
-	private const string FOOTSTEP_MUD = "event:/player/foots/foot_mud";
-
-	
-	private const string FOOTSTEP_LEAVES = "event:/player/foots/foot_leaves";
-
-	
-	private const string FOOTSTEP_ROCK = "event:/player/foots/foot_rock";
-
-	
-	private const string FOOTSTEP_SNOW = "event:/player/foots/foot_snow";
-
-	
-	private const string FOOTSTEP_WOOD = "event:/player/foots/foot_wood";
-
-	
-	private const string FOOTSTEP_METAL = "event:/player/foots/foot_metal";
-
-	
-	private const string FOOTSTEP_CARPET = "event:/player/foots/foot_carpet";
-
-	
-	private const string FOOTSTEP_PLASTIC = "event:/player/foots/foot_plastic";
-
-	
-	private const string FOOTSTEP_METAL_GRATE = "event:/player/foots/foot_metal_grate";
-
-	
-	private const string FOOTSTEP_BROKEN_GLASS = "event:/player/foots/foot_plastic_glass";
-
-	
-	private const string LAND_DEFAULT = "event:/player/foots/foot_jump_default";
-
-	
-	private const string LAND_SAND = "event:/player/foots/foot_jump_sand";
-
-	
-	private const string LAND_MUD = "event:/player/foots/foot_jump_mud";
-
-	
-	private const string LAND_SNOW = "event:/player/foots/foot_jump_snow";
-
-	
 	public bool Remote;
+
+	
+	private playerAiInfo aiInfo;
 
 	
 	private Buoyancy buoyancy;
@@ -1958,6 +1996,21 @@ public class animEventsManager : EntityEventListener
 	private Vector3 previousPosition;
 
 	
+	public Transform _weaponVelocityTr;
+
+	
+	private Vector3 _prevWepPos;
+
+	
+	public float _vrWeaponAttackWindow = 0.5f;
+
+	
+	public float _vrEnableWeaponVelocity = 30f;
+
+	
+	private float _enableWeaponTimer;
+
+	
 	[NonSerialized]
 	public bool IsSledTurning;
 
@@ -1978,4 +2031,52 @@ public class animEventsManager : EntityEventListener
 
 	
 	public bool introCutScene;
+
+	
+	private const string FOOTSTEP_DEFAULT = "event:/player/foots/foot_default";
+
+	
+	private const string FOOTSTEP_SAND = "event:/player/foots/foot_sand";
+
+	
+	private const string FOOTSTEP_MUD = "event:/player/foots/foot_mud";
+
+	
+	private const string FOOTSTEP_LEAVES = "event:/player/foots/foot_leaves";
+
+	
+	private const string FOOTSTEP_ROCK = "event:/player/foots/foot_rock";
+
+	
+	private const string FOOTSTEP_SNOW = "event:/player/foots/foot_snow";
+
+	
+	private const string FOOTSTEP_WOOD = "event:/player/foots/foot_wood";
+
+	
+	private const string FOOTSTEP_METAL = "event:/player/foots/foot_metal";
+
+	
+	private const string FOOTSTEP_CARPET = "event:/player/foots/foot_carpet";
+
+	
+	private const string FOOTSTEP_PLASTIC = "event:/player/foots/foot_plastic";
+
+	
+	private const string FOOTSTEP_METAL_GRATE = "event:/player/foots/foot_metal_grate";
+
+	
+	private const string FOOTSTEP_BROKEN_GLASS = "event:/player/foots/foot_plastic_glass";
+
+	
+	private const string LAND_DEFAULT = "event:/player/foots/foot_jump_default";
+
+	
+	private const string LAND_SAND = "event:/player/foots/foot_jump_sand";
+
+	
+	private const string LAND_MUD = "event:/player/foots/foot_jump_mud";
+
+	
+	private const string LAND_SNOW = "event:/player/foots/foot_jump_snow";
 }

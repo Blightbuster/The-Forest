@@ -8,7 +8,6 @@ public class coopPlayerRemoveUnusedClothing : MonoBehaviour
 	
 	private void Start()
 	{
-		this.amplifyObject = base.transform.GetComponent<AmplifyMotionObject>();
 		if (!BoltNetwork.isRunning)
 		{
 			base.StartCoroutine("PerformClothingCleanup");
@@ -27,18 +26,11 @@ public class coopPlayerRemoveUnusedClothing : MonoBehaviour
 			}
 		}
 		yield return null;
-		if (this.amplifyObject)
-		{
-			this.amplifyObject.enabled = true;
-		}
 		yield break;
 	}
 
 	
 	public GameObject[] clothingVariations;
-
-	
-	public AmplifyMotionObject amplifyObject;
 
 	
 	public bool alreadyClean;

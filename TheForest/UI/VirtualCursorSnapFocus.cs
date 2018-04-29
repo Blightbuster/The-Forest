@@ -9,6 +9,11 @@ namespace TheForest.UI
 		
 		private void OnEnable()
 		{
+			if (ForestVR.Prototype)
+			{
+				base.enabled = false;
+				return;
+			}
 			VirtualCursorSnapNode component = base.GetComponent<VirtualCursorSnapNode>();
 			component._layer.SetCurrentNode(component);
 		}

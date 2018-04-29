@@ -23,7 +23,7 @@ public class CoopHellDoors : EntityBehaviour<IWorldHellDoors>
 	public override void Attached()
 	{
 		base.state.AddCallback("NewProperty[]", new PropertyCallbackSimple(this.DoorItemsChanged));
-		if (this.entity.isOwner)
+		if (base.entity.isOwner)
 		{
 			base.StartCoroutine(this.LoadSaveRoutine());
 		}
@@ -40,16 +40,17 @@ public class CoopHellDoors : EntityBehaviour<IWorldHellDoors>
 		yield return null;
 		for (int i = 0; i < base.state.NewProperty.Length; i++)
 		{
-			for (int j = 0; j < base.state.NewProperty[i].Items.Length; j++)
+			int num = Mathf.Min(base.state.NewProperty[i].Items.Length, this.Doors[i]._slots.Length);
+			for (int j = 0; j < num; j++)
 			{
 				if (base.state.NewProperty[i].Items[j] != this.Doors[i]._slots[j].StoredItemId)
 				{
 					this.Doors[i]._slots[j].Added = false;
-					AddItemToDoor ev = AddItemToDoor.Create(GlobalTargets.OnlyServer);
-					ev.Door = i;
-					ev.Slot = j;
-					ev.Item = this.Doors[i]._slots[j].StoredItemId;
-					ev.Send();
+					AddItemToDoor addItemToDoor = AddItemToDoor.Create(GlobalTargets.OnlyServer);
+					addItemToDoor.Door = i;
+					addItemToDoor.Slot = j;
+					addItemToDoor.Item = this.Doors[i]._slots[j].StoredItemId;
+					addItemToDoor.Send();
 				}
 			}
 		}
@@ -59,15 +60,16 @@ public class CoopHellDoors : EntityBehaviour<IWorldHellDoors>
 	
 	private void OnWeightChanged()
 	{
-		if (this.entity.IsAttached())
+		if (base.entity.IsAttached())
 		{
-			if (this.entity.isFrozen)
+			if (base.entity.isFrozen)
 			{
-				this.entity.Freeze(false);
+				base.entity.Freeze(false);
 			}
 			for (int i = 0; i < base.state.NewProperty.Length; i++)
 			{
-				for (int j = 0; j < base.state.NewProperty[i].Items.Length; j++)
+				int num = Mathf.Min(base.state.NewProperty[i].Items.Length, this.Doors[i]._slots.Length);
+				for (int j = 0; j < num; j++)
 				{
 					if (base.state.NewProperty[i].Items[j] != this.Doors[i]._slots[j].StoredItemId)
 					{
@@ -101,7 +103,8 @@ public class CoopHellDoors : EntityBehaviour<IWorldHellDoors>
 	{
 		for (int i = 0; i < base.state.NewProperty.Length; i++)
 		{
-			for (int j = 0; j < base.state.NewProperty[i].Items.Length; j++)
+			int num = Mathf.Min(base.state.NewProperty[i].Items.Length, this.Doors[i]._slots.Length);
+			for (int j = 0; j < num; j++)
 			{
 				this.Doors[i]._slots[j].ItemIdChanged_Network(base.state.NewProperty[i].Items[j]);
 			}

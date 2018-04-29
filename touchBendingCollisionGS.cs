@@ -1,4 +1,5 @@
 ﻿using System;
+using TheForest.Buildings.World;
 using UnityEngine;
 
 
@@ -10,11 +11,17 @@ public class touchBendingCollisionGS : MonoBehaviour
 	{
 		this.myTransform = base.transform;
 		this.myRenderer = base.GetComponent<Renderer>();
+		if (!this.preventCutFromStructures)
+		{
+			this.bush = base.transform.GetComponent<BushDamage>();
+			this.bush2 = base.transform.GetComponent<CutBush2>();
+		}
 	}
 
 	
 	private void OnEnable()
 	{
+		this.enableTime = Time.time + 1f;
 		this.OnSpawnedProxy();
 	}
 
@@ -49,6 +56,36 @@ public class touchBendingCollisionGS : MonoBehaviour
 	private void OnTriggerEnter(Collider other)
 	{
 		touchBendingPlayerListener component = other.GetComponent<touchBendingPlayerListener>();
+		if (this.bush || this.bush2)
+		{
+			bool flag = false;
+			if (this.IsStructure(other))
+			{
+				if (this.bush)
+				{
+					if (flag)
+					{
+						this.bush.DespawnBush();
+					}
+					else
+					{
+						this.bush.CutDownReal();
+					}
+				}
+				if (this.bush2)
+				{
+					if (flag)
+					{
+						this.bush2.DespawnBush();
+					}
+					else
+					{
+						this.bush2.CutDown();
+					}
+				}
+				return;
+			}
+		}
 		if (component != null && component.enabled)
 		{
 			if (!this.touched)
@@ -283,6 +320,12 @@ public class touchBendingCollisionGS : MonoBehaviour
 	}
 
 	
+	private bool IsStructure(Collider col)
+	{
+		return col.gameObject.CompareTag("Target") || col.gameObject.CompareTag("Multisled") || col.gameObject.CompareTag("SLTier1") || col.gameObject.CompareTag("SLTier2") || col.gameObject.CompareTag("SLTier3") || col.gameObject.CompareTag("structure") || col.GetComponent<BuildingHealthHitRelay>() || col.GetComponent<BuildingHealthChunkHitRelay>();
+	}
+
+	
 	public float stiffness = 10f;
 
 	
@@ -290,6 +333,9 @@ public class touchBendingCollisionGS : MonoBehaviour
 
 	
 	public float duration = 5f;
+
+	
+	public bool preventCutFromStructures;
 
 	
 	public bool localSpace;
@@ -392,4 +438,13 @@ public class touchBendingCollisionGS : MonoBehaviour
 
 	
 	private float scale1;
+
+	
+	private BushDamage bush;
+
+	
+	private CutBush2 bush2;
+
+	
+	private float enableTime;
 }

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace TheForest.Graphics
 {
 	
-	[AddComponentMenu("The Forest/Graphics/Floating")]
 	[ExecuteInEditMode]
+	[AddComponentMenu("The Forest/Graphics/Floating")]
 	public class Floating : MonoBehaviour
 	{
 		
@@ -38,8 +38,8 @@ namespace TheForest.Graphics
 				Vector3 position = base.transform.position;
 				if (this.useHeight)
 				{
-					float to = water.HeightAt(base.transform.position);
-					position.y = Mathf.Lerp(position.y, to, this.DeltaTime / this.smoothTime);
+					float b = water.HeightAt(base.transform.position);
+					position.y = Mathf.Lerp(position.y, b, this.DeltaTime / this.smoothTime);
 					base.transform.position = position;
 				}
 				if (this.useNormal)
@@ -56,8 +56,8 @@ namespace TheForest.Graphics
 		}
 
 		
-		[Range(0.01f, 1f)]
 		[Header("Base")]
+		[Range(0.01f, 1f)]
 		public float smoothTime = 1f;
 
 		

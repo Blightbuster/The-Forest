@@ -5,19 +5,13 @@ using System.Collections.Generic;
 namespace UniLinq
 {
 	
-	internal class Grouping<K, T> : IEnumerable, IEnumerable<T>, IGrouping<K, T>
+	internal class Grouping<K, T> : IGrouping<K, T>, IEnumerable<T>, IEnumerable
 	{
 		
 		public Grouping(K key, IEnumerable<T> group)
 		{
 			this.group = group;
 			this.key = key;
-		}
-
-		
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.group.GetEnumerator();
 		}
 
 		
@@ -37,6 +31,12 @@ namespace UniLinq
 
 		
 		public IEnumerator<T> GetEnumerator()
+		{
+			return this.group.GetEnumerator();
+		}
+
+		
+		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return this.group.GetEnumerator();
 		}

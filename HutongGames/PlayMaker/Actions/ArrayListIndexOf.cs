@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Return the index of an item from a PlayMaker Array List Proxy component. Can search within a range")]
 	[ActionCategory("ArrayMaker/ArrayList")]
+	[Tooltip("Return the index of an item from a PlayMaker Array List Proxy component. Can search within a range")]
 	public class ArrayListIndexOf : ArrayListActions
 	{
 		
@@ -49,7 +49,7 @@ namespace HutongGames.PlayMaker.Actions
 				{
 					if (this.startIndex.Value < 0 || this.startIndex.Value >= this.proxy.arrayList.Count)
 					{
-						this.LogError("start index out of range");
+						base.LogError("start index out of range");
 						return;
 					}
 					num = this.proxy.arrayList.IndexOf(valueFromFsmVar, this.startIndex.Value);
@@ -58,7 +58,7 @@ namespace HutongGames.PlayMaker.Actions
 				{
 					if (this.startIndex.Value < 0 || this.startIndex.Value >= this.proxy.arrayList.Count - this.count.Value)
 					{
-						this.LogError("start index and count out of range");
+						base.LogError("start index and count out of range");
 						return;
 					}
 					num = this.proxy.arrayList.IndexOf(valueFromFsmVar, this.startIndex.Value, this.count.Value);
@@ -82,10 +82,10 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
-		[RequiredField]
 		[ActionSection("Set up")]
+		[RequiredField]
 		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
+		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -94,8 +94,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString reference;
 
 		
-		[UIHint(UIHint.FsmInt)]
 		[Tooltip("Optional start index to search from: set to 0 to ignore")]
+		[UIHint(UIHint.FsmInt)]
 		public FsmInt startIndex;
 
 		
@@ -104,20 +104,20 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmInt count;
 
 		
-		[RequiredField]
 		[ActionSection("Data")]
+		[RequiredField]
 		[Tooltip("The variable to get the index of.")]
 		public FsmVar variable;
 
 		
-		[Tooltip("The index of the item described below")]
 		[ActionSection("Result")]
+		[Tooltip("The index of the item described below")]
 		[UIHint(UIHint.Variable)]
 		public FsmInt indexOf;
 
 		
-		[UIHint(UIHint.FsmEvent)]
 		[Tooltip("Optional Event sent if this arrayList contains that element ( described below)")]
+		[UIHint(UIHint.FsmEvent)]
 		public FsmEvent itemFound;
 
 		

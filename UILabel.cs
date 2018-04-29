@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 
-[AddComponentMenu("NGUI/UI/NGUI Label")]
 [ExecuteInEditMode]
+[AddComponentMenu("NGUI/UI/NGUI Label")]
 public class UILabel : UIWidget
 {
 	
@@ -947,7 +948,11 @@ public class UILabel : UIWidget
 		if (!UILabel.mTexRebuildAdded)
 		{
 			UILabel.mTexRebuildAdded = true;
-			Font.textureRebuilt += UILabel.OnFontChanged;
+			if (UILabel.<>f__mg$cache0 == null)
+			{
+				UILabel.<>f__mg$cache0 = new Action<Font>(UILabel.OnFontChanged);
+			}
+			Font.textureRebuilt += UILabel.<>f__mg$cache0;
 		}
 	}
 
@@ -1053,15 +1058,15 @@ public class UILabel : UIWidget
 					if (this.mOverflow == UILabel.Overflow.ResizeFreely)
 					{
 						this.mCalculatedSize = NGUIText.CalculatePrintedSize(this.mProcessedText);
-						this.mWidth = Mathf.Max(this.minWidth, Mathf.RoundToInt(this.mCalculatedSize.x));
+						this.mWidth = Mathf.Max(this.minWidth, Mathf.CeilToInt(this.mCalculatedSize.x));
 						if (num != 1f)
 						{
-							this.mWidth = Mathf.RoundToInt((float)this.mWidth / num);
+							this.mWidth = Mathf.CeilToInt((float)this.mWidth / num);
 						}
-						this.mHeight = Mathf.Max(this.minHeight, Mathf.RoundToInt(this.mCalculatedSize.y));
+						this.mHeight = Mathf.Max(this.minHeight, Mathf.CeilToInt(this.mCalculatedSize.y));
 						if (num2 != 1f)
 						{
-							this.mHeight = Mathf.RoundToInt((float)this.mHeight / num2);
+							this.mHeight = Mathf.CeilToInt((float)this.mHeight / num2);
 						}
 						if ((this.mWidth & 1) == 1)
 						{
@@ -1075,10 +1080,10 @@ public class UILabel : UIWidget
 					else if (this.mOverflow == UILabel.Overflow.ResizeHeight)
 					{
 						this.mCalculatedSize = NGUIText.CalculatePrintedSize(this.mProcessedText);
-						this.mHeight = Mathf.Max(this.minHeight, Mathf.RoundToInt(this.mCalculatedSize.y));
+						this.mHeight = Mathf.Max(this.minHeight, Mathf.CeilToInt(this.mCalculatedSize.y));
 						if (num2 != 1f)
 						{
-							this.mHeight = Mathf.RoundToInt((float)this.mHeight / num2);
+							this.mHeight = Mathf.CeilToInt((float)this.mHeight / num2);
 						}
 						if ((this.mHeight & 1) == 1)
 						{
@@ -1613,7 +1618,12 @@ public class UILabel : UIWidget
 	{
 		if (UIPopupList.current != null)
 		{
-			this.text = ((!UIPopupList.current.isLocalized) ? UIPopupList.current.value : Localization.Get(UIPopupList.current.value));
+			string text = (!UIPopupList.current.isLocalized) ? UIPopupList.current.value : Localization.Get(UIPopupList.current.value);
+			if (UIPopupList.current.toUpper)
+			{
+				text = text.ToUpper();
+			}
+			this.text = text;
 		}
 	}
 
@@ -1739,19 +1749,19 @@ public class UILabel : UIWidget
 	public UILabel.Crispness keepCrispWhenShrunk = UILabel.Crispness.OnDesktop;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private Font mTrueTypeFont;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private UIFont mFont;
 
 	
 	[Multiline(6)]
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private string mText = string.Empty;
 
 	
@@ -1760,23 +1770,23 @@ public class UILabel : UIWidget
 	private int mFontSize = 16;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private FontStyle mFontStyle;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private NGUIText.Alignment mAlignment;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private bool mEncoding = true;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private int mMaxLineCount;
 
 	
@@ -1795,8 +1805,8 @@ public class UILabel : UIWidget
 	private NGUIText.SymbolStyle mSymbols = NGUIText.SymbolStyle.Normal;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private Vector2 mEffectDistance = Vector2.one;
 
 	
@@ -1805,33 +1815,33 @@ public class UILabel : UIWidget
 	private UILabel.Overflow mOverflow;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private Material mMaterial;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private bool mApplyGradient;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private Color mGradientTop = Color.white;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private Color mGradientBottom = new Color(0.7f, 0.7f, 0.7f);
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private int mSpacingX;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private int mSpacingY;
 
 	
@@ -1845,13 +1855,13 @@ public class UILabel : UIWidget
 	private float mFloatSpacingX;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private float mFloatSpacingY;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private bool mShrinkToFit;
 
 	
@@ -1865,8 +1875,8 @@ public class UILabel : UIWidget
 	private int mMaxLineHeight;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private float mLineWidth;
 
 	
@@ -1928,6 +1938,10 @@ public class UILabel : UIWidget
 
 	
 	private static BetterList<int> mTempIndices = new BetterList<int>();
+
+	
+	[CompilerGenerated]
+	private static Action<Font> <>f__mg$cache0;
 
 	
 	public enum Effect

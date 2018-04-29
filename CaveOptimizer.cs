@@ -16,11 +16,6 @@ public class CaveOptimizer : MonoBehaviour
 		else
 		{
 			CaveOptimizer.CanLoadOnRope = true;
-			this.Common = new CaveData
-			{
-				SceneName = "CaveProps_Streaming",
-				RootName = "CaveProps"
-			};
 		}
 	}
 
@@ -29,18 +24,74 @@ public class CaveOptimizer : MonoBehaviour
 	{
 		if (LocalPlayer.IsInCaves && !LocalPlayer.ActiveAreaInfo.IsLeavingCaves)
 		{
-			if ((CaveOptimizer.CanLoadOnRope || !LocalPlayer.AnimControl.onRope) && !LocalPlayer.IsInEndgame && !this.Common.LoadedOrLoading)
+			if (this.UseSharedCaveScene && (CaveOptimizer.CanLoadOnRope || !LocalPlayer.AnimControl.onRope) && !this.Shared.LoadedOrLoading)
 			{
-				base.StartCoroutine(this.Common.LoadIn());
+				base.StartCoroutine(this.Shared.LoadIn());
+			}
+			if (LocalPlayer.ActiveAreaInfo.CurrentCave == CaveNames.NotInCaves)
+			{
+				for (int i = 0; i < this.Caves.Length; i++)
+				{
+					CaveData caveData = this.Caves[i];
+					if (!LocalPlayer.IsInEndgame || caveData.AllowInEndgame)
+					{
+						if (!caveData.LoadedOrLoading)
+						{
+							base.StartCoroutine(caveData.LoadIn());
+						}
+					}
+					else if (caveData.LoadedOrLoading)
+					{
+						caveData.Unload();
+					}
+				}
+			}
+			else if ((CaveOptimizer.CanLoadOnRope || !LocalPlayer.AnimControl.onRope) && LocalPlayer.ActiveAreaInfo.CurrentCave != this.LastestCave)
+			{
+				CaveOptimizer.CanLoadOnRope = false;
+				if (this.LastestCave != CaveNames.NotInCaves)
+				{
+					for (int j = 0; j < this.Caves.Length; j++)
+					{
+						if (j != (int)LocalPlayer.ActiveAreaInfo.CurrentCave)
+						{
+							this.Caves[j].Unload();
+						}
+					}
+				}
+				if ((CaveNames)this.Caves.Length > LocalPlayer.ActiveAreaInfo.CurrentCave)
+				{
+					CaveData caveData2 = this.Caves[(int)LocalPlayer.ActiveAreaInfo.CurrentCave];
+					if (!LocalPlayer.IsInEndgame || caveData2.AllowInEndgame)
+					{
+						if (!caveData2.LoadedOrLoading)
+						{
+							base.StartCoroutine(caveData2.LoadIn());
+							this.LastestCave = LocalPlayer.ActiveAreaInfo.CurrentCave;
+						}
+					}
+					else if (caveData2.LoadedOrLoading)
+					{
+						caveData2.Unload();
+					}
+				}
 			}
 		}
 		else
 		{
 			bool flag = false;
-			if (this.Common.LoadedOrLoading)
+			if (this.UseSharedCaveScene && this.Shared.LoadedOrLoading)
 			{
-				this.Common.Unload();
+				this.Shared.Unload();
 				flag = true;
+			}
+			for (int k = 0; k < this.Caves.Length; k++)
+			{
+				if (this.Caves[k].LoadedOrLoading)
+				{
+					this.Caves[k].Unload();
+					flag = true;
+				}
 			}
 			if (flag)
 			{
@@ -68,7 +119,10 @@ public class CaveOptimizer : MonoBehaviour
 	public CaveData[] Caves;
 
 	
-	private CaveData Common;
+	public CaveData Shared;
+
+	
+	public bool UseSharedCaveScene;
 
 	
 	private CaveNames LastestCave = CaveNames.NotInCaves;

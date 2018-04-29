@@ -12,9 +12,9 @@ using UnityEngine;
 namespace TheForest.Buildings.Creation
 {
 	
-	[DoNotSerializePublic]
 	[AddComponentMenu("Buildings/Creation/Foundation Architect")]
-	public class FoundationArchitect : MonoBehaviour, IStructureSupport, ICoopStructure, ICoopAnchorStructure
+	[DoNotSerializePublic]
+	public class FoundationArchitect : MonoBehaviour, IStructureSupport, ICoopStructure, ICoopAnchorStructure, IProceduralStructure
 	{
 		
 		private void Awake()
@@ -31,7 +31,6 @@ namespace TheForest.Buildings.Creation
 			this._edges = new List<FoundationArchitect.Edge>();
 			this._foundationRoot = new GameObject("FoundationRoot");
 			this._edgesGo = new List<GameObject>(5);
-			this._logMat = ((!this._wasPlaced && !this._wasBuilt) ? new Material(this._logRenderer.sharedMaterial) : this._logRenderer.sharedMaterial);
 			if (this._multiPointsPositions == null)
 			{
 				this._multiPointsPositions = new List<Vector3>(5);
@@ -99,63 +98,62 @@ namespace TheForest.Buildings.Creation
 			{
 				this._craftStructure.enabled = true;
 			}
-			switch (this._mode)
+			FoundationArchitect.Modes mode = this._mode;
+			if (mode != FoundationArchitect.Modes.Manual && mode != FoundationArchitect.Modes.ManualSlave)
 			{
-			case FoundationArchitect.Modes.Auto:
-				this.UpdateAuto();
-				break;
-			case FoundationArchitect.Modes.Manual:
-			case FoundationArchitect.Modes.ManualSlave:
+				if (mode == FoundationArchitect.Modes.Auto)
+				{
+					this.UpdateAuto();
+				}
+			}
+			else
+			{
 				this.UpdateManual();
-				break;
 			}
 		}
 
 		
 		private void UpdateAuto()
 		{
-			if (this._logMat)
+			Create.CanLock = LocalPlayer.Create.BuildingPlacer.Clear;
+			GameObject foundationRoot = this._foundationRoot;
+			if (this._edges != null)
 			{
-				this._logMat.SetColor("_TintColor", (!LocalPlayer.Create.BuildingPlacer.Clear) ? LocalPlayer.Create.BuildingPlacer.RedMat.GetColor("_TintColor") : LocalPlayer.Create.BuildingPlacer.ClearMat.GetColor("_TintColor"));
-				GameObject foundationRoot = this._foundationRoot;
-				if (this._edges != null)
-				{
-					this._edges.Clear();
-				}
-				if (this._edgesGo != null)
-				{
-					this._edgesGo.Clear();
-				}
-				this._aboveGround = !LocalPlayer.IsInCaves;
-				this.RecalcPointsFromAutoBounds();
-				this._foundationRoot = new GameObject("FoundationRoot");
-				this._foundationRoot.transform.parent = base.transform;
-				this._newPool = new Stack<Transform>();
-				this.CreateStructure(false);
-				this._logPool = this._newPool;
-				UnityEngine.Object.Destroy(foundationRoot);
+				this._edges.Clear();
 			}
+			if (this._edgesGo != null)
+			{
+				this._edgesGo.Clear();
+			}
+			this._aboveGround = !LocalPlayer.IsInCaves;
+			this.RecalcPointsFromAutoBounds();
+			this._foundationRoot = new GameObject("FoundationRoot");
+			this._foundationRoot.transform.parent = base.transform;
+			this._newPool = new Stack<Transform>();
+			this.CreateStructure(false);
+			this._logPool = this._newPool;
+			UnityEngine.Object.Destroy(foundationRoot);
 		}
 
 		
 		private void UpdateManual()
 		{
-			bool flag = this._multiPointsPositions.Count < this._maxPoints;
-			if (flag && this._multiPointsPositions.Count > 0)
+			Create.CanLock = ((this._multiPointsPositions.Count == 0 && LocalPlayer.Create.BuildingPlacer.ClearOfCollision) || (LocalPlayer.Create.BuildingPlacer.OnDynamicClear && this._multiPointsPositions.Count < this._maxPoints));
+			if (Create.CanLock && this._multiPointsPositions.Count > 0)
 			{
 				Vector3 position = base.transform.position;
 				Vector3 b = this._multiPointsPositions[this._multiPointsPositions.Count - 1];
 				position.y = b.y;
 				Vector3 to = position - b;
-				flag = (to.sqrMagnitude > this._minEdgeLength * this._minEdgeLength);
-				if (flag && this._multiPointsPositions.Count > 1)
+				Create.CanLock = (to.sqrMagnitude > this._minEdgeLength * this._minEdgeLength);
+				if (Create.CanLock && this._multiPointsPositions.Count > 1)
 				{
 					Vector3 from = this._multiPointsPositions[this._multiPointsPositions.Count - 2] - this._multiPointsPositions[this._multiPointsPositions.Count - 1];
 					float num = Vector3.Angle(from, to);
-					flag = (flag && num >= this._minAngleBetweenEdges);
+					Create.CanLock = (Create.CanLock && num >= this._minAngleBetweenEdges);
 				}
 			}
-			if (flag && (TheForest.Utils.Input.GetButtonDown("Fire1") || (this._multiPointsPositions.Count >= 2 && TheForest.Utils.Input.GetButtonDown("Build"))))
+			if (Create.CanLock && (TheForest.Utils.Input.GetButtonDown("Fire1") || (this._multiPointsPositions.Count >= 2 && TheForest.Utils.Input.GetButtonDown("Build"))))
 			{
 				bool inClosureSnappingRange = this.InClosureSnappingRange;
 				Vector3 vector;
@@ -192,10 +190,10 @@ namespace TheForest.Buildings.Creation
 					this._edges.RemoveAt(this._edges.Count - 1);
 				}
 				this._multiPointsPositions.RemoveAt(this._multiPointsPositions.Count - 1);
-				flag = false;
+				Create.CanLock = false;
 			}
-			bool flag2 = this._multiPointsPositions.Count > 2 && Vector3.Distance(this._multiPointsPositions.First<Vector3>(), this._multiPointsPositions.Last<Vector3>()) > this._minEdgeLength;
-			if (flag2 && TheForest.Utils.Input.GetButtonDown("Rotate"))
+			bool flag = LocalPlayer.Create.BuildingPlacer.OnDynamicClear && this._multiPointsPositions.Count > 2 && Vector3.Distance(this._multiPointsPositions.First<Vector3>(), this._multiPointsPositions.Last<Vector3>()) > this._minEdgeLength;
+			if (flag && TheForest.Utils.Input.GetButtonDown("Rotate"))
 			{
 				this._multiPointsPositions.Add(this._multiPointsPositions.First<Vector3>());
 				this._newPool = new Stack<Transform>();
@@ -240,17 +238,17 @@ namespace TheForest.Buildings.Creation
 			else
 			{
 				base.GetComponent<Renderer>().enabled = true;
-				base.transform.localScale = new Vector3(1f, Mathf.Abs(this.GetSegmentPointFloorPosition(base.transform.position).y - base.transform.position.y), 1f);
+				base.transform.localScale = new Vector3(1f, Mathf.Abs(this.GetSegmentPointFloorPosition(base.transform.position).y - base.transform.position.y - this._logWidth / 2f), 1f);
 			}
-			bool flag3 = this._multiPointsPositions.Count >= 3 || (this._multiPointsPositions.Count >= 2 && flag);
-			if (LocalPlayer.Create.BuildingPlacer.Clear != flag3)
+			bool flag2 = this._multiPointsPositions.Count >= 3 || (this._multiPointsPositions.Count >= 2 && Create.CanLock);
+			if (LocalPlayer.Create.BuildingPlacer.Clear != flag2)
 			{
-				LocalPlayer.Create.BuildingPlacer.Clear = flag3;
+				LocalPlayer.Create.BuildingPlacer.Clear = flag2;
 			}
-			bool flag4 = this._multiPointsPositions.Count == 0;
-			bool canLock = flag && this._multiPointsPositions.Count > 0;
-			bool canUnlock = !flag4;
-			Scene.HudGui.FoundationConstructionIcons.Show(flag4, false, false, flag3, canLock, canUnlock, false);
+			bool flag3 = this._multiPointsPositions.Count == 0;
+			bool canLock = Create.CanLock && this._multiPointsPositions.Count > 0;
+			bool canUnlock = !flag3;
+			Scene.HudGui.FoundationConstructionIcons.Show(flag3, false, false, flag2, canLock, canUnlock, false);
 		}
 
 		
@@ -338,18 +336,8 @@ namespace TheForest.Buildings.Creation
 				GameObject ghostRoot = this._foundationRoot;
 				GameObject gameObject = ghostRoot;
 				gameObject.name += "Ghost";
-				Transform logGhostPrefab = this._logPrefab;
-				this._logPrefab = Prefabs.Instance.LogBuiltPrefab;
-				this._logPool = new Stack<Transform>();
-				this._newPool = new Stack<Transform>();
-				this._foundationRoot = new GameObject("FoundationRootBuilt");
-				List<GameObject> edgesBuilt = new List<GameObject>();
-				for (int e2 = 0; e2 < this._edges.Count; e2++)
-				{
-					edgesBuilt.Add(this.SpawnEdge(this._edges[e2], e2));
-				}
 				int totalLogs = this._edges.Sum((FoundationArchitect.Edge e) => e._totalLogs);
-				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.<>f__this._logItemId);
+				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.$this._logItemId);
 				if (ri == null)
 				{
 					ri = new Craft_Structure.BuildIngredients();
@@ -358,23 +346,66 @@ namespace TheForest.Buildings.Creation
 					ri._renderers = new GameObject[0];
 					this._craftStructure._requiredIngredients.Insert(0, ri);
 				}
-				List<GameObject> logStacks = new List<GameObject>();
-				foreach (GameObject edgeGo in edgesBuilt)
+				List<GameObject> logs = new List<GameObject>();
+				foreach (GameObject gameObject2 in this._edgesGo)
 				{
-					foreach (object obj in edgeGo.transform)
+					IEnumerator enumerator2 = gameObject2.transform.GetEnumerator();
+					try
 					{
-						Transform segment = (Transform)obj;
-						foreach (object obj2 in segment)
+						while (enumerator2.MoveNext())
 						{
-							Transform logStack = (Transform)obj2;
-							logStack.gameObject.SetActive(false);
-							logStacks.Add(logStack.gameObject);
+							object obj = enumerator2.Current;
+							Transform transform = (Transform)obj;
+							IEnumerator enumerator3 = transform.GetEnumerator();
+							try
+							{
+								while (enumerator3.MoveNext())
+								{
+									object obj2 = enumerator3.Current;
+									Transform transform2 = (Transform)obj2;
+									ri._amount++;
+									IEnumerator enumerator4 = transform2.GetEnumerator();
+									try
+									{
+										while (enumerator4.MoveNext())
+										{
+											object obj3 = enumerator4.Current;
+											Transform transform3 = (Transform)obj3;
+											Renderer componentInChildren = transform3.GetComponentInChildren<Renderer>();
+											componentInChildren.sharedMaterial = Prefabs.Instance.GhostClear;
+											logs.Add(componentInChildren.gameObject);
+										}
+									}
+									finally
+									{
+										IDisposable disposable;
+										if ((disposable = (enumerator4 as IDisposable)) != null)
+										{
+											disposable.Dispose();
+										}
+									}
+								}
+							}
+							finally
+							{
+								IDisposable disposable2;
+								if ((disposable2 = (enumerator3 as IDisposable)) != null)
+								{
+									disposable2.Dispose();
+								}
+							}
+						}
+					}
+					finally
+					{
+						IDisposable disposable3;
+						if ((disposable3 = (enumerator2 as IDisposable)) != null)
+						{
+							disposable3.Dispose();
 						}
 					}
 				}
-				ri._amount += logStacks.Count;
-				ri._renderers = logStacks.AsEnumerable<GameObject>().Reverse<GameObject>().Union(ri._renderers).ToArray<GameObject>();
-				this._logPrefab = logGhostPrefab;
+				ri.AddRuntimeObjects(logs.AsEnumerable<GameObject>().Reverse<GameObject>(), Prefabs.Instance.LogBuiltPrefab.GetComponentInChildren<Renderer>().sharedMaterial);
 				if (this._mode == FoundationArchitect.Modes.Manual)
 				{
 					base.transform.position = this._multiPointsPositions[0];
@@ -496,6 +527,31 @@ namespace TheForest.Buildings.Creation
 			{
 				this._foundationRoot.transform.parent = base.transform;
 			}
+		}
+
+		
+		public Transform SpawnStructure()
+		{
+			GameObject foundationRoot = this._foundationRoot;
+			this._foundationRoot = new GameObject("FoundationRoot");
+			this._foundationRoot.transform.parent = base.transform;
+			if (this._logPool == null)
+			{
+				this._logPool = new Stack<Transform>();
+			}
+			if (this._newPool == null)
+			{
+				this._newPool = new Stack<Transform>();
+			}
+			for (int i = 0; i < this._edges.Count; i++)
+			{
+				this.SpawnEdge(this._edges[i], i);
+			}
+			this._logPool.Clear();
+			this._newPool.Clear();
+			GameObject foundationRoot2 = this._foundationRoot;
+			this._foundationRoot = foundationRoot;
+			return foundationRoot2.transform;
 		}
 
 		
@@ -889,12 +945,16 @@ namespace TheForest.Buildings.Creation
 				Transform transform = this._logPool.Pop();
 				transform.position = position;
 				transform.rotation = rotation;
+				if (!this._wasBuilt && !this._wasPlaced)
+				{
+					transform.GetComponentInChildren<Renderer>().sharedMaterial = Create.CurrentGhostMat;
+				}
 				return transform;
 			}
-			Transform transform2 = (Transform)UnityEngine.Object.Instantiate(this._logPrefab, position, rotation);
-			if (!this._wasBuilt && !this._wasPlaced && this._mode == FoundationArchitect.Modes.Auto)
+			Transform transform2 = UnityEngine.Object.Instantiate<Transform>(this._logPrefab, position, rotation);
+			if (!this._wasBuilt && !this._wasPlaced)
 			{
-				transform2.GetComponentInChildren<Renderer>().sharedMaterial = this._logMat;
+				transform2.GetComponentInChildren<Renderer>().sharedMaterial = Create.CurrentGhostMat;
 			}
 			return transform2;
 		}
@@ -1037,16 +1097,6 @@ namespace TheForest.Buildings.Creation
 
 		
 		
-		public Material LogMat
-		{
-			get
-			{
-				return this._logMat;
-			}
-		}
-
-		
-		
 		public GameObject FoundationRoot
 		{
 			get
@@ -1089,9 +1139,6 @@ namespace TheForest.Buildings.Creation
 			}
 			return this._anchors[anchor];
 		}
-
-		
-		private const float MINIMUM_AUDIBLE_WIND_HEIGHT = 2f;
 
 		
 		public FoundationArchitect.Modes _mode;
@@ -1193,9 +1240,6 @@ namespace TheForest.Buildings.Creation
 		private Stack<Transform> _newPool;
 
 		
-		private Material _logMat;
-
-		
 		private List<StructureAnchor> _anchors = new List<StructureAnchor>();
 
 		
@@ -1203,6 +1247,13 @@ namespace TheForest.Buildings.Creation
 
 		
 		public FoundationArchitect.SegmentTierValidator SegmentTierValidation = (int segmentNum, int tierNum) => true;
+
+		
+		private const float MINIMUM_AUDIBLE_WIND_HEIGHT = 2f;
+
+		
+		
+		public delegate bool SegmentTierValidator(int segmentNum, int tierNum);
 
 		
 		public enum Modes
@@ -1268,9 +1319,5 @@ namespace TheForest.Buildings.Creation
 			
 			public int _totalLogs;
 		}
-
-		
-		
-		public delegate bool SegmentTierValidator(int segmentNum, int tierNum);
 	}
 }

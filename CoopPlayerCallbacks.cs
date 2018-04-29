@@ -7,11 +7,13 @@ using TheForest.Items.Core;
 using TheForest.Items.Inventory;
 using TheForest.Items.Special;
 using TheForest.Items.World;
+using TheForest.Player.Clothing;
 using TheForest.Tools;
 using TheForest.Utils;
 using UdpKit;
 using UniLinq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 [BoltGlobalBehaviour]
@@ -20,7 +22,8 @@ public class CoopPlayerCallbacks : GlobalEventListener
 	
 	public override void BoltStartBegin()
 	{
-		CoopVoice.VoiceChannel = BoltNetwork.CreateStreamChannel("Voice", UdpChannelMode.Unreliable, 1);
+		CoopVoice.VoiceChannel = BoltNetwork.CreateStreamChannel(CoopPlayerCallbacks.CHANNEL_VOICE, UdpChannelMode.Unreliable, 1);
+		Debug.Log("CoopPlayerCallbacks::BoltStartBegin CoopVoice.VoiceChannel:" + CoopVoice.VoiceChannel);
 	}
 
 	
@@ -58,7 +61,7 @@ public class CoopPlayerCallbacks : GlobalEventListener
 	
 	public override void OnEvent(Chop evnt)
 	{
-		if (evnt.Target)
+		if (evnt.Target && this.ValidateSender(evnt, SenderTypes.Any))
 		{
 			evnt.Target.GetComponentInChildren<chopEnemy>().triggerChop();
 		}
@@ -67,19 +70,25 @@ public class CoopPlayerCallbacks : GlobalEventListener
 	
 	public override void OnEvent(FauxWeaponHit evnt)
 	{
-		GameObject original = (GameObject)Resources.Load("CoopFauxWeapon", typeof(GameObject));
-		GameObject gameObject = (GameObject)UnityEngine.Object.Instantiate(original, evnt.Position, Quaternion.identity);
-		gameObject.GetComponent<CoopFauxWeapon>().Damage = evnt.Damage;
+		if (this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			GameObject original = (GameObject)Resources.Load("CoopFauxWeapon", typeof(GameObject));
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(original, evnt.Position, Quaternion.identity);
+			gameObject.GetComponent<CoopFauxWeapon>().Damage = evnt.Damage;
+		}
 	}
 
 	
 	public override void OnEvent(OpenSuitcase evnt)
 	{
-		foreach (Collider collider in Physics.OverlapSphere(evnt.Position, 0.5f))
+		if (this.ValidateSender(evnt, SenderTypes.Any))
 		{
-			if (collider.gameObject.CompareTag("suitCase"))
+			foreach (Collider collider in Physics.OverlapSphere(evnt.Position, 0.5f))
 			{
-				collider.SendMessage("Hit", evnt.Damage);
+				if (collider.gameObject.CompareTag("suitCase"))
+				{
+					collider.SendMessage("Hit", evnt.Damage);
+				}
 			}
 		}
 	}
@@ -109,29 +118,57 @@ public class CoopPlayerCallbacks : GlobalEventListener
 	
 	public override void OnEvent(ItemRemoveFromPlayer evnt)
 	{
-		Debug.Log("RECEIVED REMOVE ITEM: " + evnt.ItemId);
-		if (evnt.ItemId == 0)
+		if (this.ValidateSender(evnt, SenderTypes.Server))
 		{
-			LocalPlayer.GameObject.GetComponentInChildren<LogControler>().RemoveLog(false);
-		}
-		else
-		{
-			LocalPlayer.Inventory.RemoveItem(evnt.ItemId, 1, false, true);
+			if (evnt.ItemId == 0)
+			{
+				LocalPlayer.GameObject.GetComponentInChildren<LogControler>().RemoveLog(false);
+			}
+			else
+			{
+				LocalPlayer.Inventory.RemoveItem(evnt.ItemId, 1, false, true);
+			}
 		}
 	}
 
 	
 	public override void OnEvent(DisablePickup evnt)
 	{
-		if (evnt.Entity && evnt.Entity.isAttached && evnt.Entity.isOwner)
+		if (evnt.Entity && this.ValidateSender(evnt, SenderTypes.Any) && evnt.Entity.isAttached && evnt.Entity.isOwner)
 		{
 			evnt.Entity.SendMessage("SetPickupUsed", evnt.Num, SendMessageOptions.DontRequireReceiver);
 		}
 	}
 
 	
+	public override void OnEvent(TakeClothingOutfit evnt)
+	{
+		if (this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			if (evnt.target == null)
+			{
+				return;
+			}
+			if (!evnt.target.isOwner)
+			{
+				return;
+			}
+			ClothingPickup componentInChildren = evnt.target.GetComponentInChildren<ClothingPickup>(true);
+			if (componentInChildren == null)
+			{
+				return;
+			}
+			componentInChildren.DoBoltTaken();
+		}
+	}
+
+	
 	public override void OnEvent(DestroyPickUp evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.PickUpEntity)
 		{
 			if (evnt.PickUpEntity.isAttached)
@@ -190,13 +227,13 @@ public class CoopPlayerCallbacks : GlobalEventListener
 		else if (evnt.PickUpPlayer.isOwner)
 		{
 			ItemRemoveFromPlayer itemRemoveFromPlayer = ItemRemoveFromPlayer.Create(GlobalTargets.OnlySelf);
-			itemRemoveFromPlayer.ItemId = itemRemoveFromPlayer.ItemId;
+			itemRemoveFromPlayer.ItemId = evnt.ItemId;
 			itemRemoveFromPlayer.Send();
 		}
 		else
 		{
 			ItemRemoveFromPlayer itemRemoveFromPlayer2 = ItemRemoveFromPlayer.Create(evnt.PickUpPlayer.source);
-			itemRemoveFromPlayer2.ItemId = itemRemoveFromPlayer2.ItemId;
+			itemRemoveFromPlayer2.ItemId = evnt.ItemId;
 			itemRemoveFromPlayer2.Send();
 		}
 	}
@@ -204,6 +241,10 @@ public class CoopPlayerCallbacks : GlobalEventListener
 	
 	public override void OnEvent(FmodOneShot evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (FMOD_StudioSystem.instance && evnt.EventPath != -1)
 		{
 			string text = CoopAudioEventDb.FindEvent(evnt.EventPath);
@@ -217,6 +258,10 @@ public class CoopPlayerCallbacks : GlobalEventListener
 	
 	public override void OnEvent(FmodOneShotParameter evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (FMOD_StudioSystem.instance && evnt.EventPath != -1)
 		{
 			string text = CoopAudioEventDb.FindEvent(evnt.EventPath);
@@ -243,7 +288,7 @@ public class CoopPlayerCallbacks : GlobalEventListener
 	
 	public override void OnEvent(PlayerHitByEnemey evnt)
 	{
-		if (evnt.Target && evnt.Target.isOwner)
+		if (this.ValidateSender(evnt, SenderTypes.Server) && evnt.Target && evnt.Target.isOwner)
 		{
 			if (evnt.SharkHit)
 			{
@@ -260,33 +305,30 @@ public class CoopPlayerCallbacks : GlobalEventListener
 	{
 		if (CoopPeerStarter.Dedicated && evnt.RaisedBy == BoltNetwork.server && evnt.Sender.IsZero)
 		{
-			Scene.HudGui.Chatbox.AddLine(null, evnt.Message, true);
+			TheForest.Utils.Scene.HudGui.Chatbox.AddLine(null, evnt.Message, true);
 		}
-		else
+		else if (this.ValidateSender(evnt, SenderTypes.Any))
 		{
-			Scene.HudGui.Chatbox.AddLine(new NetworkId?(evnt.Sender), evnt.Message, false);
+			TheForest.Utils.Scene.HudGui.Chatbox.AddLine(new NetworkId?(evnt.Sender), evnt.Message, false);
 		}
 	}
 
 	
 	public override void EntityAttached(BoltEntity arg)
 	{
-		if (arg.StateIs<IBuildMissionState>())
-		{
-		}
 		if (arg.StateIs<IPlayerState>())
 		{
 			if (arg.isOwner)
 			{
 				DebugInfo.Ignore(arg);
-				Scene.HudGui.Chatbox.RegisterPlayer("You", arg.networkId);
+				TheForest.Utils.Scene.HudGui.Chatbox.RegisterPlayer("You", arg.networkId);
 			}
 			else
 			{
 				arg.source.UserData = arg;
 				arg.GetState<IPlayerState>().AddCallback("name", delegate
 				{
-					Scene.HudGui.Chatbox.RegisterPlayer(arg.GetState<IPlayerState>().name, arg.networkId);
+					TheForest.Utils.Scene.HudGui.Chatbox.RegisterPlayer(arg.GetState<IPlayerState>().name, arg.networkId);
 				});
 			}
 		}
@@ -295,13 +337,17 @@ public class CoopPlayerCallbacks : GlobalEventListener
 	
 	public override void OnEvent(RequestDestroy evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.Entity && evnt.Entity.isAttached && evnt.Entity.isOwner && (evnt.Entity.StateIs<ICookingState>() || evnt.Entity.GetComponentInChildren<ShelterTrigger>()))
 		{
-			for (int i = 0; i < Scene.SceneTracker.allPlayerEntities.Count; i++)
+			for (int i = 0; i < TheForest.Utils.Scene.SceneTracker.allPlayerEntities.Count; i++)
 			{
-				if (Scene.SceneTracker.allPlayerEntities[i].source == evnt.RaisedBy)
+				if (TheForest.Utils.Scene.SceneTracker.allPlayerEntities[i].source == evnt.RaisedBy)
 				{
-					if (Vector3.Distance(Scene.SceneTracker.allPlayerEntities[i].transform.position, evnt.Entity.transform.position) < 20f)
+					if (Vector3.Distance(TheForest.Utils.Scene.SceneTracker.allPlayerEntities[i].transform.position, evnt.Entity.transform.position) < 20f)
 					{
 						evnt.Entity.transform.parent = null;
 						BoltNetwork.Destroy(evnt.Entity);
@@ -324,7 +370,11 @@ public class CoopPlayerCallbacks : GlobalEventListener
 		{
 			try
 			{
-				Scene.HudGui.Chatbox.UnregisterPlayer(arg.networkId);
+				if (arg.source.UserData as BoltEntity == arg)
+				{
+					arg.source.UserData = null;
+				}
+				TheForest.Utils.Scene.HudGui.Chatbox.UnregisterPlayer(arg.networkId);
 			}
 			catch
 			{
@@ -356,7 +406,7 @@ public class CoopPlayerCallbacks : GlobalEventListener
 			BoltLauncher.Shutdown();
 			if (LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.EndCrash && !Application.loadedLevelName.ToLower().Contains("epilogue"))
 			{
-				Application.LoadLevel("TitleScene");
+				SceneManager.LoadScene("TitleScene", LoadSceneMode.Single);
 			}
 		}
 	}
@@ -377,6 +427,10 @@ public class CoopPlayerCallbacks : GlobalEventListener
 	
 	public override void OnEvent(HitTree evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		CoopTreeId coopTreeId = CoopPlayerCallbacks.AllTrees.FirstOrDefault((CoopTreeId x) => x.Id == evnt.TreeId);
 		if (coopTreeId)
 		{
@@ -399,7 +453,11 @@ public class CoopPlayerCallbacks : GlobalEventListener
 	
 	public override void OnEvent(PlayerHealed evnt)
 	{
-		if (evnt.HealTarget == LocalPlayer.Entity && !Scene.Cams.DeadCam.activeSelf)
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
+		if (evnt.HealTarget == LocalPlayer.Entity && !TheForest.Utils.Scene.Cams.DeadCam.activeSelf)
 		{
 			LocalPlayer.Stats.HealedMp();
 		}
@@ -508,7 +566,7 @@ public class CoopPlayerCallbacks : GlobalEventListener
 		if (BoltNetwork.isClient && LocalPlayer.Inventory.CurrentView == PlayerInventory.PlayerViews.Sleep)
 		{
 			Debug.Log("Go to sleep");
-			Scene.HudGui.MpSleepLabel.gameObject.SetActive(false);
+			TheForest.Utils.Scene.HudGui.MpSleepLabel.gameObject.SetActive(false);
 			LocalPlayer.Inventory.CurrentView = PlayerInventory.PlayerViews.World;
 			if (!evnt.Aborted)
 			{
@@ -528,7 +586,7 @@ public class CoopPlayerCallbacks : GlobalEventListener
 			{
 				LocalPlayer.Stats.GoToSleepFake();
 			}
-			Scene.HudGui.Grid.repositionNow = true;
+			TheForest.Utils.Scene.HudGui.Grid.repositionNow = true;
 		}
 	}
 
@@ -537,4 +595,7 @@ public class CoopPlayerCallbacks : GlobalEventListener
 
 	
 	private static CoopTreeId[] _allTrees;
+
+	
+	public static string CHANNEL_VOICE = "Voice";
 }

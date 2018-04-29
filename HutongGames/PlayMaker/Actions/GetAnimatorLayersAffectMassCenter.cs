@@ -63,10 +63,10 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmOwnerDefault gameObject;
 
 		
-		[UIHint(UIHint.Variable)]
-		[Tooltip("If true, additionnal layers affects the mass center")]
 		[ActionSection("Results")]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("If true, additionnal layers affects the mass center")]
 		public FsmBool affectMassCenter;
 
 		

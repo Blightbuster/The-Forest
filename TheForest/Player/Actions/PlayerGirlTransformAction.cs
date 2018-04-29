@@ -15,9 +15,9 @@ namespace TheForest.Player.Actions
 		{
 			if (!this.spectator)
 			{
-				setupEndBoss ev = setupEndBoss.Create(GlobalTargets.Everyone);
-				ev.disableBossTrigger = true;
-				ev.Send();
+				setupEndBoss setupEndBoss = setupEndBoss.Create(GlobalTargets.Everyone);
+				setupEndBoss.disableBossTrigger = true;
+				setupEndBoss.Send();
 			}
 			Vector3 fixLocalPos = new Vector3(0f, -2.344841f, 0f);
 			yield return new WaitForSeconds(0.5f);
@@ -128,10 +128,10 @@ namespace TheForest.Player.Actions
 					doScaleHack = true;
 					if (BoltNetwork.isClient && !this.spectator)
 					{
-						setupEndBoss ev2 = setupEndBoss.Create(GlobalTargets.OnlyServer);
-						ev2.target = this.girlAnimator.transform.parent.GetComponent<BoltEntity>();
-						ev2.scaleHack = true;
-						ev2.Send();
+						setupEndBoss setupEndBoss2 = setupEndBoss.Create(GlobalTargets.OnlyServer);
+						setupEndBoss2.target = this.girlAnimator.transform.parent.GetComponent<BoltEntity>();
+						setupEndBoss2.scaleHack = true;
+						setupEndBoss2.Send();
 					}
 				}
 				this.currState2 = this.ActorAnimator.GetCurrentAnimatorStateInfo(2);
@@ -139,16 +139,16 @@ namespace TheForest.Player.Actions
 			}
 			if (!BoltNetwork.isClient)
 			{
-				creepyAnimatorControl cac = this.girlAnimator.transform.parent.GetComponentsInChildren<creepyAnimatorControl>(true)[0];
-				cac.enabled = true;
-				cac.activateGirlMutant();
+				creepyAnimatorControl creepyAnimatorControl = this.girlAnimator.transform.parent.GetComponentsInChildren<creepyAnimatorControl>(true)[0];
+				creepyAnimatorControl.enabled = true;
+				creepyAnimatorControl.activateGirlMutant();
 			}
 			if (BoltNetwork.isClient && !this.spectator)
 			{
-				setupEndBoss ev3 = setupEndBoss.Create(GlobalTargets.OnlyServer);
-				ev3.target = this.girlAnimator.transform.parent.GetComponent<BoltEntity>();
-				ev3.activateBoss = true;
-				ev3.Send();
+				setupEndBoss setupEndBoss3 = setupEndBoss.Create(GlobalTargets.OnlyServer);
+				setupEndBoss3.target = this.girlAnimator.transform.parent.GetComponent<BoltEntity>();
+				setupEndBoss3.activateBoss = true;
+				setupEndBoss3.Send();
 			}
 			if (!this.spectator)
 			{
@@ -165,6 +165,7 @@ namespace TheForest.Player.Actions
 					yield return null;
 				}
 				this.unlockPlayerParams();
+				LocalPlayer.Inventory.UnlockEquipmentSlot(Item.EquipmentSlot.LeftHand);
 				LocalPlayer.FpCharacter.enabled = true;
 				LocalPlayer.ScriptSetup.pmControl.enabled = true;
 				LocalPlayer.ScriptSetup.bodyCollisionGo.SetActive(true);
@@ -203,6 +204,7 @@ namespace TheForest.Player.Actions
 					yield return null;
 				}
 			}
+			LocalPlayer.Inventory.UnlockEquipmentSlot(Item.EquipmentSlot.LeftHand);
 			yield break;
 		}
 
@@ -275,6 +277,7 @@ namespace TheForest.Player.Actions
 		
 		private void unlockPlayerParams()
 		{
+			LocalPlayer.Inventory.UnlockEquipmentSlot(Item.EquipmentSlot.LeftHand);
 			LocalPlayer.FpCharacter.allowFallDamage = true;
 			LocalPlayer.FpCharacter.Locked = false;
 			LocalPlayer.FpCharacter.CanJump = true;

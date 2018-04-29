@@ -25,7 +25,7 @@ public class soundDetect : MonoBehaviour
 	
 	private IEnumerator setupSoundEvent()
 	{
-		this.spawnedSound = (UnityEngine.Object.Instantiate(this.soundDetectGo.transform, base.transform.position, base.transform.rotation) as Transform);
+		this.spawnedSound = UnityEngine.Object.Instantiate<Transform>(this.soundDetectGo.transform, base.transform.position, base.transform.rotation);
 		this.soundCollider = this.spawnedSound.GetComponent<SphereCollider>();
 		this.spawnedSound.SendMessage("setRange", this.soundRange, SendMessageOptions.DontRequireReceiver);
 		if (this.followParent)

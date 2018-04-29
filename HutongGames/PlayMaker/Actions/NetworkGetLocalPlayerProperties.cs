@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Get the local network player properties")]
 	[ActionCategory(ActionCategory.Network)]
+	[Tooltip("Get the local network player properties")]
 	public class NetworkGetLocalPlayerProperties : FsmStateAction
 	{
 		
@@ -30,8 +30,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("The IP address of this player.")]
+		[UIHint(UIHint.Variable)]
 		public FsmString IpAddress;
 
 		
@@ -40,8 +40,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmInt port;
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("The GUID for this player, used when connecting with NAT punchthrough.")]
+		[UIHint(UIHint.Variable)]
 		public FsmString guid;
 
 		

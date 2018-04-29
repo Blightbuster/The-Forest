@@ -332,6 +332,9 @@ public class Cheats : MonoBehaviour
 	public static bool DebugConsole;
 
 	
+	public static bool UnlimitedHairspray;
+
+	
 	public class CheatsBridge : ICheatsBridge
 	{
 		
@@ -362,6 +365,12 @@ public class Cheats : MonoBehaviour
 		public void SetNoSurvival(bool onoff)
 		{
 			Cheats.NoSurvival = onoff;
+		}
+
+		
+		public void SetUnlimitedHairspray(bool onoff)
+		{
+			Cheats.UnlimitedHairspray = onoff;
 		}
 	}
 }

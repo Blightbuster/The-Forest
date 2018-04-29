@@ -1,10 +1,8 @@
 ﻿using System;
-using ModAPI;
 using TheForest.Buildings.Creation;
 using TheForest.Buildings.World;
 using TheForest.Items.Inventory;
 using TheForest.Utils;
-using UltimateCheatmenu;
 using UnityEngine;
 
 
@@ -17,7 +15,7 @@ public class KeepAboveTerrain : MonoBehaviour
 	{
 		get
 		{
-			return this._clearInternal && this._clearDynamicBuilding && this._clearSmallStructures && this.ClearOfCollision;
+			return this._clearInternal && this._clearDynamicBuilding && this._clearSmallStructures && this.ClearOfCollision && this._clearPreventConstruction;
 		}
 		set
 		{
@@ -32,11 +30,21 @@ public class KeepAboveTerrain : MonoBehaviour
 
 	
 	
+	public bool OnDynamicClear
+	{
+		get
+		{
+			return this._clearDynamicBuilding;
+		}
+	}
+
+	
+	
 	public bool OnDynamic
 	{
 		get
 		{
-			return this.shouldDoDynamicBuildingCheck && this._clearDynamicBuilding;
+			return this._shouldDoDynamicBuildingCheck && this._clearDynamicBuilding;
 		}
 	}
 
@@ -111,7 +119,7 @@ public class KeepAboveTerrain : MonoBehaviour
 	public Func<Transform, bool> ValidateAnchor { get; set; }
 
 	
-	private void __Awake__Original()
+	private void Awake()
 	{
 		this.startLocalPosition = base.transform.localPosition;
 		this.activeTerrain = Terrain.activeTerrain;
@@ -135,12 +143,12 @@ public class KeepAboveTerrain : MonoBehaviour
 		this.IgnoreLookAtCollision = false;
 		if (LocalPlayer.Create.CurrentBlueprint != null)
 		{
-			this.FloorLayersFinal = ((!LocalPlayer.Create.CurrentBlueprint._allowParentingToDynamic) ? this.FloorLayers : this.DynFloorLayers);
+			this.FloorLayersFinal = (this.DynFloorLayers | this.FloorLayers);
 		}
 	}
 
 	
-	private void __Update__Original()
+	private void Update()
 	{
 		if (!TheForest.Utils.Input.IsGamePad)
 		{
@@ -171,16 +179,17 @@ public class KeepAboveTerrain : MonoBehaviour
 		if (!this.Locked && LocalPlayer.Inventory.CurrentView == PlayerInventory.PlayerViews.World)
 		{
 			Vector3 vector = base.transform.parent.TransformPoint(this.startLocalPosition);
-			this.shouldDoSmallStructureCheck = false;
-			this.shouldDoDynamicBuildingCheck = false;
+			this._shouldDoSmallStructureCheck = false;
+			this._shouldDoDynamicBuildingCheck = false;
 			this._lockDynamicBuilding = false;
-			Vector3 to = this.boxCollider.center - this.boxCollider.size / 2f;
+			this._shouldDoPreventConstructioCheck = false;
+			Vector3 b = this.boxCollider.center - this.boxCollider.size / 2f;
 			Vector3 vector2 = this.boxCollider.center + this.boxCollider.size / 2f;
 			float cornersRaycastDistanceAlpha = LocalPlayer.Create.CurrentBlueprint._cornersRaycastDistanceAlpha;
-			Vector3 vector3 = base.transform.TransformPoint(Vector3.Lerp(this.boxCollider.center, to, cornersRaycastDistanceAlpha));
-			Vector3 vector4 = base.transform.TransformPoint(Vector3.Lerp(this.boxCollider.center, new Vector3(to.x, to.y, vector2.z), cornersRaycastDistanceAlpha));
-			Vector3 vector5 = base.transform.TransformPoint(Vector3.Lerp(this.boxCollider.center, new Vector3(vector2.x, to.y, to.z), cornersRaycastDistanceAlpha));
-			Vector3 vector6 = base.transform.TransformPoint(Vector3.Lerp(this.boxCollider.center, new Vector3(vector2.x, to.y, vector2.z), cornersRaycastDistanceAlpha));
+			Vector3 vector3 = base.transform.TransformPoint(Vector3.Lerp(this.boxCollider.center, b, cornersRaycastDistanceAlpha));
+			Vector3 vector4 = base.transform.TransformPoint(Vector3.Lerp(this.boxCollider.center, new Vector3(b.x, b.y, vector2.z), cornersRaycastDistanceAlpha));
+			Vector3 vector5 = base.transform.TransformPoint(Vector3.Lerp(this.boxCollider.center, new Vector3(vector2.x, b.y, b.z), cornersRaycastDistanceAlpha));
+			Vector3 vector6 = base.transform.TransformPoint(Vector3.Lerp(this.boxCollider.center, new Vector3(vector2.x, b.y, vector2.z), cornersRaycastDistanceAlpha));
 			this.sinkHolePos.y = base.transform.position.y;
 			this.IsInSinkHole = (Vector3.Distance(this.sinkHolePos, vector) < 190f);
 			float maxDistance = (!this.IsInSinkHole) ? this.maxBuildingHeight : (this.maxBuildingHeight + 300f);
@@ -247,17 +256,17 @@ public class KeepAboveTerrain : MonoBehaviour
 					}
 					this.ParentingRulesLookup();
 				}
-				Vector3 b = new Vector3(1f, 0f, 1f);
-				float num3 = Vector3.Distance(Vector3.Scale(a, b), Vector3.Scale(LocalPlayer.Transform.position, b));
-				float num4 = Vector3.Distance(Vector3.Scale(base.transform.position, b), Vector3.Scale(LocalPlayer.Transform.position, b));
+				Vector3 b2 = new Vector3(1f, 0f, 1f);
+				float num3 = Vector3.Distance(Vector3.Scale(a, b2), Vector3.Scale(LocalPlayer.Transform.position, b2));
+				float num4 = Vector3.Distance(Vector3.Scale(base.transform.position, b2), Vector3.Scale(LocalPlayer.Transform.position, b2));
 				if (!Mathf.Approximately(num3, num4))
 				{
-					Vector3 b2 = LocalPlayer.Transform.forward * (num3 - num4);
-					base.transform.position += b2;
-					vector3 += b2;
-					vector4 += b2;
-					vector5 += b2;
-					vector6 += b2;
+					Vector3 b3 = LocalPlayer.Transform.forward * (num3 - num4);
+					base.transform.position += b3;
+					vector3 += b3;
+					vector4 += b3;
+					vector5 += b3;
+					vector6 += b3;
 				}
 			}
 			RaycastHit? raycastHit = null;
@@ -283,6 +292,11 @@ public class KeepAboveTerrain : MonoBehaviour
 				}
 				this.ParentingRulesLookup();
 			}
+			else if (LocalPlayer.IsInEndgame)
+			{
+				vector3.y = LocalPlayer.Transform.position.y - 2f;
+				this.SetColliding();
+			}
 			else
 			{
 				vector3.y = this.activeTerrain.SampleHeight(vector3) + this.activeTerrain.transform.position.y;
@@ -303,6 +317,11 @@ public class KeepAboveTerrain : MonoBehaviour
 					num5++;
 				}
 				this.ParentingRulesLookup();
+			}
+			else if (LocalPlayer.IsInEndgame)
+			{
+				vector4.y = LocalPlayer.Transform.position.y - 2f;
+				this.SetColliding();
 			}
 			else
 			{
@@ -325,6 +344,11 @@ public class KeepAboveTerrain : MonoBehaviour
 				}
 				this.ParentingRulesLookup();
 			}
+			else if (LocalPlayer.IsInEndgame)
+			{
+				vector5.y = LocalPlayer.Transform.position.y - 2f;
+				this.SetColliding();
+			}
 			else
 			{
 				vector5.y = this.activeTerrain.SampleHeight(vector5) + this.activeTerrain.transform.position.y;
@@ -345,6 +369,11 @@ public class KeepAboveTerrain : MonoBehaviour
 					num5++;
 				}
 				this.ParentingRulesLookup();
+			}
+			else if (LocalPlayer.IsInEndgame)
+			{
+				vector6.y = LocalPlayer.Transform.position.y - 2f;
+				this.SetColliding();
 			}
 			else
 			{
@@ -377,6 +406,11 @@ public class KeepAboveTerrain : MonoBehaviour
 					num5++;
 				}
 				this.ParentingRulesLookup();
+			}
+			else if (LocalPlayer.IsInEndgame)
+			{
+				num6 = LocalPlayer.Transform.position.y - 2f;
+				this.SetColliding();
 			}
 			else
 			{
@@ -478,8 +512,8 @@ public class KeepAboveTerrain : MonoBehaviour
 				this.SetNotclear();
 			}
 			Vector3 a2 = Vector3.Cross(vector4 - vector3, vector5 - vector3);
-			Vector3 b3 = Vector3.Cross(vector5 - vector6, vector4 - vector6);
-			this.curNormal = Vector3.Normalize((a2 + b3) / 2f);
+			Vector3 b4 = Vector3.Cross(vector5 - vector6, vector4 - vector6);
+			this.curNormal = Vector3.Normalize((a2 + b4) / 2f);
 			this.MinHeight = Mathf.Min(new float[]
 			{
 				vector3.y,
@@ -534,19 +568,11 @@ public class KeepAboveTerrain : MonoBehaviour
 			{
 				if (this.Locked && this.ClearOfCollision)
 				{
-					if (this.MyRender)
-					{
-						this.MyRender.material = ((!LocalPlayer.Create.CurrentBlueprint._useFlatMeshMaterial) ? this.ClearMat : this.ClearMatFlatMesh);
-					}
-					this.Clear = true;
+					this.SetClear();
 				}
 				else
 				{
-					if (this.MyRender)
-					{
-						this.MyRender.material = this.RedMat;
-					}
-					this.Clear = false;
+					this.SetNotclear();
 				}
 			}
 		}
@@ -561,19 +587,34 @@ public class KeepAboveTerrain : MonoBehaviour
 	
 	private void OnTriggerStay(Collider other)
 	{
-		if (!this.IgnoreLookAtCollision && ((other.gameObject.CompareTag("Tree") && !this.TreeStructure) || (other.gameObject.CompareTag("Block") && !this.IgnoreBlock) || (other.gameObject.CompareTag("jumpObject") && !this.TreeStructure) || this.MatchingExclusionGroup(other, true)))
+		if (!this.IgnoreLookAtCollision && !other.isTrigger)
 		{
-			this.SetColliding();
-			this.SetNotclear();
+			if ((other.gameObject.CompareTag("Tree") && !this.TreeStructure) || (other.gameObject.CompareTag("Block") && !this.IgnoreBlock) || (other.gameObject.CompareTag("jumpObject") && !this.TreeStructure) || this.MatchingExclusionGroup(other, true))
+			{
+				this.SetColliding();
+				this.SetNotclear();
+			}
+			else if (other.GetComponentInParent<PreventConstruction>())
+			{
+				this.SetColliding();
+				this.SetNotclear();
+			}
 		}
 	}
 
 	
 	private void OnTriggerExit(Collider other)
 	{
-		if (!this.IgnoreLookAtCollision && ((other.gameObject.CompareTag("Tree") && !this.TreeStructure) || (other.gameObject.CompareTag("Block") && !this.IgnoreBlock) || (other.gameObject.CompareTag("jumpObject") && !this.TreeStructure) || this.MatchingExclusionGroup(other, false)))
+		if (!this.IgnoreLookAtCollision && !other.isTrigger)
 		{
-			this.SetClear();
+			if ((other.gameObject.CompareTag("Tree") && !this.TreeStructure) || (other.gameObject.CompareTag("Block") && !this.IgnoreBlock) || (other.gameObject.CompareTag("jumpObject") && !this.TreeStructure) || this.MatchingExclusionGroup(other, false))
+			{
+				this.SetClear();
+			}
+			else if (other.GetComponentInParent<PreventConstruction>())
+			{
+				this.SetClear();
+			}
 		}
 	}
 
@@ -621,21 +662,25 @@ public class KeepAboveTerrain : MonoBehaviour
 		{
 			if (this.hit.collider.GetComponentInParent<DynamicBuilding>())
 			{
-				this.shouldDoDynamicBuildingCheck = true;
+				this._shouldDoDynamicBuildingCheck = true;
 			}
 			else
 			{
 				Rigidbody componentInParent = this.hit.collider.GetComponentInParent<Rigidbody>();
 				if ((componentInParent && !componentInParent.isKinematic) || this.hit.collider.CompareTag("NoConstruction") || (this.hit.collider.transform.parent && this.hit.collider.transform.parent.CompareTag("NoConstruction")))
 				{
-					this.shouldDoDynamicBuildingCheck = true;
+					this._shouldDoDynamicBuildingCheck = true;
 				}
 				this._lockDynamicBuilding = true;
 			}
 		}
 		if (!LocalPlayer.Create.CurrentBlueprint._isSmall && this.hit.collider.GetComponentInParent<SmallStructureSupport>())
 		{
-			this.shouldDoSmallStructureCheck = true;
+			this._shouldDoSmallStructureCheck = true;
+		}
+		if (!this._shouldDoPreventConstructioCheck && this.hit.collider.GetComponentInParent<PreventConstruction>())
+		{
+			this._shouldDoPreventConstructioCheck = true;
 		}
 	}
 
@@ -643,7 +688,7 @@ public class KeepAboveTerrain : MonoBehaviour
 	private void ParentingRulesCheck()
 	{
 		bool clear = this.Clear;
-		if (this.shouldDoDynamicBuildingCheck)
+		if (this._shouldDoDynamicBuildingCheck)
 		{
 			this._clearDynamicBuilding = (LocalPlayer.Create.CurrentBlueprint._allowParentingToDynamic && !this._lockDynamicBuilding);
 		}
@@ -651,13 +696,21 @@ public class KeepAboveTerrain : MonoBehaviour
 		{
 			this._clearDynamicBuilding = true;
 		}
-		if (this.shouldDoSmallStructureCheck)
+		if (this._shouldDoSmallStructureCheck)
 		{
 			this._clearSmallStructures = LocalPlayer.Create.CurrentBlueprint._isSmall;
 		}
 		else
 		{
 			this._clearSmallStructures = true;
+		}
+		if (this._shouldDoPreventConstructioCheck)
+		{
+			this._clearPreventConstruction = false;
+		}
+		else
+		{
+			this._clearPreventConstruction = true;
 		}
 		if (clear != this.Clear)
 		{
@@ -688,7 +741,7 @@ public class KeepAboveTerrain : MonoBehaviour
 	}
 
 	
-	public void __SetColliding__Original()
+	public void SetColliding()
 	{
 		this.ClearOfCollision = false;
 	}
@@ -735,68 +788,30 @@ public class KeepAboveTerrain : MonoBehaviour
 				this.MyRender.sharedMaterial = this.RedMat;
 			}
 		}
+		if (LocalPlayer.Create.CraftStructures != null)
+		{
+			for (int i = 0; i < LocalPlayer.Create.CraftStructures.Count; i++)
+			{
+				Craft_Structure craft_Structure = LocalPlayer.Create.CraftStructures[i];
+				if (craft_Structure)
+				{
+					if (this.Clear)
+					{
+						craft_Structure.SetGhostMaterial((!LocalPlayer.Create.CurrentBlueprint._useFlatMeshMaterial) ? this.ClearMat : this.ClearMatFlatMesh);
+					}
+					else
+					{
+						craft_Structure.SetGhostMaterial(this.RedMat);
+					}
+				}
+			}
+		}
 	}
 
 	
 	public int GetValidLayers(int layers)
 	{
 		return (!this.IsInSinkHole) ? layers : (layers ^ 67108864);
-	}
-
-	
-	private void Awake()
-	{
-		try
-		{
-			this.maxBuildingHeight = 5000f;
-			this.maxAirBorneHeight = 5000f;
-			this.__Awake__Original();
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__Awake__Original();
-		}
-	}
-
-	
-	public void SetColliding()
-	{
-		try
-		{
-			if (UCheatmenu.BuildingCollision)
-			{
-				this.__SetColliding__Original();
-				return;
-			}
-			this.ClearOfCollision = true;
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__SetColliding__Original();
-		}
-	}
-
-	
-	private void Update()
-	{
-		try
-		{
-			this.__Update__Original();
-			if (!UCheatmenu.BuildingCollision)
-			{
-				this._clearInternal = true;
-				this._clearDynamicBuilding = true;
-				this._clearSmallStructures = true;
-				this.ClearOfCollision = true;
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__Update__Original();
-		}
 	}
 
 	
@@ -872,10 +887,16 @@ public class KeepAboveTerrain : MonoBehaviour
 	private bool _clearSmallStructures = true;
 
 	
-	private bool shouldDoDynamicBuildingCheck;
+	private bool _clearPreventConstruction = true;
 
 	
-	private bool shouldDoSmallStructureCheck;
+	private bool _shouldDoDynamicBuildingCheck;
+
+	
+	private bool _shouldDoSmallStructureCheck;
+
+	
+	private bool _shouldDoPreventConstructioCheck;
 
 	
 	private bool _inExclusionGroup;

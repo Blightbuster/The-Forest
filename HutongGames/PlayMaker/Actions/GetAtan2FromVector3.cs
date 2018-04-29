@@ -80,9 +80,9 @@ namespace HutongGames.PlayMaker.Actions
 		public GetAtan2FromVector3.aTan2EnumAxis yAxis;
 
 		
-		[Tooltip("The resulting angle. Note:If you want degrees, simply check RadToDeg")]
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("The resulting angle. Note:If you want degrees, simply check RadToDeg")]
 		public FsmFloat angle;
 
 		

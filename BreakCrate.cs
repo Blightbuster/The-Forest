@@ -21,10 +21,10 @@ public class BreakCrate : EntityBehaviour
 	
 	private void Explosion()
 	{
-		if (BoltNetwork.isRunning && this.entity.IsAttached())
+		if (BoltNetwork.isRunning && base.entity.IsAttached())
 		{
 			SendMessageEvent sendMessageEvent = SendMessageEvent.Create(GlobalTargets.OnlyServer);
-			sendMessageEvent.Target = this.entity;
+			sendMessageEvent.Target = base.entity;
 			sendMessageEvent.Message = "ExplosionReal";
 			sendMessageEvent.Send();
 		}
@@ -37,7 +37,7 @@ public class BreakCrate : EntityBehaviour
 	
 	public override void Detached()
 	{
-		if (BoltNetwork.isClient && this.entity.detachToken is CoopCreateBreakToken)
+		if (BoltNetwork.isClient && base.entity.detachToken is CoopCreateBreakToken)
 		{
 			this.ExplosionReal();
 		}
@@ -47,10 +47,10 @@ public class BreakCrate : EntityBehaviour
 	private void ExplosionReal()
 	{
 		FMODCommon.PlayOneshotNetworked(this.breakEvent, base.transform, FMODCommon.NetworkRole.Server);
-		GameObject gameObject = UnityEngine.Object.Instantiate(this.Broken, base.transform.position, base.transform.rotation) as GameObject;
-		if (this.entity.IsOwner())
+		GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.Broken, base.transform.position, base.transform.rotation);
+		if (base.entity.IsOwner())
 		{
-			BoltNetwork.Detach(this.entity, new CoopCreateBreakToken());
+			BoltNetwork.Detach(base.entity, new CoopCreateBreakToken());
 		}
 		UnityEngine.Object.Destroy(base.gameObject);
 	}

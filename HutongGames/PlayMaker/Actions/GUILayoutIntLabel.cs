@@ -35,8 +35,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString prefix;
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		[Tooltip("Int variable to display.")]
 		public FsmInt intVariable;
 

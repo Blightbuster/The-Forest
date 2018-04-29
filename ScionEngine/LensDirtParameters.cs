@@ -6,9 +6,18 @@ namespace ScionEngine
 	public struct LensDirtParameters
 	{
 		
-		public float intensity;
+		public float bloomThreshold;
 
 		
-		public float brightness;
+		public float bloomEffect;
+
+		
+		public float bloomBrightness;
+
+		
+		public float lensFlareEffect;
+
+		
+		public float lensFlareBrightness;
 	}
 }

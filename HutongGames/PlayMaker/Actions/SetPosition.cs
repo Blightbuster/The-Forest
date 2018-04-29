@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the Position of a Game Object. To leave any axis unchanged, set variable to 'None'.")]
 	[ActionCategory(ActionCategory.Transform)]
+	[Tooltip("Sets the Position of a Game Object. To leave any axis unchanged, set variable to 'None'.")]
 	public class SetPosition : FsmStateAction
 	{
 		
@@ -102,13 +102,13 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject to position.")]
 		[RequiredField]
+		[Tooltip("The GameObject to position.")]
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("Use a stored Vector3 position, and/or set individual axis below.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Use a stored Vector3 position, and/or set individual axis below.")]
 		public FsmVector3 vector;
 
 		

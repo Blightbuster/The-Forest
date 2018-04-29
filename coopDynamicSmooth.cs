@@ -23,7 +23,7 @@ public class coopDynamicSmooth : EntityBehaviour<IRigidbodyState>
 	
 	private void LateUpdate()
 	{
-		if ((this.updateOnClientOnly && BoltNetwork.isClient) || (BoltNetwork.isRunning && this.entity && this.entity.isAttached && !this.entity.isOwner))
+		if ((this.updateOnClientOnly && BoltNetwork.isClient) || (BoltNetwork.isRunning && base.entity && base.entity.isAttached && !base.entity.isOwner))
 		{
 			if ((this.smoothPos - base.transform.localPosition).sqrMagnitude < 225f)
 			{

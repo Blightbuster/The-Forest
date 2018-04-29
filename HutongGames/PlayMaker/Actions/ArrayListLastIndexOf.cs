@@ -83,20 +83,20 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[RequiredField]
 		[ActionSection("Set up")]
+		[RequiredField]
 		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
 		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
-		[UIHint(UIHint.FsmString)]
 		[Tooltip("Author defined Reference of the PlayMaker ArrayList Proxy component (necessary if several component coexists on the same GameObject)")]
+		[UIHint(UIHint.FsmString)]
 		public FsmString reference;
 
 		
-		[UIHint(UIHint.FsmInt)]
 		[Tooltip("Optional start index to search from: set to 0 to ignore")]
+		[UIHint(UIHint.FsmInt)]
 		public FsmInt startIndex;
 
 		
@@ -106,15 +106,15 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[ActionSection("Data")]
-		[Tooltip("The variable to get the index of.")]
 		[RequiredField]
+		[Tooltip("The variable to get the index of.")]
 		public FsmVar variable;
 
 		
-		[Tooltip("The index of the last item described below")]
-		[UIHint(UIHint.Variable)]
 		[ActionSection("Result")]
 		[RequiredField]
+		[Tooltip("The index of the last item described below")]
+		[UIHint(UIHint.Variable)]
 		public FsmInt lastIndexOf;
 
 		
@@ -123,8 +123,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmEvent itemFound;
 
 		
-		[UIHint(UIHint.FsmEvent)]
 		[Tooltip("Event sent if this arraList does not contains that element ( described below)")]
+		[UIHint(UIHint.FsmEvent)]
 		public FsmEvent itemNotFound;
 
 		

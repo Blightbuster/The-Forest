@@ -54,9 +54,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The Target. An Animator component is required")]
-		[CheckForComponent(typeof(Animator))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animator))]
+		[Tooltip("The Target. An Animator component is required")]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -65,9 +65,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmGameObject transform;
 
 		
-		[Tooltip("True if automatic matching is active")]
 		[ActionSection("Results")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("True if automatic matching is active")]
 		public FsmBool isControlled;
 
 		

@@ -54,13 +54,13 @@ public class CoopMutantPropSync : EntityBehaviour<IMutantState>
 	
 	public override void Attached()
 	{
-		if (!this.entity.IsOwner())
+		if (!base.entity.IsOwner())
 		{
 			base.state.AddCallback("prop_mask", delegate
 			{
 				this.ApplyPropMask(base.state.prop_mask);
 			});
-			this.token = (this.entity.attachToken as CoopMutantDummyToken);
+			this.token = (base.entity.attachToken as CoopMutantDummyToken);
 			if (this.token != null)
 			{
 				this.ApplyPropMask(this.token.Props);
@@ -71,7 +71,7 @@ public class CoopMutantPropSync : EntityBehaviour<IMutantState>
 	
 	private void Update()
 	{
-		if (this.entity.IsOwner())
+		if (base.entity.IsOwner())
 		{
 			int num = 0;
 			for (int i = 0; i < this.Props.Length; i++)

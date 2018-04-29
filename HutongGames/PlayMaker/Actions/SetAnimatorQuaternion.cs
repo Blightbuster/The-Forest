@@ -5,8 +5,8 @@ namespace HutongGames.PlayMaker.Actions
 {
 	
 	[ActionCategory("Animator")]
-	[HelpUrl("https:
 	[Tooltip("Sets the value of a quaternion parameter")]
+	[HelpUrl("https:
 	public class SetAnimatorQuaternion : FsmStateAction
 	{
 		
@@ -84,8 +84,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
 		[CheckForComponent(typeof(Animator))]
+		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
 		public FsmOwnerDefault gameObject;
 
 		

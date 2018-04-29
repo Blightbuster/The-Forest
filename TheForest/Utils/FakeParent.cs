@@ -71,6 +71,7 @@ namespace TheForest.Utils
 		
 		public void UnParent()
 		{
+			base.transform.parent = Scene.SceneTracker.transform;
 			base.transform.parent = null;
 		}
 

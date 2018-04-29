@@ -68,8 +68,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("Event to send for looping.")]
 		[ActionSection("Set up")]
+		[Tooltip("Event to send for looping.")]
 		public FsmEvent loopEvent;
 
 		
@@ -78,13 +78,13 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[ActionSection("Result")]
-		[UIHint(UIHint.Variable)]
 		[Tooltip("The index into the MasterServer Host List")]
+		[UIHint(UIHint.Variable)]
 		public FsmInt index;
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("Does this server require NAT punchthrough?")]
+		[UIHint(UIHint.Variable)]
 		public FsmBool useNat;
 
 		
@@ -98,13 +98,13 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString gameName;
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("Currently connected players")]
+		[UIHint(UIHint.Variable)]
 		public FsmInt connectedPlayers;
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("Maximum players limit")]
+		[UIHint(UIHint.Variable)]
 		public FsmInt playerLimit;
 
 		
@@ -123,13 +123,13 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmBool passwordProtected;
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("A miscellaneous comment (can hold data)")]
+		[UIHint(UIHint.Variable)]
 		public FsmString comment;
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("The GUID of the host, needed when connecting with NAT punchthrough.")]
+		[UIHint(UIHint.Variable)]
 		public FsmString guid;
 
 		

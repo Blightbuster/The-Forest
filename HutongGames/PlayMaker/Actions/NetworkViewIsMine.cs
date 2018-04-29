@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Test if the Network View is controlled by a GameObject.")]
 	[ActionCategory(ActionCategory.Network)]
+	[Tooltip("Test if the Network View is controlled by a GameObject.")]
 	public class NetworkViewIsMine : FsmStateAction
 	{
 		
@@ -59,14 +59,14 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The Game Object with the NetworkView attached.")]
-		[CheckForComponent(typeof(NetworkView))]
 		[RequiredField]
+		[CheckForComponent(typeof(NetworkView))]
+		[Tooltip("The Game Object with the NetworkView attached.")]
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("True if the network view is controlled by this object.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("True if the network view is controlled by this object.")]
 		public FsmBool isMine;
 
 		

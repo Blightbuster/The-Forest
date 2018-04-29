@@ -13,39 +13,10 @@ using UnityEngine;
 namespace TheForest.Buildings.Creation
 {
 	
-	[DoNotSerializePublic]
 	[AddComponentMenu("Buildings/Creation/Bridge Architect")]
-	public class BridgeArchitect : MonoBehaviour, IEntityReplicationFilter, IAnchorableStructure, IAnchorableStructureX2, ICoopTokenConstruction, ICoopStructure
+	[DoNotSerializePublic]
+	public class BridgeArchitect : MonoBehaviour, IAnchorableStructureX2, ICoopStructure, ICoopTokenConstruction, IEntityReplicationFilter, IAnchorableStructure
 	{
-		
-		void IAnchorableStructure.AnchorDestroyed(StructureAnchor anchor)
-		{
-			if (this)
-			{
-				BuildingHealth component = base.GetComponent<BuildingHealth>();
-				if (component)
-				{
-					component.Collapse(anchor.transform.position);
-				}
-				else if (base.gameObject)
-				{
-					UnityEngine.Object.Destroy(base.gameObject);
-				}
-			}
-		}
-
-		
-		bool IEntityReplicationFilter.AllowReplicationTo(BoltConnection connection)
-		{
-			if (this.Anchor1 && this.Anchor2)
-			{
-				BoltEntity component = this.Anchor1.GetComponentInParent(typeof(ICoopAnchorStructure)).GetComponent<BoltEntity>();
-				BoltEntity component2 = this.Anchor2.GetComponentInParent(typeof(ICoopAnchorStructure)).GetComponent<BoltEntity>();
-				return component.isAttached && component2.isAttached && connection.ExistsOnRemote(component) == ExistsResult.Yes && connection.ExistsOnRemote(component2) == ExistsResult.Yes;
-			}
-			return false;
-		}
-
 		
 		private void Awake()
 		{
@@ -57,8 +28,7 @@ namespace TheForest.Buildings.Creation
 		private IEnumerator DelayedAwake(bool isDeserializing)
 		{
 			this._logPool = new Stack<Transform>();
-			this._logWidth = ((!this._logPrefab.GetComponent<Renderer>()) ? this._logRenderer.bounds.size.z : this._logPrefab.GetComponent<Renderer>().bounds.size.z);
-			this._logMat = new Material(this._logRenderer.sharedMaterial);
+			this._logWidth = this._logRenderer.bounds.size.z * 1.075f;
 			yield return null;
 			if (this._wasBuilt)
 			{
@@ -84,7 +54,6 @@ namespace TheForest.Buildings.Creation
 					if (LocalPlayer.Create.BuildingPlacer)
 					{
 						LocalPlayer.Create.Grabber.ClosePlace();
-						base.GetComponent<Renderer>().sharedMaterial = LocalPlayer.Create.BuildingPlacer.RedMat;
 					}
 				}
 			}
@@ -106,12 +75,7 @@ namespace TheForest.Buildings.Creation
 			if (LocalPlayer.Create.BuildingPlacer.Clear != flag)
 			{
 				LocalPlayer.Create.BuildingPlacer.Clear = flag;
-				if (base.GetComponent<Renderer>().enabled)
-				{
-					base.GetComponent<Renderer>().sharedMaterial = this._logMat;
-				}
 			}
-			this._logMat.SetColor("_TintColor", (!this._anchor1 && !this._tmpAnchor) ? LocalPlayer.Create.BuildingPlacer.RedMat.GetColor("_TintColor") : LocalPlayer.Create.BuildingPlacer.ClearMat.GetColor("_TintColor"));
 			if (!base.transform.parent && !this._anchor2 && Vector3.Distance(LocalPlayer.Create.BuildingPlacer.transform.position, base.transform.position) > 3.75f)
 			{
 				this.RevertFirstAnchorSnapping();
@@ -120,31 +84,23 @@ namespace TheForest.Buildings.Creation
 			{
 				if (!this._anchor2)
 				{
-					Vector3 vector = (!this._tmpAnchor) ? base.transform.position : this._tmpAnchor.transform.position;
-					if (Vector3.Distance(this._anchor1.transform.position, vector) > this._logWidth)
+					Vector3 p = (!this._tmpAnchor) ? base.transform.position : this._tmpAnchor.transform.position;
+					Transform bridgeRoot = this.CreateBridge(this._anchor1.transform.position, p);
+					if (this._bridgeRoot)
 					{
-						if (base.GetComponent<Renderer>().enabled)
-						{
-							base.GetComponent<Renderer>().enabled = false;
-						}
-						Transform bridgeRoot = this.CreateBridge(this._anchor1.transform.position, vector);
-						if (this._bridgeRoot)
-						{
-							UnityEngine.Object.Destroy(this._bridgeRoot.gameObject);
-						}
-						this._bridgeRoot = bridgeRoot;
+						UnityEngine.Object.Destroy(this._bridgeRoot.gameObject);
 					}
-					else if (!base.GetComponent<Renderer>().enabled)
-					{
-						base.GetComponent<Renderer>().enabled = true;
-					}
+					this._bridgeRoot = bridgeRoot;
 				}
 			}
-			else if (this._bridgeRoot)
+			else
 			{
-				UnityEngine.Object.Destroy(this._bridgeRoot.gameObject);
-				this._bridgeRoot = null;
-				this._logPool.Clear();
+				Transform bridgeRoot2 = this.CreateBridge(base.transform.position, base.transform.position + base.transform.forward * this._logWidth);
+				if (this._bridgeRoot)
+				{
+					UnityEngine.Object.Destroy(this._bridgeRoot.gameObject);
+				}
+				this._bridgeRoot = bridgeRoot2;
 			}
 			this._caster.CastForAnchors<StructureAnchor>(new Action<StructureAnchor>(this.CheckLockTempAnchor));
 			this.CheckLockAnchor();
@@ -165,10 +121,6 @@ namespace TheForest.Buildings.Creation
 				if (Scene.HudGui)
 				{
 					Scene.HudGui.RoofConstructionIcons.Shutdown();
-				}
-				if (LocalPlayer.Create.BuildingPlacer)
-				{
-					this._logMat.SetColor("_TintColor", LocalPlayer.Create.BuildingPlacer.ClearMat.GetColor("_TintColor"));
 				}
 			}
 			if (this._tmpAnchor && this.Equals(this._tmpAnchor._hookedInStructure))
@@ -222,13 +174,13 @@ namespace TheForest.Buildings.Creation
 					this._anchor2._hookedInStructure = this;
 					if (this._wasBuilt)
 					{
-						this.CreateStructure(false, true);
+						this.CreateStructure(false);
 						FoundationArchitect.CreateWindSFX(base.transform);
 						this._logPool = null;
 					}
 					else if (this._wasPlaced)
 					{
-						this.CreateStructure(false, false);
+						this.CreateStructure(false);
 						this._logPool = new Stack<Transform>();
 						base.StartCoroutine(this.OnPlaced(true));
 					}
@@ -256,18 +208,13 @@ namespace TheForest.Buildings.Creation
 			{
 				UnityEngine.Object.Destroy(base.GetComponent<Rigidbody>());
 				UnityEngine.Object.Destroy(base.GetComponent<Collider>());
-				UnityEngine.Object.Destroy(base.GetComponent<Renderer>());
 				Transform ghostRoot = this._bridgeRoot;
 				Transform transform = ghostRoot;
 				transform.name += "Ghost";
 				this._logPool.Clear();
-				Transform logGhostPrefab = this._logPrefab;
-				this._logPrefab = Prefabs.Instance.LogBridgeBuiltPrefab;
-				this._bridgeRoot = this.CreateBridge(this._anchor1.transform.position, this._anchor2.transform.position);
-				this._bridgeRoot.name = "BridgeRootBuilt";
 				this._logPool = null;
 				int totalLogs = this._bridgeRoot.childCount;
-				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.<>f__this._logItemId);
+				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.$this._logItemId);
 				if (ri == null)
 				{
 					ri = new Craft_Structure.BuildIngredients();
@@ -277,20 +224,43 @@ namespace TheForest.Buildings.Creation
 					this._craftStructure._requiredIngredients.Insert(0, ri);
 				}
 				ri._amount += totalLogs;
-				List<GameObject> logStacks = new List<GameObject>();
-				foreach (object obj in this._bridgeRoot)
+				List<GameObject> logs = new List<GameObject>();
+				IEnumerator enumerator = this._bridgeRoot.GetEnumerator();
+				try
 				{
-					Transform logStack = (Transform)obj;
-					logStack.gameObject.SetActive(false);
-					logStacks.Add(logStack.gameObject);
+					while (enumerator.MoveNext())
+					{
+						object obj = enumerator.Current;
+						Transform transform2 = (Transform)obj;
+						IEnumerator enumerator2 = transform2.GetEnumerator();
+						try
+						{
+							while (enumerator2.MoveNext())
+							{
+								object obj2 = enumerator2.Current;
+								Transform transform3 = (Transform)obj2;
+								logs.Add(transform3.GetComponentInChildren<Renderer>().gameObject);
+							}
+						}
+						finally
+						{
+							IDisposable disposable;
+							if ((disposable = (enumerator2 as IDisposable)) != null)
+							{
+								disposable.Dispose();
+							}
+						}
+					}
 				}
-				ri._renderers = logStacks.ToArray();
-				foreach (object obj2 in this._bridgeRoot)
+				finally
 				{
-					Transform log = (Transform)obj2;
-					log.gameObject.SetActive(false);
+					IDisposable disposable2;
+					if ((disposable2 = (enumerator as IDisposable)) != null)
+					{
+						disposable2.Dispose();
+					}
 				}
-				this._logPrefab = logGhostPrefab;
+				ri.AddRuntimeObjects(logs.AsEnumerable<GameObject>().Reverse<GameObject>(), Prefabs.Instance.LogBridgeBuiltPrefab.GetComponentInChildren<Renderer>().sharedMaterial);
 				ghostRoot.transform.parent = null;
 				base.transform.position = this._anchor1.transform.position;
 				base.transform.LookAt(this._anchor2.transform.position);
@@ -336,7 +306,7 @@ namespace TheForest.Buildings.Creation
 		}
 
 		
-		public void CreateStructure(bool isRepair = false, bool addColliders = true)
+		public void CreateStructure(bool isRepair = false)
 		{
 			if (this._wasBuilt && isRepair)
 			{
@@ -349,16 +319,29 @@ namespace TheForest.Buildings.Creation
 			}
 			GameObject gameObject = (!this._bridgeRoot) ? null : this._bridgeRoot.gameObject;
 			this._bridgeRoot = this.CreateBridge(this._anchor1.transform.position, this._anchor2.transform.position);
-			this._bridgeRoot.name = "BridgeRoot" + ((!addColliders) ? "Ghost" : "Built");
+			this._bridgeRoot.name = "BridgeRoot" + ((!this._wasBuilt) ? "Ghost" : "Built");
 			this._bridgeRoot.parent = base.transform;
 			if (gameObject)
 			{
 				UnityEngine.Object.Destroy(gameObject);
 			}
-			if (addColliders)
+			if (this._wasBuilt)
 			{
 				base.transform.position = this._anchor1.transform.position;
 				this._bridgeRoot.parent = base.transform;
+				LOD_GroupToggle lod_GroupToggle = this._bridgeRoot.gameObject.AddComponent<LOD_GroupToggle>();
+				lod_GroupToggle.enabled = false;
+				lod_GroupToggle._levels = new LOD_GroupToggle.LodLevel[2];
+				lod_GroupToggle._levels[0] = new LOD_GroupToggle.LodLevel
+				{
+					Renderers = this._bridgeRoot.GetComponentsInChildren<Renderer>(),
+					VisibleDistance = Vector3.Distance(this._anchor1.transform.position, this._anchor2.transform.position) + 20f
+				};
+				lod_GroupToggle._levels[1] = new LOD_GroupToggle.LodLevel
+				{
+					VisibleDistance = 10000f
+				};
+				List<Renderer> list = new List<Renderer>();
 				Vector3 vector = this._bridgeRoot.GetChild(0).position;
 				int num = Mathf.CeilToInt(Vector3.Distance(this._anchor1.transform.position, this._anchor2.transform.position) / this._maxColliderLength);
 				int num2 = Mathf.CeilToInt((float)this._bridgeRoot.childCount / (float)num);
@@ -372,13 +355,19 @@ namespace TheForest.Buildings.Creation
 					Transform child = this._bridgeRoot.GetChild(num3);
 					Vector3 position = child.position;
 					Transform transform = new GameObject("Floor" + i).transform;
+					transform.gameObject.layer = 21;
 					transform.parent = base.transform;
 					transform.position = vector;
 					transform.LookAt(position);
 					BoxCollider boxCollider = transform.gameObject.AddComponent<BoxCollider>();
 					boxCollider.center = transform.InverseTransformPoint(Vector3.Lerp(vector, position, 0.5f));
-					boxCollider.size = new Vector3(4.5f, this._logWidth, Vector3.Distance(vector, position));
+					boxCollider.size = new Vector3(4.5f, this._logWidth * 0.65f, Vector3.Distance(vector, position) + ((i != num) ? 0f : (this._logWidth / 2f)));
 					transform.tag = "UnderfootWood";
+					MeshRenderer meshRenderer = transform.gameObject.AddComponent<MeshRenderer>();
+					meshRenderer.sharedMaterial = Prefabs.Instance.LogBridgeBuiltPrefabLOD1.sharedMaterial;
+					MeshFilter meshFilter = transform.gameObject.AddComponent<MeshFilter>();
+					meshFilter.sharedMesh = Prefabs.Instance.LogBridgeBuiltPrefabLOD1.GetComponent<MeshFilter>().sharedMesh;
+					list.Add(meshRenderer);
 					getStructureStrength getStructureStrength = null;
 					if (!getStructureStrength)
 					{
@@ -394,6 +383,8 @@ namespace TheForest.Buildings.Creation
 					}
 					vector = position;
 				}
+				lod_GroupToggle._levels[1].Renderers = list.ToArray();
+				lod_GroupToggle.enabled = true;
 			}
 			if (this._wasBuilt && isRepair)
 			{
@@ -406,7 +397,6 @@ namespace TheForest.Buildings.Creation
 		{
 			if (LocalPlayer.Create.BuildingPlacer)
 			{
-				base.GetComponent<Renderer>().sharedMaterial = LocalPlayer.Create.BuildingPlacer.RedMat;
 				base.transform.parent = LocalPlayer.Create.BuildingPlacer.transform;
 				base.transform.localPosition = this._placerOffset;
 				base.transform.localRotation = Quaternion.identity;
@@ -421,15 +411,11 @@ namespace TheForest.Buildings.Creation
 		
 		private void CheckLockTempAnchor(StructureAnchor anchor)
 		{
-			if (anchor && anchor._hookedInStructure == null && anchor != this._anchor1 && anchor != this._anchor2 && anchor != this._tmpAnchor && (!this._anchor1 || !this._anchor1.GetComponentInParent<PrefabIdentifier>().Equals(anchor.GetComponentInParent<PrefabIdentifier>())))
+			if (LocalPlayer.Create.BuildingPlacer.OnDynamicClear && anchor && anchor._hookedInStructure == null && anchor != this._anchor1 && anchor != this._anchor2 && anchor != this._tmpAnchor && (!this._anchor1 || !this._anchor1.GetComponentInParent<PrefabIdentifier>().Equals(anchor.GetComponentInParent<PrefabIdentifier>())))
 			{
 				if (base.transform.parent == null)
 				{
 					this.RevertFirstAnchorSnapping();
-				}
-				if (base.GetComponent<Renderer>())
-				{
-					base.GetComponent<Renderer>().sharedMaterial = LocalPlayer.Create.BuildingPlacer.ClearMat;
 				}
 				this._placerOffset = base.transform.localPosition;
 				base.transform.parent = null;
@@ -443,7 +429,8 @@ namespace TheForest.Buildings.Creation
 		
 		private void CheckLockAnchor()
 		{
-			if (this._tmpAnchor != null && TheForest.Utils.Input.GetButtonDown("Fire1"))
+			Create.CanLock = (this._tmpAnchor != null || this._anchor1);
+			if (Create.CanLock && TheForest.Utils.Input.GetButtonDown("Fire1"))
 			{
 				if (!this._anchor1)
 				{
@@ -493,8 +480,6 @@ namespace TheForest.Buildings.Creation
 						component2.enabled = false;
 						component2.enabled = true;
 					}
-					base.GetComponent<Renderer>().enabled = true;
-					base.GetComponent<Renderer>().sharedMaterial = LocalPlayer.Create.BuildingPlacer.RedMat;
 					this._anchor1._hookedInStructure = null;
 					this._anchor1 = null;
 				}
@@ -511,17 +496,20 @@ namespace TheForest.Buildings.Creation
 				p2 = vector;
 			}
 			Transform transform = new GameObject("BridgeRoot").transform;
-			transform.position = p1;
-			Quaternion quaternion = Quaternion.LookRotation(p2 - p1);
+			transform.position = Vector3.Lerp(p1, p2, 0.5f);
 			float num = Vector3.Distance(p1, p2) / 2f;
 			Stack<Transform> stack = new Stack<Transform>();
 			float num2 = this._logWidth / 3f;
+			Quaternion quaternion = Quaternion.LookRotation(p2 - p1);
 			float num3 = 1f;
 			Transform parent = null;
 			float num4;
 			while ((num4 = Vector3.Distance(p1, p2)) > num2)
 			{
 				float num5 = num4 * this._verticalBend;
+				Vector3 vector2 = Vector3.MoveTowards(p1, p2, this._logWidth - num5);
+				vector2.y -= num5;
+				quaternion = Quaternion.LookRotation(vector2 - p1);
 				Transform transform2;
 				if (!this._wasBuilt)
 				{
@@ -540,12 +528,11 @@ namespace TheForest.Buildings.Creation
 				}
 				else
 				{
-					transform2 = this.NewLog(p1, quaternion * Quaternion.Euler((float)UnityEngine.Random.Range(0, 359), (float)UnityEngine.Random.Range(-3, 3), (float)UnityEngine.Random.Range(-3, 3)));
+					transform2 = this.NewLog(p1, quaternion * Quaternion.Euler((float)UnityEngine.Random.Range(-3, 3), (float)UnityEngine.Random.Range(-2, 2), (float)UnityEngine.Random.Range(-3, 3)));
 					transform2.parent = transform;
 				}
 				stack.Push(transform2);
-				p1 = Vector3.MoveTowards(p1, p2, this._logWidth - num5);
-				p1.y -= num5;
+				p1 = vector2;
 			}
 			if (!this._wasPlaced && !this._wasBuilt)
 			{
@@ -562,12 +549,17 @@ namespace TheForest.Buildings.Creation
 				Transform transform = this._logPool.Pop();
 				transform.position = position;
 				transform.rotation = rotation;
+				transform.localScale = Vector3.one;
+				if (!this._wasBuilt && !this._wasPlaced)
+				{
+					transform.GetComponentInChildren<Renderer>().sharedMaterial = Create.CurrentGhostMat;
+				}
 				return transform;
 			}
-			Transform transform2 = (Transform)UnityEngine.Object.Instantiate(this._logPrefab, position, rotation);
+			Transform transform2 = UnityEngine.Object.Instantiate<Transform>(this._logPrefabs[UnityEngine.Random.Range(0, this._logPrefabs.Length)], position, rotation);
 			if (!this._wasBuilt && !this._wasPlaced)
 			{
-				transform2.GetComponentInChildren<Renderer>().sharedMaterial = this._logMat;
+				transform2.GetComponentInChildren<Renderer>().sharedMaterial = Create.CurrentGhostMat;
 			}
 			return transform2;
 		}
@@ -599,6 +591,23 @@ namespace TheForest.Buildings.Creation
 			set
 			{
 				this._anchor2 = value;
+			}
+		}
+
+		
+		void IAnchorableStructure.AnchorDestroyed(StructureAnchor anchor)
+		{
+			if (this)
+			{
+				BuildingHealth component = base.GetComponent<BuildingHealth>();
+				if (component)
+				{
+					component.Collapse(anchor.transform.position);
+				}
+				else if (base.gameObject)
+				{
+					UnityEngine.Object.Destroy(base.gameObject);
+				}
 			}
 		}
 
@@ -691,6 +700,18 @@ namespace TheForest.Buildings.Creation
 		}
 
 		
+		bool IEntityReplicationFilter.AllowReplicationTo(BoltConnection connection)
+		{
+			if (this.Anchor1 && this.Anchor2)
+			{
+				BoltEntity component = this.Anchor1.GetComponentInParent(typeof(ICoopAnchorStructure)).GetComponent<BoltEntity>();
+				BoltEntity component2 = this.Anchor2.GetComponentInParent(typeof(ICoopAnchorStructure)).GetComponent<BoltEntity>();
+				return component.isAttached && component2.isAttached && connection.ExistsOnRemote(component) == ExistsResult.Yes && connection.ExistsOnRemote(component2) == ExistsResult.Yes;
+			}
+			return false;
+		}
+
+		
 		public SpherecastAnchoring _caster;
 
 		
@@ -702,7 +723,7 @@ namespace TheForest.Buildings.Creation
 		public bool _wasBuilt;
 
 		
-		public Transform _logPrefab;
+		public Transform[] _logPrefabs;
 
 		
 		public Renderer _logRenderer;
@@ -757,8 +778,5 @@ namespace TheForest.Buildings.Creation
 
 		
 		private Stack<Transform> _logPool;
-
-		
-		private Material _logMat;
 	}
 }

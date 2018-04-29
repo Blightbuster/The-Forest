@@ -76,7 +76,7 @@ public class newGooseAi : MonoBehaviour
 			return;
 		}
 		this.targetAi = null;
-		if (this.controller.spawnedGeese.Count == 0)
+		if (this.controller == null || this.controller.spawnedGeese.SafeCount<GameObject>() == 0)
 		{
 			return;
 		}
@@ -708,11 +708,11 @@ public class newGooseAi : MonoBehaviour
 		yield return new WaitForSeconds(UnityEngine.Random.Range(0.5f, 1.5f));
 		if (this.leader)
 		{
-			foreach (GameObject go in this.controller.spawnedGeese)
+			foreach (GameObject gameObject in this.controller.spawnedGeese)
 			{
-				if (go)
+				if (gameObject)
 				{
-					go.SendMessage("initLanding");
+					gameObject.SendMessage("initLanding");
 				}
 			}
 		}

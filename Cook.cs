@@ -48,7 +48,7 @@ public class Cook : EntityBehaviour<ICookingState>
 			}
 			this._startTime = Time.time;
 			this._doneTime = 0f;
-			if (!BoltNetwork.isRunning || (this.entity.isAttached && this.entity.isOwner))
+			if (!BoltNetwork.isRunning || (base.entity.isAttached && base.entity.isOwner))
 			{
 				base.CancelInvoke("CookMe");
 				base.CancelInvoke("OverCooked");
@@ -62,7 +62,7 @@ public class Cook : EntityBehaviour<ICookingState>
 				}
 				base.Invoke("OverCooked", this._overcookDuration);
 			}
-			else if (BoltNetwork.isRunning && this.entity.isAttached && !this.entity.isOwner)
+			else if (BoltNetwork.isRunning && base.entity.isAttached && !base.entity.isOwner)
 			{
 				this.OnDecayStateUpdate();
 				this.OnStatusUpdate();
@@ -74,7 +74,7 @@ public class Cook : EntityBehaviour<ICookingState>
 	public void SetCustomStatus(Cook.Status status)
 	{
 		this.CurrentStatus = status;
-		if (this.entity.isAttached && this.entity.isOwner)
+		if (base.entity.isAttached && base.entity.isOwner)
 		{
 			base.state.Status = (int)status;
 		}
@@ -90,24 +90,29 @@ public class Cook : EntityBehaviour<ICookingState>
 	
 	private IEnumerator OnDeserialized()
 	{
+		if (base.GetComponent<EmptyObjectIdentifier>())
+		{
+			UnityEngine.Object.Destroy(base.gameObject);
+			yield break;
+		}
 		if (BoltNetwork.isRunning)
 		{
-			while (!this.entity.isAttached)
+			while (!base.entity.isAttached)
 			{
 				yield return null;
 			}
 		}
 		if (!base.transform.parent && this._cookDuration * 10f < this._overcookDuration)
 		{
-			DryingRack[] racks = UnityEngine.Object.FindObjectsOfType<DryingRack>();
-			foreach (DryingRack rack in racks)
+			DryingRack[] array = UnityEngine.Object.FindObjectsOfType<DryingRack>();
+			foreach (DryingRack dryingRack in array)
 			{
-				Vector3 pos = base.transform.position;
-				pos.y = rack.dryingGrid.bounds.center.y;
-				if (rack.dryingGrid.bounds.Contains(pos))
+				Vector3 position = base.transform.position;
+				position.y = dryingRack.dryingGrid.bounds.center.y;
+				if (dryingRack.dryingGrid.bounds.Contains(position))
 				{
-					base.transform.parent = rack.transform.parent;
-					if (BoltNetwork.isRunning && this.entity.isOwner && !base.state.ParentHack)
+					base.transform.parent = dryingRack.transform.parent;
+					if (BoltNetwork.isRunning && base.entity.isOwner && !base.state.ParentHack)
 					{
 						base.state.ParentHack = base.transform.parent.GetComponent<BoltEntity>();
 					}
@@ -179,7 +184,7 @@ public class Cook : EntityBehaviour<ICookingState>
 		{
 			this._targetRenderer.sharedMaterial = ((DecayingInventoryItemView)LocalPlayer.Inventory.InventoryItemViewsCache[this._itemId][0]).GetMaterialForState(this._decayState);
 		}
-		if (BoltNetwork.isRunning && this.entity.isAttached && this.entity.isOwner)
+		if (BoltNetwork.isRunning && base.entity.isAttached && base.entity.isOwner)
 		{
 			base.state.DecayState = (int)this._decayState;
 		}
@@ -188,10 +193,10 @@ public class Cook : EntityBehaviour<ICookingState>
 	
 	private void CancelCook()
 	{
-		if (this.CurrentStatus == Cook.Status.Cooking && (!BoltNetwork.isRunning || !this.entity.isAttached || this.entity.isOwner))
+		if (this.CurrentStatus == Cook.Status.Cooking && (!BoltNetwork.isRunning || !base.entity.isAttached || base.entity.isOwner))
 		{
 			Item item = ItemDatabase.ItemById(this._itemId);
-			Transform transform = (Transform)UnityEngine.Object.Instantiate((BoltNetwork.isRunning && item._pickupPrefabMP) ? item._pickupPrefabMP : item._pickupPrefab, this._targetRenderer.transform.position, this._targetRenderer.transform.rotation);
+			Transform transform = UnityEngine.Object.Instantiate<Transform>((BoltNetwork.isRunning && item._pickupPrefabMP) ? item._pickupPrefabMP : item._pickupPrefab, this._targetRenderer.transform.position, this._targetRenderer.transform.rotation);
 			if (BoltNetwork.isRunning)
 			{
 				BoltNetwork.Attach(transform.gameObject);
@@ -221,7 +226,7 @@ public class Cook : EntityBehaviour<ICookingState>
 			this._billboardSheen.SetActive(true);
 		}
 		this.CurrentStatus = Cook.Status.Cooked;
-		if (this.entity.isAttached && this.entity.isOwner)
+		if (base.entity.isAttached && base.entity.isOwner)
 		{
 			base.state.Status = 1;
 		}
@@ -250,7 +255,7 @@ public class Cook : EntityBehaviour<ICookingState>
 			this.DisolveBurnt();
 		}
 		this.CurrentStatus = Cook.Status.Burnt;
-		if (this.entity.isAttached && this.entity.isOwner)
+		if (base.entity.isAttached && base.entity.isOwner)
 		{
 			base.state.Status = 2;
 		}
@@ -259,11 +264,11 @@ public class Cook : EntityBehaviour<ICookingState>
 	
 	private void DisolveBurnt()
 	{
-		if (!BoltNetwork.isRunning || (this.entity.isAttached && this.entity.isOwner))
+		if (!BoltNetwork.isRunning || (base.entity.isAttached && base.entity.isOwner))
 		{
 			if (this.DissolvedPrefab)
 			{
-				GameObject gameObject = UnityEngine.Object.Instantiate(this.DissolvedPrefab, base.transform.position, base.transform.rotation) as GameObject;
+				GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.DissolvedPrefab, base.transform.position, base.transform.rotation);
 				if (this._scaleDisolve)
 				{
 					gameObject.transform.localScale.Scale(this._targetRenderer.transform.localScale);
@@ -287,7 +292,7 @@ public class Cook : EntityBehaviour<ICookingState>
 	
 	public override void Attached()
 	{
-		if (!this.entity.isOwner)
+		if (!base.entity.isOwner)
 		{
 			if (!base.state.ParentHack)
 			{
@@ -346,17 +351,24 @@ public class Cook : EntityBehaviour<ICookingState>
 	
 	private void OnStatusUpdate()
 	{
-		switch (base.state.Status)
+		Cook.Status status = (Cook.Status)base.state.Status;
+		if (status != Cook.Status.Cooked)
 		{
-		case 1:
+			if (status != Cook.Status.Burnt)
+			{
+				if (status == Cook.Status.CookingNoWater)
+				{
+					base.SendMessage("SetActiveBonus", (WeaponStatUpgrade.Types)(-1), SendMessageOptions.DontRequireReceiver);
+				}
+			}
+			else
+			{
+				this.OverCooked();
+			}
+		}
+		else
+		{
 			this.CookMe();
-			break;
-		case 2:
-			this.OverCooked();
-			break;
-		case 3:
-			base.SendMessage("SetActiveBonus", (WeaponStatUpgrade.Types)(-1), SendMessageOptions.DontRequireReceiver);
-			break;
 		}
 	}
 

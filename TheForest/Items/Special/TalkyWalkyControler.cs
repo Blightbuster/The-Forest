@@ -21,7 +21,7 @@ namespace TheForest.Items.Special
 		
 		protected override void OnActivating()
 		{
-			if (!LocalPlayer.Animator.GetBool("drawBowBool"))
+			if (!LocalPlayer.Animator.GetBool("drawBowBool") && !LocalPlayer.AnimControl.endGameCutScene)
 			{
 				LocalPlayer.Inventory.Equip(this._itemId, false);
 			}
@@ -37,7 +37,7 @@ namespace TheForest.Items.Special
 		private IEnumerator DelayedStop(bool equipPrevious)
 		{
 			this.ToggleSpecial(false);
-			LocalPlayer.Sfx.PlayWhoosh();
+			LocalPlayer.Sfx.PlayItemCustomSfx(this._itemId, true);
 			LocalPlayer.Animator.SetBoolReflected("pedHeld", false);
 			yield return new WaitForSeconds(1f);
 			LocalPlayer.Inventory.SkipNextAddItemWoosh = true;

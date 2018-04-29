@@ -47,9 +47,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
-		[RequiredField]
 		[ActionSection("Set up")]
+		[RequiredField]
+		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
 		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 
@@ -58,18 +58,18 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString reference;
 
 		
-		[Tooltip("The zero-based index of the first element of the range of elements to remove. This value is between 0 and the array.count minus count (inclusive)")]
 		[UIHint(UIHint.FsmInt)]
+		[Tooltip("The zero-based index of the first element of the range of elements to remove. This value is between 0 and the array.count minus count (inclusive)")]
 		public FsmInt index;
 
 		
-		[Tooltip("The number of elements to remove. This value is between 0 and the difference between the array.count minus the index ( inclusive )")]
 		[UIHint(UIHint.FsmInt)]
+		[Tooltip("The number of elements to remove. This value is between 0 and the difference between the array.count minus the index ( inclusive )")]
 		public FsmInt count;
 
 		
-		[UIHint(UIHint.FsmEvent)]
 		[ActionSection("Result")]
+		[UIHint(UIHint.FsmEvent)]
 		[Tooltip("The event to trigger if the removeRange throw errors")]
 		public FsmEvent failureEvent;
 	}

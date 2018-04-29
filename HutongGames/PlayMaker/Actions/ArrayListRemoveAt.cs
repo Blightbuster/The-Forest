@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Remove item at a specified index of a PlayMaker ArrayList Proxy component")]
 	[ActionCategory("ArrayMaker/ArrayList")]
+	[Tooltip("Remove item at a specified index of a PlayMaker ArrayList Proxy component")]
 	public class ArrayListRemoveAt : ArrayListActions
 	{
 		
@@ -46,9 +46,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
-		[RequiredField]
 		[ActionSection("Set up")]
+		[RequiredField]
+		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
 		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 
@@ -62,9 +62,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmInt index;
 
 		
+		[ActionSection("Result")]
 		[UIHint(UIHint.FsmEvent)]
 		[Tooltip("The event to trigger if the removeAt throw errors")]
-		[ActionSection("Result")]
 		public FsmEvent failureEvent;
 	}
 }

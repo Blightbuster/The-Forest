@@ -23,7 +23,7 @@ namespace TheForest.Items.World
 				this.ShowIcons(true);
 				if (TheForest.Utils.Input.GetButtonDown("Craft") && LocalPlayer.Inventory.RemoveItem(this._inputItemId, this._inputAmount, false, true))
 				{
-					LocalPlayer.Sfx.PlayWhoosh();
+					LocalPlayer.Sfx.PlayItemCustomSfx(this._inputItemId, true);
 					this.ShowIcons(false);
 					this._onInputItemAdded.Invoke();
 					this._currentInputAmount += this._inputAmount;
@@ -68,7 +68,7 @@ namespace TheForest.Items.World
 		{
 			this._spawning = false;
 			this._onOuputItemSpawned.Invoke();
-			UnityEngine.Object.Instantiate(ItemDatabase.ItemById(this._outputItemId)._pickupPrefab.gameObject, this._outputSpawnPosition.position, this._outputSpawnPosition.rotation);
+			UnityEngine.Object.Instantiate<GameObject>(ItemDatabase.ItemById(this._outputItemId)._pickupPrefab.gameObject, this._outputSpawnPosition.position, this._outputSpawnPosition.rotation);
 		}
 
 		

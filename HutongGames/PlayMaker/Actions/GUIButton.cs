@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("GUI button. Sends an Event when pressed. Optionally store the button state in a Bool Variable.")]
 	[ActionCategory(ActionCategory.GUI)]
+	[Tooltip("GUI button. Sends an Event when pressed. Optionally store the button state in a Bool Variable.")]
 	public class GUIButton : GUIContentAction
 	{
 		

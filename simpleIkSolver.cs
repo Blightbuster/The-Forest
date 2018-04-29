@@ -20,15 +20,10 @@ public class simpleIkSolver : MonoBehaviour
 	
 	private void LateUpdate()
 	{
-		this.Target.position = new Vector3(this.leftFootTarget.position.x, this.leftFootTarget.position.y + this.heightOffset, this.leftFootTarget.position.z);
-		if (this.IsActive)
-		{
-			this.Solve();
-		}
 	}
 
 	
-	private void Solve()
+	public void Solve()
 	{
 		Transform joint = this.JointEntities[this.JointEntities.Length - 1].Joint;
 		Vector3 rhs = Vector3.zero;

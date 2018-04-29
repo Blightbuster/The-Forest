@@ -2,8 +2,6 @@
 using System.Collections;
 using Bolt;
 using TheForest.Buildings.Creation;
-using TheForest.Buildings.Utils;
-using TheForest.Utils.Enums;
 using UniLinq;
 using UnityEngine;
 
@@ -56,34 +54,34 @@ namespace TheForest.Buildings.World
 		{
 			if (BoltNetwork.isRunning)
 			{
-				while (!this.entity.isAttached)
+				while (!base.entity.isAttached)
 				{
 					yield return null;
 				}
 			}
-			if (this._treeId >= 0 && !this._tsl && (!BoltNetwork.isRunning || this.entity.isAttached))
+			if (this._treeId >= 0 && !this._tsl && (!BoltNetwork.isRunning || base.entity.isAttached))
 			{
 				yield return null;
 				if (!this._tsl)
 				{
-					if (BoltNetwork.isRunning && this.entity.isAttached && this.entity.isOwner && this.entity.StateIs<ITreeHouseState>())
+					if (BoltNetwork.isRunning && base.entity.isAttached && base.entity.isOwner && base.entity.StateIs<ITreeHouseState>())
 					{
-						this.entity.GetState<ITreeHouseState>().TreeId = this._treeId;
+						base.entity.GetState<ITreeHouseState>().TreeId = this._treeId;
 					}
-					CoopTreeId tid = CoopPlayerCallbacks.AllTrees.FirstOrDefault((CoopTreeId i) => i.Id == this.<>f__this._treeId);
+					CoopTreeId tid = CoopPlayerCallbacks.AllTrees.FirstOrDefault((CoopTreeId i) => i.Id == this.$this._treeId);
 					if (!tid)
 					{
 						yield return YieldPresets.WaitThreeSeconds;
-						tid = CoopPlayerCallbacks.AllTrees.FirstOrDefault((CoopTreeId i) => i.Id == this.<>f__this._treeId);
+						tid = CoopPlayerCallbacks.AllTrees.FirstOrDefault((CoopTreeId i) => i.Id == this.$this._treeId);
 					}
 					if (tid && !this._tsl)
 					{
-						LOD_Trees lt = tid.GetComponent<LOD_Trees>();
-						lt.AddTreeCutDownTarget(base.gameObject);
+						LOD_Trees component = tid.GetComponent<LOD_Trees>();
+						component.AddTreeCutDownTarget(base.gameObject);
 						if (this._cutLeaves)
 						{
-							this._tsl = lt.gameObject.AddComponent<TreeStructureLod>();
-							this._tsl._lod = lt;
+							this._tsl = component.gameObject.AddComponent<TreeStructureLod>();
+							this._tsl._lod = component;
 						}
 					}
 				}
@@ -104,9 +102,9 @@ namespace TheForest.Buildings.World
 				fallingT = trunk.GetComponentInChildren<Rigidbody>().transform;
 			}
 			base.transform.parent = fallingT;
-			foreach (Collider c in base.GetComponentsInChildren<Collider>())
+			foreach (Collider collider in base.GetComponentsInChildren<Collider>())
 			{
-				c.enabled = false;
+				collider.enabled = false;
 			}
 			if (!BoltNetwork.isClient)
 			{
@@ -116,9 +114,9 @@ namespace TheForest.Buildings.World
 			{
 				yield return YieldPresets.WaitPointSixSeconds;
 			}
-			foreach (StructureAnchor sa in base.GetComponentsInChildren<StructureAnchor>())
+			foreach (StructureAnchor structureAnchor in base.GetComponentsInChildren<StructureAnchor>())
 			{
-				UnityEngine.Object.Destroy(sa.gameObject);
+				UnityEngine.Object.Destroy(structureAnchor.gameObject);
 			}
 			Craft_Structure ghost = base.GetComponentInChildren<Craft_Structure>();
 			if (ghost && ghost.transform.parent == base.transform)
@@ -131,9 +129,8 @@ namespace TheForest.Buildings.World
 			else
 			{
 				yield return YieldPresets.WaitThreeSeconds;
-				CollapseStructure cs = base.gameObject.AddComponent<CollapseStructure>();
-				cs._destructionForceMultiplier = 0.1f;
-				cs._capsuleDirection = CapsuleDirections.Z;
+				BuildingHealth bh = base.GetComponent<BuildingHealth>();
+				bh.Collapse(base.transform.position + Vector3.down);
 			}
 			yield break;
 		}
@@ -141,25 +138,25 @@ namespace TheForest.Buildings.World
 		
 		public override void Attached()
 		{
-			if (this.entity.isOwner)
+			if (base.entity.isOwner)
 			{
-				if (this.entity.StateIs<ITreeHouseState>() || this.entity.StateIs<IConstructionState>())
+				if (base.entity.StateIs<ITreeHouseState>() || base.entity.StateIs<IConstructionState>())
 				{
 					base.StartCoroutine(this.OnDeserialized());
 				}
 			}
-			else if (this.entity.StateIs<ITreeHouseState>())
+			else if (base.entity.StateIs<ITreeHouseState>())
 			{
-				this.entity.GetState<ITreeHouseState>().AddCallback("TreeId", new PropertyCallbackSimple(this.OnReceivedTreeId));
+				base.entity.GetState<ITreeHouseState>().AddCallback("TreeId", new PropertyCallbackSimple(this.OnReceivedTreeId));
 			}
 		}
 
 		
 		private void OnReceivedTreeId()
 		{
-			this._treeId = this.entity.GetState<ITreeHouseState>().TreeId;
+			this._treeId = base.entity.GetState<ITreeHouseState>().TreeId;
 			base.StartCoroutine(this.OnDeserialized());
-			this.entity.GetState<ITreeHouseState>().RemoveCallback("TreeId", new PropertyCallbackSimple(this.OnReceivedTreeId));
+			base.entity.GetState<ITreeHouseState>().RemoveCallback("TreeId", new PropertyCallbackSimple(this.OnReceivedTreeId));
 		}
 
 		

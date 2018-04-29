@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Inserts a flexible space element.")]
 	[ActionCategory(ActionCategory.GUILayout)]
+	[Tooltip("Inserts a flexible space element.")]
 	public class GUILayoutFlexibleSpace : FsmStateAction
 	{
 		

@@ -20,7 +20,7 @@ public class FTEM_SampleSceneGUI : MonoBehaviour
 				RaycastHit raycastHit;
 				if (Physics.Raycast(ray, out raycastHit, 1000f))
 				{
-					this.effectPrefab = (GameObject)UnityEngine.Object.Instantiate(this.particlePrefab[this.particleNum], new Vector3(raycastHit.point.x, raycastHit.point.y + 3f, raycastHit.point.z), Quaternion.Euler(0f, 0f, 0f));
+					this.effectPrefab = UnityEngine.Object.Instantiate<GameObject>(this.particlePrefab[this.particleNum], new Vector3(raycastHit.point.x, raycastHit.point.y + 3f, raycastHit.point.z), Quaternion.Euler(0f, 0f, 0f));
 				}
 			}
 			else
@@ -29,7 +29,7 @@ public class FTEM_SampleSceneGUI : MonoBehaviour
 				RaycastHit raycastHit2;
 				if (Physics.Raycast(ray2, out raycastHit2, 1000f))
 				{
-					this.effectPrefab = (GameObject)UnityEngine.Object.Instantiate(this.particlePrefab[this.particleNum], new Vector3(raycastHit2.point.x, raycastHit2.point.y, raycastHit2.point.z), Quaternion.Euler(0f, 0f, 0f));
+					this.effectPrefab = UnityEngine.Object.Instantiate<GameObject>(this.particlePrefab[this.particleNum], new Vector3(raycastHit2.point.x, raycastHit2.point.y, raycastHit2.point.z), Quaternion.Euler(0f, 0f, 0f));
 				}
 			}
 		}

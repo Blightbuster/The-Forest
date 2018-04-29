@@ -20,17 +20,24 @@ namespace HutongGames.PlayMaker.Actions
 		
 		public override void Awake()
 		{
-			switch (this.trigger)
+			TriggerType triggerType = this.trigger;
+			if (triggerType != TriggerType.OnTriggerEnter)
 			{
-			case TriggerType.OnTriggerEnter:
+				if (triggerType != TriggerType.OnTriggerStay)
+				{
+					if (triggerType == TriggerType.OnTriggerExit)
+					{
+						base.Fsm.HandleTriggerExit = true;
+					}
+				}
+				else
+				{
+					base.Fsm.HandleTriggerStay = true;
+				}
+			}
+			else
+			{
 				base.Fsm.HandleTriggerEnter = true;
-				break;
-			case TriggerType.OnTriggerStay:
-				base.Fsm.HandleTriggerStay = true;
-				break;
-			case TriggerType.OnTriggerExit:
-				base.Fsm.HandleTriggerExit = true;
-				break;
 			}
 		}
 

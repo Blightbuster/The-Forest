@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 
@@ -29,6 +30,23 @@ public class CustomActiveValueGreebleGOList : CustomActiveValueGreeble
 	}
 
 	
+	private void OnEnable()
+	{
+		base.StartCoroutine(this.OnEnableRoutine());
+	}
+
+	
+	private IEnumerator OnEnableRoutine()
+	{
+		yield return null;
+		if (base.Data != null)
+		{
+			this.InitFromData();
+		}
+		yield break;
+	}
+
+	
 	private void OnDestroy()
 	{
 		if (base.Data != null)
@@ -46,14 +64,20 @@ public class CustomActiveValueGreebleGOList : CustomActiveValueGreeble
 		{
 			base.Data = component.Data;
 			base.Index = component.Index;
-			bool flag = base.Data._instancesState[base.Index] < 252;
-			for (int i = 0; i < this._targets.Length; i++)
+			this.InitFromData();
+		}
+	}
+
+	
+	private void InitFromData()
+	{
+		bool flag = base.Data._instancesState[base.Index] < 252;
+		for (int i = 0; i < this._targets.Length; i++)
+		{
+			bool flag2 = !flag || ((int)base.Data._instancesState[base.Index] & 1 << i) == 0;
+			if (this._targets[i] && flag2 != this._targets[i].activeSelf)
 			{
-				bool flag2 = !flag || ((int)base.Data._instancesState[base.Index] & 1 << i) == 0;
-				if (this._targets[i] && flag2 != this._targets[i].activeSelf)
-				{
-					this._targets[i].SetActive(flag2);
-				}
+				this._targets[i].SetActive(flag2);
 			}
 		}
 	}

@@ -27,11 +27,24 @@ public class ResultLogger : UnityEngine.Object
 	public static void logArraylist(ArrayList result)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
-		foreach (object obj in result)
+		IEnumerator enumerator = result.GetEnumerator();
+		try
 		{
-			Hashtable item = (Hashtable)obj;
-			ResultLogger.addHashtableToString(stringBuilder, item);
-			stringBuilder.Append("\n--------------------\n");
+			while (enumerator.MoveNext())
+			{
+				object obj = enumerator.Current;
+				Hashtable item = (Hashtable)obj;
+				ResultLogger.addHashtableToString(stringBuilder, item);
+				stringBuilder.Append("\n--------------------\n");
+			}
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = (enumerator as IDisposable)) != null)
+			{
+				disposable.Dispose();
+			}
 		}
 		Debug.Log(stringBuilder.ToString());
 	}
@@ -47,22 +60,35 @@ public class ResultLogger : UnityEngine.Object
 	
 	public static void addHashtableToString(StringBuilder builder, Hashtable item)
 	{
-		foreach (object obj in item)
+		IDictionaryEnumerator enumerator = item.GetEnumerator();
+		try
 		{
-			DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
-			if (dictionaryEntry.Value is Hashtable)
+			while (enumerator.MoveNext())
 			{
-				builder.AppendFormat("{0}: ", dictionaryEntry.Key);
-				ResultLogger.addHashtableToString(builder, (Hashtable)dictionaryEntry.Value);
+				object obj = enumerator.Current;
+				DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
+				if (dictionaryEntry.Value is Hashtable)
+				{
+					builder.AppendFormat("{0}: ", dictionaryEntry.Key);
+					ResultLogger.addHashtableToString(builder, (Hashtable)dictionaryEntry.Value);
+				}
+				else if (dictionaryEntry.Value is ArrayList)
+				{
+					builder.AppendFormat("{0}: ", dictionaryEntry.Key);
+					ResultLogger.addArraylistToString(builder, (ArrayList)dictionaryEntry.Value);
+				}
+				else
+				{
+					builder.AppendFormat("{0}: {1}\n", dictionaryEntry.Key, dictionaryEntry.Value);
+				}
 			}
-			else if (dictionaryEntry.Value is ArrayList)
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = (enumerator as IDisposable)) != null)
 			{
-				builder.AppendFormat("{0}: ", dictionaryEntry.Key);
-				ResultLogger.addArraylistToString(builder, (ArrayList)dictionaryEntry.Value);
-			}
-			else
-			{
-				builder.AppendFormat("{0}: {1}\n", dictionaryEntry.Key, dictionaryEntry.Value);
+				disposable.Dispose();
 			}
 		}
 	}
@@ -70,17 +96,30 @@ public class ResultLogger : UnityEngine.Object
 	
 	public static void addArraylistToString(StringBuilder builder, ArrayList result)
 	{
-		foreach (object obj in result)
+		IEnumerator enumerator = result.GetEnumerator();
+		try
 		{
-			if (obj is Hashtable)
+			while (enumerator.MoveNext())
 			{
-				ResultLogger.addHashtableToString(builder, (Hashtable)obj);
+				object obj = enumerator.Current;
+				if (obj is Hashtable)
+				{
+					ResultLogger.addHashtableToString(builder, (Hashtable)obj);
+				}
+				else if (obj is ArrayList)
+				{
+					ResultLogger.addArraylistToString(builder, (ArrayList)obj);
+				}
+				builder.Append("\n--------------------\n");
 			}
-			else if (obj is ArrayList)
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = (enumerator as IDisposable)) != null)
 			{
-				ResultLogger.addArraylistToString(builder, (ArrayList)obj);
+				disposable.Dispose();
 			}
-			builder.Append("\n--------------------\n");
 		}
 		Debug.Log(builder.ToString());
 	}

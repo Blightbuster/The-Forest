@@ -46,8 +46,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("First Vector.")]
 		[RequiredField]
+		[Tooltip("First Vector.")]
 		public FsmVector3 fromVector;
 
 		
@@ -61,9 +61,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat amount;
 
 		
-		[Tooltip("Store the result in this vector variable.")]
 		[RequiredField]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the result in this vector variable.")]
 		public FsmVector3 storeResult;
 
 		

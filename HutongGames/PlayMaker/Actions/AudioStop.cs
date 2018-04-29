@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Stops playing the Audio Clip played by an Audio Source component on a Game Object.")]
 	[ActionCategory(ActionCategory.Audio)]
+	[Tooltip("Stops playing the Audio Clip played by an Audio Source component on a Game Object.")]
 	public class AudioStop : FsmStateAction
 	{
 		
@@ -30,9 +30,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject with an AudioSource component.")]
 		[RequiredField]
 		[CheckForComponent(typeof(AudioSource))]
+		[Tooltip("The GameObject with an AudioSource component.")]
 		public FsmOwnerDefault gameObject;
 	}
 }

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the value of the preference identified by key.")]
 	[ActionCategory("PlayerPrefs")]
+	[Tooltip("Sets the value of the preference identified by key.")]
 	public class PlayerPrefsSetFloat : FsmStateAction
 	{
 		

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using TheForest.Items.Inventory;
 using TheForest.Utils;
 using UnityEngine;
 
@@ -16,6 +17,23 @@ namespace TheForest.Items.Special
 		}
 
 		
+		private new void Update()
+		{
+			if (LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.RightHand, LocalPlayer.AnimControl._walkmanId) && LocalPlayer.Inventory.CurrentView == PlayerInventory.PlayerViews.World)
+			{
+				if (TheForest.Utils.Input.GetButtonDown("Fire1"))
+				{
+					LocalPlayer.Animator.SetBool("attack", true);
+					this.ToggleSpecial(true);
+				}
+				else if (TheForest.Utils.Input.GetButtonUp("Fire1"))
+				{
+					LocalPlayer.Animator.SetBool("attack", false);
+				}
+			}
+		}
+
+		
 		private void OnDestroy()
 		{
 			if (WalkmanControler._instance == this)
@@ -29,11 +47,6 @@ namespace TheForest.Items.Special
 		{
 			if (enable && !distractionDevice.IsActive)
 			{
-				if (LocalPlayer.Inventory.LastUtility != this)
-				{
-					LocalPlayer.Inventory.StashLeftHand();
-					LocalPlayer.Inventory.LastUtility = this;
-				}
 				base.StartCoroutine(this.PlayMusicTrack());
 			}
 			return true;
@@ -59,6 +72,10 @@ namespace TheForest.Items.Special
 		
 		private IEnumerator PlayMusicTrack()
 		{
+			if (this._waitForWalkman)
+			{
+				yield break;
+			}
 			this._waitForWalkman = true;
 			float waitTime = Time.time + 4f;
 			while (this._waitForWalkman)
@@ -120,26 +137,18 @@ namespace TheForest.Items.Special
 		
 		protected override void OnActivating()
 		{
-			if (LocalPlayer.Inventory.LastUtility == this && !LocalPlayer.Animator.GetBool("drawBowBool"))
-			{
-				LocalPlayer.Inventory.TurnOnLastUtility(Item.EquipmentSlot.LeftHand);
-			}
 		}
 
 		
 		protected override void OnDeactivating()
 		{
-			if (LocalPlayer.Inventory.LastUtility == this)
-			{
-				base.StartCoroutine(this.DelayedStop(false));
-			}
 		}
 
 		
 		private IEnumerator DelayedStop(bool equipPrevious)
 		{
 			this.ToggleSpecial(false);
-			LocalPlayer.Sfx.PlayWhoosh();
+			LocalPlayer.Sfx.PlayItemCustomSfx(this._itemId, true);
 			LocalPlayer.Animator.SetBoolReflected("walkmanHeld", false);
 			yield return new WaitForSeconds(1f);
 			LocalPlayer.Inventory.SkipNextAddItemWoosh = true;
@@ -194,7 +203,7 @@ namespace TheForest.Items.Special
 		{
 			get
 			{
-				return LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.LeftHand, LocalPlayer.Inventory.LastUtility._itemId);
+				return LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.RightHand, LocalPlayer.AnimControl._walkmanId);
 			}
 		}
 

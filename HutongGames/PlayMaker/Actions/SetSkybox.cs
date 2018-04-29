@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the global Skybox.")]
 	[ActionCategory(ActionCategory.RenderSettings)]
+	[Tooltip("Sets the global Skybox.")]
 	public class SetSkybox : FsmStateAction
 	{
 		

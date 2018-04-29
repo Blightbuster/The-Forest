@@ -10,8 +10,8 @@ public class CoopDynamicPickUp : CoopBase<IDynamicPickup>
 	{
 		this.MultiplayerPriority = 1f;
 		base.state.Transform.SetTransforms(base.transform);
-		this.entity.Freeze(false);
-		if (this.entity.isOwner)
+		base.entity.Freeze(false);
+		if (base.entity.isOwner)
 		{
 			if (this.destroyAfter > 0f)
 			{

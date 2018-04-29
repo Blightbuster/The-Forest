@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Adds multipe float variables to float variable.")]
 	[ActionCategory(ActionCategory.Math)]
+	[Tooltip("Adds multipe float variables to float variable.")]
 	public class FloatAddMutiple : FsmStateAction
 	{
 		
@@ -41,14 +41,14 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The float variables to add.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The float variables to add.")]
 		public FsmFloat[] floatVariables;
 
 		
-		[Tooltip("Add to this variable.")]
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("Add to this variable.")]
 		public FsmFloat addTo;
 
 		

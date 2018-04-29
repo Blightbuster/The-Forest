@@ -13,104 +13,8 @@ namespace Pathfinding
 	
 	[JsonOptIn]
 	[Serializable]
-	public class RecastGraph : NavGraph, IUpdatableGraph, IRaycastableGraph, INavmesh, INavmeshHolder
+	public class RecastGraph : NavGraph, INavmesh, IRaycastableGraph, IUpdatableGraph, INavmeshHolder
 	{
-		
-		GraphUpdateThreading IUpdatableGraph.CanUpdateAsync(GraphUpdateObject o)
-		{
-			return (!o.updatePhysics) ? GraphUpdateThreading.SeparateThread : ((GraphUpdateThreading)7);
-		}
-
-		
-		void IUpdatableGraph.UpdateAreaInit(GraphUpdateObject o)
-		{
-			if (!o.updatePhysics)
-			{
-				return;
-			}
-			if (!this.dynamic)
-			{
-				throw new Exception("Recast graph must be marked as dynamic to enable graph updates");
-			}
-			RelevantGraphSurface.UpdateAllPositions();
-			IntRect touchingTiles = this.GetTouchingTiles(o.bounds);
-			Bounds tileBounds = this.GetTileBounds(touchingTiles);
-			tileBounds.Expand(new Vector3(1f, 0f, 1f) * this.TileBorderSizeInWorldUnits * 2f);
-			List<RasterizationMesh> inputMeshes = this.CollectMeshes(tileBounds);
-			if (this.globalVox == null)
-			{
-				this.globalVox = new Voxelize(this.CellHeight, this.cellSize, this.walkableClimb, this.walkableHeight, this.maxSlope);
-				this.globalVox.maxEdgeLength = this.maxEdgeLength;
-			}
-			this.globalVox.inputMeshes = inputMeshes;
-		}
-
-		
-		void IUpdatableGraph.UpdateArea(GraphUpdateObject guo)
-		{
-			IntRect touchingTiles = this.GetTouchingTiles(guo.bounds);
-			if (!guo.updatePhysics)
-			{
-				for (int i = touchingTiles.ymin; i <= touchingTiles.ymax; i++)
-				{
-					for (int j = touchingTiles.xmin; j <= touchingTiles.xmax; j++)
-					{
-						RecastGraph.NavmeshTile graph = this.tiles[i * this.tileXCount + j];
-						NavMeshGraph.UpdateArea(guo, graph);
-					}
-				}
-				return;
-			}
-			if (!this.dynamic)
-			{
-				throw new Exception("Recast graph must be marked as dynamic to enable graph updates with updatePhysics = true");
-			}
-			Voxelize voxelize = this.globalVox;
-			if (voxelize == null)
-			{
-				throw new InvalidOperationException("No Voxelizer object. UpdateAreaInit should have been called before this function.");
-			}
-			for (int k = touchingTiles.xmin; k <= touchingTiles.xmax; k++)
-			{
-				for (int l = touchingTiles.ymin; l <= touchingTiles.ymax; l++)
-				{
-					this.stagingTiles.Add(this.BuildTileMesh(voxelize, k, l, 0));
-				}
-			}
-			uint graphIndex = (uint)AstarPath.active.astarData.GetGraphIndex(this);
-			for (int m = 0; m < this.stagingTiles.Count; m++)
-			{
-				RecastGraph.NavmeshTile navmeshTile = this.stagingTiles[m];
-				GraphNode[] nodes = navmeshTile.nodes;
-				for (int n = 0; n < nodes.Length; n++)
-				{
-					nodes[n].GraphIndex = graphIndex;
-				}
-			}
-		}
-
-		
-		void IUpdatableGraph.UpdateAreaPost(GraphUpdateObject guo)
-		{
-			for (int i = 0; i < this.stagingTiles.Count; i++)
-			{
-				RecastGraph.NavmeshTile navmeshTile = this.stagingTiles[i];
-				int num = navmeshTile.x + navmeshTile.z * this.tileXCount;
-				RecastGraph.NavmeshTile navmeshTile2 = this.tiles[num];
-				for (int j = 0; j < navmeshTile2.nodes.Length; j++)
-				{
-					navmeshTile2.nodes[j].Destroy();
-				}
-				this.tiles[num] = navmeshTile;
-			}
-			for (int k = 0; k < this.stagingTiles.Count; k++)
-			{
-				RecastGraph.NavmeshTile tile = this.stagingTiles[k];
-				this.ConnectTileWithNeighbours(tile, false);
-			}
-			this.stagingTiles.Clear();
-		}
-
 		
 		
 		public Bounds forcedBounds
@@ -309,6 +213,102 @@ namespace Pathfinding
 			IntRect intRect = new IntRect(Mathf.RoundToInt(b.min.x / ((float)this.tileSizeX * this.cellSize)), Mathf.RoundToInt(b.min.z / ((float)this.tileSizeZ * this.cellSize)), Mathf.RoundToInt(b.max.x / ((float)this.tileSizeX * this.cellSize)) - 1, Mathf.RoundToInt(b.max.z / ((float)this.tileSizeZ * this.cellSize)) - 1);
 			intRect = IntRect.Intersection(intRect, new IntRect(0, 0, this.tileXCount - 1, this.tileZCount - 1));
 			return intRect;
+		}
+
+		
+		GraphUpdateThreading IUpdatableGraph.CanUpdateAsync(GraphUpdateObject o)
+		{
+			return (!o.updatePhysics) ? GraphUpdateThreading.SeparateThread : ((GraphUpdateThreading)7);
+		}
+
+		
+		void IUpdatableGraph.UpdateAreaInit(GraphUpdateObject o)
+		{
+			if (!o.updatePhysics)
+			{
+				return;
+			}
+			if (!this.dynamic)
+			{
+				throw new Exception("Recast graph must be marked as dynamic to enable graph updates");
+			}
+			RelevantGraphSurface.UpdateAllPositions();
+			IntRect touchingTiles = this.GetTouchingTiles(o.bounds);
+			Bounds tileBounds = this.GetTileBounds(touchingTiles);
+			tileBounds.Expand(new Vector3(1f, 0f, 1f) * this.TileBorderSizeInWorldUnits * 2f);
+			List<RasterizationMesh> inputMeshes = this.CollectMeshes(tileBounds);
+			if (this.globalVox == null)
+			{
+				this.globalVox = new Voxelize(this.CellHeight, this.cellSize, this.walkableClimb, this.walkableHeight, this.maxSlope);
+				this.globalVox.maxEdgeLength = this.maxEdgeLength;
+			}
+			this.globalVox.inputMeshes = inputMeshes;
+		}
+
+		
+		void IUpdatableGraph.UpdateArea(GraphUpdateObject guo)
+		{
+			IntRect touchingTiles = this.GetTouchingTiles(guo.bounds);
+			if (!guo.updatePhysics)
+			{
+				for (int i = touchingTiles.ymin; i <= touchingTiles.ymax; i++)
+				{
+					for (int j = touchingTiles.xmin; j <= touchingTiles.xmax; j++)
+					{
+						RecastGraph.NavmeshTile graph = this.tiles[i * this.tileXCount + j];
+						NavMeshGraph.UpdateArea(guo, graph);
+					}
+				}
+				return;
+			}
+			if (!this.dynamic)
+			{
+				throw new Exception("Recast graph must be marked as dynamic to enable graph updates with updatePhysics = true");
+			}
+			Voxelize voxelize = this.globalVox;
+			if (voxelize == null)
+			{
+				throw new InvalidOperationException("No Voxelizer object. UpdateAreaInit should have been called before this function.");
+			}
+			for (int k = touchingTiles.xmin; k <= touchingTiles.xmax; k++)
+			{
+				for (int l = touchingTiles.ymin; l <= touchingTiles.ymax; l++)
+				{
+					this.stagingTiles.Add(this.BuildTileMesh(voxelize, k, l, 0));
+				}
+			}
+			uint graphIndex = (uint)AstarPath.active.astarData.GetGraphIndex(this);
+			for (int m = 0; m < this.stagingTiles.Count; m++)
+			{
+				RecastGraph.NavmeshTile navmeshTile = this.stagingTiles[m];
+				GraphNode[] nodes = navmeshTile.nodes;
+				for (int n = 0; n < nodes.Length; n++)
+				{
+					nodes[n].GraphIndex = graphIndex;
+				}
+			}
+		}
+
+		
+		void IUpdatableGraph.UpdateAreaPost(GraphUpdateObject guo)
+		{
+			for (int i = 0; i < this.stagingTiles.Count; i++)
+			{
+				RecastGraph.NavmeshTile navmeshTile = this.stagingTiles[i];
+				int num = navmeshTile.x + navmeshTile.z * this.tileXCount;
+				RecastGraph.NavmeshTile navmeshTile2 = this.tiles[num];
+				for (int j = 0; j < navmeshTile2.nodes.Length; j++)
+				{
+					navmeshTile2.nodes[j].Destroy();
+				}
+				this.tiles[num] = navmeshTile;
+			}
+			for (int k = 0; k < this.stagingTiles.Count; k++)
+			{
+				RecastGraph.NavmeshTile tile = this.stagingTiles[k];
+				this.ConnectTileWithNeighbours(tile, false);
+			}
+			this.stagingTiles.Clear();
 		}
 
 		
@@ -672,29 +672,29 @@ namespace Pathfinding
 			this.walkableClimb = Mathf.Min(this.walkableClimb, this.walkableHeight);
 			List<RasterizationMesh>[] buckets = this.PutMeshesIntoTileBuckets(meshes);
 			Queue<Int2> tileQueue = new Queue<Int2>();
-			for (int z = 0; z < this.tileZCount; z++)
+			for (int i = 0; i < this.tileZCount; i++)
 			{
-				for (int x = 0; x < this.tileXCount; x++)
+				for (int j = 0; j < this.tileXCount; j++)
 				{
-					tileQueue.Enqueue(new Int2(x, z));
+					tileQueue.Enqueue(new Int2(j, i));
 				}
 			}
 			int threadCount = Mathf.Min(tileQueue.Count, Mathf.Max(1, AstarPath.CalculateThreadCount(ThreadCount.AutomaticHighLoad)));
 			ManualResetEvent[] waitEvents = new ManualResetEvent[threadCount];
-			for (int i = 0; i < waitEvents.Length; i++)
+			for (int k = 0; k < waitEvents.Length; k++)
 			{
-				waitEvents[i] = new ManualResetEvent(false);
+				waitEvents[k] = new ManualResetEvent(false);
 				ThreadPool.QueueUserWorkItem(delegate(object state)
 				{
-					this.<>f__this.BuildTiles(this.<tileQueue>__2, this.<buckets>__1, this.<waitEvents>__6[(int)state], (int)state);
-				}, i);
+					this.$this.BuildTiles(tileQueue, buckets, waitEvents[(int)state], (int)state);
+				}, k);
 			}
 			int timeoutMillis = (!Application.isPlaying) ? 200 : 1;
 			while (!WaitHandle.WaitAll(waitEvents, timeoutMillis))
 			{
-				Queue<Int2> obj = tileQueue;
+				object tileQueue3 = tileQueue;
 				int count;
-				lock (obj)
+				lock (tileQueue3)
 				{
 					count = tileQueue.Count;
 				}
@@ -710,31 +710,31 @@ namespace Pathfinding
 			uint graphIndex = (uint)AstarPath.active.astarData.GetGraphIndex(this);
 			this.GetNodes(delegate(GraphNode node)
 			{
-				node.GraphIndex = this.<graphIndex>__11;
+				node.GraphIndex = graphIndex;
 				return true;
 			});
 			for (int coordinateSum = 0; coordinateSum <= 1; coordinateSum++)
 			{
-				for (int j = 0; j < this.tiles.Length; j++)
+				for (int l = 0; l < this.tiles.Length; l++)
 				{
-					if ((this.tiles[j].x + this.tiles[j].z) % 2 == coordinateSum)
+					if ((this.tiles[l].x + this.tiles[l].z) % 2 == coordinateSum)
 					{
-						tileQueue.Enqueue(new Int2(this.tiles[j].x, this.tiles[j].z));
+						tileQueue.Enqueue(new Int2(this.tiles[l].x, this.tiles[l].z));
 					}
 				}
-				for (int k = 0; k < waitEvents.Length; k++)
+				for (int m = 0; m < waitEvents.Length; m++)
 				{
-					waitEvents[k].Reset();
+					waitEvents[m].Reset();
 					ThreadPool.QueueUserWorkItem(delegate(object state)
 					{
-						this.<>f__this.ConnectTiles(this.<tileQueue>__2, state as ManualResetEvent);
-					}, waitEvents[k]);
+						this.$this.ConnectTiles(tileQueue, state as ManualResetEvent);
+					}, waitEvents[m]);
 				}
 				while (!WaitHandle.WaitAll(waitEvents, timeoutMillis))
 				{
-					Queue<Int2> obj2 = tileQueue;
+					object tileQueue2 = tileQueue;
 					int count2;
-					lock (obj2)
+					lock (tileQueue2)
 					{
 						count2 = tileQueue.Count;
 					}
@@ -926,7 +926,7 @@ namespace Pathfinding
 				int num2 = x + z * this.tileXCount;
 				num2 <<= 12;
 				TriangleMeshNode.SetNavmeshHolder((int)num, navmeshTile);
-				AstarPath active = AstarPath.active;
+				object active = AstarPath.active;
 				lock (active)
 				{
 					for (int i = 0; i < array.Length; i++)
@@ -1608,21 +1608,6 @@ namespace Pathfinding
 		}
 
 		
-		public const int VertexIndexMask = 4095;
-
-		
-		public const int TileIndexMask = 524287;
-
-		
-		public const int TileIndexOffset = 12;
-
-		
-		public const int BorderVertexMask = 1;
-
-		
-		public const int BorderVertexOffset = 31;
-
-		
 		public bool dynamic = true;
 
 		
@@ -1758,6 +1743,21 @@ namespace Pathfinding
 		private List<RecastGraph.NavmeshTile> stagingTiles = new List<RecastGraph.NavmeshTile>();
 
 		
+		public const int VertexIndexMask = 4095;
+
+		
+		public const int TileIndexMask = 524287;
+
+		
+		public const int TileIndexOffset = 12;
+
+		
+		public const int BorderVertexMask = 1;
+
+		
+		public const int BorderVertexOffset = 31;
+
+		
 		public enum RelevantGraphSurfaceMode
 		{
 			
@@ -1769,7 +1769,7 @@ namespace Pathfinding
 		}
 
 		
-		public class NavmeshTile : INavmesh, INavmeshHolder
+		public class NavmeshTile : INavmeshHolder, INavmesh
 		{
 			
 			public void GetTileCoordinates(int tileIndex, out int x, out int z)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UniLinq;
 using UnityEngine;
@@ -80,7 +81,11 @@ internal class BoltDebugStartSettings
 	{
 		if (BoltDebugStartSettings.startClient || BoltDebugStartSettings.startServer)
 		{
-			BoltDebugStartSettings.EnumWindows(new BoltDebugStartSettings.EnumWindowsProc(BoltDebugStartSettings.Window), IntPtr.Zero);
+			if (BoltDebugStartSettings.<>f__mg$cache0 == null)
+			{
+				BoltDebugStartSettings.<>f__mg$cache0 = new BoltDebugStartSettings.EnumWindowsProc(BoltDebugStartSettings.Window);
+			}
+			BoltDebugStartSettings.EnumWindows(BoltDebugStartSettings.<>f__mg$cache0, IntPtr.Zero);
 			if (BoltDebugStartSettings.unityHandle.Wrapper != null)
 			{
 				int width = Screen.width;
@@ -96,18 +101,25 @@ internal class BoltDebugStartSettings
 				}
 				else
 				{
-					switch (BoltDebugStartSettings.windowIndex % 4)
+					int num = BoltDebugStartSettings.windowIndex % 4;
+					if (num != 1)
 					{
-					case 1:
+						if (num != 2)
+						{
+							if (num == 3)
+							{
+								x = systemMetrics - width;
+								y = systemMetrics2 - height;
+							}
+						}
+						else
+						{
+							y = systemMetrics2 - height;
+						}
+					}
+					else
+					{
 						x = systemMetrics - width;
-						break;
-					case 2:
-						y = systemMetrics2 - height;
-						break;
-					case 3:
-						x = systemMetrics - width;
-						y = systemMetrics2 - height;
-						break;
 					}
 				}
 				BoltDebugStartSettings.SetWindowPos(BoltDebugStartSettings.unityHandle.Handle, BoltDebugStartSettings.HWND.Top, x, y, width, height, BoltDebugStartSettings.SWP.NOSIZE);
@@ -120,6 +132,10 @@ internal class BoltDebugStartSettings
 
 	
 	private static HandleRef unityHandle = default(HandleRef);
+
+	
+	[CompilerGenerated]
+	private static BoltDebugStartSettings.EnumWindowsProc <>f__mg$cache0;
 
 	
 	private static class HWND

@@ -138,6 +138,7 @@ public class Fish : MonoBehaviour
 		if (this.col)
 		{
 			this.col.isTrigger = true;
+			this.col.enabled = true;
 		}
 		this.Dead = false;
 		this.exploded = false;
@@ -161,6 +162,45 @@ public class Fish : MonoBehaviour
 			this.fishTypeInt = UnityEngine.Random.Range(0, this.fishTypeMesh.Length);
 			this.mySkin.sharedMaterial = this.fishTypeMat[this.fishTypeInt];
 			this.mySkin.sharedMesh = this.fishTypeMesh[this.fishTypeInt];
+			AnimalTypeTrigger component = base.transform.GetComponent<AnimalTypeTrigger>();
+			if (component)
+			{
+				if (this.fishPrefabTypeInt == 2)
+				{
+					if (this.fishTypeInt == 0)
+					{
+						this.fishNatureGuideValue = 0;
+					}
+					else
+					{
+						this.fishNatureGuideValue = 1;
+					}
+				}
+				else if (this.fishPrefabTypeInt == 4)
+				{
+					if (this.fishTypeInt == 0)
+					{
+						this.fishNatureGuideValue = 2;
+					}
+					else if (this.fishTypeInt == 1)
+					{
+						this.fishNatureGuideValue = 3;
+					}
+					else if (this.fishTypeInt == 2)
+					{
+						this.fishNatureGuideValue = 4;
+					}
+					else if (this.fishTypeInt == 3)
+					{
+						this.fishNatureGuideValue = 5;
+					}
+				}
+				else if (this.fishPrefabTypeInt == 3)
+				{
+					this.fishNatureGuideValue = 6;
+				}
+				component.setupFishType(this.fishNatureGuideValue);
+			}
 		}
 	}
 
@@ -485,6 +525,7 @@ public class Fish : MonoBehaviour
 		this.rb.useGravity = false;
 		this.rb.isKinematic = true;
 		this.col.isTrigger = true;
+		this.col.enabled = false;
 		if (!this.Dead)
 		{
 			FMODCommon.PlayOneshot(this.dieEvent, base.transform);
@@ -937,6 +978,9 @@ public class Fish : MonoBehaviour
 
 	
 	public int fishPrefabTypeInt;
+
+	
+	public int fishNatureGuideValue;
 
 	
 	[Header("FMOD")]

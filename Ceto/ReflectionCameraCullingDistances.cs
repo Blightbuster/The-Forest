@@ -4,8 +4,8 @@ using UnityEngine;
 namespace Ceto
 {
 	
-	[RequireComponent(typeof(Camera))]
 	[AddComponentMenu("Ceto/Camera/ReflectionCameraCullingDistances")]
+	[RequireComponent(typeof(Camera))]
 	public class ReflectionCameraCullingDistances : MonoBehaviour
 	{
 		

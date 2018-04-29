@@ -11,7 +11,11 @@ namespace TheForest.Utils
 		{
 			if (Input.player == null && !CoopPeerStarter.DedicatedHost)
 			{
-				if (PlayerPreferences.UseXInput)
+				if (ForestVR.Enabled)
+				{
+					UnityEngine.Object.Instantiate<GameObject>(this._rewiredVRPrefab);
+				}
+				else if (PlayerPreferences.UseXInput)
 				{
 					UnityEngine.Object.Instantiate<GameObject>(this._rewiredXInputPrefab);
 				}
@@ -36,6 +40,9 @@ namespace TheForest.Utils
 				new GameObject("CoopAckChecker").AddComponent<CoopAckChecker>();
 			}
 		}
+
+		
+		public GameObject _rewiredVRPrefab;
 
 		
 		public GameObject _rewiredXInputPrefab;

@@ -31,7 +31,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			if (num < 0 || num > Network.connections.Length)
 			{
-				this.LogError("Connection index out of range: " + num);
+				base.LogError("Connection index out of range: " + num);
 			}
 			else
 			{
@@ -56,8 +56,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("Connection index to close")]
+		[UIHint(UIHint.Variable)]
 		public FsmInt connectionIndex;
 
 		

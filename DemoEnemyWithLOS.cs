@@ -37,7 +37,7 @@ public class DemoEnemyWithLOS : MonoBehaviour
 		if (this.life <= 0)
 		{
 			this.isDead = true;
-			UnityEngine.Object.Instantiate(this.explosion.gameObject, base.transform.position, base.transform.rotation);
+			UnityEngine.Object.Instantiate<GameObject>(this.explosion.gameObject, base.transform.position, base.transform.rotation);
 			base.gameObject.SetActive(false);
 		}
 	}

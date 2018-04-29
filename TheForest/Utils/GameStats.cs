@@ -193,7 +193,7 @@ namespace TheForest.Utils
 		
 		private void OnStoryProgress(object o)
 		{
-			GameStats.StoryElements storyElements = (GameStats.StoryElements)((int)o);
+			GameStats.StoryElements storyElements = (GameStats.StoryElements)o;
 			this._stats._storyElements = (this._stats._storyElements | storyElements);
 		}
 

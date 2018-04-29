@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,6 +19,7 @@ public class clsragdollify : MonoBehaviour
 			this.enemyHealth = base.transform.GetComponent<EnemyHealth>();
 		}
 		this.animalHealth = base.GetComponentInParent<animalHealth>();
+		this.ca = base.GetComponentInParent<CoopAnimal>();
 		this.ast = base.transform.GetComponentInChildren<arrowStickToTarget>();
 		if (!this.ast && base.transform.parent)
 		{
@@ -45,13 +47,26 @@ public class clsragdollify : MonoBehaviour
 		}
 		if (!this.hackVelocity)
 		{
-			foreach (object obj in varpdestination)
+			IEnumerator enumerator = varpdestination.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				Transform transform2 = varpsource.Find(transform.name);
-				if (transform2)
+				while (enumerator.MoveNext())
 				{
-					this.metcopytransforms(transform2, transform, varpvelocity * 1f);
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					Transform transform2 = varpsource.Find(transform.name);
+					if (transform2)
+					{
+						this.metcopytransforms(transform2, transform, varpvelocity * 1f);
+					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
 				}
 			}
 		}
@@ -60,7 +75,7 @@ public class clsragdollify : MonoBehaviour
 	
 	public Transform metgoragdoll(Vector3 varpvelocity = default(Vector3))
 	{
-		Transform transform = UnityEngine.Object.Instantiate(this.vargamragdoll, base.transform.position, base.transform.rotation) as Transform;
+		Transform transform = UnityEngine.Object.Instantiate<Transform>(this.vargamragdoll, base.transform.position, base.transform.rotation);
 		if (!this.ignoreScale)
 		{
 			transform.localScale = base.transform.localScale;
@@ -71,12 +86,23 @@ public class clsragdollify : MonoBehaviour
 			transform.gameObject.SendMessage("setSkin", this.enemyHealth.MySkin.sharedMaterial, SendMessageOptions.DontRequireReceiver);
 			this.enemyHealth.MySkin.GetPropertyBlock(this.bloodPropertyBlock);
 			transform.gameObject.SendMessage("setSkinDamageProperty", this.bloodPropertyBlock, SendMessageOptions.DontRequireReceiver);
+			if (this.enemyHealth.Fire.Length > 0)
+			{
+				mutantTransferFire component = base.transform.parent.GetComponent<mutantTransferFire>();
+				foreach (GameObject gameObject in this.enemyHealth.Fire)
+				{
+					if (gameObject.activeSelf && component)
+					{
+						component.transferFireToTarget(gameObject, transform.gameObject);
+					}
+				}
+			}
 			if (BoltNetwork.isServer)
 			{
-				BoltEntity component = base.transform.parent.GetComponent<BoltEntity>();
-				if (component)
+				BoltEntity component2 = base.transform.parent.GetComponent<BoltEntity>();
+				if (component2)
 				{
-					IMutantState state = component.GetState<IMutantState>();
+					IMutantState state = component2.GetState<IMutantState>();
 					CoopMutantDummyToken coopMutantDummyToken = new CoopMutantDummyToken();
 					coopMutantDummyToken.Scale = base.transform.localScale;
 					coopMutantDummyToken.skinDamage1 = this.bloodPropertyBlock.GetFloat("_Damage1");
@@ -84,8 +110,8 @@ public class clsragdollify : MonoBehaviour
 					coopMutantDummyToken.skinDamage3 = this.bloodPropertyBlock.GetFloat("_Damage3");
 					coopMutantDummyToken.skinDamage4 = this.bloodPropertyBlock.GetFloat("_Damage4");
 					coopMutantDummyToken.skinColor = this.enemyHealth.MySkin.sharedMaterial.GetColor("_Color");
-					mutantTypeSetup component2 = base.transform.parent.GetComponent<mutantTypeSetup>();
-					if (component2)
+					mutantTypeSetup component3 = base.transform.parent.GetComponent<mutantTypeSetup>();
+					if (component3)
 					{
 					}
 					BoltNetwork.Attach(transform.gameObject, coopMutantDummyToken);
@@ -98,26 +124,51 @@ public class clsragdollify : MonoBehaviour
 			float @float = this.bloodPropertyBlock.GetFloat("_Damage1");
 			transform.gameObject.SendMessage("setSkinDamageProperty", this.bloodPropertyBlock, SendMessageOptions.DontRequireReceiver);
 		}
+		if (this.animalHealth && this.animalHealth.Fire)
+		{
+			mutantTransferFire component4;
+			if (base.transform.parent)
+			{
+				component4 = base.transform.parent.GetComponent<mutantTransferFire>();
+			}
+			else
+			{
+				component4 = base.transform.GetComponent<mutantTransferFire>();
+			}
+			if (this.animalHealth.Fire.activeSelf && component4)
+			{
+				component4.transferFireToTarget(this.animalHealth.Fire, transform.gameObject);
+			}
+		}
+		if (this.bat && this.burning)
+		{
+			transform.gameObject.SendMessage("enableFire", SendMessageOptions.DontRequireReceiver);
+		}
 		if (this.animal)
 		{
-			animalSpawnFunctions component3 = base.transform.root.GetComponent<animalSpawnFunctions>();
-			if (component3)
+			animalSpawnFunctions component5 = base.transform.root.GetComponent<animalSpawnFunctions>();
+			if (component5)
 			{
-				transform.gameObject.SendMessage("setSkin", component3.meshRenderer.sharedMaterial, SendMessageOptions.DontRequireReceiver);
+				transform.gameObject.SendMessage("setSkin", component5.meshRenderer.sharedMaterial, SendMessageOptions.DontRequireReceiver);
+			}
+			if (this.ca && this.ca.isSnow)
+			{
+				transform.gameObject.SendMessage("setupSnowRabbitTypeTrigger", SendMessageOptions.DontRequireReceiver);
 			}
 		}
 		if (this.bird)
 		{
-			lb_Bird component4 = base.transform.GetComponent<lb_Bird>();
-			transform.gameObject.SendMessage("setSkin", component4.skin.sharedMaterial, SendMessageOptions.DontRequireReceiver);
+			if (this.burning)
+			{
+				transform.gameObject.SendMessage("enableFire", SendMessageOptions.DontRequireReceiver);
+			}
+			lb_Bird component6 = base.transform.GetComponent<lb_Bird>();
+			transform.gameObject.SendMessage("setSkin", component6.skin.sharedMaterial, SendMessageOptions.DontRequireReceiver);
 		}
 		if (this.fish)
 		{
 			transform.gameObject.SendMessage("doSkinSetup", this.fishScript.fishTypeInt, SendMessageOptions.DontRequireReceiver);
-		}
-		if (this.burning)
-		{
-			transform.gameObject.SendMessage("enableFire", SendMessageOptions.DontRequireReceiver);
+			transform.gameObject.SendMessage("setupFishType", this.fishScript.fishNatureGuideValue, SendMessageOptions.DontRequireReceiver);
 		}
 		if (this.alreadyBurnt)
 		{
@@ -125,15 +176,15 @@ public class clsragdollify : MonoBehaviour
 		}
 		if (this.ast)
 		{
-			arrowStickToTarget component5 = transform.GetComponent<arrowStickToTarget>();
-			if (component5)
+			arrowStickToTarget component7 = transform.GetComponent<arrowStickToTarget>();
+			if (component7)
 			{
 				foreach (KeyValuePair<Transform, int> keyValuePair in this.ast.stuckArrows)
 				{
 					if (keyValuePair.Key)
 					{
-						component5.CreatureType(this.ast.IsAnimal, this.ast.IsBird, this.ast.IsFish);
-						component5.applyStuckArrowToDummy(keyValuePair.Key, keyValuePair.Key.localPosition, keyValuePair.Key.localRotation, keyValuePair.Value);
+						component7.CreatureType(this.ast.IsAnimal, this.ast.IsBird, this.ast.IsFish);
+						component7.applyStuckArrowToDummy(keyValuePair.Key, keyValuePair.Key.localPosition, keyValuePair.Key.localRotation, keyValuePair.Value);
 					}
 				}
 			}
@@ -165,6 +216,9 @@ public class clsragdollify : MonoBehaviour
 
 	
 	public bool bird;
+
+	
+	public bool bat;
 
 	
 	public bool burning;
@@ -201,4 +255,7 @@ public class clsragdollify : MonoBehaviour
 
 	
 	private arrowStickToTarget ast;
+
+	
+	public CoopAnimal ca;
 }

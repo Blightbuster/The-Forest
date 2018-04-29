@@ -60,12 +60,12 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			if (value < 0 || value >= source.Count)
 			{
-				this.LogError("start index out of range");
+				base.LogError("start index out of range");
 				return;
 			}
 			if (this.count.Value < 0)
 			{
-				this.LogError("count can not be negative");
+				base.LogError("count can not be negative");
 				return;
 			}
 			num = Mathf.Min(value + value2, source.Count);
@@ -76,10 +76,10 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
-		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component to copy from")]
-		[RequiredField]
 		[ActionSection("Set up")]
+		[RequiredField]
+		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component to copy from")]
+		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -87,10 +87,10 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString reference;
 
 		
-		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component to copy to")]
-		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		[ActionSection("Result")]
 		[RequiredField]
+		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component to copy to")]
+		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObjectTarget;
 
 		

@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using Rewired.Utils.Interfaces;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Rewired.Utils
 {
@@ -10,15 +12,27 @@ namespace Rewired.Utils
 	public class ExternalTools : IExternalTools
 	{
 		
+		public object GetPlatformInitializer()
+		{
+			return null;
+		}
+
 		
-		
-		public event Action<uint, bool> XboxOneInput_OnGamepadStateChange;
+		public string GetFocusedEditorWindowTitle()
+		{
+			return string.Empty;
+		}
 
 		
 		public bool LinuxInput_IsJoystickPreconfigured(string name)
 		{
 			return false;
 		}
+
+		
+		
+		
+		public event Action<uint, bool> XboxOneInput_OnGamepadStateChange;
 
 		
 		public int XboxOneInput_GetUserIdForGamepad(uint id)
@@ -206,6 +220,51 @@ namespace Rewired.Utils
 		public IntPtr PS4Input_MoveGetControllerInputForTracking()
 		{
 			return IntPtr.Zero;
+		}
+
+		
+		public void GetDeviceVIDPIDs(out List<int> vids, out List<int> pids)
+		{
+			vids = new List<int>();
+			pids = new List<int>();
+		}
+
+		
+		public bool UnityUI_Graphic_GetRaycastTarget(object graphic)
+		{
+			return !(graphic as Graphic == null) && (graphic as Graphic).raycastTarget;
+		}
+
+		
+		public void UnityUI_Graphic_SetRaycastTarget(object graphic, bool value)
+		{
+			if (graphic as Graphic == null)
+			{
+				return;
+			}
+			(graphic as Graphic).raycastTarget = value;
+		}
+
+		
+		
+		public bool UnityInput_IsTouchPressureSupported
+		{
+			get
+			{
+				return Input.touchPressureSupported;
+			}
+		}
+
+		
+		public float UnityInput_GetTouchPressure(ref Touch touch)
+		{
+			return touch.pressure;
+		}
+
+		
+		public float UnityInput_GetTouchMaximumPossiblePressure(ref Touch touch)
+		{
+			return touch.maximumPossiblePressure;
 		}
 	}
 }

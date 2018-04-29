@@ -10,19 +10,16 @@ public class FireParticle : EntityBehaviour<IFireParticle>
 	
 	public override void Attached()
 	{
-		base.state.Transform.SetTransforms(base.transform);
-	}
-
-	
-	private void Awake()
-	{
-		this.Ps = base.gameObject.GetComponent<ParticleScaler>();
+		if (base.entity && base.entity.isAttached && base.state != null)
+		{
+			base.state.Transform.SetTransforms(base.transform);
+		}
 	}
 
 	
 	private void OnEnable()
 	{
-		base.StartCoroutine(this.DelayedEnable(BoltNetwork.isRunning && this.entity && !this.entity.isAttached));
+		base.StartCoroutine(this.DelayedEnable(BoltNetwork.isRunning && base.entity && !base.entity.isAttached));
 	}
 
 	
@@ -38,11 +35,11 @@ public class FireParticle : EntityBehaviour<IFireParticle>
 		{
 			yield return null;
 		}
-		if (BoltNetwork.isRunning && this.entity && !this.entity.isAttached)
+		if (BoltNetwork.isRunning && base.entity && !base.entity.isAttached)
 		{
 			BoltNetwork.Attach(base.gameObject);
 		}
-		if ((!BoltNetwork.isRunning || (this.entity && this.entity.isAttached && this.entity.isOwner)) && this.MyFuel <= 0f)
+		if ((!BoltNetwork.isRunning || (base.entity && base.entity.isAttached && base.entity.isOwner)) && this.MyFuel <= 0f)
 		{
 			this.MyFuel = 20f;
 		}
@@ -52,13 +49,12 @@ public class FireParticle : EntityBehaviour<IFireParticle>
 	
 	private void Update()
 	{
-		if (!BoltNetwork.isRunning || (this.entity && this.entity.isAttached && this.entity.isOwner))
+		if (!BoltNetwork.isRunning || (base.entity && base.entity.isAttached && base.entity.isOwner))
 		{
 			if (this.MyFuel > 0f)
 			{
 				this.Burning = true;
 				this.MyFuel -= 1f * Time.deltaTime;
-				this.Ps.particleScale = this.MyFuel / 100f;
 			}
 			else if (this.Burning)
 			{
@@ -74,7 +70,7 @@ public class FireParticle : EntityBehaviour<IFireParticle>
 		{
 			this.Parent.ExtinguishPoint(this);
 		}
-		if (BoltNetwork.isRunning && this.entity && this.entity.isAttached && this.entity.isOwner)
+		if (BoltNetwork.isRunning && base.entity && base.entity.isAttached && base.entity.isOwner)
 		{
 			BoltNetwork.Detach(base.gameObject);
 		}
@@ -99,9 +95,6 @@ public class FireParticle : EntityBehaviour<IFireParticle>
 	
 	[HideInInspector]
 	public FireDamage Parent;
-
-	
-	private ParticleScaler Ps;
 
 	
 	private bool Burning;

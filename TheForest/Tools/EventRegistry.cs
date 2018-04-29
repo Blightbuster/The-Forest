@@ -139,6 +139,10 @@ namespace TheForest.Tools
 		public static EventRegistry Achievements = new EventRegistry();
 
 		
+		
+		public delegate void SubscriberCallback(object eventParameter);
+
+		
 		private class EventSubscription
 		{
 			
@@ -164,9 +168,5 @@ namespace TheForest.Tools
 			
 			Achievements
 		}
-
-		
-		
-		public delegate void SubscriberCallback(object eventParameter);
 	}
 }

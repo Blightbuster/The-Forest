@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Creates an FSM from a saved FSM Template.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Creates an FSM from a saved FSM Template.")]
 	public class RunFSM : FsmStateAction
 	{
 		

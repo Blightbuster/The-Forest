@@ -5,7 +5,7 @@ using System.Collections.Specialized;
 namespace LitJson
 {
 	
-	public interface IJsonWrapper : IEnumerable, IList, ICollection, IDictionary, IOrderedDictionary
+	public interface IJsonWrapper : IList, IOrderedDictionary, ICollection, IEnumerable, IDictionary
 	{
 		
 		

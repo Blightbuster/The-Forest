@@ -11,8 +11,8 @@ using UnityEngine;
 namespace TheForest.Buildings.Creation
 {
 	
-	[DoNotSerializePublic]
 	[AddComponentMenu("Buildings/Creation/Stairs Architect")]
+	[DoNotSerializePublic]
 	public class StairsArchitect : MonoBehaviour, ICoopStructure
 	{
 		
@@ -202,16 +202,42 @@ namespace TheForest.Buildings.Creation
 				this._stairsRoot.name = "StairsRootBuilt";
 				this._logPool = null;
 				this._newPool = null;
-				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.<>f__this._logItemId);
+				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.$this._logItemId);
 				List<GameObject> logStacks = new List<GameObject>();
-				foreach (object obj in this._stairsRoot)
+				IEnumerator enumerator = this._stairsRoot.GetEnumerator();
+				try
 				{
-					Transform edge = (Transform)obj;
-					foreach (object obj2 in edge)
+					while (enumerator.MoveNext())
 					{
-						Transform logStack = (Transform)obj2;
-						logStack.gameObject.SetActive(false);
-						logStacks.Add(logStack.gameObject);
+						object obj = enumerator.Current;
+						Transform transform2 = (Transform)obj;
+						IEnumerator enumerator2 = transform2.GetEnumerator();
+						try
+						{
+							while (enumerator2.MoveNext())
+							{
+								object obj2 = enumerator2.Current;
+								Transform transform3 = (Transform)obj2;
+								transform3.gameObject.SetActive(false);
+								logStacks.Add(transform3.gameObject);
+							}
+						}
+						finally
+						{
+							IDisposable disposable;
+							if ((disposable = (enumerator2 as IDisposable)) != null)
+							{
+								disposable.Dispose();
+							}
+						}
+					}
+				}
+				finally
+				{
+					IDisposable disposable2;
+					if ((disposable2 = (enumerator as IDisposable)) != null)
+					{
+						disposable2.Dispose();
 					}
 				}
 				ri._renderers = logStacks.ToArray();
@@ -234,9 +260,9 @@ namespace TheForest.Buildings.Creation
 					bc.isTrigger = true;
 				}
 				Bounds b = default(Bounds);
-				foreach (Vector3 p in this._multiPointsPositions)
+				foreach (Vector3 position in this._multiPointsPositions)
 				{
-					b.Encapsulate(this._craftStructure.transform.InverseTransformPoint(p));
+					b.Encapsulate(this._craftStructure.transform.InverseTransformPoint(position));
 				}
 				b.Encapsulate(this._craftStructure.transform.InverseTransformPoint(this.GetPointFloorPosition(this._craftStructure.transform.position)));
 				Vector3 localSize = b.size;
@@ -259,9 +285,9 @@ namespace TheForest.Buildings.Creation
 				bc.enabled = true;
 				if (!this._craftStructure.gameObject.GetComponent<getStructureStrength>())
 				{
-					getStructureStrength gss = this._craftStructure.gameObject.AddComponent<getStructureStrength>();
-					gss._strength = getStructureStrength.strength.normal;
-					gss._type = getStructureStrength.structureType.floor;
+					getStructureStrength getStructureStrength = this._craftStructure.gameObject.AddComponent<getStructureStrength>();
+					getStructureStrength._strength = getStructureStrength.strength.normal;
+					getStructureStrength._type = getStructureStrength.structureType.floor;
 				}
 			}
 			yield break;
@@ -412,7 +438,7 @@ namespace TheForest.Buildings.Creation
 				transform2.rotation = Quaternion.LookRotation(forward);
 				transform2.position = vector2 + vector4 * d;
 				Vector3 pointFloorPosition = this.GetPointFloorPosition(vector2 + Vector3.down);
-				Transform transform3 = (Transform)UnityEngine.Object.Instantiate(this._stiltPrefab, vector2, Quaternion.identity);
+				Transform transform3 = UnityEngine.Object.Instantiate<Transform>(this._stiltPrefab, vector2, Quaternion.identity);
 				transform3.parent = transform2;
 				transform3.localScale = new Vector3(1f, Mathf.Abs(vector2.y - pointFloorPosition.y) / 4.5f, 1f);
 				if (!this._wasBuilt && !this._wasPlaced)
@@ -493,7 +519,7 @@ namespace TheForest.Buildings.Creation
 				transform.rotation = rotation;
 				return transform;
 			}
-			Transform transform2 = (Transform)UnityEngine.Object.Instantiate(this._logPrefabs[UnityEngine.Random.Range(0, this._logPrefabs.Length)], position, rotation);
+			Transform transform2 = UnityEngine.Object.Instantiate<Transform>(this._logPrefabs[UnityEngine.Random.Range(0, this._logPrefabs.Length)], position, rotation);
 			if (!this._wasBuilt && !this._wasPlaced)
 			{
 				transform2.GetComponentInChildren<Renderer>().sharedMaterial = this._logMat;

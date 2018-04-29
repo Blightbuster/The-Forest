@@ -47,7 +47,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			if (this.fsm == null)
 			{
-				this.LogWarning("Could not find FSM: " + this.fsmName.Value);
+				base.LogWarning("Could not find FSM: " + this.fsmName.Value);
 				return;
 			}
 			FsmQuaternion fsmQuaternion = this.fsm.FsmVariables.GetFsmQuaternion(this.variableName.Value);
@@ -57,7 +57,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			else
 			{
-				this.LogWarning("Could not find variable: " + this.variableName.Value);
+				base.LogWarning("Could not find variable: " + this.variableName.Value);
 			}
 		}
 
@@ -73,19 +73,19 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("Optional name of FSM on Game Object")]
 		[UIHint(UIHint.FsmName)]
+		[Tooltip("Optional name of FSM on Game Object")]
 		public FsmString fsmName;
 
 		
+		[RequiredField]
 		[UIHint(UIHint.FsmQuaternion)]
 		[Tooltip("The name of the FSM variable.")]
-		[RequiredField]
 		public FsmString variableName;
 
 		
-		[Tooltip("Set the value of the variable.")]
 		[RequiredField]
+		[Tooltip("Set the value of the variable.")]
 		public FsmQuaternion setValue;
 
 		

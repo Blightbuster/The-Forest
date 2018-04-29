@@ -60,8 +60,8 @@ public class AeroplaneControlSurfaceAnimator : MonoBehaviour
 	
 	private void RotateSurface(AeroplaneControlSurfaceAnimator.ControlSurface surface, Quaternion rotation)
 	{
-		Quaternion to = surface.originalLocalRotation * rotation;
-		surface.transform.localRotation = Quaternion.Slerp(surface.transform.localRotation, to, this.smoothing * Time.deltaTime);
+		Quaternion b = surface.originalLocalRotation * rotation;
+		surface.transform.localRotation = Quaternion.Slerp(surface.transform.localRotation, b, this.smoothing * Time.deltaTime);
 	}
 
 	

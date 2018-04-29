@@ -45,8 +45,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The angle. Note: You can use degrees, simply check DegtoRad if the angle is expressed in degrees.")]
 		[RequiredField]
+		[Tooltip("The angle. Note: You can use degrees, simply check DegtoRad if the angle is expressed in degrees.")]
 		public FsmFloat angle;
 
 		
@@ -54,9 +54,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmBool DegToRad;
 
 		
-		[Tooltip("The angle cosinus")]
 		[RequiredField]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The angle cosinus")]
 		public FsmFloat result;
 
 		

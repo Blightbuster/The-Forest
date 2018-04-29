@@ -23,16 +23,40 @@ namespace TheForest.Items.World
 					component.useGravity = false;
 					component.isKinematic = true;
 				}
+				if (gameObject.GetComponent<Molotov>())
+				{
+					CapsuleCollider component2 = gameObject.GetComponent<CapsuleCollider>();
+					BoxCollider component3 = gameObject.GetComponent<BoxCollider>();
+					if (component3)
+					{
+						component3.enabled = false;
+					}
+					Collider component4 = gameObject.transform.parent.GetComponent<Collider>();
+					if (component4)
+					{
+						Physics.IgnoreCollision(component2, component4, true);
+					}
+					if (component2)
+					{
+						component2.radius = 3f;
+						component2.center = new Vector3(component2.center.x, 0.4f, component2.center.z);
+						component2.height = 1f;
+					}
+					if (!gameObject.GetComponent<molotovSpearFollow>())
+					{
+						gameObject.AddComponent<molotovSpearFollow>();
+					}
+				}
 				if (!gameObject.GetComponent<destroyAfter>())
 				{
 					gameObject.AddComponent<destroyAfter>().destroyTime = 20f;
 				}
 				if (BoltNetwork.isRunning)
 				{
-					BoltEntity component2 = gameObject.GetComponent<BoltEntity>();
-					if (component2 && !component2.isAttached)
+					BoltEntity component5 = gameObject.GetComponent<BoltEntity>();
+					if (component5 && !component5.isAttached)
 					{
-						BoltNetwork.Attach(component2);
+						BoltNetwork.Attach(component5);
 					}
 				}
 				this._targetView.ActiveBonus = (WeaponStatUpgrade.Types)(-1);
@@ -50,5 +74,8 @@ namespace TheForest.Items.World
 
 		
 		public Transform _position;
+
+		
+		public bool _fixMolotovCollider;
 	}
 }

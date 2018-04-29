@@ -4,11 +4,22 @@ using UniLinq;
 using UnityEngine;
 
 
-[DontStore]
-[ExecuteInEditMode]
 [AddComponentMenu("Storage/Store Materials")]
+[ExecuteInEditMode]
+[DontStore]
 public class StoreMaterials : MonoBehaviour
 {
+	
+	static StoreMaterials()
+	{
+		DelegateSupport.RegisterFunctionType<Texture2D, int>();
+		DelegateSupport.RegisterFunctionType<StoreMaterials, List<StoreMaterials.MaterialProperty>>();
+		DelegateSupport.RegisterFunctionType<StoreMaterials.MaterialProperty, StoreMaterials.MaterialProperty.PropertyType>();
+		DelegateSupport.RegisterFunctionType<StoreMaterials.MaterialProperty, string>();
+		DelegateSupport.RegisterFunctionType<StoreMaterials.StoredValue, StoreMaterials.MaterialProperty>();
+		DelegateSupport.RegisterFunctionType<StoreMaterials.StoredValue, object>();
+	}
+
 	
 	public StoreMaterials()
 	{
@@ -16,6 +27,7 @@ public class StoreMaterials : MonoBehaviour
 		{
 			this.MaterialProperties.Add(new StoreMaterials.MaterialProperty
 			{
+				type = StoreMaterials.MaterialProperty.PropertyType.color,
 				name = "_Color"
 			});
 			this.MaterialProperties.Add(new StoreMaterials.MaterialProperty
@@ -60,6 +72,7 @@ public class StoreMaterials : MonoBehaviour
 			});
 			this.MaterialProperties.Add(new StoreMaterials.MaterialProperty
 			{
+				type = StoreMaterials.MaterialProperty.PropertyType.color,
 				name = "_TintColor"
 			});
 			this.MaterialProperties.Add(new StoreMaterials.MaterialProperty
@@ -94,10 +107,12 @@ public class StoreMaterials : MonoBehaviour
 			});
 			this.MaterialProperties.Add(new StoreMaterials.MaterialProperty
 			{
+				type = StoreMaterials.MaterialProperty.PropertyType.color,
 				name = "_FogColor"
 			});
 			this.MaterialProperties.Add(new StoreMaterials.MaterialProperty
 			{
+				type = StoreMaterials.MaterialProperty.PropertyType.color,
 				name = "_SpecColor"
 			});
 			this.MaterialProperties.Add(new StoreMaterials.MaterialProperty
@@ -107,6 +122,7 @@ public class StoreMaterials : MonoBehaviour
 			});
 			this.MaterialProperties.Add(new StoreMaterials.MaterialProperty
 			{
+				type = StoreMaterials.MaterialProperty.PropertyType.color,
 				name = "_ReflectColor"
 			});
 			this.MaterialProperties.Add(new StoreMaterials.MaterialProperty
@@ -120,17 +136,6 @@ public class StoreMaterials : MonoBehaviour
 				name = "_Parallax"
 			});
 		}
-	}
-
-	
-	static StoreMaterials()
-	{
-		DelegateSupport.RegisterFunctionType<Texture2D, int>();
-		DelegateSupport.RegisterFunctionType<StoreMaterials, List<StoreMaterials.MaterialProperty>>();
-		DelegateSupport.RegisterFunctionType<StoreMaterials.MaterialProperty, StoreMaterials.MaterialProperty.PropertyType>();
-		DelegateSupport.RegisterFunctionType<StoreMaterials.MaterialProperty, string>();
-		DelegateSupport.RegisterFunctionType<StoreMaterials.StoredValue, StoreMaterials.MaterialProperty>();
-		DelegateSupport.RegisterFunctionType<StoreMaterials.StoredValue, object>();
 	}
 
 	
@@ -226,7 +231,8 @@ public class StoreMaterials : MonoBehaviour
 						{
 							list.Add(new StoreMaterials.MaterialProperty
 							{
-								name = materialProperty.name
+								name = materialProperty.name,
+								type = StoreMaterials.MaterialProperty.PropertyType.color
 							});
 						}
 					}

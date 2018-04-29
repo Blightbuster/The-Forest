@@ -2,8 +2,8 @@
 using UnityEngine;
 
 
-[ExecuteInEditMode]
 [RequireComponent(typeof(Camera))]
+[ExecuteInEditMode]
 public class PreClamp : MonoBehaviour
 {
 	

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the position of a vertex in a GameObject's mesh. Hint: Use GetVertexCount to get the number of vertices in a mesh.")]
 	[ActionCategory("Mesh")]
+	[Tooltip("Gets the position of a vertex in a GameObject's mesh. Hint: Use GetVertexCount to get the number of vertices in a mesh.")]
 	public class GetVertexPosition : FsmStateAction
 	{
 		
@@ -42,7 +42,7 @@ namespace HutongGames.PlayMaker.Actions
 				MeshFilter component = ownerDefaultTarget.GetComponent<MeshFilter>();
 				if (component == null)
 				{
-					this.LogError("Missing MeshFilter!");
+					base.LogError("Missing MeshFilter!");
 					return;
 				}
 				Space space = this.space;
@@ -62,9 +62,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject to check.")]
-		[CheckForComponent(typeof(MeshFilter))]
 		[RequiredField]
+		[CheckForComponent(typeof(MeshFilter))]
+		[Tooltip("The GameObject to check.")]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -77,8 +77,8 @@ namespace HutongGames.PlayMaker.Actions
 		public Space space;
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		[Tooltip("Store the vertex position in a variable.")]
 		public FsmVector3 storePosition;
 

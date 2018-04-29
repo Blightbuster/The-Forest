@@ -188,16 +188,16 @@ namespace Pathfinding
 		}
 
 		
-		private const int D = 4;
-
-		
-		private const bool SortGScores = true;
-
-		
 		public int numberOfItems;
 
 		
 		public float growthFactor = 2f;
+
+		
+		private const int D = 4;
+
+		
+		private const bool SortGScores = true;
 
 		
 		private BinaryHeap.Tuple[] heap;

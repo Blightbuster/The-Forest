@@ -16,9 +16,13 @@ namespace TheForest.Buildings.Creation
 			this._offsetWithPlacer = base.transform.localPosition;
 			yield return YieldPresets.WaitForEndOfFrame;
 			GameObject trigger = this._freeGo.transform.GetChild(0).Find("Trigger").gameObject;
-			trigger.SetActive(false);
 			GameObject trigger2 = this._snappedGo.transform.GetChild(0).Find("Trigger").gameObject;
+			trigger.SetActive(false);
 			trigger2.SetActive(false);
+			Craft_Structure tmpCraftStructure = trigger.GetComponent<Craft_Structure>();
+			Craft_Structure tmpCraftStructure2 = trigger2.GetComponent<Craft_Structure>();
+			LocalPlayer.Create.CraftStructures.Add(tmpCraftStructure);
+			LocalPlayer.Create.CraftStructures.Add(tmpCraftStructure2);
 			yield return null;
 			this._snappedGo.SetActive(false);
 			this._freeGo.SetActive(false);
@@ -91,35 +95,40 @@ namespace TheForest.Buildings.Creation
 				{
 					ghost.parent = LocalPlayer.Create.BuildingPlacer.LastHit.Value.transform.GetComponentInParent<BoltEntity>().transform;
 				}
+				else if (LocalPlayer.Create.ParentEntity)
+				{
+					DynamicBuilding component = LocalPlayer.Create.ParentEntity.GetComponent<DynamicBuilding>();
+					ghost.transform.parent = ((!component || !component._parentOverride) ? LocalPlayer.Create.ParentEntity.transform : component._parentOverride);
+				}
 				else
 				{
 					ghost.parent = null;
 				}
 				ghost.SendMessage("OnPlaced", SendMessageOptions.DontRequireReceiver);
-				GameObject trigger = ghost.Find("Trigger").gameObject;
-				trigger.SetActive(true);
+				GameObject gameObject = ghost.Find("Trigger").gameObject;
+				gameObject.SetActive(true);
 				if ((this._snappedGo.activeSelf && this._initializeSnapped) || (this._freeGo.activeSelf && this._initializeAirborne))
 				{
-					trigger.GetComponent<Craft_Structure>().Initialize();
+					gameObject.GetComponent<Craft_Structure>().Initialize();
 				}
 				UnityEngine.Object.Destroy(base.gameObject);
 			}
 			else
 			{
-				PlaceConstruction ev = PlaceConstruction.Create(GlobalTargets.OnlyServer);
+				PlaceConstruction placeConstruction = PlaceConstruction.Create(GlobalTargets.OnlyServer);
 				if (LocalPlayer.Create.BuildingPlacer.LastHit != null)
 				{
-					ev.Parent = LocalPlayer.Create.BuildingPlacer.LastHit.Value.transform.GetComponentInParent<BoltEntity>();
+					placeConstruction.Parent = LocalPlayer.Create.BuildingPlacer.LastHit.Value.transform.GetComponentInParent<BoltEntity>();
 				}
-				ev.PrefabId = ghost.GetComponent<BoltEntity>().prefabId;
-				ev.Position = ghost.position;
-				ev.Rotation = ghost.rotation;
-				FoundationArchitect fa = ghost.GetComponent<FoundationArchitect>();
-				if (fa)
+				placeConstruction.PrefabId = ghost.GetComponent<BoltEntity>().prefabId;
+				placeConstruction.Position = ghost.position;
+				placeConstruction.Rotation = ghost.rotation;
+				FoundationArchitect component2 = ghost.GetComponent<FoundationArchitect>();
+				if (component2)
 				{
-					ev.AboveGround = fa._aboveGround;
+					placeConstruction.AboveGround = component2._aboveGround;
 				}
-				ev.Send();
+				placeConstruction.Send();
 				UnityEngine.Object.Destroy(base.gameObject, 0.05f);
 			}
 			yield break;

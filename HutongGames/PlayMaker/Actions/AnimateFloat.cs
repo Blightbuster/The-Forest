@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Animates the value of a Float Variable using an Animation Curve.")]
 	[ActionCategory(ActionCategory.AnimateVariables)]
+	[Tooltip("Animates the value of a Float Variable using an Animation Curve.")]
 	public class AnimateFloat : FsmStateAction
 	{
 		
@@ -61,14 +61,14 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The animation curve to use.")]
 		[RequiredField]
+		[Tooltip("The animation curve to use.")]
 		public FsmAnimationCurve animCurve;
 
 		
-		[Tooltip("The float variable to set.")]
 		[RequiredField]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The float variable to set.")]
 		public FsmFloat floatVariable;
 
 		

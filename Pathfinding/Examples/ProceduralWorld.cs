@@ -217,39 +217,39 @@ namespace Pathfinding.Examples
 					ProceduralWorld.ProceduralPrefab pref = this.world.prefabs[i];
 					if (pref.singleFixed)
 					{
-						Vector3 p = new Vector3(((float)this.x + 0.5f) * this.world.tileSize, 0f, ((float)this.z + 0.5f) * this.world.tileSize);
-						GameObject ob = UnityEngine.Object.Instantiate(pref.prefab, p, Quaternion.identity) as GameObject;
-						ob.transform.parent = this.root;
+						Vector3 position = new Vector3(((float)this.x + 0.5f) * this.world.tileSize, 0f, ((float)this.z + 0.5f) * this.world.tileSize);
+						GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(pref.prefab, position, Quaternion.identity);
+						gameObject.transform.parent = this.root;
 					}
 					else
 					{
 						float subSize = this.world.tileSize / (float)this.world.subTiles;
+						for (int k = 0; k < this.world.subTiles; k++)
+						{
+							for (int l = 0; l < this.world.subTiles; l++)
+							{
+								ditherMap[k + 1, l + 1] = 0f;
+							}
+						}
 						for (int sx = 0; sx < this.world.subTiles; sx++)
 						{
 							for (int sz = 0; sz < this.world.subTiles; sz++)
 							{
-								ditherMap[sx + 1, sz + 1] = 0f;
-							}
-						}
-						for (int sx2 = 0; sx2 < this.world.subTiles; sx2++)
-						{
-							for (int sz2 = 0; sz2 < this.world.subTiles; sz2++)
-							{
-								float px = (float)this.x + (float)sx2 / (float)this.world.subTiles;
-								float pz = (float)this.z + (float)sz2 / (float)this.world.subTiles;
+								float px = (float)this.x + (float)sx / (float)this.world.subTiles;
+								float pz = (float)this.z + (float)sz / (float)this.world.subTiles;
 								float perl = Mathf.Pow(Mathf.PerlinNoise((px + pref.perlinOffset.x) * pref.perlinScale, (pz + pref.perlinOffset.y) * pref.perlinScale), pref.perlinPower);
 								float density = pref.density * Mathf.Lerp(1f, perl, pref.perlin) * Mathf.Lerp(1f, (float)this.rnd.NextDouble(), pref.random);
-								float fcount = subSize * subSize * density + ditherMap[sx2 + 1, sz2 + 1];
+								float fcount = subSize * subSize * density + ditherMap[sx + 1, sz + 1];
 								int count = Mathf.RoundToInt(fcount);
-								ditherMap[sx2 + 1 + 1, sz2 + 1] += 0.4375f * (fcount - (float)count);
-								ditherMap[sx2 + 1 - 1, sz2 + 1 + 1] += 0.1875f * (fcount - (float)count);
-								ditherMap[sx2 + 1, sz2 + 1 + 1] += 0.3125f * (fcount - (float)count);
-								ditherMap[sx2 + 1 + 1, sz2 + 1 + 1] += 0.0625f * (fcount - (float)count);
+								ditherMap[sx + 1 + 1, sz + 1] += 0.4375f * (fcount - (float)count);
+								ditherMap[sx + 1 - 1, sz + 1 + 1] += 0.1875f * (fcount - (float)count);
+								ditherMap[sx + 1, sz + 1 + 1] += 0.3125f * (fcount - (float)count);
+								ditherMap[sx + 1 + 1, sz + 1 + 1] += 0.0625f * (fcount - (float)count);
 								for (int j = 0; j < count; j++)
 								{
-									Vector3 p2 = this.RandomInside(px, pz);
-									GameObject ob2 = UnityEngine.Object.Instantiate(pref.prefab, p2, this.RandomYRot()) as GameObject;
-									ob2.transform.parent = this.root;
+									Vector3 p = this.RandomInside(px, pz);
+									GameObject ob = UnityEngine.Object.Instantiate<GameObject>(pref.prefab, p, this.RandomYRot());
+									ob.transform.parent = this.root;
 									counter++;
 									if (counter % 2 == 0)
 									{

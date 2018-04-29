@@ -105,13 +105,13 @@ public class pmCombatReplace : MonoBehaviour
 		this.setup.ai.resetCombatParams();
 		this.setup.animator.SetInteger("randInt2", UnityEngine.Random.Range(0, 2));
 		this.setup.pmBrain.FsmVariables.GetFsmBool("fearOverrideBool").Value = true;
-		this.setup.familyFunctions.Invoke("resetFearOverride", 25f);
+		this.setup.familyFunctions.Invoke("resetFearOverride", 7f);
 		yield return null;
 		if (this.animator.GetInteger("hitDirection") < 5)
 		{
-			Vector3 lookAtPos = this.setup.search.currentTarget.transform.position;
-			lookAtPos.y = this.tr.position.y;
-			this.tr.LookAt(lookAtPos, Vector3.up);
+			Vector3 position = this.setup.search.currentTarget.transform.position;
+			position.y = this.tr.position.y;
+			this.tr.LookAt(position, Vector3.up);
 		}
 		if (this.setup.pmSleep.enabled)
 		{
@@ -359,6 +359,7 @@ public class pmCombatReplace : MonoBehaviour
 	{
 		this.setup.targetFunctions.sendAddAttacker();
 		yield return null;
+		this.ai.resetCombatParams();
 		if (!this.fsmTargetSeenBool.Value)
 		{
 			this.setup.pmCombat.SendEvent("toTargetLost");
@@ -386,6 +387,7 @@ public class pmCombatReplace : MonoBehaviour
 			{
 				yield return null;
 			}
+			this.animator.SetBool("screamBOOL", false);
 			break;
 		case 2:
 			doingFlank = true;
@@ -430,8 +432,8 @@ public class pmCombatReplace : MonoBehaviour
 		yield return YieldPresets.WaitPointThreeSeconds;
 		if (this.setup.pmBrain.FsmVariables.GetFsmBool("firemanBool").Value)
 		{
-			float rVal = UnityEngine.Random.value;
-			if (rVal < 0.25f)
+			float value = UnityEngine.Random.value;
+			if (value < 0.25f)
 			{
 				this.setup.pmCombat.SendEvent("goToBurnStructure");
 				yield break;
@@ -442,6 +444,7 @@ public class pmCombatReplace : MonoBehaviour
 				yield break;
 			}
 		}
+		this.ai.resetCombatParams();
 		this.setup.search.setToPlayer();
 		this.setup.ai.StartCoroutine("toRun");
 		this.runToAttack = true;
@@ -749,8 +752,8 @@ public class pmCombatReplace : MonoBehaviour
 		yield return YieldPresets.WaitPointZeroFiveSeconds;
 		if (this.setup.pmCombat.FsmVariables.GetFsmBool("rescueBool").Value && UnityEngine.Random.value > 0.5f && this.setup.ai.mainPlayerDist < 50f && this.setup.familyFunctions.currentMemberTarget)
 		{
-			float dist = Vector3.Distance(this.tr.position, this.setup.familyFunctions.currentMemberTarget.transform.position);
-			if (dist < 50f && dist > 13f)
+			float num = Vector3.Distance(this.tr.position, this.setup.familyFunctions.currentMemberTarget.transform.position);
+			if (num < 50f && num > 13f)
 			{
 				this.setup.search.StartCoroutine("toDisableVis");
 				this.fsmCloseCombatBool.Value = false;
@@ -829,13 +832,21 @@ public class pmCombatReplace : MonoBehaviour
 				}
 				yield return null;
 			}
+			this.animator.SetBool("screamBOOL", false);
 			break;
 		case 4:
 			this.setup.pmCombat.FsmVariables.GetFsmBool("lowTreeBool").Value = true;
 			this.setup.pmCombat.SendEvent("goToTree");
 			yield break;
 		case 5:
-			this.setup.pmCombat.SendEvent("toTimeout");
+			if (this.toAttractArtifact)
+			{
+				base.StartCoroutine(this.doSideWalkRoutine());
+			}
+			else
+			{
+				this.setup.pmCombat.SendEvent("toTimeout");
+			}
 			yield break;
 		case 6:
 			this.setup.pmCombat.SendEvent("goToTree");
@@ -915,8 +926,8 @@ public class pmCombatReplace : MonoBehaviour
 		}
 		if (this.setup.pmBrain.FsmVariables.GetFsmBool("firemanBool").Value)
 		{
-			float rand = UnityEngine.Random.value;
-			if (rand > 0.5f)
+			float value = UnityEngine.Random.value;
+			if (value > 0.5f)
 			{
 				if (this.setup.ai.targetDist > 18f)
 				{
@@ -924,7 +935,7 @@ public class pmCombatReplace : MonoBehaviour
 					yield break;
 				}
 			}
-			else if (rand > 0.1f)
+			else if (value > 0.1f)
 			{
 				this.setup.pmCombat.SendEvent("goToBurnStructure");
 				yield break;
@@ -969,6 +980,7 @@ public class pmCombatReplace : MonoBehaviour
 				}
 				yield return null;
 			}
+			this.animator.SetBool("screamBOOL", false);
 			break;
 		case 2:
 			this.setup.pmCombat.SendEvent("goToFlank");
@@ -1147,7 +1159,14 @@ public class pmCombatReplace : MonoBehaviour
 					this.setup.pmCombat.SendEvent("goToAttack");
 					yield break;
 				case 2:
-					this.setup.pmCombat.SendEvent("toTimeout");
+					if (this.toAttractArtifact)
+					{
+						this.setup.pmCombat.SendEvent("goToAttack");
+					}
+					else
+					{
+						this.setup.pmCombat.SendEvent("toTimeout");
+					}
 					yield break;
 				case 3:
 					if (this.fsmLeaderBool.Value)
@@ -1163,7 +1182,7 @@ public class pmCombatReplace : MonoBehaviour
 			}
 			else if (this.setup.ai.targetDist > this.setup.aiManager.fsmRunTowardPlayerDist.Value)
 			{
-				switch (weightsRandomizer.From<int>(new Dictionary<int, int>
+				int num = weightsRandomizer.From<int>(new Dictionary<int, int>
 				{
 					{
 						0,
@@ -1177,15 +1196,19 @@ public class pmCombatReplace : MonoBehaviour
 						2,
 						Mathf.FloorToInt(this.setup.aiManager.fsmSneakForward.Value * 1000f)
 					}
-				}).TakeOne())
+				}).TakeOne();
+				if (num == 0)
 				{
-				case 0:
 					this.setup.pmCombat.SendEvent("goToRunForward");
 					yield break;
-				case 1:
+				}
+				if (num == 1)
+				{
 					this.setup.pmCombat.SendEvent("goToTree");
 					yield break;
-				case 2:
+				}
+				if (num == 2)
+				{
 					this.setup.pmCombat.SendEvent("toCreepForward");
 					yield break;
 				}
@@ -1230,7 +1253,14 @@ public class pmCombatReplace : MonoBehaviour
 			this.setup.pmCombat.SendEvent("goToRunForward");
 			yield break;
 		case 3:
-			this.setup.pmCombat.SendEvent("toTimeout");
+			if (this.toAttractArtifact)
+			{
+				this.setup.pmCombat.SendEvent("goToAttack");
+			}
+			else
+			{
+				this.setup.pmCombat.SendEvent("toTimeout");
+			}
 			yield break;
 		case 4:
 			this.setup.pmCombat.SendEvent("toCreepForward");
@@ -1262,6 +1292,11 @@ public class pmCombatReplace : MonoBehaviour
 				this.doSmoothLookAt(this.setup.ai.target.position, 1f);
 			}
 			yield return null;
+		}
+		if (this.toRepelArtifact)
+		{
+			this.setup.pmCombat.SendEvent("toTimeout");
+			yield break;
 		}
 		if (this.setup.ai.mainPlayerDist < 20f)
 		{
@@ -1303,9 +1338,13 @@ public class pmCombatReplace : MonoBehaviour
 			this.setup.pmCombat.SendEvent("goToRunAway");
 			yield break;
 		case 2:
-			if (UnityEngine.Random.value > 0.7f)
+			if (UnityEngine.Random.value > 0.7f && !this.toAttractArtifact)
 			{
 				this.setup.pmCombat.SendEvent("toTimeout");
+			}
+			else
+			{
+				this.setup.pmCombat.SendEvent("goToRunAway");
 			}
 			yield break;
 		case 3:
@@ -1451,6 +1490,7 @@ public class pmCombatReplace : MonoBehaviour
 					this.animator.SetBool("screamBOOL", true);
 					yield return YieldPresets.WaitOneSecond;
 					timer = Time.time + UnityEngine.Random.Range(3f, 8f);
+					this.animator.SetBool("screamBOOL", false);
 				}
 				else if (rand > 0.4f)
 				{
@@ -1498,10 +1538,10 @@ public class pmCombatReplace : MonoBehaviour
 		this.ai.cancelDefaultActions();
 		this.search.setToWaypoint();
 		this.search.StartCoroutine("toDisableVis");
-		float timer = Time.time + 2f;
+		float timer = Time.time + 3f;
 		while (this.setup.animControl.currLayerState1.tagHash != this.setup.hashs.idleTag)
 		{
-			if (Time.time > 2f)
+			if (Time.time > timer)
 			{
 				this.setup.pmCombat.SendEvent("toReset");
 				yield break;
@@ -1514,10 +1554,22 @@ public class pmCombatReplace : MonoBehaviour
 		}
 		this.ai.StartCoroutine("toRun");
 		timer = Time.time + 9f;
+		if (this.fsmTreeGo.Value)
+		{
+			Collider component = this.fsmTreeGo.Value.GetComponent<Collider>();
+			if (this.fsmTreeGo.Value.activeSelf && component && component.enabled && this.rootTr.gameObject.activeSelf && this.setup.controller.enabled)
+			{
+				Physics.IgnoreCollision(component, this.setup.controller, true);
+			}
+		}
 		while (Vector3.Distance(this.fsmTreeGo.Value.transform.position, this.tr.position) > 12f)
 		{
 			if (Time.time > timer || this.fsmTreeGo.Value == null)
 			{
+				if (!this.ai.startedRun)
+				{
+					this.ai.StartCoroutine("toRun");
+				}
 				this.setup.pmCombat.SendEvent("toReset");
 				yield break;
 			}
@@ -1526,8 +1578,6 @@ public class pmCombatReplace : MonoBehaviour
 		Vector3 treePos = this.setup.pmCombat.FsmVariables.GetFsmVector3("treePos").Value;
 		if (this.setup.pmCombat.FsmVariables.GetFsmBool("lowTreeBool").Value)
 		{
-			base.StartCoroutine(this.doLowTreeAttackRoutine());
-			yield break;
 		}
 		Vector3 attachPos = this.search.findTreeAttachPos(treePos, 1.7f);
 		this.animator.SetBool("treeBOOL", true);
@@ -1791,9 +1841,16 @@ public class pmCombatReplace : MonoBehaviour
 		Vector3 treePos = this.setup.pmCombat.FsmVariables.GetFsmVector3("treePos").Value;
 		Vector3 attachPos = this.search.findTreeAttachPos(treePos, 1f);
 		this.animator.SetBool("treeJumpBOOL", true);
-		float timer = Time.time + 4f;
+		float timer = Time.time + 3f;
 		while (this.animControl.currLayerState1.tagHash != this.animControl.landingHash)
 		{
+			if (this.setup.animControl.currLayerState1.tagHash == this.setup.hashs.idleTag)
+			{
+				this.resetTreeParams();
+				this.search.StartCoroutine(this.search.toLook());
+				this.setup.pmCombat.SendEvent("toReset");
+				yield break;
+			}
 			this.doSmoothLookAt(treePos, 4f);
 			if (Time.time > timer)
 			{
@@ -1806,6 +1863,13 @@ public class pmCombatReplace : MonoBehaviour
 		timer = Time.time + 4f;
 		while (Time.time < timer)
 		{
+			if (this.setup.animControl.currLayerState1.tagHash == this.setup.hashs.idleTag)
+			{
+				this.resetTreeParams();
+				this.search.StartCoroutine(this.search.toLook());
+				this.setup.pmCombat.SendEvent("toReset");
+				yield break;
+			}
 			if (this.animControl.currLayerState1.tagHash == this.animControl.inTreehash || this.animControl.currLayerState1.tagHash == this.animControl.inTreeMirhash || this.animControl.nextLayerState1.tagHash == this.animControl.inTreehash || this.animControl.nextLayerState1.tagHash == this.animControl.inTreeMirhash)
 			{
 				break;
@@ -1831,6 +1895,13 @@ public class pmCombatReplace : MonoBehaviour
 			{
 				break;
 			}
+			if (this.setup.animControl.currLayerState1.tagHash == this.setup.hashs.idleTag)
+			{
+				this.resetTreeParams();
+				this.search.StartCoroutine(this.search.toLook());
+				this.setup.pmCombat.SendEvent("toReset");
+				yield break;
+			}
 			yield return null;
 		}
 		if (doAttack && this.ai.mainPlayerAngle > 160f && this.ai.mainPlayerAngle < 180f)
@@ -1841,12 +1912,7 @@ public class pmCombatReplace : MonoBehaviour
 			this.animator.SetBool("attackJumpBOOL", false);
 			this.setup.pmCombat.FsmVariables.GetFsmBool("lowTreeBool").Value = false;
 		}
-		this.animator.SetBool("treeJumpBOOL", false);
-		this.rootTr.gameObject.layer = 14;
-		this.setup.mutantStats.setTargetUp();
-		this.fsmJumpDownBool.Value = false;
-		this.setup.pmCombat.FsmVariables.GetFsmBool("inTreeBool").Value = false;
-		this.fsmTreeGo.Value = null;
+		this.resetTreeParams();
 		yield return YieldPresets.WaitOneSecond;
 		if (this.fsmStalking.Value)
 		{
@@ -1860,6 +1926,17 @@ public class pmCombatReplace : MonoBehaviour
 		}
 		yield return null;
 		yield break;
+	}
+
+	
+	private void resetTreeParams()
+	{
+		this.animator.SetBool("treeJumpBOOL", false);
+		this.rootTr.gameObject.layer = 14;
+		this.setup.mutantStats.setTargetUp();
+		this.fsmJumpDownBool.Value = false;
+		this.setup.pmCombat.FsmVariables.GetFsmBool("inTreeBool").Value = false;
+		this.fsmTreeGo.Value = null;
 	}
 
 	
@@ -2048,6 +2125,7 @@ public class pmCombatReplace : MonoBehaviour
 	{
 		this.ai.resetCombatParams();
 		this.setup.pmCombat.FsmVariables.GetFsmBool("timeOutBool").Value = false;
+		this.toRepelArtifact = false;
 		if (this.fsmLeaderBool.Value)
 		{
 			this.setup.familyFunctions.sendAllFleeArea();
@@ -3284,7 +3362,6 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator goToTreeAttackRoutine()
 	{
-		Debug.Log("doing tree attack routine");
 		float t = Time.time + 4f;
 		this.search.setToClosestPlayer();
 		while (this.animControl.fullBodyState.tagHash != this.animControl.idlehash)
@@ -3634,6 +3711,12 @@ public class pmCombatReplace : MonoBehaviour
 
 	
 	public bool toBurnRecover;
+
+	
+	public bool toAttractArtifact;
+
+	
+	public bool toRepelArtifact;
 
 	
 	public List<IEnumerator> activeRoutines = new List<IEnumerator>();

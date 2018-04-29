@@ -5,8 +5,8 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 
-[HelpURL("http:
 [AddComponentMenu("Pathfinding/Seeker")]
+[HelpURL("http:
 public class Seeker : MonoBehaviour, ISerializationCallbackReceiver
 {
 	
@@ -14,21 +14,6 @@ public class Seeker : MonoBehaviour, ISerializationCallbackReceiver
 	{
 		this.onPathDelegate = new OnPathDelegate(this.OnPathComplete);
 		this.onPartialPathDelegate = new OnPathDelegate(this.OnPartialPathComplete);
-	}
-
-	
-	void ISerializationCallbackReceiver.OnBeforeSerialize()
-	{
-	}
-
-	
-	void ISerializationCallbackReceiver.OnAfterDeserialize()
-	{
-		if (this.traversableTagsCompatibility != null && this.traversableTagsCompatibility.tagsChange != -1)
-		{
-			this.traversableTags = this.traversableTagsCompatibility.tagsChange;
-			this.traversableTagsCompatibility = new TagMask(-1, -1);
-		}
 	}
 
 	
@@ -289,6 +274,21 @@ public class Seeker : MonoBehaviour, ISerializationCallbackReceiver
 	}
 
 	
+	void ISerializationCallbackReceiver.OnBeforeSerialize()
+	{
+	}
+
+	
+	void ISerializationCallbackReceiver.OnAfterDeserialize()
+	{
+		if (this.traversableTagsCompatibility != null && this.traversableTagsCompatibility.tagsChange != -1)
+		{
+			this.traversableTags = this.traversableTagsCompatibility.tagsChange;
+			this.traversableTagsCompatibility = new TagMask(-1, -1);
+		}
+	}
+
+	
 	public bool drawGizmos = true;
 
 	
@@ -302,9 +302,9 @@ public class Seeker : MonoBehaviour, ISerializationCallbackReceiver
 	public int traversableTags = -1;
 
 	
-	[HideInInspector]
 	[FormerlySerializedAs("traversableTags")]
 	[SerializeField]
+	[HideInInspector]
 	protected TagMask traversableTagsCompatibility = new TagMask(-1, -1);
 
 	

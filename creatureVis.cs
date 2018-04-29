@@ -1,5 +1,4 @@
 ﻿using System;
-using TheForest.Utils;
 using UnityEngine;
 
 
@@ -8,10 +7,6 @@ public class creatureVis : MonoBehaviour
 	
 	private void Awake()
 	{
-		if (this.useMotionBlur)
-		{
-			base.InvokeRepeating("checkPlayerDist", UnityEngine.Random.Range(0f, 3f), 2f);
-		}
 		this.animator = base.transform.parent.GetComponent<Animator>();
 		this._renderer = base.gameObject.GetComponent<SkinnedMeshRenderer>();
 		this.control = base.transform.parent.GetComponent<lizardAnimatorControl>();
@@ -25,89 +20,11 @@ public class creatureVis : MonoBehaviour
 	}
 
 	
-	private void OnEnable()
-	{
-		if (!base.IsInvoking("checkPlayerDist"))
-		{
-			base.InvokeRepeating("checkPlayerDist", UnityEngine.Random.Range(0f, 3f), 2f);
-		}
-	}
-
-	
-	private void OnDisable()
-	{
-		base.CancelInvoke("checkPlayerDist");
-	}
-
-	
-	private void getAmplifyObj()
-	{
-		this.amplifyBase = base.transform.root.GetComponentsInChildren<AmplifyMotionObjectBase>();
-		this.doAmplify = true;
-		if (!this.useMotionBlur)
-		{
-			this.disableAmplifyMotion();
-		}
-	}
-
-	
-	private void checkPlayerDist()
-	{
-		if (LocalPlayer.Transform != null)
-		{
-			this.playerDist = Vector3.Distance(this.thisTr.position, LocalPlayer.Transform.position);
-		}
-	}
-
-	
 	private void Update()
 	{
 		if (this.renderCam == null && Camera.main)
 		{
 			this.renderCam = Camera.main;
-		}
-		if (this.useMotionBlur)
-		{
-			if (this.playerDist > 40f && !this.amplifyTrigger && this.doAmplify)
-			{
-				this.disableAmplifyMotion();
-				this.amplifyTrigger = true;
-			}
-			else if (this.playerDist < 40f && this.amplifyTrigger && this.doAmplify)
-			{
-				this.enableAmplifyMotion();
-				this.amplifyTrigger = false;
-			}
-		}
-	}
-
-	
-	private void disableAmplifyMotion()
-	{
-		if (this.amplifyBase != null)
-		{
-			for (int i = 0; i < this.amplifyBase.Length; i++)
-			{
-				if (this.amplifyBase[i])
-				{
-					this.amplifyBase[i].enabled = false;
-				}
-			}
-		}
-	}
-
-	
-	private void enableAmplifyMotion()
-	{
-		if (this.amplifyBase != null)
-		{
-			for (int i = 0; i < this.amplifyBase.Length; i++)
-			{
-				if (this.amplifyBase[i])
-				{
-					this.amplifyBase[i].enabled = true;
-				}
-			}
 		}
 	}
 
@@ -147,16 +64,7 @@ public class creatureVis : MonoBehaviour
 	private PlayMakerFSM pmControl;
 
 	
-	private float playerDist;
-
-	
 	public bool disableAnimator;
-
-	
-	public AmplifyMotionObject[] amplifyObj;
-
-	
-	public AmplifyMotionObjectBase[] amplifyBase;
 
 	
 	public Animator animator;
@@ -183,11 +91,5 @@ public class creatureVis : MonoBehaviour
 	private bool isVisible;
 
 	
-	private bool doAmplify;
-
-	
 	private bool amplifyTrigger;
-
-	
-	public bool useMotionBlur;
 }

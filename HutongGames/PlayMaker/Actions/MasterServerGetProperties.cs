@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Get the IP address, port, update rate and dedicated server flag of the master server and store in variables.")]
 	[ActionCategory(ActionCategory.Network)]
+	[Tooltip("Get the IP address, port, update rate and dedicated server flag of the master server and store in variables.")]
 	public class MasterServerGetProperties : FsmStateAction
 	{
 		
@@ -60,8 +60,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmInt updateRate;
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("Flag to report if this machine is a dedicated server.")]
+		[UIHint(UIHint.Variable)]
 		public FsmBool dedicatedServer;
 
 		

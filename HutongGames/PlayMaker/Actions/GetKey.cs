@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the pressed state of a Key.")]
 	[ActionCategory(ActionCategory.Input)]
+	[Tooltip("Gets the pressed state of a Key.")]
 	public class GetKey : FsmStateAction
 	{
 		
@@ -44,9 +44,9 @@ namespace HutongGames.PlayMaker.Actions
 		public KeyCode key;
 
 		
-		[Tooltip("Store if the key is down (True) or up (False).")]
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("Store if the key is down (True) or up (False).")]
 		public FsmBool storeResult;
 
 		

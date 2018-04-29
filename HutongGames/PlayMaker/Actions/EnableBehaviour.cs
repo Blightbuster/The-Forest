@@ -42,7 +42,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			if (this.componentTarget == null)
 			{
-				this.LogWarning(" " + go.name + " missing behaviour: " + this.behaviour.Value);
+				base.LogWarning(" " + go.name + " missing behaviour: " + this.behaviour.Value);
 				return;
 			}
 			this.componentTarget.enabled = this.enable.Value;
@@ -74,8 +74,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject that owns the Behaviour.")]
 		[RequiredField]
+		[Tooltip("The GameObject that owns the Behaviour.")]
 		public FsmOwnerDefault gameObject;
 
 		

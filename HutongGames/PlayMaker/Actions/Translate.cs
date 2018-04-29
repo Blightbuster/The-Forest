@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Translates a Game Object. Use a Vector3 variable and/or XYZ components. To leave any axis unchanged, set variable to 'None'.")]
 	[ActionCategory(ActionCategory.Transform)]
+	[Tooltip("Translates a Game Object. Use a Vector3 variable and/or XYZ components. To leave any axis unchanged, set variable to 'None'.")]
 	public class Translate : FsmStateAction
 	{
 		
@@ -115,8 +115,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The game object to translate.")]
 		[RequiredField]
+		[Tooltip("The game object to translate.")]
 		public FsmOwnerDefault gameObject;
 
 		

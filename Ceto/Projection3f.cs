@@ -233,24 +233,10 @@ namespace Ceto
 			this.m_projectorV[3, 1] = 0f;
 			this.m_projectorV[3, 2] = 0f;
 			this.m_projectorV[3, 3] = 1f;
-			int num;
-			int row = num = 0;
-			int num2;
-			int column = num2 = 0;
-			float num3 = this.m_projectorV[num, num2];
-			this.m_projectorV[row, column] = num3 * -1f;
-			int row2 = num2 = 0;
-			int column2 = num = 1;
-			num3 = this.m_projectorV[num2, num];
-			this.m_projectorV[row2, column2] = num3 * -1f;
-			int row3 = num = 0;
-			int column3 = num2 = 2;
-			num3 = this.m_projectorV[num, num2];
-			this.m_projectorV[row3, column3] = num3 * -1f;
-			int row4 = num2 = 0;
-			int column4 = num = 3;
-			num3 = this.m_projectorV[num2, num];
-			this.m_projectorV[row4, column4] = num3 * -1f;
+			this.m_projectorV[0, 0] = this.m_projectorV[0, 0] * -1f;
+			this.m_projectorV[0, 1] = this.m_projectorV[0, 1] * -1f;
+			this.m_projectorV[0, 2] = this.m_projectorV[0, 2] * -1f;
+			this.m_projectorV[0, 3] = this.m_projectorV[0, 3] * -1f;
 		}
 
 		

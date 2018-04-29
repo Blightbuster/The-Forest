@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Close a GUILayout group started with BeginArea.")]
 	[ActionCategory(ActionCategory.GUILayout)]
+	[Tooltip("Close a GUILayout group started with BeginArea.")]
 	public class GUILayoutEndArea : FsmStateAction
 	{
 		

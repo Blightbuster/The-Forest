@@ -2,8 +2,8 @@
 using UnityEngine;
 
 
-[AddComponentMenu("NGUI/UI/NGUI Texture")]
 [ExecuteInEditMode]
+[AddComponentMenu("NGUI/UI/NGUI Texture")]
 public class UITexture : UIBasicSprite
 {
 	
@@ -347,8 +347,8 @@ public class UITexture : UIBasicSprite
 	}
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private Rect mRect = new Rect(0f, 0f, 1f, 1f);
 
 	
@@ -367,13 +367,13 @@ public class UITexture : UIBasicSprite
 	private Shader mShader;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private Vector4 mBorder = Vector4.zero;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private bool mFixedAspect;
 
 	

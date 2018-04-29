@@ -65,7 +65,7 @@ public class clsdismemberatortester : MonoBehaviour
 	
 	private void metinstantiatemodel()
 	{
-		this.varmodelinstance = (UnityEngine.Object.Instantiate(this.vargammodel, base.transform.position, Quaternion.identity) as GameObject);
+		this.varmodelinstance = UnityEngine.Object.Instantiate<GameObject>(this.vargammodel, base.transform.position, Quaternion.identity);
 		Transform transform = this.varmodelinstance.transform;
 		transform.position = this.vargamspawnposition;
 		transform.rotation = Quaternion.identity;

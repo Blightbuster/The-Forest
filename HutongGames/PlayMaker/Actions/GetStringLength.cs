@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the Length of a String.")]
 	[ActionCategory(ActionCategory.String)]
+	[Tooltip("Gets the Length of a String.")]
 	public class GetStringLength : FsmStateAction
 	{
 		
@@ -46,8 +46,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmString stringVariable;
 
 		

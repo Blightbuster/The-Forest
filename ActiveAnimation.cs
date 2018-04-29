@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using AnimationOrTween;
 using UnityEngine;
@@ -25,29 +26,42 @@ public class ActiveAnimation : MonoBehaviour
 		{
 			if (!(this.mAnim == null))
 			{
-				foreach (object obj in this.mAnim)
+				IEnumerator enumerator = this.mAnim.GetEnumerator();
+				try
 				{
-					AnimationState animationState = (AnimationState)obj;
-					if (this.mAnim.IsPlaying(animationState.name))
+					while (enumerator.MoveNext())
 					{
-						if (this.mLastDirection == Direction.Forward)
+						object obj = enumerator.Current;
+						AnimationState animationState = (AnimationState)obj;
+						if (this.mAnim.IsPlaying(animationState.name))
 						{
-							if (animationState.time < animationState.length)
+							if (this.mLastDirection == Direction.Forward)
 							{
-								return true;
+								if (animationState.time < animationState.length)
+								{
+									return true;
+								}
+							}
+							else
+							{
+								if (this.mLastDirection != Direction.Reverse)
+								{
+									return true;
+								}
+								if (animationState.time > 0f)
+								{
+									return true;
+								}
 							}
 						}
-						else
-						{
-							if (this.mLastDirection != Direction.Reverse)
-							{
-								return true;
-							}
-							if (animationState.time > 0f)
-							{
-								return true;
-							}
-						}
+					}
+				}
+				finally
+				{
+					IDisposable disposable;
+					if ((disposable = (enumerator as IDisposable)) != null)
+					{
+						disposable.Dispose();
 					}
 				}
 				return false;
@@ -76,16 +90,29 @@ public class ActiveAnimation : MonoBehaviour
 	{
 		if (this.mAnim != null)
 		{
-			foreach (object obj in this.mAnim)
+			IEnumerator enumerator = this.mAnim.GetEnumerator();
+			try
 			{
-				AnimationState animationState = (AnimationState)obj;
-				if (this.mLastDirection == Direction.Forward)
+				while (enumerator.MoveNext())
 				{
-					animationState.time = animationState.length;
+					object obj = enumerator.Current;
+					AnimationState animationState = (AnimationState)obj;
+					if (this.mLastDirection == Direction.Forward)
+					{
+						animationState.time = animationState.length;
+					}
+					else if (this.mLastDirection == Direction.Reverse)
+					{
+						animationState.time = 0f;
+					}
 				}
-				else if (this.mLastDirection == Direction.Reverse)
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
 				{
-					animationState.time = 0f;
+					disposable.Dispose();
 				}
 			}
 			this.mAnim.Sample();
@@ -101,16 +128,29 @@ public class ActiveAnimation : MonoBehaviour
 	{
 		if (this.mAnim != null)
 		{
-			foreach (object obj in this.mAnim)
+			IEnumerator enumerator = this.mAnim.GetEnumerator();
+			try
 			{
-				AnimationState animationState = (AnimationState)obj;
-				if (this.mLastDirection == Direction.Reverse)
+				while (enumerator.MoveNext())
 				{
-					animationState.time = animationState.length;
+					object obj = enumerator.Current;
+					AnimationState animationState = (AnimationState)obj;
+					if (this.mLastDirection == Direction.Reverse)
+					{
+						animationState.time = animationState.length;
+					}
+					else if (this.mLastDirection == Direction.Forward)
+					{
+						animationState.time = 0f;
+					}
 				}
-				else if (this.mLastDirection == Direction.Forward)
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
 				{
-					animationState.time = 0f;
+					disposable.Dispose();
 				}
 			}
 		}
@@ -156,32 +196,45 @@ public class ActiveAnimation : MonoBehaviour
 				return;
 			}
 			bool flag = false;
-			foreach (object obj in this.mAnim)
+			IEnumerator enumerator = this.mAnim.GetEnumerator();
+			try
 			{
-				AnimationState animationState = (AnimationState)obj;
-				if (this.mAnim.IsPlaying(animationState.name))
+				while (enumerator.MoveNext())
 				{
-					float num = animationState.speed * deltaTime;
-					animationState.time += num;
-					if (num < 0f)
+					object obj = enumerator.Current;
+					AnimationState animationState = (AnimationState)obj;
+					if (this.mAnim.IsPlaying(animationState.name))
 					{
-						if (animationState.time > 0f)
+						float num = animationState.speed * deltaTime;
+						animationState.time += num;
+						if (num < 0f)
+						{
+							if (animationState.time > 0f)
+							{
+								flag = true;
+							}
+							else
+							{
+								animationState.time = 0f;
+							}
+						}
+						else if (animationState.time < animationState.length)
 						{
 							flag = true;
 						}
 						else
 						{
-							animationState.time = 0f;
+							animationState.time = animationState.length;
 						}
 					}
-					else if (animationState.time < animationState.length)
-					{
-						flag = true;
-					}
-					else
-					{
-						animationState.time = animationState.length;
-					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
 				}
 			}
 			this.mAnim.Sample();
@@ -234,21 +287,34 @@ public class ActiveAnimation : MonoBehaviour
 			{
 				this.mAnim.Play(clipName);
 			}
-			foreach (object obj in this.mAnim)
+			IEnumerator enumerator = this.mAnim.GetEnumerator();
+			try
 			{
-				AnimationState animationState = (AnimationState)obj;
-				if (string.IsNullOrEmpty(clipName) || animationState.name == clipName)
+				while (enumerator.MoveNext())
 				{
-					float num = Mathf.Abs(animationState.speed);
-					animationState.speed = num * (float)playDirection;
-					if (playDirection == Direction.Reverse && animationState.time == 0f)
+					object obj = enumerator.Current;
+					AnimationState animationState = (AnimationState)obj;
+					if (string.IsNullOrEmpty(clipName) || animationState.name == clipName)
 					{
-						animationState.time = animationState.length;
+						float num = Mathf.Abs(animationState.speed);
+						animationState.speed = num * (float)playDirection;
+						if (playDirection == Direction.Reverse && animationState.time == 0f)
+						{
+							animationState.time = animationState.length;
+						}
+						else if (playDirection == Direction.Forward && animationState.time == animationState.length)
+						{
+							animationState.time = 0f;
+						}
 					}
-					else if (playDirection == Direction.Forward && animationState.time == animationState.length)
-					{
-						animationState.time = 0f;
-					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
 				}
 			}
 			this.mLastDirection = playDirection;

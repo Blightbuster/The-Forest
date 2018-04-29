@@ -30,7 +30,7 @@ namespace TheForest.Items.World
 		
 		public override void Attached()
 		{
-			if (this.entity.isOwner)
+			if (base.entity.isOwner)
 			{
 				base.state.State = (int)this.DecayState;
 			}
@@ -58,7 +58,7 @@ namespace TheForest.Items.World
 			set
 			{
 				this._decayState = value;
-				if (BoltNetwork.isRunning && this.entity && this.entity.isAttached && this.entity.isOwner)
+				if (BoltNetwork.isRunning && base.entity && base.entity.isAttached && base.entity.isOwner)
 				{
 					base.state.State = (int)value;
 				}

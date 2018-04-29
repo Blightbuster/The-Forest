@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using Bolt;
-using ModAPI;
 using TheForest.Buildings.World;
 using TheForest.Items;
 using TheForest.Utils;
@@ -28,7 +27,7 @@ namespace TheForest.Buildings.Creation
 			this._logPool = new Stack<Transform>();
 			this._newPool = new Stack<Transform>();
 			this._craneRoot = new GameObject("CraneRoot").transform;
-			this._logMat = this._logRenderer.sharedMaterial;
+			this._logMat = ((!this._wasPlaced && !this._wasBuilt) ? new Material(this._logRenderer.sharedMaterial) : this._logRenderer.sharedMaterial);
 			if (this._logPrefab.GetComponent<Renderer>())
 			{
 				this._logLength = this._logPrefab.GetComponent<Renderer>().bounds.size.z;
@@ -62,8 +61,6 @@ namespace TheForest.Buildings.Creation
 					{
 						LocalPlayer.Create.Grabber.ClosePlace();
 					}
-					this._logMat = new Material(this._logRenderer.sharedMaterial);
-					base.GetComponent<Renderer>().sharedMaterial = this._logMat;
 					LocalPlayer.Create.BuildingPlacer.SetRenderer(null);
 				}
 				if (this._craftStructure)
@@ -84,17 +81,26 @@ namespace TheForest.Buildings.Creation
 		}
 
 		
-		private void __LateUpdate__Original()
+		private void LateUpdate()
 		{
 			if (this._logMat)
 			{
 				this._logMat.SetColor("_TintColor", (!LocalPlayer.Create.BuildingPlacer.ClearOfCollision) ? LocalPlayer.Create.BuildingPlacer.RedMat.GetColor("_TintColor") : LocalPlayer.Create.BuildingPlacer.ClearMat.GetColor("_TintColor"));
 				if (this._lockMode == CraneArchitect.LockModes.Bottom)
 				{
+					bool flag = LocalPlayer.Create.BuildingPlacer.ClearOfCollision && LocalPlayer.Create.BuildingPlacer.OnDynamicClear;
 					LocalPlayer.Create.BuildingPlacer.IgnoreLookAtCollision = false;
 					LocalPlayer.Create.BuildingPlacer.Airborne = false;
-					LocalPlayer.Create.BuildingPlacer.SetNotclear();
-					if (LocalPlayer.Create.BuildingPlacer.ClearOfCollision && TheForest.Utils.Input.GetButtonDown("Fire1"))
+					if (flag)
+					{
+						LocalPlayer.Create.BuildingPlacer.SetClear();
+					}
+					else
+					{
+						LocalPlayer.Create.BuildingPlacer.SetNotclear();
+					}
+					LocalPlayer.Create.BuildingPlacer.Clear = false;
+					if (flag && TheForest.Utils.Input.GetButtonDown("Fire1"))
 					{
 						LocalPlayer.Create.BuildingPlacer.SetClear();
 						if (LocalPlayer.Create.BuildingPlacer.LastHit != null)
@@ -134,7 +140,6 @@ namespace TheForest.Buildings.Creation
 						base.transform.localPosition = LocalPlayer.Create.GetGhostOffsetWithPlacer(base.gameObject);
 						base.transform.localRotation = Quaternion.identity;
 						this._lockMode = CraneArchitect.LockModes.Bottom;
-						base.GetComponent<Renderer>().sharedMaterial = this._logMat;
 						LocalPlayer.Create.BuildingPlacer.SetRenderer(null);
 						LocalPlayer.Create.BuildingPlacer.ForcedParent = null;
 						LocalPlayer.Sfx.PlayWhoosh();
@@ -147,12 +152,12 @@ namespace TheForest.Buildings.Creation
 				this._aboveGround = !LocalPlayer.IsInCaves;
 				this.CreateStructure(false);
 				bool showManualfillLockIcon = this._lockMode == CraneArchitect.LockModes.Bottom && LocalPlayer.Create.BuildingPlacer.ClearOfCollision;
-				bool flag = this._lockMode == CraneArchitect.LockModes.Top;
+				bool flag2 = this._lockMode == CraneArchitect.LockModes.Top;
 				bool showManualPlace = this._lockMode == CraneArchitect.LockModes.Top && LocalPlayer.Create.BuildingPlacer.Clear;
-				Scene.HudGui.FoundationConstructionIcons.Show(showManualfillLockIcon, false, false, showManualPlace, false, flag, false);
-				if (Scene.HudGui.RotateIcon.activeSelf == flag)
+				Scene.HudGui.FoundationConstructionIcons.Show(showManualfillLockIcon, false, false, showManualPlace, false, flag2, false);
+				if (Scene.HudGui.RotateIcon.activeSelf == flag2)
 				{
-					Scene.HudGui.RotateIcon.SetActive(!flag);
+					Scene.HudGui.RotateIcon.SetActive(!flag2);
 				}
 			}
 		}
@@ -219,14 +224,8 @@ namespace TheForest.Buildings.Creation
 				Transform ghostRoot = this._craneRoot;
 				Transform transform = ghostRoot;
 				transform.name += "Ghost";
-				Transform logGhostPrefab = this._logPrefab;
-				this._logPrefab = Prefabs.Instance.CraneLogBuiltPrefab;
-				this._logPool = new Stack<Transform>();
-				this._newPool = new Stack<Transform>();
-				this._craneRoot = null;
-				this.CreateStructure(false);
 				int totalLogs = this._craneRoot.childCount;
-				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.<>f__this._logItemId);
+				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.$this._logItemId);
 				if (ri == null)
 				{
 					ri = new Craft_Structure.BuildIngredients();
@@ -235,21 +234,51 @@ namespace TheForest.Buildings.Creation
 					ri._renderers = new GameObject[0];
 					this._craftStructure._requiredIngredients.Insert(0, ri);
 				}
-				List<GameObject> logStacks = new List<GameObject>();
+				List<GameObject> logs = new List<GameObject>();
 				float minY = base.transform.position.y;
-				foreach (object obj in this._craneRoot)
+				this._logMat = this._logRenderer.sharedMaterial;
+				IEnumerator enumerator = this._craneRoot.GetEnumerator();
+				try
 				{
-					Transform log = (Transform)obj;
-					logStacks.Add(log.gameObject);
-					if (log.position.y < minY)
+					while (enumerator.MoveNext())
 					{
-						minY = log.position.y;
+						object obj = enumerator.Current;
+						Transform transform2 = (Transform)obj;
+						IEnumerator enumerator2 = transform2.GetEnumerator();
+						try
+						{
+							while (enumerator2.MoveNext())
+							{
+								object obj2 = enumerator2.Current;
+								Transform transform3 = (Transform)obj2;
+								Renderer componentInChildren = transform3.GetComponentInChildren<Renderer>();
+								componentInChildren.sharedMaterial = this._logMat;
+								logs.Add(transform3.gameObject);
+							}
+						}
+						finally
+						{
+							IDisposable disposable;
+							if ((disposable = (enumerator2 as IDisposable)) != null)
+							{
+								disposable.Dispose();
+							}
+						}
+						if (transform2.position.y < minY)
+						{
+							minY = transform2.position.y;
+						}
 					}
-					log.gameObject.SetActive(false);
 				}
-				ri._amount += logStacks.Count;
-				ri._renderers = logStacks.AsEnumerable<GameObject>().Reverse<GameObject>().Union(ri._renderers).ToArray<GameObject>();
-				this._logPrefab = logGhostPrefab;
+				finally
+				{
+					IDisposable disposable2;
+					if ((disposable2 = (enumerator as IDisposable)) != null)
+					{
+						disposable2.Dispose();
+					}
+				}
+				ri.AddRuntimeObjects(logs.AsEnumerable<GameObject>().Reverse<GameObject>(), Prefabs.Instance.CraneLogBuiltPrefab.GetComponentInChildren<Renderer>().sharedMaterial);
 				this._craneRoot.transform.parent = base.transform;
 				ghostRoot.transform.parent = base.transform;
 				this._craftStructure.GetComponent<Collider>().enabled = true;
@@ -438,7 +467,7 @@ namespace TheForest.Buildings.Creation
 				transform.rotation = rotation;
 				return transform;
 			}
-			Transform transform2 = (Transform)UnityEngine.Object.Instantiate(this._logPrefab, position, rotation);
+			Transform transform2 = UnityEngine.Object.Instantiate<Transform>(this._logPrefab, position, rotation);
 			if (!this._wasBuilt && !this._wasPlaced)
 			{
 				transform2.GetComponentInChildren<Renderer>().sharedMaterial = this._logMat;
@@ -494,7 +523,7 @@ namespace TheForest.Buildings.Creation
 		
 		public override void Attached()
 		{
-			this.CustomToken = this.entity.attachToken;
+			this.CustomToken = base.entity.attachToken;
 		}
 
 		
@@ -517,88 +546,6 @@ namespace TheForest.Buildings.Creation
 				{
 					this._wasPlaced = true;
 				}
-			}
-		}
-
-		
-		private void LateUpdate()
-		{
-			try
-			{
-				if (this._logMat)
-				{
-					this._logMat.SetColor("_TintColor", (!LocalPlayer.Create.BuildingPlacer.ClearOfCollision) ? LocalPlayer.Create.BuildingPlacer.RedMat.GetColor("_TintColor") : LocalPlayer.Create.BuildingPlacer.ClearMat.GetColor("_TintColor"));
-					if (this._lockModes == 0)
-					{
-						LocalPlayer.Create.BuildingPlacer.IgnoreLookAtCollision = false;
-						LocalPlayer.Create.BuildingPlacer.Airborne = false;
-						LocalPlayer.Create.BuildingPlacer.SetNotclear();
-						if (LocalPlayer.Create.BuildingPlacer.ClearOfCollision && TheForest.Utils.Input.GetButtonDown("Fire1"))
-						{
-							LocalPlayer.Create.BuildingPlacer.SetClear();
-							if (LocalPlayer.Create.BuildingPlacer.LastHit != null)
-							{
-								BoltEntity componentInParent = LocalPlayer.Create.BuildingPlacer.LastHit.Value.transform.GetComponentInParent<BoltEntity>();
-								if (componentInParent)
-								{
-									LocalPlayer.Create.BuildingPlacer.ForcedParent = componentInParent.gameObject;
-								}
-							}
-							this._bottomY = LocalPlayer.Create.BuildingPlacer.MinHeight;
-							this._lockModes = 1;
-							base.transform.parent = null;
-							LocalPlayer.Sfx.PlayWhoosh();
-						}
-						if (this._holeCutter.gameObject.activeSelf)
-						{
-							this._holeCutter.gameObject.SetActive(false);
-						}
-					}
-					else
-					{
-						LocalPlayer.Create.BuildingPlacer.IgnoreLookAtCollision = true;
-						LocalPlayer.Create.BuildingPlacer.Airborne = true;
-						if (!this._holeCutter.gameObject.activeSelf)
-						{
-							this._holeCutter.gameObject.SetActive(true);
-						}
-						BoxCollider component = this._holeCutter.GetComponent<BoxCollider>();
-						component.size = new Vector3(this._logLength * 0.9f * 2f, base.transform.position.y - this._bottomY, this._logLength * 0.9f * 2f);
-						component.center = new Vector3(0f, component.size.y / -2f, 0f);
-						base.transform.eulerAngles = new Vector3(0f, LocalPlayer.Create.BuildingPlacer.YRotation, 0f);
-						base.transform.position = new Vector3(base.transform.position.x, Mathf.Clamp(LocalPlayer.Create.BuildingPlacer.AirBorneHeight, this._bottomY + this._logLength, this._bottomY + this._logLength + 5000f), base.transform.position.z);
-						if (TheForest.Utils.Input.GetButtonDown("AltFire"))
-						{
-							base.transform.parent = LocalPlayer.Create.BuildingPlacer.transform;
-							base.transform.localPosition = LocalPlayer.Create.GetGhostOffsetWithPlacer(base.gameObject);
-							base.transform.localRotation = Quaternion.identity;
-							this._lockModes = 0;
-							base.GetComponent<Renderer>().sharedMaterial = this._logMat;
-							LocalPlayer.Create.BuildingPlacer.SetRenderer(null);
-							LocalPlayer.Create.BuildingPlacer.ForcedParent = null;
-							LocalPlayer.Sfx.PlayWhoosh();
-						}
-						if (TheForest.Utils.Input.GetButtonDown("Take"))
-						{
-							this._holeCutter.OnPlaced();
-						}
-					}
-					this._aboveGround = !LocalPlayer.IsInCaves;
-					this.CreateStructure(false);
-					bool showManualfillLockIcon = this._lockModes == 0 && LocalPlayer.Create.BuildingPlacer.ClearOfCollision;
-					bool flag = this._lockModes == 1;
-					bool showManualPlace = this._lockModes == 1;
-					Scene.HudGui.FoundationConstructionIcons.Show(showManualfillLockIcon, false, false, showManualPlace, false, flag, false);
-					if (Scene.HudGui.RotateIcon.activeSelf == flag)
-					{
-						Scene.HudGui.RotateIcon.SetActive(!flag);
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-				this.__LateUpdate__Original();
 			}
 		}
 
@@ -672,9 +619,6 @@ namespace TheForest.Buildings.Creation
 
 		
 		private CraneArchitect.LockModes _lockMode;
-
-		
-		public int _lockModes;
 
 		
 		private enum LockModes

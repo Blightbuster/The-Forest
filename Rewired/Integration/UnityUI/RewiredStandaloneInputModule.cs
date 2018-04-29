@@ -74,6 +74,21 @@ namespace Rewired.Integration.UnityUI
 		
 		
 		
+		public bool UsePlayingPlayersOnly
+		{
+			get
+			{
+				return this.usePlayingPlayersOnly;
+			}
+			set
+			{
+				this.usePlayingPlayersOnly = value;
+			}
+		}
+
+		
+		
+		
 		public bool MoveOneElementPerAxisPress
 		{
 			get
@@ -122,7 +137,7 @@ namespace Rewired.Integration.UnityUI
 		{
 			get
 			{
-				return this.m_allowMouseInput && (!this.isTouchSupported || this.m_allowMouseInputIfTouchSupported);
+				return Input.mousePresent && this.m_allowMouseInput && (!this.isTouchSupported || this.m_allowMouseInputIfTouchSupported);
 			}
 		}
 
@@ -272,10 +287,14 @@ namespace Rewired.Integration.UnityUI
 			{
 				return;
 			}
+			if (!this.m_HasFocus && this.ShouldIgnoreEventsOnNoFocus())
+			{
+				return;
+			}
 			if (this.isMouseSupported)
 			{
 				this.m_LastMousePosition = this.m_MousePosition;
-				this.m_MousePosition = ReInput.controllers.Mouse.screenPosition;
+				this.m_MousePosition = Input.mousePosition;
 			}
 		}
 
@@ -306,24 +325,27 @@ namespace Rewired.Integration.UnityUI
 				Player player = ReInput.players.GetPlayer(this.playerIds[i]);
 				if (player != null)
 				{
-					flag |= player.GetButtonDown(this.m_SubmitButton);
-					flag |= player.GetButtonDown(this.m_CancelButton);
-					if (this.moveOneElementPerAxisPress)
+					if (!this.usePlayingPlayersOnly || player.isPlaying)
 					{
-						flag |= (player.GetButtonDown(this.m_HorizontalAxis) || player.GetNegativeButtonDown(this.m_HorizontalAxis));
-						flag |= (player.GetButtonDown(this.m_VerticalAxis) || player.GetNegativeButtonDown(this.m_VerticalAxis));
-					}
-					else
-					{
-						flag |= !Mathf.Approximately(player.GetAxisRaw(this.m_HorizontalAxis), 0f);
-						flag |= !Mathf.Approximately(player.GetAxisRaw(this.m_VerticalAxis), 0f);
+						flag |= player.GetButtonDown(this.m_SubmitButton);
+						flag |= player.GetButtonDown(this.m_CancelButton);
+						if (this.moveOneElementPerAxisPress)
+						{
+							flag |= (player.GetButtonDown(this.m_HorizontalAxis) || player.GetNegativeButtonDown(this.m_HorizontalAxis));
+							flag |= (player.GetButtonDown(this.m_VerticalAxis) || player.GetNegativeButtonDown(this.m_VerticalAxis));
+						}
+						else
+						{
+							flag |= !Mathf.Approximately(player.GetAxisRaw(this.m_HorizontalAxis), 0f);
+							flag |= !Mathf.Approximately(player.GetAxisRaw(this.m_VerticalAxis), 0f);
+						}
 					}
 				}
 			}
 			if (this.isMouseSupported)
 			{
 				flag |= ((this.m_MousePosition - this.m_LastMousePosition).sqrMagnitude > 0f);
-				flag |= ReInput.controllers.Mouse.GetButtonDown(0);
+				flag |= Input.GetMouseButtonDown(0);
 			}
 			if (this.isTouchSupported)
 			{
@@ -339,12 +361,16 @@ namespace Rewired.Integration.UnityUI
 		
 		public override void ActivateModule()
 		{
+			if (!this.m_HasFocus && this.ShouldIgnoreEventsOnNoFocus())
+			{
+				return;
+			}
 			base.ActivateModule();
 			if (this.isMouseSupported)
 			{
-				Vector2 screenPosition = ReInput.controllers.Mouse.screenPosition;
-				this.m_MousePosition = screenPosition;
-				this.m_LastMousePosition = screenPosition;
+				Vector2 vector = Input.mousePosition;
+				this.m_MousePosition = vector;
+				this.m_LastMousePosition = vector;
 			}
 			GameObject gameObject = base.eventSystem.currentSelectedGameObject;
 			if (gameObject == null)
@@ -365,6 +391,10 @@ namespace Rewired.Integration.UnityUI
 		public override void Process()
 		{
 			if (!ReInput.isReady)
+			{
+				return;
+			}
+			if (!this.m_HasFocus && this.ShouldIgnoreEventsOnNoFocus())
 			{
 				return;
 			}
@@ -396,18 +426,21 @@ namespace Rewired.Integration.UnityUI
 			for (int i = 0; i < Input.touchCount; i++)
 			{
 				Touch touch = Input.GetTouch(i);
-				bool pressed;
-				bool flag;
-				PointerEventData touchPointerEventData = base.GetTouchPointerEventData(touch, out pressed, out flag);
-				this.ProcessTouchPress(touchPointerEventData, pressed, flag);
-				if (!flag)
+				if (touch.type != TouchType.Indirect)
 				{
-					this.ProcessMove(touchPointerEventData);
-					this.ProcessDrag(touchPointerEventData);
-				}
-				else
-				{
-					base.RemovePointerData(touchPointerEventData);
+					bool pressed;
+					bool flag;
+					PointerEventData touchPointerEventData = base.GetTouchPointerEventData(touch, out pressed, out flag);
+					this.ProcessTouchPress(touchPointerEventData, pressed, flag);
+					if (!flag)
+					{
+						this.ProcessMove(touchPointerEventData);
+						this.ProcessDrag(touchPointerEventData);
+					}
+					else
+					{
+						base.RemovePointerData(touchPointerEventData);
+					}
 				}
 			}
 			return Input.touchCount > 0;
@@ -511,15 +544,18 @@ namespace Rewired.Integration.UnityUI
 				Player player = ReInput.players.GetPlayer(this.playerIds[i]);
 				if (player != null)
 				{
-					if (player.GetButtonDown(this.m_SubmitButton))
+					if (!this.usePlayingPlayersOnly || player.isPlaying)
 					{
-						ExecuteEvents.Execute<ISubmitHandler>(base.eventSystem.currentSelectedGameObject, baseEventData, ExecuteEvents.submitHandler);
-						break;
-					}
-					if (player.GetButtonDown(this.m_CancelButton))
-					{
-						ExecuteEvents.Execute<ICancelHandler>(base.eventSystem.currentSelectedGameObject, baseEventData, ExecuteEvents.cancelHandler);
-						break;
+						if (player.GetButtonDown(this.m_SubmitButton))
+						{
+							ExecuteEvents.Execute<ISubmitHandler>(base.eventSystem.currentSelectedGameObject, baseEventData, ExecuteEvents.submitHandler);
+							break;
+						}
+						if (player.GetButtonDown(this.m_CancelButton))
+						{
+							ExecuteEvents.Execute<ICancelHandler>(base.eventSystem.currentSelectedGameObject, baseEventData, ExecuteEvents.cancelHandler);
+							break;
+						}
 					}
 				}
 			}
@@ -541,36 +577,39 @@ namespace Rewired.Integration.UnityUI
 				Player player = ReInput.players.GetPlayer(this.playerIds[i]);
 				if (player != null)
 				{
-					if (this.moveOneElementPerAxisPress)
+					if (!this.usePlayingPlayersOnly || player.isPlaying)
 					{
-						float num = 0f;
-						if (player.GetButtonDown(this.m_HorizontalAxis))
+						if (this.moveOneElementPerAxisPress)
 						{
-							num = 1f;
+							float num = 0f;
+							if (player.GetButtonDown(this.m_HorizontalAxis))
+							{
+								num = 1f;
+							}
+							else if (player.GetNegativeButtonDown(this.m_HorizontalAxis))
+							{
+								num = -1f;
+							}
+							float num2 = 0f;
+							if (player.GetButtonDown(this.m_VerticalAxis))
+							{
+								num2 = 1f;
+							}
+							else if (player.GetNegativeButtonDown(this.m_VerticalAxis))
+							{
+								num2 = -1f;
+							}
+							zero.x += num;
+							zero.y += num2;
 						}
-						else if (player.GetNegativeButtonDown(this.m_HorizontalAxis))
+						else
 						{
-							num = -1f;
+							zero.x += player.GetAxisRaw(this.m_HorizontalAxis);
+							zero.y += player.GetAxisRaw(this.m_VerticalAxis);
 						}
-						float num2 = 0f;
-						if (player.GetButtonDown(this.m_VerticalAxis))
-						{
-							num2 = 1f;
-						}
-						else if (player.GetNegativeButtonDown(this.m_VerticalAxis))
-						{
-							num2 = -1f;
-						}
-						zero.x += num;
-						zero.y += num2;
+						flag |= (player.GetButtonDown(this.m_HorizontalAxis) || player.GetNegativeButtonDown(this.m_HorizontalAxis));
+						flag2 |= (player.GetButtonDown(this.m_VerticalAxis) || player.GetNegativeButtonDown(this.m_VerticalAxis));
 					}
-					else
-					{
-						zero.x += player.GetAxisRaw(this.m_HorizontalAxis);
-						zero.y += player.GetAxisRaw(this.m_VerticalAxis);
-					}
-					flag |= (player.GetButtonDown(this.m_HorizontalAxis) || player.GetNegativeButtonDown(this.m_HorizontalAxis));
-					flag2 |= (player.GetButtonDown(this.m_VerticalAxis) || player.GetNegativeButtonDown(this.m_VerticalAxis));
 				}
 			}
 			if (flag)
@@ -662,8 +701,11 @@ namespace Rewired.Integration.UnityUI
 				Player player = ReInput.players.GetPlayer(this.playerIds[i]);
 				if (player != null)
 				{
-					flag |= (player.GetButtonDown(this.m_HorizontalAxis) || player.GetNegativeButtonDown(this.m_HorizontalAxis));
-					flag |= (player.GetButtonDown(this.m_VerticalAxis) || player.GetNegativeButtonDown(this.m_VerticalAxis));
+					if (!this.usePlayingPlayersOnly || player.isPlaying)
+					{
+						flag |= (player.GetButtonDown(this.m_HorizontalAxis) || player.GetNegativeButtonDown(this.m_HorizontalAxis));
+						flag |= (player.GetButtonDown(this.m_VerticalAxis) || player.GetNegativeButtonDown(this.m_VerticalAxis));
+					}
 				}
 			}
 			return flag;
@@ -782,6 +824,18 @@ namespace Rewired.Integration.UnityUI
 		}
 
 		
+		protected virtual void OnApplicationFocus(bool hasFocus)
+		{
+			this.m_HasFocus = hasFocus;
+		}
+
+		
+		private bool ShouldIgnoreEventsOnNoFocus()
+		{
+			return !ReInput.isReady || ReInput.configuration.ignoreInputWhenAppNotInFocus;
+		}
+
+		
 		private void InitializeRewired()
 		{
 			if (!ReInput.isReady)
@@ -798,21 +852,11 @@ namespace Rewired.Integration.UnityUI
 		{
 			if (this.useAllRewiredGamePlayers)
 			{
-				IList<Player> list;
-				if (this.useRewiredSystemPlayer)
+				IList<Player> list = (!this.useRewiredSystemPlayer) ? ReInput.players.Players : ReInput.players.AllPlayers;
+				this.playerIds = new int[list.Count];
+				for (int i = 0; i < list.Count; i++)
 				{
-					IList<Player> allPlayers = ReInput.players.AllPlayers;
-					list = allPlayers;
-				}
-				else
-				{
-					list = ReInput.players.Players;
-				}
-				IList<Player> list2 = list;
-				this.playerIds = new int[list2.Count];
-				for (int i = 0; i < list2.Count; i++)
-				{
-					this.playerIds[i] = list2[i].id;
+					this.playerIds[i] = list[i].id;
 				}
 			}
 			else
@@ -885,14 +929,19 @@ namespace Rewired.Integration.UnityUI
 		private bool useAllRewiredGamePlayers;
 
 		
-		[Tooltip("Allow the Rewired System Player to control the UI.")]
 		[SerializeField]
+		[Tooltip("Allow the Rewired System Player to control the UI.")]
 		private bool useRewiredSystemPlayer;
 
 		
 		[SerializeField]
 		[Tooltip("A list of Player Ids that are allowed to control the UI. If Use All Rewired Game Players = True, this list will be ignored.")]
 		private int[] rewiredPlayerIds = new int[1];
+
+		
+		[SerializeField]
+		[Tooltip("Allow only Players with Player.isPlaying = true to control the UI.")]
+		private bool usePlayingPlayersOnly;
 
 		
 		[SerializeField]
@@ -915,12 +964,15 @@ namespace Rewired.Integration.UnityUI
 		private Vector2 m_MousePosition;
 
 		
+		private bool m_HasFocus = true;
+
+		
 		[SerializeField]
 		private string m_HorizontalAxis = "UIHorizontal";
 
 		
-		[Tooltip("Name of the vertical axis for movement (if axis events are used).")]
 		[SerializeField]
+		[Tooltip("Name of the vertical axis for movement (if axis events are used).")]
 		private string m_VerticalAxis = "UIVertical";
 
 		
@@ -929,13 +981,13 @@ namespace Rewired.Integration.UnityUI
 		private string m_SubmitButton = "UISubmit";
 
 		
-		[Tooltip("Name of the action used to cancel.")]
 		[SerializeField]
+		[Tooltip("Name of the action used to cancel.")]
 		private string m_CancelButton = "UICancel";
 
 		
-		[Tooltip("Number of selection changes allowed per second when a movement button/axis is held in a direction.")]
 		[SerializeField]
+		[Tooltip("Number of selection changes allowed per second when a movement button/axis is held in a direction.")]
 		private float m_InputActionsPerSecond = 10f;
 
 		
@@ -944,19 +996,19 @@ namespace Rewired.Integration.UnityUI
 		private float m_RepeatDelay;
 
 		
-		[Tooltip("Allows the mouse to be used to select elements.")]
 		[SerializeField]
+		[Tooltip("Allows the mouse to be used to select elements.")]
 		private bool m_allowMouseInput = true;
 
 		
-		[Tooltip("Allows the mouse to be used to select elements if the device also supports touch control.")]
 		[SerializeField]
+		[Tooltip("Allows the mouse to be used to select elements if the device also supports touch control.")]
 		private bool m_allowMouseInputIfTouchSupported = true;
 
 		
 		[SerializeField]
-		[Tooltip("Forces the module to always be active.")]
 		[FormerlySerializedAs("m_AllowActivationOnMobileDevice")]
+		[Tooltip("Forces the module to always be active.")]
 		private bool m_ForceModuleActive;
 	}
 }

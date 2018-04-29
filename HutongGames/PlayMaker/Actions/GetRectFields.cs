@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Get the individual fields of a Rect Variable and store them in Float Variables.")]
 	[ActionCategory(ActionCategory.Rect)]
+	[Tooltip("Get the individual fields of a Rect Variable and store them in Float Variables.")]
 	public class GetRectFields : FsmStateAction
 	{
 		

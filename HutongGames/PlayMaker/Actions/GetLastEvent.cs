@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the event that caused the transition to the current state, and stores it in a String Variable.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Gets the event that caused the transition to the current state, and stores it in a String Variable.")]
 	public class GetLastEvent : FsmStateAction
 	{
 		

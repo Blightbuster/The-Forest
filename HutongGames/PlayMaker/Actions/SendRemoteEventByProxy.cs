@@ -51,9 +51,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The game object that sends the event.")]
-		[CheckForComponent(typeof(NetworkView), typeof(PlayMakerRPCProxy))]
 		[RequiredField]
+		[CheckForComponent(typeof(NetworkView), typeof(PlayMakerRPCProxy))]
+		[Tooltip("The game object that sends the event.")]
 		public FsmOwnerDefault gameObject;
 
 		

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace uSky
 {
 	
-	[RequireComponent(typeof(uSkyManager))]
 	[AddComponentMenu("uSky/Play TOD")]
+	[RequireComponent(typeof(uSkyManager))]
 	public class PlayTOD : MonoBehaviour
 	{
 		

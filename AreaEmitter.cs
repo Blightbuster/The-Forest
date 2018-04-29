@@ -506,9 +506,6 @@ public class AreaEmitter : MonoBehaviour, FMOD_Listener.IAreaEmitter
 	}
 
 	
-	private const float SOURCE_WIDTH = 90f;
-
-	
 	public string eventPath;
 
 	
@@ -556,6 +553,9 @@ public class AreaEmitter : MonoBehaviour, FMOD_Listener.IAreaEmitter
 
 	
 	private EventInstance eventInstanceFollowingPlayer;
+
+	
+	private const float SOURCE_WIDTH = 90f;
 
 	
 	private static Texture2D lineTexture;
@@ -789,12 +789,9 @@ public class AreaEmitter : MonoBehaviour, FMOD_Listener.IAreaEmitter
 		{
 			for (int i = 0; i < this.activeSegments.Count; i++)
 			{
-				List<AreaEmitter.Polygon.SegmentFlags> list2;
-				List<AreaEmitter.Polygon.SegmentFlags> list = list2 = this.segmentFlags;
-				int index2;
-				int index = index2 = this.activeSegments[i];
-				AreaEmitter.Polygon.SegmentFlags segmentFlags = list2[index2];
-				list[index] = (segmentFlags & ~AreaEmitter.Polygon.SegmentFlags.Active);
+				List<AreaEmitter.Polygon.SegmentFlags> list;
+				int index;
+				(list = this.segmentFlags)[index = this.activeSegments[i]] = (list[index] & ~AreaEmitter.Polygon.SegmentFlags.Active);
 			}
 			this.activeSegments.Clear();
 			if (this.grid != null)
@@ -885,17 +882,12 @@ public class AreaEmitter : MonoBehaviour, FMOD_Listener.IAreaEmitter
 				}
 			}
 			value.sqrDistance = (value.closestPoint - LocalPlayer.Transform.position).sqrMagnitude;
-			List<AreaEmitter.Polygon.SegmentFlags> list2;
-			List<AreaEmitter.Polygon.SegmentFlags> list = list2 = this.segmentFlags;
-			AreaEmitter.Polygon.SegmentFlags segmentFlags = list2[index];
-			list[index] = (segmentFlags & ~AreaEmitter.Polygon.SegmentFlags.Occluded);
+			List<AreaEmitter.Polygon.SegmentFlags> list;
+			(list = this.segmentFlags)[index] = (list[index] & ~AreaEmitter.Polygon.SegmentFlags.Occluded);
 			if (value.sqrDistance < this.sqrMaximumDistance)
 			{
 				this.activeSegments.Add(index);
-				List<AreaEmitter.Polygon.SegmentFlags> list4;
-				List<AreaEmitter.Polygon.SegmentFlags> list3 = list4 = this.segmentFlags;
-				segmentFlags = list4[index];
-				list3[index] = (segmentFlags | AreaEmitter.Polygon.SegmentFlags.Active);
+				(list = this.segmentFlags)[index] = (list[index] | AreaEmitter.Polygon.SegmentFlags.Active);
 			}
 			this.segments[index] = value;
 		}
@@ -980,12 +972,9 @@ public class AreaEmitter : MonoBehaviour, FMOD_Listener.IAreaEmitter
 					lhs.y = 0f;
 					if (Vector3.Dot(lhs, rightOfLeft) >= 0f && Vector3.Dot(lhs, leftOfRight) >= 0f)
 					{
-						List<AreaEmitter.Polygon.SegmentFlags> list2;
-						List<AreaEmitter.Polygon.SegmentFlags> list = list2 = this.segmentFlags;
-						int index2;
-						int index = index2 = num;
-						AreaEmitter.Polygon.SegmentFlags segmentFlags = list2[index2];
-						list[index] = (segmentFlags | AreaEmitter.Polygon.SegmentFlags.Occluded);
+						List<AreaEmitter.Polygon.SegmentFlags> list;
+						int index;
+						(list = this.segmentFlags)[index = num] = (list[index] | AreaEmitter.Polygon.SegmentFlags.Occluded);
 						this.audibleSegmentCount--;
 						this.activeSegments[i] = this.activeSegments[this.audibleSegmentCount];
 						this.activeSegments[this.audibleSegmentCount] = num;

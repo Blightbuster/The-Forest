@@ -56,11 +56,11 @@ public class activateGirlPickup : EntityEventListener
 		{
 			if (this._rootGo && !BoltNetwork.isClient)
 			{
-				destroyAfter da = this._rootGo.AddComponent<destroyAfter>();
-				da.destroyTime = 60f;
+				destroyAfter destroyAfter = this._rootGo.AddComponent<destroyAfter>();
+				destroyAfter.destroyTime = 60f;
 			}
-			GameObject spawn = (GameObject)UnityEngine.Object.Instantiate(Resources.Load("CutScene/girl_Pickup"), LocalPlayer.PlayerBase.transform.position, LocalPlayer.PlayerBase.transform.rotation);
-			LocalPlayer.SpecialActions.SendMessage("setGirlGo", spawn, SendMessageOptions.DontRequireReceiver);
+			GameObject value = (GameObject)UnityEngine.Object.Instantiate(Resources.Load("CutScene/girl_Pickup"), LocalPlayer.PlayerBase.transform.position, LocalPlayer.PlayerBase.transform.rotation);
+			LocalPlayer.SpecialActions.SendMessage("setGirlGo", value, SendMessageOptions.DontRequireReceiver);
 			LocalPlayer.SpecialActions.SendMessage("setGirlTrigger", base.gameObject, SendMessageOptions.DontRequireReceiver);
 			this.ragdollGo.SetActive(false);
 		}
@@ -72,11 +72,11 @@ public class activateGirlPickup : EntityEventListener
 		LocalPlayer.SpecialActions.SendMessage("pickupGirlRoutine", base.transform.position, SendMessageOptions.DontRequireReceiver);
 		if (BoltNetwork.isRunning)
 		{
-			this.entity.Freeze(false);
-			syncGirlPickup ev = syncGirlPickup.Create(GlobalTargets.Everyone);
-			ev.target = base.transform.GetComponentInParent<BoltEntity>();
-			ev.disableTrigger = true;
-			ev.Send();
+			base.entity.Freeze(false);
+			syncGirlPickup syncGirlPickup = syncGirlPickup.Create(GlobalTargets.Everyone);
+			syncGirlPickup.target = base.transform.GetComponentInParent<BoltEntity>();
+			syncGirlPickup.disableTrigger = true;
+			syncGirlPickup.Send();
 		}
 		base.gameObject.SetActive(false);
 		yield return null;

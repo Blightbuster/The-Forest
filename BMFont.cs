@@ -169,13 +169,13 @@ public class BMFont
 	}
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private int mSize = 16;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private int mBase;
 
 	
@@ -184,18 +184,18 @@ public class BMFont
 	private int mWidth;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private int mHeight;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private string mSpriteName;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private List<BMGlyph> mSaved = new List<BMGlyph>();
 
 	

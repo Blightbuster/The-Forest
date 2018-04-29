@@ -1,13 +1,11 @@
 ﻿using System;
 using Bolt;
-using ModAPI;
 using PathologicalGames;
 using TheForest.Buildings.World;
 using TheForest.Items;
 using TheForest.Tools;
 using TheForest.UI;
 using TheForest.Utils;
-using UltimateCheatmenu;
 using UniLinq;
 using UnityEngine;
 
@@ -50,6 +48,10 @@ public class Garden : MonoBehaviour
 		else if (!flag)
 		{
 			this._currentSeedType = this.NextSeedType();
+			this.Widget.Shutdown();
+		}
+		else
+		{
 			this.Widget.Shutdown();
 		}
 	}
@@ -110,7 +112,7 @@ public class Garden : MonoBehaviour
 	}
 
 	
-	public void __PlantSeed__Original()
+	public void PlantSeed()
 	{
 		EventRegistry.Achievements.Publish(TfEvent.Achievements.PlantedSeed, this.CurrentSeedItemId);
 		if (BoltNetwork.isRunning)
@@ -200,36 +202,6 @@ public class Garden : MonoBehaviour
 		get
 		{
 			return Scene.HudGui.GardenWidgets[(int)this._dirtPileType];
-		}
-	}
-
-	
-	public void PlantSeed()
-	{
-		try
-		{
-			if (UCheatmenu.seedtype >= 0)
-			{
-				this._currentSeedType = UCheatmenu.seedtype;
-			}
-			if (BoltNetwork.isRunning)
-			{
-				if (BoltNetwork.isClient)
-				{
-					LocalPlayer.Sfx.PlayDigDirtPile(base.gameObject);
-				}
-				GrowGarden growGarden = GrowGarden.Create(GlobalTargets.OnlyServer);
-				growGarden.Garden = base.GetComponentInParent<BoltEntity>();
-				growGarden.SeedNum = this._currentSeedType;
-				growGarden.Send();
-				return;
-			}
-			this.PlantSeed_Real(this._currentSeedType);
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__PlantSeed__Original();
 		}
 	}
 

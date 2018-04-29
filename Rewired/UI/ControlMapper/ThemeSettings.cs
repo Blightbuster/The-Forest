@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -62,28 +61,14 @@ namespace Rewired.UI.ControlMapper
 			{
 				if (themeClass != null)
 				{
-					if (ThemeSettings.<>f__switch$map12 == null)
+					if (themeClass == "inputGridField")
 					{
-						ThemeSettings.<>f__switch$map12 = new Dictionary<string, int>(1)
-						{
-							{
-								"inputGridField",
-								0
-							}
-						};
-					}
-					int num;
-					if (ThemeSettings.<>f__switch$map12.TryGetValue(themeClass, out num))
-					{
-						if (num == 0)
-						{
-							selectableSettings_Base = this._inputGridFieldSettings;
-							goto IL_7E;
-						}
+						selectableSettings_Base = this._inputGridFieldSettings;
+						goto IL_51;
 					}
 				}
 				selectableSettings_Base = this._buttonSettings;
-				IL_7E:;
+				IL_51:;
 			}
 			else if (item as Scrollbar != null)
 			{
@@ -97,28 +82,14 @@ namespace Rewired.UI.ControlMapper
 			{
 				if (themeClass != null)
 				{
-					if (ThemeSettings.<>f__switch$map13 == null)
+					if (themeClass == "button")
 					{
-						ThemeSettings.<>f__switch$map13 = new Dictionary<string, int>(1)
-						{
-							{
-								"button",
-								0
-							}
-						};
-					}
-					int num;
-					if (ThemeSettings.<>f__switch$map13.TryGetValue(themeClass, out num))
-					{
-						if (num == 0)
-						{
-							selectableSettings_Base = this._buttonSettings;
-							goto IL_12E;
-						}
+						selectableSettings_Base = this._buttonSettings;
+						goto IL_D4;
 					}
 				}
 				selectableSettings_Base = this._selectableSettings;
-				IL_12E:;
+				IL_D4:;
 			}
 			else
 			{
@@ -173,37 +144,19 @@ namespace Rewired.UI.ControlMapper
 			ThemeSettings.TextSettings textSettings;
 			if (themeClass != null)
 			{
-				if (ThemeSettings.<>f__switch$map15 == null)
+				if (themeClass == "button")
 				{
-					ThemeSettings.<>f__switch$map15 = new Dictionary<string, int>(2)
-					{
-						{
-							"button",
-							0
-						},
-						{
-							"inputGridField",
-							1
-						}
-					};
+					textSettings = this._buttonTextSettings;
+					goto IL_5C;
 				}
-				int num;
-				if (ThemeSettings.<>f__switch$map15.TryGetValue(themeClass, out num))
+				if (themeClass == "inputGridField")
 				{
-					if (num == 0)
-					{
-						textSettings = this._buttonTextSettings;
-						goto IL_8C;
-					}
-					if (num == 1)
-					{
-						textSettings = this._inputGridFieldTextSettings;
-						goto IL_8C;
-					}
+					textSettings = this._inputGridFieldTextSettings;
+					goto IL_5C;
 				}
 			}
 			textSettings = this._textSettings;
-			IL_8C:
+			IL_5C:
 			if (textSettings.font != null)
 			{
 				item.font = textSettings.font;

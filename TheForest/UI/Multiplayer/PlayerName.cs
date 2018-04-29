@@ -56,22 +56,13 @@ namespace TheForest.UI.Multiplayer
 					Vector3 position = LocalPlayer.MainCam.WorldToViewportPoint(base.transform.position);
 					position.z = z;
 					this._overlayTr.position = Scene.HudGui.ActionIconCams.ViewportToWorldPoint(position);
-					bool flag;
 					if (PlayerPreferences.ShowPlayerNamesMP)
 					{
-						flag = (base.transform.position.y < Terrain.activeTerrain.SampleHeight(base.transform.position));
+						bool flag = base.transform.position.y < Terrain.activeTerrain.SampleHeight(base.transform.position);
 						if (flag)
 						{
 							flag = !Scene.IsInSinkhole(base.transform.position);
 						}
-					}
-					else
-					{
-						flag = false;
-					}
-					if (this._overlay._inCaveIcon.enabled != flag)
-					{
-						this._overlay._inCaveIcon.enabled = flag;
 					}
 				}
 			}
@@ -93,7 +84,7 @@ namespace TheForest.UI.Multiplayer
 			PlayerOverlay playerOverlay = Scene.HudGui.PlayerOverlay;
 			if (!this._overlay)
 			{
-				this._overlay = (PlayerOverlay)UnityEngine.Object.Instantiate(playerOverlay, playerOverlay.transform.position, playerOverlay.transform.rotation);
+				this._overlay = UnityEngine.Object.Instantiate<PlayerOverlay>(playerOverlay, playerOverlay.transform.position, playerOverlay.transform.rotation);
 			}
 			this._overlay._name.text = name;
 			this._overlay.gameObject.SetActive(false);

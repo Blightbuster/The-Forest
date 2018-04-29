@@ -262,8 +262,8 @@ public class UIToggle : UIWidgetContainer
 	private UISprite checkSprite;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private Animation checkAnimation;
 
 	
@@ -272,13 +272,13 @@ public class UIToggle : UIWidgetContainer
 	private GameObject eventReceiver;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private string functionName = "OnActivate";
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private bool startsChecked;
 
 	

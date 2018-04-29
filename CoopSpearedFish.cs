@@ -17,9 +17,9 @@ public class CoopSpearedFish : EntityBehaviour<IPlayerState>
 	
 	private void Update()
 	{
-		if (this.entity && this.entity.isAttached)
+		if (base.entity && base.entity.isAttached)
 		{
-			if (this.entity.isOwner)
+			if (base.entity.isOwner)
 			{
 				if (this._weapon.MyFish && this._weapon.MyFish.gameObject.activeSelf)
 				{
@@ -80,7 +80,7 @@ public class CoopSpearedFish : EntityBehaviour<IPlayerState>
 	
 	public override void Attached()
 	{
-		if (this.entity.isOwner)
+		if (base.entity.isOwner)
 		{
 			base.state.SpearedFishType = -1;
 		}

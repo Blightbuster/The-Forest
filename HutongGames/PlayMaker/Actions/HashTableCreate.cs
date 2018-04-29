@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Adds a PlayMakerHashTableProxy Component to a Game Object. Use this to create arrayList on the fly instead of during authoring.\n Optionally remove the HashTable component on exiting the state.\n Simply point to existing if the reference exists already.")]
 	[ActionCategory("ArrayMaker/HashTable")]
+	[Tooltip("Adds a PlayMakerHashTableProxy Component to a Game Object. Use this to create arrayList on the fly instead of during authoring.\n Optionally remove the HashTable component on exiting the state.\n Simply point to existing if the reference exists already.")]
 	public class HashTableCreate : HashTableActions
 	{
 		
@@ -56,9 +56,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The Game Object to add the Hashtable Component to.")]
 		[ActionSection("Set up")]
 		[RequiredField]
+		[Tooltip("The Game Object to add the Hashtable Component to.")]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -71,9 +71,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmBool removeOnExit;
 
 		
-		[Tooltip("The event to trigger if the hashtable exists already")]
-		[UIHint(UIHint.FsmEvent)]
 		[ActionSection("Result")]
+		[UIHint(UIHint.FsmEvent)]
+		[Tooltip("The event to trigger if the hashtable exists already")]
 		public FsmEvent alreadyExistsEvent;
 
 		

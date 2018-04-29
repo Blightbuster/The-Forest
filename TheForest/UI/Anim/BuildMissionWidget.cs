@@ -1,6 +1,7 @@
 ﻿using System;
 using PathologicalGames;
 using TheForest.Buildings.Creation;
+using TheForest.Tools;
 using TheForest.Utils;
 using UnityEngine;
 
@@ -16,6 +17,18 @@ namespace TheForest.UI.Anim
 			{
 				this._buildLog = base.GetComponentInChildren<BuildLog>();
 			}
+		}
+
+		
+		private void OnEnable()
+		{
+			EventRegistry.Game.Subscribe(TfEvent.LanguageSet, new EventRegistry.SubscriberCallback(this.OnLanguageChange));
+		}
+
+		
+		private void OnDestroy()
+		{
+			EventRegistry.Game.Unsubscribe(TfEvent.LanguageSet, new EventRegistry.SubscriberCallback(this.OnLanguageChange));
 		}
 
 		
@@ -35,6 +48,16 @@ namespace TheForest.UI.Anim
 			else if (this.CheckTweenersFinished(this._crossOffTweeners))
 			{
 				this.Hide();
+			}
+		}
+
+		
+		private void OnLanguageChange(object eventParameter)
+		{
+			if (this._buildLog._itemId > 0)
+			{
+				this._itemNameLabel.text = Scene.HudGui.GetItemName(this._buildLog._itemId, true, true);
+				this._buildLog._label.UpdateAnchors();
 			}
 		}
 

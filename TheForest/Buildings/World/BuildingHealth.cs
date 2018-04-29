@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections;
 using Bolt;
-using ModAPI;
 using TheForest.Buildings.Creation;
 using TheForest.Buildings.Interfaces;
 using TheForest.Tools;
 using TheForest.Utils;
 using TheForest.Utils.Enums;
 using TheForest.World;
-using UltimateCheatmenu;
 using UniLinq;
 using UnityEngine;
 
@@ -24,6 +22,16 @@ namespace TheForest.Buildings.World
 			if (!LevelSerializer.IsDeserializing || this.HpActual == 0f)
 			{
 				this.HpActual = this._maxHP;
+			}
+		}
+
+		
+		private void Start()
+		{
+			raftOnLand componentInParent = base.transform.GetComponentInParent<raftOnLand>();
+			if (componentInParent && componentInParent.BuildContainer && base.transform.parent != componentInParent.BuildContainer)
+			{
+				base.transform.parent = componentInParent.BuildContainer;
 			}
 		}
 
@@ -59,7 +67,7 @@ namespace TheForest.Buildings.World
 		}
 
 		
-		public void __LocalizedHit__Original(LocalizedHitData data)
+		public void LocalizedHit(LocalizedHitData data)
 		{
 			if (!PlayerPreferences.NoDestruction && this._lastHit + 0.5f < Time.realtimeSinceStartup)
 			{
@@ -67,7 +75,7 @@ namespace TheForest.Buildings.World
 				if (BoltNetwork.isRunning)
 				{
 					LocalizedHit localizedHit = global::LocalizedHit.Create(GlobalTargets.OnlyServer);
-					localizedHit.Building = this.entity;
+					localizedHit.Building = base.entity;
 					localizedHit.Damage = data._damage;
 					localizedHit.Position = data._position;
 					localizedHit.Chunk = -1;
@@ -112,7 +120,7 @@ namespace TheForest.Buildings.World
 			if (BoltNetwork.isRunning)
 			{
 				AddRepairMaterial addRepairMaterial = global::AddRepairMaterial.Create(GlobalTargets.OnlyServer);
-				addRepairMaterial.Building = this.entity;
+				addRepairMaterial.Building = base.entity;
 				addRepairMaterial.IsLog = isLog;
 				addRepairMaterial.Send();
 			}
@@ -192,7 +200,7 @@ namespace TheForest.Buildings.World
 				{
 					_damage = other._maxHP - other.Hp
 				}, 0);
-				if (BoltNetwork.isRunning && this.entity.isAttached && other.entity.isAttached)
+				if (BoltNetwork.isRunning && base.entity.isAttached && other.entity.isAttached)
 				{
 					base.state.BuildingHits = other.state.BuildingHits;
 					if (base.state.BuildingHits > 0)
@@ -208,11 +216,23 @@ namespace TheForest.Buildings.World
 		{
 			if (data._damage > 0f)
 			{
-				Renderer[] array = (!this._renderersRoot) ? base.transform.GetComponentsInChildren<Renderer>() : this._renderersRoot.GetComponentsInChildren<Renderer>();
+				Renderer[] array = null;
+				if (this._renderersRoot)
+				{
+					LOD_GroupToggle component = this._renderersRoot.GetComponent<LOD_GroupToggle>();
+					if (component && component._levels != null && component._levels.Length > 0)
+					{
+						array = component._levels[0].Renderers;
+					}
+				}
+				if (array == null)
+				{
+					array = ((!(this._renderersRoot != null)) ? base.gameObject : this._renderersRoot).GetComponentsInChildren<Renderer>();
+				}
 				float num = Mathf.Clamp(data._damage * data._distortRatio * 10f / this._maxHP, 1f, Mathf.Lerp(2f, 10f, (this._maxHP - 100f) / 400f));
 				for (int i = 0; i < array.Length; i++)
 				{
-					if (array[i].enabled)
+					if (array[i] && array[i].enabled)
 					{
 						Transform transform = array[i].transform;
 						GameObject gameObject = transform.gameObject;
@@ -251,19 +271,23 @@ namespace TheForest.Buildings.World
 				this._collapsing = true;
 				if (this._type == BuildingTypes.WorkBench || this._type == BuildingTypes.Chair || this._type == BuildingTypes.BoneChair)
 				{
-					activateBench ab = base.transform.GetComponentInChildren<activateBench>();
-					if (ab)
+					activateBench componentInChildren = base.transform.GetComponentInChildren<activateBench>();
+					if (componentInChildren)
 					{
-						ab.gameObject.SetActive(false);
-						if (ab.Sheen)
+						componentInChildren.gameObject.SetActive(false);
+						if (componentInChildren.Sheen)
 						{
-							ab.Sheen.SetActive(false);
+							componentInChildren.Sheen.SetActive(false);
 						}
-						if (ab.MyPickUp)
+						if (componentInChildren.MyPickUp)
 						{
-							ab.MyPickUp.SetActive(false);
+							componentInChildren.MyPickUp.SetActive(false);
 						}
 					}
+				}
+				if (BoltNetwork.isServer)
+				{
+					yield return YieldPresets.WaitPointOneSeconds;
 				}
 				if (this._type == BuildingTypes.WeaponRack)
 				{
@@ -275,74 +299,92 @@ namespace TheForest.Buildings.World
 				}
 				if ((this._type == BuildingTypes.HouseBoat || this._type == BuildingTypes.Raft || this._type == BuildingTypes.RaftEx) && LocalPlayer.Transform.IsChildOf(base.transform))
 				{
-					RaftPush[] rp = base.transform.GetComponentsInChildren<RaftPush>(true);
-					if (rp.Length > 0)
+					RaftPush[] componentsInChildren = base.transform.GetComponentsInChildren<RaftPush>(true);
+					if (componentsInChildren.Length > 0)
 					{
-						foreach (RaftPush r in rp)
+						foreach (RaftPush raftPush in componentsInChildren)
 						{
-							r.SendMessage("offRaft");
+							raftPush.SendMessage("offRaft");
 						}
 					}
 				}
-				for (int i = base.transform.childCount - 1; i >= 0; i--)
+				for (int j = base.transform.childCount - 1; j >= 0; j--)
 				{
-					LODGroup lg = base.transform.GetChild(i).GetComponent<LODGroup>();
-					if (lg)
+					LODGroup component = base.transform.GetChild(j).GetComponent<LODGroup>();
+					if (component)
 					{
-						LOD[] lods = lg.GetLODs();
+						LOD[] lods = component.GetLODs();
 						if (lods != null && (lods.Length > 1 & lods[1].renderers != null))
 						{
-							for (int r2 = 0; r2 < lods[1].renderers.Length; r2++)
+							for (int k = 0; k < lods[1].renderers.Length; k++)
 							{
-								UnityEngine.Object.Destroy(lods[1].renderers[r2].gameObject);
+								UnityEngine.Object.Destroy(lods[1].renderers[k].gameObject);
 							}
 						}
 						break;
 					}
 				}
+				Transform renderersRoot = (!this._renderersRoot) ? base.transform : this._renderersRoot.transform;
+				LOD_GroupToggle lgt = (!renderersRoot.parent) ? null : renderersRoot.parent.GetComponent<LOD_GroupToggle>();
+				if (lgt)
+				{
+					lgt.ForceVisibility(0);
+					for (int l = lgt._levels.Length - 1; l > 0; l--)
+					{
+						foreach (Renderer renderer in lgt._levels[l].Renderers)
+						{
+							if (renderer)
+							{
+								renderer.transform.parent = null;
+								UnityEngine.Object.Destroy(renderer.gameObject);
+							}
+						}
+					}
+					UnityEngine.Object.Destroy(lgt);
+				}
 				if (!BoltNetwork.isClient)
 				{
 					yield return YieldPresets.WaitPointZeroFiveSeconds;
-					for (int j = base.transform.childCount - 1; j >= 0; j--)
+					for (int n = base.transform.childCount - 1; n >= 0; n--)
 					{
-						Transform child = base.transform.GetChild(j);
-						BuildingHealth bh = child.GetComponent<BuildingHealth>();
-						if (bh)
+						Transform child = base.transform.GetChild(n);
+						BuildingHealth component2 = child.GetComponent<BuildingHealth>();
+						if (component2)
 						{
 							child.parent = null;
-							bh.Collapse(child.position);
-							Transform trigger = child.Find("Trigger");
-							if (trigger)
+							component2.Collapse(child.position);
+							Transform transform = child.Find("Trigger");
+							if (transform)
 							{
-								UnityEngine.Object.Destroy(trigger.gameObject);
+								UnityEngine.Object.Destroy(transform.gameObject);
 							}
 						}
 						else
 						{
-							FoundationHealth fh = child.GetComponent<FoundationHealth>();
-							if (fh)
+							FoundationHealth component3 = child.GetComponent<FoundationHealth>();
+							if (component3)
 							{
 								child.parent = null;
-								fh.Collapse(child.position);
+								component3.Collapse(child.position);
 							}
 							else if (BoltNetwork.isRunning && child.GetComponent<BoltEntity>())
 							{
 								child.parent = null;
-								destroyAfter da = child.gameObject.AddComponent<destroyAfter>();
-								da.destroyTime = 2.5f;
-								Transform trigger2 = child.Find("Trigger");
-								if (trigger2)
+								destroyAfter destroyAfter = child.gameObject.AddComponent<destroyAfter>();
+								destroyAfter.destroyTime = 2.5f;
+								Transform transform2 = child.Find("Trigger");
+								if (transform2)
 								{
-									UnityEngine.Object.Destroy(trigger2.gameObject);
+									UnityEngine.Object.Destroy(transform2.gameObject);
 								}
 							}
 						}
 						if (BoltNetwork.isRunning)
 						{
-							CoopAutoAttach caa = child.GetComponent<CoopAutoAttach>();
-							if (caa)
+							CoopAutoAttach component4 = child.GetComponent<CoopAutoAttach>();
+							if (component4)
 							{
-								UnityEngine.Object.Destroy(caa);
+								UnityEngine.Object.Destroy(component4);
 							}
 						}
 					}
@@ -355,54 +397,60 @@ namespace TheForest.Buildings.World
 				{
 					LocalPlayer.HitReactions.disableImpact(0.15f);
 				}
-				foreach (MeshRenderer r3 in (!this._renderersRoot) ? base.GetComponentsInChildren<MeshRenderer>() : this._renderersRoot.GetComponentsInChildren<MeshRenderer>())
+				Renderer[] renderers = null;
+				if (lgt && lgt._levels != null && lgt._levels.Length > 0)
 				{
-					GameObject go = r3.gameObject;
-					if (r3.enabled && go.activeInHierarchy)
+					renderers = lgt._levels[0].Renderers;
+				}
+				if (renderers == null || renderers.Length == 0)
+				{
+					renderers = ((!this._renderersRoot) ? base.GetComponentsInChildren<MeshRenderer>() : this._renderersRoot.GetComponentsInChildren<MeshRenderer>());
+				}
+				foreach (Renderer renderer2 in renderers)
+				{
+					GameObject gameObject = renderer2.gameObject;
+					if (renderer2.enabled && gameObject.activeInHierarchy)
 					{
-						Transform tr = r3.transform;
-						if (!go.GetComponent<Collider>())
+						Transform transform3 = renderer2.transform;
+						if (!gameObject.GetComponent<Collider>())
 						{
-							MeshFilter mf = r3.GetComponent<MeshFilter>();
-							if (!mf || !mf.sharedMesh)
+							MeshFilter component5 = renderer2.GetComponent<MeshFilter>();
+							if (!component5 || !component5.sharedMesh)
 							{
-								goto IL_7CA;
+								goto IL_7BB;
 							}
-							BoxCollider bc = go.AddComponent<BoxCollider>();
-							Bounds meshBounds = mf.sharedMesh.bounds;
-							bc.size = meshBounds.size * 0.9f;
-							bc.center = meshBounds.center;
+							BoxCollider boxCollider = gameObject.AddComponent<BoxCollider>();
+							Bounds bounds = component5.sharedMesh.bounds;
+							boxCollider.size = bounds.size * 0.9f;
+							boxCollider.center = bounds.center;
 						}
-						go.layer = this._detachedLayer;
-						tr.parent = null;
-						Rigidbody rb = go.AddComponent<Rigidbody>();
-						if (rb)
+						gameObject.layer = this._detachedLayer;
+						transform3.parent = null;
+						Rigidbody rigidbody = gameObject.AddComponent<Rigidbody>();
+						if (rigidbody)
 						{
-							rb.AddForce(((tr.position - origin).normalized + Vector3.up) * (2.5f * this._destructionForceMultiplier), ForceMode.Impulse);
-							rb.AddRelativeTorque(Vector3.up * (2f * this._destructionForceMultiplier), ForceMode.Impulse);
-							rb.mass = 10f;
+							rigidbody.AddForce(((transform3.position - origin).normalized + Vector3.up) * (2.5f * this._destructionForceMultiplier), ForceMode.Impulse);
+							rigidbody.AddRelativeTorque(Vector3.up * (2f * this._destructionForceMultiplier), ForceMode.Impulse);
+							rigidbody.mass = 10f;
 						}
-						destroyAfter da2 = go.AddComponent<destroyAfter>();
+						destroyAfter destroyAfter2 = gameObject.AddComponent<destroyAfter>();
 						if (this._type == BuildingTypes.WeaponRack)
 						{
-							da2.destroyTime = 1.5f;
+							destroyAfter2.destroyTime = 1.5f;
 						}
 						else
 						{
-							da2.destroyTime = 5f;
+							destroyAfter2.destroyTime = 5f;
 						}
 					}
-					IL_7CA:;
+					IL_7BB:;
 				}
 				if (this._repairTrigger)
 				{
 					UnityEngine.Object.Destroy(this._repairTrigger.gameObject);
 					this._repairTrigger = null;
 				}
-				if (this._dustPrefab)
-				{
-					UnityEngine.Object.Instantiate(this._dustPrefab, base.transform.position, base.transform.rotation);
-				}
+				this.SpawnCollapseDust();
 				if (!BoltNetwork.isClient)
 				{
 					if (!BoltNetwork.isRunning)
@@ -444,11 +492,20 @@ namespace TheForest.Buildings.World
 		}
 
 		
+		public void SpawnCollapseDust()
+		{
+			if (this._dustPrefab)
+			{
+				UnityEngine.Object.Instantiate<GameObject>(this._dustPrefab, base.transform.position, base.transform.rotation);
+			}
+		}
+
+		
 		public void Collapse(Vector3 origin)
 		{
 			if (BoltNetwork.isRunning)
 			{
-				if (this.entity.isAttached && base.state != null)
+				if (base.entity.isAttached && base.state != null)
 				{
 					base.state.BuildingCollapsePoint = origin;
 				}
@@ -466,7 +523,7 @@ namespace TheForest.Buildings.World
 			{
 				return;
 			}
-			if (BoltNetwork.isRunning && this.entity && this.entity.isAttached && this.entity.isOwner)
+			if (BoltNetwork.isRunning && base.entity && base.entity.isAttached && base.entity.isOwner)
 			{
 				base.state.repairTrigger = true;
 			}
@@ -508,7 +565,7 @@ namespace TheForest.Buildings.World
 			if (BoltNetwork.isServer)
 			{
 				PerformRepairBuilding performRepairBuilding = PerformRepairBuilding.Create(GlobalTargets.AllClients);
-				performRepairBuilding.Building = this.entity;
+				performRepairBuilding.Building = base.entity;
 				performRepairBuilding.Send();
 			}
 			this.RespawnBuilding();
@@ -527,6 +584,10 @@ namespace TheForest.Buildings.World
 				LocalPlayer.Create.Grabber.Reset();
 			}
 			DynamicBuilding dynamicBuilding = (!base.transform.parent) ? null : base.transform.parent.GetComponentInParent<DynamicBuilding>();
+			if (dynamicBuilding == null)
+			{
+				dynamicBuilding = base.transform.GetComponent<DynamicBuilding>();
+			}
 			if (dynamicBuilding)
 			{
 				dynamicBuilding.LockPhysics();
@@ -537,26 +598,43 @@ namespace TheForest.Buildings.World
 				GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(Prefabs.Instance.Constructions._blueprints.Find((BuildingBlueprint bp) => bp._type == this._type)._builtPrefab);
 				gameObject.transform.position = base.transform.position;
 				gameObject.transform.rotation = base.transform.rotation;
+				if (dynamicBuilding && this._repairMode == BuildingHealth.RepairModes.RenderersOnly)
+				{
+					Collider[] componentsInChildren = gameObject.GetComponentsInChildren<Collider>(true);
+					for (int i = 0; i < componentsInChildren.Length; i++)
+					{
+						componentsInChildren[i].enabled = false;
+					}
+				}
 				if (this._repairMode == BuildingHealth.RepairModes.RenderersOnly)
 				{
 					base.SendMessage("RespawningRenderersFrom", gameObject, SendMessageOptions.DontRequireReceiver);
 					Transform transform = (!this._renderersRoot) ? base.transform : this._renderersRoot.transform;
-					for (int i = transform.childCount - 1; i >= 0; i--)
+					LOD_GroupToggle lod_GroupToggle = (!transform.parent) ? null : transform.parent.GetComponent<LOD_GroupToggle>();
+					for (int j = transform.childCount - 1; j >= 0; j--)
 					{
-						Transform child = transform.GetChild(i);
+						Transform child = transform.GetChild(j);
 						if ((!child.GetComponent<StoreInformation>() || child.GetComponent<ForceRepairRespawn>()) && !child.GetComponent<SkipRepairRespawn>() && !child.name.Contains("Anchor"))
 						{
 							UnityEngine.Object.Destroy(child.gameObject);
 						}
 					}
 					Transform transform2 = (!this._renderersRoot) ? gameObject.transform : gameObject.GetComponent<BuildingHealth>()._renderersRoot.transform;
-					for (int j = transform2.childCount - 1; j >= 0; j--)
+					for (int k = transform2.childCount - 1; k >= 0; k--)
 					{
-						Transform child2 = transform2.GetChild(j);
+						Transform child2 = transform2.GetChild(k);
 						if ((!child2.GetComponent<StoreInformation>() || child2.GetComponent<ForceRepairRespawn>()) && !child2.GetComponent<SkipRepairRespawn>() && !child2.name.Contains("Anchor"))
 						{
 							child2.parent = transform;
+							if (lod_GroupToggle)
+							{
+								lod_GroupToggle._levels[0].Renderers[k] = child2.GetComponentInChildren<Renderer>();
+							}
 						}
+					}
+					if (lod_GroupToggle)
+					{
+						lod_GroupToggle.RefreshVisibility(true);
 					}
 					UnityEngine.Object.Destroy(gameObject);
 					gameObject2 = base.gameObject;
@@ -594,7 +672,16 @@ namespace TheForest.Buildings.World
 			}
 			if (dynamicBuilding)
 			{
-				dynamicBuilding.Invoke("UnlockPhysics", 0.1f);
+				raftOnLand component3 = base.transform.GetComponent<raftOnLand>();
+				if (component3)
+				{
+					dynamicBuilding.UnlockPhysics();
+					component3.StartCoroutine(component3.fixBounceOnSpawn());
+				}
+				else
+				{
+					dynamicBuilding.Invoke("UnlockPhysics", 0.1f);
+				}
 			}
 			if (LocalPlayer.Sfx)
 			{
@@ -698,13 +785,13 @@ namespace TheForest.Buildings.World
 		
 		private void CheckBuildingHits()
 		{
-			if (this._colliders == null || this._colliders.Length == 0 || this._colliders[0] == null)
+			if (this._mpRandomDistortColliders == null || this._mpRandomDistortColliders.Length == 0 || this._mpRandomDistortColliders[0] == null)
 			{
-				this._colliders = (from x in base.GetComponentsInChildren<Collider>()
-				where x.CompareTag("structure")
+				this._mpRandomDistortColliders = (from x in base.GetComponentsInChildren<Collider>()
+				where !x.isTrigger && (x.CompareTag("structure") || x.CompareTag("jumpObject"))
 				select x).ToArray<Collider>();
 			}
-			if (this._chunks.Length > 0 || this._colliders.Length > 0)
+			if (this._chunks.Length > 0 || this._mpRandomDistortColliders.Length > 0)
 			{
 				while (this._distorts < base.state.BuildingHits)
 				{
@@ -723,9 +810,9 @@ namespace TheForest.Buildings.World
 		
 		public override void Attached()
 		{
-			if (this.entity.StateIs<IBuildingDestructibleState>())
+			if (base.entity.StateIs<IBuildingDestructibleState>())
 			{
-				if (this.entity.isOwner)
+				if (base.entity.isOwner)
 				{
 					base.state.hp = this._hp;
 					if (this._repairTrigger)
@@ -733,7 +820,7 @@ namespace TheForest.Buildings.World
 						base.state.repairTrigger = true;
 					}
 				}
-				if (!this.entity.isOwner)
+				if (!base.entity.isOwner)
 				{
 					base.state.AddCallback("repairTrigger", new PropertyCallbackSimple(this.CheckRepairTriggerState));
 					this.CheckRepairTriggerState();
@@ -762,6 +849,12 @@ namespace TheForest.Buildings.World
 		}
 
 		
+		public void SetMpRandomDistortColliders(params Collider[] colliders)
+		{
+			this._mpRandomDistortColliders = colliders;
+		}
+
+		
 		public static Vector3 GetPointInCollider(BoxCollider c)
 		{
 			Bounds bounds = c.bounds;
@@ -787,9 +880,9 @@ namespace TheForest.Buildings.World
 		{
 			if (this._chunks.Length <= 0)
 			{
-				if (this._colliders.Length > 0)
+				if (this._mpRandomDistortColliders != null && this._mpRandomDistortColliders.Length > 0)
 				{
-					Collider collider = this._colliders[UnityEngine.Random.Range(0, this._colliders.Length)];
+					Collider collider = this._mpRandomDistortColliders[UnityEngine.Random.Range(0, this._mpRandomDistortColliders.Length)];
 					Vector3 vector = default(Vector3);
 					if (collider is BoxCollider)
 					{
@@ -819,7 +912,7 @@ namespace TheForest.Buildings.World
 		{
 			get
 			{
-				if (BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+				if (BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 				{
 					return base.state.hp;
 				}
@@ -827,7 +920,7 @@ namespace TheForest.Buildings.World
 			}
 			set
 			{
-				if (BoltNetwork.isRunning && this.entity && this.entity.isAttached && this.entity.isOwner)
+				if (BoltNetwork.isRunning && base.entity && base.entity.isAttached && base.entity.isOwner)
 				{
 					base.state.hp = value;
 				}
@@ -842,7 +935,7 @@ namespace TheForest.Buildings.World
 		{
 			get
 			{
-				if (BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+				if (BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 				{
 					return Mathf.Max(base.state.repairMaterial - base.state.RepairMaterialTotal, 0);
 				}
@@ -850,7 +943,7 @@ namespace TheForest.Buildings.World
 			}
 			set
 			{
-				if (BoltNetwork.isRunning && this.entity && this.entity.isAttached && this.entity.isOwner)
+				if (BoltNetwork.isRunning && base.entity && base.entity.isAttached && base.entity.isOwner)
 				{
 					base.state.repairMaterial = value + base.state.RepairMaterialTotal;
 				}
@@ -865,7 +958,7 @@ namespace TheForest.Buildings.World
 		{
 			get
 			{
-				if (BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+				if (BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 				{
 					return base.state.repairLogs;
 				}
@@ -873,7 +966,7 @@ namespace TheForest.Buildings.World
 			}
 			set
 			{
-				if (BoltNetwork.isRunning && this.entity && this.entity.isAttached && this.entity.isOwner)
+				if (BoltNetwork.isRunning && base.entity && base.entity.isAttached && base.entity.isOwner)
 				{
 					base.state.repairLogs = value;
 				}
@@ -888,20 +981,6 @@ namespace TheForest.Buildings.World
 			get
 			{
 				return this._repairTrigger;
-			}
-		}
-
-		
-		public void LocalizedHit(LocalizedHitData data)
-		{
-			try
-			{
-				this.__LocalizedHit__Original(DestroyBuildings.GetLocalizedHitData(data));
-			}
-			catch (Exception ex)
-			{
-				Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-				this.__LocalizedHit__Original(data);
 			}
 		}
 
@@ -948,6 +1027,9 @@ namespace TheForest.Buildings.World
 		public BuildingHealthChunk[] _chunks = new BuildingHealthChunk[0];
 
 		
+		public Collider[] _mpRandomDistortColliders;
+
+		
 		[SerializeThis]
 		private float _hp;
 
@@ -968,9 +1050,6 @@ namespace TheForest.Buildings.World
 
 		
 		private BuildingRepair _repairTrigger;
-
-		
-		private Collider[] _colliders = new Collider[0];
 
 		
 		private int _distorts;

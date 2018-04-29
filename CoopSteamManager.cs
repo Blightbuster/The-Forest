@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Steamworks;
 using TheForest.Networking;
 using UnityEngine;
@@ -13,11 +14,31 @@ public static class CoopSteamManager
 		{
 			Debug.Log("CoopSteamManager Initialize");
 			CoopSteamManager.runInit = false;
-			CoopSteamManager.GameServerChangeRequested_Callback = Callback<GameServerChangeRequested_t>.Create(new Callback<GameServerChangeRequested_t>.DispatchDelegate(CoopSteamManager.JoinServerRequest));
-			CoopSteamManager.LobbyInvite_Callback = Callback<LobbyInvite_t>.Create(new Callback<LobbyInvite_t>.DispatchDelegate(CoopSteamManager.LobbyInvite));
-			CoopSteamManager.LobbyJoin_Callback = Callback<GameLobbyJoinRequested_t>.Create(new Callback<GameLobbyJoinRequested_t>.DispatchDelegate(CoopSteamManager.LobbyJoin));
-			CoopSteamManager.P2PSessionRequest_Callback = Callback<P2PSessionRequest_t>.Create(new Callback<P2PSessionRequest_t>.DispatchDelegate(CoopSteamManager.P2PSessionRequest));
-			CoopSteamManager.P2PSessionConnectFail_Callback = Callback<P2PSessionConnectFail_t>.Create(new Callback<P2PSessionConnectFail_t>.DispatchDelegate(CoopSteamManager.P2PSessionConnectFail));
+			if (CoopSteamManager.<>f__mg$cache0 == null)
+			{
+				CoopSteamManager.<>f__mg$cache0 = new Callback<GameServerChangeRequested_t>.DispatchDelegate(CoopSteamManager.JoinServerRequest);
+			}
+			CoopSteamManager.GameServerChangeRequested_Callback = Callback<GameServerChangeRequested_t>.Create(CoopSteamManager.<>f__mg$cache0);
+			if (CoopSteamManager.<>f__mg$cache1 == null)
+			{
+				CoopSteamManager.<>f__mg$cache1 = new Callback<LobbyInvite_t>.DispatchDelegate(CoopSteamManager.LobbyInvite);
+			}
+			CoopSteamManager.LobbyInvite_Callback = Callback<LobbyInvite_t>.Create(CoopSteamManager.<>f__mg$cache1);
+			if (CoopSteamManager.<>f__mg$cache2 == null)
+			{
+				CoopSteamManager.<>f__mg$cache2 = new Callback<GameLobbyJoinRequested_t>.DispatchDelegate(CoopSteamManager.LobbyJoin);
+			}
+			CoopSteamManager.LobbyJoin_Callback = Callback<GameLobbyJoinRequested_t>.Create(CoopSteamManager.<>f__mg$cache2);
+			if (CoopSteamManager.<>f__mg$cache3 == null)
+			{
+				CoopSteamManager.<>f__mg$cache3 = new Callback<P2PSessionRequest_t>.DispatchDelegate(CoopSteamManager.P2PSessionRequest);
+			}
+			CoopSteamManager.P2PSessionRequest_Callback = Callback<P2PSessionRequest_t>.Create(CoopSteamManager.<>f__mg$cache3);
+			if (CoopSteamManager.<>f__mg$cache4 == null)
+			{
+				CoopSteamManager.<>f__mg$cache4 = new Callback<P2PSessionConnectFail_t>.DispatchDelegate(CoopSteamManager.P2PSessionConnectFail);
+			}
+			CoopSteamManager.P2PSessionConnectFail_Callback = Callback<P2PSessionConnectFail_t>.Create(CoopSteamManager.<>f__mg$cache4);
 		}
 	}
 
@@ -169,4 +190,24 @@ public static class CoopSteamManager
 
 	
 	private static Callback<P2PSessionConnectFail_t> P2PSessionConnectFail_Callback;
+
+	
+	[CompilerGenerated]
+	private static Callback<GameServerChangeRequested_t>.DispatchDelegate <>f__mg$cache0;
+
+	
+	[CompilerGenerated]
+	private static Callback<LobbyInvite_t>.DispatchDelegate <>f__mg$cache1;
+
+	
+	[CompilerGenerated]
+	private static Callback<GameLobbyJoinRequested_t>.DispatchDelegate <>f__mg$cache2;
+
+	
+	[CompilerGenerated]
+	private static Callback<P2PSessionRequest_t>.DispatchDelegate <>f__mg$cache3;
+
+	
+	[CompilerGenerated]
+	private static Callback<P2PSessionConnectFail_t>.DispatchDelegate <>f__mg$cache4;
 }

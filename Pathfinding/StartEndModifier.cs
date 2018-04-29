@@ -89,12 +89,7 @@ namespace Pathfinding
 				case StartEndModifier.Exactness.NodeConnection:
 				{
 					this.connectionBuffer = (this.connectionBuffer ?? new List<GraphNode>());
-					GraphNodeDelegate graphNodeDelegate;
-					if ((graphNodeDelegate = this.connectionBufferAddDelegate) == null)
-					{
-						graphNodeDelegate = new GraphNodeDelegate(this.connectionBuffer.Add);
-					}
-					this.connectionBufferAddDelegate = graphNodeDelegate;
+					this.connectionBufferAddDelegate = (this.connectionBufferAddDelegate ?? new GraphNodeDelegate(this.connectionBuffer.Add));
 					GraphNode graphNode2 = path.path[Mathf.Clamp(num + ((!start) ? -1 : 1), 0, path.path.Count - 1)];
 					graphNode.GetConnections(this.connectionBufferAddDelegate);
 					Vector3 result = vector;

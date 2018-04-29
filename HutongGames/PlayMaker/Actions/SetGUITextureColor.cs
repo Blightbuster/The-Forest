@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the Color of the GUITexture attached to a Game Object.")]
 	[ActionCategory(ActionCategory.GUIElement)]
+	[Tooltip("Sets the Color of the GUITexture attached to a Game Object.")]
 	public class SetGUITextureColor : ComponentAction<GUITexture>
 	{
 		

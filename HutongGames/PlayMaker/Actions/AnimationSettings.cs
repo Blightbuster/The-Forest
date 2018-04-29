@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Set the Wrap Mode, Blend Mode, Layer and Speed of an Animation.\nNOTE: Settings are applied once, on entering the state, NOT continuously. To dynamically control an animation's settings, use Set Animation Speede etc.")]
 	[ActionCategory(ActionCategory.Animation)]
+	[Tooltip("Set the Wrap Mode, Blend Mode, Layer and Speed of an Animation.\nNOTE: Settings are applied once, on entering the state, NOT continuously. To dynamically control an animation's settings, use Set Animation Speede etc.")]
 	public class AnimationSettings : FsmStateAction
 	{
 		
@@ -37,13 +37,13 @@ namespace HutongGames.PlayMaker.Actions
 			Animation component = ownerDefaultTarget.GetComponent<Animation>();
 			if (component == null)
 			{
-				this.LogWarning("Missing animation component: " + ownerDefaultTarget.name);
+				base.LogWarning("Missing animation component: " + ownerDefaultTarget.name);
 				return;
 			}
 			AnimationState animationState = component[this.animName.Value];
 			if (animationState == null)
 			{
-				this.LogWarning("Missing animation: " + this.animName.Value);
+				base.LogWarning("Missing animation: " + this.animName.Value);
 				return;
 			}
 			animationState.wrapMode = this.wrapMode;
@@ -59,15 +59,15 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("A GameObject with an Animation Component.")]
 		[RequiredField]
 		[CheckForComponent(typeof(Animation))]
+		[Tooltip("A GameObject with an Animation Component.")]
 		public FsmOwnerDefault gameObject;
 
 		
 		[RequiredField]
-		[Tooltip("The name of the animation.")]
 		[UIHint(UIHint.Animation)]
+		[Tooltip("The name of the animation.")]
 		public FsmString animName;
 
 		
@@ -79,8 +79,8 @@ namespace HutongGames.PlayMaker.Actions
 		public AnimationBlendMode blendMode;
 
 		
-		[Tooltip("The speed of the animation. 1 = normal; 2 = double speed...")]
 		[HasFloatSlider(0f, 5f)]
+		[Tooltip("The speed of the animation. 1 = normal; 2 = double speed...")]
 		public FsmFloat speed;
 
 		

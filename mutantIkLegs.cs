@@ -43,9 +43,9 @@ public class mutantIkLegs : MonoBehaviour
 			if (Physics.Raycast(origin, Vector3.down, out this.hitPoint, 3f, this.groundMask))
 			{
 				num = this.hitPoint.point.y - this.baseTr.position.y;
-				Quaternion to = this.LeftIkTarget.rotation;
-				to = Quaternion.LookRotation(Vector3.Cross(this.leftFootTarget.right, this.hitPoint.normal), this.hitPoint.normal);
-				this.leftFootTarget.rotation = Quaternion.Lerp(this.LeftIkTarget.rotation, to, this.ankleHeightBlend * this.ankleAngleBlend);
+				Quaternion b = this.LeftIkTarget.rotation;
+				b = Quaternion.LookRotation(Vector3.Cross(this.leftFootTarget.right, this.hitPoint.normal), this.hitPoint.normal);
+				this.leftFootTarget.rotation = Quaternion.Lerp(this.LeftIkTarget.rotation, b, this.ankleHeightBlend * this.ankleAngleBlend);
 			}
 			else
 			{
@@ -91,9 +91,9 @@ public class mutantIkLegs : MonoBehaviour
 			if (Physics.Raycast(origin, Vector3.down, out this.hitPoint, 3f, this.groundMask))
 			{
 				num = this.hitPoint.point.y - this.baseTr.position.y;
-				Quaternion to2 = this.RightIkTarget.rotation;
-				to2 = Quaternion.LookRotation(Vector3.Cross(this.RightFootTarget.right, -this.hitPoint.normal), -this.hitPoint.normal);
-				this.RightFootTarget.rotation = Quaternion.Lerp(this.RightIkTarget.rotation, to2, this.ankleHeightBlend * this.ankleAngleBlend);
+				Quaternion b2 = this.RightIkTarget.rotation;
+				b2 = Quaternion.LookRotation(Vector3.Cross(this.RightFootTarget.right, -this.hitPoint.normal), -this.hitPoint.normal);
+				this.RightFootTarget.rotation = Quaternion.Lerp(this.RightIkTarget.rotation, b2, this.ankleHeightBlend * this.ankleAngleBlend);
 			}
 			else
 			{

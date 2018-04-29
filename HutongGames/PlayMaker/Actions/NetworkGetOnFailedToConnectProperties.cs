@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Get the network OnFailedToConnect or MasterServer OnFailedToConnectToMasterServer connection error message.")]
 	[ActionCategory(ActionCategory.Network)]
+	[Tooltip("Get the network OnFailedToConnect or MasterServer OnFailedToConnectToMasterServer connection error message.")]
 	public class NetworkGetOnFailedToConnectProperties : FsmStateAction
 	{
 		
@@ -41,62 +41,61 @@ namespace HutongGames.PlayMaker.Actions
 		{
 			NetworkConnectionError connectionError = Fsm.EventData.ConnectionError;
 			this.errorLabel.Value = connectionError.ToString();
-			NetworkConnectionError networkConnectionError = connectionError;
-			switch (networkConnectionError)
+			switch (connectionError + 5)
 			{
-			case NetworkConnectionError.ConnectionFailed:
-				if (this.ConnectionFailedEvent != null)
+			case NetworkConnectionError.NoError:
+				if (this.InternalDirectConnectFailedEvent != null)
 				{
-					base.Fsm.Event(this.ConnectionFailedEvent);
+					base.Fsm.Event(this.InternalDirectConnectFailedEvent);
 				}
 				break;
-			case NetworkConnectionError.AlreadyConnectedToServer:
-				if (this.AlreadyConnectedToServerEvent != null)
+			case (NetworkConnectionError)1:
+				if (this.EmptyConnectTargetEvent != null)
 				{
-					base.Fsm.Event(this.AlreadyConnectedToServerEvent);
+					base.Fsm.Event(this.EmptyConnectTargetEvent);
+				}
+				break;
+			case (NetworkConnectionError)2:
+				if (this.IncorrectParametersEvent != null)
+				{
+					base.Fsm.Event(this.IncorrectParametersEvent);
+				}
+				break;
+			case (NetworkConnectionError)3:
+				if (this.CreateSocketOrThreadFailureEvent != null)
+				{
+					base.Fsm.Event(this.CreateSocketOrThreadFailureEvent);
+				}
+				break;
+			case (NetworkConnectionError)4:
+				if (this.AlreadyConnectedToAnotherServerEvent != null)
+				{
+					base.Fsm.Event(this.AlreadyConnectedToAnotherServerEvent);
+				}
+				break;
+			case (NetworkConnectionError)5:
+				if (this.NoErrorEvent != null)
+				{
+					base.Fsm.Event(this.NoErrorEvent);
 				}
 				break;
 			default:
-				switch (networkConnectionError + 5)
+				switch (connectionError)
 				{
-				case NetworkConnectionError.NoError:
-					if (this.InternalDirectConnectFailedEvent != null)
+				case NetworkConnectionError.ConnectionFailed:
+					if (this.ConnectionFailedEvent != null)
 					{
-						base.Fsm.Event(this.InternalDirectConnectFailedEvent);
+						base.Fsm.Event(this.ConnectionFailedEvent);
 					}
 					break;
-				case (NetworkConnectionError)1:
-					if (this.EmptyConnectTargetEvent != null)
+				case NetworkConnectionError.AlreadyConnectedToServer:
+					if (this.AlreadyConnectedToServerEvent != null)
 					{
-						base.Fsm.Event(this.EmptyConnectTargetEvent);
-					}
-					break;
-				case (NetworkConnectionError)2:
-					if (this.IncorrectParametersEvent != null)
-					{
-						base.Fsm.Event(this.IncorrectParametersEvent);
-					}
-					break;
-				case (NetworkConnectionError)3:
-					if (this.CreateSocketOrThreadFailureEvent != null)
-					{
-						base.Fsm.Event(this.CreateSocketOrThreadFailureEvent);
-					}
-					break;
-				case (NetworkConnectionError)4:
-					if (this.AlreadyConnectedToAnotherServerEvent != null)
-					{
-						base.Fsm.Event(this.AlreadyConnectedToAnotherServerEvent);
-					}
-					break;
-				case (NetworkConnectionError)5:
-					if (this.NoErrorEvent != null)
-					{
-						base.Fsm.Event(this.NoErrorEvent);
+						base.Fsm.Event(this.AlreadyConnectedToServerEvent);
 					}
 					break;
 				default:
-					switch (networkConnectionError)
+					switch (connectionError)
 					{
 					case NetworkConnectionError.NATTargetNotConnected:
 						if (this.NATTargetNotConnectedEvent != null)
@@ -118,30 +117,30 @@ namespace HutongGames.PlayMaker.Actions
 						break;
 					}
 					break;
-				}
-				break;
-			case NetworkConnectionError.TooManyConnectedPlayers:
-				if (this.TooManyConnectedPlayersEvent != null)
-				{
-					base.Fsm.Event(this.TooManyConnectedPlayersEvent);
-				}
-				break;
-			case NetworkConnectionError.RSAPublicKeyMismatch:
-				if (this.RSAPublicKeyMismatchEvent != null)
-				{
-					base.Fsm.Event(this.RSAPublicKeyMismatchEvent);
-				}
-				break;
-			case NetworkConnectionError.ConnectionBanned:
-				if (this.ConnectionBannedEvent != null)
-				{
-					base.Fsm.Event(this.ConnectionBannedEvent);
-				}
-				break;
-			case NetworkConnectionError.InvalidPassword:
-				if (this.InvalidPasswordEvent != null)
-				{
-					base.Fsm.Event(this.InvalidPasswordEvent);
+				case NetworkConnectionError.TooManyConnectedPlayers:
+					if (this.TooManyConnectedPlayersEvent != null)
+					{
+						base.Fsm.Event(this.TooManyConnectedPlayersEvent);
+					}
+					break;
+				case NetworkConnectionError.RSAPublicKeyMismatch:
+					if (this.RSAPublicKeyMismatchEvent != null)
+					{
+						base.Fsm.Event(this.RSAPublicKeyMismatchEvent);
+					}
+					break;
+				case NetworkConnectionError.ConnectionBanned:
+					if (this.ConnectionBannedEvent != null)
+					{
+						base.Fsm.Event(this.ConnectionBannedEvent);
+					}
+					break;
+				case NetworkConnectionError.InvalidPassword:
+					if (this.InvalidPasswordEvent != null)
+					{
+						base.Fsm.Event(this.InvalidPasswordEvent);
+					}
+					break;
 				}
 				break;
 			}

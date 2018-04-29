@@ -81,8 +81,12 @@ public class Grabber : MonoBehaviour
 	
 	public void RefreshCollider()
 	{
-		this.collider.enabled = false;
-		this.collider.enabled = true;
+		if (!this.colliderWasRefreshed)
+		{
+			this.colliderWasRefreshed = true;
+			this.collider.enabled = false;
+			this.collider.enabled = true;
+		}
 	}
 
 	
@@ -122,6 +126,18 @@ public class Grabber : MonoBehaviour
 			}
 			this.physicsUpdate = false;
 			this.triggerStayUpdate = false;
+		}
+		if (this.colliderWasRefreshed)
+		{
+			if (!this.readyToResetColliderWasRefreshed)
+			{
+				this.readyToResetColliderWasRefreshed = true;
+			}
+			else
+			{
+				this.colliderWasRefreshed = false;
+				this.readyToResetColliderWasRefreshed = false;
+			}
 		}
 	}
 
@@ -186,6 +202,12 @@ public class Grabber : MonoBehaviour
 
 	
 	private bool busyLock;
+
+	
+	private bool colliderWasRefreshed;
+
+	
+	private bool readyToResetColliderWasRefreshed;
 
 	
 	private Collider collider;

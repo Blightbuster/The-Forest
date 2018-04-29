@@ -64,8 +64,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[UIHint(UIHint.Variable)]
-		[Title("Position")]
 		[Tooltip("Rectangle on the screen to draw the texture within. Alternatively, set or override individual properties below.")]
+		[Title("Position")]
 		public FsmRect screenRect;
 
 		

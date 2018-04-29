@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using UnityEngine;
@@ -154,8 +153,8 @@ public static class NGUIText
 	}
 
 	
-	[DebuggerStepThrough]
 	[DebuggerHidden]
+	[DebuggerStepThrough]
 	public static float ParseAlpha(string text, int index)
 	{
 		int num = NGUIMath.HexToDecimal(text[index + 1]) << 4 | NGUIMath.HexToDecimal(text[index + 2]);
@@ -163,8 +162,8 @@ public static class NGUIText
 	}
 
 	
-	[DebuggerStepThrough]
 	[DebuggerHidden]
+	[DebuggerStepThrough]
 	public static Color ParseColor(string text, int offset)
 	{
 		return NGUIText.ParseColor24(text, offset);
@@ -196,8 +195,8 @@ public static class NGUIText
 	}
 
 	
-	[DebuggerStepThrough]
 	[DebuggerHidden]
+	[DebuggerStepThrough]
 	public static string EncodeColor(Color c)
 	{
 		return NGUIText.EncodeColor24(c);
@@ -228,8 +227,8 @@ public static class NGUIText
 	}
 
 	
-	[DebuggerStepThrough]
 	[DebuggerHidden]
+	[DebuggerStepThrough]
 	public static string EncodeColor24(Color c)
 	{
 		int num = 16777215 & NGUIMath.ColorToInt(c) >> 8;
@@ -258,8 +257,8 @@ public static class NGUIText
 	}
 
 	
-	[DebuggerStepThrough]
 	[DebuggerHidden]
+	[DebuggerStepThrough]
 	public static bool IsHex(char ch)
 	{
 		return (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F');
@@ -285,29 +284,38 @@ public static class NGUIText
 				return true;
 			}
 			string text2 = text.Substring(index, 3);
-			string text3 = text2;
-			switch (text3)
+			if (text2 != null)
 			{
-			case "[b]":
-				bold = true;
-				index += 3;
-				return true;
-			case "[i]":
-				italic = true;
-				index += 3;
-				return true;
-			case "[u]":
-				underline = true;
-				index += 3;
-				return true;
-			case "[s]":
-				strike = true;
-				index += 3;
-				return true;
-			case "[c]":
-				ignoreColor = true;
-				index += 3;
-				return true;
+				if (text2 == "[b]")
+				{
+					bold = true;
+					index += 3;
+					return true;
+				}
+				if (text2 == "[i]")
+				{
+					italic = true;
+					index += 3;
+					return true;
+				}
+				if (text2 == "[u]")
+				{
+					underline = true;
+					index += 3;
+					return true;
+				}
+				if (text2 == "[s]")
+				{
+					strike = true;
+					index += 3;
+					return true;
+				}
+				if (text2 == "[c]")
+				{
+					ignoreColor = true;
+					index += 3;
+					return true;
+				}
 			}
 		}
 		if (index + 4 > length)
@@ -316,37 +324,46 @@ public static class NGUIText
 		}
 		if (text[index + 3] == ']')
 		{
-			string text4 = text.Substring(index, 4);
-			string text3 = text4;
-			switch (text3)
+			string text3 = text.Substring(index, 4);
+			if (text3 != null)
 			{
-			case "[/b]":
-				bold = false;
-				index += 4;
-				return true;
-			case "[/i]":
-				italic = false;
-				index += 4;
-				return true;
-			case "[/u]":
-				underline = false;
-				index += 4;
-				return true;
-			case "[/s]":
-				strike = false;
-				index += 4;
-				return true;
-			case "[/c]":
-				ignoreColor = false;
-				index += 4;
-				return true;
+				if (text3 == "[/b]")
+				{
+					bold = false;
+					index += 4;
+					return true;
+				}
+				if (text3 == "[/i]")
+				{
+					italic = false;
+					index += 4;
+					return true;
+				}
+				if (text3 == "[/u]")
+				{
+					underline = false;
+					index += 4;
+					return true;
+				}
+				if (text3 == "[/s]")
+				{
+					strike = false;
+					index += 4;
+					return true;
+				}
+				if (text3 == "[/c]")
+				{
+					ignoreColor = false;
+					index += 4;
+					return true;
+				}
 			}
 			char ch = text[index + 1];
 			char ch2 = text[index + 2];
 			if (NGUIText.IsHex(ch) && NGUIText.IsHex(ch2))
 			{
-				int num2 = NGUIMath.HexToDecimal(ch) << 4 | NGUIMath.HexToDecimal(ch2);
-				NGUIText.mAlpha = (float)num2 / 255f;
+				int num = NGUIMath.HexToDecimal(ch) << 4 | NGUIMath.HexToDecimal(ch2);
+				NGUIText.mAlpha = (float)num / 255f;
 				index += 4;
 				return true;
 			}
@@ -357,39 +374,20 @@ public static class NGUIText
 		}
 		if (text[index + 4] == ']')
 		{
-			string text5 = text.Substring(index, 5);
-			string text3 = text5;
-			if (text3 != null)
+			string text4 = text.Substring(index, 5);
+			if (text4 != null)
 			{
-				if (NGUIText.<>f__switch$mapC == null)
+				if (text4 == "[sub]")
 				{
-					NGUIText.<>f__switch$mapC = new Dictionary<string, int>(2)
-					{
-						{
-							"[sub]",
-							0
-						},
-						{
-							"[sup]",
-							1
-						}
-					};
+					sub = 1;
+					index += 5;
+					return true;
 				}
-				int num;
-				if (NGUIText.<>f__switch$mapC.TryGetValue(text3, out num))
+				if (text4 == "[sup]")
 				{
-					if (num == 0)
-					{
-						sub = 1;
-						index += 5;
-						return true;
-					}
-					if (num == 1)
-					{
-						sub = 2;
-						index += 5;
-						return true;
-					}
+					sub = 2;
+					index += 5;
+					return true;
 				}
 			}
 		}
@@ -399,29 +397,34 @@ public static class NGUIText
 		}
 		if (text[index + 5] == ']')
 		{
-			string text6 = text.Substring(index, 6);
-			string text3 = text6;
-			switch (text3)
+			string text5 = text.Substring(index, 6);
+			if (text5 != null)
 			{
-			case "[/sub]":
-				sub = 0;
-				index += 6;
-				return true;
-			case "[/sup]":
-				sub = 0;
-				index += 6;
-				return true;
-			case "[/url]":
-				index += 6;
-				return true;
+				if (text5 == "[/sub]")
+				{
+					sub = 0;
+					index += 6;
+					return true;
+				}
+				if (text5 == "[/sup]")
+				{
+					sub = 0;
+					index += 6;
+					return true;
+				}
+				if (text5 == "[/url]")
+				{
+					index += 6;
+					return true;
+				}
 			}
 		}
 		if (text[index + 1] == 'u' && text[index + 2] == 'r' && text[index + 3] == 'l' && text[index + 4] == '=')
 		{
-			int num3 = text.IndexOf(']', index + 4);
-			if (num3 != -1)
+			int num2 = text.IndexOf(']', index + 4);
+			if (num2 != -1)
 			{
-				index = num3 + 1;
+				index = num2 + 1;
 				return true;
 			}
 			index = text.Length;
@@ -516,100 +519,101 @@ public static class NGUIText
 	
 	public static void Align(BetterList<Vector3> verts, int indexOffset, float printedWidth, int elements = 4)
 	{
-		switch (NGUIText.alignment)
+		NGUIText.Alignment alignment = NGUIText.alignment;
+		if (alignment != NGUIText.Alignment.Right)
 		{
-		case NGUIText.Alignment.Center:
-		{
-			float num = ((float)NGUIText.rectWidth - printedWidth) * 0.5f;
-			if (num < 0f)
+			if (alignment != NGUIText.Alignment.Center)
 			{
-				return;
+				if (alignment == NGUIText.Alignment.Justified)
+				{
+					if (printedWidth < (float)NGUIText.rectWidth * 0.65f)
+					{
+						return;
+					}
+					float num = ((float)NGUIText.rectWidth - printedWidth) * 0.5f;
+					if (num < 1f)
+					{
+						return;
+					}
+					int num2 = (verts.size - indexOffset) / elements;
+					if (num2 < 1)
+					{
+						return;
+					}
+					float num3 = 1f / (float)(num2 - 1);
+					float num4 = (float)NGUIText.rectWidth / printedWidth;
+					int i = indexOffset + elements;
+					int num5 = 1;
+					while (i < verts.size)
+					{
+						float num6 = verts.buffer[i].x;
+						float num7 = verts.buffer[i + elements / 2].x;
+						float num8 = num7 - num6;
+						float num9 = num6 * num4;
+						float a = num9 + num8;
+						float num10 = num7 * num4;
+						float b = num10 - num8;
+						float t = (float)num5 * num3;
+						num7 = Mathf.Lerp(a, num10, t);
+						num6 = Mathf.Lerp(num9, b, t);
+						num6 = Mathf.Round(num6);
+						num7 = Mathf.Round(num7);
+						if (elements == 4)
+						{
+							verts.buffer[i++].x = num6;
+							verts.buffer[i++].x = num6;
+							verts.buffer[i++].x = num7;
+							verts.buffer[i++].x = num7;
+						}
+						else if (elements == 2)
+						{
+							verts.buffer[i++].x = num6;
+							verts.buffer[i++].x = num7;
+						}
+						else if (elements == 1)
+						{
+							verts.buffer[i++].x = num6;
+						}
+						num5++;
+					}
+				}
 			}
-			int num2 = Mathf.RoundToInt((float)NGUIText.rectWidth - printedWidth);
-			int num3 = Mathf.RoundToInt((float)NGUIText.rectWidth);
-			bool flag = (num2 & 1) == 1;
-			bool flag2 = (num3 & 1) == 1;
-			if ((flag && !flag2) || (!flag && flag2))
+			else
 			{
-				num += 0.5f * NGUIText.fontScale;
+				float num11 = ((float)NGUIText.rectWidth - printedWidth) * 0.5f;
+				if (num11 < 0f)
+				{
+					return;
+				}
+				int num12 = Mathf.RoundToInt((float)NGUIText.rectWidth - printedWidth);
+				int num13 = Mathf.RoundToInt((float)NGUIText.rectWidth);
+				bool flag = (num12 & 1) == 1;
+				bool flag2 = (num13 & 1) == 1;
+				if ((flag && !flag2) || (!flag && flag2))
+				{
+					num11 += 0.5f * NGUIText.fontScale;
+				}
+				for (int j = indexOffset; j < verts.size; j++)
+				{
+					Vector3[] buffer = verts.buffer;
+					int num14 = j;
+					buffer[num14].x = buffer[num14].x + num11;
+				}
 			}
-			for (int i = indexOffset; i < verts.size; i++)
-			{
-				Vector3[] buffer = verts.buffer;
-				int num4 = i;
-				buffer[num4].x = buffer[num4].x + num;
-			}
-			break;
 		}
-		case NGUIText.Alignment.Right:
+		else
 		{
-			float num5 = (float)NGUIText.rectWidth - printedWidth;
-			if (num5 < 0f)
+			float num15 = (float)NGUIText.rectWidth - printedWidth;
+			if (num15 < 0f)
 			{
 				return;
 			}
-			for (int j = indexOffset; j < verts.size; j++)
+			for (int k = indexOffset; k < verts.size; k++)
 			{
 				Vector3[] buffer2 = verts.buffer;
-				int num6 = j;
-				buffer2[num6].x = buffer2[num6].x + num5;
+				int num16 = k;
+				buffer2[num16].x = buffer2[num16].x + num15;
 			}
-			break;
-		}
-		case NGUIText.Alignment.Justified:
-		{
-			if (printedWidth < (float)NGUIText.rectWidth * 0.65f)
-			{
-				return;
-			}
-			float num7 = ((float)NGUIText.rectWidth - printedWidth) * 0.5f;
-			if (num7 < 1f)
-			{
-				return;
-			}
-			int num8 = (verts.size - indexOffset) / elements;
-			if (num8 < 1)
-			{
-				return;
-			}
-			float num9 = 1f / (float)(num8 - 1);
-			float num10 = (float)NGUIText.rectWidth / printedWidth;
-			int k = indexOffset + elements;
-			int num11 = 1;
-			while (k < verts.size)
-			{
-				float num12 = verts.buffer[k].x;
-				float num13 = verts.buffer[k + elements / 2].x;
-				float num14 = num13 - num12;
-				float num15 = num12 * num10;
-				float from = num15 + num14;
-				float num16 = num13 * num10;
-				float to = num16 - num14;
-				float t = (float)num11 * num9;
-				num13 = Mathf.Lerp(from, num16, t);
-				num12 = Mathf.Lerp(num15, to, t);
-				num12 = Mathf.Round(num12);
-				num13 = Mathf.Round(num13);
-				if (elements == 4)
-				{
-					verts.buffer[k++].x = num12;
-					verts.buffer[k++].x = num12;
-					verts.buffer[k++].x = num13;
-					verts.buffer[k++].x = num13;
-				}
-				else if (elements == 2)
-				{
-					verts.buffer[k++].x = num12;
-					verts.buffer[k++].x = num13;
-				}
-				else if (elements == 1)
-				{
-					verts.buffer[k++].x = num12;
-				}
-				num11++;
-			}
-			break;
-		}
 		}
 	}
 
@@ -670,16 +674,16 @@ public static class NGUIText
 	}
 
 	
-	[DebuggerStepThrough]
 	[DebuggerHidden]
+	[DebuggerStepThrough]
 	private static bool IsSpace(int ch)
 	{
 		return ch == 32 || ch == 8202 || ch == 8203 || ch == 8201;
 	}
 
 	
-	[DebuggerStepThrough]
 	[DebuggerHidden]
+	[DebuggerStepThrough]
 	public static void EndLine(ref StringBuilder s)
 	{
 		int num = s.Length - 1;
@@ -694,8 +698,8 @@ public static class NGUIText
 	}
 
 	
-	[DebuggerStepThrough]
 	[DebuggerHidden]
+	[DebuggerStepThrough]
 	private static void ReplaceSpaceWithNewline(ref StringBuilder s)
 	{
 		int num = s.Length - 1;

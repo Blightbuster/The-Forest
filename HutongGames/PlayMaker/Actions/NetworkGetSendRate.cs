@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Store the current send rate for all NetworkViews")]
 	[ActionCategory(ActionCategory.Network)]
+	[Tooltip("Store the current send rate for all NetworkViews")]
 	public class NetworkGetSendRate : FsmStateAction
 	{
 		
@@ -28,8 +28,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("Store the current send rate for NetworkViews")]
 		[RequiredField]
+		[Tooltip("Store the current send rate for NetworkViews")]
 		[UIHint(UIHint.Variable)]
 		public FsmFloat sendRate;
 	}

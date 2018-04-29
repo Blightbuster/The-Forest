@@ -11,7 +11,7 @@ public class CoopServerInfo : EntityBehaviour<ICoopServerInfo>
 	public override void Attached()
 	{
 		CoopServerInfo.Instance = this;
-		if (this.entity.isOwner)
+		if (base.entity.isOwner)
 		{
 			this.RefreshServerInfo();
 			EventRegistry.Game.Subscribe(TfEvent.RegrowModeSet, new EventRegistry.SubscriberCallback(this.OnGameSettingsChanged));
@@ -36,12 +36,12 @@ public class CoopServerInfo : EntityBehaviour<ICoopServerInfo>
 	
 	private void RefreshServerInfo()
 	{
-		if (this.entity.isAttached && this.entity.isOwner)
+		if (base.entity.isAttached && base.entity.isOwner)
 		{
 			base.state.NoDestructionMode = PlayerPreferences.NoDestruction;
 			base.state.RegrowMode = PlayerPreferences.TreeRegrowth;
 			base.state.DifficultyMode = (int)GameSetup.Difficulty;
-			this.entity.Freeze(false);
+			base.entity.Freeze(false);
 		}
 	}
 

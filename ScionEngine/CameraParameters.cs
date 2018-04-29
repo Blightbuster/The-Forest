@@ -44,5 +44,8 @@ namespace ScionEngine
 
 		
 		public float farPlane;
+
+		
+		public Matrix4x4 previousViewProjection;
 	}
 }

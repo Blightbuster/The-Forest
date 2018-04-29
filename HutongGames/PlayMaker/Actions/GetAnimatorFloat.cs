@@ -83,8 +83,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
 		[CheckForComponent(typeof(Animator))]
+		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -97,10 +97,10 @@ namespace HutongGames.PlayMaker.Actions
 		public bool everyFrame;
 
 		
+		[ActionSection("Results")]
+		[RequiredField]
 		[UIHint(UIHint.Variable)]
 		[Tooltip("The float value of the animator parameter")]
-		[RequiredField]
-		[ActionSection("Results")]
 		public FsmFloat result;
 
 		

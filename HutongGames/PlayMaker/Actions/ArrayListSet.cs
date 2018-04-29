@@ -46,9 +46,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
 		[ActionSection("Set up")]
 		[RequiredField]
+		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
 		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 
@@ -58,16 +58,16 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString reference;
 
 		
-		[UIHint(UIHint.FsmString)]
 		[Tooltip("The index of the Data in the ArrayList")]
+		[UIHint(UIHint.FsmString)]
 		public FsmInt atIndex;
 
 		
 		public bool everyFrame;
 
 		
-		[Tooltip("The variable to add.")]
 		[ActionSection("Data")]
+		[Tooltip("The variable to add.")]
 		public FsmVar variable;
 	}
 }

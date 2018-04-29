@@ -2,7 +2,6 @@
 using System.Collections;
 using FMOD.Studio;
 using PathologicalGames;
-using ScionEngine;
 using TheForest.Items.Inventory;
 using TheForest.Utils;
 using UnityEngine;
@@ -143,7 +142,7 @@ public class TriggerCutScene : MonoBehaviour
 		this.disabled = false;
 		this.skipOpening = false;
 		Scene.Atmosphere.TimeOfDay = 302f;
-		this.Atm.LightingTimeOfDayOverrideValue = 140f;
+		this.Atm.LightingTimeOfDayOverrideValue = 180f;
 		this.Atm.OverrideLightingTimeOfDay = true;
 		this.Atm.FogMaxHeight = 1500f;
 		this.Hud.enabled = false;
@@ -200,6 +199,7 @@ public class TriggerCutScene : MonoBehaviour
 		yield return new WaitForSeconds(9f);
 		this.playerSeatGo.GetComponent<playerPlaneControl>().book.SetActive(false);
 		yield return new WaitForSeconds(9.8f);
+		base.StartCoroutine(this.moveCloudsRoutine(this._stormClouds.transform));
 		this.ScreenFlight.SetActive(false);
 		this.ScreenFlightTimmy.SetActive(false);
 		this.ScreenFlightClient.SetActive(false);
@@ -210,6 +210,25 @@ public class TriggerCutScene : MonoBehaviour
 		this.ShowDamage();
 		yield return new WaitForSeconds(25f);
 		this.SmokeOn();
+		yield break;
+	}
+
+	
+	private IEnumerator moveCloudsRoutine(Transform tr)
+	{
+		float t = 0f;
+		while (t < 1f)
+		{
+			Vector3 localPos = tr.localPosition;
+			localPos.y += 0.0005f;
+			tr.localPosition = localPos;
+			t += Time.deltaTime / 10f;
+			yield return null;
+		}
+		if (tr)
+		{
+			UnityEngine.Object.Destroy(tr.gameObject);
+		}
 		yield break;
 	}
 
@@ -268,7 +287,7 @@ public class TriggerCutScene : MonoBehaviour
 	{
 		if (!this.skipOpening && Clock.planecrash)
 		{
-			if (!Scene.HudGui.PauseMenu.activeSelf && TheForest.Utils.Input.GetButtonDown("Jump"))
+			if (!Scene.HudGui.PauseMenu.activeSelf && (TheForest.Utils.Input.GetButtonDown("Jump") || TriggerCutScene.FastStart))
 			{
 				this.SpaceTut.SetActive(false);
 				this.LightsFlight.SetActive(false);
@@ -454,7 +473,7 @@ public class TriggerCutScene : MonoBehaviour
 		this.GlassAndStuff.SetActive(false);
 		this.PlaneInterior.material = this.PlaneCrashOff;
 		this.LightsCrash.SetActive(true);
-		this.Mutant = (GameObject)UnityEngine.Object.Instantiate(this.MutantOnPlaneReal, this.MutantOnPlane.transform.position, this.MutantOnPlane.transform.rotation);
+		this.Mutant = UnityEngine.Object.Instantiate<GameObject>(this.MutantOnPlaneReal, this.MutantOnPlane.transform.position, this.MutantOnPlane.transform.rotation);
 		this.Mutant.transform.localScale = this.MutantOnPlane.transform.localScale;
 		this.Mutant.transform.parent = this.PlaneReal.transform;
 		if (this.timmySeat)
@@ -543,9 +562,9 @@ public class TriggerCutScene : MonoBehaviour
 		UnityEngine.Object.Destroy(this.ScreenCrashClient);
 		UnityEngine.Object.Destroy(this.ScreenFlightClient);
 		Animator[] anims = this.playerPosGo.GetComponentsInChildren<Animator>(true);
-		foreach (Animator a in anims)
+		foreach (Animator animator in anims)
 		{
-			UnityEngine.Object.Destroy(a.gameObject);
+			UnityEngine.Object.Destroy(animator.gameObject);
 		}
 		base.StopAllCoroutines();
 		this.FinalizePlanePosition();
@@ -599,6 +618,10 @@ public class TriggerCutScene : MonoBehaviour
 		{
 			crawl.gameObject.SetActive(false);
 		}
+		if (this._stormClouds)
+		{
+			UnityEngine.Object.Destroy(this._stormClouds);
+		}
 		this.GroundOn();
 		base.enabled = false;
 		this.Hud.enabled = true;
@@ -647,6 +670,10 @@ public class TriggerCutScene : MonoBehaviour
 		LocalPlayer.AnimControl.introCutScene = true;
 		if (BoltNetwork.isClient)
 		{
+			LocalPlayer.AnimControl.lockGravity = true;
+			LocalPlayer.Rigidbody.useGravity = false;
+			LocalPlayer.AnimControl.playerCollider.enabled = false;
+			LocalPlayer.AnimControl.playerHeadCollider.enabled = false;
 			base.StopCoroutine("lockPlayerPosition");
 			LocalPlayer.Transform.position = this.startPlayerPos;
 		}
@@ -766,7 +793,14 @@ public class TriggerCutScene : MonoBehaviour
 		LocalPlayer.Transform.rotation = standPos.rotation;
 		float storeFov = PlayerPreferences.Fov;
 		PlayerPreferences.Fov = 76f;
-		LocalPlayer.Animator.SetBoolReflected("introStandBool", true);
+		if (ForestVR.Enabled)
+		{
+			LocalPlayer.vrPlayerControl.VRCameraRig.localEulerAngles = Vector3.zero;
+		}
+		else if (!TriggerCutScene.FastStart)
+		{
+			LocalPlayer.Animator.SetBoolReflected("introStandBool", true);
+		}
 		yield return YieldPresets.WaitPointFiveSeconds;
 		if (clientNumber > 5)
 		{
@@ -776,19 +810,23 @@ public class TriggerCutScene : MonoBehaviour
 		base.Invoke("resetStandBool", 2.5f);
 		base.StartCoroutine(this.resetFov(storeFov));
 		LocalPlayer.Transform.SendMessage("enableMpRenderers");
-		if (BoltNetwork.isClient)
+		if (!ForestVR.Enabled)
 		{
-			yield return new WaitForSeconds(UnityEngine.Random.Range(1.5f, 2.5f));
+			if (BoltNetwork.isClient)
+			{
+				yield return new WaitForSeconds(UnityEngine.Random.Range(1.5f, 2.5f));
+			}
+			else
+			{
+				yield return YieldPresets.WaitOnePointThreeSeconds;
+			}
 		}
-		else
-		{
-			yield return YieldPresets.WaitOnePointThreeSeconds;
-		}
+		int standupHash = Animator.StringToHash("standup");
 		AnimatorStateInfo state = LocalPlayer.Animator.GetCurrentAnimatorStateInfo(2);
 		while (state.IsTag("getup"))
 		{
-			yield return null;
 			state = LocalPlayer.Animator.GetCurrentAnimatorStateInfo(2);
+			yield return null;
 		}
 		LocalPlayer.ScriptSetup.forceLocalPos.enabled = true;
 		LocalPlayer.MainRotator.rotationRange = new Vector2(0f, 999f);
@@ -922,7 +960,7 @@ public class TriggerCutScene : MonoBehaviour
 		if (!this.disabled)
 		{
 			this.planeController.transform.parent = null;
-			UnityEngine.Object.Instantiate(this.testSavePos, this.planeController.transform.position, this.planeController.transform.rotation);
+			UnityEngine.Object.Instantiate<GameObject>(this.testSavePos, this.planeController.transform.position, this.planeController.transform.rotation);
 			this.planeAnim.enabled = false;
 			this.planeController.enabled = false;
 			this.disabled = true;
@@ -1045,6 +1083,9 @@ public class TriggerCutScene : MonoBehaviour
 	public Transform playerSeatPos;
 
 	
+	public Transform playerSeatPosVR;
+
+	
 	public Transform clientSeatPos1;
 
 	
@@ -1073,6 +1114,12 @@ public class TriggerCutScene : MonoBehaviour
 
 	
 	public Transform clientStartCamPos;
+
+	
+	public Transform playerPlanePosition;
+
+	
+	public Transform playerAislePosition;
 
 	
 	public GameObject timmySeatGo;
@@ -1174,6 +1221,9 @@ public class TriggerCutScene : MonoBehaviour
 	public GameObject PlaneAfterSound;
 
 	
+	public GameObject _stormClouds;
+
+	
 	private string[] preloadEvents;
 
 	
@@ -1195,6 +1245,12 @@ public class TriggerCutScene : MonoBehaviour
 	private GameObject forwardHullConstrain;
 
 	
+	private int standUpHash = Animator.StringToHash("standup");
+
+	
+	private Vector3 storeCamLocalPos;
+
+	
 	private bool disabled;
 
 	
@@ -1204,8 +1260,8 @@ public class TriggerCutScene : MonoBehaviour
 	private bool finishedInitialLoad;
 
 	
-	private ScionPostProcess EyeAdapt;
+	private EventInstance attendantDialogueEvent;
 
 	
-	private EventInstance attendantDialogueEvent;
+	public static bool FastStart;
 }

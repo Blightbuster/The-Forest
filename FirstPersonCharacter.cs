@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections;
 using HutongGames.PlayMaker;
-using ModAPI;
 using TheForest.Items.Inventory;
 using TheForest.UI.Multiplayer;
 using TheForest.Utils;
 using TheForest.Utils.Physics;
 using TheForest.Utils.Settings;
-using UltimateCheatmenu;
+using TheForest.World;
 using UnityEngine;
 
 
@@ -83,7 +82,7 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 	}
 
 	
-	private void __Start__Original()
+	private void Start()
 	{
 		if (!base.GetComponent<OnCollisionEnterProxy>())
 		{
@@ -104,6 +103,7 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 		this.fsmGrounded = LocalPlayer.ScriptSetup.pmControl.FsmVariables.GetFsmBool("grounded");
 		this.Stats = base.gameObject.GetComponent<PlayerStats>();
 		this.animator = this.setup.playerBase.GetComponent<Animator>();
+		this.vrAdapter = base.transform.GetComponentInChildren<VRPlayerAdapter>();
 		this.fsmCrouchBlockedBool = this.setup.pmControl.FsmVariables.GetFsmBool("crouchBlockedBool");
 	}
 
@@ -134,7 +134,7 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 		}
 		if (this.collFlags.groundAngleVal > this.extremeAngleGroundedLimit && this.onSlipperySlope)
 		{
-			this.clampInputVal = 0.1f;
+			this.clampInputVal = 0.04f;
 		}
 		else if (this.collFlags.groundAngleVal > this.extremeAngleGroundedLimit && !this.doingClampInput && !this.jumping && !this.Grounded && !LocalPlayer.AnimControl.swimming)
 		{
@@ -163,7 +163,7 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 			float num = this.originalHeight / 2f;
 			Vector3 position = base.transform.position;
 			position.y -= 0.75f;
-			if (Physics.SphereCast(position, 0.75f, Vector3.up * (num - this.capsule.height / 2f), out this.hitInfo, num - this.capsule.height / 2f + 1.25f, this.CollisionLayers))
+			if (Physics.SphereCast(position, 0.75f, Vector3.up * (num - this.capsule.height / 2f), out this.hitInfo, num - this.capsule.height / 2f + 1.25f, this.CollisionLayers, QueryTriggerInteraction.Ignore))
 			{
 				this.crouchHeightBlocked = true;
 			}
@@ -296,7 +296,7 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 	}
 
 	
-	private void __FixedUpdate__Original()
+	private void FixedUpdate()
 	{
 		if (!this.swimming)
 		{
@@ -379,6 +379,10 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 				this.ClampVelocity();
 				this.ApplyGroundingForce();
 			}
+			if (this.hitByEnemy)
+			{
+				this.ClampVelocity();
+			}
 			if (!this.swimming && !this.Diving && this.jumping)
 			{
 				this.HandleJumpSpeed(vector);
@@ -413,7 +417,14 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 	{
 		if (this.onSlipperySlope)
 		{
-			this.extremeAngleGroundedLimit = this.getSlopeLimit / 1.5f;
+			if (this.modExtremeAngleLimit > 0f)
+			{
+				this.extremeAngleGroundedLimit = this.modExtremeAngleLimit;
+			}
+			else
+			{
+				this.extremeAngleGroundedLimit = this.getSlopeLimit / 1.5f;
+			}
 		}
 		else
 		{
@@ -518,7 +529,7 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 				this.capsule.center = new Vector3(this.capsule.center.x, Mathf.Lerp(this.yChange, this.originalYPos + 0.25f, Time.deltaTime), this.capsule.center.z);
 			}
 		}
-		else if (LocalPlayer.Stats.IsInNorthColdArea() && !LocalPlayer.IsInEndgame && !this.snowFlotation && LocalPlayer.Transform.position.y - Terrain.activeTerrain.SampleHeight(LocalPlayer.Transform.position) < 2.4f && !Clock.planecrash && !LocalPlayer.AnimControl.introCutScene)
+		else if (LocalPlayer.Stats.IsInNorthColdArea() && !this.snowFlotation && LocalPlayer.Transform.position.y - Terrain.activeTerrain.SampleHeight(LocalPlayer.Transform.position) < 2.4f && !Clock.planecrash && !LocalPlayer.AnimControl.introCutScene)
 		{
 			this.inSnow = true;
 			if (!this.crouching)
@@ -639,6 +650,21 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 	private Vector3 DetermineVelocityChange()
 	{
 		Vector3 vector = new Vector3(TheForest.Utils.Input.GetAxis("Horizontal") + this.InputHack.x, 0f, TheForest.Utils.Input.GetAxis("Vertical") + this.InputHack.y);
+		if (ForestVR.Enabled)
+		{
+			Vector3 vector2 = LocalPlayer.Transform.InverseTransformPoint(this.vrAdapter.VREyeCamera.transform.position + this.vrAdapter.VREyeCamera.transform.forward);
+			float num = Vector3.Angle(this.vrAdapter.VREyeCamera.transform.forward, LocalPlayer.Transform.forward);
+			if (vector2.x < 0f)
+			{
+				num *= -1f;
+			}
+			float num2 = this.vrAdapter.VREyeCamera.transform.forward.normalized.y - 0.25f;
+			if (num2 < 0f)
+			{
+				num2 *= -1f;
+			}
+			vector = Quaternion.AngleAxis(num, Vector3.up) * vector * (1f - num2) + vector * num2;
+		}
 		vector = Vector3.ClampMagnitude(vector, 1.1f);
 		if (this.Locked)
 		{
@@ -785,7 +811,7 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 		}
 		else if (this.crouching)
 		{
-			this.speed = this.crouchSpeed * 1.75f;
+			this.speed = this.crouchSpeed * 1.75f * Mathf.Min(1f + (float)LocalPlayer.Stats.Skills.AthleticismSkillLevel * 0.01f, 1.85f);
 		}
 		else if (this.isChainSawAttack())
 		{
@@ -793,7 +819,7 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 		}
 		else
 		{
-			this.speed = this.runSpeed;
+			this.speed = this.runSpeed * Mathf.Min(1f + (float)LocalPlayer.Stats.Skills.AthleticismSkillLevel * 0.05f, 1.5f);
 		}
 	}
 
@@ -834,7 +860,7 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 		float num2 = num;
 		if (num2 > 0f)
 		{
-			num *= 8f;
+			num *= 13.5f;
 		}
 		else
 		{
@@ -881,6 +907,7 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 		this.standingOnRaft = false;
 		this.terrainContact = false;
 		this.onSlipperySlope = false;
+		this.StandingOnDynamicObject = false;
 		this.setup.targetInfo.onStructure = false;
 	}
 
@@ -918,7 +945,14 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 			getWalkableSurface component = col.contacts[i].otherCollider.GetComponent<getWalkableSurface>();
 			if (component)
 			{
-				if (component._type == getWalkableSurface.walkableType.slippery && this.collFlags.groundAngleVal > 30f && this.PrevVelocity < 28.5f)
+				float num = 30f;
+				this.modExtremeAngleLimit = 0f;
+				if (component.CustomSlopeLimit > 0f)
+				{
+					num = component.CustomSlopeLimit;
+					this.modExtremeAngleLimit = component.CustomSlopeLimit;
+				}
+				if (component._type == getWalkableSurface.walkableType.slippery && this.collFlags.groundAngleVal > num && this.PrevVelocity < 28.5f)
 				{
 					this.onSlipperySlope = true;
 				}
@@ -933,8 +967,8 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 			}
 			else if (col.contacts[i].otherCollider.GetType() != typeof(TerrainCollider))
 			{
-				float num = col.contacts[i].point.y - base.transform.position.y;
-				if (num < 0.5f)
+				float num2 = col.contacts[i].point.y - base.transform.position.y;
+				if (num2 < 0.5f)
 				{
 					this.terrainContact = true;
 				}
@@ -963,9 +997,9 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 			}
 			if (col.contacts[i].otherCollider.GetType() == typeof(MeshCollider) && LocalPlayer.AnimControl.swimming)
 			{
-				float num2 = 57.29578f * Mathf.Asin(col.contacts[i].normal.y);
-				float num3 = col.contacts[i].point.y - base.transform.position.y;
-				if (num2 > 0f && num3 < 0.5f)
+				float num3 = 57.29578f * Mathf.Asin(col.contacts[i].normal.y);
+				float num4 = col.contacts[i].point.y - base.transform.position.y;
+				if (num3 > 0f && num4 < 0.5f)
 				{
 					this.allowWaterJump = true;
 				}
@@ -1012,8 +1046,8 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 				}
 				if (col.contacts[j].thisCollider.GetType() == typeof(SphereCollider))
 				{
-					float num4 = this.HeadBlock.bounds.center.y - col.contacts[j].point.y;
-					if (!this.prevGrounded && this.jumpingTimer < 3.5f && num4 > 0.3f)
+					float num5 = this.HeadBlock.bounds.center.y - col.contacts[j].point.y;
+					if (!this.prevGrounded && this.jumpingTimer < 3.5f && num5 > 0.3f)
 					{
 						this.allowFauxGrounded = true;
 					}
@@ -1040,7 +1074,11 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 		{
 			this.setup.targetInfo.onStructure = true;
 		}
-		if (col.gameObject && col.gameObject.GetComponent<Buoyancy>() && !this.Diving)
+		if (col.rigidbody && !col.rigidbody.isKinematic)
+		{
+			this.StandingOnDynamicObject = true;
+		}
+		if ((col.gameObject.GetComponentInParent<Buoyancy>() || col.gameObject.GetComponent<DynamicFloor>() || col.gameObject.GetComponent<DynamicFloorProxy>()) && !this.Diving)
 		{
 			this.standingOnRaft = true;
 		}
@@ -1082,7 +1120,7 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 		float num = this.jumpHeight;
 		if (this.onSlipperySlope && this.collFlags.groundAngleVal > this.extremeAngleGroundedLimit)
 		{
-			num /= 7f;
+			num /= 9f;
 		}
 		return Mathf.Sqrt(2f * num * this.gravity);
 	}
@@ -1090,7 +1128,7 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 	
 	private float CalculateWaterJumpVerticalSpeed()
 	{
-		return Mathf.Sqrt(2f * this.jumpHeight * this.gravity);
+		return Mathf.Sqrt(this.jumpHeight / 2f * this.gravity);
 	}
 
 	
@@ -1112,17 +1150,17 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 		{
 			return;
 		}
-		float to = this.crouchCapsuleCenter;
+		float b = this.crouchCapsuleCenter;
 		if ((this.inSand || this.inSnow) && !LocalPlayer.AnimControl.doShellRideMode)
 		{
-			to = this.crouchCapsuleCenter + this.getCapsuleY;
+			b = this.crouchCapsuleCenter + this.getCapsuleY;
 		}
 		else
 		{
 			this.getCapsuleY = 0f;
 		}
 		this.capsule.height = Mathf.Lerp(this.originalHeight, this.crouchHeight, alpha);
-		this.capsule.center = new Vector3(0f, Mathf.Lerp(this.getCapsuleY, to, alpha), 0f);
+		this.capsule.center = new Vector3(0f, Mathf.Lerp(this.getCapsuleY, b, alpha), 0f);
 		this.HeadBlock.center = new Vector3(0f, Mathf.Lerp(1.76f, -0.1f, alpha), this.HeadBlock.center.z);
 	}
 
@@ -1411,11 +1449,6 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 	}
 
 	
-	public void clampVelocity()
-	{
-	}
-
-	
 	public void clampVelocityTowardEnemy(Vector3 otherPos)
 	{
 		Vector3 normalized = this.storeTargetVelocity.normalized;
@@ -1537,167 +1570,6 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 	}
 
 	
-	protected void BaseValues()
-	{
-		this.baseMaxSwimVelocity = this.maxSwimVelocity;
-		this.baseWalkSpeed = this.walkSpeed;
-		this.baseRunSpeed = this.runSpeed;
-		this.baseJumpHeight = this.jumpHeight;
-		this.baseCrouchSpeed = this.crouchSpeed;
-		this.baseStrafeSpeed = this.strafeSpeed;
-		this.baseSwimmingSpeed = this.swimmingSpeed;
-		this.baseMaxVelocityChange = this.maxVelocityChange;
-		this.baseMaximumVelocity = this.maximumVelocity;
-		this.baseGravity = this.gravity;
-	}
-
-	
-	private void Start()
-	{
-		try
-		{
-			this.AllChildColliders = base.gameObject.GetComponentsInChildren<Collider>();
-			this.AllColliders = base.gameObject.GetComponents<Collider>();
-			this.AllChildCollidersEnabled = new bool[this.AllChildColliders.Length];
-			this.AllCollidersEnabled = new bool[this.AllColliders.Length];
-			for (int i = 0; i < this.AllColliders.Length; i++)
-			{
-				this.AllCollidersEnabled[i] = this.AllColliders[i].enabled;
-			}
-			for (int j = 0; j < this.AllChildColliders.Length; j++)
-			{
-				this.AllChildCollidersEnabled[j] = this.AllChildColliders[j].enabled;
-			}
-			this.__Start__Original();
-			this.BaseValues();
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__Start__Original();
-		}
-	}
-
-	
-	private void FixedUpdate()
-	{
-		try
-		{
-			this.allowFallDamage = !UCheatmenu.GodMode;
-			this.fallShakeBlock = UCheatmenu.GodMode;
-			this.walkSpeed = this.baseWalkSpeed * UCheatmenu.SpeedMultiplier;
-			this.runSpeed = this.baseRunSpeed * UCheatmenu.SpeedMultiplier;
-			this.jumpHeight = this.baseJumpHeight * UCheatmenu.JumpMultiplier;
-			this.crouchSpeed = this.baseCrouchSpeed * UCheatmenu.SpeedMultiplier;
-			this.strafeSpeed = this.baseStrafeSpeed * UCheatmenu.SpeedMultiplier;
-			this.swimmingSpeed = this.baseSwimmingSpeed * UCheatmenu.SpeedMultiplier;
-			this.maxSwimVelocity = this.baseMaxSwimVelocity * UCheatmenu.SpeedMultiplier;
-			if (!UCheatmenu.FreeCam)
-			{
-				if (UCheatmenu.FlyMode && !this.PushingSled)
-				{
-					this.rb.useGravity = false;
-					if (UCheatmenu.NoClip)
-					{
-						if (!this.LastNoClip)
-						{
-							for (int i = 0; i < this.AllColliders.Length; i++)
-							{
-								this.AllColliders[i].enabled = false;
-							}
-							for (int j = 0; j < this.AllChildColliders.Length; j++)
-							{
-								this.AllChildColliders[j].enabled = false;
-							}
-							this.LastNoClip = true;
-						}
-					}
-					else if (this.LastNoClip)
-					{
-						for (int k = 0; k < this.AllColliders.Length; k++)
-						{
-							this.AllColliders[k].enabled = this.AllCollidersEnabled[k];
-						}
-						for (int l = 0; l < this.AllChildColliders.Length; l++)
-						{
-							this.AllChildColliders[l].enabled = this.AllChildCollidersEnabled[l];
-						}
-						this.LastNoClip = false;
-					}
-					bool button = TheForest.Utils.Input.GetButton("Crouch");
-					bool button2 = TheForest.Utils.Input.GetButton("Run");
-					bool button3 = TheForest.Utils.Input.GetButton("Jump");
-					float num = this.baseWalkSpeed;
-					this.gravity = 0f;
-					if (button2)
-					{
-						num = this.baseRunSpeed;
-					}
-					Vector3 a = Camera.main.transform.rotation * (new Vector3(TheForest.Utils.Input.GetAxis("Horizontal"), 0f, TheForest.Utils.Input.GetAxis("Vertical")) * num * UCheatmenu.SpeedMultiplier);
-					Vector3 b = this.rb.velocity;
-					if (button3)
-					{
-						b.y -= num * UCheatmenu.SpeedMultiplier;
-					}
-					if (button)
-					{
-						b.y += num * UCheatmenu.SpeedMultiplier;
-					}
-					Vector3 force = a - b;
-					this.rb.AddForce(force, ForceMode.VelocityChange);
-					this.LastFlyMode = true;
-					return;
-				}
-				if (this.LastFlyMode)
-				{
-					if (!this.IsInWater())
-					{
-						this.rb.useGravity = true;
-					}
-					this.gravity = this.baseGravity;
-					if (this.LastNoClip)
-					{
-						for (int m = 0; m < this.AllColliders.Length; m++)
-						{
-							this.AllColliders[m].enabled = this.AllCollidersEnabled[m];
-						}
-						for (int n = 0; n < this.AllChildColliders.Length; n++)
-						{
-							this.AllChildColliders[n].enabled = this.AllChildCollidersEnabled[n];
-						}
-						this.LastNoClip = false;
-					}
-					this.LastFlyMode = false;
-				}
-				this.__FixedUpdate__Original();
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__FixedUpdate__Original();
-		}
-	}
-
-	
-	public const float HARD_FALL_THRESHOLD = 28.5f;
-
-	
-	private const float jumpRayLength = 0.7f;
-
-	
-	private const float WET_GROUND_END = 1f;
-
-	
-	private const float IMMERSION_START = 5f;
-
-	
-	private const float IMMERSION_END = 10f;
-
-	
-	private const float IMMERSION_RANGE = 5f;
-
-	
 	public Vector2 InputHack;
 
 	
@@ -1735,6 +1607,9 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 
 	
 	public bool standingOnRaft;
+
+	
+	public bool StandingOnDynamicObject;
 
 	
 	public bool Locked;
@@ -1800,6 +1675,9 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 	public bool _doingExitVelocity;
 
 	
+	public const float HARD_FALL_THRESHOLD = 28.5f;
+
+	
 	public RigidBodyCollisionFlags collFlags;
 
 	
@@ -1822,6 +1700,9 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 
 	
 	private Animator animator;
+
+	
+	private VRPlayerAdapter vrAdapter;
 
 	
 	private SphereCollider headCollider;
@@ -1941,6 +1822,9 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 	private FsmBool fsmGrounded;
 
 	
+	private const float jumpRayLength = 0.7f;
+
+	
 	private float lastUpdateTime;
 
 	
@@ -2037,50 +1921,17 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 	public bool enforceHighDrag;
 
 	
-	protected float baseWalkSpeed;
+	private float modExtremeAngleLimit;
 
 	
-	protected float baseRunSpeed;
+	private const float WET_GROUND_END = 1f;
 
 	
-	protected float baseJumpHeight;
+	private const float IMMERSION_START = 5f;
 
 	
-	protected float baseCrouchSpeed;
+	private const float IMMERSION_END = 10f;
 
 	
-	protected float baseStrafeSpeed;
-
-	
-	protected float baseSwimmingSpeed;
-
-	
-	protected float baseGravity;
-
-	
-	protected float baseMaxVelocityChange;
-
-	
-	protected float baseMaximumVelocity;
-
-	
-	protected float baseMaxSwimVelocity;
-
-	
-	protected Collider[] AllChildColliders;
-
-	
-	protected Collider[] AllColliders;
-
-	
-	protected bool[] AllChildCollidersEnabled;
-
-	
-	protected bool[] AllCollidersEnabled;
-
-	
-	protected bool LastNoClip;
-
-	
-	protected bool LastFlyMode;
+	private const float IMMERSION_RANGE = 5f;
 }

@@ -171,8 +171,8 @@ public class ShadeParticles : MonoBehaviour
 	public bool UseUniqueMaterial;
 
 	
-	[Header("2nd additional Light: Point Light")]
 	[Space(5f)]
+	[Header("2nd additional Light: Point Light")]
 	public GameObject importantPointLightRef;
 
 	

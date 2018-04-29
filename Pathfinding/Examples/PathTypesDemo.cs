@@ -324,12 +324,9 @@ namespace Pathfinding.Examples
 					vector /= (float)list.Count;
 					for (int j = 0; j < this.agents.Length; j++)
 					{
-						List<Vector3> list3;
-						List<Vector3> list2 = list3 = list;
-						int index2;
-						int index = index2 = j;
-						Vector3 a = list3[index2];
-						list2[index] = a - vector;
+						List<Vector3> list2;
+						int index;
+						(list2 = list)[index = j] = list2[index] - vector;
 					}
 					PathUtilities.GetPointsAroundPoint(this.end.position, AstarPath.active.graphs[0] as IRaycastableGraph, list, 0f, 0.2f);
 					for (int k = 0; k < this.agents.Length; k++)

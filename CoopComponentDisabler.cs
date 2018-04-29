@@ -50,26 +50,26 @@ internal class CoopComponentDisabler : EntityBehaviour
 			base.enabled = false;
 			return;
 		}
-		if (this.entity && this.entity.isAttached)
+		if (base.entity && base.entity.isAttached)
 		{
 			CoopAnimal componentInChildren = base.transform.GetComponentInChildren<CoopAnimal>();
 			if (componentInChildren && componentInChildren.birdType)
 			{
 				UnityEngine.Object.Destroy(this);
 			}
-			foreach (Renderer item in this.entity.GetComponentsInChildren<Renderer>())
+			foreach (Renderer item in base.entity.GetComponentsInChildren<Renderer>())
 			{
 				this.Renderers.Add(item);
 			}
-			foreach (Collider item2 in this.entity.GetComponentsInChildren<Collider>())
+			foreach (Collider item2 in base.entity.GetComponentsInChildren<Collider>())
 			{
 				this.Colliders.Add(item2);
 			}
 			if (!this.animator)
 			{
-				this.animator = this.entity.GetComponentInChildren<Animator>();
+				this.animator = base.entity.GetComponentInChildren<Animator>();
 			}
-			if (this.entity.isFrozen)
+			if (base.entity.isFrozen)
 			{
 				this.DisableComponents();
 			}

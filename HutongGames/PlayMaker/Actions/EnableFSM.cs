@@ -50,7 +50,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			if (this.fsmComponent == null)
 			{
-				this.LogError("Missing FsmComponent!");
+				base.LogError("Missing FsmComponent!");
 				return;
 			}
 			this.fsmComponent.enabled = this.enable.Value;

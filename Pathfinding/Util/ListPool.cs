@@ -9,7 +9,7 @@ namespace Pathfinding.Util
 		
 		public static List<T> Claim()
 		{
-			List<List<T>> obj = ListPool<T>.pool;
+			object obj = ListPool<T>.pool;
 			List<T> result;
 			lock (obj)
 			{
@@ -31,7 +31,7 @@ namespace Pathfinding.Util
 		
 		public static List<T> Claim(int capacity)
 		{
-			List<List<T>> obj = ListPool<T>.pool;
+			object obj = ListPool<T>.pool;
 			List<T> result;
 			lock (obj)
 			{
@@ -73,7 +73,7 @@ namespace Pathfinding.Util
 		
 		public static void Warmup(int count, int size)
 		{
-			List<List<T>> obj = ListPool<T>.pool;
+			object obj = ListPool<T>.pool;
 			lock (obj)
 			{
 				List<T>[] array = new List<T>[count];
@@ -92,7 +92,7 @@ namespace Pathfinding.Util
 		public static void Release(List<T> list)
 		{
 			list.Clear();
-			List<List<T>> obj = ListPool<T>.pool;
+			object obj = ListPool<T>.pool;
 			lock (obj)
 			{
 				ListPool<T>.pool.Add(list);
@@ -102,7 +102,7 @@ namespace Pathfinding.Util
 		
 		public static void Clear()
 		{
-			List<List<T>> obj = ListPool<T>.pool;
+			object obj = ListPool<T>.pool;
 			lock (obj)
 			{
 				ListPool<T>.pool.Clear();
@@ -116,12 +116,12 @@ namespace Pathfinding.Util
 		}
 
 		
-		private const int MaxCapacitySearchLength = 8;
-
-		
 		private static readonly List<List<T>> pool = new List<List<T>>();
 
 		
 		private static readonly HashSet<List<T>> inPool = new HashSet<List<T>>();
+
+		
+		private const int MaxCapacitySearchLength = 8;
 	}
 }

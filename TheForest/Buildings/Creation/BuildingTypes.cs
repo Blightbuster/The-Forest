@@ -130,6 +130,8 @@ namespace TheForest.Buildings.Creation
 		
 		WallDefensiveReinforcement,
 		
+		WallDefensiveGate,
+		
 		WallDoorway = 290,
 		
 		WallWindow = 300,
@@ -250,6 +252,16 @@ namespace TheForest.Buildings.Creation
 		
 		Swap_Platform = 5020,
 		
-		Swap_WeaponHolderDecoration = 5030
+		Swap_WeaponHolderDecoration = 5030,
+		
+		TimmyEffigy = 7001,
+		
+		TimmyEffigySitting,
+		
+		MomEffigy,
+		
+		MomEffigySitting,
+		
+		Signal = 8000
 	}
 }

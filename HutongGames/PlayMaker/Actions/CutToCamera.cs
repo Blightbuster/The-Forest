@@ -21,7 +21,7 @@ namespace HutongGames.PlayMaker.Actions
 		{
 			if (this.camera == null)
 			{
-				this.LogError("Missing camera!");
+				base.LogError("Missing camera!");
 				return;
 			}
 			this.oldCamera = Camera.main;

@@ -58,7 +58,7 @@ public class SerializeRigidBody : IComponentSerializer
 			this.constraints = source.constraints;
 			this.collisionDetectionMode = source.collisionDetectionMode;
 			this.interpolation = source.interpolation;
-			this.solverIterationCount = source.solverIterationCount;
+			this.solverIterationCount = source.solverIterations;
 		}
 
 		
@@ -83,7 +83,7 @@ public class SerializeRigidBody : IComponentSerializer
 			body.constraints = this.constraints;
 			body.collisionDetectionMode = this.collisionDetectionMode;
 			body.interpolation = this.interpolation;
-			body.solverIterationCount = this.solverIterationCount;
+			body.solverIterations = this.solverIterationCount;
 			body.isKinematic = this.isKinematic;
 			if (!this.isKinematic)
 			{

@@ -38,15 +38,15 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The Material variable to convert to an Object.")]
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("The Material variable to convert to an Object.")]
 		public FsmMaterial materialVariable;
 
 		
 		[RequiredField]
-		[Tooltip("Store the result in an Object variable.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the result in an Object variable.")]
 		public FsmObject objectVariable;
 
 		

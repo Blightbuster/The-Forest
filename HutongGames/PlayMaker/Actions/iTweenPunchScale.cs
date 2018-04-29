@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Applies a jolt of force to a GameObject's scale and wobbles it back to its initial scale.")]
 	[ActionCategory("iTween")]
+	[Tooltip("Applies a jolt of force to a GameObject's scale and wobbles it back to its initial scale.")]
 	public class iTweenPunchScale : iTweenFsmAction
 	{
 		
@@ -90,8 +90,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString id;
 
 		
-		[Tooltip("A vector punch range.")]
 		[RequiredField]
+		[Tooltip("A vector punch range.")]
 		public FsmVector3 vector;
 
 		

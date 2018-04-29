@@ -3,13 +3,11 @@ using System.Collections;
 using Bolt;
 using FMOD.Studio;
 using HutongGames.PlayMaker;
-using ModAPI;
 using PathologicalGames;
 using TheForest.Items.Utils;
 using TheForest.Tools;
 using TheForest.Utils;
 using TheForest.Utils.Settings;
-using UltimateCheatmenu;
 using UnityEngine;
 
 
@@ -325,7 +323,7 @@ public class EnemyHealth : EntityBehaviour
 					this.Health -= 40;
 					if (this.Health < 1)
 					{
-						UnityEngine.Object.Instantiate(this.RagDollExploded, base.transform.position, base.transform.rotation);
+						UnityEngine.Object.Instantiate<GameObject>(this.RagDollExploded, base.transform.position, base.transform.rotation);
 						this.typeSetup.removeFromSpawnAndExplode();
 						return;
 					}
@@ -333,7 +331,7 @@ public class EnemyHealth : EntityBehaviour
 				}
 				else if (explodeDist < 10.5f)
 				{
-					UnityEngine.Object.Instantiate(this.RagDollExploded, base.transform.position, base.transform.rotation);
+					UnityEngine.Object.Instantiate<GameObject>(this.RagDollExploded, base.transform.position, base.transform.rotation);
 					this.typeSetup.removeFromSpawnAndExplode();
 				}
 				else if (explodeDist > 10.5f && explodeDist < 18f)
@@ -382,7 +380,7 @@ public class EnemyHealth : EntityBehaviour
 					this.familyFunctions.cancelEatMeEvent();
 					this.familyFunctions.cancelRescueEvent();
 				}
-				UnityEngine.Object.Instantiate(this.RagDollExploded, base.transform.position, base.transform.rotation);
+				UnityEngine.Object.Instantiate<GameObject>(this.RagDollExploded, base.transform.position, base.transform.rotation);
 				this.typeSetup.removeFromSpawnAndExplode();
 			}
 			this.explodeBlock = true;
@@ -576,13 +574,27 @@ public class EnemyHealth : EntityBehaviour
 				this.MySkin.sharedMaterial = this.Burnt;
 				this.alreadyBurnt = true;
 			}
+			float num;
+			if (this.setup.ai.creepy_fat)
+			{
+				num = 10f;
+			}
+			else if (this.setup.ai.fireman || this.setup.ai.creepy_boss)
+			{
+				num = 5f;
+			}
+			else
+			{
+				num = UnityEngine.Random.Range(7f, 14f);
+			}
 			if (this.Fire != null && this.Fire.Length > 0)
 			{
 				foreach (GameObject gameObject in this.Fire)
 				{
-					if (gameObject)
+					if (gameObject && !gameObject.activeSelf)
 					{
 						gameObject.SetActive(true);
+						gameObject.SendMessage("setFireDuration", num + 7f, SendMessageOptions.DontRequireReceiver);
 					}
 				}
 			}
@@ -592,12 +604,12 @@ public class EnemyHealth : EntityBehaviour
 				this.setup.pmCombat.FsmVariables.GetFsmBool("onFireBool").Value = true;
 			}
 			this.targetSwitcher.attackerType = 4;
-			int num = this.douseMult - 1;
-			if (num < 1)
+			int num2 = this.douseMult - 1;
+			if (num2 < 1)
 			{
-				num = 1;
+				num2 = 1;
 			}
-			this.Hit(5 * num);
+			this.Hit(5 * num2);
 			if (this.ai.creepy_male || this.ai.creepy || this.ai.creepy_fat || this.ai.creepy_baby)
 			{
 				if (!this.ai.creepy_boss)
@@ -608,18 +620,13 @@ public class EnemyHealth : EntityBehaviour
 				}
 				this.StartOnFireEvent();
 			}
-			base.InvokeRepeating("HitFire", UnityEngine.Random.Range(1f, 2f), 1f);
-			if (this.setup.ai.creepy_fat)
+			if (!base.IsInvoking("HitFire"))
 			{
-				base.Invoke("disableBurn", 10f);
+				base.InvokeRepeating("HitFire", 2f, 1f);
 			}
-			else if (this.setup.ai.fireman || this.setup.ai.creepy_boss)
+			if (!base.IsInvoking("disableBurn"))
 			{
-				base.Invoke("disableBurn", 5f);
-			}
-			else
-			{
-				base.Invoke("disableBurn", UnityEngine.Random.Range(7f, 14f));
+				base.Invoke("disableBurn", num);
 			}
 		}
 		else
@@ -715,13 +722,15 @@ public class EnemyHealth : EntityBehaviour
 		{
 			return;
 		}
+		float num = 4f;
 		if (this.Fire != null && this.Fire.Length > 0)
 		{
 			foreach (GameObject gameObject in this.Fire)
 			{
-				if (gameObject)
+				if (gameObject && !gameObject.activeSelf)
 				{
 					gameObject.SetActive(true);
+					gameObject.SendMessage("setFireDuration", num + 7f, SendMessageOptions.DontRequireReceiver);
 				}
 			}
 		}
@@ -757,14 +766,20 @@ public class EnemyHealth : EntityBehaviour
 				this.setup.pmCombat.FsmVariables.GetFsmBool("onFireBool").Value = true;
 			}
 		}
-		int num = this.douseMult - 1;
-		if (num < 1)
+		int num2 = this.douseMult - 1;
+		if (num2 < 1)
 		{
-			num = 1;
+			num2 = 1;
 		}
-		this.Hit(5 * num);
-		base.InvokeRepeating("HitFire", UnityEngine.Random.Range(1f, 1.5f), 1f);
-		base.Invoke("disableBurn", 4f);
+		this.Hit(5 * num2);
+		if (!base.IsInvoking("HitFire"))
+		{
+			base.InvokeRepeating("HitFire", 2f, 1f);
+		}
+		if (!base.IsInvoking("disableBurn"))
+		{
+			base.Invoke("disableBurn", num);
+		}
 	}
 
 	
@@ -958,7 +973,7 @@ public class EnemyHealth : EntityBehaviour
 	}
 
 	
-	public void __Hit__Original(int damage)
+	public void Hit(int damage)
 	{
 		if ((this.setup.ai.male || this.setup.ai.female) && !this.setup.ai.maleSkinny && !this.setup.ai.femaleSkinny && this.targetSwitcher.attackerType == 0)
 		{
@@ -1396,7 +1411,7 @@ public class EnemyHealth : EntityBehaviour
 	{
 		EventRegistry.Enemy.Publish(TfEvent.KilledEnemy, this);
 		Scene.SceneTracker.addToRecentlyKilledEnemies();
-		GameObject gameObject = UnityEngine.Object.Instantiate(this.RagDollExploded, base.transform.position, base.transform.rotation) as GameObject;
+		GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.RagDollExploded, base.transform.position, base.transform.rotation);
 		gameObject.SendMessage("setSkin", this.MySkin.sharedMaterial, SendMessageOptions.DontRequireReceiver);
 		this.typeSetup.removeFromSpawnAndExplode();
 	}
@@ -1434,16 +1449,16 @@ public class EnemyHealth : EntityBehaviour
 		{
 			base.Invoke("BloodActual", 0.1f);
 		}
-		if (BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+		if (BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 		{
-			FxEnemeyBlood.Raise(this.entity).Send();
+			FxEnemeyBlood.Raise(base.entity).Send();
 		}
 	}
 
 	
 	public void BloodActual()
 	{
-		if (!base.gameObject.activeSelf)
+		if (!base.gameObject.activeInHierarchy)
 		{
 			return;
 		}
@@ -1457,8 +1472,11 @@ public class EnemyHealth : EntityBehaviour
 		quaternion *= Quaternion.AngleAxis(angle, Vector3.up);
 		Transform tr = PoolManager.Pools["Particles"].Spawn(Prefabs.Instance.BloodHitPSPrefabs[num].transform, this.BloodPos.position, quaternion);
 		Transform tr2 = PoolManager.Pools["Particles"].Spawn(Prefabs.Instance.BloodHitPSPrefabs[1].transform, this.BloodPos.position, quaternion);
-		base.StartCoroutine(this.fixBloodPosition(tr));
-		base.StartCoroutine(this.fixBloodPosition(tr2));
+		if (base.gameObject.activeInHierarchy)
+		{
+			base.StartCoroutine(this.fixBloodPosition(tr));
+			base.StartCoroutine(this.fixBloodPosition(tr2));
+		}
 		if (UnityEngine.Random.value > 0.5f && this.toothPickup != null && Time.time > this.teethCoolDown)
 		{
 			this.teethCoolDown = Time.time + 4f;
@@ -1688,25 +1706,6 @@ public class EnemyHealth : EntityBehaviour
 	private void resetGettingHit()
 	{
 		this.setup.pmCombat.FsmVariables.GetFsmBool("gettingHit").Value = false;
-	}
-
-	
-	public void Hit(int damage)
-	{
-		try
-		{
-			if (UCheatmenu.InstaKill)
-			{
-				this.Die();
-				return;
-			}
-			this.HitReal(damage);
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__Hit__Original(damage);
-		}
 	}
 
 	

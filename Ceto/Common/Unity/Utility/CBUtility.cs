@@ -7,26 +7,6 @@ namespace Ceto.Common.Unity.Utility
 	public static class CBUtility
 	{
 		
-		static CBUtility()
-		{
-			
-			string[,] array = new string[4, 3];
-			array[0, 0] = "read2DC1";
-			array[0, 1] = "_Tex2D";
-			array[0, 2] = "_Buffer2DC1";
-			array[1, 0] = "read2DC2";
-			array[1, 1] = "_Tex2D";
-			array[1, 2] = "_Buffer2DC2";
-			array[2, 0] = "read2DC3";
-			array[2, 1] = "_Tex2D";
-			array[2, 2] = "_Buffer2DC3";
-			array[3, 0] = "read2DC4";
-			array[3, 1] = "_Tex2D";
-			array[3, 2] = "_Buffer2DC4";
-			CBUtility.readNames2D = array;
-		}
-
-		
 		public static void ReadFromRenderTexture(RenderTexture tex, int channels, ComputeBuffer buffer, ComputeShader readData)
 		{
 			if (tex == null)
@@ -121,6 +101,26 @@ namespace Ceto.Common.Unity.Utility
 			readData.SetInt("_IdxZ", (int)z);
 			readData.SetVector("_UV", new Vector4(x / (float)(width - 1), y / (float)(height - 1), z / (float)(num - 1), 0f));
 			readData.Dispatch(num2, 1, 1, 1);
+		}
+
+		
+		static CBUtility()
+		{
+			
+			string[,] array = new string[4, 3];
+			array[0, 0] = "read2DC1";
+			array[0, 1] = "_Tex2D";
+			array[0, 2] = "_Buffer2DC1";
+			array[1, 0] = "read2DC2";
+			array[1, 1] = "_Tex2D";
+			array[1, 2] = "_Buffer2DC2";
+			array[2, 0] = "read2DC3";
+			array[2, 1] = "_Tex2D";
+			array[2, 2] = "_Buffer2DC3";
+			array[3, 0] = "read2DC4";
+			array[3, 1] = "_Tex2D";
+			array[3, 2] = "_Buffer2DC4";
+			CBUtility.readNames2D = array;
 		}
 
 		

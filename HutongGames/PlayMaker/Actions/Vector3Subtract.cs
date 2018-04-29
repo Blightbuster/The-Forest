@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Subtracts a Vector3 value from a Vector3 variable.")]
 	[ActionCategory(ActionCategory.Vector3)]
+	[Tooltip("Subtracts a Vector3 value from a Vector3 variable.")]
 	public class Vector3Subtract : FsmStateAction
 	{
 		

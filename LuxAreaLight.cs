@@ -46,8 +46,8 @@ public class LuxAreaLight : MonoBehaviour
 	}
 
 	
-	[Range(0f, 40f)]
 	[Header("Area Light Properties")]
+	[Range(0f, 40f)]
 	public float lightLength = 1f;
 
 	

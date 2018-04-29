@@ -1,9 +1,7 @@
 ﻿using System;
 using Bolt;
-using ModAPI;
 using TheForest.Tools;
 using TheForest.Utils;
-using UltimateCheatmenu;
 using UnityEngine;
 
 
@@ -23,7 +21,7 @@ public class Explode : EntityBehaviour
 	}
 
 	
-	private void __RunExplode__Original()
+	private void RunExplode()
 	{
 		this.radius = this.radius;
 		Vector3 position = base.transform.position;
@@ -144,21 +142,6 @@ public class Explode : EntityBehaviour
 	private void CleanUp()
 	{
 		UnityEngine.Object.Destroy(base.gameObject);
-	}
-
-	
-	private void RunExplode()
-	{
-		try
-		{
-			this.radius = UCheatmenu.ExplosionRadius;
-			this.__RunExplode__Original();
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__RunExplode__Original();
-		}
 	}
 
 	

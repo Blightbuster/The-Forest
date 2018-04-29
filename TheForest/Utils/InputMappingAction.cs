@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Rewired;
+using TheForest.UI;
 using UniLinq;
 using UnityEngine;
 
@@ -13,23 +14,7 @@ namespace TheForest.Utils
 		
 		private void Start()
 		{
-			if (!this._mappingManager)
-			{
-				this._mappingManager = UnityEngine.Object.FindObjectOfType<InputMapping>();
-			}
-			this._actionRowMappingCount = new Dictionary<InputActionRow, int>();
-			this._knownActionMaps = new Dictionary<ActionElementMap, InputActionButton>();
-			this.ShowUserAssignableActions();
-			this._nextChangeTimer = Time.realtimeSinceStartup + this._interChangeDelay;
-			base.enabled = false;
-			ReInput.ControllerConnectedEvent -= this.OnControllerConnectedEvent;
-			ReInput.ControllerConnectedEvent += this.OnControllerConnectedEvent;
-			ReInput.ControllerDisconnectedEvent -= this.OnControllerConnectedEvent;
-			ReInput.ControllerDisconnectedEvent += this.OnControllerConnectedEvent;
-			if (Input.player != null)
-			{
-				Input.player.controllers.maps.SetMapsEnabled(true, ControllerType.Joystick, "Menu");
-			}
+			this.InitializeUI(true);
 		}
 
 		
@@ -37,13 +22,12 @@ namespace TheForest.Utils
 		{
 			if (this._pollInput)
 			{
-				if (this._autoCancelTimer < Time.realtimeSinceStartup)
+				if (Input.GetButtonDown("Esc"))
 				{
 					this.Cancel();
 				}
 				else
 				{
-					this._selectionScreenTimer.text = Mathf.RoundToInt(this._autoCancelTimer - Time.realtimeSinceStartup) + "s";
 					this.PollControllerForAssignment();
 				}
 			}
@@ -51,6 +35,11 @@ namespace TheForest.Utils
 			{
 				this.CancelConflictingMapping();
 				this.Cancel();
+			}
+			bool flag = this.IsModalWindowActive();
+			for (int i = 0; i < this._actionTriggerEventToLock.Length; i++)
+			{
+				this._actionTriggerEventToLock[i].enabled = !flag;
 			}
 		}
 
@@ -87,7 +76,7 @@ namespace TheForest.Utils
 		{
 			if (this)
 			{
-				this.ResetUI();
+				this.InitializeUI(false);
 			}
 		}
 
@@ -95,42 +84,27 @@ namespace TheForest.Utils
 		public void SelectController_Keyboard()
 		{
 			this._controllerType = ControllerType.Keyboard;
-			this.ResetUI();
+			this.InitializeUI(true);
 		}
 
 		
 		public void SelectController_Mouse()
 		{
 			this._controllerType = ControllerType.Mouse;
-			this.ResetUI();
+			this.InitializeUI(true);
 		}
 
 		
 		public void SelectController_Joystick()
 		{
 			this._controllerType = ControllerType.Joystick;
-			this.ResetUI();
+			this.InitializeUI(true);
 		}
 
 		
 		public void SaveChanges()
 		{
 			this._mappingManager.SaveAllMaps();
-			this._mappingManager.LoadAllMaps();
-		}
-
-		
-		public void CancelChanges()
-		{
-			this._mappingManager.LoadAllMaps();
-			this.ResetUI();
-		}
-
-		
-		public void ResetUI()
-		{
-			this.ClearUI();
-			this.Start();
 		}
 
 		
@@ -145,7 +119,7 @@ namespace TheForest.Utils
 			UnityEngine.Object.FindObjectOfType<RewiredSpawner>().SendMessage("Awake");
 			this._mappingManager = UnityEngine.Object.FindObjectOfType<InputMapping>();
 			this._mappingManager.LoadAllMaps();
-			this.ResetUI();
+			this.InitializeUI(true);
 		}
 
 		
@@ -156,7 +130,7 @@ namespace TheForest.Utils
 				this._delayedPollInput = true;
 				if (Input.IsGamePad)
 				{
-					while (!Input.GetButtonUp("Fire1"))
+					while (!Input.GetButtonDown("Rebind"))
 					{
 						yield return null;
 					}
@@ -173,8 +147,6 @@ namespace TheForest.Utils
 		{
 			if (!base.enabled && this._nextChangeTimer < Time.realtimeSinceStartup)
 			{
-				this._autoCancelTimer = Time.realtimeSinceStartup + this._inputSelectionDuration;
-				this._selectionScreenTimer.gameObject.SetActive(true);
 				base.enabled = true;
 				this._pollInput = true;
 				if (LocalPlayer.Inventory)
@@ -183,9 +155,22 @@ namespace TheForest.Utils
 				}
 				if (Input.player != null)
 				{
-					Input.player.controllers.maps.SetMapsEnabled(false, ControllerType.Joystick, "Menu");
+					InputMappingAction.SetJoystickMenuMap(false);
 				}
 			}
+		}
+
+		
+		private static void SetJoystickMenuMap(bool enabledValue)
+		{
+			if (Input.player == null)
+			{
+				return;
+			}
+			Input.player.controllers.maps.SetMapsEnabled(enabledValue, ControllerType.Joystick, "Menu");
+			Input.player.controllers.maps.SetMapsEnabled(enabledValue, ControllerType.Joystick, "Default");
+			Input.player.controllers.maps.SetMapsEnabled(enabledValue, ControllerType.Keyboard, "Default");
+			Input.player.controllers.maps.SetMapsEnabled(enabledValue, ControllerType.Mouse, "Default");
 		}
 
 		
@@ -197,77 +182,72 @@ namespace TheForest.Utils
 			{
 				LocalPlayer.Inventory.enabled = true;
 			}
-			if (Input.player != null)
-			{
-				Input.player.controllers.maps.SetMapsEnabled(true, ControllerType.Joystick, "Menu");
-			}
+			InputMappingAction.SetJoystickMenuMap(true);
 		}
 
 		
 		private void CheckMappingConflictAndConfirm()
 		{
-			if (base.enabled)
+			if (!base.enabled)
 			{
-				this._pollInput = false;
-				this._selectionScreenTimer.gameObject.SetActive(false);
-				bool flag = false;
-				bool flag2 = false;
-				string text = string.Empty;
-				foreach (ElementAssignmentConflictInfo elementAssignmentConflictInfo in ReInput.controllers.conflictChecking.ElementAssignmentConflicts(this._entry.ToElementAssignmentConflictCheck()))
+				return;
+			}
+			this._pollInput = false;
+			bool flag = false;
+			bool flag2 = false;
+			string text = string.Empty;
+			foreach (ElementAssignmentConflictInfo elementAssignmentConflictInfo in ReInput.controllers.conflictChecking.ElementAssignmentConflicts(this._entry.ToElementAssignmentConflictCheck()))
+			{
+				flag = true;
+				ControllerMap controllerMap = Input.player.controllers.maps.GetAllMaps(elementAssignmentConflictInfo.controllerType).First<ControllerMap>();
+				if (controllerMap != null)
 				{
-					flag = true;
-					ControllerMap controllerMap = Input.player.controllers.maps.GetAllMaps(elementAssignmentConflictInfo.controllerType).First<ControllerMap>();
-					if (controllerMap != null)
+					ActionElementMap elementMap = controllerMap.GetElementMap(elementAssignmentConflictInfo.elementMapId);
+					if (elementMap != null)
 					{
-						ActionElementMap elementMap = controllerMap.GetElementMap(elementAssignmentConflictInfo.elementMapId);
-						if (elementMap != null)
+						int actionId = elementMap.actionId;
+						if (this._entry.actionId == actionId)
 						{
-							int actionId = elementMap.actionId;
-							if (this._entry.actionId == actionId)
-							{
-								this.Cancel();
-								return;
-							}
-							InputAction action = ReInput.mapping.GetAction(actionId);
-							string text2 = (!(action.descriptiveName != string.Empty)) ? action.name : action.descriptiveName;
-							if (!elementAssignmentConflictInfo.isUserAssignable || !action.userAssignable)
-							{
-								flag2 = true;
-								text = text2;
-								break;
-							}
-							text = text + text2 + ", ";
+							this.Cancel();
+							return;
 						}
+						InputAction action = ReInput.mapping.GetAction(actionId);
+						string text2 = action.descriptiveName.IfNullOrEmpty(action.name);
+						text2 = UiTranslationDatabase.TranslateKey(text2.ToUpper(), text2, true);
+						if (!elementAssignmentConflictInfo.isUserAssignable || !action.userAssignable)
+						{
+							flag2 = true;
+							text = text2;
+							break;
+						}
+						text = text + text2 + ", ";
 					}
 				}
-				if (flag)
+			}
+			if (flag)
+			{
+				if (flag2)
 				{
-					if (flag2)
-					{
-						string message = this._entry.elementName + " is already in use and is protected from reassignment. You cannot remove the protected assignment, but you can still assign the action to this element. If you do so, the element will trigger multiple actions when activated.";
-						Debug.Log(message);
-						this._mappingSystemConflictUI.text = this._entry.elementName.ToUpperInvariant();
-						this._mappingSystemConflictUI.transform.parent.gameObject.SetActive(true);
-					}
-					else
-					{
-						string message2 = this._entry.elementName + " is already in use. You may replace the other conflicting assignments, add this assignment anyway which will leave multiple actions assigned to this element, or cancel this assignment.";
-						Debug.Log(message2);
-						text = text.TrimEnd(new char[]
-						{
-							' ',
-							','
-						});
-						this._mappingConflictResolutionActionLabel.text = text;
-						this._mappingConflictResolutionKeyLabel.text = this._entry.elementName.ToUpperInvariant();
-						this._mappingConflictResolutionKeyLabel.transform.parent.gameObject.SetActive(true);
-					}
-					this._nextChangeTimer = float.MaxValue;
+					string message = this._entry.elementName + " is already in use and is protected from reassignment. You cannot remove the protected assignment, but you can still assign the action to this element. If you do so, the element will trigger multiple actions when activated.";
+					Debug.Log(message);
+					this.CancelConflictingMapping();
 				}
 				else
 				{
-					this.Confirm(InputMappingAction.ConflictResolution.DoNothing);
+					string message2 = this._entry.elementName + " is already in use. You may replace the other conflicting assignments, add this assignment anyway which will leave multiple actions assigned to this element, or cancel this assignment.";
+					Debug.Log(message2);
+					text = text.TrimEnd(new char[]
+					{
+						' ',
+						','
+					});
+					this.ConfirmKeepingConflicts();
 				}
+				this._nextChangeTimer = Time.realtimeSinceStartup + this._interChangeDelay;
+			}
+			else
+			{
+				this.Confirm(InputMappingAction.ConflictResolution.DoNothing);
 			}
 		}
 
@@ -275,25 +255,28 @@ namespace TheForest.Utils
 		public void ConfirmReplacingConflicts()
 		{
 			this.Confirm(InputMappingAction.ConflictResolution.Replace);
-			this.ResetUI();
+			this.InitializeUI(false);
 		}
 
 		
 		public void ConfirmKeepingConflicts()
 		{
 			this.Confirm(InputMappingAction.ConflictResolution.DoNothing);
-			this.ResetUI();
+			this.InitializeUI(false);
 		}
 
 		
 		public void CancelConflictingMapping()
 		{
-			this._selectionScreenTimer.gameObject.SetActive(false);
-			this._mappingConflictResolutionKeyLabel.transform.parent.gameObject.SetActive(false);
-			this._mappingSystemConflictUI.transform.parent.gameObject.SetActive(false);
 			this._nextChangeTimer = Time.realtimeSinceStartup + this._interChangeDelay;
 			this.StopPollInput();
-			this.ResetUI();
+			this.InitializeUI(false);
+		}
+
+		
+		public bool IsModalWindowActive()
+		{
+			return false;
 		}
 
 		
@@ -303,22 +286,21 @@ namespace TheForest.Utils
 			{
 				if (conflictResolution == InputMappingAction.ConflictResolution.Replace)
 				{
-					ElementAssignmentConflictInfo info;
-					foreach (ElementAssignmentConflictInfo info2 in ReInput.controllers.conflictChecking.ElementAssignmentConflicts(this._entry.ToElementAssignmentConflictCheck()))
+					using (IEnumerator<ElementAssignmentConflictInfo> enumerator = ReInput.controllers.conflictChecking.ElementAssignmentConflicts(this._entry.ToElementAssignmentConflictCheck()).GetEnumerator())
 					{
-						info = info2;
-						if (this._knownActionMaps.Any((KeyValuePair<ActionElementMap, InputActionButton> m) => m.Key.id == info.elementMapId))
+						while (enumerator.MoveNext())
 						{
-							ActionElementMap elementMap = this._knownActionMaps.First((KeyValuePair<ActionElementMap, InputActionButton> m) => m.Key.id == info.elementMapId).Key;
-							UnityEngine.Object.Destroy(this._knownActionMaps[elementMap].gameObject);
-							this._knownActionMaps.Remove(elementMap);
-							InputActionRow key = this._actionRowMappingCount.First((KeyValuePair<InputActionRow, int> r) => r.Key._action.id == elementMap.actionId).Key;
-							Dictionary<InputActionRow, int> actionRowMappingCount;
-							Dictionary<InputActionRow, int> dictionary = actionRowMappingCount = this._actionRowMappingCount;
-							InputActionRow key3;
-							InputActionRow key2 = key3 = key;
-							int num = actionRowMappingCount[key3];
-							dictionary[key2] = num - 1;
+							ElementAssignmentConflictInfo info = enumerator.Current;
+							if (this._knownActionMaps.Any((KeyValuePair<ActionElementMap, InputActionButton> m) => m.Key.id == info.elementMapId))
+							{
+								ActionElementMap elementMap = this._knownActionMaps.First((KeyValuePair<ActionElementMap, InputActionButton> m) => m.Key.id == info.elementMapId).Key;
+								UnityEngine.Object.Destroy(this._knownActionMaps[elementMap].gameObject);
+								this._knownActionMaps.Remove(elementMap);
+								InputActionRow key = this._actionRowMappingCount.First((KeyValuePair<InputActionRow, int> r) => r.Key._action.id == elementMap.actionId).Key;
+								Dictionary<InputActionRow, int> actionRowMappingCount;
+								InputActionRow key2;
+								(actionRowMappingCount = this._actionRowMappingCount)[key2 = key] = actionRowMappingCount[key2] - 1;
+							}
 						}
 					}
 					ReInput.controllers.conflictChecking.RemoveElementAssignmentConflicts(this._entry.ToElementAssignmentConflictCheck());
@@ -331,12 +313,9 @@ namespace TheForest.Utils
 					UnityEngine.Object.Destroy(this._entry.uiButton.gameObject);
 					if (this._entry.uiRow)
 					{
-						Dictionary<InputActionRow, int> actionRowMappingCount2;
-						Dictionary<InputActionRow, int> dictionary2 = actionRowMappingCount2 = this._actionRowMappingCount;
-						InputActionRow key3;
-						InputActionRow key4 = key3 = this._entry.uiRow;
-						int num = actionRowMappingCount2[key3];
-						dictionary2[key4] = num - 1;
+						Dictionary<InputActionRow, int> actionRowMappingCount;
+						InputActionRow uiRow;
+						(actionRowMappingCount = this._actionRowMappingCount)[uiRow = this._entry.uiRow] = actionRowMappingCount[uiRow] - 1;
 					}
 					this._entry.changeType = InputMappingAction.ElementAssignmentChangeType.Add;
 				}
@@ -348,11 +327,8 @@ namespace TheForest.Utils
 					this.AddActionAssignmentButton(this._entry.uiRow, Input.player.id, ReInput.mapping.GetAction(this._entry.actionId), actionElementMap.axisContribution, this._entry.controllerMap, false, actionElementMap, showInvert);
 					this.HideAddActionMapButton(this._entry.uiRow, this._entry.controllerType);
 				}
-				this._selectionScreenTimer.gameObject.SetActive(false);
-				this._mappingConflictResolutionKeyLabel.transform.parent.gameObject.SetActive(false);
-				this._mappingSystemConflictUI.transform.parent.gameObject.SetActive(false);
 				this._nextChangeTimer = Time.realtimeSinceStartup + this._interChangeDelay;
-				this.ResetUI();
+				this.InitializeUI(false);
 				this.StopPollInput();
 			}
 		}
@@ -362,7 +338,6 @@ namespace TheForest.Utils
 		{
 			if (base.enabled)
 			{
-				this._selectionScreenTimer.gameObject.SetActive(false);
 				this._nextChangeTimer = Time.realtimeSinceStartup + this._interChangeDelay;
 				this.StopPollInput();
 			}
@@ -375,7 +350,13 @@ namespace TheForest.Utils
 			uilabel.transform.parent = this._table.transform;
 			uilabel.transform.localPosition = Vector3.zero;
 			uilabel.transform.localScale = Vector3.one;
-			uilabel.text = name.ToUpperInvariant();
+			if (this._table.transform.childCount == 1)
+			{
+				uilabel.height = 40;
+			}
+			name = name.ToUpperInvariant();
+			name = UiTranslationDatabase.TranslateKey(name, name, true);
+			uilabel.text = name;
 		}
 
 		
@@ -386,7 +367,9 @@ namespace TheForest.Utils
 			inputActionRow.transform.localPosition = Vector3.zero;
 			inputActionRow.transform.localScale = Vector3.one;
 			inputActionRow._action = action;
-			inputActionRow._label.text = name.ToUpperInvariant();
+			name = name.ToUpperInvariant();
+			name = UiTranslationDatabase.TranslateKey(name, name, true);
+			inputActionRow._label.text = name;
 			this._actionRowMappingCount[inputActionRow] = 0;
 			return inputActionRow;
 		}
@@ -394,27 +377,35 @@ namespace TheForest.Utils
 		
 		private void ShowUserAssignableActions()
 		{
+			List<InputActionButton> list = new List<InputActionButton>();
 			foreach (InputCategory inputCategory in ReInput.mapping.ActionCategories)
 			{
-				if (ReInput.mapping.ActionsInCategory(inputCategory.id).Count<InputAction>() > 0)
+				InputAction[] array = (from a in ReInput.mapping.ActionsInCategory(inputCategory.id)
+				where a.userAssignable
+				select a).ToArray<InputAction>();
+				if (array.Length != 0)
 				{
 					this.AddNewUIActionCategory(inputCategory.name);
-					InputAction action;
-					foreach (InputAction action2 in from a in ReInput.mapping.ActionsInCategory(inputCategory.id)
-					where a.userAssignable
-					select a)
+					InputAction[] array2 = array;
+					for (int i = 0; i < array2.Length; i++)
 					{
-						action = action2;
-						string name = (!(action.descriptiveName != string.Empty)) ? action.name : action.descriptiveName;
+						InputAction action = array2[i];
+						string name = action.descriptiveName.IfNullOrEmpty(action.name);
 						InputActionRow newUIRow = this.GetNewUIRow(action, name);
 						if (action.type == InputActionType.Button)
 						{
 							this.InitAddActionMapButton(newUIRow, Input.player.id, action, Pole.Positive, true);
 							foreach (ControllerMap controllerMap in Input.player.controllers.maps.GetAllMaps())
 							{
-								foreach (ActionElementMap elementMap in controllerMap.AllMaps.Where((ActionElementMap m) => m.actionId == action.id))
+								foreach (ActionElementMap elementMap in from m in controllerMap.AllMaps
+								where m.actionId == action.id
+								select m)
 								{
-									this.AddActionAssignmentButton(newUIRow, Input.player.id, action, Pole.Positive, controllerMap, true, elementMap, false);
+									InputActionButton inputActionButton = this.AddActionAssignmentButton(newUIRow, Input.player.id, action, Pole.Positive, controllerMap, true, elementMap, false);
+									if (inputActionButton != null && controllerMap.controllerType == ControllerType.Joystick)
+									{
+										list.Add(inputActionButton);
+									}
 								}
 							}
 						}
@@ -423,45 +414,69 @@ namespace TheForest.Utils
 							this.InitAddActionMapButton(newUIRow, Input.player.id, action, Pole.Positive, true);
 							foreach (ControllerMap controllerMap2 in Input.player.controllers.maps.GetAllMaps())
 							{
-								foreach (ActionElementMap actionElementMap in controllerMap2.AllMaps.Where((ActionElementMap m) => m.actionId == action.id))
+								foreach (ActionElementMap actionElementMap in from m in controllerMap2.AllMaps
+								where m.actionId == action.id
+								select m)
 								{
 									if (actionElementMap.elementType != ControllerElementType.Button)
 									{
 										if (actionElementMap.axisType != AxisType.Split)
 										{
-											this.AddActionAssignmentButton(newUIRow, Input.player.id, action, Pole.Positive, controllerMap2, true, actionElementMap, true);
+											InputActionButton inputActionButton2 = this.AddActionAssignmentButton(newUIRow, Input.player.id, action, Pole.Positive, controllerMap2, true, actionElementMap, false);
+											if (inputActionButton2 != null && controllerMap2.controllerType == ControllerType.Joystick)
+											{
+												list.Add(inputActionButton2);
+											}
 										}
 									}
 								}
 							}
-							string str = (!(action.positiveDescriptiveName != string.Empty)) ? (action.descriptiveName + " +") : action.positiveDescriptiveName;
-							newUIRow = this.GetNewUIRow(action, "    " + str);
-							this.InitAddActionMapButton(newUIRow, Input.player.id, action, Pole.Positive, false);
-							foreach (ControllerMap controllerMap3 in Input.player.controllers.maps.GetAllMaps())
+							if (!action.positiveDescriptiveName.IsEmpty())
 							{
-								foreach (ActionElementMap actionElementMap2 in controllerMap3.AllMaps.Where((ActionElementMap m) => m.actionId == action.id))
+								string positiveDescriptiveName = action.positiveDescriptiveName;
+								newUIRow = this.GetNewUIRow(action, "____" + positiveDescriptiveName);
+								this.InitAddActionMapButton(newUIRow, Input.player.id, action, Pole.Positive, false);
+								foreach (ControllerMap controllerMap3 in Input.player.controllers.maps.GetAllMaps())
 								{
-									if (actionElementMap2.axisContribution == Pole.Positive)
+									foreach (ActionElementMap actionElementMap2 in from m in controllerMap3.AllMaps
+									where m.actionId == action.id
+									select m)
 									{
-										if (actionElementMap2.axisType != AxisType.Normal)
+										if (actionElementMap2.axisContribution == Pole.Positive)
 										{
-											this.AddActionAssignmentButton(newUIRow, Input.player.id, action, Pole.Positive, controllerMap3, false, actionElementMap2, false);
+											if (actionElementMap2.axisType != AxisType.Normal)
+											{
+												InputActionButton inputActionButton3 = this.AddActionAssignmentButton(newUIRow, Input.player.id, action, Pole.Positive, controllerMap3, false, actionElementMap2, false);
+												if (inputActionButton3 != null && controllerMap3.controllerType == ControllerType.Joystick)
+												{
+													list.Add(inputActionButton3);
+												}
+											}
 										}
 									}
 								}
 							}
-							string str2 = (!(action.negativeDescriptiveName != string.Empty)) ? (action.descriptiveName + " -") : action.negativeDescriptiveName;
-							newUIRow = this.GetNewUIRow(action, "    " + str2);
-							this.InitAddActionMapButton(newUIRow, Input.player.id, action, Pole.Negative, false);
-							foreach (ControllerMap controllerMap4 in Input.player.controllers.maps.GetAllMaps())
+							if (!action.negativeDescriptiveName.IsEmpty())
 							{
-								foreach (ActionElementMap actionElementMap3 in controllerMap4.AllMaps.Where((ActionElementMap m) => m.actionId == action.id))
+								string negativeDescriptiveName = action.negativeDescriptiveName;
+								newUIRow = this.GetNewUIRow(action, "____" + negativeDescriptiveName);
+								this.InitAddActionMapButton(newUIRow, Input.player.id, action, Pole.Negative, false);
+								foreach (ControllerMap controllerMap4 in Input.player.controllers.maps.GetAllMaps())
 								{
-									if (actionElementMap3.axisContribution == Pole.Negative)
+									foreach (ActionElementMap actionElementMap3 in from m in controllerMap4.AllMaps
+									where m.actionId == action.id
+									select m)
 									{
-										if (actionElementMap3.axisType != AxisType.Normal)
+										if (actionElementMap3.axisContribution == Pole.Negative)
 										{
-											this.AddActionAssignmentButton(newUIRow, Input.player.id, action, Pole.Negative, controllerMap4, false, actionElementMap3, false);
+											if (actionElementMap3.axisType != AxisType.Normal)
+											{
+												InputActionButton inputActionButton4 = this.AddActionAssignmentButton(newUIRow, Input.player.id, action, Pole.Negative, controllerMap4, false, actionElementMap3, false);
+												if (inputActionButton4 != null && controllerMap4.controllerType == ControllerType.Joystick)
+												{
+													list.Add(inputActionButton4);
+												}
+											}
 										}
 									}
 								}
@@ -470,20 +485,69 @@ namespace TheForest.Utils
 					}
 				}
 			}
-			this._table.repositionNow = true;
+			InputActionButton inputActionButton5 = null;
+			for (int j = 0; j < list.Count; j++)
+			{
+				InputActionButton inputActionButton6 = list[j];
+				UIKeyNavigation uiKeyNavigation = inputActionButton6._UiKeyNavigation;
+				if (j == 0)
+				{
+					uiKeyNavigation.startsSelected = true;
+				}
+				if (inputActionButton5 != null)
+				{
+					uiKeyNavigation.onUp = inputActionButton5.gameObject;
+					inputActionButton5._UiKeyNavigation.onDown = inputActionButton6.gameObject;
+				}
+				inputActionButton5 = inputActionButton6;
+			}
+			this._table.Reposition();
 		}
 
 		
-		private void ClearUI()
+		private void InitializeUI(bool resetScrollView)
 		{
-			if (this._table)
+			this.ClearUI(resetScrollView);
+			if (!this._mappingManager)
 			{
-				int i = this._table.transform.childCount;
-				while (i > 0)
-				{
-					UnityEngine.Object.Destroy(this._table.transform.GetChild(--i).gameObject);
-				}
+				this._mappingManager = UnityEngine.Object.FindObjectOfType<InputMapping>();
 			}
+			this._actionRowMappingCount = new Dictionary<InputActionRow, int>();
+			this._knownActionMaps = new Dictionary<ActionElementMap, InputActionButton>();
+			this.ShowUserAssignableActions();
+			this._nextChangeTimer = Time.realtimeSinceStartup + this._interChangeDelay;
+			base.enabled = false;
+			ReInput.ControllerConnectedEvent -= this.OnControllerConnectedEvent;
+			ReInput.ControllerConnectedEvent += this.OnControllerConnectedEvent;
+			ReInput.ControllerDisconnectedEvent -= this.OnControllerConnectedEvent;
+			ReInput.ControllerDisconnectedEvent += this.OnControllerConnectedEvent;
+			InputMappingAction.SetJoystickMenuMap(true);
+			if (resetScrollView)
+			{
+				this._scrollView.ResetPosition();
+				this._scrollbar.value = 0f;
+			}
+		}
+
+		
+		private void ClearUI(bool resetScrollView)
+		{
+			if (this._table == null)
+			{
+				return;
+			}
+			if (resetScrollView)
+			{
+				this._scrollView.ResetPosition();
+			}
+			foreach (Transform transform in this._table.GetChildList())
+			{
+				transform.parent = null;
+				transform.gameObject.SetActive(false);
+				UnityEngine.Object.Destroy(transform.gameObject);
+			}
+			this._table.Reposition();
+			this._scrollView.UpdateScrollbars();
 		}
 
 		
@@ -513,99 +577,118 @@ namespace TheForest.Utils
 		
 		private void HideAddActionMapButton(InputActionRow uiRow, ControllerType controllerType)
 		{
-			uiRow._addButtons[(int)controllerType].gameObject.SetActive(false);
+			ControllerType controllerType2 = controllerType;
+			if (controllerType2 == ControllerType.Mouse)
+			{
+				controllerType2 = ControllerType.Keyboard;
+			}
+			uiRow._addButtons[(int)controllerType2].gameObject.SetActive(false);
 		}
 
 		
 		private void ShowActionMappingCount(InputActionRow uiRow, ControllerType controllerType)
 		{
-			uiRow._addButtons[(int)controllerType].gameObject.SetActive(true);
+			ControllerType controllerType2 = controllerType;
+			if (controllerType2 == ControllerType.Mouse)
+			{
+				controllerType2 = ControllerType.Keyboard;
+			}
+			uiRow._addButtons[(int)controllerType2].gameObject.SetActive(true);
 		}
 
 		
-		private void AddActionAssignmentButton(InputActionRow uiRow, int playerId, InputAction action, Pole actionAxisContribution, ControllerMap controllerMap, bool assignFullAxis, ActionElementMap elementMap, bool showInvert = false)
+		private InputActionButton AddActionAssignmentButton(InputActionRow uiRow, int playerId, InputAction action, Pole actionAxisContribution, ControllerMap controllerMap, bool assignFullAxis, ActionElementMap elementMap, bool showInvert = false)
 		{
-			if (uiRow._addButtons[(int)controllerMap.controllerType].gameObject.activeSelf)
+			ControllerType controllerType = controllerMap.controllerType;
+			if (controllerType == ControllerType.Mouse)
 			{
-				InputActionButton uiButton;
-				if (!showInvert)
+				controllerType = ControllerType.Keyboard;
+			}
+			if (!uiRow._addButtons[(int)controllerType].gameObject.activeSelf)
+			{
+				return null;
+			}
+			InputActionButton uiButton;
+			if (!showInvert)
+			{
+				uiButton = UnityEngine.Object.Instantiate<InputActionButton>(this._inputActionButtonPrefab);
+			}
+			else
+			{
+				uiButton = UnityEngine.Object.Instantiate<InputActionButton>(this._inputAxisActionButtonPrefab);
+			}
+			uiButton.name = string.Format("actBtn_{0}_{1}_{2}", controllerMap.controllerType, elementMap.elementType, new string[]
+			{
+				action.descriptiveName,
+				action.positiveDescriptiveName,
+				action.negativeDescriptiveName,
+				action.name,
+				"UNKNOWN"
+			}.FirstNotNullOrEmpty(null));
+			uiButton._label.text = elementMap.elementIdentifierName.ToUpperInvariant();
+			uiButton._actionElementMap = elementMap;
+			uiButton._button.onClick.Add(new EventDelegate(delegate
+			{
+				if (!this.enabled && this._nextChangeTimer < Time.realtimeSinceStartup && !this._delayedPollInput && !this._pollInput)
 				{
-					uiButton = UnityEngine.Object.Instantiate<InputActionButton>(this._inputActionButtonPrefab);
-				}
-				else
-				{
-					uiButton = UnityEngine.Object.Instantiate<InputActionButton>(this._inputAxisActionButtonPrefab);
-				}
-				uiButton._label.text = elementMap.elementIdentifierName.ToUpperInvariant();
-				uiButton._actionElementMap = elementMap;
-				uiButton._button.onClick.Add(new EventDelegate(delegate
-				{
-					if (!this.enabled && this._nextChangeTimer < Time.realtimeSinceStartup && !this._delayedPollInput && !this._pollInput)
+					if ((Input.IsGamePad && Input.GetButtonDown("Rebind")) || (!Input.IsGamePad && UICamera.currentTouchID == -1))
 					{
-						if ((Input.IsGamePad && Input.GetButtonDown("Fire1")) || (!Input.IsGamePad && UICamera.currentTouchID == -1))
-						{
-							this._controllerType = controllerMap.controllerType;
-							this._replaceElementMap = true;
-							this._entry = new InputMappingAction.ElementAssignmentChange(playerId, InputMappingAction.ElementAssignmentChangeType.ReassignOrRemove, elementMap.id, action.id, actionAxisContribution, action.type, assignFullAxis, elementMap.invert);
-							this._entry.controllerMap = controllerMap;
-							this._entry.controllerMapPrevious = controllerMap;
-							this._entry.uiButton = uiButton;
-							this._entry.uiRow = uiRow;
-							this.StartCoroutine(this.StartPollInputDelayed());
-						}
-						else if ((Input.IsGamePad && Input.GetButtonDown("AltFire")) || (!Input.IsGamePad && UICamera.currentTouchID == -2))
-						{
-							this._controllerType = controllerMap.controllerType;
-							this._entry = new InputMappingAction.ElementAssignmentChange(playerId, InputMappingAction.ElementAssignmentChangeType.Remove, elementMap.id, action.id, actionAxisContribution, action.type, assignFullAxis, elementMap.invert);
-							controllerMap.DeleteElementMap(this._entry.actionElementMapId);
-							this._knownActionMaps.Remove(elementMap);
-							UnityEngine.Object.Destroy(uiButton.gameObject);
-							Dictionary<InputActionRow, int> actionRowMappingCount2;
-							Dictionary<InputActionRow, int> dictionary2 = actionRowMappingCount2 = this._actionRowMappingCount;
-							InputActionRow uiRow3;
-							InputActionRow key2 = uiRow3 = uiRow;
-							int num2 = actionRowMappingCount2[uiRow3];
-							dictionary2[key2] = num2 - 1;
-							this.ShowActionMappingCount(uiRow, controllerMap.controllerType);
-							this._nextChangeTimer = Time.realtimeSinceStartup + this._interChangeDelay;
-							this.ResetUI();
-						}
+						this._controllerType = controllerMap.controllerType;
+						this._replaceElementMap = true;
+						this._entry = new InputMappingAction.ElementAssignmentChange(playerId, InputMappingAction.ElementAssignmentChangeType.ReassignOrRemove, elementMap.id, action.id, actionAxisContribution, action.type, assignFullAxis, elementMap.invert);
+						this._entry.controllerMap = controllerMap;
+						this._entry.controllerMapPrevious = controllerMap;
+						this._entry.uiButton = uiButton;
+						this._entry.uiRow = uiRow;
+						this.StartCoroutine(this.StartPollInputDelayed());
+					}
+					else if ((Input.IsGamePad && Input.GetButtonDown("AltFire")) || (!Input.IsGamePad && UICamera.currentTouchID == -2))
+					{
+						this._controllerType = controllerMap.controllerType;
+						this._entry = new InputMappingAction.ElementAssignmentChange(playerId, InputMappingAction.ElementAssignmentChangeType.Remove, elementMap.id, action.id, actionAxisContribution, action.type, assignFullAxis, elementMap.invert);
+						controllerMap.DeleteElementMap(this._entry.actionElementMapId);
+						this._knownActionMaps.Remove(elementMap);
+						UnityEngine.Object.Destroy(uiButton.gameObject);
+						Dictionary<InputActionRow, int> actionRowMappingCount2;
+						InputActionRow uiRow3;
+						(actionRowMappingCount2 = this._actionRowMappingCount)[uiRow3 = uiRow] = actionRowMappingCount2[uiRow3] - 1;
+						this.ShowActionMappingCount(uiRow, controllerMap.controllerType);
+						this._nextChangeTimer = Time.realtimeSinceStartup + this._interChangeDelay;
+						this.InitializeUI(false);
+					}
+				}
+			}));
+			if (showInvert)
+			{
+				uiButton._invertAxisToggle.gameObject.SetActive(true);
+				uiButton._invertAxisToggle.value = uiButton._actionElementMap.invert;
+				uiButton._invertAxisToggle.onChange.Add(new EventDelegate(delegate
+				{
+					if (!this.enabled && this._nextChangeTimer < Time.realtimeSinceStartup)
+					{
+						uiButton._actionElementMap.invert = uiButton._invertAxisToggle.value;
 					}
 				}));
-				if (showInvert)
-				{
-					uiButton._invertAxisToggle.gameObject.SetActive(true);
-					uiButton._invertAxisToggle.value = uiButton._actionElementMap.invert;
-					uiButton._invertAxisToggle.onChange.Add(new EventDelegate(delegate
-					{
-						if (!this.enabled && this._nextChangeTimer < Time.realtimeSinceStartup)
-						{
-							uiButton._actionElementMap.invert = uiButton._invertAxisToggle.value;
-						}
-					}));
-				}
-				UIButtonColor component = uiButton.GetComponent<UIButtonColor>();
-				UIButtonColor component2 = uiRow._addButtons[(int)controllerMap.controllerType].GetComponent<UIButtonColor>();
-				if (component && component2)
-				{
-					component.tweenTarget = uiRow._addButtons[(int)controllerMap.controllerType].GetComponent<UIButtonColor>().tweenTarget;
-				}
-				else
-				{
-					Debug.LogWarning("Missing tweener for element: " + elementMap.elementIdentifierName);
-				}
-				uiButton.transform.parent = uiRow._addButtons[(int)controllerMap.controllerType].transform.parent;
-				uiButton.transform.localPosition = Vector3.zero;
-				uiButton.transform.localScale = Vector3.one;
-				this.HideAddActionMapButton(uiRow, controllerMap.controllerType);
-				this._knownActionMaps.Add(elementMap, uiButton);
-				Dictionary<InputActionRow, int> actionRowMappingCount;
-				Dictionary<InputActionRow, int> dictionary = actionRowMappingCount = this._actionRowMappingCount;
-				InputActionRow uiRow2;
-				InputActionRow key = uiRow2 = uiRow;
-				int num = actionRowMappingCount[uiRow2];
-				dictionary[key] = num + 1;
 			}
+			UIButtonColor component = uiButton.GetComponent<UIButtonColor>();
+			UIButtonColor component2 = uiRow._addButtons[(int)controllerMap.controllerType].GetComponent<UIButtonColor>();
+			if (component && component2)
+			{
+				component.tweenTarget = uiRow._addButtons[(int)controllerMap.controllerType].GetComponent<UIButtonColor>().tweenTarget;
+			}
+			else
+			{
+				Debug.LogWarning("Missing tweener for element: " + elementMap.elementIdentifierName);
+			}
+			uiButton.transform.parent = uiRow._addButtons[(int)controllerType].transform.parent;
+			uiButton.transform.localPosition = Vector3.zero;
+			uiButton.transform.localScale = Vector3.one;
+			this.HideAddActionMapButton(uiRow, controllerMap.controllerType);
+			this._knownActionMaps.Add(elementMap, uiButton);
+			Dictionary<InputActionRow, int> actionRowMappingCount;
+			InputActionRow uiRow2;
+			(actionRowMappingCount = this._actionRowMappingCount)[uiRow2 = uiRow] = actionRowMappingCount[uiRow2] + 1;
+			return uiButton;
 		}
 
 		
@@ -613,17 +696,20 @@ namespace TheForest.Utils
 		{
 			if (base.enabled)
 			{
-				if (this._pollInput && this._controllerType == ControllerType.Keyboard)
+				if (this._controllerType == ControllerType.Keyboard || this._controllerType == ControllerType.Mouse)
 				{
-					this.PollKeyboardForAssignment();
+					if (this._pollInput)
+					{
+						this.PollKeyboardForAssignment();
+					}
+					if (this._pollInput)
+					{
+						this.PollMouseForAssignment();
+					}
 				}
 				if (this._pollInput && this._controllerType == ControllerType.Joystick)
 				{
 					this.PollJoystickForAssignment();
-				}
-				if (this._pollInput && this._controllerType == ControllerType.Mouse)
-				{
-					this.PollMouseForAssignment();
 				}
 			}
 		}
@@ -657,24 +743,16 @@ namespace TheForest.Utils
 			}
 			if (pollingInfo.keyboardKey == KeyCode.None)
 			{
-				if (num > 0)
+				if (num > 0 && num == 1)
 				{
-					if (num == 1)
+					if (ReInput.controllers.Keyboard.GetKeyTimePressed(pollingInfo2.keyboardKey) > 1f)
 					{
-						if (ReInput.controllers.Keyboard.GetKeyTimePressed(pollingInfo2.keyboardKey) > 1f)
-						{
-							this._entry.pollingInfo = pollingInfo2;
-							this._entry.controllerId = 0;
-							this._entry.controllerType = ControllerType.Keyboard;
-							this._entry.controllerMap = Input.player.controllers.maps.GetMap(ControllerType.Keyboard, 0, 0, 1);
-							this.CheckMappingConflictAndConfirm();
-							return;
-						}
-						this._selectionScreenTimer.text = Keyboard.GetKeyName(pollingInfo2.keyboardKey).ToUpperInvariant();
-					}
-					else
-					{
-						this._selectionScreenTimer.text = Keyboard.ModifierKeyFlagsToString(modifierKeyFlags).ToUpperInvariant();
+						this._entry.pollingInfo = pollingInfo2;
+						this._entry.controllerId = 0;
+						this._entry.controllerType = ControllerType.Keyboard;
+						this._entry.controllerMap = Input.player.controllers.maps.GetMap(ControllerType.Keyboard, 0, 0, 1);
+						this.CheckMappingConflictAndConfirm();
+						return;
 					}
 				}
 				return;
@@ -757,6 +835,12 @@ namespace TheForest.Utils
 		public UITable _table;
 
 		
+		public UIScrollView _scrollView;
+
+		
+		public UIScrollBar _scrollbar;
+
+		
 		public UILabel _selectionScreenTimer;
 
 		
@@ -778,6 +862,9 @@ namespace TheForest.Utils
 		public float _interChangeDelay = 0.5f;
 
 		
+		public ActionTriggerEvent[] _actionTriggerEventToLock;
+
+		
 		private bool _delayedPollInput;
 
 		
@@ -791,9 +878,6 @@ namespace TheForest.Utils
 
 		
 		private InputMappingAction.ElementAssignmentChange _entry;
-
-		
-		private float _autoCancelTimer;
 
 		
 		private float _nextChangeTimer;

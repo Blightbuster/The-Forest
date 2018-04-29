@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using TheForest.Tools;
 using TheForest.Utils;
 using UnityEngine;
@@ -146,10 +147,23 @@ public class activateTimmyPickup : MonoBehaviour
 		this.placedToyGo.SetActive(true);
 		for (int i = this.doneProgressTicks; i < 5; i++)
 		{
-			foreach (object obj in this.screensGo.transform)
+			IEnumerator enumerator = this.screensGo.transform.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				transform.SendMessage("CheckNextImage", SendMessageOptions.DontRequireReceiver);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					transform.SendMessage("CheckNextImage", SendMessageOptions.DontRequireReceiver);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 		base.Invoke("PublishTimmyFoundEvent", 1f);

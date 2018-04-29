@@ -878,9 +878,9 @@ public class mutantAnimatorControl : MonoBehaviour
 			{
 				yield break;
 			}
-			Vector3 finalPos = this.setup.pmEncounter.FsmVariables.GetFsmGameObject("footPivotGo").Value.transform.position;
-			finalPos.y = this.rootTr.position.y;
-			this.rootTr.position = Vector3.Lerp(this.rootTr.position, finalPos, Time.deltaTime * 5f);
+			Vector3 position = this.setup.pmEncounter.FsmVariables.GetFsmGameObject("footPivotGo").Value.transform.position;
+			position.y = this.rootTr.position.y;
+			this.rootTr.position = Vector3.Lerp(this.rootTr.position, position, Time.deltaTime * 5f);
 			yield return null;
 		}
 		yield break;
@@ -1242,6 +1242,12 @@ public class mutantAnimatorControl : MonoBehaviour
 
 	
 	public int idleToBurningHash = Animator.StringToHash("idleToBurning");
+
+	
+	public int burnToDeathHash = Animator.StringToHash("burnToDeath");
+
+	
+	public int burnToDeathHashMir = Animator.StringToHash("burnToDeathMir");
 
 	
 	private RaycastHit hit;

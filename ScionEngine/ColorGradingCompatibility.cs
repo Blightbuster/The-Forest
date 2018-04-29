@@ -6,6 +6,10 @@ namespace ScionEngine
 	public enum ColorGradingCompatibility
 	{
 		
-		Amplify = 2
+		Unity,
+		
+		Chromatica,
+		
+		Amplify
 	}
 }

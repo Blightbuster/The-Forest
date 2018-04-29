@@ -115,7 +115,7 @@ namespace TheForest.Buildings.World
 			{
 				this.UnDock();
 			}
-			else if (this.entity.isAttached && this.entity.isOwner)
+			else if (base.entity.isAttached && base.entity.isOwner)
 			{
 				this.MpSendDock(Vector3.zero);
 			}
@@ -166,7 +166,7 @@ namespace TheForest.Buildings.World
 			Vector3 position = this._dockStilt.transform.position + (base.transform.position - this._dockStilt.transform.position).normalized * 1f;
 			position.y = base.transform.position.y + 0.5f;
 			this._dockIcon.transform.position = position;
-			if (this._forceDock && (!BoltNetwork.isRunning || this.entity.isAttached))
+			if (this._forceDock && (!BoltNetwork.isRunning || base.entity.isAttached))
 			{
 				this._forceDock = false;
 				this.Dock();
@@ -249,7 +249,7 @@ namespace TheForest.Buildings.World
 		public override void Attached()
 		{
 			base.state.AddCallback("DockPosition", new PropertyCallbackSimple(this.DockPositionUpdated));
-			if (this.entity.isOwner)
+			if (base.entity.isOwner)
 			{
 				if (this._forceDock && this._dockStilt)
 				{
@@ -266,11 +266,11 @@ namespace TheForest.Buildings.World
 		
 		public void MpSendDock(Vector3 position)
 		{
-			if (!this.entity.isOwner)
+			if (!base.entity.isOwner)
 			{
-				ToggleDockingState toggleDockingState = ToggleDockingState.Create(this.entity.source);
+				ToggleDockingState toggleDockingState = ToggleDockingState.Create(base.entity.source);
 				toggleDockingState.DockPosition = position;
-				toggleDockingState.Entity = this.entity;
+				toggleDockingState.Entity = base.entity;
 				toggleDockingState.Send();
 			}
 			else

@@ -22,7 +22,12 @@ public class SheenBillboard : MonoBehaviour, IThreadSafeTask
 	
 	
 	
-	public UISprite FillSprite { get; set; }
+	public bool UseFillSprite { get; set; }
+
+	
+	
+	
+	public DelayedAction FillSpriteAction { get; set; }
 
 	
 	public void Awake()
@@ -68,7 +73,19 @@ public class SheenBillboard : MonoBehaviour, IThreadSafeTask
 	{
 		if (this._action != InputMappingIcons.Actions.None)
 		{
-			this.FillSprite = ActionIconSystem.RegisterIcon(base.transform, this._action, this._sideIcon, ActionIconSystem.CurrentViewOptions.AllowInWorld);
+			ActionIcon actionIcon = ActionIconSystem.RegisterIcon(base.transform, this._action, this._sideIcon, ActionIconSystem.CurrentViewOptions.AllowInWorld, false, true);
+			if (actionIcon)
+			{
+				this.FillSpriteAction = actionIcon._fillSpriteAction;
+				if (this.FillSpriteAction && this.FillSpriteAction.gameObject.activeSelf != this.UseFillSprite)
+				{
+					this.FillSpriteAction.gameObject.SetActive(this.UseFillSprite);
+				}
+				if (this.UseFillSprite)
+				{
+					this.FillSpriteAction.SetAction(this._action);
+				}
+			}
 		}
 	}
 
@@ -77,7 +94,11 @@ public class SheenBillboard : MonoBehaviour, IThreadSafeTask
 	{
 		if (this._action != InputMappingIcons.Actions.None)
 		{
-			ActionIconSystem.UnregisterIcon(base.transform);
+			if (this.FillSpriteAction && this.FillSpriteAction.gameObject.activeSelf)
+			{
+				this.FillSpriteAction.gameObject.SetActive(false);
+			}
+			ActionIconSystem.UnregisterIcon(base.transform, false, true);
 		}
 	}
 
@@ -113,7 +134,7 @@ public class SheenBillboard : MonoBehaviour, IThreadSafeTask
 			array2[num2 + 2] = new Vector2(1f, 0f);
 			array2[num2 + 3] = new Vector2(1f, 1f);
 			int num3 = 6 * i;
-			array3[num3] = 0 + num2;
+			array3[num3] = num2;
 			array3[num3 + 1] = 1 + num2;
 			array3[num3 + 2] = 2 + num2;
 			array3[num3 + 3] = 2 + num2;

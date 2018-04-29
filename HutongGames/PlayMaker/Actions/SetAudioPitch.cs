@@ -43,8 +43,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(AudioSource))]
 		[RequiredField]
+		[CheckForComponent(typeof(AudioSource))]
 		public FsmOwnerDefault gameObject;
 
 		

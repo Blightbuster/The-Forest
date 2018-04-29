@@ -292,13 +292,13 @@ public class UIPlayTween : MonoBehaviour
 	public List<EventDelegate> onFinished = new List<EventDelegate>();
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private GameObject eventReceiver;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private string callWhenFinished;
 
 	

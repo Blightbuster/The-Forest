@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Returns true if automatic matching is active. Can also send events")]
 	[ActionCategory("Animator")]
+	[Tooltip("Returns true if automatic matching is active. Can also send events")]
 	public class GetAnimatorIsMatchingTarget : FsmStateAction
 	{
 		
@@ -89,9 +89,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
+		[RequiredField]
 		[CheckForComponent(typeof(Animator))]
 		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
-		[RequiredField]
 		public FsmOwnerDefault gameObject;
 
 		

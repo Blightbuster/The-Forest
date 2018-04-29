@@ -24,7 +24,7 @@ public class nitrogenTankLoader : MonoBehaviour
 		}
 		if (!this.spawnedTank)
 		{
-			this.spawnedTank = (UnityEngine.Object.Instantiate(this.tankGo, base.transform.position, base.transform.rotation) as GameObject);
+			this.spawnedTank = UnityEngine.Object.Instantiate<GameObject>(this.tankGo, base.transform.position, base.transform.rotation);
 			base.enabled = false;
 		}
 	}

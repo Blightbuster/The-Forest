@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the number of Touches.")]
 	[ActionCategory(ActionCategory.Device)]
+	[Tooltip("Gets the number of Touches.")]
 	public class GetTouchCount : FsmStateAction
 	{
 		

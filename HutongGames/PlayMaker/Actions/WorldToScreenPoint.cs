@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Transforms position from world space into screen space. NOTE: Uses the MainCamera!")]
 	[ActionCategory(ActionCategory.Camera)]
+	[Tooltip("Transforms position from world space into screen space. NOTE: Uses the MainCamera!")]
 	public class WorldToScreenPoint : FsmStateAction
 	{
 		
@@ -51,7 +51,7 @@ namespace HutongGames.PlayMaker.Actions
 		{
 			if (Camera.main == null)
 			{
-				this.LogError("No MainCamera defined!");
+				base.LogError("No MainCamera defined!");
 				base.Finish();
 				return;
 			}
@@ -84,8 +84,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("World position to transform into screen coordinates.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("World position to transform into screen coordinates.")]
 		public FsmVector3 worldPosition;
 
 		
@@ -111,8 +111,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat storeScreenX;
 
 		
-		[Tooltip("Store the screen Y position in a Float Variable.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the screen Y position in a Float Variable.")]
 		public FsmFloat storeScreenY;
 
 		

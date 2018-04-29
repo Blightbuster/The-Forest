@@ -193,7 +193,7 @@ public class CustomBillboard : MonoBehaviour
 			array[num6 + 2] = this.uv2;
 			array[num6 + 3] = this.uv3;
 			int num7 = num5 * i;
-			array2[num7] = 0 + num6;
+			array2[num7] = num6;
 			array2[num7 + 1] = 1 + num6;
 			array2[num7 + 2] = 2 + num6;
 			array2[num7 + 3] = 2 + num6;
@@ -217,7 +217,7 @@ public class CustomBillboard : MonoBehaviour
 				array[num6 + 2] = this.uv2;
 				array[num6 + 3] = this.uv3;
 				num7 += num3;
-				array2[num7] = 0 + num6;
+				array2[num7] = num6;
 				array2[num7 + 1] = 1 + num6;
 				array2[num7 + 2] = 2 + num6;
 				array2[num7 + 3] = 2 + num6;
@@ -258,9 +258,6 @@ public class CustomBillboard : MonoBehaviour
 	}
 
 	
-	private const float kOneOver180 = 0.00555555569f;
-
-	
 	public float FadeNearDistance = 20f;
 
 	
@@ -284,6 +281,9 @@ public class CustomBillboard : MonoBehaviour
 
 	
 	public float HorizontalSize = 3f;
+
+	
+	private const float kOneOver180 = 0.00555555569f;
 
 	
 	private Mesh mesh;

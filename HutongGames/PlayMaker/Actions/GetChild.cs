@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Finds the Child of a GameObject by Name and/or Tag. Use this to find attach points etc. NOTE: This action will search recursively through all children and return the first match; To find a specific child use Find Child.")]
 	[ActionCategory(ActionCategory.GameObject)]
+	[Tooltip("Finds the Child of a GameObject by Name and/or Tag. Use this to find attach points etc. NOTE: This action will search recursively through all children and return the first match; To find a specific child use Find Child.")]
 	public class GetChild : FsmStateAction
 	{
 		
@@ -31,31 +32,44 @@ namespace HutongGames.PlayMaker.Actions
 			{
 				return null;
 			}
-			foreach (object obj in root.transform)
+			IEnumerator enumerator = root.transform.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				if (!string.IsNullOrEmpty(name))
+				while (enumerator.MoveNext())
 				{
-					if (transform.name == name)
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					if (!string.IsNullOrEmpty(name))
 					{
-						if (string.IsNullOrEmpty(tag))
+						if (transform.name == name)
 						{
-							return transform.gameObject;
-						}
-						if (transform.tag.Equals(tag))
-						{
-							return transform.gameObject;
+							if (string.IsNullOrEmpty(tag))
+							{
+								return transform.gameObject;
+							}
+							if (transform.tag.Equals(tag))
+							{
+								return transform.gameObject;
+							}
 						}
 					}
+					else if (!string.IsNullOrEmpty(tag) && transform.CompareTag(tag))
+					{
+						return transform.gameObject;
+					}
+					GameObject gameObject = GetChild.DoGetChildByName(transform.gameObject, name, tag);
+					if (gameObject != null)
+					{
+						return gameObject;
+					}
 				}
-				else if (!string.IsNullOrEmpty(tag) && transform.CompareTag(tag))
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
 				{
-					return transform.gameObject;
-				}
-				GameObject gameObject = GetChild.DoGetChildByName(transform.gameObject, name, tag);
-				if (gameObject != null)
-				{
-					return gameObject;
+					disposable.Dispose();
 				}
 			}
 			return null;

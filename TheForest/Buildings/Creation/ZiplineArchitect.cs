@@ -40,9 +40,6 @@ namespace TheForest.Buildings.Creation
 			else
 			{
 				this._wasPlaced = (!LocalPlayer.Create || base.gameObject != LocalPlayer.Create.CurrentGhost);
-				this._ropeMat = ((!this._wasPlaced) ? new Material(this._ropeRenderer.sharedMaterial) : this._ropeRenderer.sharedMaterial);
-				this._gate1.GetComponent<Renderer>().sharedMaterial = this._ropeMat;
-				this._gate2.GetComponent<Renderer>().sharedMaterial = this._ropeMat;
 				this._craftStructure.OnBuilt = new Action<GameObject>(this.OnBuilt);
 				this._craftStructure._playTwinkle = false;
 				if (!this._wasPlaced)
@@ -115,12 +112,21 @@ namespace TheForest.Buildings.Creation
 			bool flag3 = this.CheckLockGate();
 			this.CheckUnlockGate();
 			bool flag4 = flag2;
+			if (flag3 || flag4)
+			{
+				this.SetRopeMaterial(LocalPlayer.Create.BuildingPlacer.ClearMat);
+				LocalPlayer.Create.BuildingPlacer.SetClear();
+			}
+			else
+			{
+				this.SetRopeMaterial(LocalPlayer.Create.BuildingPlacer.RedMat);
+				LocalPlayer.Create.BuildingPlacer.SetNotclear();
+			}
 			if (LocalPlayer.Create.BuildingPlacer.Clear != flag4 || Scene.HudGui.RotateIcon.activeSelf == flag)
 			{
 				Scene.HudGui.RotateIcon.SetActive(!flag);
 				LocalPlayer.Create.BuildingPlacer.Clear = flag4;
 			}
-			this._ropeMat.SetColor("_TintColor", (!flag3 && !flag4) ? LocalPlayer.Create.BuildingPlacer.RedMat.GetColor("_TintColor") : LocalPlayer.Create.BuildingPlacer.ClearMat.GetColor("_TintColor"));
 			bool showManualfillLockIcon = !flag && flag3;
 			bool canLock = flag && flag3;
 			bool canUnlock = flag;
@@ -140,10 +146,6 @@ namespace TheForest.Buildings.Creation
 				if (Scene.HudGui)
 				{
 					Scene.HudGui.RoofConstructionIcons.Shutdown();
-				}
-				if (LocalPlayer.Create && this._ropeMat == this._ropeRenderer.sharedMaterial)
-				{
-					this._ropeMat.SetColor("_TintColor", LocalPlayer.Create.BuildingPlacer.ClearMat.GetColor("_TintColor"));
 				}
 			}
 			if (this._gate1 && !this._gate1.transform.parent)
@@ -219,13 +221,9 @@ namespace TheForest.Buildings.Creation
 				UnityEngine.Object.Destroy(base.GetComponent<Renderer>());
 				Transform ghostRoot = this._ziplineRoot;
 				this._ropePool.Clear();
-				Transform logGhostPrefab = this._ropePrefab;
-				this._ropePrefab = Prefabs.Instance.ZiplineRopeBuiltPrefab;
-				this._ziplineRoot = this.CreateZipline(this.Gate1RopePosition, this.Gate2RopePosition);
-				this._ziplineRoot.name = "ZiplineRootBuilt";
 				this._ropePool = null;
 				int totalLogs = this._ziplineRoot.childCount;
-				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.<>f__this._ropeItemId);
+				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.$this._ropeItemId);
 				if (ri == null)
 				{
 					ri = new Craft_Structure.BuildIngredients();
@@ -234,22 +232,44 @@ namespace TheForest.Buildings.Creation
 					ri._renderers = new GameObject[0];
 					this._craftStructure._requiredIngredients.Insert(0, ri);
 				}
-				ri._amount += totalLogs;
-				List<GameObject> logStacks = new List<GameObject>();
-				foreach (object obj in this._ziplineRoot)
+				List<GameObject> logs = new List<GameObject>();
+				IEnumerator enumerator = this._ziplineRoot.GetEnumerator();
+				try
 				{
-					Transform logStack = (Transform)obj;
-					logStack.gameObject.SetActive(false);
-					logStacks.Add(logStack.gameObject);
+					while (enumerator.MoveNext())
+					{
+						object obj = enumerator.Current;
+						Transform transform = (Transform)obj;
+						IEnumerator enumerator2 = transform.GetEnumerator();
+						try
+						{
+							while (enumerator2.MoveNext())
+							{
+								object obj2 = enumerator2.Current;
+								Transform transform2 = (Transform)obj2;
+								logs.Add(transform2.GetComponentInChildren<Renderer>().gameObject);
+							}
+						}
+						finally
+						{
+							IDisposable disposable;
+							if ((disposable = (enumerator2 as IDisposable)) != null)
+							{
+								disposable.Dispose();
+							}
+						}
+					}
+				}
+				finally
+				{
+					IDisposable disposable2;
+					if ((disposable2 = (enumerator as IDisposable)) != null)
+					{
+						disposable2.Dispose();
+					}
 				}
 				ri._amount += totalLogs;
-				ri._renderers = logStacks.AsEnumerable<GameObject>().Reverse<GameObject>().Union(ri._renderers).ToArray<GameObject>();
-				foreach (object obj2 in this._ziplineRoot)
-				{
-					Transform log = (Transform)obj2;
-					log.gameObject.SetActive(false);
-				}
-				this._ropePrefab = logGhostPrefab;
+				ri.AddRuntimeObjects(logs.AsEnumerable<GameObject>().Reverse<GameObject>(), Prefabs.Instance.ZiplineRopeBuiltPrefab.GetComponentInChildren<Renderer>().sharedMaterial);
 				ghostRoot.transform.parent = null;
 				this._gate1.transform.parent = null;
 				this._gate2.transform.parent = null;
@@ -431,7 +451,7 @@ namespace TheForest.Buildings.Creation
 		
 		protected virtual bool CheckLockGate()
 		{
-			bool flag = this._gate2.transform.parent && LocalPlayer.Create.BuildingPlacer.ClearOfCollision;
+			bool flag = this._gate2.transform.parent && LocalPlayer.Create.BuildingPlacer.ClearOfCollision && LocalPlayer.Create.BuildingPlacer.OnDynamicClear;
 			if (flag)
 			{
 				bool flag2 = !this._gate1.transform.parent;
@@ -443,7 +463,12 @@ namespace TheForest.Buildings.Creation
 						return false;
 					}
 					RaycastHit raycastHit;
-					if (Physics.SphereCast(this.Gate1RopePosition + Vector3.down, 1.5f, this.Gate2RopePosition - this.Gate1RopePosition, out raycastHit, num, LocalPlayer.Create.BuildingPlacer.FloorLayers | 1 << LayerMask.NameToLayer("treeMid")))
+					if (Physics.SphereCast(this.Gate1RopePosition + Vector3.down, 1.5f, this.Gate2RopePosition - this.Gate1RopePosition, out raycastHit, num, LocalPlayer.Create.BuildingPlacer.FloorLayers | LayerMask.GetMask(new string[]
+					{
+						"treeMid",
+						"Blocker",
+						"PickUp"
+					}), QueryTriggerInteraction.Collide))
 					{
 						return false;
 					}
@@ -558,12 +583,34 @@ namespace TheForest.Buildings.Creation
 				transform.rotation = rotation;
 				return transform;
 			}
-			Transform transform2 = (Transform)UnityEngine.Object.Instantiate(this._ropePrefab, position, rotation);
-			if (!this._wasBuilt && !this._wasPlaced)
+			return UnityEngine.Object.Instantiate<Transform>(this._ropePrefab, position, rotation);
+		}
+
+		
+		private void SetRopeMaterial(Material mat)
+		{
+			if (this._ziplineRoot)
 			{
-				transform2.GetComponentInChildren<Renderer>().sharedMaterial = this._ropeMat;
+				IEnumerator enumerator = this._ziplineRoot.GetEnumerator();
+				try
+				{
+					while (enumerator.MoveNext())
+					{
+						object obj = enumerator.Current;
+						Transform transform = (Transform)obj;
+						Renderer componentInChildren = transform.GetComponentInChildren<Renderer>();
+						componentInChildren.sharedMaterial = mat;
+					}
+				}
+				finally
+				{
+					IDisposable disposable;
+					if ((disposable = (enumerator as IDisposable)) != null)
+					{
+						disposable.Dispose();
+					}
+				}
 			}
-			return transform2;
 		}
 
 		
@@ -599,7 +646,7 @@ namespace TheForest.Buildings.Creation
 		
 		public override void Attached()
 		{
-			this.CustomToken = this.entity.attachToken;
+			this.CustomToken = base.entity.attachToken;
 		}
 
 		
@@ -622,7 +669,7 @@ namespace TheForest.Buildings.Creation
 				this._gate2.transform.position = coopZiplineToken.p2;
 				if (!this._wasBuilt)
 				{
-					if (this.entity.isOwner)
+					if (base.entity.isOwner)
 					{
 						this.EnsureGatesDestroyProxies(true);
 					}
@@ -682,8 +729,5 @@ namespace TheForest.Buildings.Creation
 
 		
 		private Stack<Transform> _ropePool;
-
-		
-		private Material _ropeMat;
 	}
 }

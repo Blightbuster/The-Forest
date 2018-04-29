@@ -27,19 +27,6 @@ public class lb_Bird : MonoBehaviour
 	{
 		this.seeker = base.transform.GetComponent<Seeker>();
 		this.anim = base.gameObject.GetComponent<Animator>();
-		if (CoopPeerStarter.DedicatedHost)
-		{
-			AmplifyMotionObject[] componentsInChildren = base.transform.GetComponentsInChildren<AmplifyMotionObject>(true);
-			AmplifyMotionObjectBase[] componentsInChildren2 = base.transform.GetComponentsInChildren<AmplifyMotionObjectBase>(true);
-			foreach (AmplifyMotionObject obj in componentsInChildren)
-			{
-				UnityEngine.Object.Destroy(obj);
-			}
-			foreach (AmplifyMotionObjectBase obj2 in componentsInChildren2)
-			{
-				UnityEngine.Object.Destroy(obj2);
-			}
-		}
 	}
 
 	
@@ -89,6 +76,7 @@ public class lb_Bird : MonoBehaviour
 		this.singTriggerHash = Animator.StringToHash("sing");
 		this.flyingDirectionHash = Animator.StringToHash("flyingDirectionX");
 		this.anim.SetFloatReflected("IdleAgitated", this.agitationLevel);
+		this.onFire = false;
 		this.health = 1;
 		if (this.anim.enabled)
 		{
@@ -186,62 +174,72 @@ public class lb_Bird : MonoBehaviour
 			if (!this.paused)
 			{
 				this.distanceToTarget = Vector3.Distance(this.tr.position, this.target);
-				float modFlyingSpeed = this.flyingSpeed;
+				float d = this.flyingSpeed;
 				if (this.diff.y > 0f)
 				{
-					modFlyingSpeed = this.flyingSpeed * 0.9f;
+					d = this.flyingSpeed * 0.9f;
 				}
 				else
 				{
-					modFlyingSpeed = this.flyingSpeed * 1.1f;
+					d = this.flyingSpeed * 1.1f;
 				}
-				this.tr.position += this.tr.forward * modFlyingSpeed * Time.deltaTime;
-				Vector3 modTargetWaypoint = this.targetWaypoint;
+				this.tr.position += this.tr.forward * d * Time.deltaTime;
+				Vector3 a = this.targetWaypoint;
 				if (this.path == null || this.path.vectorPath.Count < 3 || !this.onValidArea)
 				{
 					this.vectorDirectionToTarget = (this.target - base.transform.position).normalized;
 				}
 				else
 				{
-					float tempDist = this.distanceToTarget * 0.2f;
-					if (tempDist < 1f)
+					float num = this.distanceToTarget * 0.2f;
+					if (num < 1f)
 					{
-						tempDist = 1f;
+						num = 1f;
 					}
-					float targetY = (base.transform.position.y - this.target.y) / tempDist;
+					float num2 = (base.transform.position.y - this.target.y) / num;
 					if (this.path != null && this.path.vectorPath.Count > 1)
 					{
 						if ((double)(this.tr.position.y - this.path.vectorPath[this.currentWaypoint].y) < 4.5 && this.distanceToTarget > 16f && !this.takeoff)
 						{
-							modTargetWaypoint.y = this.path.vectorPath[this.currentWaypoint].y + 5f;
+							a.y = this.path.vectorPath[this.currentWaypoint].y + 5f;
 						}
 						else
 						{
-							modTargetWaypoint.y = base.transform.position.y - targetY;
+							a.y = base.transform.position.y - num2;
 						}
 					}
 					if (this.distanceToTarget < 15f)
 					{
-						modTargetWaypoint.y = this.target.y;
+						a.y = this.target.y;
 					}
-					this.vectorDirectionToTarget = (modTargetWaypoint - base.transform.position).normalized;
+					this.vectorDirectionToTarget = (a - base.transform.position).normalized;
 				}
 				this.checkPerchTarget();
-				Vector3 groundHeightVector = this.vectorDirectionToTarget;
+				if (this.distanceToTarget < 15f && !this.takeoff && !this.landing)
+				{
+					float num3 = Terrain.activeTerrain.SampleHeight(this.target) + Terrain.activeTerrain.transform.position.y;
+					num3 = this.target.y - num3;
+					if (num3 > 7f && !this.flyingToPerch && Time.time > this.updateTargetTimer)
+					{
+						this.findNewRandomTarget(true);
+						this.updateTargetTimer = Time.time + 2f;
+					}
+				}
+				Vector3 vector = this.vectorDirectionToTarget;
 				if (this.tr.position.y - this.groundHeight < 1.4f && !this.landing && !this.onGround && this.distanceToTarget > 8f)
 				{
 					this.groundAvoidTimer = Time.time + 1f;
-					groundHeightVector.y = 0.4f;
+					vector.y = 0.4f;
 				}
 				if (Time.time < this.groundAvoidTimer)
 				{
-					groundHeightVector.y = 0.4f;
+					vector.y = 0.4f;
 				}
 				else if (Time.time < this.groundAvoidTimer + 1f)
 				{
-					groundHeightVector.y = Mathf.Lerp(groundHeightVector.y, this.vectorDirectionToTarget.y, Time.deltaTime);
+					vector.y = Mathf.Lerp(vector.y, this.vectorDirectionToTarget.y, Time.deltaTime);
 				}
-				this.finalRotation = Quaternion.LookRotation(groundHeightVector);
+				this.finalRotation = Quaternion.LookRotation(vector);
 				this.currentDir = (this.tr.rotation * Vector3.forward).normalized;
 				this.lastDir = (this.desiredRotation * Vector3.forward).normalized;
 				if (Vector3.Dot(this.lastDir, this.currentDir) > 0f)
@@ -259,11 +257,11 @@ public class lb_Bird : MonoBehaviour
 				}
 				if (this.takeoff)
 				{
-					this.diff = groundHeightVector.normalized;
+					this.diff = vector.normalized;
 				}
 				else
 				{
-					this.diff = Vector3.Slerp(this.diff, groundHeightVector, this.rotateSpeed * Time.deltaTime);
+					this.diff = Vector3.Slerp(this.diff, vector, this.rotateSpeed * Time.deltaTime);
 				}
 				if (this.diff.sqrMagnitude > 0.02f)
 				{
@@ -291,19 +289,9 @@ public class lb_Bird : MonoBehaviour
 				}
 			}
 			yield return null;
-			if (this.path != null)
-			{
-				if (this.currentWaypoint != this.path.vectorPath.Count - 1 || !this.flying || this.landing || this.distanceToTarget > 45f)
-				{
-				}
-				if (this.path.vectorPath.Count >= 21 || this.currentWaypoint != this.path.vectorPath.Count - 1 || !this.flying || !this.takeoff)
-				{
-				}
-			}
 			if (this.distanceToTarget < 4f && !this.flyingToPerch && !this.takeoff && !this.landing)
 			{
 				this.findNewLandingTarget();
-				Debug.Log("finding new path due to very close to target but not landing");
 			}
 		}
 		this.anim.SetFloatReflected(this.flyingDirectionHash, 0f);
@@ -539,6 +527,7 @@ public class lb_Bird : MonoBehaviour
 	
 	private void setNewFlyTarget(Vector3 getPos)
 	{
+		this.flyingToAirTarget = false;
 		if (!this.flying)
 		{
 			base.StopCoroutine("FlyToTarget");
@@ -574,11 +563,12 @@ public class lb_Bird : MonoBehaviour
 	
 	private void findNewRandomTarget(bool restart)
 	{
-		Vector2 vector = this.Circle2(75f);
+		Vector2 vector = this.Circle2(90f);
 		Vector3 vector2 = new Vector3(this.tr.position.x + vector.x, this.tr.position.y + (float)UnityEngine.Random.Range(-5, 5), vector.y + this.tr.position.z);
+		this.target = vector2;
 		if (!this.landing && this.flying)
 		{
-			this.target = vector2;
+			this.findNewTarget();
 			this.generatePathToTarget();
 			this.flyingToPerch = false;
 			if (restart)
@@ -603,6 +593,12 @@ public class lb_Bird : MonoBehaviour
 	private void setFlyingToPerch()
 	{
 		this.flyingToPerch = true;
+	}
+
+	
+	private void setFlyingToAirTarget()
+	{
+		this.flyingToAirTarget = true;
 	}
 
 	
@@ -633,7 +629,7 @@ public class lb_Bird : MonoBehaviour
 	
 	private void SpawnAFeather()
 	{
-		UnityEngine.Object.Instantiate(this.MyFeather, base.transform.position, base.transform.rotation);
+		UnityEngine.Object.Instantiate<GameObject>(this.MyFeather, base.transform.position, base.transform.rotation);
 	}
 
 	
@@ -756,7 +752,9 @@ public class lb_Bird : MonoBehaviour
 		Transform transform = this.ragDoll.metgoragdoll(default(Vector3));
 		if (BoltNetwork.isRunning && BoltNetwork.isServer)
 		{
-			BoltNetwork.Attach(transform.gameObject);
+			CoopRagdollToken coopRagdollToken = new CoopRagdollToken();
+			coopRagdollToken.onFireApplied = true;
+			BoltNetwork.Attach(transform.gameObject, coopRagdollToken);
 		}
 		this.controller.Unspawn(base.gameObject);
 	}
@@ -895,7 +893,7 @@ public class lb_Bird : MonoBehaviour
 	}
 
 	
-	private void SetController(lb_BirdController cont)
+	public void SetController(lb_BirdController cont)
 	{
 		this.controller = cont;
 	}
@@ -1006,7 +1004,7 @@ public class lb_Bird : MonoBehaviour
 					this.findNewRandomTarget(true);
 				}
 				this.lastPos = this.tr.position;
-				this.smallCircleCheckDelay = Time.time + 2f;
+				this.smallCircleCheckDelay = Time.time + 1.5f;
 			}
 			this.groundHeight = Terrain.activeTerrain.SampleHeight(this.tr.position) + Terrain.activeTerrain.transform.position.y;
 			if (Time.time > this.updatePathTimer)
@@ -1091,10 +1089,10 @@ public class lb_Bird : MonoBehaviour
 			}
 			if (this.currentWaypoint < this.path.vectorPath.Count - 1)
 			{
-				Vector3 modPos = this.path.vectorPath[this.currentWaypoint];
-				modPos.y = base.transform.position.y;
-				float dist = this.XZSqrMagnitude(modPos, base.transform.position);
-				if (dist < this.nextWaypointDistance * this.nextWaypointDistance)
+				Vector3 a = this.path.vectorPath[this.currentWaypoint];
+				a.y = base.transform.position.y;
+				float num = this.XZSqrMagnitude(a, base.transform.position);
+				if (num < this.nextWaypointDistance * this.nextWaypointDistance)
 				{
 					this.currentWaypoint++;
 				}
@@ -1216,6 +1214,9 @@ public class lb_Bird : MonoBehaviour
 	public bool flyingToPerch;
 
 	
+	public bool flyingToAirTarget;
+
+	
 	public float distanceToTarget;
 
 	
@@ -1223,6 +1224,9 @@ public class lb_Bird : MonoBehaviour
 
 	
 	private float originalAnimSpeed = 1f;
+
+	
+	private float updateTargetTimer;
 
 	
 	public float repathRate;
@@ -1274,6 +1278,12 @@ public class lb_Bird : MonoBehaviour
 
 	
 	public int pathWaypointCount;
+
+	
+	public bool onFire;
+
+	
+	public Transform testSphere;
 
 	
 	private RecastGraph rg;

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Multiplies supplied values by 360 and rotates a GameObject by calculated amount over time.")]
 	[ActionCategory("iTween")]
+	[Tooltip("Multiplies supplied values by 360 and rotates a GameObject by calculated amount over time.")]
 	public class iTweenRotateBy : iTweenFsmAction
 	{
 		

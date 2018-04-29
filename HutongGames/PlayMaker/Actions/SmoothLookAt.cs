@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Smoothly Rotates a Game Object so its forward vector points at a Target. The target can be defined as a Game Object or a world Position. If you specify both, then the position will be used as a local offset from the object's position.")]
 	[ActionCategory(ActionCategory.Transform)]
+	[Tooltip("Smoothly Rotates a Game Object so its forward vector points at a Target. The target can be defined as a Game Object or a world Position. If you specify both, then the position will be used as a local offset from the object's position.")]
 	public class SmoothLookAt : FsmStateAction
 	{
 		
@@ -124,8 +124,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmBool invertDirection;
 
 		
-		[Tooltip("How fast the look at moves.")]
 		[HasFloatSlider(0.5f, 15f)]
+		[Tooltip("How fast the look at moves.")]
 		public FsmFloat speed;
 
 		

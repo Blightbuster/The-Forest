@@ -31,8 +31,8 @@ namespace HutongGames.PlayMaker.Actions
 		public LogLevel logLevel;
 
 		
-		[Tooltip("Prints the value of a GameObject variable in the PlayMaker log window.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Prints the value of a GameObject variable in the PlayMaker log window.")]
 		public FsmGameObject gameObject;
 	}
 }

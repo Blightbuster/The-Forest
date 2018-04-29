@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Each time this action is called it gets the next item from a PlayMaker ArrayList Proxy component. \nThis lets you quickly loop through all the children of an object to perform actions on them.\nNOTE: To get to specific item use ArrayListGet instead.")]
 	[ActionCategory("ArrayMaker/ArrayList")]
+	[Tooltip("Each time this action is called it gets the next item from a PlayMaker ArrayList Proxy component. \nThis lets you quickly loop through all the children of an object to perform actions on them.\nNOTE: To get to specific item use ArrayListGet instead.")]
 	public class ArrayListGetNext : ArrayListActions
 	{
 		
@@ -91,10 +91,10 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
+		[ActionSection("Set up")]
 		[RequiredField]
 		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
-		[ActionSection("Set up")]
+		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -123,8 +123,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmEvent failureEvent;
 
 		
-		[UIHint(UIHint.Variable)]
 		[ActionSection("Result")]
+		[UIHint(UIHint.Variable)]
 		public FsmVar result;
 
 		

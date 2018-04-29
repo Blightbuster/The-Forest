@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using TheForest.Tools;
 
 namespace TheForest.Utils.Settings
@@ -16,7 +17,13 @@ namespace TheForest.Utils.Settings
 				GameSettings.Animals = new AnimalSettings();
 				GameSettings.Ai = new AiSettings();
 			}
-			EventRegistry.Game.Subscribe(TfEvent.DifficultySet, new EventRegistry.SubscriberCallback(GameSettings.OnDifficultySet));
+			EventRegistry game = EventRegistry.Game;
+			object difficultySet = TfEvent.DifficultySet;
+			if (GameSettings.<>f__mg$cache0 == null)
+			{
+				GameSettings.<>f__mg$cache0 = new EventRegistry.SubscriberCallback(GameSettings.OnDifficultySet);
+			}
+			game.Subscribe(difficultySet, GameSettings.<>f__mg$cache0);
 		}
 
 		
@@ -38,5 +45,9 @@ namespace TheForest.Utils.Settings
 
 		
 		public static AiSettings Ai;
+
+		
+		[CompilerGenerated]
+		private static EventRegistry.SubscriberCallback <>f__mg$cache0;
 	}
 }

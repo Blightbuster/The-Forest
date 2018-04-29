@@ -542,15 +542,6 @@ public static class SteamDSConfig
 	}
 
 	
-	public const int ServerStarting = -1;
-
-	
-	public const int ServerRunning = 0;
-
-	
-	public const int ServerSaving = 1;
-
-	
 	public static bool isDedicatedServer = false;
 
 	
@@ -591,6 +582,15 @@ public static class SteamDSConfig
 
 	
 	public static int currentServerStatus = -1;
+
+	
+	public const int ServerStarting = -1;
+
+	
+	public const int ServerRunning = 0;
+
+	
+	public const int ServerSaving = 1;
 
 	
 	public static EServerMode ServerAuthMode = EServerMode.eServerModeAuthentication;

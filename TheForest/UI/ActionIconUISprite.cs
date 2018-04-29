@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using TheForest.Utils;
 using UnityEngine;
 
 namespace TheForest.UI
@@ -9,7 +11,84 @@ namespace TheForest.UI
 		
 		private void Awake()
 		{
-			this._startHeight = this._sprite.height;
+			if (this._sprite)
+			{
+				this._startHeight = this._sprite.height;
+			}
+			this._widget = base.GetComponent<UIWidget>();
+		}
+
+		
+		public void OnEnable()
+		{
+			if (this._action != InputMappingIcons.Actions.None && (!this._gamepadOnly || TheForest.Utils.Input.IsGamePad))
+			{
+				this._registeredAsBigIcon = (this._useBigIcon || (TheForest.Utils.Input.IsGamePad && this._useBigIconForGamepad));
+				ActionIcon actionIcon = ActionIconSystem.RegisterIcon(base.transform, this._action, this._sideIcon, this._currentViewOption, this._useAltTextIcon, this._registeredAsBigIcon);
+				if (actionIcon)
+				{
+					this._fillSprite = actionIcon._fillSprite;
+					if (this._fillSprite)
+					{
+						if (this._fillSprite.gameObject.activeSelf != this._useFillSprite)
+						{
+							this._fillSprite.gameObject.SetActive(this._useFillSprite);
+						}
+						if (this._useFillSprite && actionIcon._fillSpriteAction)
+						{
+							actionIcon._fillSpriteAction.SetAction(this._action);
+						}
+					}
+					if (actionIcon._sprite && this._widget && this._refreshSiblings)
+					{
+						Transform target = this._widget.leftAnchor.target;
+						this._widget.leftAnchor.target = null;
+						this._widget.width = Mathf.RoundToInt((float)actionIcon._sprite.width / base.transform.localScale.x);
+						this._widget.leftAnchor.target = target;
+						this._widget.SkipWidthUpdate = true;
+						IEnumerator enumerator = base.transform.GetEnumerator();
+						try
+						{
+							while (enumerator.MoveNext())
+							{
+								object obj = enumerator.Current;
+								Transform transform = (Transform)obj;
+								UILabel component = transform.GetComponent<UILabel>();
+								if (component)
+								{
+									component.MarkAsChanged();
+									component.ProcessText();
+								}
+							}
+						}
+						finally
+						{
+							IDisposable disposable;
+							if ((disposable = (enumerator as IDisposable)) != null)
+							{
+								disposable.Dispose();
+							}
+						}
+					}
+				}
+			}
+			if (this._sprite)
+			{
+				this._sprite.enabled = false;
+			}
+			if (this._label)
+			{
+				this._label.enabled = false;
+			}
+		}
+
+		
+		public void OnDisable()
+		{
+			if (this._action != InputMappingIcons.Actions.None)
+			{
+				ActionIconSystem.UnregisterIcon(base.transform, this._useAltTextIcon, this._registeredAsBigIcon);
+			}
 		}
 
 		
@@ -17,78 +96,33 @@ namespace TheForest.UI
 		{
 			if (this._version != InputMappingIcons.Version)
 			{
-				this._sprite.height = this._startHeight;
-				if (!InputMappingIcons.UsesText(this._action) || !this._label)
-				{
-					string mappingFor = InputMappingIcons.GetMappingFor(this._action);
-					if (string.IsNullOrEmpty(mappingFor))
-					{
-						this._sprite.enabled = false;
-						if (this._label)
-						{
-							this._label.enabled = false;
-						}
-					}
-					else
-					{
-						this._sprite.spriteName = mappingFor;
-						this._sprite.enabled = true;
-						if (this._label)
-						{
-							this._label.enabled = false;
-						}
-					}
-					UISpriteData atlasSprite = this._sprite.GetAtlasSprite();
-					if (atlasSprite != null)
-					{
-						float num = (float)atlasSprite.width / (float)atlasSprite.height;
-						this._sprite.width = Mathf.RoundToInt(num * (float)this._sprite.height);
-					}
-					else
-					{
-						Debug.LogError("Missing sprite: " + this._sprite.spriteName);
-					}
-				}
-				else
-				{
-					this._sprite.spriteName = InputMappingIcons.TextIconBacking.name;
-					this._sprite.enabled = true;
-					this._label.text = InputMappingIcons.GetMappingFor(this._action);
-					this._label.enabled = true;
-					float num2;
-					if (this._invertScale)
-					{
-						num2 = (float)this._label.width * 1f / this._label.transform.localScale.x / (float)this._startHeight;
-					}
-					else
-					{
-						num2 = (float)this._label.width * 1f * this._label.transform.localScale.x / (float)this._startHeight;
-					}
-					if (num2 > 1.5f)
-					{
-						this._sprite.width = Mathf.RoundToInt((float)this._startHeight * num2);
-					}
-					else
-					{
-						this._sprite.width = this._startHeight;
-					}
-				}
 				this._version = InputMappingIcons.Version;
+				this.OnDisable();
+				this.OnEnable();
 			}
 		}
 
 		
-		public void ChangeAction(InputMappingIcons.Actions action)
+		public void ChangeAction(InputMappingIcons.Actions action, bool useFillSprite)
 		{
-			if (this._action != action)
+			if (this._action != action || this._useFillSprite != useFillSprite)
 			{
+				this._useFillSprite = useFillSprite;
 				this._action = action;
 				this._version--;
+				this.OnDisable();
+				this.OnEnable();
 			}
 		}
 
 		
 		public InputMappingIcons.Actions _action;
+
+		
+		public ActionIcon.SideIconTypes _sideIcon = ActionIcon.SideIconTypes.None;
+
+		
+		public ActionIconSystem.CurrentViewOptions _currentViewOption = ActionIconSystem.CurrentViewOptions.HudIcon;
 
 		
 		public UISprite _sprite;
@@ -97,12 +131,36 @@ namespace TheForest.UI
 		public UILabel _label;
 
 		
-		public bool _invertScale;
+		public bool _useFillSprite;
+
+		
+		public bool _useAltTextIcon;
+
+		
+		public bool _useBigIcon;
+
+		
+		public bool _useBigIconForGamepad;
+
+		
+		public bool _refreshSiblings;
+
+		
+		public bool _gamepadOnly;
+
+		
+		private bool _registeredAsBigIcon;
 
 		
 		private int _version;
 
 		
 		private int _startHeight;
+
+		
+		private UISprite _fillSprite;
+
+		
+		private UIWidget _widget;
 	}
 }

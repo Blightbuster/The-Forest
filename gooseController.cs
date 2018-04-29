@@ -108,9 +108,9 @@ public class gooseController : MonoBehaviour
 		this.leader = this.spawnedGeese[UnityEngine.Random.Range(0, this.spawnedGeese.Count)].transform;
 		this.leader.SendMessage("setAsLeader");
 		yield return YieldPresets.WaitForFixedUpdate;
-		foreach (GameObject go in this.spawnedGeese)
+		foreach (GameObject gameObject in this.spawnedGeese)
 		{
-			go.SendMessage("setNewLeader");
+			gameObject.SendMessage("setNewLeader");
 		}
 		yield break;
 	}
@@ -142,7 +142,7 @@ public class gooseController : MonoBehaviour
 		{
 			Vector3 spawnPos = this.RandomSpawnPos((float)UnityEngine.Random.Range(5, 20));
 			spawnPos = new Vector3(spawnPos.x + base.transform.position.x, base.transform.position.y, spawnPos.y + base.transform.position.z);
-			GameObject spawn = UnityEngine.Object.Instantiate(this.goose, spawnPos, base.transform.rotation) as GameObject;
+			GameObject spawn = UnityEngine.Object.Instantiate<GameObject>(this.goose, spawnPos, base.transform.rotation);
 			if (spawn)
 			{
 				spawn.transform.eulerAngles = new Vector3(0f, (float)UnityEngine.Random.Range(0, 360), 0f);
@@ -175,7 +175,7 @@ public class gooseController : MonoBehaviour
 		{
 			spawnPos = new Vector3(spawnPos.x + base.transform.position.x, base.transform.position.y, spawnPos.y + base.transform.position.z);
 		}
-		GameObject spawn = UnityEngine.Object.Instantiate(this.goose, spawnPos, spawnAt.rotation) as GameObject;
+		GameObject spawn = UnityEngine.Object.Instantiate<GameObject>(this.goose, spawnPos, spawnAt.rotation);
 		if (spawn)
 		{
 			spawn.name += this.spawnedGeese.Count + 2;

@@ -45,7 +45,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			if (this.fsm == null)
 			{
-				this.LogWarning("Could not find FSM: " + this.fsmName.Value);
+				base.LogWarning("Could not find FSM: " + this.fsmName.Value);
 				return;
 			}
 			FsmVector3 fsmVector = this.fsm.FsmVariables.GetFsmVector3(this.variableName.Value);
@@ -55,7 +55,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			else
 			{
-				this.LogWarning("Could not find variable: " + this.variableName.Value);
+				base.LogWarning("Could not find variable: " + this.variableName.Value);
 			}
 		}
 

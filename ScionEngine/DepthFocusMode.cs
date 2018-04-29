@@ -6,6 +6,12 @@ namespace ScionEngine
 	public enum DepthFocusMode
 	{
 		
-		PointAverage = 2
+		ManualDistance,
+		
+		ManualRange,
+		
+		TargetTransform,
+		
+		PointAverage
 	}
 }

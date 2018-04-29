@@ -15,13 +15,13 @@ namespace TheForest.Utils
 		
 		private IEnumerator Start()
 		{
-			while (!this.entity || !this.entity.isAttached)
+			while (!base.entity || !base.entity.isAttached)
 			{
 				yield return null;
 			}
-			if (this.entity.isFrozen)
+			if (base.entity.isFrozen)
 			{
-				this.entity.Freeze(false);
+				base.entity.Freeze(false);
 			}
 			yield break;
 		}
@@ -29,7 +29,7 @@ namespace TheForest.Utils
 		
 		public void BeginStage(int stage, float startTime, BoltEntity actor)
 		{
-			this.entity.Freeze(false);
+			base.entity.Freeze(false);
 			base.state.Progress = 0;
 			base.state.Completed = false;
 			base.state.Stage = stage + 1;
@@ -41,7 +41,7 @@ namespace TheForest.Utils
 		
 		public void ProgressStage()
 		{
-			this.entity.Freeze(false);
+			base.entity.Freeze(false);
 			base.state.Progress++;
 		}
 
@@ -57,7 +57,7 @@ namespace TheForest.Utils
 		
 		public void SetSequence(AnimationSequence sequence)
 		{
-			if (!this.Sequence && this.entity.isAttached)
+			if (!this.Sequence && base.entity.isAttached)
 			{
 				this.Sequence = sequence;
 				if (this.Sequence)
@@ -87,7 +87,7 @@ namespace TheForest.Utils
 		{
 			if (!this.Sequence)
 			{
-				this.SetSequence(GeoHashHelper<AnimationSequence>.GetFromHash(base.transform.ToGeoHash()));
+				this.SetSequence(GeoHashHelper<AnimationSequence>.GetFromHash(base.transform.ToGeoHash(), Lookup.Auto));
 			}
 		}
 

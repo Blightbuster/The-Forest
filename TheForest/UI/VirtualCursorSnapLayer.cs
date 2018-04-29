@@ -40,6 +40,11 @@ namespace TheForest.UI
 		
 		private void OnEnable()
 		{
+			if (ForestVR.Prototype)
+			{
+				base.enabled = false;
+				return;
+			}
 			if (TheForest.Utils.Input.IsGamePad && this._currentNode != null)
 			{
 				this.SetCurrentNode(this._currentNode);

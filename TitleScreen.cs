@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Rewired;
 using TheForest.Commons.Enums;
 using TheForest.Modding;
@@ -8,6 +9,7 @@ using TheForest.UI;
 using TheForest.Utils;
 using TheForest.Utils.Settings;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 public class TitleScreen : MonoBehaviour, ITitleScene
@@ -42,6 +44,7 @@ public class TitleScreen : MonoBehaviour, ITitleScene
 	{
 		VirtualCursor.Instance.SetCursorType(VirtualCursor.CursorTypes.None);
 		GameSettings.Init();
+		TheForest.Utils.Input.player.controllers.maps.SetMapsEnabled(true, ControllerType.Joystick, "Default");
 		TheForest.Utils.Input.player.controllers.maps.SetMapsEnabled(true, ControllerType.Keyboard, "Menu");
 		TheForest.Utils.Input.player.controllers.maps.SetMapsEnabled(true, ControllerType.Joystick, "Menu");
 	}
@@ -132,13 +135,13 @@ public class TitleScreen : MonoBehaviour, ITitleScene
 	
 	public void OnStartDedicated()
 	{
-		Application.LoadLevel("SteamStartSceneDedicatedServer");
+		SceneManager.LoadScene("SteamStartSceneDedicatedServer", LoadSceneMode.Single);
 	}
 
 	
 	public void OnJoinDedicated()
 	{
-		Application.LoadLevel("SteamStartSceneDedicatedServer_Client");
+		SceneManager.LoadScene("SteamStartSceneDedicatedServer_Client", LoadSceneMode.Single);
 	}
 
 	
@@ -213,7 +216,7 @@ public class TitleScreen : MonoBehaviour, ITitleScene
 		{
 			this.BreadCrumbLevel3Mp();
 			this.InitMpScreenScenery();
-			Application.LoadLevel(this.CoopScene);
+			SceneManager.LoadScene(this.CoopScene, LoadSceneMode.Single);
 		}
 		this.MenuRoot.gameObject.SetActive(false);
 	}
@@ -248,7 +251,7 @@ public class TitleScreen : MonoBehaviour, ITitleScene
 		else
 		{
 			this.InitMpScreenScenery();
-			Application.LoadLevel(this.CoopScene);
+			SceneManager.LoadScene(this.CoopScene, LoadSceneMode.Single);
 		}
 		this.MenuRoot.gameObject.SetActive(false);
 	}
@@ -258,7 +261,7 @@ public class TitleScreen : MonoBehaviour, ITitleScene
 	{
 		this.InitMpScreenScenery();
 		GameSetup.SetMpType(MpTypes.Client);
-		Application.LoadLevel(this.CoopScene);
+		SceneManager.LoadScene(this.CoopScene, LoadSceneMode.Single);
 		this.MenuRoot.gameObject.SetActive(false);
 	}
 
@@ -289,12 +292,25 @@ public class TitleScreen : MonoBehaviour, ITitleScene
 	
 	private void FixMissingLoaderRef()
 	{
-		foreach (object obj in base.transform.parent)
+		IEnumerator enumerator = base.transform.parent.GetEnumerator();
+		try
 		{
-			Transform transform = (Transform)obj;
-			if (transform.name == "Loading")
+			while (enumerator.MoveNext())
 			{
-				this.MyLoader = transform.gameObject;
+				object obj = enumerator.Current;
+				Transform transform = (Transform)obj;
+				if (transform.name == "Loading")
+				{
+					this.MyLoader = transform.gameObject;
+				}
+			}
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = (enumerator as IDisposable)) != null)
+			{
+				disposable.Dispose();
 			}
 		}
 	}
@@ -310,6 +326,9 @@ public class TitleScreen : MonoBehaviour, ITitleScene
 
 	
 	public string CoopScene = "SteamStartScene";
+
+	
+	public string CoopScenePS4 = "SteamStartSceneNGUI";
 
 	
 	public GameObject PlayerPrefab;

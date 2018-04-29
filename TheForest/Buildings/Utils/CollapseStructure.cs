@@ -1,4 +1,5 @@
 ﻿using System;
+using TheForest.Buildings.World;
 using TheForest.Utils.Enums;
 using UnityEngine;
 
@@ -19,8 +20,36 @@ namespace TheForest.Buildings.Utils
 		
 		public void Collapse()
 		{
-			MeshRenderer[] array = (!this._destroyTarget) ? base.GetComponentsInChildren<MeshRenderer>() : this._destroyTarget.GetComponentsInChildren<MeshRenderer>();
+			if (!BoltNetwork.isClient)
+			{
+				for (int i = base.transform.childCount - 1; i >= 0; i--)
+				{
+					Transform child = base.transform.GetChild(i);
+					BuildingHealth component = child.GetComponent<BuildingHealth>();
+					if (component)
+					{
+						child.parent = null;
+						component.Collapse(child.position);
+					}
+					else
+					{
+						FoundationHealth component2 = child.GetComponent<FoundationHealth>();
+						if (component2)
+						{
+							child.parent = null;
+							component2.Collapse(child.position);
+						}
+						else if (BoltNetwork.isRunning && child.GetComponent<BoltEntity>())
+						{
+							child.parent = null;
+							destroyAfter destroyAfter = child.gameObject.AddComponent<destroyAfter>();
+							destroyAfter.destroyTime = 1f;
+						}
+					}
+				}
+			}
 			bool flag = true;
+			MeshRenderer[] componentsInChildren = (this._destroyTarget ?? base.gameObject).GetComponentsInChildren<MeshRenderer>();
 			int mask = LayerMask.GetMask(new string[]
 			{
 				"Default",
@@ -29,7 +58,7 @@ namespace TheForest.Buildings.Utils
 				"PropSmall",
 				"PickUp"
 			});
-			foreach (MeshRenderer renderer in array)
+			foreach (MeshRenderer renderer in componentsInChildren)
 			{
 				GameObject gameObject = renderer.gameObject;
 				if (gameObject.activeInHierarchy && (1 << gameObject.layer & mask) != 0)
@@ -54,14 +83,14 @@ namespace TheForest.Buildings.Utils
 						rigidbody.AddForce((transform.position.normalized + Vector3.up) * (2.5f * this._destructionForceMultiplier), ForceMode.Impulse);
 						rigidbody.AddRelativeTorque(Vector3.up * (2f * this._destructionForceMultiplier), ForceMode.Impulse);
 					}
-					destroyAfter destroyAfter = gameObject.AddComponent<destroyAfter>();
-					destroyAfter.destroyTime = 2.5f;
+					destroyAfter destroyAfter2 = gameObject.AddComponent<destroyAfter>();
+					destroyAfter2.destroyTime = 2.5f;
 				}
 			}
 			if (BoltNetwork.isClient)
 			{
-				BoltEntity component = base.GetComponent<BoltEntity>();
-				if (component && component.isAttached && !component.isOwner)
+				BoltEntity component3 = base.GetComponent<BoltEntity>();
+				if (component3 && component3.isAttached && !component3.isOwner)
 				{
 					return;
 				}

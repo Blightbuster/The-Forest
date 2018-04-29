@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Bolt;
 using TheForest.Buildings.Creation;
 using TheForest.Commons.Delegates;
@@ -70,7 +71,7 @@ public class WallChunkLods : EntityBehaviour
 	
 	private void RefreshVisibility()
 	{
-		if (BoltNetwork.isRunning && !this.entity.isAttached)
+		if (BoltNetwork.isRunning && !base.entity.isAttached)
 		{
 			return;
 		}
@@ -192,22 +193,35 @@ public class WallChunkLods : EntityBehaviour
 		mesh.tangents = WallChunkLods.tangents;
 		mesh.bounds = new Bounds(Vector3.zero, new Vector3(10f, 10f, 10f));
 		meshFilter.sharedMesh = mesh;
-		renderer.sharedMaterial = Prefabs.Instance.WallChunkBillboardMat;
+		renderer.sharedMaterial = Prefabs.Instance.GetWallChunkBillboardMat();
 	}
 
 	
 	private GameObject SpawnLOD(Mesh lodM, Transform wallRoot)
 	{
-		Transform transform = (Transform)UnityEngine.Object.Instantiate(wallRoot, wallRoot.position, wallRoot.rotation);
+		Transform transform = UnityEngine.Object.Instantiate<Transform>(wallRoot, wallRoot.position, wallRoot.rotation);
 		transform.parent = wallRoot.parent;
 		transform.gameObject.SetActive(false);
-		foreach (object obj in transform)
+		IEnumerator enumerator = transform.GetEnumerator();
+		try
 		{
-			Transform transform2 = (Transform)obj;
-			MeshFilter component = transform2.GetChild(0).GetComponent<MeshFilter>();
-			if (component)
+			while (enumerator.MoveNext())
 			{
-				component.sharedMesh = lodM;
+				object obj = enumerator.Current;
+				Transform transform2 = (Transform)obj;
+				MeshFilter component = transform2.GetChild(0).GetComponent<MeshFilter>();
+				if (component)
+				{
+					component.sharedMesh = lodM;
+				}
+			}
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = (enumerator as IDisposable)) != null)
+			{
+				disposable.Dispose();
 			}
 		}
 		return transform.gameObject;

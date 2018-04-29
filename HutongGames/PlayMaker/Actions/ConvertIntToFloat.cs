@@ -38,14 +38,14 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The Integer variable to convert to a float.")]
 		[RequiredField]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The Integer variable to convert to a float.")]
 		public FsmInt intVariable;
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		[Tooltip("Store the result in a Float variable.")]
 		public FsmFloat floatVariable;
 

@@ -44,13 +44,13 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmEventTarget eventTarget;
 
 		
-		[Tooltip("The event to send. NOTE: Events must be marked Global to send between FSMs.")]
 		[RequiredField]
+		[Tooltip("The event to send. NOTE: Events must be marked Global to send between FSMs.")]
 		public FsmEvent sendEvent;
 
 		
-		[Tooltip("Optional delay in seconds.")]
 		[HasFloatSlider(0f, 10f)]
+		[Tooltip("Optional delay in seconds.")]
 		public FsmFloat delay;
 
 		

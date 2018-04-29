@@ -14,7 +14,7 @@ public class LakeTrigger : MonoBehaviour
 	
 	private void OnTriggerEnter(Collider other)
 	{
-		UnityEngine.Object.Instantiate(this.MyParticle, this.GetSplashPosition(other.transform.position), base.transform.rotation);
+		UnityEngine.Object.Instantiate<Transform>(this.MyParticle, this.GetSplashPosition(other.transform.position), base.transform.rotation);
 		if (other.gameObject.CompareTag("Player"))
 		{
 			other.SendMessage("GotClean");

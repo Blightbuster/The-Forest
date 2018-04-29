@@ -2,8 +2,8 @@
 using UnityEngine;
 
 
-[AddComponentMenu("NGUI/Tween/Tween Fill")]
 [RequireComponent(typeof(UIBasicSprite))]
+[AddComponentMenu("NGUI/Tween/Tween Fill")]
 public class TweenFill : UITweener
 {
 	

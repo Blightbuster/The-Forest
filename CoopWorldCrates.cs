@@ -36,7 +36,7 @@ public class CoopWorldCrates : EntityBehaviour<IWorldCrates>
 	{
 		for (;;)
 		{
-			if (this.entity.IsAttached())
+			if (base.entity.IsAttached())
 			{
 				for (int i = 0; i < this.Crates.Length; i++)
 				{
@@ -44,9 +44,9 @@ public class CoopWorldCrates : EntityBehaviour<IWorldCrates>
 					{
 						if (base.state.Broken[i] == 0)
 						{
-							BreakCrateEvent ev = BreakCrateEvent.Create(GlobalTargets.OnlyServer);
-							ev.Index = i;
-							ev.Send();
+							BreakCrateEvent breakCrateEvent = BreakCrateEvent.Create(GlobalTargets.OnlyServer);
+							breakCrateEvent.Index = i;
+							breakCrateEvent.Send();
 							this._lastSend = Time.time + 1f;
 						}
 					}

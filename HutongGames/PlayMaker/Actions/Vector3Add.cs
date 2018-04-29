@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Adds a value to Vector3 Variable.")]
 	[ActionCategory(ActionCategory.Vector3)]
+	[Tooltip("Adds a value to Vector3 Variable.")]
 	public class Vector3Add : FsmStateAction
 	{
 		

@@ -56,7 +56,7 @@ namespace HutongGames.PlayMaker.Actions
 			string text = this.ErrorCheck();
 			if (!string.IsNullOrEmpty(text))
 			{
-				this.LogError(text);
+				base.LogError(text);
 				base.Finish();
 			}
 		}

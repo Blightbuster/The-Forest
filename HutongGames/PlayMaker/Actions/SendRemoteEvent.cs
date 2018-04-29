@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Send an Fsm Event on a remote machine. Uses Unity RPC functions.")]
 	[ActionCategory(ActionCategory.Network)]
+	[Tooltip("Send an Fsm Event on a remote machine. Uses Unity RPC functions.")]
 	public class SendRemoteEvent : ComponentAction<NetworkView>
 	{
 		
@@ -51,9 +51,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
+		[RequiredField]
 		[CheckForComponent(typeof(NetworkView))]
 		[Tooltip("The game object that sends the event.")]
-		[RequiredField]
 		public FsmOwnerDefault gameObject;
 
 		

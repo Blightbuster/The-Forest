@@ -22,7 +22,7 @@ public class flintLockNetSetup : MonoBehaviour
 		this.nextPlayerState1 = this.netAnimator.GetNextAnimatorStateInfo(1);
 		if (this.nextPlayerState1.shortNameHash == this.playerShootHash && !this.doParticles)
 		{
-			UnityEngine.Object.Instantiate(this.smokeSpawn, this.smokePos.position, this.smokePos.rotation);
+			UnityEngine.Object.Instantiate<GameObject>(this.smokeSpawn, this.smokePos.position, this.smokePos.rotation);
 			this.doParticles = true;
 			base.Invoke("resetParticles", 2f);
 		}

@@ -15,9 +15,13 @@ namespace TheForest.Buildings.Creation
 			base.enabled = false;
 			yield return null;
 			GameObject trigger = this._outWaterGo.transform.GetChild(0).Find("Trigger").gameObject;
-			trigger.SetActive(false);
 			GameObject trigger2 = this._inWaterGo.transform.GetChild(0).Find("Trigger").gameObject;
+			trigger.SetActive(false);
 			trigger2.SetActive(false);
+			Craft_Structure tmpCraftStructure = trigger.GetComponent<Craft_Structure>();
+			Craft_Structure tmpCraftStructure2 = trigger2.GetComponent<Craft_Structure>();
+			LocalPlayer.Create.CraftStructures.Add(tmpCraftStructure);
+			LocalPlayer.Create.CraftStructures.Add(tmpCraftStructure2);
 			yield return null;
 			this._outWaterGo.SetActive(false);
 			this._inWaterGo.SetActive(false);
@@ -100,6 +104,11 @@ namespace TheForest.Buildings.Creation
 				{
 					child.parent = LocalPlayer.Create.BuildingPlacer.LastHit.Value.transform.GetComponentInParent<BoltEntity>().transform;
 				}
+				else if (LocalPlayer.Create.ParentEntity)
+				{
+					DynamicBuilding component = LocalPlayer.Create.ParentEntity.GetComponent<DynamicBuilding>();
+					child.transform.parent = ((!component || !component._parentOverride) ? LocalPlayer.Create.ParentEntity.transform : component._parentOverride);
+				}
 				else
 				{
 					child.parent = null;
@@ -115,17 +124,17 @@ namespace TheForest.Buildings.Creation
 			}
 			else
 			{
-				CoopConstructionEx component = child.GetComponent<CoopConstructionEx>();
-				if (component)
+				CoopConstructionEx component2 = child.GetComponent<CoopConstructionEx>();
+				if (component2)
 				{
-					BoltEntity component2 = child.GetComponent<BoltEntity>();
-					BoltEntity parentEntity = LocalPlayer.Create.GetParentEntity(child.gameObject);
-					component.SendMessage("OnSerializing");
-					CoopConstructionExToken coopConstructionExToken = LocalPlayer.Create.GetCoopConstructionExToken(component, parentEntity);
+					BoltEntity component3 = child.GetComponent<BoltEntity>();
+					BoltEntity boltEntity = LocalPlayer.Create.GetParentEntity(child.gameObject) ?? LocalPlayer.Create.ParentEntity;
+					component2.SendMessage("OnSerializing");
+					CoopConstructionExToken coopConstructionExToken = LocalPlayer.Create.GetCoopConstructionExToken(component2, boltEntity);
 					PlaceFoundationEx placeFoundationEx = PlaceFoundationEx.Create(GlobalTargets.OnlyServer);
-					placeFoundationEx.Parent = parentEntity;
+					placeFoundationEx.Parent = boltEntity;
 					placeFoundationEx.Position = child.transform.position;
-					placeFoundationEx.Prefab = component2.prefabId;
+					placeFoundationEx.Prefab = component3.prefabId;
 					placeFoundationEx.Token = coopConstructionExToken;
 					placeFoundationEx.Send();
 				}
@@ -139,10 +148,10 @@ namespace TheForest.Buildings.Creation
 					placeConstruction.PrefabId = child.GetComponent<BoltEntity>().prefabId;
 					placeConstruction.Position = child.position;
 					placeConstruction.Rotation = child.rotation;
-					FoundationArchitect component3 = child.GetComponent<FoundationArchitect>();
-					if (component3)
+					FoundationArchitect component4 = child.GetComponent<FoundationArchitect>();
+					if (component4)
 					{
-						placeConstruction.AboveGround = component3._aboveGround;
+						placeConstruction.AboveGround = component4._aboveGround;
 					}
 					placeConstruction.Send();
 				}

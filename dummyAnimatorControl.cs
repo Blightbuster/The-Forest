@@ -134,36 +134,11 @@ public class dummyAnimatorControl : MonoBehaviour
 			{
 				return;
 			}
-			this.allHit = Physics.RaycastAll(this.pos, Vector3.down, 7f, this.groundMask);
-			float num = float.PositiveInfinity;
-			Collider exists = null;
-			for (int i = 0; i < this.allHit.Length; i++)
-			{
-				if (!this.allHit[i].collider.isTrigger)
-				{
-					float distance = this.allHit[i].distance;
-					if (distance < num)
-					{
-						num = distance;
-						exists = this.allHit[i].collider;
-						this.hit = this.allHit[i];
-					}
-				}
-			}
 			Vector3 deltaPosition = this.animator.deltaPosition;
-			if (!BoltNetwork.isClient && exists)
+			if (Physics.Raycast(this.pos, Vector3.down, out this.hit, 15f, this.groundMask, QueryTriggerInteraction.Ignore))
 			{
 				this.Tr.Translate(deltaPosition, Space.World);
 				this.Tr.position = new Vector3(this.Tr.position.x, Mathf.Lerp(this.Tr.position.y, this.hit.point.y, Time.deltaTime * 5f), this.Tr.position.z);
-			}
-			else if (!BoltNetwork.isClient)
-			{
-				deltaPosition = this.animator.deltaPosition;
-				deltaPosition.y -= 0.25f;
-				this.Tr.Translate(deltaPosition, Space.World);
-			}
-			if (exists)
-			{
 				if (!this.testNeck)
 				{
 					this.setNormal = this.hit.normal;
@@ -171,27 +146,17 @@ public class dummyAnimatorControl : MonoBehaviour
 				this.Tr.rotation = this.animator.rootRotation;
 				this.Tr.rotation = Quaternion.Lerp(this.Tr.rotation, Quaternion.LookRotation(Vector3.Cross(this.Tr.right, this.setNormal), this.setNormal), Time.deltaTime * 8f);
 			}
+			else if (!BoltNetwork.isClient)
+			{
+				deltaPosition = this.animator.deltaPosition;
+				deltaPosition.y -= 0.25f;
+				this.Tr.Translate(deltaPosition, Space.World);
+			}
 			if (!this.testNeck && Time.time > this.neckRayCastDelay)
 			{
 				Vector3 position = this.neck.position;
 				position.y += 3f;
-				this.allHit2 = Physics.RaycastAll(position, Vector3.down, 4f, this.groundMask);
-				float num2 = float.PositiveInfinity;
-				Collider exists2 = null;
-				for (int j = 0; j < this.allHit2.Length; j++)
-				{
-					if (!this.allHit2[j].collider.isTrigger)
-					{
-						float distance2 = this.allHit2[j].distance;
-						if (distance2 < num2)
-						{
-							num2 = distance2;
-							exists2 = this.allHit2[j].collider;
-							this.hit2 = this.allHit2[j];
-						}
-					}
-				}
-				if (exists2 && this.neck.position.y - this.hit2.point.y < 0.1f)
+				if (Physics.Raycast(position, Vector3.down, out this.hit2, 4f, this.groundMask, QueryTriggerInteraction.Ignore) && this.neck.position.y - this.hit2.point.y < 0.1f)
 				{
 					Vector3 point = this.hit2.point;
 					point.y += 0.1f;
@@ -439,7 +404,7 @@ public class dummyAnimatorControl : MonoBehaviour
 		if (Time.time > this.groundCheckTimer && !this.animator.GetBool("trapBool") && !this.animationInTrap() && !BoltNetwork.isClient)
 		{
 			RaycastHit raycastHit;
-			if (Physics.Raycast(this.hips.position, Vector3.down, out raycastHit, 2f, this.groundMask))
+			if (Physics.Raycast(this.hips.position, Vector3.down, out raycastHit, 2f, this.groundMask, QueryTriggerInteraction.Ignore))
 			{
 				this.groundCheckTimer = Time.time + 1.5f;
 			}
@@ -502,23 +467,7 @@ public class dummyAnimatorControl : MonoBehaviour
 	{
 		Vector3 origin = dropPos;
 		origin.y += 5f;
-		RaycastHit[] array = Physics.RaycastAll(origin, Vector3.down, 20f, this.groundMask);
-		float num = float.PositiveInfinity;
-		Collider exists = null;
-		for (int i = 0; i < array.Length; i++)
-		{
-			if (!array[i].collider.isTrigger)
-			{
-				float distance = array[i].distance;
-				if (distance < num)
-				{
-					num = distance;
-					exists = array[i].collider;
-					this.finalHit = array[i];
-				}
-			}
-		}
-		if (exists)
+		if (Physics.Raycast(origin, Vector3.down, out this.finalHit, 20f, this.groundMask, QueryTriggerInteraction.Ignore))
 		{
 			return this.finalHit.point;
 		}
@@ -555,6 +504,9 @@ public class dummyAnimatorControl : MonoBehaviour
 
 	
 	private dummyAnimatorControl control;
+
+	
+	public Collider BodyCollider;
 
 	
 	public GameObject parentGo;
@@ -665,10 +617,7 @@ public class dummyAnimatorControl : MonoBehaviour
 	private RaycastHit hit;
 
 	
-	private RaycastHit[] allHit;
-
-	
-	private RaycastHit[] allHit2;
+	private RaycastHit hit1;
 
 	
 	private RaycastHit hit2;

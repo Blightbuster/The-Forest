@@ -6,8 +6,8 @@ using Pathfinding.RVO;
 using UnityEngine;
 
 
-[AddComponentMenu("Pathfinding/AI/AIPath (3D)")]
 [RequireComponent(typeof(Seeker))]
+[AddComponentMenu("Pathfinding/AI/AIPath (3D)")]
 [HelpURL("http:
 public class AIPath : MonoBehaviour
 {
@@ -272,8 +272,8 @@ public class AIPath : MonoBehaviour
 			return;
 		}
 		Quaternion quaternion = this.tr.rotation;
-		Quaternion to = Quaternion.LookRotation(dir);
-		Vector3 eulerAngles = Quaternion.Slerp(quaternion, to, this.turningSpeed * Time.deltaTime).eulerAngles;
+		Quaternion b = Quaternion.LookRotation(dir);
+		Vector3 eulerAngles = Quaternion.Slerp(quaternion, b, this.turningSpeed * Time.deltaTime).eulerAngles;
 		eulerAngles.z = 0f;
 		eulerAngles.x = 0f;
 		quaternion = Quaternion.Euler(eulerAngles);

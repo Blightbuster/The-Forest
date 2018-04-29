@@ -10,7 +10,7 @@ public class ropeSetGroundHeight : MonoBehaviour
 	{
 		if (!this.disableGroundHeightCheck)
 		{
-			yield return YieldPresets.WaitOneSecond;
+			yield return YieldPresets.WaitPointFiveSeconds;
 			this.setGroundTriggerHeight();
 		}
 		yield break;
@@ -43,6 +43,38 @@ public class ropeSetGroundHeight : MonoBehaviour
 					position2.y = num + 3.5f;
 					this.triggerBottom.transform.position = position2;
 				}
+			}
+		}
+		activateClimbTop componentInChildren = base.transform.GetComponentInChildren<activateClimbTop>();
+		if (componentInChildren)
+		{
+			float num2 = Vector3.Distance(componentInChildren.transform.position, this.triggerBottom.transform.position);
+			if (num2 < 3f)
+			{
+				Transform transform = null;
+				MeshFilter[] componentsInChildren = base.transform.GetComponentsInChildren<MeshFilter>();
+				for (int i = 0; i < componentsInChildren.Length; i++)
+				{
+					if (componentsInChildren[i].name.Equals("rope"))
+					{
+						transform = componentsInChildren[i].transform;
+					}
+				}
+				if (transform)
+				{
+					if (transform.parent.GetComponent<LODGroup>())
+					{
+						transform.localPosition = new Vector3(transform.localPosition.x, -0.38f, transform.localPosition.z);
+						transform.localScale = new Vector3(1f, 0.0806f, 1f);
+					}
+					else
+					{
+						transform.localPosition = new Vector3(transform.localPosition.x, 15.95f, transform.localPosition.z);
+						transform.localScale = new Vector3(1f, 0.0819f, 1f);
+					}
+				}
+				componentInChildren.gameObject.SetActive(false);
+				this.triggerBottom.SetActive(false);
 			}
 		}
 	}

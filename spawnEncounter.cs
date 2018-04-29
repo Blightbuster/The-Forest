@@ -27,7 +27,7 @@ public class spawnEncounter : MonoBehaviour
 	{
 		if (!this.spawnedEncounter)
 		{
-			this.spawnedEncounter = (UnityEngine.Object.Instantiate(this.EncounterGo, this.orientTr.position, base.transform.rotation) as GameObject);
+			this.spawnedEncounter = UnityEngine.Object.Instantiate<GameObject>(this.EncounterGo, this.orientTr.position, base.transform.rotation);
 			if (this.hideMeshes)
 			{
 				this.spawnedEncounter.SendMessage("removeDummyGeo", SendMessageOptions.DontRequireReceiver);

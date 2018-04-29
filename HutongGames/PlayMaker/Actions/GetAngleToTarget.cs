@@ -63,8 +63,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The game object whose forward axis we measure from. If the target is dead ahead the angle will be 0.")]
 		[RequiredField]
+		[Tooltip("The game object whose forward axis we measure from. If the target is dead ahead the angle will be 0.")]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -80,9 +80,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmBool ignoreHeight;
 
 		
-		[Tooltip("Store the angle in a float variable.")]
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the angle in a float variable.")]
 		public FsmFloat storeAngle;
 
 		

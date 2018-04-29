@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sorts the sequence of elements in a PlayMaker ArrayList Proxy component")]
 	[ActionCategory("ArrayMaker/ArrayList")]
+	[Tooltip("Sorts the sequence of elements in a PlayMaker ArrayList Proxy component")]
 	public class ArrayListSort : ArrayListActions
 	{
 		
@@ -35,10 +35,10 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		[ActionSection("Set up")]
 		[RequiredField]
 		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
+		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 
 		

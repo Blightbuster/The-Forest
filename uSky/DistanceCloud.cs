@@ -5,8 +5,8 @@ using UnityEngine;
 namespace uSky
 {
 	
-	[AddComponentMenu("uSky/Distance Cloud (beta)")]
 	[ExecuteInEditMode]
+	[AddComponentMenu("uSky/Distance Cloud (beta)")]
 	[RequireComponent(typeof(uSkyManager))]
 	public class DistanceCloud : MonoBehaviour
 	{
@@ -74,13 +74,13 @@ namespace uSky
 				return currentColor;
 			}
 			Vector3 vector = (!(this.skyManager != null)) ? new Vector3(5.81f, 13.57f, 33.13f) : (this.skyManager.BetaR * 1000f);
-			Vector3 to = new Vector3(0.5f, 0.5f, 0.5f);
-			to = new Vector3(vector.x / 5.81f * 0.5f, vector.y / 13.57f * 0.5f, vector.z / 33.13f * 0.5f);
-			to = Vector3.Lerp(new Vector3(Mathf.Abs(1f - to.x), Mathf.Abs(1f - to.y), Mathf.Abs(1f - to.z)), to, this.skyManager.SunsetTime);
-			to = Vector3.Lerp(new Vector3(0.5f, 0.5f, 0.5f), to, this.skyManager.DayTime);
-			Vector3 vector2 = new Vector3(Mathf.Lerp(currentColor.r - offsetRange, currentColor.r + offsetRange, to.x), Mathf.Lerp(currentColor.g - offsetRange, currentColor.g + offsetRange, to.y), Mathf.Lerp(currentColor.b - offsetRange, currentColor.b + offsetRange, to.z));
-			Vector3 to2 = new Vector3(vector2.x / vector.x, vector2.y / vector.y, vector2.z / vector.z) * 4f;
-			vector2 = ((this.skyManager.RayleighScattering >= 1f) ? Vector3.Lerp(vector2, to2, Mathf.Max(0f, this.skyManager.RayleighScattering - 1f) / 4f * rayleighOffsetRange) : Vector3.Lerp(Vector3.zero, vector2, this.skyManager.RayleighScattering));
+			Vector3 b = new Vector3(0.5f, 0.5f, 0.5f);
+			b = new Vector3(vector.x / 5.81f * 0.5f, vector.y / 13.57f * 0.5f, vector.z / 33.13f * 0.5f);
+			b = Vector3.Lerp(new Vector3(Mathf.Abs(1f - b.x), Mathf.Abs(1f - b.y), Mathf.Abs(1f - b.z)), b, this.skyManager.SunsetTime);
+			b = Vector3.Lerp(new Vector3(0.5f, 0.5f, 0.5f), b, this.skyManager.DayTime);
+			Vector3 vector2 = new Vector3(Mathf.Lerp(currentColor.r - offsetRange, currentColor.r + offsetRange, b.x), Mathf.Lerp(currentColor.g - offsetRange, currentColor.g + offsetRange, b.y), Mathf.Lerp(currentColor.b - offsetRange, currentColor.b + offsetRange, b.z));
+			Vector3 b2 = new Vector3(vector2.x / vector.x, vector2.y / vector.y, vector2.z / vector.z) * 4f;
+			vector2 = ((this.skyManager.RayleighScattering >= 1f) ? Vector3.Lerp(vector2, b2, Mathf.Max(0f, this.skyManager.RayleighScattering - 1f) / 4f * rayleighOffsetRange) : Vector3.Lerp(Vector3.zero, vector2, this.skyManager.RayleighScattering));
 			return new Color(vector2.x, vector2.y, vector2.z, 1f) * this.skyManager.Exposure;
 		}
 

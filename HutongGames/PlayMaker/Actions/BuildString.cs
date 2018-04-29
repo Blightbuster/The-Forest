@@ -49,8 +49,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("Array of Strings to combine.")]
 		[RequiredField]
+		[Tooltip("Array of Strings to combine.")]
 		public FsmString[] stringParts;
 
 		
@@ -58,9 +58,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString separator;
 
 		
-		[Tooltip("Store the final String in a variable.")]
 		[RequiredField]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the final String in a variable.")]
 		public FsmString storeResult;
 
 		

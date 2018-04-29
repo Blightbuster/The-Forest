@@ -68,6 +68,10 @@ namespace TheForest.Buildings.Creation
 		public List<BuildingBlueprint> _blueprints;
 
 		
+		[Header("Construction Helpers")]
+		public SkewTransform _defensiveWallSkewLOD;
+
+		
 		private Dictionary<string, BuildingBlueprint> _blueprintsByGuid = new Dictionary<string, BuildingBlueprint>();
 
 		

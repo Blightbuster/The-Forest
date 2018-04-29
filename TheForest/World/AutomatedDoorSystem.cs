@@ -97,8 +97,11 @@ namespace TheForest.World
 		{
 			foreach (AutomatedDoorSystem.Door door in this._doors)
 			{
-				door._door.position = Vector3.Lerp(door._closedPosition.position, door._openedPosition.position, this._alpha);
-				door._door.rotation = Quaternion.Slerp(door._closedPosition.rotation, door._openedPosition.rotation, this._alpha);
+				if (door._door)
+				{
+					door._door.position = Vector3.Lerp(door._closedPosition.position, door._openedPosition.position, this._alpha);
+					door._door.rotation = Quaternion.Slerp(door._closedPosition.rotation, door._openedPosition.rotation, this._alpha);
+				}
 			}
 		}
 
@@ -158,12 +161,6 @@ namespace TheForest.World
 		}
 
 		
-		private const string OPEN_EVENT = "event:/endgame/sfx_endgame/slide_door_open";
-
-		
-		private const string CLOSE_EVENT = "event:/endgame/sfx_endgame/slide_door_close";
-
-		
 		public AutomatedDoorSystem.Door[] _doors;
 
 		
@@ -188,10 +185,19 @@ namespace TheForest.World
 		public AutomatedDoorSystem.StateEvent[] _stateEvents;
 
 		
+		public TextMesh[] _stateTextDebugReadout;
+
+		
 		private float _alpha;
 
 		
 		private EventInstance _currentEvent;
+
+		
+		private const string OPEN_EVENT = "event:/endgame/sfx_endgame/slide_door_open";
+
+		
+		private const string CLOSE_EVENT = "event:/endgame/sfx_endgame/slide_door_close";
 
 		
 		[Serializable]

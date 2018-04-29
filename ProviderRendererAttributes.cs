@@ -3,14 +3,14 @@ using Serialization;
 using UnityEngine;
 
 
-[AttributeListProvider(typeof(Joint))]
-[AttributeListProvider(typeof(MeshFilter))]
-[AttributeListProvider(typeof(ParticleEmitter))]
 [AttributeListProvider(typeof(Renderer))]
-[AttributeListProvider(typeof(TextMesh))]
 [AttributeListProvider(typeof(AudioListener))]
+[AttributeListProvider(typeof(ParticleEmitter))]
 [AttributeListProvider(typeof(Cloth))]
 [AttributeListProvider(typeof(Light))]
+[AttributeListProvider(typeof(Joint))]
+[AttributeListProvider(typeof(MeshFilter))]
+[AttributeListProvider(typeof(TextMesh))]
 public class ProviderRendererAttributes : ProvideAttributes
 {
 	

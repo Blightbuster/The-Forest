@@ -31,8 +31,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("GameObject to unparent children from.")]
 		[RequiredField]
+		[Tooltip("GameObject to unparent children from.")]
 		public FsmOwnerDefault gameObject;
 	}
 }

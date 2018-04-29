@@ -39,16 +39,29 @@ public class SetSaveGame : MonoBehaviour
 				}
 				if (CoopSteamCloud.ShouldUseCloud())
 				{
-					foreach (object obj in Enum.GetValues(typeof(Slots)))
+					IEnumerator enumerator = Enum.GetValues(typeof(Slots)).GetEnumerator();
+					try
 					{
-						Slots slot = (Slots)((int)obj);
-						PlayerPrefsFile.SyncWithCloud("__RESUME__", PlayerModes.SinglePlayer, slot);
-						PlayerPrefsFile.SyncWithCloud("info", PlayerModes.SinglePlayer, slot);
-						PlayerPrefsFile.SyncWithCloud("thumb.png", PlayerModes.SinglePlayer, slot);
-						PlayerPrefsFile.SyncWithCloud("__RESUME__", PlayerModes.Multiplayer, slot);
-						PlayerPrefsFile.SyncWithCloud("info", PlayerModes.Multiplayer, slot);
-						PlayerPrefsFile.SyncWithCloud("thumb.png", PlayerModes.Multiplayer, slot);
-						PlayerPrefsFile.SyncWithCloud("guid", PlayerModes.Multiplayer, slot);
+						while (enumerator.MoveNext())
+						{
+							object obj = enumerator.Current;
+							Slots slot = (Slots)obj;
+							PlayerPrefsFile.SyncWithCloud("__RESUME__", PlayerModes.SinglePlayer, slot);
+							PlayerPrefsFile.SyncWithCloud("info", PlayerModes.SinglePlayer, slot);
+							PlayerPrefsFile.SyncWithCloud("thumb.png", PlayerModes.SinglePlayer, slot);
+							PlayerPrefsFile.SyncWithCloud("__RESUME__", PlayerModes.Multiplayer, slot);
+							PlayerPrefsFile.SyncWithCloud("info", PlayerModes.Multiplayer, slot);
+							PlayerPrefsFile.SyncWithCloud("thumb.png", PlayerModes.Multiplayer, slot);
+							PlayerPrefsFile.SyncWithCloud("guid", PlayerModes.Multiplayer, slot);
+						}
+					}
+					finally
+					{
+						IDisposable disposable;
+						if ((disposable = (enumerator as IDisposable)) != null)
+						{
+							disposable.Dispose();
+						}
 					}
 					Debug.Log("Cloud Sync Done");
 				}
@@ -58,10 +71,9 @@ public class SetSaveGame : MonoBehaviour
 				}
 			}
 		}
-		catch (Exception ex2)
+		catch (Exception exception)
 		{
-			Exception ex = ex2;
-			Debug.LogException(ex);
+			Debug.LogException(exception);
 		}
 		finally
 		{

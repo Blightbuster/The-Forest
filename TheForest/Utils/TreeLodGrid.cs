@@ -24,17 +24,24 @@ namespace TheForest.Utils
 				this.TreeDensityUnscaled = 1f - (num - this._minOutput) / this._maxOutput;
 				if (this._updateTreeOcclusionBonusRatio)
 				{
-					switch (TheForestQualitySettings.UserSettings.DrawDistance)
+					TheForestQualitySettings.DrawDistances drawDistance = TheForestQualitySettings.UserSettings.DrawDistance;
+					if (drawDistance != TheForestQualitySettings.DrawDistances.Medium)
 					{
-					case TheForestQualitySettings.DrawDistances.Medium:
+						if (drawDistance != TheForestQualitySettings.DrawDistances.Low)
+						{
+							if (drawDistance == TheForestQualitySettings.DrawDistances.UltraLow)
+							{
+								num -= (num - this._minOutput) * 0.6f;
+							}
+						}
+						else
+						{
+							num -= (num - this._minOutput) * 0.4f;
+						}
+					}
+					else
+					{
 						num -= (num - this._minOutput) * 0.2f;
-						break;
-					case TheForestQualitySettings.DrawDistances.Low:
-						num -= (num - this._minOutput) * 0.4f;
-						break;
-					case TheForestQualitySettings.DrawDistances.UltraLow:
-						num -= (num - this._minOutput) * 0.6f;
-						break;
 					}
 					LOD_Manager.TreeOcclusionBonusRatio = Mathf.Lerp(LOD_Manager.TreeOcclusionBonusRatio, num, (LOD_Manager.TreeOcclusionBonusRatio >= num) ? 0.03f : 0.012f);
 				}
@@ -322,8 +329,8 @@ namespace TheForest.Utils
 		public bool _refreshGrid;
 
 		
-		[Range(0f, 1f)]
 		[Header("Gizmos")]
+		[Range(0f, 1f)]
 		public float _gizmosAlphaOffset;
 
 		

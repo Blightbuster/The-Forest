@@ -10,6 +10,7 @@ public class CaveTriggers : MonoBehaviour
 	
 	private void Awake()
 	{
+		this.caveManager = base.transform.GetComponent<caveEntranceManager>();
 		base.enabled = false;
 	}
 
@@ -19,18 +20,32 @@ public class CaveTriggers : MonoBehaviour
 		for (int i = this.playersEnteringTrigger.Count - 1; i >= 0; i--)
 		{
 			Transform transform = this.playersEnteringTrigger[i];
+			if (transform == null)
+			{
+				this.playersEnteringTrigger.RemoveAt(i);
+				return;
+			}
 			Vector3 position = base.transform.InverseTransformPoint(transform.position);
 			position.x = 0f;
 			position.y = 0f;
 			Vector3 a = base.transform.TransformPoint(position);
 			float num = Vector3.Distance(a, base.transform.position);
-			if (num < 4.9f)
+			float num2 = 4.9f;
+			if (this.climbEntrance)
+			{
+				num2 = 0.3f;
+			}
+			if (num < num2)
 			{
 				this.playersEnteringTrigger.RemoveAt(i);
 				this.playersExitingTrigger.Add(transform);
 				if (transform == LocalPlayer.Transform && position.z < 0f)
 				{
 					LocalPlayer.ActiveAreaInfo.SetCurrentCave(this.ForwardCaveNum);
+					if (this.climbEntrance && this.caveManager)
+					{
+						this.caveManager.StartCoroutine("disableCaveBlackRoutine");
+					}
 				}
 				if (!this.IsOutsideArea)
 				{
@@ -52,20 +67,44 @@ public class CaveTriggers : MonoBehaviour
 		for (int j = this.playersExitingTrigger.Count - 1; j >= 0; j--)
 		{
 			Transform transform2 = this.playersExitingTrigger[j];
+			if (transform2 == null)
+			{
+				this.playersExitingTrigger.RemoveAt(j);
+				return;
+			}
 			Vector3 position2 = base.transform.InverseTransformPoint(transform2.position);
 			position2.x = 0f;
 			position2.y = 0f;
 			Vector3 a2 = base.transform.TransformPoint(position2);
-			float num2 = Vector3.Distance(a2, base.transform.position);
-			if (num2 > 6.48f)
+			float num3 = Vector3.Distance(a2, base.transform.position);
+			bool flag = false;
+			if (transform2 == LocalPlayer.Transform && this.climbEntrance && num3 > 2f)
 			{
-				this.playersExitingTrigger.RemoveAt(j);
+				flag = true;
+			}
+			if (num3 > 6.48f || flag)
+			{
+				if (flag)
+				{
+					if ((double)num3 > 6.48)
+					{
+						this.playersExitingTrigger.RemoveAt(j);
+					}
+				}
+				else
+				{
+					this.playersExitingTrigger.RemoveAt(j);
+				}
 				if (transform2 == LocalPlayer.Transform && position2.z < 0f)
 				{
 					LocalPlayer.ActiveAreaInfo.SetCurrentCave(this.BackwardCaveNum);
 				}
-				if (!this.IsOutsideArea && position2.z < 0f && !this.animTriggeredExit)
+				if (!this.IsOutsideArea && position2.z < 0f)
 				{
+					if (this.climbEntrance && this.caveManager && transform2 == LocalPlayer.Transform)
+					{
+						this.caveManager.StartCoroutine("enableCaveBlackRoutine");
+					}
 					transform2.SendMessage("NotInACave", SendMessageOptions.DontRequireReceiver);
 				}
 				if (transform2 == LocalPlayer.Transform && position2.z < 0f)
@@ -89,7 +128,6 @@ public class CaveTriggers : MonoBehaviour
 			base.transform.InverseTransformPoint(other.transform.position).y = 0f;
 			base.enabled = true;
 			this.playersEnteringTrigger.Add(other.transform);
-			this.animTriggeredExit = false;
 		}
 		if (other.gameObject.CompareTag("PlayerNet") && !this.playersEnteringTrigger.Contains(other.transform) && !this.playersExitingTrigger.Contains(other.transform))
 		{
@@ -161,6 +199,9 @@ public class CaveTriggers : MonoBehaviour
 	}
 
 	
+	private caveEntranceManager caveManager;
+
+	
 	public bool IsEntryControlled;
 
 	
@@ -182,7 +223,7 @@ public class CaveTriggers : MonoBehaviour
 	public List<Transform> playersExitingTrigger = new List<Transform>();
 
 	
-	private bool animTriggeredExit;
+	public bool climbEntrance;
 
 	
 	private int climbOutHash = Animator.StringToHash("climbToIdle");

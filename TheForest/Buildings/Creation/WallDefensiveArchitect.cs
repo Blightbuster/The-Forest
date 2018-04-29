@@ -7,8 +7,8 @@ using UnityEngine;
 namespace TheForest.Buildings.Creation
 {
 	
-	[DoNotSerializePublic]
 	[AddComponentMenu("Buildings/Creation/Wall Defensive Architect")]
+	[DoNotSerializePublic]
 	public class WallDefensiveArchitect : WallArchitect
 	{
 		

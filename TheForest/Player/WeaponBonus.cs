@@ -90,58 +90,62 @@ namespace TheForest.Player
 					BoltEntity component = gameObject.GetComponent<BoltEntity>();
 					if (component)
 					{
-						switch (this._bonusType)
+						WeaponBonus.BonusTypes bonusType = this._bonusType;
+						if (bonusType != WeaponBonus.BonusTypes.Burn)
 						{
-						case WeaponBonus.BonusTypes.Burn:
-						{
-							Burn burn = Burn.Create(GlobalTargets.OnlyServer);
-							burn.Entity = component;
-							burn.Send();
-							break;
-						}
-						case WeaponBonus.BonusTypes.Poison:
-							if (Vector3.Dot(otherObject.transform.position - base.transform.position, base.transform.forward) > 0.25f)
+							if (bonusType != WeaponBonus.BonusTypes.Poison)
+							{
+								if (bonusType == WeaponBonus.BonusTypes.DouseBurn)
+								{
+									Burn burn = Burn.Create(GlobalTargets.OnlyServer);
+									burn.Entity = component;
+									burn.Send();
+								}
+							}
+							else if (Vector3.Dot(otherObject.transform.position - base.transform.position, base.transform.forward) > 0.25f)
 							{
 								Poison poison = Poison.Create(GlobalTargets.OnlyServer);
 								poison.Entity = component;
 								poison.Send();
 							}
-							break;
-						case WeaponBonus.BonusTypes.DouseBurn:
+						}
+						else
 						{
 							Burn burn2 = Burn.Create(GlobalTargets.OnlyServer);
 							burn2.Entity = component;
 							burn2.Send();
-							break;
-						}
 						}
 					}
 				}
-				switch (this._bonusType)
+				WeaponBonus.BonusTypes bonusType2 = this._bonusType;
+				if (bonusType2 != WeaponBonus.BonusTypes.Poison)
 				{
-				case WeaponBonus.BonusTypes.Burn:
-					Prefabs.Instance.SpawnFireHitPS(base.transform.position, Quaternion.LookRotation(base.transform.position - otherObject.transform.position));
-					otherObject.SendMessage("Burn", SendMessageOptions.DontRequireReceiver);
-					this._onHit.Invoke();
-					break;
-				case WeaponBonus.BonusTypes.Poison:
-					if (otherObject.CompareTag("enemyRoot") || otherObject.CompareTag("enemyCollide") || otherObject.CompareTag("animalCollide") || otherObject.CompareTag("animalRoot"))
+					if (bonusType2 != WeaponBonus.BonusTypes.DouseBurn)
 					{
-						otherObject.SendMessage("Poison", SendMessageOptions.DontRequireReceiver);
+						if (bonusType2 == WeaponBonus.BonusTypes.Burn)
+						{
+							Prefabs.Instance.SpawnFireHitPS(base.transform.position, Quaternion.LookRotation(base.transform.position - otherObject.transform.position));
+							otherObject.SendMessage("Burn", SendMessageOptions.DontRequireReceiver);
+							this._onHit.Invoke();
+						}
+					}
+					else
+					{
+						Prefabs.Instance.SpawnFireHitPS(base.transform.position, Quaternion.LookRotation(base.transform.position - otherObject.transform.position));
+						otherObject.SendMessage("Douse", SendMessageOptions.DontRequireReceiver);
+						otherObject.SendMessage("Burn", SendMessageOptions.DontRequireReceiver);
 						this._onHit.Invoke();
 					}
-					else if (Vector3.Dot(otherObject.transform.position - base.transform.position, base.transform.forward) > 0.25f)
-					{
-						otherObject.SendMessage("Poison", SendMessageOptions.DontRequireReceiver);
-						this._onHit.Invoke();
-					}
-					break;
-				case WeaponBonus.BonusTypes.DouseBurn:
-					Prefabs.Instance.SpawnFireHitPS(base.transform.position, Quaternion.LookRotation(base.transform.position - otherObject.transform.position));
-					otherObject.SendMessage("Douse", SendMessageOptions.DontRequireReceiver);
-					otherObject.SendMessage("Burn", SendMessageOptions.DontRequireReceiver);
+				}
+				else if (otherObject.CompareTag("enemyRoot") || otherObject.CompareTag("enemyCollide") || otherObject.CompareTag("animalCollide") || otherObject.CompareTag("animalRoot"))
+				{
+					otherObject.SendMessage("Poison", SendMessageOptions.DontRequireReceiver);
 					this._onHit.Invoke();
-					break;
+				}
+				else if (Vector3.Dot(otherObject.transform.position - base.transform.position, base.transform.forward) > 0.25f)
+				{
+					otherObject.SendMessage("Poison", SendMessageOptions.DontRequireReceiver);
+					this._onHit.Invoke();
 				}
 			}
 		}

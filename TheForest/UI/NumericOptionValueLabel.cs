@@ -31,7 +31,7 @@ namespace TheForest.UI
 				this.ShowFloat(PlayerPreferences.MouseSensitivityX);
 				break;
 			case NumericOptionValueLabel.Option.GhostOpacity:
-				this.ShowFloat(PlayerPreferences.GhostTintOpacity);
+				this.ShowFloat(Mathf.InverseLerp(0.0784f, 0.75f, PlayerPreferences.GhostTintOpacity));
 				break;
 			case NumericOptionValueLabel.Option.MouseSensitivityY:
 				this.ShowFloat(PlayerPreferences.MouseSensitivityY);
@@ -46,7 +46,7 @@ namespace TheForest.UI
 				this.ShowFloat(PlayerPreferences.GammaCavesAndNight);
 				break;
 			case NumericOptionValueLabel.Option.MicrophoneVolume:
-				this.ShowFloat(PlayerPreferences.MicrophoneVolume);
+				this.ShowFloat(Mathf.InverseLerp(0f, 10f, PlayerPreferences.MicrophoneVolume));
 				break;
 			}
 		}

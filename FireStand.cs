@@ -1,37 +1,15 @@
 ﻿using System;
 using Bolt;
-using ModAPI;
 using TheForest.Buildings.Creation;
 using TheForest.Items;
 using TheForest.Items.Inventory;
 using TheForest.Utils;
-using UltimateCheatmenu;
 using UnityEngine;
 
 
 [DoNotSerializePublic]
 public class FireStand : EntityBehaviour<IFireState>, IEventListener
 {
-	
-	
-	bool IEventListener.InvokeIfDisabled
-	{
-		get
-		{
-			return true;
-		}
-	}
-
-	
-	
-	bool IEventListener.InvokeIfGameObjectIsInactive
-	{
-		get
-		{
-			return true;
-		}
-	}
-
 	
 	private void Awake()
 	{
@@ -68,7 +46,7 @@ public class FireStand : EntityBehaviour<IFireState>, IEventListener
 	
 	public override void Attached()
 	{
-		IFireState state = this.entity.GetState<IFireState>();
+		IFireState state = base.entity.GetState<IFireState>();
 		state.AddCallback("Lit", delegate
 		{
 			if (state.Lit)
@@ -176,7 +154,7 @@ public class FireStand : EntityBehaviour<IFireState>, IEventListener
 		if (BoltNetwork.isRunning)
 		{
 			FireLightEvent fireLightEvent = FireLightEvent.Raise(GlobalTargets.OnlyServer);
-			fireLightEvent.Target = this.entity;
+			fireLightEvent.Target = base.entity;
 			fireLightEvent.Send();
 		}
 		else
@@ -193,7 +171,7 @@ public class FireStand : EntityBehaviour<IFireState>, IEventListener
 		if (BoltNetwork.isRunning)
 		{
 			FireAddFuelEvent fireAddFuelEvent = FireAddFuelEvent.Raise(GlobalTargets.OnlyServer);
-			fireAddFuelEvent.Target = this.entity;
+			fireAddFuelEvent.Target = base.entity;
 			fireAddFuelEvent.Send();
 		}
 		else
@@ -235,7 +213,7 @@ public class FireStand : EntityBehaviour<IFireState>, IEventListener
 	}
 
 	
-	private void __Drain__Original()
+	private void Drain()
 	{
 		if (this.Fuel >= 0f)
 		{
@@ -270,19 +248,22 @@ public class FireStand : EntityBehaviour<IFireState>, IEventListener
 	}
 
 	
-	private void Drain()
+	
+	bool IEventListener.InvokeIfDisabled
 	{
-		try
+		get
 		{
-			if (!UCheatmenu.InfFire)
-			{
-				this.__Drain__Original();
-			}
+			return true;
 		}
-		catch (Exception ex)
+	}
+
+	
+	
+	bool IEventListener.InvokeIfGameObjectIsInactive
+	{
+		get
 		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__Drain__Original();
+			return true;
 		}
 	}
 

@@ -48,64 +48,264 @@ namespace Serialization
 				num = num3 + 1;
 				prewarmedNames[key2] = num3;
 			}
-			UnitySerializer.DataPath = Application.persistentDataPath;
 			UnitySerializer.RegisterSerializationAssembly();
 			foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
 			{
 				UnitySerializer.RegisterSerializationAssembly(assembly);
 			}
-			UnitySerializer.Writers[typeof(string)] = new UnitySerializer.WriteAValue(UnitySerializer.StringWriter);
-			UnitySerializer.Writers[typeof(decimal)] = new UnitySerializer.WriteAValue(UnitySerializer.DecimalWriter);
-			UnitySerializer.Writers[typeof(float)] = new UnitySerializer.WriteAValue(UnitySerializer.FloatWriter);
-			UnitySerializer.Writers[typeof(byte[])] = new UnitySerializer.WriteAValue(UnitySerializer.ByteArrayWriter);
-			UnitySerializer.Writers[typeof(bool)] = new UnitySerializer.WriteAValue(UnitySerializer.BoolWriter);
-			UnitySerializer.Writers[typeof(Guid)] = new UnitySerializer.WriteAValue(UnitySerializer.GuidWriter);
-			UnitySerializer.Writers[typeof(DateTime)] = new UnitySerializer.WriteAValue(UnitySerializer.DateTimeWriter);
-			UnitySerializer.Writers[typeof(TimeSpan)] = new UnitySerializer.WriteAValue(UnitySerializer.TimeSpanWriter);
-			UnitySerializer.Writers[typeof(char)] = new UnitySerializer.WriteAValue(UnitySerializer.CharWriter);
-			UnitySerializer.Writers[typeof(ushort)] = new UnitySerializer.WriteAValue(UnitySerializer.UShortWriter);
-			UnitySerializer.Writers[typeof(double)] = new UnitySerializer.WriteAValue(UnitySerializer.DoubleWriter);
-			UnitySerializer.Writers[typeof(ulong)] = new UnitySerializer.WriteAValue(UnitySerializer.ULongWriter);
-			UnitySerializer.Writers[typeof(int)] = new UnitySerializer.WriteAValue(UnitySerializer.IntWriter);
-			UnitySerializer.Writers[typeof(uint)] = new UnitySerializer.WriteAValue(UnitySerializer.UIntWriter);
-			UnitySerializer.Writers[typeof(byte)] = new UnitySerializer.WriteAValue(UnitySerializer.ByteWriter);
-			UnitySerializer.Writers[typeof(long)] = new UnitySerializer.WriteAValue(UnitySerializer.LongWriter);
-			UnitySerializer.Writers[typeof(short)] = new UnitySerializer.WriteAValue(UnitySerializer.ShortWriter);
-			UnitySerializer.Writers[typeof(sbyte)] = new UnitySerializer.WriteAValue(UnitySerializer.SByteWriter);
-			UnitySerializer.Readers[typeof(string)] = new UnitySerializer.ReadAValue(UnitySerializer.AStringReader);
-			UnitySerializer.Readers[typeof(decimal)] = new UnitySerializer.ReadAValue(UnitySerializer.DecimalReader);
-			UnitySerializer.Readers[typeof(float)] = new UnitySerializer.ReadAValue(UnitySerializer.FloatReader);
-			UnitySerializer.Readers[typeof(byte[])] = new UnitySerializer.ReadAValue(UnitySerializer.ByteArrayReader);
-			UnitySerializer.Readers[typeof(bool)] = new UnitySerializer.ReadAValue(UnitySerializer.BoolReader);
-			UnitySerializer.Readers[typeof(Guid)] = new UnitySerializer.ReadAValue(UnitySerializer.GuidReader);
-			UnitySerializer.Readers[typeof(DateTime)] = new UnitySerializer.ReadAValue(UnitySerializer.DateTimeReader);
-			UnitySerializer.Readers[typeof(TimeSpan)] = new UnitySerializer.ReadAValue(UnitySerializer.TimeSpanReader);
-			UnitySerializer.Readers[typeof(char)] = new UnitySerializer.ReadAValue(UnitySerializer.CharReader);
-			UnitySerializer.Readers[typeof(ushort)] = new UnitySerializer.ReadAValue(UnitySerializer.UShortReader);
-			UnitySerializer.Readers[typeof(double)] = new UnitySerializer.ReadAValue(UnitySerializer.DoubleReader);
-			UnitySerializer.Readers[typeof(ulong)] = new UnitySerializer.ReadAValue(UnitySerializer.ULongReader);
-			UnitySerializer.Readers[typeof(int)] = new UnitySerializer.ReadAValue(UnitySerializer.IntReader);
-			UnitySerializer.Readers[typeof(uint)] = new UnitySerializer.ReadAValue(UnitySerializer.UIntReader);
-			UnitySerializer.Readers[typeof(byte)] = new UnitySerializer.ReadAValue(UnitySerializer.ByteReader);
-			UnitySerializer.Readers[typeof(long)] = new UnitySerializer.ReadAValue(UnitySerializer.LongReader);
-			UnitySerializer.Readers[typeof(short)] = new UnitySerializer.ReadAValue(UnitySerializer.ShortReader);
-			UnitySerializer.Readers[typeof(sbyte)] = new UnitySerializer.ReadAValue(UnitySerializer.SByteReader);
+			Dictionary<Type, UnitySerializer.WriteAValue> writers = UnitySerializer.Writers;
+			Type typeFromHandle = typeof(string);
+			if (UnitySerializer.<>f__mg$cache0 == null)
+			{
+				UnitySerializer.<>f__mg$cache0 = new UnitySerializer.WriteAValue(UnitySerializer.StringWriter);
+			}
+			writers[typeFromHandle] = UnitySerializer.<>f__mg$cache0;
+			Dictionary<Type, UnitySerializer.WriteAValue> writers2 = UnitySerializer.Writers;
+			Type typeFromHandle2 = typeof(decimal);
+			if (UnitySerializer.<>f__mg$cache1 == null)
+			{
+				UnitySerializer.<>f__mg$cache1 = new UnitySerializer.WriteAValue(UnitySerializer.DecimalWriter);
+			}
+			writers2[typeFromHandle2] = UnitySerializer.<>f__mg$cache1;
+			Dictionary<Type, UnitySerializer.WriteAValue> writers3 = UnitySerializer.Writers;
+			Type typeFromHandle3 = typeof(float);
+			if (UnitySerializer.<>f__mg$cache2 == null)
+			{
+				UnitySerializer.<>f__mg$cache2 = new UnitySerializer.WriteAValue(UnitySerializer.FloatWriter);
+			}
+			writers3[typeFromHandle3] = UnitySerializer.<>f__mg$cache2;
+			Dictionary<Type, UnitySerializer.WriteAValue> writers4 = UnitySerializer.Writers;
+			Type typeFromHandle4 = typeof(byte[]);
+			if (UnitySerializer.<>f__mg$cache3 == null)
+			{
+				UnitySerializer.<>f__mg$cache3 = new UnitySerializer.WriteAValue(UnitySerializer.ByteArrayWriter);
+			}
+			writers4[typeFromHandle4] = UnitySerializer.<>f__mg$cache3;
+			Dictionary<Type, UnitySerializer.WriteAValue> writers5 = UnitySerializer.Writers;
+			Type typeFromHandle5 = typeof(bool);
+			if (UnitySerializer.<>f__mg$cache4 == null)
+			{
+				UnitySerializer.<>f__mg$cache4 = new UnitySerializer.WriteAValue(UnitySerializer.BoolWriter);
+			}
+			writers5[typeFromHandle5] = UnitySerializer.<>f__mg$cache4;
+			Dictionary<Type, UnitySerializer.WriteAValue> writers6 = UnitySerializer.Writers;
+			Type typeFromHandle6 = typeof(Guid);
+			if (UnitySerializer.<>f__mg$cache5 == null)
+			{
+				UnitySerializer.<>f__mg$cache5 = new UnitySerializer.WriteAValue(UnitySerializer.GuidWriter);
+			}
+			writers6[typeFromHandle6] = UnitySerializer.<>f__mg$cache5;
+			Dictionary<Type, UnitySerializer.WriteAValue> writers7 = UnitySerializer.Writers;
+			Type typeFromHandle7 = typeof(DateTime);
+			if (UnitySerializer.<>f__mg$cache6 == null)
+			{
+				UnitySerializer.<>f__mg$cache6 = new UnitySerializer.WriteAValue(UnitySerializer.DateTimeWriter);
+			}
+			writers7[typeFromHandle7] = UnitySerializer.<>f__mg$cache6;
+			Dictionary<Type, UnitySerializer.WriteAValue> writers8 = UnitySerializer.Writers;
+			Type typeFromHandle8 = typeof(TimeSpan);
+			if (UnitySerializer.<>f__mg$cache7 == null)
+			{
+				UnitySerializer.<>f__mg$cache7 = new UnitySerializer.WriteAValue(UnitySerializer.TimeSpanWriter);
+			}
+			writers8[typeFromHandle8] = UnitySerializer.<>f__mg$cache7;
+			Dictionary<Type, UnitySerializer.WriteAValue> writers9 = UnitySerializer.Writers;
+			Type typeFromHandle9 = typeof(char);
+			if (UnitySerializer.<>f__mg$cache8 == null)
+			{
+				UnitySerializer.<>f__mg$cache8 = new UnitySerializer.WriteAValue(UnitySerializer.CharWriter);
+			}
+			writers9[typeFromHandle9] = UnitySerializer.<>f__mg$cache8;
+			Dictionary<Type, UnitySerializer.WriteAValue> writers10 = UnitySerializer.Writers;
+			Type typeFromHandle10 = typeof(ushort);
+			if (UnitySerializer.<>f__mg$cache9 == null)
+			{
+				UnitySerializer.<>f__mg$cache9 = new UnitySerializer.WriteAValue(UnitySerializer.UShortWriter);
+			}
+			writers10[typeFromHandle10] = UnitySerializer.<>f__mg$cache9;
+			Dictionary<Type, UnitySerializer.WriteAValue> writers11 = UnitySerializer.Writers;
+			Type typeFromHandle11 = typeof(double);
+			if (UnitySerializer.<>f__mg$cacheA == null)
+			{
+				UnitySerializer.<>f__mg$cacheA = new UnitySerializer.WriteAValue(UnitySerializer.DoubleWriter);
+			}
+			writers11[typeFromHandle11] = UnitySerializer.<>f__mg$cacheA;
+			Dictionary<Type, UnitySerializer.WriteAValue> writers12 = UnitySerializer.Writers;
+			Type typeFromHandle12 = typeof(ulong);
+			if (UnitySerializer.<>f__mg$cacheB == null)
+			{
+				UnitySerializer.<>f__mg$cacheB = new UnitySerializer.WriteAValue(UnitySerializer.ULongWriter);
+			}
+			writers12[typeFromHandle12] = UnitySerializer.<>f__mg$cacheB;
+			Dictionary<Type, UnitySerializer.WriteAValue> writers13 = UnitySerializer.Writers;
+			Type typeFromHandle13 = typeof(int);
+			if (UnitySerializer.<>f__mg$cacheC == null)
+			{
+				UnitySerializer.<>f__mg$cacheC = new UnitySerializer.WriteAValue(UnitySerializer.IntWriter);
+			}
+			writers13[typeFromHandle13] = UnitySerializer.<>f__mg$cacheC;
+			Dictionary<Type, UnitySerializer.WriteAValue> writers14 = UnitySerializer.Writers;
+			Type typeFromHandle14 = typeof(uint);
+			if (UnitySerializer.<>f__mg$cacheD == null)
+			{
+				UnitySerializer.<>f__mg$cacheD = new UnitySerializer.WriteAValue(UnitySerializer.UIntWriter);
+			}
+			writers14[typeFromHandle14] = UnitySerializer.<>f__mg$cacheD;
+			Dictionary<Type, UnitySerializer.WriteAValue> writers15 = UnitySerializer.Writers;
+			Type typeFromHandle15 = typeof(byte);
+			if (UnitySerializer.<>f__mg$cacheE == null)
+			{
+				UnitySerializer.<>f__mg$cacheE = new UnitySerializer.WriteAValue(UnitySerializer.ByteWriter);
+			}
+			writers15[typeFromHandle15] = UnitySerializer.<>f__mg$cacheE;
+			Dictionary<Type, UnitySerializer.WriteAValue> writers16 = UnitySerializer.Writers;
+			Type typeFromHandle16 = typeof(long);
+			if (UnitySerializer.<>f__mg$cacheF == null)
+			{
+				UnitySerializer.<>f__mg$cacheF = new UnitySerializer.WriteAValue(UnitySerializer.LongWriter);
+			}
+			writers16[typeFromHandle16] = UnitySerializer.<>f__mg$cacheF;
+			Dictionary<Type, UnitySerializer.WriteAValue> writers17 = UnitySerializer.Writers;
+			Type typeFromHandle17 = typeof(short);
+			if (UnitySerializer.<>f__mg$cache10 == null)
+			{
+				UnitySerializer.<>f__mg$cache10 = new UnitySerializer.WriteAValue(UnitySerializer.ShortWriter);
+			}
+			writers17[typeFromHandle17] = UnitySerializer.<>f__mg$cache10;
+			Dictionary<Type, UnitySerializer.WriteAValue> writers18 = UnitySerializer.Writers;
+			Type typeFromHandle18 = typeof(sbyte);
+			if (UnitySerializer.<>f__mg$cache11 == null)
+			{
+				UnitySerializer.<>f__mg$cache11 = new UnitySerializer.WriteAValue(UnitySerializer.SByteWriter);
+			}
+			writers18[typeFromHandle18] = UnitySerializer.<>f__mg$cache11;
+			Dictionary<Type, UnitySerializer.ReadAValue> readers = UnitySerializer.Readers;
+			Type typeFromHandle19 = typeof(string);
+			if (UnitySerializer.<>f__mg$cache12 == null)
+			{
+				UnitySerializer.<>f__mg$cache12 = new UnitySerializer.ReadAValue(UnitySerializer.AStringReader);
+			}
+			readers[typeFromHandle19] = UnitySerializer.<>f__mg$cache12;
+			Dictionary<Type, UnitySerializer.ReadAValue> readers2 = UnitySerializer.Readers;
+			Type typeFromHandle20 = typeof(decimal);
+			if (UnitySerializer.<>f__mg$cache13 == null)
+			{
+				UnitySerializer.<>f__mg$cache13 = new UnitySerializer.ReadAValue(UnitySerializer.DecimalReader);
+			}
+			readers2[typeFromHandle20] = UnitySerializer.<>f__mg$cache13;
+			Dictionary<Type, UnitySerializer.ReadAValue> readers3 = UnitySerializer.Readers;
+			Type typeFromHandle21 = typeof(float);
+			if (UnitySerializer.<>f__mg$cache14 == null)
+			{
+				UnitySerializer.<>f__mg$cache14 = new UnitySerializer.ReadAValue(UnitySerializer.FloatReader);
+			}
+			readers3[typeFromHandle21] = UnitySerializer.<>f__mg$cache14;
+			Dictionary<Type, UnitySerializer.ReadAValue> readers4 = UnitySerializer.Readers;
+			Type typeFromHandle22 = typeof(byte[]);
+			if (UnitySerializer.<>f__mg$cache15 == null)
+			{
+				UnitySerializer.<>f__mg$cache15 = new UnitySerializer.ReadAValue(UnitySerializer.ByteArrayReader);
+			}
+			readers4[typeFromHandle22] = UnitySerializer.<>f__mg$cache15;
+			Dictionary<Type, UnitySerializer.ReadAValue> readers5 = UnitySerializer.Readers;
+			Type typeFromHandle23 = typeof(bool);
+			if (UnitySerializer.<>f__mg$cache16 == null)
+			{
+				UnitySerializer.<>f__mg$cache16 = new UnitySerializer.ReadAValue(UnitySerializer.BoolReader);
+			}
+			readers5[typeFromHandle23] = UnitySerializer.<>f__mg$cache16;
+			Dictionary<Type, UnitySerializer.ReadAValue> readers6 = UnitySerializer.Readers;
+			Type typeFromHandle24 = typeof(Guid);
+			if (UnitySerializer.<>f__mg$cache17 == null)
+			{
+				UnitySerializer.<>f__mg$cache17 = new UnitySerializer.ReadAValue(UnitySerializer.GuidReader);
+			}
+			readers6[typeFromHandle24] = UnitySerializer.<>f__mg$cache17;
+			Dictionary<Type, UnitySerializer.ReadAValue> readers7 = UnitySerializer.Readers;
+			Type typeFromHandle25 = typeof(DateTime);
+			if (UnitySerializer.<>f__mg$cache18 == null)
+			{
+				UnitySerializer.<>f__mg$cache18 = new UnitySerializer.ReadAValue(UnitySerializer.DateTimeReader);
+			}
+			readers7[typeFromHandle25] = UnitySerializer.<>f__mg$cache18;
+			Dictionary<Type, UnitySerializer.ReadAValue> readers8 = UnitySerializer.Readers;
+			Type typeFromHandle26 = typeof(TimeSpan);
+			if (UnitySerializer.<>f__mg$cache19 == null)
+			{
+				UnitySerializer.<>f__mg$cache19 = new UnitySerializer.ReadAValue(UnitySerializer.TimeSpanReader);
+			}
+			readers8[typeFromHandle26] = UnitySerializer.<>f__mg$cache19;
+			Dictionary<Type, UnitySerializer.ReadAValue> readers9 = UnitySerializer.Readers;
+			Type typeFromHandle27 = typeof(char);
+			if (UnitySerializer.<>f__mg$cache1A == null)
+			{
+				UnitySerializer.<>f__mg$cache1A = new UnitySerializer.ReadAValue(UnitySerializer.CharReader);
+			}
+			readers9[typeFromHandle27] = UnitySerializer.<>f__mg$cache1A;
+			Dictionary<Type, UnitySerializer.ReadAValue> readers10 = UnitySerializer.Readers;
+			Type typeFromHandle28 = typeof(ushort);
+			if (UnitySerializer.<>f__mg$cache1B == null)
+			{
+				UnitySerializer.<>f__mg$cache1B = new UnitySerializer.ReadAValue(UnitySerializer.UShortReader);
+			}
+			readers10[typeFromHandle28] = UnitySerializer.<>f__mg$cache1B;
+			Dictionary<Type, UnitySerializer.ReadAValue> readers11 = UnitySerializer.Readers;
+			Type typeFromHandle29 = typeof(double);
+			if (UnitySerializer.<>f__mg$cache1C == null)
+			{
+				UnitySerializer.<>f__mg$cache1C = new UnitySerializer.ReadAValue(UnitySerializer.DoubleReader);
+			}
+			readers11[typeFromHandle29] = UnitySerializer.<>f__mg$cache1C;
+			Dictionary<Type, UnitySerializer.ReadAValue> readers12 = UnitySerializer.Readers;
+			Type typeFromHandle30 = typeof(ulong);
+			if (UnitySerializer.<>f__mg$cache1D == null)
+			{
+				UnitySerializer.<>f__mg$cache1D = new UnitySerializer.ReadAValue(UnitySerializer.ULongReader);
+			}
+			readers12[typeFromHandle30] = UnitySerializer.<>f__mg$cache1D;
+			Dictionary<Type, UnitySerializer.ReadAValue> readers13 = UnitySerializer.Readers;
+			Type typeFromHandle31 = typeof(int);
+			if (UnitySerializer.<>f__mg$cache1E == null)
+			{
+				UnitySerializer.<>f__mg$cache1E = new UnitySerializer.ReadAValue(UnitySerializer.IntReader);
+			}
+			readers13[typeFromHandle31] = UnitySerializer.<>f__mg$cache1E;
+			Dictionary<Type, UnitySerializer.ReadAValue> readers14 = UnitySerializer.Readers;
+			Type typeFromHandle32 = typeof(uint);
+			if (UnitySerializer.<>f__mg$cache1F == null)
+			{
+				UnitySerializer.<>f__mg$cache1F = new UnitySerializer.ReadAValue(UnitySerializer.UIntReader);
+			}
+			readers14[typeFromHandle32] = UnitySerializer.<>f__mg$cache1F;
+			Dictionary<Type, UnitySerializer.ReadAValue> readers15 = UnitySerializer.Readers;
+			Type typeFromHandle33 = typeof(byte);
+			if (UnitySerializer.<>f__mg$cache20 == null)
+			{
+				UnitySerializer.<>f__mg$cache20 = new UnitySerializer.ReadAValue(UnitySerializer.ByteReader);
+			}
+			readers15[typeFromHandle33] = UnitySerializer.<>f__mg$cache20;
+			Dictionary<Type, UnitySerializer.ReadAValue> readers16 = UnitySerializer.Readers;
+			Type typeFromHandle34 = typeof(long);
+			if (UnitySerializer.<>f__mg$cache21 == null)
+			{
+				UnitySerializer.<>f__mg$cache21 = new UnitySerializer.ReadAValue(UnitySerializer.LongReader);
+			}
+			readers16[typeFromHandle34] = UnitySerializer.<>f__mg$cache21;
+			Dictionary<Type, UnitySerializer.ReadAValue> readers17 = UnitySerializer.Readers;
+			Type typeFromHandle35 = typeof(short);
+			if (UnitySerializer.<>f__mg$cache22 == null)
+			{
+				UnitySerializer.<>f__mg$cache22 = new UnitySerializer.ReadAValue(UnitySerializer.ShortReader);
+			}
+			readers17[typeFromHandle35] = UnitySerializer.<>f__mg$cache22;
+			Dictionary<Type, UnitySerializer.ReadAValue> readers18 = UnitySerializer.Readers;
+			Type typeFromHandle36 = typeof(sbyte);
+			if (UnitySerializer.<>f__mg$cache23 == null)
+			{
+				UnitySerializer.<>f__mg$cache23 = new UnitySerializer.ReadAValue(UnitySerializer.SByteReader);
+			}
+			readers18[typeFromHandle36] = UnitySerializer.<>f__mg$cache23;
 		}
-
-		
-		
-		
-		public static event Func<Type, bool> CanSerialize;
-
-		
-		
-		
-		public static event EventHandler<UnitySerializer.ObjectMappingEventArgs> CreateType;
-
-		
-		
-		
-		public static event EventHandler<UnitySerializer.TypeMappingEventArgs> MapMissingType;
 
 		
 		public static void ForceJSONSerialization()
@@ -165,7 +365,7 @@ namespace Serialization
 		
 		public static void SerializeToFile(object obj, string fileName)
 		{
-			using (FileStream fileStream = File.Create(UnitySerializer.DataPath + "/" + fileName))
+			using (FileStream fileStream = File.Create(Application.persistentDataPath + "/" + fileName))
 			{
 				UnitySerializer.Serialize(obj, fileStream, false);
 			}
@@ -174,12 +374,12 @@ namespace Serialization
 		
 		public static T DeserializeFromFile<T>(string fileName) where T : class
 		{
-			if (!File.Exists(UnitySerializer.DataPath + "/" + fileName))
+			if (!File.Exists(Application.persistentDataPath + "/" + fileName))
 			{
 				return (T)((object)null);
 			}
 			T result;
-			using (FileStream fileStream = File.Open(UnitySerializer.DataPath + "/" + fileName, FileMode.Open))
+			using (FileStream fileStream = File.Open(Application.persistentDataPath + "/" + fileName, FileMode.Open))
 			{
 				result = (UnitySerializer.Deserialize(fileStream) as T);
 			}
@@ -221,7 +421,7 @@ namespace Serialization
 		public static UnitySerializer.FinalProcess TakeOwnershipOfFinalization()
 		{
 			UnitySerializer.FinalProcess result = default(UnitySerializer.FinalProcess);
-			List<UnitySerializer.DeferredSetter> fixupFunctions = UnitySerializer.FixupFunctions;
+			object fixupFunctions = UnitySerializer.FixupFunctions;
 			lock (fixupFunctions)
 			{
 				result.deserializedObjects = UnitySerializer.DeserializedObject;
@@ -237,7 +437,7 @@ namespace Serialization
 		
 		public static void RunDeferredActions(int count = 1, bool clear = true)
 		{
-			List<UnitySerializer.DeferredSetter> fixupFunctions = UnitySerializer.FixupFunctions;
+			object fixupFunctions = UnitySerializer.FixupFunctions;
 			lock (fixupFunctions)
 			{
 				for (int i = 0; i < count; i++)
@@ -271,7 +471,7 @@ namespace Serialization
 		
 		public static void RunDeferredActions(UnitySerializer.FinalProcess process, int count = 1, bool clear = true)
 		{
-			List<UnitySerializer.DeferredSetter> fixupFunctions = UnitySerializer.FixupFunctions;
+			object fixupFunctions = UnitySerializer.FixupFunctions;
 			lock (fixupFunctions)
 			{
 				List<UnitySerializer.DeferredSetter> fixupFunctions2 = UnitySerializer.FixupFunctions;
@@ -311,12 +511,17 @@ namespace Serialization
 		
 		public static void AddFixup(UnitySerializer.DeferredSetter setter)
 		{
-			List<UnitySerializer.DeferredSetter> fixupFunctions = UnitySerializer.FixupFunctions;
+			object fixupFunctions = UnitySerializer.FixupFunctions;
 			lock (fixupFunctions)
 			{
 				UnitySerializer.FixupFunctions.Add(setter);
 			}
 		}
+
+		
+		
+		
+		public static event Func<Type, bool> CanSerialize;
 
 		
 		internal static bool CanSerializeType(Type tp)
@@ -365,6 +570,11 @@ namespace Serialization
 		}
 
 		
+		
+		
+		public static event EventHandler<UnitySerializer.ObjectMappingEventArgs> CreateType;
+
+		
 		private static void InvokeCreateType(UnitySerializer.ObjectMappingEventArgs e)
 		{
 			EventHandler<UnitySerializer.ObjectMappingEventArgs> createType = UnitySerializer.CreateType;
@@ -373,6 +583,11 @@ namespace Serialization
 				createType(null, e);
 			}
 		}
+
+		
+		
+		
+		public static event EventHandler<UnitySerializer.TypeMappingEventArgs> MapMissingType;
 
 		
 		internal static void InvokeMapMissingType(UnitySerializer.TypeMappingEventArgs e)
@@ -543,7 +758,7 @@ namespace Serialization
 		
 		internal static IEnumerable<PropertyInfo> GetPropertyInfo(Type itm)
 		{
-			Dictionary<Type, IEnumerable<PropertyInfo>> propertyLists = UnitySerializer.PropertyLists;
+			object propertyLists = UnitySerializer.PropertyLists;
 			IEnumerable<PropertyInfo> result;
 			lock (propertyLists)
 			{
@@ -596,19 +811,18 @@ namespace Serialization
 					UnitySerializer.ChecksumLists[itm] = enumerable;
 				}
 				PropertyInfo[] array = (enumerable as PropertyInfo[]) ?? enumerable.ToArray<PropertyInfo>();
-				IEnumerable<PropertyInfo> enumerable3;
+				IEnumerable<PropertyInfo> enumerable2;
 				if (UnitySerializer.IgnoreIds && enumerable != null)
 				{
-					IEnumerable<PropertyInfo> enumerable2 = from p in array
+					enumerable2 = from p in array
 					where !p.GetCustomAttributes(typeof(SerializerId), true).Any<object>()
 					select p;
-					enumerable3 = enumerable2;
 				}
 				else
 				{
-					enumerable3 = array;
+					enumerable2 = array;
 				}
-				result = enumerable3;
+				result = enumerable2;
 			}
 			return result;
 		}
@@ -648,7 +862,7 @@ namespace Serialization
 		
 		internal static IEnumerable<FieldInfo> GetFieldInfo(Type itm)
 		{
-			Dictionary<Type, IEnumerable<FieldInfo>> fieldLists = UnitySerializer.FieldLists;
+			object fieldLists = UnitySerializer.FieldLists;
 			IEnumerable<FieldInfo> result;
 			lock (fieldLists)
 			{
@@ -705,10 +919,9 @@ namespace Serialization
 				IEnumerable<FieldInfo> enumerable3;
 				if (UnitySerializer.IsChecksum)
 				{
-					IEnumerable<FieldInfo> enumerable2 = from p in enumerable
+					enumerable3 = from p in enumerable
 					where !p.GetCustomAttributes(typeof(DoNotChecksum), true).Any<object>()
 					select p;
-					enumerable3 = enumerable2;
 				}
 				else
 				{
@@ -1557,15 +1770,28 @@ namespace Serialization
 			storage.BeginWriteList(item.Count, item.GetType());
 			Entry entry = new Entry();
 			int num = 0;
-			foreach (object value in item)
+			IEnumerator enumerator = item.GetEnumerator();
+			try
 			{
-				entry.Value = value;
-				entry.StoredType = storedType;
-				if (!storage.BeginWriteListItem(num++, value))
+				while (enumerator.MoveNext())
 				{
-					UnitySerializer.SerializeObject(entry, storage);
+					object value = enumerator.Current;
+					entry.Value = value;
+					entry.StoredType = storedType;
+					if (!storage.BeginWriteListItem(num++, value))
+					{
+						UnitySerializer.SerializeObject(entry, storage);
+					}
+					storage.EndWriteListItem();
 				}
-				storage.EndWriteListItem();
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 			storage.EndWriteList();
 		}
@@ -1584,32 +1810,58 @@ namespace Serialization
 			storage.BeginWriteDictionary(item.Count, item.GetType());
 			storage.BeginWriteDictionaryKeys();
 			int num = 0;
-			foreach (object value in item.Keys)
+			IEnumerator enumerator = item.Keys.GetEnumerator();
+			try
 			{
-				if (!storage.BeginWriteDictionaryKey(num++, value))
+				while (enumerator.MoveNext())
 				{
-					UnitySerializer.SerializeObject(new Entry
+					object value = enumerator.Current;
+					if (!storage.BeginWriteDictionaryKey(num++, value))
 					{
-						StoredType = storedType,
-						Value = value
-					}, storage);
+						UnitySerializer.SerializeObject(new Entry
+						{
+							StoredType = storedType,
+							Value = value
+						}, storage);
+					}
+					storage.EndWriteDictionaryKey();
 				}
-				storage.EndWriteDictionaryKey();
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 			storage.EndWriteDictionaryKeys();
 			storage.BeginWriteDictionaryValues();
 			num = 0;
-			foreach (object value2 in item.Values)
+			IEnumerator enumerator2 = item.Values.GetEnumerator();
+			try
 			{
-				if (!storage.BeginWriteDictionaryValue(num++, value2))
+				while (enumerator2.MoveNext())
 				{
-					UnitySerializer.SerializeObject(new Entry
+					object value2 = enumerator2.Current;
+					if (!storage.BeginWriteDictionaryValue(num++, value2))
 					{
-						StoredType = storedType2,
-						Value = value2
-					}, storage);
+						UnitySerializer.SerializeObject(new Entry
+						{
+							StoredType = storedType2,
+							Value = value2
+						}, storage);
+					}
+					storage.EndWriteDictionaryValue();
 				}
-				storage.EndWriteDictionaryValue();
+			}
+			finally
+			{
+				IDisposable disposable2;
+				if ((disposable2 = (enumerator2 as IDisposable)) != null)
+				{
+					disposable2.Dispose();
+				}
 			}
 			storage.EndWriteDictionaryValues();
 			storage.EndWriteDictionary();
@@ -2592,9 +2844,6 @@ namespace Serialization
 		public static Encoding TextEncoding = Encoding.Default;
 
 		
-		private static readonly string DataPath;
-
-		
 		internal static List<Action> FinalDeserialization = new List<Action>();
 
 		
@@ -2736,6 +2985,150 @@ namespace Serialization
 		private static readonly Dictionary<string, bool> componentNames = new Dictionary<string, bool>();
 
 		
+		[CompilerGenerated]
+		private static UnitySerializer.WriteAValue <>f__mg$cache0;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.WriteAValue <>f__mg$cache1;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.WriteAValue <>f__mg$cache2;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.WriteAValue <>f__mg$cache3;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.WriteAValue <>f__mg$cache4;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.WriteAValue <>f__mg$cache5;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.WriteAValue <>f__mg$cache6;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.WriteAValue <>f__mg$cache7;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.WriteAValue <>f__mg$cache8;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.WriteAValue <>f__mg$cache9;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.WriteAValue <>f__mg$cacheA;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.WriteAValue <>f__mg$cacheB;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.WriteAValue <>f__mg$cacheC;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.WriteAValue <>f__mg$cacheD;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.WriteAValue <>f__mg$cacheE;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.WriteAValue <>f__mg$cacheF;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.WriteAValue <>f__mg$cache10;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.WriteAValue <>f__mg$cache11;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.ReadAValue <>f__mg$cache12;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.ReadAValue <>f__mg$cache13;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.ReadAValue <>f__mg$cache14;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.ReadAValue <>f__mg$cache15;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.ReadAValue <>f__mg$cache16;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.ReadAValue <>f__mg$cache17;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.ReadAValue <>f__mg$cache18;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.ReadAValue <>f__mg$cache19;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.ReadAValue <>f__mg$cache1A;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.ReadAValue <>f__mg$cache1B;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.ReadAValue <>f__mg$cache1C;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.ReadAValue <>f__mg$cache1D;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.ReadAValue <>f__mg$cache1E;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.ReadAValue <>f__mg$cache1F;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.ReadAValue <>f__mg$cache20;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.ReadAValue <>f__mg$cache21;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.ReadAValue <>f__mg$cache22;
+
+		
+		[CompilerGenerated]
+		private static UnitySerializer.ReadAValue <>f__mg$cache23;
+
+		
 		public struct FinalProcess
 		{
 			
@@ -2768,6 +3161,10 @@ namespace Serialization
 				UnitySerializer.currentTypes.Pop();
 			}
 		}
+
+		
+		
+		public delegate object GetData(Dictionary<string, object> parameters);
 
 		
 		public class DeferredSetter
@@ -2840,6 +3237,14 @@ namespace Serialization
 		}
 
 		
+		
+		public delegate object ReadAValue(BinaryReader reader);
+
+		
+		
+		private delegate void WriteAValue(BinaryWriter writer, object value);
+
+		
 		public class ObjectMappingEventArgs : EventArgs
 		{
 			
@@ -2858,6 +3263,10 @@ namespace Serialization
 			
 			public Dictionary<string, ushort> propertyLookup;
 		}
+
+		
+		
+		internal delegate void ScanTypeFunction(Type type, Attribute attribute);
 
 		
 		public class SerializationScope : IDisposable
@@ -3044,21 +3453,5 @@ namespace Serialization
 			
 			public Type UseType;
 		}
-
-		
-		
-		public delegate object GetData(Dictionary<string, object> parameters);
-
-		
-		
-		public delegate object ReadAValue(BinaryReader reader);
-
-		
-		
-		private delegate void WriteAValue(BinaryWriter writer, object value);
-
-		
-		
-		internal delegate void ScanTypeFunction(Type type, Attribute attribute);
 	}
 }

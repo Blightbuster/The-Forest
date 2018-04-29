@@ -98,9 +98,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject that owns the CharacterController.")]
-		[CheckForComponent(typeof(CharacterController))]
 		[RequiredField]
+		[CheckForComponent(typeof(CharacterController))]
+		[Tooltip("The GameObject that owns the CharacterController.")]
 		public FsmOwnerDefault gameObject;
 
 		

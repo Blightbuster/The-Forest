@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace UniLinq
 {
 	
-	public class Lookup<TKey, TElement> : IEnumerable, IEnumerable<IGrouping<TKey, TElement>>, ILookup<TKey, TElement>
+	public class Lookup<TKey, TElement> : IEnumerable<IGrouping<TKey, TElement>>, ILookup<TKey, TElement>, IEnumerable
 	{
 		
 		internal Lookup(Dictionary<TKey, List<TElement>> lookup, IEnumerable<TElement> nullKeyElements)
@@ -19,12 +19,6 @@ namespace UniLinq
 			{
 				this.nullGrouping = new Grouping<TKey, TElement>(default(TKey), nullKeyElements);
 			}
-		}
-
-		
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.GetEnumerator();
 		}
 
 		
@@ -87,6 +81,12 @@ namespace UniLinq
 				yield return g;
 			}
 			yield break;
+		}
+
+		
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.GetEnumerator();
 		}
 
 		

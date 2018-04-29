@@ -22,12 +22,15 @@ namespace TheForest.Items.World
 			if (this._state == BurnableItem.States.Idle && LocalPlayer.Inventory)
 			{
 				this._attacking = false;
-				if (LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.LeftHand, LocalPlayer.Inventory.DefaultLight._itemId))
+				if (!ForestVR.Enabled)
 				{
-					LighterControler.HasLightableItem = true;
+					if (LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.LeftHand, LocalPlayer.Inventory.DefaultLight._itemId))
+					{
+						LighterControler.HasLightableItem = true;
+					}
+					LocalPlayer.Inventory.Attacked.AddListener(new UnityAction(this.OnAttacking));
+					LocalPlayer.Inventory.AttackEnded.AddListener(new UnityAction(this.OnAttackEnded));
 				}
-				LocalPlayer.Inventory.Attacked.AddListener(new UnityAction(this.OnAttacking));
-				LocalPlayer.Inventory.AttackEnded.AddListener(new UnityAction(this.OnAttackEnded));
 			}
 		}
 
@@ -161,7 +164,7 @@ namespace TheForest.Items.World
 				GameStats.LitWeapon.Invoke();
 				LocalPlayer.Inventory.DefaultLight.StashLighter();
 				Transform transform = (!this._weaponFireSpawn) ? base.transform : this._weaponFireSpawn.transform;
-				this._weaponFire = (GameObject)UnityEngine.Object.Instantiate(this._weaponFirePrefab, transform.position, transform.rotation);
+				this._weaponFire = UnityEngine.Object.Instantiate<GameObject>(this._weaponFirePrefab, transform.position, transform.rotation);
 				this._weaponFire.transform.parent = transform;
 				if (!this._weaponFire.activeSelf)
 				{

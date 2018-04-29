@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Stops all playing Animations on a Game Object. Optionally, specify a single Animation to Stop.")]
 	[ActionCategory(ActionCategory.Animation)]
+	[Tooltip("Stops all playing Animations on a Game Object. Optionally, specify a single Animation to Stop.")]
 	public class StopAnimation : ComponentAction<Animation>
 	{
 		
@@ -41,8 +41,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Animation))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animation))]
 		public FsmOwnerDefault gameObject;
 
 		

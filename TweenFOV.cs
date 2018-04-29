@@ -2,8 +2,8 @@
 using UnityEngine;
 
 
-[AddComponentMenu("NGUI/Tween/Tween Field of View")]
 [RequireComponent(typeof(Camera))]
+[AddComponentMenu("NGUI/Tween/Tween Field of View")]
 public class TweenFOV : UITweener
 {
 	

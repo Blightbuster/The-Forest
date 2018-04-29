@@ -113,7 +113,7 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 						{
 							throw new SharpZipBaseException("Illegal rep length code");
 						}
-						goto IL_E3;
+						goto IL_DC;
 					}
 					if (symbol < 0)
 					{
@@ -124,15 +124,15 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 					this.mode = 2;
 					return true;
 				case 8:
-					goto IL_E3;
+					goto IL_DC;
 				case 9:
-					goto IL_13D;
+					goto IL_136;
 				case 10:
 					break;
 				default:
 					throw new SharpZipBaseException("Inflater unknown mode");
 				}
-				IL_18D:
+				IL_181:
 				if (this.neededBits > 0)
 				{
 					this.mode = 10;
@@ -148,7 +148,7 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 				i -= this.repLength;
 				this.mode = 7;
 				continue;
-				IL_13D:
+				IL_136:
 				symbol = this.distTree.GetSymbol(this.input);
 				if (symbol < 0)
 				{
@@ -163,8 +163,8 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 				{
 					throw new SharpZipBaseException("Illegal rep dist code");
 				}
-				goto IL_18D;
-				IL_E3:
+				goto IL_181;
+				IL_DC:
 				if (this.neededBits > 0)
 				{
 					this.mode = 8;
@@ -177,7 +177,7 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 					this.repLength += num2;
 				}
 				this.mode = 9;
-				goto IL_13D;
+				goto IL_136;
 			}
 			return true;
 		}
@@ -276,7 +276,7 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 			case 4:
 				break;
 			case 5:
-				goto IL_1D4;
+				goto IL_1D3;
 			case 6:
 				if (!this.dynHeader.Decode(this.input))
 				{
@@ -285,12 +285,12 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 				this.litlenTree = this.dynHeader.BuildLitLenTree();
 				this.distTree = this.dynHeader.BuildDistTree();
 				this.mode = 7;
-				goto IL_263;
+				goto IL_264;
 			case 7:
 			case 8:
 			case 9:
 			case 10:
-				goto IL_263;
+				goto IL_264;
 			case 11:
 				return this.DecodeChksum();
 			case 12:
@@ -309,7 +309,7 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 				throw new SharpZipBaseException("broken uncompressed block");
 			}
 			this.mode = 5;
-			IL_1D4:
+			IL_1D3:
 			int num3 = this.outputWindow.CopyStored(this.input, this.uncomprLen);
 			this.uncomprLen -= num3;
 			if (this.uncomprLen == 0)
@@ -318,7 +318,7 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 				return true;
 			}
 			return !this.input.IsNeedingInput;
-			IL_263:
+			IL_264:
 			return this.DecodeHuffman();
 		}
 
@@ -505,45 +505,6 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 		}
 
 		
-		private const int DECODE_HEADER = 0;
-
-		
-		private const int DECODE_DICT = 1;
-
-		
-		private const int DECODE_BLOCKS = 2;
-
-		
-		private const int DECODE_STORED_LEN1 = 3;
-
-		
-		private const int DECODE_STORED_LEN2 = 4;
-
-		
-		private const int DECODE_STORED = 5;
-
-		
-		private const int DECODE_DYN_HEADER = 6;
-
-		
-		private const int DECODE_HUFFMAN = 7;
-
-		
-		private const int DECODE_HUFFMAN_LENBITS = 8;
-
-		
-		private const int DECODE_HUFFMAN_DIST = 9;
-
-		
-		private const int DECODE_HUFFMAN_DISTBITS = 10;
-
-		
-		private const int DECODE_CHKSUM = 11;
-
-		
-		private const int FINISHED = 12;
-
-		
 		private static readonly int[] CPLENS = new int[]
 		{
 			3,
@@ -680,6 +641,45 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 			13,
 			13
 		};
+
+		
+		private const int DECODE_HEADER = 0;
+
+		
+		private const int DECODE_DICT = 1;
+
+		
+		private const int DECODE_BLOCKS = 2;
+
+		
+		private const int DECODE_STORED_LEN1 = 3;
+
+		
+		private const int DECODE_STORED_LEN2 = 4;
+
+		
+		private const int DECODE_STORED = 5;
+
+		
+		private const int DECODE_DYN_HEADER = 6;
+
+		
+		private const int DECODE_HUFFMAN = 7;
+
+		
+		private const int DECODE_HUFFMAN_LENBITS = 8;
+
+		
+		private const int DECODE_HUFFMAN_DIST = 9;
+
+		
+		private const int DECODE_HUFFMAN_DISTBITS = 10;
+
+		
+		private const int DECODE_CHKSUM = 11;
+
+		
+		private const int FINISHED = 12;
 
 		
 		private int mode;

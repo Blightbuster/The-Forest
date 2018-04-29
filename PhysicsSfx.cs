@@ -131,8 +131,11 @@ public class PhysicsSfx : MonoBehaviour
 	private void UpdateSlideEvent()
 	{
 		UnityUtil.ERRCHECK(this.slideEventInstance.setParameterValue("speed", this.rigidbody.velocity.magnitude));
-		Vector3 pos = this.collider.ClosestPointOnBounds(LocalPlayer.Transform.position);
-		UnityUtil.ERRCHECK(this.slideEventInstance.set3DAttributes(pos.to3DAttributes()));
+		if (LocalPlayer.Transform != null)
+		{
+			Vector3 pos = this.collider.ClosestPointOnBounds(LocalPlayer.Transform.position);
+			UnityUtil.ERRCHECK(this.slideEventInstance.set3DAttributes(pos.to3DAttributes()));
+		}
 	}
 
 	
@@ -223,12 +226,6 @@ public class PhysicsSfx : MonoBehaviour
 	}
 
 	
-	private const float SLIDE_STOP_DELAY = 0.05f;
-
-	
-	private const float SLIDE_SAFETY_TIMEOUT = 10f;
-
-	
 	public float impactSpeedThreshold = 2f;
 
 	
@@ -309,4 +306,10 @@ public class PhysicsSfx : MonoBehaviour
 
 	
 	private bool isStoppingSlideEvent;
+
+	
+	private const float SLIDE_STOP_DELAY = 0.05f;
+
+	
+	private const float SLIDE_SAFETY_TIMEOUT = 10f;
 }

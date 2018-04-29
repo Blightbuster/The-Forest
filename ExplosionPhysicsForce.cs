@@ -14,16 +14,16 @@ public class ExplosionPhysicsForce : MonoBehaviour
 		float r = 10f * multiplier;
 		Collider[] cols = Physics.OverlapSphere(base.transform.position, r);
 		List<Rigidbody> rigidbodies = new List<Rigidbody>();
-		foreach (Collider col in cols)
+		foreach (Collider collider in cols)
 		{
-			if (col.attachedRigidbody != null && !rigidbodies.Contains(col.attachedRigidbody))
+			if (collider.attachedRigidbody != null && !rigidbodies.Contains(collider.attachedRigidbody))
 			{
-				rigidbodies.Add(col.attachedRigidbody);
+				rigidbodies.Add(collider.attachedRigidbody);
 			}
 		}
-		foreach (Rigidbody rb in rigidbodies)
+		foreach (Rigidbody rigidbody in rigidbodies)
 		{
-			rb.AddExplosionForce(this.explosionForce * multiplier, base.transform.position, r, 1f * multiplier, ForceMode.Impulse);
+			rigidbody.AddExplosionForce(this.explosionForce * multiplier, base.transform.position, r, 1f * multiplier, ForceMode.Impulse);
 		}
 		yield break;
 	}

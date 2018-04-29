@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the global sound volume.")]
 	[ActionCategory(ActionCategory.Audio)]
+	[Tooltip("Sets the global sound volume.")]
 	public class SetGameVolume : FsmStateAction
 	{
 		
@@ -32,8 +32,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[HasFloatSlider(0f, 1f)]
 		[RequiredField]
+		[HasFloatSlider(0f, 1f)]
 		public FsmFloat volume;
 
 		

@@ -45,6 +45,11 @@ namespace TheForest.Utils
 		public static Slots Slot { get; private set; }
 
 		
+		
+		
+		public static string SaveUserId { get; private set; }
+
+		
 		public static void SetGameType(GameTypes game)
 		{
 			GameSetup.Game = game;
@@ -80,6 +85,7 @@ namespace TheForest.Utils
 		public static void SetSlot(Slots slot)
 		{
 			GameSetup.Slot = (Slots)Mathf.RoundToInt((float)Mathf.Clamp((int)slot, 1, 5));
+			GameSetup.SaveUserId = SaveSlotUtils.UserId;
 		}
 
 		

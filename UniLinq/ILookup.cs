@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace UniLinq
 {
 	
-	public interface ILookup<TKey, TElement> : IEnumerable, IEnumerable<IGrouping<TKey, TElement>>
+	public interface ILookup<TKey, TElement> : IEnumerable<IGrouping<TKey, TElement>>, IEnumerable
 	{
 		
 		

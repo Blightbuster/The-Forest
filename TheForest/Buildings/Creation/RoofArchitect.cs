@@ -14,14 +14,8 @@ namespace TheForest.Buildings.Creation
 	
 	[AddComponentMenu("Buildings/Creation/Roof Architect")]
 	[DoNotSerializePublic]
-	public class RoofArchitect : EntityBehaviour, IEntityReplicationFilter, IHoleStructure, IStructureSupport, ICoopStructure, IRoof
+	public class RoofArchitect : EntityBehaviour, IStructureSupport, IHoleStructure, ICoopStructure, IRoof, IEntityReplicationFilter
 	{
-		
-		bool IEntityReplicationFilter.AllowReplicationTo(BoltConnection connection)
-		{
-			return this.CurrentSupport == null || connection.ExistsOnRemote((this.CurrentSupport as MonoBehaviour).GetComponent<BoltEntity>()) == ExistsResult.Yes;
-		}
-
 		
 		private void Awake()
 		{
@@ -35,7 +29,6 @@ namespace TheForest.Buildings.Creation
 		{
 			this._logPool = new Stack<Transform>();
 			this._newPool = new Stack<Transform>();
-			this._logMat = new Material(this._logRenderer.sharedMaterial);
 			this._roofRoot = new GameObject("RoofRoot").transform;
 			if (this._multiPointsPositions == null)
 			{
@@ -82,7 +75,6 @@ namespace TheForest.Buildings.Creation
 			else
 			{
 				base.enabled = true;
-				base.GetComponent<Renderer>().sharedMaterial = this._logMat;
 			}
 			yield break;
 		}
@@ -141,6 +133,10 @@ namespace TheForest.Buildings.Creation
 			{
 				if (!flag && this._multiPointsPositions.Count >= 3 && TheForest.Utils.Input.GetButtonDown("Build"))
 				{
+					if (this.CurrentSupport != null)
+					{
+						LocalPlayer.Create.BuildingPlacer.ForcedParent = (this.CurrentSupport as MonoBehaviour).gameObject;
+					}
 					this._lockMode = RoofArchitect.LockModes.Height;
 					LocalPlayer.Sfx.PlayWhoosh();
 				}
@@ -220,17 +216,22 @@ namespace TheForest.Buildings.Creation
 			{
 				Scene.HudGui.MultipointShapeGizmo.Shutdown();
 			}
-			bool flag6 = (this._lockMode != RoofArchitect.LockModes.Height) ? (!flag && (flag2 || flag3 || this._multiPointsPositions.Count > 0)) : flag3;
-			this._logMat.SetColor("_TintColor", (!flag6) ? LocalPlayer.Create.BuildingPlacer.RedMat.GetColor("_TintColor") : LocalPlayer.Create.BuildingPlacer.ClearMat.GetColor("_TintColor"));
-			base.GetComponent<Renderer>().enabled = (this.CurrentSupport == null && this._multiPointsPositions.Count == 0);
-			bool flag7 = this._lockMode == RoofArchitect.LockModes.Height;
-			bool flag8 = !this._autofillmode && this._multiPointsPositions.Count == 0 && this.CurrentSupport != null;
+			bool canLock = (this._lockMode != RoofArchitect.LockModes.Height) ? (!flag && (flag2 || flag3 || this._multiPointsPositions.Count > 0)) : flag3;
+			Create.CanLock = canLock;
+			Renderer component = base.GetComponent<Renderer>();
+			if (component)
+			{
+				component.sharedMaterial = Create.CurrentGhostMat;
+				component.enabled = (this.CurrentSupport == null && this._multiPointsPositions.Count == 0);
+			}
+			bool flag6 = this._lockMode == RoofArchitect.LockModes.Height;
+			bool flag7 = !this._autofillmode && this._multiPointsPositions.Count == 0 && this.CurrentSupport != null;
 			bool canToggleAutofill = this._lockMode == RoofArchitect.LockModes.Shape && (flag2 || flag3 || this._multiPointsPositions.Count > 0 || this.CurrentSupport != null);
-			bool canLock = !flag8 && flag2 && this._lockMode == RoofArchitect.LockModes.Shape;
-			bool canUnlock = !this._autofillmode && !flag7 && this._multiPointsPositions.Count > 0 && this._lockMode == RoofArchitect.LockModes.Shape;
-			bool showAutofillPlace = this._autofillmode && !flag7 && !flag && this._multiPointsPositions.Count >= 3;
-			bool showManualPlace = !this._autofillmode && !flag7 && !flag && this._multiPointsPositions.Count >= ((!flag2) ? 3 : 2);
-			Scene.HudGui.RoofConstructionIcons.Show(flag8, canToggleAutofill, showAutofillPlace, showManualPlace, canLock, canUnlock, flag7);
+			bool canLock2 = !flag7 && flag2 && this._lockMode == RoofArchitect.LockModes.Shape;
+			bool canUnlock = !this._autofillmode && !flag6 && this._multiPointsPositions.Count > 0 && this._lockMode == RoofArchitect.LockModes.Shape;
+			bool showAutofillPlace = this._autofillmode && !flag6 && !flag && this._multiPointsPositions.Count >= 3;
+			bool showManualPlace = !this._autofillmode && !flag6 && !flag && this._multiPointsPositions.Count >= ((!flag2) ? 3 : 2);
+			Scene.HudGui.RoofConstructionIcons.Show(flag7, canToggleAutofill, showAutofillPlace, showManualPlace, canLock2, canUnlock, flag6);
 		}
 
 		
@@ -323,23 +324,45 @@ namespace TheForest.Buildings.Creation
 				Transform ghostRoot = this._roofRoot;
 				Transform transform = ghostRoot;
 				transform.name += "Ghost";
-				Transform logGhostPrefab = this._logPrefab;
-				this._logPrefab = Prefabs.Instance.LogRoofBuiltPrefab;
-				this._logPool = new Stack<Transform>();
-				this._newPool = new Stack<Transform>();
-				this._roofRoot = new GameObject("RoofRootBuilt").transform;
-				this.SpawnRoof();
-				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.<>f__this._logItemId);
-				List<GameObject> logStacks = new List<GameObject>();
-				foreach (object obj in this._roofRoot)
+				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.$this._logItemId);
+				List<GameObject> logs = new List<GameObject>();
+				IEnumerator enumerator = this._roofRoot.GetEnumerator();
+				try
 				{
-					Transform logStack = (Transform)obj;
-					logStack.gameObject.SetActive(false);
-					logStacks.Add(logStack.gameObject);
+					while (enumerator.MoveNext())
+					{
+						object obj = enumerator.Current;
+						Transform transform2 = (Transform)obj;
+						ri._amount++;
+						IEnumerator enumerator2 = transform2.GetEnumerator();
+						try
+						{
+							while (enumerator2.MoveNext())
+							{
+								object obj2 = enumerator2.Current;
+								Transform transform3 = (Transform)obj2;
+								logs.Add(transform3.GetComponentInChildren<Renderer>().gameObject);
+							}
+						}
+						finally
+						{
+							IDisposable disposable;
+							if ((disposable = (enumerator2 as IDisposable)) != null)
+							{
+								disposable.Dispose();
+							}
+						}
+					}
 				}
-				ri._renderers = logStacks.ToArray();
-				ri._amount += this._roofRoot.childCount;
-				this._logPrefab = logGhostPrefab;
+				finally
+				{
+					IDisposable disposable2;
+					if ((disposable2 = (enumerator as IDisposable)) != null)
+					{
+						disposable2.Dispose();
+					}
+				}
+				ri.AddRuntimeObjects(logs, Prefabs.Instance.LogRoofBuiltPrefab.GetComponentInChildren<Renderer>().sharedMaterial);
 				this._roofRoot.transform.parent = base.transform;
 				ghostRoot.transform.parent = base.transform;
 				this._craftStructure.GetComponent<Collider>().enabled = true;
@@ -467,22 +490,16 @@ namespace TheForest.Buildings.Creation
 		
 		private void CheckTargetingSupport(PrefabIdentifier structureRoot)
 		{
-			IStructureSupport structureSupport;
-			if (structureRoot)
+			IStructureSupport structureSupport = (!structureRoot) ? null : structureRoot.GetComponent<IStructureSupport>();
+			if (structureSupport != null)
 			{
-				IStructureSupport component = structureRoot.GetComponent<IStructureSupport>();
-				structureSupport = component;
-			}
-			else
-			{
-				structureSupport = null;
-			}
-			IStructureSupport structureSupport2 = structureSupport;
-			if (structureSupport2 != null)
-			{
-				if (this.CurrentSupport == null && (!this._autofillmode || !(structureSupport2 as MonoBehaviour).GetComponent<FloorArchitect>()))
+				if (this.CurrentSupport == null && (!this._autofillmode || !(structureSupport as MonoBehaviour).GetComponent<FloorArchitect>()))
 				{
-					this.CurrentSupport = structureSupport2;
+					this.CurrentSupport = structureSupport;
+					if (this.CurrentSupport != null)
+					{
+						LocalPlayer.Create.BuildingPlacer.ForcedParent = (this.CurrentSupport as MonoBehaviour).gameObject;
+					}
 					this.SupportHeight = this.CurrentSupport.GetLevel();
 					this.UpdateAutoFill(false);
 				}
@@ -547,7 +564,7 @@ namespace TheForest.Buildings.Creation
 		{
 			edgeCrossing = false;
 			Vector3 vector = this.GetCurrentEdgePoint();
-			bool flag = this.CurrentSupport != null && this.CurrentSupport.GetMultiPointsPositions(true) != null && Mathf.Abs(vector.y - this.SupportHeight) < this._closureSnappingDistance && (this._multiPointsPositions.Count == 0 || Mathf.Abs(this._multiPointsPositions[0].y - this.SupportHeight) < this._closureSnappingDistance) && this._multiPointsPositions.Count < this._maxPoints;
+			bool flag = LocalPlayer.Create.BuildingPlacer.OnDynamicClear && this.CurrentSupport != null && this.CurrentSupport.GetMultiPointsPositions(true) != null && Mathf.Abs(vector.y - this.SupportHeight) < this._closureSnappingDistance && (this._multiPointsPositions.Count == 0 || Mathf.Abs(this._multiPointsPositions[0].y - this.SupportHeight) < this._closureSnappingDistance) && this._multiPointsPositions.Count < this._maxPoints;
 			if (flag && this._multiPointsPositions.Count > 0)
 			{
 				Vector3 to = vector - this._multiPointsPositions[this._multiPointsPositions.Count - 1];
@@ -822,9 +839,9 @@ namespace TheForest.Buildings.Creation
 				int count = this._rowPointsBuffer[k].Count;
 				for (int l = 1; l < count; l += 2)
 				{
-					Vector3 from = this._rowPointsBuffer[k][l - 1];
+					Vector3 a = this._rowPointsBuffer[k][l - 1];
 					Vector3 vector = this._rowPointsBuffer[k][l];
-					array6[k].Add(Vector3.Lerp(from, vector, 0.5f));
+					array6[k].Add(Vector3.Lerp(a, vector, 0.5f));
 					vector.y = 1f;
 					this._rowPointsBuffer[k][l] = vector;
 				}
@@ -1022,23 +1039,23 @@ namespace TheForest.Buildings.Creation
 						if (num32 > 0f)
 						{
 							Vector3 vector7 = Vector3.Lerp(vector6, vector5, Mathf.Abs(num32));
-							Vector3 a = Vector3.Lerp(vector6, vector5, Mathf.Abs(num33));
-							this.SpawnChunk(a - vector7, vector7, roofRoot, logStackScaleRatio, ref num26);
+							Vector3 a2 = Vector3.Lerp(vector6, vector5, Mathf.Abs(num33));
+							this.SpawnChunk(a2 - vector7, vector7, roofRoot, logStackScaleRatio, ref num26);
 						}
 						else if (num32 < 0f)
 						{
 							Vector3 vector8 = Vector3.Lerp(vector6, vector4, Mathf.Abs(num32));
-							Vector3 a2 = Vector3.Lerp(vector6, vector4, Mathf.Abs(num33));
-							this.SpawnChunk(a2 - vector8, vector8, roofRoot, logStackScaleRatio, ref num26);
+							Vector3 a3 = Vector3.Lerp(vector6, vector4, Mathf.Abs(num33));
+							this.SpawnChunk(a3 - vector8, vector8, roofRoot, logStackScaleRatio, ref num26);
 						}
 					}
 					else
 					{
 						Vector3 vector9 = Vector3.Lerp(vector6, vector4, Mathf.Abs(num32));
-						Vector3 a3 = vector6;
-						this.SpawnChunk(a3 - vector9, vector9, roofRoot, logStackScaleRatio, ref num26);
+						Vector3 a4 = vector6;
+						this.SpawnChunk(a4 - vector9, vector9, roofRoot, logStackScaleRatio, ref num26);
 						vector9 = Vector3.Lerp(vector6, vector5, Mathf.Abs(num33));
-						this.SpawnChunk(a3 - vector9, vector9, roofRoot, logStackScaleRatio, ref num26);
+						this.SpawnChunk(a4 - vector9, vector9, roofRoot, logStackScaleRatio, ref num26);
 					}
 				}
 			}
@@ -1086,12 +1103,16 @@ namespace TheForest.Buildings.Creation
 				Transform transform = this._logPool.Pop();
 				transform.position = position;
 				transform.rotation = rotation;
+				if (!this._wasBuilt && !this._wasPlaced)
+				{
+					transform.GetComponentInChildren<Renderer>().sharedMaterial = Create.CurrentGhostMat;
+				}
 				return transform;
 			}
-			Transform transform2 = (Transform)UnityEngine.Object.Instantiate(this._logPrefab, position, rotation);
+			Transform transform2 = UnityEngine.Object.Instantiate<Transform>(this._logPrefab, position, rotation);
 			if (!this._wasBuilt && !this._wasPlaced)
 			{
-				transform2.GetComponentInChildren<Renderer>().sharedMaterial = this._logMat;
+				transform2.GetComponentInChildren<Renderer>().sharedMaterial = Create.CurrentGhostMat;
 			}
 			return transform2;
 		}
@@ -1241,10 +1262,10 @@ namespace TheForest.Buildings.Creation
 		
 		public override void Attached()
 		{
-			if (!this.entity.isOwner)
+			if (!base.entity.isOwner)
 			{
 				IBuildingDestructibleState buildingDestructibleState;
-				if (this.entity.TryFindState<IBuildingDestructibleState>(out buildingDestructibleState))
+				if (base.entity.TryFindState<IBuildingDestructibleState>(out buildingDestructibleState))
 				{
 					buildingDestructibleState.AddCallback("Token", new PropertyCallbackSimple(this.OnTokenUpdated));
 				}
@@ -1270,7 +1291,7 @@ namespace TheForest.Buildings.Creation
 		private void OnTokenUpdated()
 		{
 			IBuildingDestructibleState buildingDestructibleState;
-			if (this.entity.TryFindState<IBuildingDestructibleState>(out buildingDestructibleState))
+			if (base.entity.TryFindState<IBuildingDestructibleState>(out buildingDestructibleState))
 			{
 				this.CustomToken = buildingDestructibleState.Token;
 			}
@@ -1301,12 +1322,18 @@ namespace TheForest.Buildings.Creation
 						this._holes = coopRoofToken.Holes.ToList<Hole>();
 					}
 					this._roofHeight = coopRoofToken.Height;
-					if (!this.entity.isOwner || this._wasBuilt)
+					if (!base.entity.isOwner || this._wasBuilt)
 					{
 						this.CreateStructure(false);
 					}
 				}
 			}
+		}
+
+		
+		bool IEntityReplicationFilter.AllowReplicationTo(BoltConnection connection)
+		{
+			return this.CurrentSupport == null || connection.ExistsOnRemote((this.CurrentSupport as MonoBehaviour).GetComponent<BoltEntity>()) == ExistsResult.Yes;
 		}
 
 		
@@ -1412,9 +1439,6 @@ namespace TheForest.Buildings.Creation
 
 		
 		private Stack<Transform> _newPool;
-
-		
-		private Material _logMat;
 
 		
 		private RoofArchitect.LockModes _lockMode;

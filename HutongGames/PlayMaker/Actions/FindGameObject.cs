@@ -57,8 +57,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString objectName;
 
 		
-		[Tooltip("Find a GameObject with this tag. If Object Name is specified then both name and Tag must match.")]
 		[UIHint(UIHint.Tag)]
+		[Tooltip("Find a GameObject with this tag. If Object Name is specified then both name and Tag must match.")]
 		public FsmString withTag;
 
 		

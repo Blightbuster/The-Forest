@@ -18,13 +18,13 @@ namespace Serialization
 			{
 				a = a,
 				value = a.Get(obj)
-			} into <>__TranspIdent1
+			} into <>__TranspIdent0
 			select new Entry
 			{
-				PropertyInfo = <>__TranspIdent1.a.Info,
+				PropertyInfo = <>__TranspIdent0.a.Info,
 				MustHaveName = true,
-				Value = <>__TranspIdent1.value,
-				IsStatic = <>__TranspIdent1.a.IsStatic
+				Value = <>__TranspIdent0.value,
+				IsStatic = <>__TranspIdent0.a.IsStatic
 			}).ToArray<Entry>();
 		}
 
@@ -38,13 +38,13 @@ namespace Serialization
 			{
 				a = a,
 				value = a.Get(obj)
-			} into <>__TranspIdent2
+			} into <>__TranspIdent1
 			select new Entry
 			{
-				FieldInfo = <>__TranspIdent2.a.FieldInfo,
+				FieldInfo = <>__TranspIdent1.a.FieldInfo,
 				MustHaveName = true,
-				Value = <>__TranspIdent2.value,
-				IsStatic = <>__TranspIdent2.a.IsStatic
+				Value = <>__TranspIdent1.value,
+				IsStatic = <>__TranspIdent1.a.IsStatic
 			}).ToArray<Entry>();
 		}
 
@@ -55,7 +55,7 @@ namespace Serialization
 			try
 			{
 				object obj = null;
-				Dictionary<Type, object> vanilla = GetWritableAttributes.Vanilla;
+				object vanilla = GetWritableAttributes.Vanilla;
 				lock (vanilla)
 				{
 					if (!GetWritableAttributes.Vanilla.TryGetValue(type, out obj))
@@ -76,7 +76,7 @@ namespace Serialization
 		
 		private static GetSet[][] GetAccessors(Type type)
 		{
-			Dictionary<Type, GetSet[][][]> propertyAccess = GetWritableAttributes.PropertyAccess;
+			object propertyAccess = GetWritableAttributes.PropertyAccess;
 			GetSet[][] result;
 			lock (propertyAccess)
 			{

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Plays a Movie Texture. Use the Movie Texture in a Material, or in the GUI.")]
 	[ActionCategory(ActionCategory.Movie)]
+	[Tooltip("Plays a Movie Texture. Use the Movie Texture in a Material, or in the GUI.")]
 	public class PlayMovieTexture : FsmStateAction
 	{
 		

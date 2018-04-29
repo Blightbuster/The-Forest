@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using UnityEngine;
 
@@ -46,7 +47,6 @@ public class Loom : MonoBehaviour
 				}
 			}
 			Loom._current = gameObject.AddComponent<Loom>();
-			UnityEngine.Object.DontDestroyOnLoad(Loom._current);
 			Loom._initialized = true;
 			Loom._threadId = Thread.CurrentThread.ManagedThreadId;
 		}
@@ -69,7 +69,7 @@ public class Loom : MonoBehaviour
 	{
 		if (time != 0f)
 		{
-			List<Loom.DelayedQueueItem> delayed = Loom.Current._delayed;
+			object delayed = Loom.Current._delayed;
 			lock (delayed)
 			{
 				Loom.Current._delayed.Add(new Loom.DelayedQueueItem
@@ -81,7 +81,7 @@ public class Loom : MonoBehaviour
 		}
 		else
 		{
-			List<Action> actions = Loom.Current._actions;
+			object actions = Loom.Current._actions;
 			lock (actions)
 			{
 				Loom.Current._actions.Add(action);
@@ -92,7 +92,11 @@ public class Loom : MonoBehaviour
 	
 	public static void RunAsync(Action action)
 	{
-		new Thread(new ParameterizedThreadStart(Loom.RunAction))
+		if (Loom.<>f__mg$cache0 == null)
+		{
+			Loom.<>f__mg$cache0 = new ParameterizedThreadStart(Loom.RunAction);
+		}
+		new Thread(Loom.<>f__mg$cache0)
 		{
 			Priority = System.Threading.ThreadPriority.Normal
 		}.Start(action);
@@ -112,7 +116,7 @@ public class Loom : MonoBehaviour
 	
 	private void Update()
 	{
-		List<Action> actions = this._actions;
+		object actions = this._actions;
 		lock (actions)
 		{
 			for (int i = 0; i < this._actions.Count; i++)
@@ -121,7 +125,7 @@ public class Loom : MonoBehaviour
 			}
 			this._actions.Clear();
 		}
-		List<Loom.DelayedQueueItem> delayed = this._delayed;
+		object delayed = this._delayed;
 		lock (delayed)
 		{
 			for (int j = 0; j < this._delayed.Count; j++)
@@ -154,6 +158,10 @@ public class Loom : MonoBehaviour
 
 	
 	private List<Loom.DelayedQueueItem> _delayed = new List<Loom.DelayedQueueItem>();
+
+	
+	[CompilerGenerated]
+	private static ParameterizedThreadStart <>f__mg$cache0;
 
 	
 	public class DelayedQueueItem

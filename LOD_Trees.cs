@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using FMOD.Studio;
 using PathologicalGames;
@@ -106,12 +107,25 @@ public class LOD_Trees : LOD_Base
 	{
 		if (base.transform.localScale.x >= 1f && this.StumpPrefab)
 		{
-			foreach (object obj in base.transform)
+			IEnumerator enumerator = base.transform.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				UnityEngine.Object.Destroy(transform.gameObject);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					UnityEngine.Object.Destroy(transform.gameObject);
+				}
 			}
-			GameObject gameObject = UnityEngine.Object.Instantiate(this.StumpPrefab, base.transform.position, base.transform.rotation) as GameObject;
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
+			}
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.StumpPrefab, base.transform.position, base.transform.rotation);
 			gameObject.transform.localScale = this.High.transform.localScale;
 			gameObject.transform.parent = base.transform;
 			return true;

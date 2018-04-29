@@ -1,4 +1,5 @@
 ﻿using System;
+using TheForest.Items;
 using TheForest.Utils;
 using UnityEngine;
 
@@ -25,7 +26,7 @@ public class flareHeldAnimSetup : MonoBehaviour
 		}
 		if (!this._net)
 		{
-			LocalPlayer.Inventory.StashLeftHand();
+			LocalPlayer.Inventory.UseAltWorldPrefab = true;
 		}
 		this._flareBody.sharedMaterial = this._unlitBodyMat;
 		this._cap.SetActive(true);
@@ -36,16 +37,20 @@ public class flareHeldAnimSetup : MonoBehaviour
 		}
 		this.blockAmmoSpawn = false;
 		this.leftHandFull = false;
+		this.flareIsLit = false;
 		if (!this._net)
 		{
-			this._playerAnimator.SetBool("strikeFlare", true);
-			base.Invoke("resetLightWeapon", 1f);
 		}
 	}
 
 	
 	private void OnDisable()
 	{
+		if (!this._net)
+		{
+			LocalPlayer.Inventory.UseAltWorldPrefab = false;
+			base.CancelInvoke("setFlareIsLit");
+		}
 		this._cap.SetActive(true);
 		this._capHeld.SetActive(false);
 		if (this._flareLight)
@@ -63,6 +68,19 @@ public class flareHeldAnimSetup : MonoBehaviour
 			this.currState1 = this._playerAnimator.GetCurrentAnimatorStateInfo(1);
 			this.nextState1 = this._playerAnimator.GetNextAnimatorStateInfo(1);
 			this.currState2 = this._playerAnimator.GetCurrentAnimatorStateInfo(2);
+			if (!this._net && !this.flareIsLit && TheForest.Utils.Input.GetButtonDown("AltFire") && this.currState1.shortNameHash == this.flareIdleHash)
+			{
+				if (!LocalPlayer.Inventory.IsSlotEmpty(Item.EquipmentSlot.LeftHand))
+				{
+					LocalPlayer.Inventory.StashLeftHand();
+					LocalPlayer.Animator.CrossFade(this.idleBaseHash, 0f, 3, 0f);
+				}
+				this._playerAnimator.SetBool("strikeFlare", true);
+				this.flareIsLit = true;
+				base.CancelInvoke("setFlareIsLit");
+				base.Invoke("resetLightWeapon", 1f);
+				base.Invoke("setFlareIsLit", 1f);
+			}
 			if (this.currState1.tagHash == this.knockBackHash || this.currState2.shortNameHash == this.sittingHash)
 			{
 				this._animator.CrossFade(this.idleHash, 0f, 0, 0f);
@@ -172,6 +190,12 @@ public class flareHeldAnimSetup : MonoBehaviour
 	}
 
 	
+	private void setFlareIsLit()
+	{
+		LocalPlayer.Inventory.UseAltWorldPrefab = false;
+	}
+
+	
 	public Animator _playerAnimator;
 
 	
@@ -194,6 +218,9 @@ public class flareHeldAnimSetup : MonoBehaviour
 
 	
 	public bool _net;
+
+	
+	public bool flareIsLit;
 
 	
 	private MeshRenderer mr;
@@ -245,6 +272,12 @@ public class flareHeldAnimSetup : MonoBehaviour
 
 	
 	private int idleToFlareHash = Animator.StringToHash("idleToFlare");
+
+	
+	private int flareIdleHash = Animator.StringToHash("flareIdle");
+
+	
+	private int idleBaseHash = Animator.StringToHash("idleBase");
 
 	
 	private bool reloadSync;

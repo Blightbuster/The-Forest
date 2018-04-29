@@ -38,7 +38,7 @@ namespace HutongGames.PlayMaker.Actions
 			ProceduralMaterial proceduralMaterial = this.substanceMaterial.Value as ProceduralMaterial;
 			if (proceduralMaterial == null)
 			{
-				this.LogError("Not a substance material!");
+				base.LogError("Not a substance material!");
 				return;
 			}
 			if (!this.immediately.Value)

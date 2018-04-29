@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Split a text asset or string into an arrayList")]
 	[ActionCategory("ArrayMaker/ArrayList")]
+	[Tooltip("Split a text asset or string into an arrayList")]
 	public class SplitTextToArrayList : ArrayListActions
 	{
 		
@@ -118,10 +118,10 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		[ActionSection("Set up")]
-		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
 		[RequiredField]
+		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
+		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -137,8 +137,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmInt parseRange;
 
 		
-		[Tooltip("Text asset source")]
 		[ActionSection("Source")]
+		[Tooltip("Text asset source")]
 		public TextAsset textAsset;
 
 		
@@ -155,8 +155,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString OrThisChar;
 
 		
-		[Tooltip("Parse the line as a specific type")]
 		[ActionSection("Value")]
+		[Tooltip("Parse the line as a specific type")]
 		public SplitTextToArrayList.ArrayMakerParseStringAs parseAsType;
 
 		

@@ -9,7 +9,7 @@ namespace Pathfinding.Util
 		
 		public static T Claim()
 		{
-			List<T> obj = ObjectPoolSimple<T>.pool;
+			object obj = ObjectPoolSimple<T>.pool;
 			T result;
 			lock (obj)
 			{
@@ -31,7 +31,7 @@ namespace Pathfinding.Util
 		
 		public static void Release(ref T obj)
 		{
-			List<T> obj2 = ObjectPoolSimple<T>.pool;
+			object obj2 = ObjectPoolSimple<T>.pool;
 			lock (obj2)
 			{
 				ObjectPoolSimple<T>.pool.Add(obj);
@@ -42,7 +42,7 @@ namespace Pathfinding.Util
 		
 		public static void Clear()
 		{
-			List<T> obj = ObjectPoolSimple<T>.pool;
+			object obj = ObjectPoolSimple<T>.pool;
 			lock (obj)
 			{
 				ObjectPoolSimple<T>.pool.Clear();

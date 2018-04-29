@@ -92,10 +92,13 @@ public class LOD_SimpleToggle : MonoBehaviour, IThreadSafeTask
 		{
 			for (int i = 0; i < this.Renderers.Length; i++)
 			{
-				this.Renderers[i].enabled = flag;
-				if (flag)
+				if (!this.Renderers[i].IsNull())
 				{
-					this.Renderers[i].SendMessage("OnSpawned", SendMessageOptions.DontRequireReceiver);
+					this.Renderers[i].enabled = flag;
+					if (flag)
+					{
+						this.Renderers[i].SendMessage("OnSpawned", SendMessageOptions.DontRequireReceiver);
+					}
 				}
 			}
 			for (int j = 0; j < this.Components.Length; j++)

@@ -64,17 +64,20 @@ public class Sunshine : MonoBehaviour
 	{
 		get
 		{
-			switch (this.ShadowFilter)
+			SunshineShadowFilters shadowFilter = this.ShadowFilter;
+			if (shadowFilter == SunshineShadowFilters.PCF2x2)
 			{
-			case SunshineShadowFilters.PCF2x2:
 				return 1f;
-			case SunshineShadowFilters.PCF3x3:
+			}
+			if (shadowFilter == SunshineShadowFilters.PCF3x3)
+			{
 				return 1.5f;
-			case SunshineShadowFilters.PCF4x4:
-				return 2f;
-			default:
+			}
+			if (shadowFilter != SunshineShadowFilters.PCF4x4)
+			{
 				return 0.5f;
 			}
+			return 2f;
 		}
 	}
 
@@ -356,17 +359,23 @@ public class Sunshine : MonoBehaviour
 			num = 0f;
 			for (int i = 0; i <= cID; i++)
 			{
-				switch (i)
+				if (i != 0)
 				{
-				case 0:
+					if (i != 1)
+					{
+						if (i == 2)
+						{
+							num += (1f - num) * this.ManualCascadeSplit2;
+						}
+					}
+					else
+					{
+						num += (1f - num) * this.ManualCascadeSplit1;
+					}
+				}
+				else
+				{
 					num += (1f - num) * this.ManualCascadeSplit0;
-					break;
-				case 1:
-					num += (1f - num) * this.ManualCascadeSplit1;
-					break;
-				case 2:
-					num += (1f - num) * this.ManualCascadeSplit2;
-					break;
 				}
 			}
 		}

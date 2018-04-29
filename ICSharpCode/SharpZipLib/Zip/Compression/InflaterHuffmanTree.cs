@@ -7,12 +7,6 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 	public class InflaterHuffmanTree
 	{
 		
-		public InflaterHuffmanTree(byte[] codeLengths)
-		{
-			this.BuildTree(codeLengths);
-		}
-
-		
 		static InflaterHuffmanTree()
 		{
 			try
@@ -48,6 +42,12 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 			{
 				throw new SharpZipBaseException("InflaterHuffmanTree: static tree length illegal");
 			}
+		}
+
+		
+		public InflaterHuffmanTree(byte[] codeLengths)
+		{
+			this.BuildTree(codeLengths);
 		}
 
 		

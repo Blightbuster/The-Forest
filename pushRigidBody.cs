@@ -40,6 +40,10 @@ public class pushRigidBody : MonoBehaviour
 				{
 					flag2 = true;
 				}
+				if (!this.dontBreakCrates && hit.gameObject.CompareTag("BreakableWood") && this.setup && this.setup.animator.GetFloat("Speed") > 0.9f && !flag2)
+				{
+					hit.gameObject.SendMessage("Hit", 60, SendMessageOptions.DontRequireReceiver);
+				}
 				if (attachedRigidbody == null || attachedRigidbody.isKinematic)
 				{
 					return;
@@ -48,20 +52,27 @@ public class pushRigidBody : MonoBehaviour
 				{
 					this.setup = base.transform.root.GetComponentInChildren<mutantScriptSetup>();
 				}
-				if (this.setup.animator.GetFloat("Speed") > 0.9f && !flag2)
+				float num = 1500f;
+				if (this.DummyType)
 				{
-					hit.gameObject.SendMessage("Hit", 10, SendMessageOptions.DontRequireReceiver);
+					num = this.pushPower;
 				}
-				float explosionForce = 2000f;
-				if (flag)
+				if (this.DummyType)
 				{
-					explosionForce = 2000f;
+					attachedRigidbody.AddExplosionForce(num * attachedRigidbody.mass, base.transform.root.position, 20f);
 				}
-				if (flag2)
+				else
 				{
-					explosionForce = 8000f;
+					attachedRigidbody.AddExplosionForce(num, base.transform.position, 20f);
 				}
-				attachedRigidbody.AddExplosionForce(explosionForce, base.transform.position, 20f);
+				if (this.DummyType && !flag2)
+				{
+					hit.gameObject.SendMessage("Hit", 60, SendMessageOptions.DontRequireReceiver);
+				}
+				else if (this.setup && this.setup.animator.GetFloat("Speed") > 0.9f && !flag2)
+				{
+					hit.gameObject.SendMessage("Hit", 60, SendMessageOptions.DontRequireReceiver);
+				}
 			}
 		}
 		else
@@ -101,18 +112,21 @@ public class pushRigidBody : MonoBehaviour
 				{
 					return;
 				}
-				float explosionForce2 = 2000f;
+				float num2 = 2000f;
 				if (flag3)
 				{
-					explosionForce2 = 2000f;
+					num2 = 2000f;
 				}
-				attachedRigidbody2.AddExplosionForce(explosionForce2, base.transform.position, 20f);
+				attachedRigidbody2.AddExplosionForce(num2 * attachedRigidbody2.mass, base.transform.position, 20f);
 			}
 		}
 	}
 
 	
 	public bool regularMutant;
+
+	
+	public bool DummyType;
 
 	
 	public bool dontBreakCrates;

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Get the network OnDisconnectedFromServer.")]
 	[ActionCategory(ActionCategory.Network)]
+	[Tooltip("Get the network OnDisconnectedFromServer.")]
 	public class NetworkGetNetworkDisconnectionInfos : FsmStateAction
 	{
 		
@@ -28,10 +28,9 @@ namespace HutongGames.PlayMaker.Actions
 		{
 			NetworkDisconnection disconnectionInfo = Fsm.EventData.DisconnectionInfo;
 			this.disconnectionLabel.Value = disconnectionInfo.ToString();
-			NetworkDisconnection networkDisconnection = disconnectionInfo;
-			if (networkDisconnection != NetworkDisconnection.Disconnected)
+			if (disconnectionInfo != NetworkDisconnection.Disconnected)
 			{
-				if (networkDisconnection == NetworkDisconnection.LostConnection)
+				if (disconnectionInfo == NetworkDisconnection.LostConnection)
 				{
 					if (this.lostConnectionEvent != null)
 					{
@@ -46,8 +45,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("Disconnection label")]
+		[UIHint(UIHint.Variable)]
 		public FsmString disconnectionLabel;
 
 		

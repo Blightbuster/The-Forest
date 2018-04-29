@@ -16,7 +16,6 @@ public class activateSledPush : EntityBehaviour<IMultiHolderState>
 			IMultiHolderState state = componentInParent.GetState<IMultiHolderState>();
 			return state.IsReal && !state.GrabbedBy;
 		}
-		Debug.LogError("Could not find entity with multiholderstate");
 		return false;
 	}
 
@@ -29,7 +28,7 @@ public class activateSledPush : EntityBehaviour<IMultiHolderState>
 	
 	private void SetEnable(bool value)
 	{
-		if (BoltNetwork.isRunning && this.entity && this.entity.isAttached && this.entity.isOwner && !base.state.IsReal)
+		if (BoltNetwork.isRunning && base.entity && base.entity.isAttached && base.entity.isOwner && !base.state.IsReal)
 		{
 			Debug.LogWarning("Can't change enable state for sledpush when sled is not real");
 			return;
@@ -48,7 +47,7 @@ public class activateSledPush : EntityBehaviour<IMultiHolderState>
 		{
 			lookAtDir.enabled = false;
 		}
-		if (!BoltNetwork.isRunning || (this.entity && this.entity.isAttached && base.state.IsReal))
+		if (!BoltNetwork.isRunning || (base.entity && base.entity.isAttached && base.state.IsReal))
 		{
 			this.SetEnable(false);
 		}
@@ -220,10 +219,10 @@ public class activateSledPush : EntityBehaviour<IMultiHolderState>
 		}
 		if (BoltNetwork.isRunning)
 		{
-			BoltEntity entity = base.GetComponentInParent<BoltEntity>();
-			if (entity)
+			BoltEntity componentInParent = base.GetComponentInParent<BoltEntity>();
+			if (componentInParent)
 			{
-				BoltNetwork.Destroy(entity);
+				BoltNetwork.Destroy(componentInParent);
 			}
 		}
 		Grabber.SetFilter(null);

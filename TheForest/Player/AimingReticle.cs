@@ -122,7 +122,7 @@ namespace TheForest.Player
 				if (this._displayMode == AimingReticle.DisplayModes.Target || this._displayMode == AimingReticle.DisplayModes.GroundTarget)
 				{
 					RaycastHit raycastHit;
-					if (Physics.Raycast(vector2, vector - vector2, out raycastHit, Vector3.Distance(vector, vector2), this._targetLayers))
+					if (Physics.Raycast(vector2, vector - vector2, out raycastHit, Vector3.Distance(vector, vector2), this._targetLayers, QueryTriggerInteraction.Ignore))
 					{
 						this.ShowHitTargetAt(raycastHit.point);
 						break;
@@ -156,7 +156,7 @@ namespace TheForest.Player
 			else if (this._displayMode == AimingReticle.DisplayModes.GroundTarget)
 			{
 				RaycastHit raycastHit;
-				if (Physics.Raycast(position + Vector3.up, Vector3.down, out raycastHit, 100f, this._groundLayers))
+				if (Physics.Raycast(position + Vector3.up, Vector3.down, out raycastHit, 100f, this._groundLayers, QueryTriggerInteraction.Ignore))
 				{
 					float t = Mathf.Lerp(0.01f, 0.4f, Vector3.Distance(Scene.HudGui.RangedWeaponHitGroundTarget.transform.position, raycastHit.point) / 2f);
 					Scene.HudGui.RangedWeaponHitGroundTarget.transform.position = Vector3.Lerp(Scene.HudGui.RangedWeaponHitGroundTarget.transform.position, raycastHit.point + new Vector3(0f, 0.2f, 0f), t);

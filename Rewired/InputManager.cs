@@ -30,12 +30,6 @@ namespace Rewired
 		}
 
 		
-		protected override string GetFocusedEditorWindowTitle()
-		{
-			return string.Empty;
-		}
-
-		
 		protected override IExternalTools GetExternalTools()
 		{
 			return new ExternalTools();

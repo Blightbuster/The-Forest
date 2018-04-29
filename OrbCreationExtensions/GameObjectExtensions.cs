@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using UnityEngine;
 
@@ -201,13 +202,12 @@ namespace OrbCreationExtensions
 			{
 				return go;
 			}
-			foreach (object obj in go.transform)
+			Transform[] componentsInChildren = go.GetComponentsInChildren<Transform>(true);
+			for (int i = 0; i < componentsInChildren.Length; i++)
 			{
-				Transform transform = (Transform)obj;
-				GameObject gameObject = transform.gameObject.FindFirstChildWithName(childName);
-				if (gameObject != null)
+				if (componentsInChildren[i].gameObject.name == childName)
 				{
-					return gameObject;
+					return componentsInChildren[i].gameObject;
 				}
 			}
 			return null;
@@ -228,23 +228,63 @@ namespace OrbCreationExtensions
 			{
 				total++;
 			}
-			foreach (object obj in go.transform)
+			IEnumerator enumerator = go.transform.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				transform.gameObject.CountChildrenWithName(childName, ref total);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					transform.gameObject.CountChildrenWithName(childName, ref total);
+				}
 			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
+			}
+		}
+
+		
+		public static GameObject GetGameObjectNamed(this GameObject go, string aStr, GameObject parentGO)
+		{
+			Transform[] componentsInChildren = parentGO.GetComponentsInChildren<Transform>(true);
+			for (int i = 0; i < componentsInChildren.Length; i++)
+			{
+				if (componentsInChildren[i].gameObject.name == aStr)
+				{
+					return componentsInChildren[i].gameObject;
+				}
+			}
+			return null;
 		}
 
 		
 		public static void DestroyChildren(this GameObject go, bool disabledOnly)
 		{
 			List<Transform> list = new List<Transform>();
-			foreach (object obj in go.transform)
+			IEnumerator enumerator = go.transform.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				if (!transform.gameObject.activeSelf || !disabledOnly)
+				while (enumerator.MoveNext())
 				{
-					list.Add(transform);
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					if (!transform.gameObject.activeSelf || !disabledOnly)
+					{
+						list.Add(transform);
+					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
 				}
 			}
 			for (int i = list.Count - 1; i >= 0; i--)
@@ -495,11 +535,11 @@ namespace OrbCreationExtensions
 		
 		public static Mesh[] CombineMeshes(this GameObject aGO)
 		{
-			return aGO.CombineMeshes(new string[0], true);
+			return aGO.CombineMeshes(new string[0]);
 		}
 
 		
-		public static Mesh[] CombineMeshes(this GameObject aGO, string[] skipSubmeshNames, bool makeNewGameObjectWhenRendererPresent = true)
+		public static Mesh[] CombineMeshes(this GameObject aGO, string[] skipSubmeshNames)
 		{
 			List<Mesh> list = new List<Mesh>();
 			MeshRenderer[] componentsInChildren = aGO.GetComponentsInChildren<MeshRenderer>(false);
@@ -511,7 +551,7 @@ namespace OrbCreationExtensions
 			bool flag = false;
 			if (aGO.GetComponent<SkinnedMeshRenderer>() != null || aGO.GetComponent<MeshRenderer>() != null)
 			{
-				flag = makeNewGameObjectWhenRendererPresent;
+				flag = true;
 			}
 			if (componentsInChildren2 != null && componentsInChildren2.Length > 0)
 			{
@@ -605,6 +645,7 @@ namespace OrbCreationExtensions
 					bool flag3 = false;
 					int num8 = 0;
 					int num9 = -1;
+					int num10 = 0;
 					foreach (SkinnedMeshRenderer skinnedMeshRenderer2 in componentsInChildren2)
 					{
 						if (skinnedMeshRenderer2.sharedMesh != null)
@@ -613,14 +654,45 @@ namespace OrbCreationExtensions
 							{
 								flag2 = true;
 							}
+							if (mesh == null && skinnedMeshRenderer2.sharedMesh.blendShapeCount > 0 && k <= num8 && !flag2)
+							{
+								mesh = UnityEngine.Object.Instantiate<Mesh>(skinnedMeshRenderer2.sharedMesh);
+								mesh.uv4 = null;
+								mesh.uv3 = null;
+								mesh.uv2 = null;
+								mesh.uv2 = null;
+								mesh.boneWeights = null;
+								mesh.colors32 = null;
+								mesh.triangles = null;
+								mesh.tangents = null;
+								mesh.normals = null;
+								mesh.vertices = null;
+								bool flag4 = GameObjectExtensions.MergeMeshInto(skinnedMeshRenderer2.sharedMesh, skinnedMeshRenderer2.bones, skinnedMeshRenderer2.sharedMaterials, list2, list3, list4, list5, list6, list7, list8, list11, list9, list10, dictionary, skinnedMeshRenderer2.transform.localScale.x * skinnedMeshRenderer2.transform.localScale.y * skinnedMeshRenderer2.transform.localScale.z < 0f, new Vector4(1f, 1f, 0f, 0f), skinnedMeshRenderer2.transform, gameObject2.transform, skinnedMeshRenderer2.gameObject.name + "_" + skinnedMeshRenderer2.sharedMesh.name, skipSubmeshNames);
+								if (flag4 && skinnedMeshRenderer2.gameObject != gameObject2)
+								{
+									skinnedMeshRenderer2.gameObject.SetActive(false);
+								}
+								num9 = num10;
+							}
+							num10++;
+						}
+					}
+					foreach (SkinnedMeshRenderer skinnedMeshRenderer3 in componentsInChildren2)
+					{
+						if (skinnedMeshRenderer3.sharedMesh != null)
+						{
+							if (list2.Count + skinnedMeshRenderer3.sharedMesh.vertexCount > 65534)
+							{
+								flag2 = true;
+							}
 							if (k <= num8 && !flag2)
 							{
 								if (num8 != num9)
 								{
-									bool flag4 = GameObjectExtensions.MergeMeshInto(skinnedMeshRenderer2.sharedMesh, skinnedMeshRenderer2.bones, skinnedMeshRenderer2.sharedMaterials, list2, list3, list4, list5, list6, list7, list8, list11, list9, list10, dictionary, skinnedMeshRenderer2.transform.localScale.x * skinnedMeshRenderer2.transform.localScale.y * skinnedMeshRenderer2.transform.localScale.z < 0f, new Vector4(1f, 1f, 0f, 0f), skinnedMeshRenderer2.transform, gameObject2.transform, skinnedMeshRenderer2.gameObject.name + "_" + skinnedMeshRenderer2.sharedMesh.name, skipSubmeshNames);
-									if (flag4 && skinnedMeshRenderer2.gameObject != gameObject2)
+									bool flag5 = GameObjectExtensions.MergeMeshInto(skinnedMeshRenderer3.sharedMesh, skinnedMeshRenderer3.bones, skinnedMeshRenderer3.sharedMaterials, list2, list3, list4, list5, list6, list7, list8, list11, list9, list10, dictionary, skinnedMeshRenderer3.transform.localScale.x * skinnedMeshRenderer3.transform.localScale.y * skinnedMeshRenderer3.transform.localScale.z < 0f, new Vector4(1f, 1f, 0f, 0f), skinnedMeshRenderer3.transform, gameObject2.transform, skinnedMeshRenderer3.gameObject.name + "_" + skinnedMeshRenderer3.sharedMesh.name, skipSubmeshNames);
+									if (flag5 && skinnedMeshRenderer3.gameObject != gameObject2)
 									{
-										skinnedMeshRenderer2.gameObject.SetActive(false);
+										skinnedMeshRenderer3.gameObject.SetActive(false);
 									}
 								}
 								flag3 = true;
@@ -642,8 +714,8 @@ namespace OrbCreationExtensions
 								}
 								if (k <= num8 && !flag2)
 								{
-									bool flag5 = GameObjectExtensions.MergeMeshInto(component2.sharedMesh, null, meshRenderer2.sharedMaterials, list2, list3, list4, list5, list6, list7, list8, list11, list9, list10, dictionary, component2.transform.localScale.x * component2.transform.localScale.y * component2.transform.localScale.z < 0f, meshRenderer2.lightmapScaleOffset, component2.transform, gameObject2.transform, component2.gameObject.name + "_" + component2.sharedMesh.name, skipSubmeshNames);
-									if (flag5)
+									bool flag6 = GameObjectExtensions.MergeMeshInto(component2.sharedMesh, null, meshRenderer2.sharedMaterials, list2, list3, list4, list5, list6, list7, list8, list11, list9, list10, dictionary, component2.transform.localScale.x * component2.transform.localScale.y * component2.transform.localScale.z < 0f, meshRenderer2.lightmapScaleOffset, component2.transform, gameObject2.transform, component2.gameObject.name + "_" + component2.sharedMesh.name, skipSubmeshNames);
+									if (flag6)
 									{
 										meshRenderer2.enabled = false;
 									}
@@ -656,7 +728,7 @@ namespace OrbCreationExtensions
 				}
 				else if (componentsInChildren != null && componentsInChildren.Length > 0)
 				{
-					int num10 = 0;
+					int num11 = 0;
 					foreach (MeshRenderer meshRenderer3 in componentsInChildren)
 					{
 						if (num4 < 0 || meshRenderer3.lightmapIndex < 0 || meshRenderer3.lightmapIndex > 253 || num4 == meshRenderer3.lightmapIndex)
@@ -664,10 +736,10 @@ namespace OrbCreationExtensions
 							MeshFilter component3 = meshRenderer3.gameObject.GetComponent<MeshFilter>();
 							if (component3 != null && component3.sharedMesh != null)
 							{
-								if (k <= num10 && list2.Count + component3.sharedMesh.vertexCount <= 65534)
+								if (k <= num11 && list2.Count + component3.sharedMesh.vertexCount <= 65534)
 								{
-									bool flag6 = GameObjectExtensions.MergeMeshInto(component3.sharedMesh, null, meshRenderer3.sharedMaterials, list2, list3, list4, list5, list6, list7, list8, list11, list9, list10, dictionary, component3.transform.localScale.x * component3.transform.localScale.y * component3.transform.localScale.z < 0f, meshRenderer3.lightmapScaleOffset, component3.transform, gameObject2.transform, component3.gameObject.name + "_" + component3.sharedMesh.name, skipSubmeshNames);
-									if (flag6 && component3.gameObject != gameObject2)
+									bool flag7 = GameObjectExtensions.MergeMeshInto(component3.sharedMesh, null, meshRenderer3.sharedMaterials, list2, list3, list4, list5, list6, list7, list8, list11, list9, list10, dictionary, component3.transform.localScale.x * component3.transform.localScale.y * component3.transform.localScale.z < 0f, meshRenderer3.lightmapScaleOffset, component3.transform, gameObject2.transform, component3.gameObject.name + "_" + component3.sharedMesh.name, skipSubmeshNames);
+									if (flag7 && component3.gameObject != gameObject2)
 									{
 										component3.gameObject.SetActive(false);
 										Transform parent = component3.gameObject.transform.parent;
@@ -678,7 +750,7 @@ namespace OrbCreationExtensions
 									}
 									k++;
 								}
-								num10++;
+								num11++;
 							}
 						}
 					}
@@ -693,68 +765,68 @@ namespace OrbCreationExtensions
 				{
 					mesh.normals = list3.ToArray();
 				}
-				bool flag7 = false;
-				for (int num11 = 0; num11 < list4.Count; num11++)
+				bool flag8 = false;
+				for (int num13 = 0; num13 < list4.Count; num13++)
 				{
-					if (list4[num11].x != 0f || list4[num11].y != 0f)
+					if (list4[num13].x != 0f || list4[num13].y != 0f)
 					{
-						flag7 = true;
+						flag8 = true;
 						break;
 					}
 				}
-				if (flag7)
+				if (flag8)
 				{
 					mesh.uv = list4.ToArray();
 				}
-				flag7 = false;
-				for (int num12 = 0; num12 < list5.Count; num12++)
+				flag8 = false;
+				for (int num14 = 0; num14 < list5.Count; num14++)
 				{
-					if (list5[num12].x != 0f || list5[num12].y != 0f)
+					if (list5[num14].x != 0f || list5[num14].y != 0f)
 					{
-						flag7 = true;
+						flag8 = true;
 						break;
 					}
 				}
-				if (flag7)
+				if (flag8)
 				{
 					mesh.uv2 = list5.ToArray();
 				}
-				flag7 = false;
-				for (int num13 = 0; num13 < list6.Count; num13++)
+				flag8 = false;
+				for (int num15 = 0; num15 < list6.Count; num15++)
 				{
-					if (list6[num13].x != 0f || list6[num13].y != 0f)
+					if (list6[num15].x != 0f || list6[num15].y != 0f)
 					{
-						flag7 = true;
+						flag8 = true;
 						break;
 					}
 				}
-				if (flag7)
+				if (flag8)
 				{
 					mesh.uv3 = list6.ToArray();
 				}
-				flag7 = false;
-				for (int num14 = 0; num14 < list7.Count; num14++)
+				flag8 = false;
+				for (int num16 = 0; num16 < list7.Count; num16++)
 				{
-					if (list7[num14].x != 0f || list7[num14].y != 0f)
+					if (list7[num16].x != 0f || list7[num16].y != 0f)
 					{
-						flag7 = true;
+						flag8 = true;
 						break;
 					}
 				}
-				if (flag7)
+				if (flag8)
 				{
 					mesh.uv4 = list7.ToArray();
 				}
-				flag7 = false;
-				for (int num15 = 0; num15 < list8.Count; num15++)
+				flag8 = false;
+				for (int num17 = 0; num17 < list8.Count; num17++)
 				{
-					if (list8[num15].r > 0 || list8[num15].g > 0 || list8[num15].b > 0)
+					if (list8[num17].r > 0 || list8[num17].g > 0 || list8[num17].b > 0)
 					{
-						flag7 = true;
+						flag8 = true;
 						break;
 					}
 				}
-				if (flag7)
+				if (flag8)
 				{
 					mesh.colors32 = list8.ToArray();
 				}
@@ -774,12 +846,12 @@ namespace OrbCreationExtensions
 					}
 				}
 				mesh.subMeshCount = dictionary.Keys.Count;
-				Material[] array6 = new Material[dictionary.Keys.Count];
-				int num16 = 0;
+				Material[] array7 = new Material[dictionary.Keys.Count];
+				int num18 = 0;
 				foreach (Material material in dictionary.Keys)
 				{
-					array6[num16] = material;
-					mesh.SetTriangles(dictionary[material].ToArray(), num16++);
+					array7[num18] = material;
+					mesh.SetTriangles(dictionary[material].ToArray(), num18++);
 				}
 				if (list3 == null || list3.Count <= 0)
 				{
@@ -789,15 +861,15 @@ namespace OrbCreationExtensions
 				mesh.RecalculateBounds();
 				if (componentsInChildren2 != null && componentsInChildren2.Length > 0)
 				{
-					SkinnedMeshRenderer skinnedMeshRenderer3 = gameObject2.GetComponent<SkinnedMeshRenderer>();
-					if (skinnedMeshRenderer3 == null)
+					SkinnedMeshRenderer skinnedMeshRenderer4 = gameObject2.GetComponent<SkinnedMeshRenderer>();
+					if (skinnedMeshRenderer4 == null)
 					{
-						skinnedMeshRenderer3 = gameObject2.AddComponent<SkinnedMeshRenderer>();
+						skinnedMeshRenderer4 = gameObject2.AddComponent<SkinnedMeshRenderer>();
 					}
-					skinnedMeshRenderer3.quality = componentsInChildren2[0].quality;
-					skinnedMeshRenderer3.sharedMesh = mesh;
-					skinnedMeshRenderer3.sharedMaterials = array6;
-					skinnedMeshRenderer3.bones = list9.ToArray();
+					skinnedMeshRenderer4.quality = componentsInChildren2[0].quality;
+					skinnedMeshRenderer4.sharedMesh = mesh;
+					skinnedMeshRenderer4.sharedMaterials = array7;
+					skinnedMeshRenderer4.bones = list9.ToArray();
 				}
 				else if (componentsInChildren != null && componentsInChildren.Length > 0)
 				{
@@ -810,7 +882,7 @@ namespace OrbCreationExtensions
 					{
 						meshRenderer4.lightmapIndex = num4;
 					}
-					meshRenderer4.sharedMaterials = array6;
+					meshRenderer4.sharedMaterials = array7;
 					MeshFilter meshFilter = gameObject2.GetComponent<MeshFilter>();
 					if (meshFilter == null)
 					{
@@ -944,30 +1016,30 @@ namespace OrbCreationExtensions
 			}
 			else
 			{
-				MeshFilter meshFilter = go.GetComponent<MeshFilter>();
-				if (meshFilter != null)
+				MeshFilter component = go.GetComponent<MeshFilter>();
+				if (component != null)
 				{
-					mesh = meshFilter.sharedMesh;
+					mesh = component.sharedMesh;
 				}
 			}
 			if (mesh == null)
 			{
 				throw new ApplicationException("No mesh found in " + go.name + ". Maybe you need to select a child object?");
 			}
-			for (int i = 0; i < maxWeights.Length; i++)
+			for (int j = 0; j < maxWeights.Length; j++)
 			{
-				if (maxWeights[i] <= 0f)
+				if (maxWeights[j] <= 0f)
 				{
 					throw new ApplicationException("MaxWeight should be more that 0 or else this operation will have no effect");
 				}
 			}
 			Mesh mesh2 = mesh;
 			Mesh[] lodMeshes = new Mesh[maxWeights.Length];
-			for (int j = 0; j < maxWeights.Length; j++)
+			for (int i = 0; i < maxWeights.Length; i++)
 			{
 				yield return null;
 				Hashtable lodInfo = new Hashtable();
-				lodInfo["maxWeight"] = maxWeights[j];
+				lodInfo["maxWeight"] = maxWeights[i];
 				lodInfo["removeSmallParts"] = removeSmallParts;
 				Vector3[] vs = mesh.vertices;
 				if (vs.Length <= 0)
@@ -991,17 +1063,17 @@ namespace OrbCreationExtensions
 				int[] subMeshOffsets = new int[mesh.subMeshCount];
 				if (mesh.subMeshCount > 1)
 				{
-					for (int s = 0; s < mesh.subMeshCount; s++)
+					for (int k = 0; k < mesh.subMeshCount; k++)
 					{
-						int[] subTs = mesh.GetTriangles(s);
-						int t;
-						for (t = 0; t < subTs.Length; t++)
+						int[] triangles = mesh.GetTriangles(k);
+						int l;
+						for (l = 0; l < triangles.Length; l++)
 						{
-							ts[subMeshOffsets[s] + t] = subTs[t];
+							ts[subMeshOffsets[k] + l] = triangles[l];
 						}
-						if (s + 1 < mesh.subMeshCount)
+						if (k + 1 < mesh.subMeshCount)
 						{
-							subMeshOffsets[s + 1] = subMeshOffsets[s] + t;
+							subMeshOffsets[k + 1] = subMeshOffsets[k] + l;
 						}
 					}
 				}
@@ -1018,15 +1090,19 @@ namespace OrbCreationExtensions
 				lodInfo["boneWeights"] = bws;
 				lodInfo["subMeshOffsets"] = subMeshOffsets;
 				lodInfo["meshBounds"] = meshBounds;
-				Thread thread = new Thread(new ParameterizedThreadStart(LODMaker.MakeLODMeshInBackground));
+				if (GameObjectExtensions.<>f__mg$cache0 == null)
+				{
+					GameObjectExtensions.<>f__mg$cache0 = new ParameterizedThreadStart(LODMaker.MakeLODMeshInBackground);
+				}
+				Thread thread = new Thread(GameObjectExtensions.<>f__mg$cache0);
 				thread.Start(lodInfo);
 				while (!lodInfo.ContainsKey("ready"))
 				{
 					yield return new WaitForSeconds(0.2f);
 				}
-				lodMeshes[j] = LODMaker.CreateNewMesh((Vector3[])lodInfo["vertices"], (Vector3[])lodInfo["normals"], (Vector2[])lodInfo["uv1s"], (Vector2[])lodInfo["uv2s"], (Vector2[])lodInfo["uv3s"], (Vector2[])lodInfo["uv4s"], (Color32[])lodInfo["colors32"], (int[])lodInfo["triangles"], (BoneWeight[])lodInfo["boneWeights"], (Matrix4x4[])lodInfo["bindposes"], (int[])lodInfo["subMeshOffsets"], recalcNormals);
-				mesh = lodMeshes[j];
-				go.transform.parent.gameObject.BroadcastMessage("LOD" + (j + 1) + "IsReady", go, SendMessageOptions.DontRequireReceiver);
+				lodMeshes[i] = LODMaker.CreateNewMesh((Vector3[])lodInfo["vertices"], (Vector3[])lodInfo["normals"], (Vector2[])lodInfo["uv1s"], (Vector2[])lodInfo["uv2s"], (Vector2[])lodInfo["uv3s"], (Vector2[])lodInfo["uv4s"], (Color32[])lodInfo["colors32"], (int[])lodInfo["triangles"], (BoneWeight[])lodInfo["boneWeights"], (Matrix4x4[])lodInfo["bindposes"], (int[])lodInfo["subMeshOffsets"], recalcNormals);
+				mesh = lodMeshes[i];
+				go.transform.parent.gameObject.BroadcastMessage("LOD" + (i + 1) + "IsReady", go, SendMessageOptions.DontRequireReceiver);
 			}
 			yield return null;
 			if (lodMeshes != null)
@@ -1036,9 +1112,9 @@ namespace OrbCreationExtensions
 					lodSwitcher = go.AddComponent<LODSwitcher>();
 				}
 				Array.Resize<Mesh>(ref lodMeshes, maxWeights.Length + 1);
-				for (int k = maxWeights.Length; k > 0; k--)
+				for (int m = maxWeights.Length; m > 0; m--)
 				{
-					lodMeshes[k] = lodMeshes[k - 1];
+					lodMeshes[m] = lodMeshes[m - 1];
 				}
 				lodMeshes[0] = mesh2;
 				lodSwitcher.lodMeshes = lodMeshes;
@@ -1127,31 +1203,18 @@ namespace OrbCreationExtensions
 					array3[k].transform.localRotation = Quaternion.identity;
 					array3[k].transform.localScale = Vector3.one;
 				}
-				if (component != null)
+				MeshFilter meshFilter = array3[k].GetComponent<MeshFilter>();
+				if (meshFilter == null)
 				{
-					SkinnedMeshRenderer skinnedMeshRenderer = array3[k].GetComponent<SkinnedMeshRenderer>();
-					if (skinnedMeshRenderer == null)
-					{
-						skinnedMeshRenderer = array3[k].AddComponent<SkinnedMeshRenderer>();
-					}
-					skinnedMeshRenderer.sharedMesh = array2[k];
-					skinnedMeshRenderer.sharedMaterials = sharedMaterials;
+					meshFilter = array3[k].AddComponent<MeshFilter>();
 				}
-				else
+				meshFilter.sharedMesh = array2[k];
+				MeshRenderer meshRenderer = array3[k].GetComponent<MeshRenderer>();
+				if (meshRenderer == null)
 				{
-					MeshFilter meshFilter = array3[k].GetComponent<MeshFilter>();
-					if (meshFilter == null)
-					{
-						meshFilter = array3[k].AddComponent<MeshFilter>();
-					}
-					meshFilter.sharedMesh = array2[k];
-					MeshRenderer meshRenderer = array3[k].GetComponent<MeshRenderer>();
-					if (meshRenderer == null)
-					{
-						meshRenderer = array3[k].AddComponent<MeshRenderer>();
-					}
-					meshRenderer.sharedMaterials = sharedMaterials;
+					meshRenderer = array3[k].AddComponent<MeshRenderer>();
 				}
+				meshRenderer.sharedMaterials = sharedMaterials;
 				array3[k].SetActive(k == 0);
 			}
 			lodswitcher.lodGameObjects = array3;
@@ -1176,10 +1239,19 @@ namespace OrbCreationExtensions
 				}
 			}
 			GameObject gameObject = new GameObject(go.name + "_$LodGrp");
-			gameObject.transform.position = go.transform.position;
-			gameObject.transform.rotation = go.transform.rotation;
+			if (go.transform.parent != null)
+			{
+				gameObject.transform.SetParent(go.transform.parent);
+			}
+			gameObject.transform.localPosition = go.transform.localPosition;
+			gameObject.transform.localRotation = go.transform.localRotation;
 			gameObject.transform.localScale = go.transform.localScale;
-			gameObject.transform.SetParent(go.transform.parent);
+			GameObject gameObject2 = UnityEngine.Object.Instantiate<GameObject>(go);
+			gameObject2.name = go.name + "_$Lod:0";
+			gameObject2.transform.SetParent(gameObject.transform);
+			gameObject2.transform.localPosition = Vector3.zero;
+			gameObject2.transform.localRotation = Quaternion.identity;
+			gameObject2.transform.localScale = Vector3.one;
 			if (lodgroup == null)
 			{
 				lodgroup = gameObject.AddComponent<LODGroup>();
@@ -1196,52 +1268,56 @@ namespace OrbCreationExtensions
 				}
 			}
 			LOD[] array = new LOD[maxWeights.Length + 1];
-			array[0] = new LOD(relativeTransitionHeights[0], go.GetComponentsInChildren<MeshRenderer>(false));
+			array[0] = new LOD(relativeTransitionHeights[0], gameObject2.GetComponentsInChildren<MeshRenderer>(false));
 			List<Mesh> list = new List<Mesh>();
 			Mesh[] array2 = go.GetMeshes(false);
+			for (int j = 0; j < array2.Length; j++)
+			{
+				list.Add(array2[j]);
+			}
 			float num2 = 0f;
-			for (int j = 1; j < array.Length; j++)
+			for (int k = 1; k < array.Length; k++)
 			{
 				Mesh[] array3 = new Mesh[array2.Length];
-				for (int k = 0; k < array2.Length; k++)
+				for (int l = 0; l < array2.Length; l++)
 				{
-					Mesh mesh = array2[k];
+					Mesh mesh = array2[l];
 					if (nrOfSteps < 1)
 					{
 						nrOfSteps = 1;
 					}
-					for (int l = 0; l < nrOfSteps; l++)
+					for (int m = 0; m < nrOfSteps; m++)
 					{
-						float num3 = maxWeights[j - 1] - num2;
-						mesh = mesh.MakeLODMesh((float)(l + 1) * (num3 / (float)nrOfSteps) + num2, recalcNormals, removeSmallParts, protectNormals, protectUvs, protectSubMeshesAndSharpEdges, smallTrianglesFirst);
+						float num3 = maxWeights[k - 1] - num2;
+						mesh = mesh.MakeLODMesh((float)(m + 1) * (num3 / (float)nrOfSteps) + num2, recalcNormals, removeSmallParts, protectNormals, protectUvs, protectSubMeshesAndSharpEdges, smallTrianglesFirst);
 					}
-					num2 = maxWeights[j - 1];
-					array3[k] = mesh;
+					num2 = maxWeights[k - 1];
+					array3[l] = mesh;
 					mesh.name = string.Concat(new object[]
 					{
 						go.name,
 						"_",
-						k,
+						l,
 						"_LOD",
-						j
+						k
 					});
 					list.Add(mesh);
 				}
-				GameObject gameObject2 = UnityEngine.Object.Instantiate<GameObject>(go);
-				gameObject2.name = go.name + "_$Lod:" + j;
-				gameObject2.transform.SetParent(gameObject.transform);
-				gameObject2.transform.localPosition = go.transform.localPosition;
-				gameObject2.transform.localRotation = go.transform.localRotation;
-				gameObject2.transform.localScale = go.transform.localScale;
-				gameObject2.SetMeshes(array3);
-				float screenRelativeTransitionHeight = (j >= relativeTransitionHeights.Length) ? 0f : relativeTransitionHeights[j];
-				array[j] = new LOD(screenRelativeTransitionHeight, gameObject2.GetComponentsInChildren<MeshRenderer>(false));
+				GameObject gameObject3 = UnityEngine.Object.Instantiate<GameObject>(go);
+				gameObject3.name = go.name + "_$Lod:" + k;
+				gameObject3.transform.SetParent(gameObject.transform);
+				gameObject3.transform.localPosition = Vector3.zero;
+				gameObject3.transform.localRotation = Quaternion.identity;
+				gameObject3.transform.localScale = new Vector3(1f, 1f, 1f);
+				gameObject3.SetMeshes(array3);
+				float screenRelativeTransitionHeight = (k >= relativeTransitionHeights.Length) ? 0f : relativeTransitionHeights[k];
+				array[k] = new LOD(screenRelativeTransitionHeight, gameObject3.GetComponentsInChildren<MeshRenderer>(false));
 				array2 = array3;
 			}
-			go.SetActive(false);
 			lodgroup.SetLODs(array);
 			lodgroup.RecalculateBounds();
 			lodgroup.ForceLOD(-1);
+			go.SetActive(false);
 			return list.ToArray();
 		}
 
@@ -1318,10 +1394,10 @@ namespace OrbCreationExtensions
 			}
 			else
 			{
-				MeshFilter meshFilter = go.GetComponent<MeshFilter>();
-				if (meshFilter != null)
+				MeshFilter component = go.GetComponent<MeshFilter>();
+				if (component != null)
 				{
-					mesh = meshFilter.sharedMesh;
+					mesh = component.sharedMesh;
 				}
 			}
 			if (mesh == null)
@@ -1353,17 +1429,17 @@ namespace OrbCreationExtensions
 			int[] subMeshOffsets = new int[mesh.subMeshCount];
 			if (mesh.subMeshCount > 1)
 			{
-				for (int s = 0; s < mesh.subMeshCount; s++)
+				for (int i = 0; i < mesh.subMeshCount; i++)
 				{
-					int[] subTs = mesh.GetTriangles(s);
-					int t;
-					for (t = 0; t < subTs.Length; t++)
+					int[] triangles = mesh.GetTriangles(i);
+					int j;
+					for (j = 0; j < triangles.Length; j++)
 					{
-						ts[subMeshOffsets[s] + t] = subTs[t];
+						ts[subMeshOffsets[i] + j] = triangles[j];
 					}
-					if (s + 1 < mesh.subMeshCount)
+					if (i + 1 < mesh.subMeshCount)
 					{
-						subMeshOffsets[s + 1] = subMeshOffsets[s] + t;
+						subMeshOffsets[i + 1] = subMeshOffsets[i] + j;
 					}
 				}
 			}
@@ -1380,7 +1456,11 @@ namespace OrbCreationExtensions
 			lodInfo["boneWeights"] = bws;
 			lodInfo["subMeshOffsets"] = subMeshOffsets;
 			lodInfo["meshBounds"] = meshBounds;
-			Thread thread = new Thread(new ParameterizedThreadStart(LODMaker.MakeLODMeshInBackground));
+			if (GameObjectExtensions.<>f__mg$cache1 == null)
+			{
+				GameObjectExtensions.<>f__mg$cache1 = new ParameterizedThreadStart(LODMaker.MakeLODMeshInBackground);
+			}
+			Thread thread = new Thread(GameObjectExtensions.<>f__mg$cache1);
 			thread.Start(lodInfo);
 			while (!lodInfo.ContainsKey("ready"))
 			{
@@ -1657,12 +1737,9 @@ namespace OrbCreationExtensions
 			{
 				for (int j = 0; j < 4; j++)
 				{
-					int row2;
-					int row = row2 = i;
-					int column2;
-					int column = column2 = j;
-					float num = matrix4x[row2, column2];
-					matrix4x[row, column] = num * boneWeight;
+					int row;
+					int column;
+					matrix4x[row = i, column = j] = matrix4x[row, column] * boneWeight;
 				}
 			}
 			return matrix4x.MultiplyPoint3x4(vertex);
@@ -1676,15 +1753,20 @@ namespace OrbCreationExtensions
 			{
 				for (int j = 0; j < 4; j++)
 				{
-					int row2;
-					int row = row2 = i;
-					int column2;
-					int column = column2 = j;
-					float num = inverse[row2, column2];
-					inverse[row, column] = num * boneWeight;
+					int row;
+					int column;
+					inverse[row = i, column = j] = inverse[row, column] * boneWeight;
 				}
 			}
 			return inverse.MultiplyPoint3x4(vertex);
 		}
+
+		
+		[CompilerGenerated]
+		private static ParameterizedThreadStart <>f__mg$cache0;
+
+		
+		[CompilerGenerated]
+		private static ParameterizedThreadStart <>f__mg$cache1;
 	}
 }

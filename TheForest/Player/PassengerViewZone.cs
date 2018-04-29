@@ -47,10 +47,10 @@ namespace TheForest.Player
 			}
 			if (loader && loader.Instance)
 			{
-				PassengerView pv = loader.Instance.GetComponent<PassengerView>();
-				if (pv)
+				PassengerView component = loader.Instance.GetComponent<PassengerView>();
+				if (component)
 				{
-					pv._id = this._passengerIds[index];
+					component._id = this._passengerIds[index];
 					loader.Instance.GetComponent<Collider>().enabled = true;
 				}
 			}

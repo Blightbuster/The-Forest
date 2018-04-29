@@ -70,7 +70,7 @@ namespace TheForest.Buildings.World
 			this._parts.RemoveRange(this._partCount, this._parts.Count - this._partCount);
 			if (BoltNetwork.isRunning)
 			{
-				while (!this.entity.isAttached)
+				while (!base.entity.isAttached)
 				{
 					yield return null;
 				}
@@ -138,7 +138,7 @@ namespace TheForest.Buildings.World
 		private void CastForItem(int itemId, LayerMask layers)
 		{
 			RaycastHit hit;
-			if (Physics.SphereCast(LocalPlayer.MainCamTr.position, 0.4f, LocalPlayer.MainCamTr.forward, out hit, 4f, layers) && hit.transform.GetComponentInParent<EffigyArchitect>() == this)
+			if (Physics.SphereCast(LocalPlayer.MainCamTr.position, 0.4f, LocalPlayer.MainCamTr.forward, out hit, 4f, layers, QueryTriggerInteraction.Ignore) && hit.transform.GetComponentInParent<EffigyArchitect>() == this)
 			{
 				this.UpdateCurrentPreviewItem(itemId);
 				this.PositionCurrentPreviewItem(hit);
@@ -160,7 +160,7 @@ namespace TheForest.Buildings.World
 				{
 					this._rotationAngle = 0f;
 					this._currentPreviewTr = UnityEngine.Object.Instantiate<Transform>(item._bareItemPrefab);
-					this._currentPreviewTr.GetComponentInChildren<Renderer>().sharedMaterial = Prefabs.Instance.GhostClear;
+					this._currentPreviewTr.GetComponentInChildren<Renderer>().sharedMaterial = Prefabs.Instance.GetGhostClear();
 					UnityEngine.Object.Destroy(this._currentPreviewTr.GetComponentInChildren<Collider>());
 					this._currentPreviewItemId = itemId;
 					this._enableEffigy.SendMessage("GrabExit");
@@ -367,12 +367,6 @@ namespace TheForest.Buildings.World
 		}
 
 		
-		private const int TorsoFakeId = -2;
-
-		
-		private const float MaxEffigyRange = 80f;
-
-		
 		[ItemIdPicker(Item.Types.Equipment)]
 		public int _baseItemId;
 
@@ -408,6 +402,12 @@ namespace TheForest.Buildings.World
 		
 		[SerializeThis]
 		private int _partCount;
+
+		
+		private const int TorsoFakeId = -2;
+
+		
+		private const float MaxEffigyRange = 80f;
 
 		
 		[Serializable]

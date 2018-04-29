@@ -12,6 +12,11 @@ namespace TheForest.UI
 		{
 			if (this._target)
 			{
+				if (this._inHud)
+				{
+					base.transform.position = this._target.position + this._worldOffsetHud;
+					return;
+				}
 				Vector3 position;
 				if (this._inBook)
 				{
@@ -24,16 +29,16 @@ namespace TheForest.UI
 				}
 				else
 				{
-					position = LocalPlayer.MainCam.WorldToViewportPoint(this._target.position + this._worldOffset);
+					position = LocalPlayer.MainCam.WorldToViewportPoint(this._target.position + this._worldOffset - LocalPlayer.MainCamTr.up * this._verticalOffsetRatio) + this._viewportOffsetWorld;
 					if (this._target2)
 					{
-						Vector3 vector = LocalPlayer.MainCam.WorldToViewportPoint(this._target2.position + this._worldOffset);
+						Vector3 vector = LocalPlayer.MainCam.WorldToViewportPoint(this._target2.position + this._worldOffset - LocalPlayer.MainCamTr.up * this._verticalOffsetRatio) + this._viewportOffsetWorld;
 						if (vector.z > 0.25f && (vector.z < position.z || position.z < 0.5f || position.x < 0f || position.x > 1f || position.y < 0f || position.y > 1f))
 						{
 							position = vector;
 						}
 					}
-					if (position.z > 0f)
+					if (position.z > 0f || this._inPlane)
 					{
 						position.z = Mathf.Clamp(position.z, this._minDepth, this._maxDepth);
 					}
@@ -95,8 +100,6 @@ namespace TheForest.UI
 			this._target = null;
 			this._target2 = null;
 			base.enabled = false;
-			this._maxDepth = float.PositiveInfinity;
-			this._minDepth = 1.45f;
 		}
 
 		
@@ -125,16 +128,31 @@ namespace TheForest.UI
 		public float _maxDepth = float.PositiveInfinity;
 
 		
+		public Vector3 _viewportOffsetWorld;
+
+		
 		public Vector3 _viewportOffsetBook;
 
 		
+		public Vector3 _worldOffsetHud;
+
+		
 		public float _depthRatioBook = 5f;
+
+		
+		public float _verticalOffsetRatio = 1f;
+
+		
+		public bool _inHud;
 
 		
 		public bool _inBook;
 
 		
 		public bool _inInventory;
+
+		
+		public bool _inPlane;
 
 		
 		public bool _scaleDepthByMonitorHeight;

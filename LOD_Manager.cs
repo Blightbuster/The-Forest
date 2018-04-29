@@ -90,8 +90,8 @@ public class LOD_Manager : MonoBehaviour
 			}
 			this.currentQuality = Mathf.Max(0.33f, this.currentQuality);
 		}
-		float to = LocalPlayer.IsInOutsideWorld ? 1f : 0.25f;
-		this.currentCaveQuality = Mathf.Lerp(this.currentCaveQuality, to, 0.02f);
+		float b = LocalPlayer.IsInOutsideWorld ? 1f : 0.25f;
+		this.currentCaveQuality = Mathf.Lerp(this.currentCaveQuality, b, 0.02f);
 		if (!this.FpsQualityScaling)
 		{
 			this.currentQuality = 1f;

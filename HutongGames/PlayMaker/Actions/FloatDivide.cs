@@ -32,14 +32,14 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		[Tooltip("The float variable to divide.")]
 		public FsmFloat floatVariable;
 
 		
-		[Tooltip("Divide the float variable by this value.")]
 		[RequiredField]
+		[Tooltip("Divide the float variable by this value.")]
 		public FsmFloat divideBy;
 
 		

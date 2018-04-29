@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the value of a Float Variable.")]
 	[ActionCategory(ActionCategory.Math)]
+	[Tooltip("Sets the value of a Float Variable.")]
 	public class SetFloatValue : FsmStateAction
 	{
 		

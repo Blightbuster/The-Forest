@@ -12,11 +12,18 @@ namespace TheForest.UI
 	public class InputMappingIcons : MonoBehaviour
 	{
 		
-		private void Start()
+		private void Awake()
 		{
 			InputMappingIcons.TextIconBacking = this._textIconBacking;
-			InputMappingIcons.TexturesByName = this._textures.ToDictionary((Texture2D t) => t.name);
+			InputMappingIcons.TexturesByName = (from t in this._textures
+			where t != null
+			select t).ToDictionary((Texture2D t) => t.name);
 			InputMappingIcons.Version = 1;
+		}
+
+		
+		private void Start()
+		{
 			InputMappingIcons.RefreshMappings();
 		}
 
@@ -28,6 +35,20 @@ namespace TheForest.UI
 				Controller lastActiveController = TheForest.Utils.Input.player.controllers.GetLastActiveController();
 				if (lastActiveController != InputMappingIcons.LastController)
 				{
+					if (InputMappingIcons.LastController != null)
+					{
+						Debug.Log(string.Concat(new object[]
+						{
+							"===> Changing gamepad icons: currentController=",
+							lastActiveController.name,
+							", LastController=",
+							InputMappingIcons.LastController
+						}));
+					}
+					else
+					{
+						Debug.Log("===> Init gamepad icons: currentController=" + lastActiveController.name);
+					}
 					InputMappingIcons.LastController = lastActiveController;
 					InputMappingIcons.RefreshMappings();
 					InputMappingIcons.Version++;
@@ -37,6 +58,14 @@ namespace TheForest.UI
 			{
 				this._usingGamePadVersion = TheForest.Utils.Input.IsGamePad;
 				InputMappingIcons.Version++;
+				if (TheForest.Utils.Input.IsGamePad)
+				{
+					Debug.Log("===> Switching from KM to gamepad     Version=" + InputMappingIcons.Version);
+				}
+				else
+				{
+					Debug.Log("===> Switching from gamepad to KM     Version = " + InputMappingIcons.Version);
+				}
 			}
 		}
 
@@ -50,35 +79,9 @@ namespace TheForest.UI
 			string text = InputMappingIcons.KeyboardMappings[(int)action];
 			if (text != null)
 			{
-				if (InputMappingIcons.<>f__switch$map16 == null)
+				if (text == "Right_Mouse_Button" || text == "Left_Mouse_Button" || text == "Mouse_Horizontal" || text == "Mouse_Vertical")
 				{
-					InputMappingIcons.<>f__switch$map16 = new Dictionary<string, int>(4)
-					{
-						{
-							"Right_Mouse_Button",
-							0
-						},
-						{
-							"Left_Mouse_Button",
-							0
-						},
-						{
-							"Mouse_Horizontal",
-							0
-						},
-						{
-							"Mouse_Vertical",
-							0
-						}
-					};
-				}
-				int num;
-				if (InputMappingIcons.<>f__switch$map16.TryGetValue(text, out num))
-				{
-					if (num == 0)
-					{
-						return false;
-					}
+					return false;
 				}
 			}
 			return true;
@@ -94,35 +97,9 @@ namespace TheForest.UI
 			string text = InputMappingIcons.KeyboardMappings[(int)action];
 			if (text != null)
 			{
-				if (InputMappingIcons.<>f__switch$map17 == null)
+				if (text == "Right_Mouse_Button" || text == "Left_Mouse_Button" || text == "Mouse_Horizontal" || text == "Mouse_Vertical")
 				{
-					InputMappingIcons.<>f__switch$map17 = new Dictionary<string, int>(4)
-					{
-						{
-							"Right_Mouse_Button",
-							0
-						},
-						{
-							"Left_Mouse_Button",
-							0
-						},
-						{
-							"Mouse_Horizontal",
-							0
-						},
-						{
-							"Mouse_Vertical",
-							0
-						}
-					};
-				}
-				int num;
-				if (InputMappingIcons.<>f__switch$map17.TryGetValue(text, out num))
-				{
-					if (num == 0)
-					{
-						return InputMappingIcons.TexturesByName[InputMappingIcons.KeyboardMappings[(int)action]];
-					}
+					return InputMappingIcons.TexturesByName[InputMappingIcons.KeyboardMappings[(int)action]];
 				}
 			}
 			return InputMappingIcons.TextIconBacking;
@@ -135,13 +112,42 @@ namespace TheForest.UI
 			{
 				return InputMappingIcons.GamepadMappings[(int)action];
 			}
+			string text = InputMappingIcons.KeyboardMappings[(int)action];
+			if (text != null)
+			{
+				if (text == "Space")
+				{
+					return UiTranslationDatabase.TranslateKey("SPACE", "SPACE", true);
+				}
+			}
 			return InputMappingIcons.KeyboardMappings[(int)action];
+		}
+
+		
+		public static string GetBackingFor(InputMappingIcons.Actions action)
+		{
+			if (TheForest.Utils.Input.IsGamePad)
+			{
+				return InputMappingIcons.GamepadMappings[(int)action];
+			}
+			string text = InputMappingIcons.KeyboardMappings[(int)action];
+			if (text != null)
+			{
+				if (text == "Space")
+				{
+					return "space_button";
+				}
+			}
+			return InputMappingIcons.TextIconBacking.name;
 		}
 
 		
 		public static void RefreshMappings()
 		{
-			Debug.Log("Refreshing Input Mapping Icons");
+			if (SteamDSConfig.isDedicatedServer)
+			{
+				return;
+			}
 			foreach (ControllerMap controllerMap in ReInput.players.GetPlayer(0).controllers.maps.GetAllMaps(ControllerType.Mouse))
 			{
 				foreach (ActionElementMap actionElementMap in controllerMap.AllMaps)
@@ -176,37 +182,19 @@ namespace TheForest.UI
 							string text2;
 							if (elementIdentifierName != null)
 							{
-								if (InputMappingIcons.<>f__switch$map18 == null)
+								if (elementIdentifierName == "Left Control")
 								{
-									InputMappingIcons.<>f__switch$map18 = new Dictionary<string, int>(2)
-									{
-										{
-											"Left Control",
-											0
-										},
-										{
-											"Right Control",
-											1
-										}
-									};
+									text2 = "LCtrl";
+									goto IL_1FD;
 								}
-								int num;
-								if (InputMappingIcons.<>f__switch$map18.TryGetValue(elementIdentifierName, out num))
+								if (elementIdentifierName == "Right Control")
 								{
-									if (num == 0)
-									{
-										text2 = "LCtrl";
-										goto IL_22B;
-									}
-									if (num == 1)
-									{
-										text2 = "RCtrl";
-										goto IL_22B;
-									}
+									text2 = "RCtrl";
+									goto IL_1FD;
 								}
 							}
 							text2 = actionElementMap2.elementIdentifierName;
-							IL_22B:
+							IL_1FD:
 							InputAction action2 = ReInput.mapping.GetAction(actionElementMap2.actionId);
 							if (action2.type == InputActionType.Axis)
 							{
@@ -233,21 +221,25 @@ namespace TheForest.UI
 							{
 								try
 								{
-									string elementIdentifierName = actionElementMap3.elementIdentifierName;
+									string elementIdentifierName2 = actionElementMap3.elementIdentifierName;
 									string text3;
-									switch (elementIdentifierName)
+									if (elementIdentifierName2 != null)
 									{
-									case "View":
-										text3 = "Back";
-										goto IL_4B4;
-									case "Right Stick X":
-									case "Right Stick Y":
-										text3 = "Right_Stick_Button";
-										goto IL_4B4;
-									case "Left Stick X":
-									case "Left Stick Y":
-										text3 = "Left_Stick_Button";
-										goto IL_4B4;
+										if (elementIdentifierName2 == "View")
+										{
+											text3 = "Back";
+											goto IL_45B;
+										}
+										if (elementIdentifierName2 == "Right Stick X" || elementIdentifierName2 == "Right Stick Y")
+										{
+											text3 = "Right_Stick_Button";
+											goto IL_45B;
+										}
+										if (elementIdentifierName2 == "Left Stick X" || elementIdentifierName2 == "Left Stick Y")
+										{
+											text3 = "Left_Stick_Button";
+											goto IL_45B;
+										}
 									}
 									text3 = actionElementMap3.elementIdentifierName.Replace(" X", string.Empty).Replace(" Y", string.Empty).TrimEnd(new char[]
 									{
@@ -255,14 +247,21 @@ namespace TheForest.UI
 										'+',
 										'-'
 									}).Replace(' ', '_');
-									IL_4B4:
+									IL_45B:
 									InputAction action3 = ReInput.mapping.GetAction(actionElementMap3.actionId);
 									if (flag)
 									{
 										text3 = "PS4_" + text3;
 										if (action3.type == InputActionType.Axis)
 										{
-											InputMappingIcons.GamepadMappings[(int)Enum.Parse(typeof(InputMappingIcons.Actions), ((actionElementMap3.axisContribution != Pole.Positive) ? action3.negativeDescriptiveName : action3.positiveDescriptiveName).Replace(' ', '_'))] = text3;
+											if (!string.IsNullOrEmpty(action3.positiveDescriptiveName) || !string.IsNullOrEmpty(action3.negativeDescriptiveName))
+											{
+												InputMappingIcons.GamepadMappings[(int)Enum.Parse(typeof(InputMappingIcons.Actions), ((actionElementMap3.axisContribution != Pole.Positive) ? action3.negativeDescriptiveName : action3.positiveDescriptiveName).Replace(' ', '_'))] = text3;
+											}
+											else
+											{
+												InputMappingIcons.GamepadMappings[(int)Enum.Parse(typeof(InputMappingIcons.Actions), action3.name.Replace(' ', '_'))] = text3;
+											}
 										}
 										InputMappingIcons.GamepadMappings[(int)Enum.Parse(typeof(InputMappingIcons.Actions), action3.name.Replace(' ', '_'))] = text3;
 									}
@@ -412,7 +411,15 @@ namespace TheForest.UI
 			
 			ItemSlot4,
 			
-			ScrollX
+			ScrollX,
+			
+			Rebind,
+			
+			SetOption,
+			
+			RestoreDefaults,
+			
+			SaveBindings
 		}
 	}
 }

@@ -25,10 +25,10 @@ namespace TheForest.Buildings.World
 				this._exploding = true;
 				if (!BoltNetwork.isClient)
 				{
-					BuildingHealth be = base.GetComponent<BuildingHealth>();
-					if (be)
+					BuildingHealth component = base.GetComponent<BuildingHealth>();
+					if (component)
 					{
-						be.LocalizedHit(new LocalizedHitData
+						component.LocalizedHit(new LocalizedHitData
 						{
 							_damage = explodeData.explode.damage * this.GetDamageRatio(explodeData.distance, explodeData.explode.radius),
 							_position = explodeData.explode.transform.position,
@@ -38,10 +38,10 @@ namespace TheForest.Buildings.World
 				}
 				else
 				{
-					FoundationHealth fh = base.GetComponent<FoundationHealth>();
-					if (fh)
+					FoundationHealth component2 = base.GetComponent<FoundationHealth>();
+					if (component2)
 					{
-						fh.Distort(new LocalizedHitData
+						component2.Distort(new LocalizedHitData
 						{
 							_damage = explodeData.explode.damage * this.GetDamageRatio(explodeData.distance, explodeData.explode.radius),
 							_position = explodeData.explode.transform.position,

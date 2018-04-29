@@ -66,18 +66,18 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("Optional name of FSM on Game Object")]
 		[UIHint(UIHint.FsmName)]
+		[Tooltip("Optional name of FSM on Game Object")]
 		public FsmString fsmName;
 
 		
-		[UIHint(UIHint.FsmFloat)]
 		[RequiredField]
+		[UIHint(UIHint.FsmFloat)]
 		public FsmString variableName;
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmFloat storeValue;
 
 		

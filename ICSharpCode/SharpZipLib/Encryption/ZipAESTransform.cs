@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 namespace ICSharpCode.SharpZipLib.Encryption
 {
 	
-	internal class ZipAESTransform : IDisposable, ICryptoTransform
+	internal class ZipAESTransform : ICryptoTransform, IDisposable
 	{
 		
 		public ZipAESTransform(string key, byte[] saltBytes, int blockSize, bool writeMode)

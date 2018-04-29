@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the Rotation of a Game Object. To leave any axis unchanged, set variable to 'None'.")]
 	[ActionCategory(ActionCategory.Transform)]
+	[Tooltip("Sets the Rotation of a Game Object. To leave any axis unchanged, set variable to 'None'.")]
 	public class SetRotation : FsmStateAction
 	{
 		
@@ -117,9 +117,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmQuaternion quaternion;
 
 		
-		[Tooltip("Use euler angles stored in a Vector3 variable, and/or set each axis below.")]
-		[Title("Euler Angles")]
 		[UIHint(UIHint.Variable)]
+		[Title("Euler Angles")]
+		[Tooltip("Use euler angles stored in a Vector3 variable, and/or set each axis below.")]
 		public FsmVector3 vector;
 
 		

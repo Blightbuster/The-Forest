@@ -86,16 +86,16 @@ public class EatCooked : EntityBehaviour
 				LocalPlayer.Sfx.PlayDrink();
 				LocalPlayer.Stats.Thirst = 0f;
 			}
-			if (BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+			if (BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 			{
-				if (this.entity.isOwner)
+				if (base.entity.isOwner)
 				{
-					BoltNetwork.Destroy(this.entity);
+					BoltNetwork.Destroy(base.entity);
 				}
 				else
 				{
 					RequestDestroy requestDestroy = RequestDestroy.Create(GlobalTargets.Everyone);
-					requestDestroy.Entity = this.entity;
+					requestDestroy.Entity = base.entity;
 					requestDestroy.Send();
 				}
 			}

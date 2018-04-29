@@ -78,6 +78,10 @@ namespace TheForest.World
 		
 		public void GotoRemotePoint()
 		{
+			if (this._useLimit > 0 && this._useCount >= this._useLimit)
+			{
+				return;
+			}
 			float num = Vector3.Distance(this._rb.position, this._upPosition.position);
 			float num2 = Vector3.Distance(this._rb.position, this._downPosition.position);
 			if (num > num2)
@@ -93,6 +97,7 @@ namespace TheForest.World
 		
 		private IEnumerator Goto(Vector3 targetPos, Quaternion targetRotation)
 		{
+			this._useCount++;
 			this._moving = true;
 			this.ToggleGoArray(this._movingGos, this._moving);
 			this.ToggleGoArray(this._idleGos, !this._moving);
@@ -108,16 +113,24 @@ namespace TheForest.World
 				yield return YieldPresets.WaitFiveSeconds;
 				this._onFinishKeycard.Invoke();
 			}
-			this._onStartMoving.Invoke();
 			LocalPlayer.ImageEffectOptimizer.SkipMotionBlur = true;
 			yield return null;
-			LocalPlayer.Transform.parent = this._rb.transform;
+			GameObject trackerGo = new GameObject("_tracker_");
+			trackerGo.transform.position = LocalPlayer.Transform.position;
+			trackerGo.transform.rotation = LocalPlayer.Transform.rotation;
+			trackerGo.transform.parent = this._rb.transform;
 			this._rb.transform.position = targetPos;
 			this._rb.transform.rotation = targetRotation;
-			LocalPlayer.Transform.parent = null;
-			LocalPlayer.CamFollowHead.transform.localRotation = LocalPlayer.CamFollowHead.transform.parent.localRotation;
+			LocalPlayer.MainRotator.enabled = false;
+			LocalPlayer.Transform.position = trackerGo.transform.position;
+			LocalPlayer.Transform.rotation = trackerGo.transform.rotation;
+			LocalPlayer.MainRotator.resetOriginalRotation = true;
+			LocalPlayer.MainRotator.enabled = true;
 			LocalPlayer.PlayerBase.SendMessage("ForcedUpdate");
 			yield return YieldPresets.WaitForFixedUpdate;
+			LocalPlayer.Transform.position = trackerGo.transform.position;
+			UnityEngine.Object.Destroy(trackerGo);
+			this._onStartMoving.Invoke();
 			yield return null;
 			LocalPlayer.ImageEffectOptimizer.SkipMotionBlur = false;
 			yield return new WaitForSeconds(this._duration);
@@ -197,6 +210,15 @@ namespace TheForest.World
 
 		
 		public int _sequenceStage;
+
+		
+		public TextMesh[] _stateTextDebugReadout;
+
+		
+		public int _useLimit;
+
+		
+		private int _useCount;
 
 		
 		private bool _moving;

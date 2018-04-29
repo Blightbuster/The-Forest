@@ -1,16 +1,22 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.PostProcessing;
 
 
-[ExecuteInEditMode]
 public class InventoryImageEffectOptimizer : MonoBehaviour
 {
 	
-	private void OnEnable()
+	private void Awake()
 	{
 		this.MyCamera = base.gameObject.GetComponent<Camera>();
-		this.ssao = base.GetComponent<SESSAO>();
+		this.amplifyOcclusion = base.GetComponent<AmplifyOcclusionEffect>();
 		this.bleedEffect = base.GetComponent<BleedBehavior>();
+		PostProcessingBehaviour component = base.GetComponent<PostProcessingBehaviour>();
+		if (component != null && component.profile != null && InventoryImageEffectOptimizer._instancedProfile == null)
+		{
+			component.profile = UnityEngine.Object.Instantiate<PostProcessingProfile>(component.profile);
+			InventoryImageEffectOptimizer._instancedProfile = component.profile;
+		}
 	}
 
 	
@@ -21,21 +27,59 @@ public class InventoryImageEffectOptimizer : MonoBehaviour
 		{
 			ssaotechnique = TheForestQualitySettings.SSAOTechnique.Off;
 		}
-		if (this.ssao)
+		if (this.amplifyOcclusion && (TheForestQualitySettings.UserSettings.SSAOType == TheForestQualitySettings.SSAOTypes.AMPLIFY || !InventoryImageEffectOptimizer._instancedProfile))
 		{
-			this.ssao.enabled = (ssaotechnique != TheForestQualitySettings.SSAOTechnique.Off);
-			TheForestQualitySettings.SSAOTechnique ssaotechnique2 = ssaotechnique;
-			if (ssaotechnique2 != TheForestQualitySettings.SSAOTechnique.Ultra)
+			this.amplifyOcclusion.enabled = (ssaotechnique != TheForestQualitySettings.SSAOTechnique.Off);
+			if (InventoryImageEffectOptimizer._instancedProfile)
 			{
-				if (ssaotechnique2 == TheForestQualitySettings.SSAOTechnique.High)
+				InventoryImageEffectOptimizer._instancedProfile.ambientOcclusion.enabled = false;
+			}
+			if (ssaotechnique != TheForestQualitySettings.SSAOTechnique.Ultra)
+			{
+				if (ssaotechnique != TheForestQualitySettings.SSAOTechnique.High)
 				{
-					this.ssao.halfSampling = true;
+					if (ssaotechnique == TheForestQualitySettings.SSAOTechnique.Low)
+					{
+						this.amplifyOcclusion.SampleCount = AmplifyOcclusionBase.SampleCountLevel.Low;
+					}
+				}
+				else
+				{
+					this.amplifyOcclusion.SampleCount = AmplifyOcclusionBase.SampleCountLevel.High;
 				}
 			}
 			else
 			{
-				this.ssao.halfSampling = false;
+				this.amplifyOcclusion.SampleCount = AmplifyOcclusionBase.SampleCountLevel.VeryHigh;
 			}
+		}
+		else if (InventoryImageEffectOptimizer._instancedProfile && (TheForestQualitySettings.UserSettings.SSAOType == TheForestQualitySettings.SSAOTypes.UNITY || !this.amplifyOcclusion))
+		{
+			InventoryImageEffectOptimizer._instancedProfile.ambientOcclusion.enabled = (ssaotechnique != TheForestQualitySettings.SSAOTechnique.Off);
+			if (this.amplifyOcclusion)
+			{
+				this.amplifyOcclusion.enabled = false;
+			}
+			AmbientOcclusionModel.Settings settings = InventoryImageEffectOptimizer._instancedProfile.ambientOcclusion.settings;
+			if (ssaotechnique != TheForestQualitySettings.SSAOTechnique.Ultra)
+			{
+				if (ssaotechnique != TheForestQualitySettings.SSAOTechnique.High)
+				{
+					if (ssaotechnique == TheForestQualitySettings.SSAOTechnique.Low)
+					{
+						settings.sampleCount = AmbientOcclusionModel.SampleCount.Lowest;
+					}
+				}
+				else
+				{
+					settings.sampleCount = AmbientOcclusionModel.SampleCount.Medium;
+				}
+			}
+			else
+			{
+				settings.sampleCount = AmbientOcclusionModel.SampleCount.High;
+			}
+			InventoryImageEffectOptimizer._instancedProfile.ambientOcclusion.settings = settings;
 		}
 		if (this.bleedEffect)
 		{
@@ -54,8 +98,11 @@ public class InventoryImageEffectOptimizer : MonoBehaviour
 	private Camera MyCamera;
 
 	
-	private SESSAO ssao;
+	private AmplifyOcclusionEffect amplifyOcclusion;
 
 	
 	private BleedBehavior bleedEffect;
+
+	
+	private static PostProcessingProfile _instancedProfile;
 }

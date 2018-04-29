@@ -78,7 +78,7 @@ public class MassDestructionSaveManager : MonoBehaviour
 						{
 							Transform transform = component.transform;
 							GameObject original = (!component.StumpPrefab) ? this.StumpPrefab : component.StumpPrefab;
-							GameObject gameObject = UnityEngine.Object.Instantiate(original, transform.position, transform.rotation) as GameObject;
+							GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(original, transform.position, transform.rotation);
 							if (this.MatchTreeScale)
 							{
 								gameObject.transform.localScale = component.High.transform.localScale;

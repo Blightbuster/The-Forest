@@ -11,14 +11,6 @@ namespace TheForest.Graphics
 	public class Ocean : Water
 	{
 		
-		public Ocean()
-		{
-			this.meshLOD = new List<Ocean.MeshLOD>();
-			this.meshObject = new List<GameObject>();
-			base..ctor();
-		}
-
-		
 		
 		public List<GameObject> MeshObject
 		{
@@ -264,11 +256,11 @@ namespace TheForest.Graphics
 		public Material meshMaterial;
 
 		
-		public List<Ocean.MeshLOD> meshLOD;
+		public List<Ocean.MeshLOD> meshLOD = new List<Ocean.MeshLOD>();
 
 		
 		[SerializeField]
-		private List<GameObject> meshObject;
+		private List<GameObject> meshObject = new List<GameObject>();
 
 		
 		public float level = 41.5f;

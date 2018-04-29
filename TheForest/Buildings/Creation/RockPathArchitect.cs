@@ -6,8 +6,8 @@ using UnityEngine;
 namespace TheForest.Buildings.Creation
 {
 	
-	[DoNotSerializePublic]
 	[AddComponentMenu("Buildings/Creation/Rock Path Architect")]
+	[DoNotSerializePublic]
 	public class RockPathArchitect : WallArchitect
 	{
 		

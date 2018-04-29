@@ -447,8 +447,8 @@ public class UIAtlas : MonoBehaviour
 	private Material material;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private List<UISpriteData> mSprites = new List<UISpriteData>();
 
 	
@@ -467,8 +467,8 @@ public class UIAtlas : MonoBehaviour
 	private UIAtlas.Coordinates mCoordinates;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private List<UIAtlas.Sprite> sprites = new List<UIAtlas.Sprite>();
 
 	

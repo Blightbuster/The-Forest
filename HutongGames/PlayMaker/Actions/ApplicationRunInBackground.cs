@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets if the Application should play in the background. Useful for servers or testing network games on one machine.")]
 	[ActionCategory(ActionCategory.Application)]
+	[Tooltip("Sets if the Application should play in the background. Useful for servers or testing network games on one machine.")]
 	public class ApplicationRunInBackground : FsmStateAction
 	{
 		

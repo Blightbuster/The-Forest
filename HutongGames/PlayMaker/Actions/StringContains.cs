@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Tests if a String contains another String.")]
 	[ActionCategory(ActionCategory.Logic)]
+	[Tooltip("Tests if a String contains another String.")]
 	public class StringContains : FsmStateAction
 	{
 		
@@ -58,8 +58,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		[Tooltip("The String variable to test.")]
 		public FsmString stringVariable;
 

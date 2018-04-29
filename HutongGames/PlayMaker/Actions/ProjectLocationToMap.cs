@@ -137,9 +137,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat height;
 
 		
+		[ActionSection("Projection")]
 		[UIHint(UIHint.Variable)]
 		[Tooltip("Store the projected X coordinate in a Float Variable. Use this to display a marker on the map.")]
-		[ActionSection("Projection")]
 		public FsmFloat projectedX;
 
 		

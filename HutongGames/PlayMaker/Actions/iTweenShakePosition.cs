@@ -96,8 +96,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString id;
 
 		
-		[Tooltip("A vector shake range.")]
 		[RequiredField]
+		[Tooltip("A vector shake range.")]
 		public FsmVector3 vector;
 
 		

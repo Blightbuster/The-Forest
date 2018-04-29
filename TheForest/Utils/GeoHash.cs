@@ -20,13 +20,13 @@ namespace TheForest.Utils
 		
 		public static long ToGeoHash(this Transform tr)
 		{
-			return (long)(Mathf.RoundToInt(tr.position.x * 10f) + Mathf.RoundToInt(tr.position.y * 10f) * 1000000) + (long)Mathf.RoundToInt(tr.position.y * 10f) * 1000000000000L;
+			return (long)(Mathf.RoundToInt(tr.position.x * 10f) + Mathf.RoundToInt(tr.position.y * 10f) * 1000000) + (long)Mathf.RoundToInt(tr.position.z * 10f) * 1000000000000L;
 		}
 
 		
 		public static long ToGeoHash(Vector3 position)
 		{
-			return (long)(Mathf.RoundToInt(position.x * 10f) + Mathf.RoundToInt(position.y * 10f) * 1000000) + (long)Mathf.RoundToInt(position.y * 10f) * 1000000000000L;
+			return (long)(Mathf.RoundToInt(position.x * 10f) + Mathf.RoundToInt(position.y * 10f) * 1000000) + (long)Mathf.RoundToInt(position.z * 10f) * 1000000000000L;
 		}
 
 		

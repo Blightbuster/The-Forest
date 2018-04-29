@@ -17,7 +17,7 @@ public class CreateChildSphere : MonoBehaviour
 	{
 		if (!LevelSerializer.IsDeserializing && (double)UnityEngine.Random.value < 0.4)
 		{
-			Transform transform = UnityEngine.Object.Instantiate(this.prefab, base.transform.position + UnityEngine.Random.onUnitSphere * 3f, Quaternion.identity) as Transform;
+			Transform transform = UnityEngine.Object.Instantiate<Transform>(this.prefab, base.transform.position + UnityEngine.Random.onUnitSphere * 3f, Quaternion.identity);
 			transform.parent = base.transform;
 		}
 	}

@@ -44,9 +44,9 @@ namespace TheForest.Items.Special
 			}
 			if (this._logs > 0)
 			{
-				int tmpLog = this._logs;
+				int logs = this._logs;
 				this._logs = 0;
-				for (int i = 0; i < tmpLog; i++)
+				for (int i = 0; i < logs; i++)
 				{
 					this.Lift();
 				}
@@ -171,7 +171,7 @@ namespace TheForest.Items.Special
 				}
 				else
 				{
-					UnityEngine.Object.Instantiate(this._logPrefab, vector, quaternion);
+					UnityEngine.Object.Instantiate<GameObject>(this._logPrefab, vector, quaternion);
 				}
 				FMODCommon.PlayOneshotNetworked("event:/player/foley/log_drop_exert", transform, FMODCommon.NetworkRole.Any);
 			}

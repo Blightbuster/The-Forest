@@ -318,9 +318,6 @@ public static class CoopTreeGrid
 	public const int NODES_PER_FRAME = 512;
 
 	
-	private const int sweepNodeSize = 4;
-
-	
 	private static int r_debug = int.MinValue;
 
 	
@@ -340,6 +337,9 @@ public static class CoopTreeGrid
 
 	
 	private static bool AttachRoutineDone;
+
+	
+	private const int sweepNodeSize = 4;
 
 	
 	private struct Node

@@ -17,6 +17,11 @@ public class Digger : MonoBehaviour
 	
 	private void Start()
 	{
+		if (ForestVR.Prototype)
+		{
+			base.enabled = false;
+			return;
+		}
 		this.snowStartHeight = Terrain.activeTerrain.materialTemplate.GetFloat("_SnowStartHeight");
 		this.snowFadeLength = Terrain.activeTerrain.materialTemplate.GetFloat("_SnowFadeLength");
 		this.snowStartHeight += this.snowFadeLength / 4f;
@@ -41,12 +46,12 @@ public class Digger : MonoBehaviour
 			this.Dice2 = UnityEngine.Random.Range(0, 20);
 			if (this.Dice == 1)
 			{
-				GameObject gameObject = UnityEngine.Object.Instantiate(this.Rock, this.hit.point, base.transform.rotation) as GameObject;
+				GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.Rock, this.hit.point, base.transform.rotation);
 				gameObject.transform.eulerAngles = new Vector3(0f, (float)UnityEngine.Random.Range(0, 360), 0f);
 			}
 			if (this.Dice2 == 1)
 			{
-				GameObject gameObject2 = UnityEngine.Object.Instantiate(this.SpecialItem, this.hit.point, base.transform.rotation) as GameObject;
+				GameObject gameObject2 = UnityEngine.Object.Instantiate<GameObject>(this.SpecialItem, this.hit.point, base.transform.rotation);
 				gameObject2.transform.eulerAngles = new Vector3(0f, (float)UnityEngine.Random.Range(0, 360), 0f);
 			}
 		}

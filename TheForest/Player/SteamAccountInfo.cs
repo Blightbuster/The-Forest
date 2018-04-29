@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Steamworks;
 using TheForest.Tools;
 using UnityEngine;
@@ -15,7 +16,13 @@ namespace TheForest.Player
 			bool result;
 			try
 			{
-				EventRegistry.Endgame.Subscribe(TfEvent.Endgame.Completed, new EventRegistry.SubscriberCallback(AccountInfo.SetStoryCompleted));
+				EventRegistry endgame = EventRegistry.Endgame;
+				object completed = TfEvent.Endgame.Completed;
+				if (SteamAccountInfo.<>f__mg$cache0 == null)
+				{
+					SteamAccountInfo.<>f__mg$cache0 = new EventRegistry.SubscriberCallback(AccountInfo.SetStoryCompleted);
+				}
+				endgame.Subscribe(completed, SteamAccountInfo.<>f__mg$cache0);
 				this._statReceivedCallback = Callback<UserStatsReceived_t>.Create(new Callback<UserStatsReceived_t>.DispatchDelegate(this.OnReceivedStats));
 				result = SteamUserStats.RequestCurrentStats();
 			}
@@ -187,5 +194,9 @@ namespace TheForest.Player
 
 		
 		private Callback<UserStatsReceived_t> _statReceivedCallback;
+
+		
+		[CompilerGenerated]
+		private static EventRegistry.SubscriberCallback <>f__mg$cache0;
 	}
 }

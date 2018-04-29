@@ -47,8 +47,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("The Target. An Animator component is required")]
 		[CheckForComponent(typeof(Animator))]
+		[Tooltip("The Target. An Animator component is required")]
 		public FsmOwnerDefault gameObject;
 
 		

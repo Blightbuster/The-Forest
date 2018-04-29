@@ -66,26 +66,20 @@ namespace TheForest.Buildings.Creation
 					{
 						this._presentIngredients[i] = new ReceipeIngredient
 						{
-							_itemID = buildIngredients._itemID
+							_itemID = buildIngredients._itemID,
+							_amount = 0
 						};
 					}
 					ReceipeIngredient receipeIngredient = this._presentIngredients[i];
 					int amount = buildIngredients._amount - receipeIngredient._amount;
 					BuildMission.AddNeededToBuildMission(buildIngredients._itemID, amount, true);
-					for (int j = 0; j < receipeIngredient._amount; j++)
-					{
-						if (j >= buildIngredients._renderers.Length)
-						{
-							break;
-						}
-						buildIngredients._renderers[j].SetActive(true);
-					}
+					buildIngredients.SetBuilt(receipeIngredient._amount);
 				}
 				this._initialized = true;
 				if (BoltNetwork.isRunning)
 				{
 					base.gameObject.AddComponent<CoopConstruction>();
-					if (BoltNetwork.isServer && this.entity.isAttached)
+					if (BoltNetwork.isServer && base.entity.isAttached)
 					{
 						this.UpdateNetworkIngredients();
 					}
@@ -171,13 +165,11 @@ namespace TheForest.Buildings.Creation
 						{
 							if (!LocalPlayer.Inventory.Owns(this._requiredIngredients[j]._itemID, true) && !Cheats.Creative)
 							{
-								icons._iconSprite.color = Scene.HudGui.BuildingIngredientMissing;
-								icons._border.color = Scene.HudGui.BuildingIngredientMissing;
+								icons.SetMissingIngredientColor();
 							}
 							else
 							{
-								icons._iconSprite.color = Scene.HudGui.BuildingIngredientOwned;
-								icons._border.color = Scene.HudGui.BuildingIngredientOwned;
+								icons.SetAvailableIngredientColor();
 								if (this._nextAddItem < Time.time && !flag)
 								{
 									flag = true;
@@ -185,7 +177,7 @@ namespace TheForest.Buildings.Creation
 									{
 										Scene.HudGui.AddBuildingIngredientIcon.SetActive(true);
 									}
-									Scene.HudGui.AddBuildingIngredientIcon.transform.localPosition = icons._iconGo.transform.localPosition;
+									Scene.HudGui.AddBuildingIngredientIcon.transform.localPosition = icons._iconGo.transform.localPosition + new Vector3(0f, -50f, 0f);
 									Scene.HudGui.AddBuildingIngredientIcon.transform.rotation = icons._iconGo.transform.rotation;
 									if (TheForest.Utils.Input.GetButtonDown("Build") || (Cheats.Creative && TheForest.Utils.Input.GetButton("Build")))
 									{
@@ -286,15 +278,15 @@ namespace TheForest.Buildings.Creation
 			{
 				LocalPlayer.Sfx.PlayWhoosh();
 			}
-			if (BoltNetwork.isRunning && !this.entity.isOwner)
+			if (BoltNetwork.isRunning && !base.entity.isOwner)
 			{
-				SwapGhost swapGhost = SwapGhost.Create(this.entity.source);
-				swapGhost.GhostEntity = this.entity;
+				SwapGhost swapGhost = SwapGhost.Create(base.entity.source);
+				swapGhost.GhostEntity = base.entity;
 				swapGhost.Send();
 			}
 			else
 			{
-				GameObject gameObject = (GameObject)UnityEngine.Object.Instantiate(this._swapTo, this._ghost.transform.position, this._ghost.transform.rotation);
+				GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this._swapTo, this._ghost.transform.position, this._ghost.transform.rotation);
 				if (this._ghost.transform.parent)
 				{
 					gameObject.transform.parent = this._ghost.transform.parent;
@@ -312,7 +304,8 @@ namespace TheForest.Buildings.Creation
 							{
 								componentInChildren._presentIngredients[j] = new ReceipeIngredient
 								{
-									_itemID = this._presentIngredients[i]._itemID
+									_itemID = this._presentIngredients[i]._itemID,
+									_amount = 0
 								};
 							}
 							if (this._presentIngredients[i]._itemID == componentInChildren._presentIngredients[j]._itemID)
@@ -450,27 +443,33 @@ namespace TheForest.Buildings.Creation
 						this._bounds.center = base.transform.position;
 						this._requiredIngredients.ForEach(delegate(Craft_Structure.BuildIngredients ri)
 						{
-							ri._renderers.ForEach(delegate(GameObject go)
+							ri._subIngredients.ForEach(delegate(Craft_Structure.BuildIngredients.SubIngredient si)
 							{
-								Renderer component = go.GetComponent<Renderer>();
-								if (component)
+								si._renderers.ForEach(delegate(GameObject go)
 								{
-									this._bounds.Encapsulate(component.bounds.center);
-								}
-								else if (go.transform.childCount > 0)
-								{
-									Transform child = go.transform.GetChild(0);
-									component = child.GetComponent<Renderer>();
-									if (component)
+									if (go.activeSelf)
 									{
-										this._bounds.Encapsulate(component.bounds.center);
+										Renderer component = go.GetComponent<Renderer>();
+										if (component)
+										{
+											this._bounds.Encapsulate(component.bounds.center);
+										}
+										else if (go.transform.childCount > 0)
+										{
+											Transform child = go.transform.GetChild(0);
+											component = child.GetComponent<Renderer>();
+											if (component)
+											{
+												this._bounds.Encapsulate(component.bounds.center);
+											}
+											else
+											{
+												this._bounds.Encapsulate(child.position);
+											}
+										}
 									}
-									else
-									{
-										this._bounds.Encapsulate(child.position);
-									}
-								}
-								this._bounds.Encapsulate(go.transform.position);
+									this._bounds.Encapsulate(go.transform.position);
+								});
 							});
 						});
 					}
@@ -500,7 +499,6 @@ namespace TheForest.Buildings.Creation
 						this._uiFollowTarget.position = LocalPlayer.MainCamTr.position + LocalPlayer.MainCamTr.forward * Mathf.Clamp(10f, 1f, num);
 						forward = this._uiFollowTarget.position - LocalPlayer.MainCamTr.position;
 					}
-					forward.y = 0f;
 					this._uiFollowTarget.rotation = Quaternion.LookRotation(forward);
 					Scene.HudGui.BuildingIngredientsFollow._target = this._uiFollowTarget;
 					for (int i = this._requiredIngredients.Count - 1; i >= 0; i--)
@@ -540,22 +538,26 @@ namespace TheForest.Buildings.Creation
 								Scene.HudGui.BuildingIngredientsFollow.gameObject.SetActive(true);
 							}
 						}
-						switch (buildIngredients._textDisplayMode)
+						Craft_Structure.BuildIngredients.TextOptions textDisplayMode = buildIngredients._textDisplayMode;
+						if (textDisplayMode != Craft_Structure.BuildIngredients.TextOptions.PresentOverTotal)
 						{
-						case Craft_Structure.BuildIngredients.TextOptions.PresentOverTotal:
-							if (icons.DisplayedPresent != receipeIngredient._amount || icons.DisplayedNeeded != buildIngredients._amount)
+							if (textDisplayMode != Craft_Structure.BuildIngredients.TextOptions.Present)
 							{
-								icons.DisplayedPresent = receipeIngredient._amount;
-								icons.DisplayedNeeded = buildIngredients._amount;
-								icons._label.text = receipeIngredient._amount + "/" + buildIngredients._amount;
+								if (textDisplayMode == Craft_Structure.BuildIngredients.TextOptions.Total)
+								{
+									icons._label.text = buildIngredients._amount.ToString();
+								}
 							}
-							break;
-						case Craft_Structure.BuildIngredients.TextOptions.Present:
-							icons._label.text = receipeIngredient._amount.ToString();
-							break;
-						case Craft_Structure.BuildIngredients.TextOptions.Total:
-							icons._label.text = buildIngredients._amount.ToString();
-							break;
+							else
+							{
+								icons._label.text = receipeIngredient._amount.ToString();
+							}
+						}
+						else if (icons.DisplayedPresent != receipeIngredient._amount || icons.DisplayedNeeded != buildIngredients._amount)
+						{
+							icons.DisplayedPresent = receipeIngredient._amount;
+							icons.DisplayedNeeded = buildIngredients._amount;
+							icons._label.text = receipeIngredient._amount + "/" + buildIngredients._amount;
 						}
 					}
 					else if (icons._iconGo.activeSelf || icons._label.gameObject.activeSelf)
@@ -616,15 +618,17 @@ namespace TheForest.Buildings.Creation
 			{
 				Craft_Structure.BuildIngredients buildIngredients = this._requiredIngredients[i];
 				ReceipeIngredient receipeIngredient = this._presentIngredients[i];
-				int num = 0;
-				while (num < receipeIngredient._amount && num < buildIngredients._renderers.Length)
-				{
-					if (!buildIngredients._renderers[num].activeSelf)
-					{
-						buildIngredients._renderers[num].SetActive(true);
-					}
-					num++;
-				}
+				buildIngredients.SetBuilt(receipeIngredient._amount);
+			}
+		}
+
+		
+		public void SetGhostMaterial(Material mat)
+		{
+			for (int i = 0; i < this._requiredIngredients.Count; i++)
+			{
+				Craft_Structure.BuildIngredients buildIngredients = this._requiredIngredients[i];
+				buildIngredients.SetGhostMaterial(mat);
 			}
 		}
 
@@ -689,9 +693,9 @@ namespace TheForest.Buildings.Creation
 			}
 			this.CheckText();
 			this.AllOff(false);
-			if (BoltNetwork.isRunning && this.entity.isAttached)
+			if (BoltNetwork.isRunning && base.entity.isAttached)
 			{
-				BoltNetwork.Destroy(this.entity);
+				BoltNetwork.Destroy(base.entity);
 			}
 			else
 			{
@@ -706,7 +710,7 @@ namespace TheForest.Buildings.Creation
 			if (BoltNetwork.isRunning)
 			{
 				CancelBluePrint cancelBluePrint = CancelBluePrint.Create(GlobalTargets.OnlyServer);
-				cancelBluePrint.BluePrint = this.entity;
+				cancelBluePrint.BluePrint = base.entity;
 				cancelBluePrint.Send();
 			}
 			else
@@ -737,26 +741,45 @@ namespace TheForest.Buildings.Creation
 						Craft_Structure.PickupAxis pickupAxis = this._requiredIngredients[ingredientId]._pickupAxis;
 						float f = (float)amount * 0.428571433f + 1f;
 						int num2 = Mathf.Min(Mathf.RoundToInt(f), 10);
-						for (int i = 0; i < num2; i++)
+						int i = 0;
+						while (i < num2)
 						{
 							int num3 = Mathf.RoundToInt((float)i / (float)num2 * (float)amount);
-							if (this._requiredIngredients[ingredientId]._renderers.Length <= num3)
+							int j;
+							for (j = 0; j < this._requiredIngredients[ingredientId]._subIngredients.Count; j++)
 							{
-								break;
+								if (this._requiredIngredients[ingredientId]._subIngredients[j]._renderers.Length > num3)
+								{
+									Transform transform2 = this._requiredIngredients[ingredientId]._subIngredients[j]._renderers[num3].transform;
+									Transform transform3 = BoltNetwork.isRunning ? BoltNetwork.Instantiate(transform.gameObject).transform : UnityEngine.Object.Instantiate<Transform>(transform);
+									transform3.position = transform2.position;
+									if (pickupAxis != Craft_Structure.PickupAxis.X)
+									{
+										if (pickupAxis != Craft_Structure.PickupAxis.Y)
+										{
+											if (pickupAxis == Craft_Structure.PickupAxis.Z)
+											{
+												transform3.rotation = transform2.rotation;
+											}
+										}
+										else
+										{
+											transform3.rotation = Quaternion.LookRotation(transform2.up);
+										}
+									}
+									else
+									{
+										transform3.rotation = Quaternion.LookRotation(transform2.right);
+									}
+									i++;
+								}
+								else
+								{
+									num3 -= this._requiredIngredients[ingredientId]._subIngredients[j]._renderers.Length;
+								}
 							}
-							Transform transform2 = this._requiredIngredients[ingredientId]._renderers[num3].transform;
-							Transform transform3 = BoltNetwork.isRunning ? BoltNetwork.Instantiate(transform.gameObject).transform : UnityEngine.Object.Instantiate<Transform>(transform);
-							transform3.position = transform2.position;
-							switch (pickupAxis)
+							if (j >= this._requiredIngredients[ingredientId]._subIngredients.Count)
 							{
-							case Craft_Structure.PickupAxis.Z:
-								transform3.rotation = transform2.rotation;
-								break;
-							case Craft_Structure.PickupAxis.X:
-								transform3.rotation = Quaternion.LookRotation(transform2.right);
-								break;
-							case Craft_Structure.PickupAxis.Y:
-								transform3.rotation = Quaternion.LookRotation(transform2.up);
 								break;
 							}
 						}
@@ -794,17 +817,17 @@ namespace TheForest.Buildings.Creation
 			GameObject gameObject;
 			if (BoltNetwork.isServer)
 			{
-				if (this.entity.attachToken != null)
+				if (base.entity.attachToken != null)
 				{
-					if (this.entity.attachToken is CoopWallChunkToken)
+					if (base.entity.attachToken is CoopWallChunkToken)
 					{
-						(this.entity.attachToken as CoopWallChunkToken).Additions = this.entity.GetComponent<WallChunkArchitect>().Addition;
+						(base.entity.attachToken as CoopWallChunkToken).Additions = base.entity.GetComponent<WallChunkArchitect>().Addition;
 					}
-					gameObject = BoltNetwork.Instantiate(this.Built, this.entity.attachToken, this._ghost.transform.position, this._ghost.transform.rotation).gameObject;
+					gameObject = BoltNetwork.Instantiate(this.Built, base.entity.attachToken, this._ghost.transform.position, this._ghost.transform.rotation).gameObject;
 				}
 				else
 				{
-					gameObject = BoltNetwork.Instantiate(this.Built, this.entity.attachToken, this._ghost.transform.position, this._ghost.transform.rotation).gameObject;
+					gameObject = BoltNetwork.Instantiate(this.Built, base.entity.attachToken, this._ghost.transform.position, this._ghost.transform.rotation).gameObject;
 					BoltEntity component = gameObject.GetComponent<BoltEntity>();
 					if (component && component.isAttached && component.StateIs<IMultiHolderState>())
 					{
@@ -819,7 +842,7 @@ namespace TheForest.Buildings.Creation
 			}
 			else
 			{
-				gameObject = (GameObject)UnityEngine.Object.Instantiate(this.Built, this._ghost.transform.position, this._ghost.transform.rotation);
+				gameObject = UnityEngine.Object.Instantiate<GameObject>(this.Built, this._ghost.transform.position, this._ghost.transform.rotation);
 			}
 			TreeStructure component3 = this._ghost.GetComponent<TreeStructure>();
 			if (component3)
@@ -839,6 +862,15 @@ namespace TheForest.Buildings.Creation
 			if (this._ghost.transform.parent != null)
 			{
 				gameObject.transform.parent = this._ghost.transform.parent;
+				DynamicBuilding componentInParent = gameObject.GetComponentInParent<DynamicBuilding>();
+				if (componentInParent != null)
+				{
+					IgnoreCollisionInChildren componentInChildren = componentInParent.GetComponentInChildren<IgnoreCollisionInChildren>();
+					if (componentInChildren != null)
+					{
+						componentInChildren.startDisableChildren();
+					}
+				}
 			}
 			this.OnBuilt(gameObject);
 			this.OnBuilt = null;
@@ -968,7 +1000,73 @@ namespace TheForest.Buildings.Creation
 		public class BuildIngredients : ReceipeIngredient
 		{
 			
+			public void SetBuilt(int amount)
+			{
+				int num = 0;
+				for (int i = 0; i < this._subIngredients.Count; i++)
+				{
+					num += this._subIngredients[i]._renderers.Length;
+				}
+				int num2 = Mathf.RoundToInt((float)amount / (float)this._amount * (float)num);
+				for (int j = 0; j < this._subIngredients.Count; j++)
+				{
+					for (int k = 0; k < this._subIngredients[j]._renderers.Length; k++)
+					{
+						if (num2-- <= 0)
+						{
+							return;
+						}
+						if (!this._subIngredients[j]._renderers[k].activeSelf)
+						{
+							this._subIngredients[j]._renderers[k].SetActive(true);
+						}
+						if (this._subIngredients[j]._material && this._subIngredients[j]._renderers[k].layer != 21)
+						{
+							this._subIngredients[j]._renderers[k].layer = 21;
+							this._subIngredients[j]._renderers[k].GetComponent<Renderer>().sharedMaterial = this._subIngredients[j]._material;
+						}
+					}
+				}
+			}
+
+			
+			public void AddRuntimeObjects(IEnumerable<GameObject> gos, Material mat)
+			{
+				for (int i = 0; i < this._subIngredients.Count; i++)
+				{
+					if (this._subIngredients[i]._material == mat)
+					{
+						this._subIngredients[i]._renderers = gos.Union(this._subIngredients[i]._renderers).ToArray<GameObject>();
+						return;
+					}
+				}
+				this._subIngredients.Add(new Craft_Structure.BuildIngredients.SubIngredient
+				{
+					_renderers = gos.ToArray<GameObject>(),
+					_material = mat
+				});
+			}
+
+			
+			public void SetGhostMaterial(Material mat)
+			{
+				for (int i = 0; i < this._subIngredients.Count; i++)
+				{
+					for (int j = 0; j < this._subIngredients[i]._renderers.Length; j++)
+					{
+						this._subIngredients[i]._renderers[j].GetComponent<Renderer>().sharedMaterial = mat;
+					}
+				}
+			}
+
+			
+			public List<Craft_Structure.BuildIngredients.SubIngredient> _subIngredients;
+
+			
 			public GameObject[] _renderers;
+
+			
+			public Material _material;
 
 			
 			public Craft_Structure.BuildIngredients.TextOptions _textDisplayMode;
@@ -985,6 +1083,17 @@ namespace TheForest.Buildings.Creation
 				Present,
 				
 				Total
+			}
+
+			
+			[Serializable]
+			public class SubIngredient
+			{
+				
+				public GameObject[] _renderers;
+
+				
+				public Material _material;
 			}
 		}
 

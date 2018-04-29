@@ -54,7 +54,7 @@ public class UIKeyNavigation : MonoBehaviour
 	private void Start()
 	{
 		this.mStarted = true;
-		if (this.startsSelected && this.isColliderEnabled)
+		if (this.startsSelected && (this.CanNavigateToWhenDisabled || this.isColliderEnabled))
 		{
 			UICamera.hoveredObject = base.gameObject;
 		}
@@ -74,12 +74,17 @@ public class UIKeyNavigation : MonoBehaviour
 			return false;
 		}
 		Collider component = go.GetComponent<Collider>();
-		if (component != null)
+		if (!(component != null))
 		{
-			return component.enabled;
+			Collider2D component2 = go.GetComponent<Collider2D>();
+			return component2 != null && component2.enabled;
 		}
-		Collider2D component2 = go.GetComponent<Collider2D>();
-		return component2 != null && component2.enabled;
+		UIKeyNavigation component3 = go.GetComponent<UIKeyNavigation>();
+		if (component3)
+		{
+			return component3.CanNavigateToWhenDisabled || component.enabled;
+		}
+		return component.enabled;
 	}
 
 	
@@ -149,7 +154,7 @@ public class UIKeyNavigation : MonoBehaviour
 		for (int i = 0; i < UIKeyNavigation.list.size; i++)
 		{
 			UIKeyNavigation uikeyNavigation = UIKeyNavigation.list[i];
-			if (uikeyNavigation && !(uikeyNavigation == this) && uikeyNavigation.isColliderEnabled)
+			if (uikeyNavigation && !(uikeyNavigation == this) && (uikeyNavigation.isColliderEnabled || uikeyNavigation.CanNavigateToWhenDisabled))
 			{
 				UIWidget component = uikeyNavigation.GetComponent<UIWidget>();
 				if (!(component != null) || (component.alpha != 0f && component.isVisible))
@@ -287,6 +292,9 @@ public class UIKeyNavigation : MonoBehaviour
 
 	
 	public static BetterList<UIKeyNavigation> list = new BetterList<UIKeyNavigation>();
+
+	
+	public bool CanNavigateToWhenDisabled;
 
 	
 	public UIKeyNavigation.Constraint constraint;

@@ -140,9 +140,6 @@ namespace Pathfinding.Examples
 		}
 
 		
-		private const float rad2Deg = 57.2957764f;
-
-		
 		public GUIStyle selectionBox;
 
 		
@@ -165,5 +162,8 @@ namespace Pathfinding.Examples
 
 		
 		private Camera cam;
+
+		
+		private const float rad2Deg = 57.2957764f;
 	}
 }

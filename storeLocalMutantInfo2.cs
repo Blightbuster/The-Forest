@@ -87,4 +87,16 @@ public class storeLocalMutantInfo2 : MonoBehaviour
 
 	
 	public List<Quaternion> stuckArrowRot = new List<Quaternion>();
+
+	
+	public List<Transform> fire = new List<Transform>();
+
+	
+	public Dictionary<Transform, int> fireIndex = new Dictionary<Transform, int>();
+
+	
+	public List<Vector3> firePos = new List<Vector3>();
+
+	
+	public List<Quaternion> fireRot = new List<Quaternion>();
 }

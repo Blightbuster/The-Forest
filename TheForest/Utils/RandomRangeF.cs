@@ -15,6 +15,12 @@ namespace TheForest.Utils
 		}
 
 		
+		public static implicit operator float(RandomRangeF rr)
+		{
+			return (rr._min >= rr._max) ? rr._min : UnityEngine.Random.Range(rr._min, rr._max);
+		}
+
+		
 		
 		public float Average
 		{
@@ -28,12 +34,6 @@ namespace TheForest.Utils
 		public override string ToString()
 		{
 			return (this._min == this._max) ? this._max.ToString() : (this._min + " to " + this._max);
-		}
-
-		
-		public static implicit operator float(RandomRangeF rr)
-		{
-			return (rr._min >= rr._max) ? rr._min : UnityEngine.Random.Range(rr._min, rr._max);
 		}
 
 		

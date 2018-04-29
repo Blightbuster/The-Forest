@@ -442,18 +442,6 @@ public class GreebleZonesManager : MonoBehaviour
 	}
 
 	
-	public const byte ZIS_DestroyedInstance = 255;
-
-	
-	public const byte ZIS_UnusedInstanceSlot = 254;
-
-	
-	public const byte ZIS_ActiveInstance = 253;
-
-	
-	public const byte ZIS_CustomActiveInstance = 252;
-
-	
 	public int _zoneCount;
 
 	
@@ -475,6 +463,18 @@ public class GreebleZonesManager : MonoBehaviour
 
 	
 	private bool _forcedUnload;
+
+	
+	public const byte ZIS_DestroyedInstance = 255;
+
+	
+	public const byte ZIS_UnusedInstanceSlot = 254;
+
+	
+	public const byte ZIS_ActiveInstance = 253;
+
+	
+	public const byte ZIS_CustomActiveInstance = 252;
 
 	
 	[Serializable]

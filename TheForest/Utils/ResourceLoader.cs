@@ -13,11 +13,8 @@ namespace TheForest.Utils
 			if (ResourceLoader.InUseAssetsCounters.ContainsKey(this._assetPath))
 			{
 				Dictionary<string, int> inUseAssetsCounters;
-				Dictionary<string, int> dictionary = inUseAssetsCounters = ResourceLoader.InUseAssetsCounters;
 				string assetPath;
-				string key = assetPath = this._assetPath;
-				int num = inUseAssetsCounters[assetPath];
-				dictionary[key] = num + 1;
+				(inUseAssetsCounters = ResourceLoader.InUseAssetsCounters)[assetPath = this._assetPath] = inUseAssetsCounters[assetPath] + 1;
 			}
 			else
 			{
@@ -31,11 +28,8 @@ namespace TheForest.Utils
 		{
 			bool resourceUnload = false;
 			Dictionary<string, int> inUseAssetsCounters;
-			Dictionary<string, int> dictionary = inUseAssetsCounters = ResourceLoader.InUseAssetsCounters;
 			string assetPath;
-			string key = assetPath = this._assetPath;
-			int num = inUseAssetsCounters[assetPath];
-			if ((dictionary[key] = num - 1) == 0)
+			if (((inUseAssetsCounters = ResourceLoader.InUseAssetsCounters)[assetPath = this._assetPath] = inUseAssetsCounters[assetPath] - 1) == 0)
 			{
 				ResourceLoader.InUseAssetsCounters.Remove(this._assetPath);
 				resourceUnload = true;

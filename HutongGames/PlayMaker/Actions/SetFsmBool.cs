@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Set the value of a Bool Variable in another FSM.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Set the value of a Bool Variable in another FSM.")]
 	public class SetFsmBool : FsmStateAction
 	{
 		
@@ -45,7 +45,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			if (this.fsm == null)
 			{
-				this.LogWarning("Could not find FSM: " + this.fsmName.Value);
+				base.LogWarning("Could not find FSM: " + this.fsmName.Value);
 				return;
 			}
 			FsmBool fsmBool = this.fsm.FsmVariables.FindFsmBool(this.variableName.Value);
@@ -55,7 +55,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			else
 			{
-				this.LogWarning("Could not find variable: " + this.variableName.Value);
+				base.LogWarning("Could not find variable: " + this.variableName.Value);
 			}
 		}
 
@@ -66,8 +66,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject that owns the FSM.")]
 		[RequiredField]
+		[Tooltip("The GameObject that owns the FSM.")]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -76,14 +76,14 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString fsmName;
 
 		
+		[RequiredField]
 		[UIHint(UIHint.FsmBool)]
 		[Tooltip("The name of the FSM variable.")]
-		[RequiredField]
 		public FsmString variableName;
 
 		
-		[Tooltip("Set the value of the variable.")]
 		[RequiredField]
+		[Tooltip("Set the value of the variable.")]
 		public FsmBool setValue;
 
 		

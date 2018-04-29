@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Count items from a PlayMaker ArrayList Proxy component")]
 	[ActionCategory("ArrayMaker/ArrayList")]
+	[Tooltip("Count items from a PlayMaker ArrayList Proxy component")]
 	public class ArrayListCount : ArrayListActions
 	{
 		
@@ -37,9 +37,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
 		[ActionSection("Set up")]
 		[RequiredField]
+		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
 		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 
@@ -48,9 +48,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString reference;
 
 		
-		[Tooltip("Store the count value")]
 		[ActionSection("Result")]
 		[UIHint(UIHint.FsmInt)]
+		[Tooltip("Store the count value")]
 		public FsmInt count;
 	}
 }

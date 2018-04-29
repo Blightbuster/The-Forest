@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Store mesh vertex positions into an arrayList")]
 	[ActionCategory("ArrayMaker/ArrayList")]
+	[Tooltip("Store mesh vertex positions into an arrayList")]
 	public class ArrayListGetVertexPositions : ArrayListActions
 	{
 		
@@ -48,10 +48,10 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		[ActionSection("Set up")]
 		[RequiredField]
 		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
+		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -59,8 +59,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString reference;
 
 		
-		[Tooltip("the GameObject to get the mesh from")]
 		[ActionSection("Source")]
+		[Tooltip("the GameObject to get the mesh from")]
 		[CheckForComponent(typeof(MeshFilter))]
 		public FsmGameObject mesh;
 	}

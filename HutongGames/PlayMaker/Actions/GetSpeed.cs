@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the Speed of a Game Object and stores it in a Float Variable. NOTE: The Game Object must have a rigid body.")]
 	[ActionCategory(ActionCategory.Physics)]
+	[Tooltip("Gets the Speed of a Game Object and stores it in a Float Variable. NOTE: The Game Object must have a rigid body.")]
 	public class GetSpeed : ComponentAction<Rigidbody>
 	{
 		
@@ -48,15 +48,15 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Rigidbody))]
 		[RequiredField]
+		[CheckForComponent(typeof(Rigidbody))]
 		[Tooltip("The GameObject with a Rigidbody.")]
 		public FsmOwnerDefault gameObject;
 
 		
 		[RequiredField]
-		[Tooltip("Store the speed in a float variable.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the speed in a float variable.")]
 		public FsmFloat storeResult;
 
 		

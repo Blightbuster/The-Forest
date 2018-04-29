@@ -18,9 +18,9 @@ public class CoopAutoAttach : EntityBehaviour
 	private IEnumerator DelayedOnEnable()
 	{
 		yield return null;
-		if (this.entity && !this.entity.isAttached)
+		if (base.entity && !base.entity.isAttached)
 		{
-			BoltNetwork.Attach(this.entity);
+			BoltNetwork.Attach(base.entity);
 		}
 		yield break;
 	}

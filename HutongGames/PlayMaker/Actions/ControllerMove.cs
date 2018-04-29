@@ -48,9 +48,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject to move.")]
-		[CheckForComponent(typeof(CharacterController))]
 		[RequiredField]
+		[CheckForComponent(typeof(CharacterController))]
+		[Tooltip("The GameObject to move.")]
 		public FsmOwnerDefault gameObject;
 
 		

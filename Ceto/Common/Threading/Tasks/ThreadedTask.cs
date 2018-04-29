@@ -6,7 +6,7 @@ using Ceto.Common.Threading.Scheduling;
 namespace Ceto.Common.Threading.Tasks
 {
 	
-	public abstract class ThreadedTask : ICancelToken, IThreadedTask
+	public abstract class ThreadedTask : IThreadedTask, ICancelToken
 	{
 		
 		protected ThreadedTask(bool isThreaded)

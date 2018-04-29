@@ -62,7 +62,7 @@ public class tempTreeSpawnManager : MonoBehaviour
 			Vector3 vector = new Vector3((float)UnityEngine.Random.Range(-200, 200), 0f, (float)UnityEngine.Random.Range(-200, 200));
 			if (this.useInstantiate)
 			{
-				GameObject item = UnityEngine.Object.Instantiate(tree, vector, Quaternion.identity) as GameObject;
+				GameObject item = UnityEngine.Object.Instantiate<GameObject>(tree, vector, Quaternion.identity);
 				this.instantiatedTrees.Add(item);
 			}
 			else

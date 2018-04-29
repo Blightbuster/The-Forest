@@ -8,7 +8,7 @@ public class BoltHeldItem : EntityBehaviour
 	
 	private void OnEnable()
 	{
-		if (!BoltNetwork.isRunning || this.entity.isOwner)
+		if (!BoltNetwork.isRunning || base.entity.isOwner)
 		{
 		}
 	}
@@ -16,7 +16,7 @@ public class BoltHeldItem : EntityBehaviour
 	
 	private void OnDisable()
 	{
-		if (!BoltNetwork.isRunning || this.entity.isOwner)
+		if (!BoltNetwork.isRunning || base.entity.isOwner)
 		{
 		}
 	}

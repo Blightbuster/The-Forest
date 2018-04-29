@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the X Position of the mouse and stores it in a Float Variable.")]
 	[ActionCategory(ActionCategory.Input)]
+	[Tooltip("Gets the X Position of the mouse and stores it in a Float Variable.")]
 	public class GetMouseX : FsmStateAction
 	{
 		
@@ -42,8 +42,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmFloat storeResult;
 
 		

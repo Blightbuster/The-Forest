@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets info on the last event that caused a state change. See also Set Event Data action.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Gets info on the last event that caused a state change. See also Set Event Data action.")]
 	public class GetEventInfo : FsmStateAction
 	{
 		

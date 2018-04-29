@@ -36,7 +36,7 @@ public class mutantFireBombSetup : MonoBehaviour
 		this.contactFireGo.SetActive(true);
 		this.contactFireGo.transform.parent = null;
 		base.GetComponent<Rigidbody>().isKinematic = true;
-		UnityEngine.Object.Instantiate(this.gridBlockerGo, base.transform.position, base.transform.rotation);
+		UnityEngine.Object.Instantiate<GameObject>(this.gridBlockerGo, base.transform.position, base.transform.rotation);
 	}
 
 	

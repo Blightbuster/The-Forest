@@ -4,8 +4,8 @@ using UnityEngine;
 namespace Pathfinding
 {
 	
-	[HelpURL("http:
 	[AddComponentMenu("Pathfinding/Link")]
+	[HelpURL("http:
 	public class NodeLink : GraphModifier
 	{
 		

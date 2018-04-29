@@ -1,4 +1,5 @@
 ﻿using System;
+using TheForest.UI;
 using TheForest.Utils;
 using UnityEngine;
 
@@ -18,8 +19,15 @@ namespace TheForest.Player
 			this._weightUp.Init();
 			this._weightStable.Init();
 			this._weightDown.Init();
-			this._caloriesEaten.Init();
-			this._caloriesBurnt.Init();
+			if (GameSetup.IsHardSurvivalMode)
+			{
+				this._caloriesEaten.Init();
+				this._caloriesBurnt.Init();
+			}
+			else
+			{
+				this._caloriesEaten._go.transform.parent.gameObject.SetActive(false);
+			}
 			this._sanity.Init();
 			this._athleticism.Init();
 			this._athleticismMalus.Init();
@@ -55,8 +63,11 @@ namespace TheForest.Player
 			this.UpdateDisplay(this._weightUp, weightTrend > 0);
 			this.UpdateDisplay(this._weightStable, weightTrend == 0);
 			this.UpdateDisplay(this._weightDown, weightTrend < 0);
-			this.UpdateDisplay(this._caloriesEaten, (int)LocalPlayer.Stats.Calories.CurrentCaloriesEatenCount);
-			this.UpdateDisplay(this._caloriesBurnt, (int)LocalPlayer.Stats.Calories.CurrentCaloriesBurntCount);
+			if (GameSetup.IsHardSurvivalMode)
+			{
+				this.UpdateDisplay(this._caloriesEaten, (int)LocalPlayer.Stats.Calories.CurrentCaloriesEatenCount);
+				this.UpdateDisplay(this._caloriesBurnt, (int)LocalPlayer.Stats.Calories.CurrentCaloriesBurntCount);
+			}
 			this.UpdateDisplay(this._sanity, Mathf.FloorToInt(LocalPlayer.Stats.Sanity.CurrentSanity));
 			this.UpdateDisplay(this._athleticism, LocalPlayer.Stats.Skills.AthleticismSkillLevelProgressApprox);
 			this.UpdateDisplay(this._athleticismMalus, LocalPlayer.Stats.BloodInfection.Infected);
@@ -209,9 +220,9 @@ namespace TheForest.Player
 		{
 			if (this._currentFeelingAlpha < 0.5f)
 			{
-				return this._currentFeeling._feelingName;
+				return UiTranslationDatabase.TranslateKey(this._currentFeeling._feelingName, this._currentFeeling._feelingName, true);
 			}
-			return this._defaultFeeling;
+			return UiTranslationDatabase.TranslateKey(this._defaultFeeling, this._defaultFeeling, true);
 		}
 
 		

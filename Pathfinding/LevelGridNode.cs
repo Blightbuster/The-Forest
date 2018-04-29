@@ -255,6 +255,15 @@ namespace Pathfinding
 		}
 
 		
+		private static LayerGridGraph[] _gridGraphs = new LayerGridGraph[0];
+
+		
+		protected ushort gridConnections;
+
+		
+		protected static LayerGridGraph[] gridGraphs;
+
+		
 		public const int NoConnection = 15;
 
 		
@@ -265,14 +274,5 @@ namespace Pathfinding
 
 		
 		public const int MaxLayerCount = 15;
-
-		
-		private static LayerGridGraph[] _gridGraphs = new LayerGridGraph[0];
-
-		
-		protected ushort gridConnections;
-
-		
-		protected static LayerGridGraph[] gridGraphs;
 	}
 }

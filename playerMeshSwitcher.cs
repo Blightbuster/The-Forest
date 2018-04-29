@@ -52,18 +52,16 @@ public class playerMeshSwitcher : MonoBehaviour
 		}
 		if (this.pVis.localplayerDist < this.lod1Distance)
 		{
-			if (this.Lod0)
+			if (this.Lod0 && this.skin.sharedMesh != this.Lod0)
 			{
-				base.StartCoroutine(this.fixMotionBlur());
 				this.skin.sharedMesh = this.Lod0;
 			}
 			this.enableLodJoints();
 		}
 		else if (this.pVis.localplayerDist < this.lod2Distance)
 		{
-			if (this.Lod1)
+			if (this.Lod1 && this.skin.sharedMesh != this.Lod1)
 			{
-				base.StartCoroutine(this.fixMotionBlur());
 				this.skin.sharedMesh = this.Lod1;
 			}
 			if (!this.jointsUseLod2Distance)
@@ -73,14 +71,15 @@ public class playerMeshSwitcher : MonoBehaviour
 		}
 		else
 		{
-			if (this.Lod2)
+			if (this.Lod2 && this.skin.sharedMesh)
 			{
-				base.StartCoroutine(this.fixMotionBlur());
-				this.skin.sharedMesh = this.Lod2;
+				if (this.skin.sharedMesh != this.Lod2)
+				{
+					this.skin.sharedMesh = this.Lod2;
+				}
 			}
-			else if (this.Lod1)
+			else if (this.Lod1 && this.skin.sharedMesh && this.skin.sharedMesh != this.Lod1)
 			{
-				base.StartCoroutine(this.fixMotionBlur());
 				this.skin.sharedMesh = this.Lod1;
 			}
 			this.disableLodJoints();
@@ -116,7 +115,16 @@ public class playerMeshSwitcher : MonoBehaviour
 	
 	private IEnumerator fixMotionBlur()
 	{
+		if (this.skin)
+		{
+			this.skin.enabled = false;
+		}
 		yield return YieldPresets.WaitForEndOfFrame;
+		if (this.skin)
+		{
+			this.skin.enabled = true;
+		}
+		yield return null;
 		yield break;
 	}
 

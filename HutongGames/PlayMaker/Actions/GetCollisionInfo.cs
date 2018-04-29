@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets info on the last collision event and store in variables. See Unity Physics docs.")]
 	[ActionCategory(ActionCategory.Physics)]
+	[Tooltip("Gets info on the last collision event and store in variables. See Unity Physics docs.")]
 	public class GetCollisionInfo : FsmStateAction
 	{
 		
@@ -49,8 +49,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmGameObject gameObjectHit;
 
 		
-		[Tooltip("Get the relative velocity of the collision.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Get the relative velocity of the collision.")]
 		public FsmVector3 relativeVelocity;
 
 		
@@ -59,8 +59,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat relativeSpeed;
 
 		
-		[Tooltip("Get the world position of the collision contact. Useful for spawning effects etc.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Get the world position of the collision contact. Useful for spawning effects etc.")]
 		public FsmVector3 contactPoint;
 
 		
@@ -69,8 +69,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmVector3 contactNormal;
 
 		
-		[Tooltip("Get the name of the physics material of the colliding GameObject. Useful for triggering different effects. Audio, particles...")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Get the name of the physics material of the colliding GameObject. Useful for triggering different effects. Audio, particles...")]
 		public FsmString physicsMaterialName;
 	}
 }

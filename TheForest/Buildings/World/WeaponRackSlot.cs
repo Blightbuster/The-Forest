@@ -12,6 +12,7 @@ using TheForest.Utils;
 using UniLinq;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace TheForest.Buildings.World
 {
@@ -63,22 +64,22 @@ namespace TheForest.Buildings.World
 				}
 				else if (this._billboardRotate)
 				{
-					Scene.HudGui.RackWidgets[(int)this._type].ShowList(ItemDatabase.Items[this._currentAddItem]._id, this._addIcon.transform, SideIcons.Craft);
+					Scene.HudGui.RackWidgets[(int)this._rackWidgitType].ShowList(ItemDatabase.Items[this._currentAddItem]._id, this._addIcon.transform, SideIcons.Craft);
 				}
 				else
 				{
-					Scene.HudGui.RackWidgets[(int)this._type].ShowSingle(LocalPlayer.Inventory.RightHandOrNext._itemId, this._addIcon.transform, SideIcons.Craft);
+					Scene.HudGui.RackWidgets[(int)this._rackWidgitType].ShowSingle(LocalPlayer.Inventory.RightHandOrNext._itemId, this._addIcon.transform, SideIcons.Craft);
 				}
 			}
 			else if (this._nextActionTime < Time.time && TheForest.Utils.Input.GetButtonDown("Take"))
 			{
 				this._nextActionTime = Time.time + 0.35f;
-				LocalPlayer.Sfx.PlayWhoosh();
+				LocalPlayer.Sfx.PlayItemCustomSfx(this._storedItemId, true);
 				this.TakeCurrentItem();
 			}
 			else
 			{
-				Scene.HudGui.RackWidgets[(int)this._type].ShowSingle(this._storedItemId, this._takeIcon.transform, SideIcons.Take);
+				Scene.HudGui.RackWidgets[(int)this._rackWidgitType].ShowSingle(this._storedItemId, this._takeIcon.transform, SideIcons.Take);
 			}
 		}
 
@@ -100,7 +101,7 @@ namespace TheForest.Buildings.World
 			}
 			if (Scene.HudGui)
 			{
-				Scene.HudGui.RackWidgets[(int)this._type].Shutdown();
+				Scene.HudGui.RackWidgets[(int)this._rackWidgitType].Shutdown();
 			}
 		}
 
@@ -169,7 +170,6 @@ namespace TheForest.Buildings.World
 				if (this._fillMode == WeaponRackSlot.FillMode.EquipedInRightHand && !LocalPlayer.Inventory.IsRightHandEmpty() && this.IsValidItem(LocalPlayer.Inventory.RightHandOrNext.ItemCache))
 				{
 					this._currentAddItem = ItemDatabase.ItemIndexById(LocalPlayer.Inventory.RightHandOrNext._itemId);
-					this.UpdateIcons();
 				}
 				else
 				{
@@ -184,6 +184,10 @@ namespace TheForest.Buildings.World
 				else
 				{
 					this._addIcon.transform.parent.position = base.transform.position + this.IconsOffset;
+				}
+				if (!base.enabled)
+				{
+					Scene.HudGui.RackWidgets[(int)this._rackWidgitType].ShowNoValidOption(this._addIcon.transform);
 				}
 			}
 			else
@@ -215,15 +219,17 @@ namespace TheForest.Buildings.World
 		private void GrabExit()
 		{
 			base.enabled = false;
-			Scene.HudGui.RackWidgets[(int)this._type].Shutdown();
+			Scene.HudGui.RackWidgets[(int)this._rackWidgitType].Shutdown();
 		}
 
 		
-		private void UpdateIcons()
+		public void Disable()
 		{
-			Item item = ItemDatabase.Items[this._currentAddItem];
-			this._addIcon.sharedMaterial = item._addMat;
-			this._takeIcon.sharedMaterial = item._takeMat;
+			if (base.enabled)
+			{
+				this.GrabExit();
+			}
+			base.GetComponent<Collider>().enabled = false;
 		}
 
 		
@@ -233,7 +239,6 @@ namespace TheForest.Buildings.World
 			if (nextItemIndex != this._currentAddItem)
 			{
 				this._currentAddItem = nextItemIndex;
-				this.UpdateIcons();
 				return;
 			}
 			if (this._currentAddItem > -1)
@@ -349,6 +354,18 @@ namespace TheForest.Buildings.World
 		{
 			Reparent.Locked = true;
 			InventoryItemView inventoryItemView = LocalPlayer.Inventory.InventoryItemViewsCache[this._storedItemId][0];
+			if (inventoryItemView._held == null)
+			{
+				Debug.LogError(string.Concat(new string[]
+				{
+					"Attempting to spawn invalid item! No 'held' version of \"",
+					ItemDatabase.ItemById(this._storedItemId)._name,
+					"\" \"",
+					base.gameObject.GetFullName(),
+					"\""
+				}));
+				return;
+			}
 			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(inventoryItemView._held);
 			FakeParent component = inventoryItemView._held.GetComponent<FakeParent>();
 			if (this._applyUpsideDownOffset && inventoryItemView.ItemCache._allowUpsideDownPlacement)
@@ -364,6 +381,21 @@ namespace TheForest.Buildings.World
 			gameObject.transform.localRotation = ((!component) ? inventoryItemView._held.transform.localRotation : component.RealLocalRotation);
 			gameObject.transform.parent = base.transform;
 			ItemUtils.FixItemPosition(gameObject, this._storedItemId);
+			Item item = ItemDatabase.ItemById(this._storedItemId);
+			RackPlacement placementOverride = this.GetPlacementOverride(item);
+			if (placementOverride != null)
+			{
+				Vector3 zero = Vector3.zero;
+				Quaternion identity = Quaternion.identity;
+				Vector3 one = Vector3.one;
+				placementOverride.ApplyTo(ref zero, ref identity, ref one);
+				gameObject.transform.localScale = one;
+				gameObject.transform.parent = base.transform;
+				gameObject.transform.localPosition = zero;
+				gameObject.transform.localRotation = identity;
+				gameObject.transform.localPosition += WeaponRackSlot.GetJitterVector3(this._jitterPosition);
+				gameObject.transform.localRotation = Quaternion.Euler(WeaponRackSlot.GetJitterVector3(this._jitterRotation)) * gameObject.transform.localRotation;
+			}
 			gameObject.layer = base.gameObject.layer;
 			Animator animator = gameObject.GetComponent<Animator>() ?? gameObject.transform.GetChild(0).GetComponent<Animator>();
 			if (animator)
@@ -378,7 +410,10 @@ namespace TheForest.Buildings.World
 			}
 			this._storedItemGO = gameObject;
 			Reparent.Locked = false;
-			this.OnItemAdded.Invoke(this._storedItemId);
+			if (this.OnItemAdded != null)
+			{
+				this.OnItemAdded.Invoke(this._storedItemId);
+			}
 		}
 
 		
@@ -458,11 +493,31 @@ namespace TheForest.Buildings.World
 			InventoryItemView inventoryItemView = LocalPlayer.Inventory.InventoryItemViewsCache[this._storedItemId][0];
 			InventoryItemView inventoryItemView2 = UnityEngine.Object.Instantiate<InventoryItemView>(inventoryItemView);
 			Vector3 position = base.transform.position;
-			position.y += inventoryItemView.transform.position.y - LocalPlayer.Inventory._inventoryGO.transform.position.y;
-			inventoryItemView2.transform.localScale = inventoryItemView.transform.lossyScale;
-			inventoryItemView2.transform.parent = base.transform;
-			inventoryItemView2.transform.position = position;
-			inventoryItemView2.transform.rotation = inventoryItemView.transform.rotation;
+			Quaternion rotation = base.transform.rotation;
+			Item item = ItemDatabase.ItemById(this._storedItemId);
+			RackPlacement placementOverride = this.GetPlacementOverride(item);
+			if (placementOverride != null)
+			{
+				Vector3 zero = Vector3.zero;
+				Quaternion identity = Quaternion.identity;
+				Vector3 one = Vector3.one;
+				placementOverride.ApplyTo(ref zero, ref identity, ref one);
+				inventoryItemView2.transform.localScale = one;
+				inventoryItemView2.transform.parent = base.transform;
+				inventoryItemView2.transform.localPosition = zero;
+				inventoryItemView2.transform.localRotation = identity;
+				inventoryItemView2.transform.localPosition += WeaponRackSlot.GetJitterVector3(this._jitterPosition);
+				inventoryItemView2.transform.localRotation = Quaternion.Euler(WeaponRackSlot.GetJitterVector3(this._jitterRotation)) * inventoryItemView2.transform.localRotation;
+			}
+			else
+			{
+				Vector3 position2 = position;
+				position2.y += inventoryItemView.transform.position.y - LocalPlayer.Inventory._inventoryGO.transform.position.y;
+				inventoryItemView2.transform.localScale = inventoryItemView.transform.lossyScale;
+				inventoryItemView2.transform.parent = base.transform;
+				inventoryItemView2.transform.position = position2;
+				inventoryItemView2.transform.rotation = inventoryItemView.transform.rotation;
+			}
 			inventoryItemView2.gameObject.layer = base.gameObject.layer;
 			inventoryItemView2.gameObject.SetActive(true);
 			this._storedItemGO = inventoryItemView2.gameObject;
@@ -478,26 +533,53 @@ namespace TheForest.Buildings.World
 			{
 				UnityEngine.Object.Destroy(component2);
 			}
-			this.OnItemAdded.Invoke(this._storedItemId);
+			if (this.OnItemAdded != null)
+			{
+				this.OnItemAdded.Invoke(this._storedItemId);
+			}
+		}
+
+		
+		private static Vector3 GetJitterVector3(Vector3 jitterMinMax)
+		{
+			return new Vector3(UnityEngine.Random.Range(-jitterMinMax.x, jitterMinMax.x), UnityEngine.Random.Range(-jitterMinMax.y, jitterMinMax.y), UnityEngine.Random.Range(-jitterMinMax.z, jitterMinMax.z));
+		}
+
+		
+		private RackPlacement GetPlacementOverride(Item item)
+		{
+			if (item == null || item._rackPlacements.NullOrEmpty())
+			{
+				return null;
+			}
+			foreach (RackPlacement rackPlacement in item._rackPlacements)
+			{
+				if (rackPlacement != null && rackPlacement.PlacementType == this._rackPlacementType)
+				{
+					return rackPlacement;
+				}
+			}
+			return null;
 		}
 
 		
 		private void TakeCurrentItem()
 		{
+			bool flag = false;
 			if (this._fillMode == WeaponRackSlot.FillMode.EquipedInRightHand)
 			{
 				LocalPlayer.Inventory.MemorizeItem(Item.EquipmentSlot.RightHand);
-				if (!LocalPlayer.Inventory.Equip(this._storedItemId, true))
-				{
-					ItemUtils.SpawnItem(this._storedItemId, this._storedItemGO.transform.position, this._storedItemGO.transform.rotation, true);
-				}
+				flag = LocalPlayer.Inventory.Equip(this._storedItemId, true);
 			}
-			else if (!LocalPlayer.Inventory.AddItem(this._storedItemId, 1, false, false, null))
+			if (!flag)
 			{
-				ItemUtils.SpawnItem(this._storedItemId, this._storedItemGO.transform.position, this._storedItemGO.transform.rotation, true);
+				flag = LocalPlayer.Inventory.AddItem(this._storedItemId, 1, false, false, null);
+			}
+			if (!flag)
+			{
+				LocalPlayer.Inventory.FakeDrop(this._storedItemId, null);
 			}
 			this._currentAddItem = ItemDatabase.ItemIndexById(this._storedItemId);
-			this.UpdateIcons();
 			UnityEngine.Object.Destroy(this._storedItemGO);
 			this._storedItemGO = null;
 			this._storedItemId = -1;
@@ -525,9 +607,34 @@ namespace TheForest.Buildings.World
 		}
 
 		
-		private bool IsValidItem(Item item)
+		public bool IsValidItem(Item item)
 		{
-			return item.MatchType(this._acceptedItemTypes) && (this._positionningSource != WeaponRackSlot.PositionningSource.Held || item._equipmentSlot == Item.EquipmentSlot.RightHand) && (this._forbidenItemTypes == (Item.Types)0 || !item.MatchType(this._forbidenItemTypes)) && item._maxAmount >= 0 && (this._itemWhiteList.Length == 0 || this._itemWhiteList.Contains(item._id)) && (this._itemBlackList.Length == 0 || !this._itemBlackList.Contains(item._id));
+			if (this.IsWhiteListed(item))
+			{
+				return true;
+			}
+			if (this.IsBlackListed(item))
+			{
+				return false;
+			}
+			if (!item.MatchType(this._acceptedItemTypes) || item.MatchType(this._forbidenItemTypes))
+			{
+				return false;
+			}
+			bool flag = this._positionningSource != WeaponRackSlot.PositionningSource.Held || item._equipmentSlot == Item.EquipmentSlot.RightHand;
+			return flag && item._maxAmount >= 0;
+		}
+
+		
+		private bool IsWhiteListed(Item item)
+		{
+			return this._itemWhiteList.Length != 0 && this._itemWhiteList.Contains(item._id);
+		}
+
+		
+		private bool IsBlackListed(Item item)
+		{
+			return this._itemBlackList.Length != 0 && this._itemBlackList.Contains(item._id);
 		}
 
 		
@@ -614,7 +721,17 @@ namespace TheForest.Buildings.World
 		public bool hellDoorSlot;
 
 		
-		public RackTypes _type;
+		[FormerlySerializedAs("_type")]
+		public RackTypes _rackWidgitType;
+
+		
+		public RackPlacementTypes _rackPlacementType;
+
+		
+		public Vector3 _jitterPosition;
+
+		
+		public Vector3 _jitterRotation;
 
 		
 		[SerializeThis]

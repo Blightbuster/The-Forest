@@ -25,7 +25,7 @@ namespace TheForest.Buildings.World
 				this._billboardGatherSheen.SetActive(false);
 			}
 			this._layerMask = 67108880;
-			this._entityCache = this.entity;
+			this._entityCache = base.entity;
 			base.enabled = false;
 		}
 
@@ -78,7 +78,7 @@ namespace TheForest.Buildings.World
 						}
 						else
 						{
-							num = Mathf.Min(this.AmountReal, LocalPlayer.Stats.Thirst);
+							num = Mathf.Min(this.AmountReal, Mathf.Max(LocalPlayer.Stats.Thirst, 0.15f));
 							this.RemoveWater(num);
 						}
 						LocalPlayer.Stats.Thirst -= num * ((!this._polluted) ? 1f : GameSettings.Survival.PolutedWaterThirstRatio);

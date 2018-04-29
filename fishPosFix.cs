@@ -16,19 +16,7 @@ public class fishPosFix : MonoBehaviour
 	{
 		if (!this.fish || this.fish.spearedBool)
 		{
-			if (!this.amb)
-			{
-				this.amb = base.gameObject.AddComponent<AmplifyMotionObjectBase>();
-			}
-			else
-			{
-				this.amb.enabled = true;
-			}
 			this.tr.position = this.refPos.position;
-		}
-		else if (this.amb)
-		{
-			this.amb.enabled = false;
 		}
 	}
 
@@ -49,7 +37,4 @@ public class fishPosFix : MonoBehaviour
 
 	
 	private Transform tr;
-
-	
-	private AmplifyMotionObjectBase amb;
 }

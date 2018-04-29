@@ -516,7 +516,7 @@ public class enemyAnimEvents : EntityEventListener
 		GameObject gameObject;
 		if (this.ai.fireman_dynamite)
 		{
-			gameObject = (UnityEngine.Object.Instantiate(this.setup.thrownFireBombGo, this.setup.clawsWeapon.transform.position, Quaternion.identity) as GameObject);
+			gameObject = UnityEngine.Object.Instantiate<GameObject>(this.setup.thrownFireBombGo, this.setup.clawsWeapon.transform.position, Quaternion.identity);
 		}
 		else
 		{
@@ -524,7 +524,7 @@ public class enemyAnimEvents : EntityEventListener
 			{
 				this.setup.fireBombGo.SetActive(false);
 			}
-			gameObject = (UnityEngine.Object.Instantiate(this.setup.thrownFireBombGo, this.setup.clawsWeapon.transform.position, Quaternion.identity) as GameObject);
+			gameObject = UnityEngine.Object.Instantiate<GameObject>(this.setup.thrownFireBombGo, this.setup.clawsWeapon.transform.position, Quaternion.identity);
 		}
 		Transform transform;
 		if (this.setup.ai.target.CompareTag("Player") || this.setup.ai.target.CompareTag("PlayerNet"))
@@ -648,9 +648,9 @@ public class enemyAnimEvents : EntityEventListener
 		}
 		else
 		{
-			if (!this.Remote && BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+			if (!this.Remote && BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 			{
-				SfxEnemyWeaponSwoosh.Raise(this.entity, EntityTargets.EveryoneExceptOwner).Send();
+				SfxEnemyWeaponSwoosh.Raise(base.entity, EntityTargets.EveryoneExceptOwner).Send();
 			}
 			if (this.setup.ai.fireman)
 			{
@@ -672,9 +672,9 @@ public class enemyAnimEvents : EntityEventListener
 	
 	private void playFallDown()
 	{
-		if (!this.Remote && BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+		if (!this.Remote && BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 		{
-			SfxEnemyFallDown.Raise(this.entity, EntityTargets.EveryoneExceptOwner).Send();
+			SfxEnemyFallDown.Raise(base.entity, EntityTargets.EveryoneExceptOwner).Send();
 		}
 		this.playFMODEvent(this.fallDownEvent, this.eventPosition, delegate(EventInstance instance)
 		{
@@ -691,9 +691,9 @@ public class enemyAnimEvents : EntityEventListener
 	
 	private void playFallDownShort()
 	{
-		if (!this.Remote && BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+		if (!this.Remote && BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 		{
-			SfxEnemyFallDownShort.Raise(this.entity, EntityTargets.EveryoneExceptOwner).Send();
+			SfxEnemyFallDownShort.Raise(base.entity, EntityTargets.EveryoneExceptOwner).Send();
 		}
 		this.playFMODEvent(this.fallDownEvent, this.eventPosition, delegate(EventInstance instance)
 		{
@@ -731,9 +731,9 @@ public class enemyAnimEvents : EntityEventListener
 	
 	private void playTreeJumpStart()
 	{
-		if (!this.Remote && BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+		if (!this.Remote && BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 		{
-			SfxEnemyTreeJumpStart.Raise(this.entity, EntityTargets.EveryoneExceptOwner).Send();
+			SfxEnemyTreeJumpStart.Raise(base.entity, EntityTargets.EveryoneExceptOwner).Send();
 		}
 		this.playFMODEvent(this.treeJumpStartEvent, this.feetAudio, null);
 	}
@@ -747,9 +747,9 @@ public class enemyAnimEvents : EntityEventListener
 	
 	private void playTreeJumpLand()
 	{
-		if (!this.Remote && BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+		if (!this.Remote && BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 		{
-			SfxEnemyTreeJumpLand.Raise(this.entity, EntityTargets.EveryoneExceptOwner).Send();
+			SfxEnemyTreeJumpLand.Raise(base.entity, EntityTargets.EveryoneExceptOwner).Send();
 		}
 		this.playFMODEvent(this.treeJumpLandEvent, this.feetAudio, null);
 	}
@@ -1180,15 +1180,6 @@ public class enemyAnimEvents : EntityEventListener
 	}
 
 	
-	private const string IDLE_STATE_PATH = "Base Layer.idle01";
-
-	
-	private const float IDLE_STATE_TIMEOUT = 2f;
-
-	
-	private const float SQR_FOOTSTEP_DISTANCE_THRESHOLD = 1600f;
-
-	
 	private Animator animator;
 
 	
@@ -1331,6 +1322,12 @@ public class enemyAnimEvents : EntityEventListener
 	private bool inIdleState;
 
 	
+	private const string IDLE_STATE_PATH = "Base Layer.idle01";
+
+	
+	private const float IDLE_STATE_TIMEOUT = 2f;
+
+	
 	private int actor;
 
 	
@@ -1344,6 +1341,9 @@ public class enemyAnimEvents : EntityEventListener
 
 	
 	private Collider lastJumpCollider;
+
+	
+	private const float SQR_FOOTSTEP_DISTANCE_THRESHOLD = 1600f;
 
 	
 	private bool doingLookAt;

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets data from a url and store it in variables. See Unity WWW docs for more details.")]
 	[ActionCategory("Web Player")]
+	[Tooltip("Gets data from a url and store it in variables. See Unity WWW docs for more details.")]
 	public class WWWObject : FsmStateAction
 	{
 		
@@ -51,7 +51,7 @@ namespace HutongGames.PlayMaker.Actions
 			{
 				this.storeText.Value = this.wwwObject.text;
 				this.storeTexture.Value = this.wwwObject.texture;
-				this.storeMovieTexture.Value = this.wwwObject.movie;
+				this.storeMovieTexture.Value = this.wwwObject.GetMovieTexture();
 				this.errorString.Value = this.wwwObject.error;
 				base.Fsm.Event((!string.IsNullOrEmpty(this.errorString.Value)) ? this.isError : this.isDone);
 				base.Finish();
@@ -70,19 +70,19 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString storeText;
 
 		
-		[Tooltip("Gets a Texture from the url.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Gets a Texture from the url.")]
 		public FsmTexture storeTexture;
 
 		
+		[UIHint(UIHint.Variable)]
 		[ObjectType(typeof(MovieTexture))]
 		[Tooltip("Gets a Texture from the url.")]
-		[UIHint(UIHint.Variable)]
 		public FsmObject storeMovieTexture;
 
 		
-		[Tooltip("Error message if there was an error during the download.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Error message if there was an error during the download.")]
 		public FsmString errorString;
 
 		
@@ -91,8 +91,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat progress;
 
 		
-		[Tooltip("Event to send when the data has finished loading (progress = 1).")]
 		[ActionSection("Events")]
+		[Tooltip("Event to send when the data has finished loading (progress = 1).")]
 		public FsmEvent isDone;
 
 		

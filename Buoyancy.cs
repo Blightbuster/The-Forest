@@ -152,7 +152,14 @@ public class Buoyancy : MonoBehaviour
 				this.voxelHalfHeight = bounds.size.z;
 			}
 			this.voxelHalfHeight /= (float)(2 * this.slicesPerAxis);
-			base.GetComponent<Rigidbody>().centerOfMass = new Vector3(0f, -bounds.extents.y * 0.2f, 0f) + bounds.center;
+			if (this.OverrideCenterOfMass)
+			{
+				base.GetComponent<Rigidbody>().centerOfMass = this.OverrideCenterOfMass.position;
+			}
+			else
+			{
+				base.GetComponent<Rigidbody>().centerOfMass = new Vector3(0f, -bounds.extents.y * 0.2f, 0f) + base.transform.InverseTransformPoint(bounds.center);
+			}
 			List<Vector3> list = this.SliceIntoVoxels(collidersRoot, componentsInChildren, bounds);
 			collidersRoot.position = position;
 			collidersRoot.rotation = rotation;
@@ -278,9 +285,11 @@ public class Buoyancy : MonoBehaviour
 	{
 		if (other.CompareTag("Water"))
 		{
-			if (this.isPlayer && !this.isPlayerNet && LocalPlayer.AnimControl.playerHeadCollider && LocalPlayer.AnimControl.playerHeadCollider.enabled && other.enabled)
+			if (this.isPlayer && !this.isPlayerNet && LocalPlayer.AnimControl.playerHeadCollider && !this.WaterTriggers.Contains(other) && LocalPlayer.AnimControl.playerHeadCollider.enabled && other.enabled)
 			{
 				Physics.IgnoreCollision(LocalPlayer.AnimControl.playerHeadCollider, other, true);
+				LocalPlayer.AnimControl.playerCollider.enabled = false;
+				LocalPlayer.AnimControl.playerCollider.enabled = true;
 			}
 			if (!this.WaterTriggers.Contains(other))
 			{
@@ -427,12 +436,6 @@ public class Buoyancy : MonoBehaviour
 	}
 
 	
-	private const float DAMPFER = 0.15f;
-
-	
-	private const float WATER_DENSITY = 1000f;
-
-	
 	public bool isPlayer;
 
 	
@@ -467,6 +470,15 @@ public class Buoyancy : MonoBehaviour
 
 	
 	public int voxelsLimit = 16;
+
+	
+	public Transform OverrideCenterOfMass;
+
+	
+	private const float DAMPFER = 0.15f;
+
+	
+	private const float WATER_DENSITY = 1000f;
 
 	
 	private float lastWaterHeight;

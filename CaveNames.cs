@@ -26,5 +26,7 @@ public enum CaveNames
 	
 	Cave10,
 	
-	HellCave
+	HellCave,
+	
+	SnowCave
 }

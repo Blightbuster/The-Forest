@@ -81,7 +81,25 @@ namespace TheForest.Player
 		
 		public void DoneMessage(object o)
 		{
-			this.LogMessage(UiTranslationDatabase.TranslateKey(this._tickedEntryKey, "NEW ITEM DISCOVERED", true));
+			TickOffSystem.EntryType type = (o as TickOffSystem.Entry)._type;
+			if (type != TickOffSystem.EntryType.CollectItem)
+			{
+				if (type != TickOffSystem.EntryType.InspectAnimal)
+				{
+					if (type == TickOffSystem.EntryType.InspectPlant)
+					{
+						this.LogMessage(UiTranslationDatabase.TranslateKey(this._inspectedPlantMessageKey, "NEW PLANT DISCOVERED", true));
+					}
+				}
+				else
+				{
+					this.LogMessage(UiTranslationDatabase.TranslateKey(this._inspectedAnimalMessageKey, "NEW ANIMAL DISCOVERED", true));
+				}
+			}
+			else
+			{
+				this.LogMessage(UiTranslationDatabase.TranslateKey(this._collectedItemMessageKey, "NEW PLANT DISCOVERED", true));
+			}
 			if (this._tickOffTab)
 			{
 				this._tickOffTab.Highlight(null);
@@ -93,7 +111,13 @@ namespace TheForest.Player
 		public SelectPageNumber _tickOffTab;
 
 		
-		public string _tickedEntryKey = "TICKED_ENTRY_MESSAGE";
+		public string _collectedItemMessageKey = "COLLECTED_ITEM_MESSAGE";
+
+		
+		public string _inspectedAnimalMessageKey = "INSPECTED_ANIMAL_MESSAGE";
+
+		
+		public string _inspectedPlantMessageKey = "INSPECTED_PLANT_MESSAGE";
 
 		
 		public TickOffSystem.Entry[] _entries;
@@ -115,7 +139,14 @@ namespace TheForest.Player
 				TickOffSystem.EntryType type = this._type;
 				if (type != TickOffSystem.EntryType.CollectItem)
 				{
-					if (type == TickOffSystem.EntryType.InspectAnimal)
+					if (type != TickOffSystem.EntryType.InspectAnimal)
+					{
+						if (type == TickOffSystem.EntryType.InspectPlant)
+						{
+							EventRegistry.Player.Subscribe(TfEvent.InspectedPlant, new EventRegistry.SubscriberCallback(this.OnInspectedPlant));
+						}
+					}
+					else
 					{
 						EventRegistry.Player.Subscribe(TfEvent.InspectedAnimal, new EventRegistry.SubscriberCallback(this.OnInspectedAnimal));
 					}
@@ -133,7 +164,14 @@ namespace TheForest.Player
 				TickOffSystem.EntryType type = this._type;
 				if (type != TickOffSystem.EntryType.CollectItem)
 				{
-					if (type == TickOffSystem.EntryType.InspectAnimal)
+					if (type != TickOffSystem.EntryType.InspectAnimal)
+					{
+						if (type == TickOffSystem.EntryType.InspectPlant)
+						{
+							EventRegistry.Player.Unsubscribe(TfEvent.InspectedPlant, new EventRegistry.SubscriberCallback(this.OnInspectedPlant));
+						}
+					}
+					else
 					{
 						EventRegistry.Player.Unsubscribe(TfEvent.InspectedAnimal, new EventRegistry.SubscriberCallback(this.OnInspectedAnimal));
 					}
@@ -176,7 +214,20 @@ namespace TheForest.Player
 			
 			private void OnInspectedAnimal(object o)
 			{
-				AnimalType animalType = (AnimalType)((int)o);
+				AnimalType animalType = (AnimalType)o;
+				if (animalType == this._animalType)
+				{
+					this._ticked = true;
+					this._tickGo.SetActive(true);
+					this.Clear();
+					EventRegistry.Player.Publish(TfEvent.TickedOffEntry, this);
+				}
+			}
+
+			
+			private void OnInspectedPlant(object o)
+			{
+				AnimalType animalType = (AnimalType)o;
 				if (animalType == this._animalType)
 				{
 					this._ticked = true;
@@ -212,7 +263,9 @@ namespace TheForest.Player
 			
 			CollectItem,
 			
-			InspectAnimal
+			InspectAnimal,
+			
+			InspectPlant
 		}
 	}
 }

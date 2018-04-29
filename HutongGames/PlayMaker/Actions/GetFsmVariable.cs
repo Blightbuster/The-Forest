@@ -49,7 +49,7 @@ namespace HutongGames.PlayMaker.Actions
 				this.storeValue.Type = FsmUtility.GetVariableType(this.targetVariable);
 				if (!string.IsNullOrEmpty(this.storeValue.variableName) && this.sourceVariable == null)
 				{
-					this.LogWarning("Missing Variable: " + this.storeValue.variableName);
+					base.LogWarning("Missing Variable: " + this.storeValue.variableName);
 				}
 				this.cachedGO = ownerDefaultTarget;
 			}
@@ -73,13 +73,13 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("Optional name of FSM on Game Object")]
 		[UIHint(UIHint.FsmName)]
+		[Tooltip("Optional name of FSM on Game Object")]
 		public FsmString fsmName;
 
 		
-		[HideTypeFilter]
 		[RequiredField]
+		[HideTypeFilter]
 		[UIHint(UIHint.Variable)]
 		public FsmVar storeValue;
 

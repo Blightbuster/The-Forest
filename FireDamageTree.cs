@@ -1,6 +1,5 @@
 ﻿using System;
 using Bolt;
-using UnityEngine;
 
 
 public class FireDamageTree : FireDamage
@@ -75,6 +74,16 @@ public class FireDamageTree : FireDamage
 	}
 
 	
+	protected override void Burn()
+	{
+		if (this.MyFuel == 0f)
+		{
+			this.MyFuel = 15f;
+		}
+		base.Ignite(base.transform.position, 0);
+	}
+
+	
 	protected override void BurningOff()
 	{
 		if (!BoltNetwork.isRunning)
@@ -88,16 +97,9 @@ public class FireDamageTree : FireDamage
 	{
 		if (!BoltNetwork.isClient)
 		{
-			Debug.Log("FinishedBurning");
-			if (this.MyBurnt)
-			{
-				GameObject value = (GameObject)UnityEngine.Object.Instantiate(this.MyBurnt, base.transform.position, base.transform.rotation);
-				base.SendMessage("Burnt", value, SendMessageOptions.DontRequireReceiver);
-			}
 			this.isBurning = false;
 			this.usedFuelSeconds = 0f;
 			base.StopBurning();
-			base.GetComponent<TreeHealth>().LodTree.DespawnCurrent();
 		}
 		else
 		{

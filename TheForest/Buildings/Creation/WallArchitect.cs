@@ -34,9 +34,6 @@ namespace TheForest.Buildings.Creation
 		{
 			this._logPool = new Queue<Transform>();
 			this._newPool = new Queue<Transform>();
-			this._logMat = new Material(this._logRenderer.sharedMaterial);
-			this._unlockableLogMat = new Material(this._logRenderer.sharedMaterial);
-			this._unlockableLogMat.SetColor("_TintColor", LocalPlayer.Create.BuildingPlacer.RedMat.GetColor("_TintColor"));
 			this._edges = new List<WallArchitect.Edge>();
 			this._wallRoot = new GameObject("WallRoot");
 			if (this._multiPointsPositions == null)
@@ -67,16 +64,12 @@ namespace TheForest.Buildings.Creation
 				this._saveAutofill = true;
 				this.UpdateAutoFill(true);
 			}
-			bool flag = this._multiPointsPositions.Count > 1 || (this._multiPointsPositions.Count == 1 && Vector3.Distance(base.transform.position, this._multiPointsPositions[this._multiPointsPositions.Count - 1]) > this.MinPlaceLockLength);
-			if (LocalPlayer.Create.BuildingPlacer.Clear != flag)
-			{
-				LocalPlayer.Create.BuildingPlacer.Clear = flag;
-			}
-			bool flag2 = false;
+			bool flag = false;
+			bool flag3;
 			if (!this._autofillmode)
 			{
-				bool flag3 = this._multiPointsPositions.Count > 0;
-				if (flag3 && TheForest.Utils.Input.GetButtonDown("AltFire"))
+				bool flag2 = this._multiPointsPositions.Count > 0;
+				if (flag2 && TheForest.Utils.Input.GetButtonDown("AltFire"))
 				{
 					this._tmpEdge.Clear();
 					this._tmpEdge = null;
@@ -87,20 +80,22 @@ namespace TheForest.Buildings.Creation
 					}
 					this._multiPointsPositions.RemoveAt(this._multiPointsPositions.Count - 1);
 				}
-				this._canLock = this.CanLock;
+				Create.CanLock = this.CanLock;
 				this._canPlaceLock = this.CanPlaceLock;
-				if ((this._canLock || this._canPlaceLock) && this._multiPointsPositions.Count > 0)
+				flag3 = (this._canPlaceLock || this.CanPlaceNoLock);
+				if ((Create.CanLock || this._canPlaceLock) && this._multiPointsPositions.Count > 0)
 				{
 					Vector3 vector = base.transform.position - this._multiPointsPositions[this._multiPointsPositions.Count - 1];
 					RaycastHit raycastHit;
 					if (Physics.SphereCast(this._multiPointsPositions[this._multiPointsPositions.Count - 1] + Vector3.up, 0.5f, vector.normalized, out raycastHit, vector.magnitude, 1 << LayerMask.NameToLayer("treeMid")))
 					{
-						this._canLock = false;
+						Create.CanLock = false;
 						this._canPlaceLock = false;
+						flag3 = false;
 						LocalPlayer.Create.BuildingPlacer.Clear = false;
 					}
 				}
-				if ((this._canLock && TheForest.Utils.Input.GetButtonDown("Fire1")) || (this._canPlaceLock && TheForest.Utils.Input.GetButtonDown("Build")))
+				if ((Create.CanLock && TheForest.Utils.Input.GetButtonDown("Fire1")) || (this._canPlaceLock && TheForest.Utils.Input.GetButtonDown("Build")))
 				{
 					this.LockCurrentPoint();
 					base.GetComponent<Renderer>().enabled = false;
@@ -115,27 +110,34 @@ namespace TheForest.Buildings.Creation
 					edge._root.parent = this._wallRoot.transform;
 					this._edges.Add(edge);
 					this._logPool.Clear();
-					flag2 = true;
+					flag = true;
 				}
 				this.ShowTempWall();
 			}
 			else
 			{
-				this._canLock = false;
+				flag3 = false;
 				this.UpdateHeight();
 				if (this._multiPointsPositions.Count > 1)
 				{
+					Create.CanLock = true;
 					if (this._autofillmode && TheForest.Utils.Input.GetButtonDown("Build"))
 					{
-						flag2 = true;
+						flag = true;
 					}
 				}
 				else
 				{
+					Create.CanLock = false;
 					this.ShowTempWall();
 				}
 			}
-			if (flag2)
+			bool flag5 = LocalPlayer.Create.BuildingPlacer.OnDynamicClear && (Create.CanLock || this._canPlaceLock || flag3) && (this._multiPointsPositions.Count > 1 || (this._multiPointsPositions.Count == 1 && Vector3.Distance(base.transform.position, this._multiPointsPositions[this._multiPointsPositions.Count - 1]) > this.MinPlaceLockLength));
+			if (LocalPlayer.Create.BuildingPlacer.Clear != flag5)
+			{
+				LocalPlayer.Create.BuildingPlacer.Clear = flag5;
+			}
+			if (flag)
 			{
 				LocalPlayer.Create.PlaceGhost(false);
 			}
@@ -143,13 +145,13 @@ namespace TheForest.Buildings.Creation
 			{
 				this._caster.CastForAnchors<PrefabIdentifier>(new Action<PrefabIdentifier>(this.CheckTargetingSupport));
 			}
-			bool flag5 = !this._autofillmode && this._multiPointsPositions.Count == 0;
+			bool flag6 = !this._autofillmode && this._multiPointsPositions.Count == 0;
 			bool canToggleAutofill = this._canPlayerToggleAutofillmode && this.CurrentSupport != null;
-			bool canLock = !flag5 && this._canLock;
+			bool canLock = !flag6 && Create.CanLock;
 			bool canUnlock = !this._autofillmode && this._multiPointsPositions.Count > 0;
-			bool showAutofillPlace = this._autofillmode && flag;
-			bool showManualPlace = !this._autofillmode && flag;
-			this.ConstructionIcons.Show(flag5, canToggleAutofill, showAutofillPlace, showManualPlace, canLock, canUnlock, false);
+			bool showAutofillPlace = this._autofillmode && flag5;
+			bool showManualPlace = !this._autofillmode && flag5;
+			this.ConstructionIcons.Show(flag6, canToggleAutofill, showAutofillPlace, showManualPlace, canLock, canUnlock, false);
 		}
 
 		
@@ -197,43 +199,43 @@ namespace TheForest.Buildings.Creation
 			LocalPlayer.Create.Grabber.ClosePlace();
 			int chunkCount = 0;
 			float lengthCount = 0f;
-			for (int e = 0; e < this._edges.Count; e++)
+			for (int i = 0; i < this._edges.Count; i++)
 			{
-				WallArchitect.Edge edge = this._edges[e];
+				WallArchitect.Edge edge = this._edges[i];
 				float height = (!this._autofillmode) ? edge._height : this._currentHeight;
 				lengthCount += edge._hlength;
-				for (int s = 0; s < edge._segments.Length; s++)
+				for (int j = 0; j < edge._segments.Length; j++)
 				{
-					WallArchitect.HorizontalSegment hs = edge._segments[s];
-					if (this.CheckForDoubledUpGhost(hs))
+					WallArchitect.HorizontalSegment horizontalSegment = edge._segments[j];
+					if (this.CheckForDoubledUpGhost(horizontalSegment))
 					{
-						IStructureSupport segmentSupport = this.GetSegmentSupport(hs);
+						IStructureSupport segmentSupport = this.GetSegmentSupport(horizontalSegment);
 						if (BoltNetwork.isRunning)
 						{
-							PlaceWallChunk ev = PlaceWallChunk.Create(GlobalTargets.OnlyServer);
-							CoopWallChunkToken to = new CoopWallChunkToken();
-							to.P1 = hs._p1;
-							to.P2 = hs._p2;
-							to.PointsPositions = this.MultiPointsPositions.ToArray();
-							to.Additions = WallChunkArchitect.Additions.Wall;
-							to.Height = height;
-							ev.parent = ((segmentSupport == null) ? base.transform.GetComponentInParent<BoltEntity>() : (segmentSupport as Component).GetComponentInParent<BoltEntity>());
-							ev.token = to;
-							ev.prefab = this.ChunkPrefab.GetComponent<BoltEntity>().prefabId;
-							ev.support = null;
-							ev.Send();
+							PlaceWallChunk placeWallChunk = PlaceWallChunk.Create(GlobalTargets.OnlyServer);
+							CoopWallChunkToken coopWallChunkToken = new CoopWallChunkToken();
+							coopWallChunkToken.P1 = horizontalSegment._p1;
+							coopWallChunkToken.P2 = horizontalSegment._p2;
+							coopWallChunkToken.PointsPositions = this.MultiPointsPositions.ToArray();
+							coopWallChunkToken.Additions = WallChunkArchitect.Additions.Wall;
+							coopWallChunkToken.Height = height;
+							placeWallChunk.parent = ((segmentSupport == null) ? base.transform.GetComponentInParent<BoltEntity>() : (segmentSupport as Component).GetComponentInParent<BoltEntity>());
+							placeWallChunk.token = coopWallChunkToken;
+							placeWallChunk.prefab = this.ChunkPrefab.GetComponent<BoltEntity>().prefabId;
+							placeWallChunk.support = null;
+							placeWallChunk.Send();
 						}
 						else
 						{
-							WallChunkArchitect wca = UnityEngine.Object.Instantiate<WallChunkArchitect>(this.ChunkPrefab);
-							wca.transform.parent = ((segmentSupport == null) ? base.transform.parent : (segmentSupport as Component).transform);
-							wca.transform.position = hs._p1;
-							wca.transform.LookAt(hs._p2);
-							wca.MultipointPositions = this._multiPointsPositions;
-							wca.P1 = hs._p1;
-							wca.P2 = hs._p2;
-							wca.CurrentSupport = segmentSupport;
-							wca.Height = height;
+							WallChunkArchitect wallChunkArchitect = UnityEngine.Object.Instantiate<WallChunkArchitect>(this.ChunkPrefab);
+							wallChunkArchitect.transform.parent = ((segmentSupport == null) ? base.transform.parent : (segmentSupport as Component).transform);
+							wallChunkArchitect.transform.position = horizontalSegment._p1;
+							wallChunkArchitect.transform.LookAt(horizontalSegment._p2);
+							wallChunkArchitect.MultipointPositions = this._multiPointsPositions;
+							wallChunkArchitect.P1 = horizontalSegment._p1;
+							wallChunkArchitect.P2 = horizontalSegment._p2;
+							wallChunkArchitect.CurrentSupport = segmentSupport;
+							wallChunkArchitect.Height = height;
 						}
 						chunkCount++;
 					}
@@ -253,9 +255,9 @@ namespace TheForest.Buildings.Creation
 			}
 			else
 			{
-				CoopDestroyPredictedGhost dpg = base.gameObject.AddComponent<CoopDestroyPredictedGhost>();
-				dpg.count = (float)chunkCount;
-				dpg.delay = 0.005f;
+				CoopDestroyPredictedGhost coopDestroyPredictedGhost = base.gameObject.AddComponent<CoopDestroyPredictedGhost>();
+				coopDestroyPredictedGhost.count = (float)chunkCount;
+				coopDestroyPredictedGhost.delay = 0.005f;
 				base.gameObject.AddComponent<destroyAfter>().destroyTime = 2f;
 			}
 			yield break;
@@ -264,20 +266,10 @@ namespace TheForest.Buildings.Creation
 		
 		private void CheckTargetingSupport(PrefabIdentifier structureRoot)
 		{
-			IStructureSupport structureSupport;
-			if (structureRoot)
+			IStructureSupport structureSupport = (!structureRoot) ? null : structureRoot.GetComponent<IStructureSupport>();
+			if (structureSupport != null)
 			{
-				IStructureSupport component = structureRoot.GetComponent<IStructureSupport>();
-				structureSupport = component;
-			}
-			else
-			{
-				structureSupport = null;
-			}
-			IStructureSupport structureSupport2 = structureSupport;
-			if (structureSupport2 != null)
-			{
-				this.InitSupport(structureSupport2);
+				this.InitSupport(structureSupport);
 			}
 			else
 			{
@@ -340,17 +332,7 @@ namespace TheForest.Buildings.Creation
 			{
 				structureSupport = null;
 			}
-			IStructureSupport result;
-			if (structureSupport != null)
-			{
-				IStructureSupport structureSupport2 = structureSupport;
-				result = structureSupport2;
-			}
-			else
-			{
-				result = this.CurrentSupport;
-			}
-			return result;
+			return (structureSupport == null) ? this.CurrentSupport : structureSupport;
 		}
 
 		
@@ -367,6 +349,7 @@ namespace TheForest.Buildings.Creation
 				}
 				LocalPlayer.Create.BuildingPlacer.Clear = false;
 				this._canPlaceLock = true;
+				Create.CanLock = true;
 				List<Vector3> multiPointsPositions = this.CurrentSupport.GetMultiPointsPositions(true);
 				float height = this.CurrentSupport.GetHeight();
 				if (multiPointsPositions.Count > 1)
@@ -624,7 +607,7 @@ namespace TheForest.Buildings.Creation
 		private WallArchitect.Edge CalcEdge(Vector3 p1, Vector3 p2)
 		{
 			int num = 0;
-			Vector3 from = p1;
+			Vector3 a = p1;
 			WallArchitect.Edge edge = new WallArchitect.Edge
 			{
 				_p1 = p1,
@@ -647,7 +630,7 @@ namespace TheForest.Buildings.Creation
 				horizontalSegment._length = Vector3.Distance(horizontalSegment._p1, horizontalSegment._p2);
 				if (num == 1 && !flag)
 				{
-					Vector3 vector2 = Vector3.Lerp(from, horizontalSegment._p2, 0.5f);
+					Vector3 vector2 = Vector3.Lerp(a, horizontalSegment._p2, 0.5f);
 					vector2.y += this.SegmentPointTestOffset / 2f;
 					horizontalSegment._p1 = vector2;
 					vector2.y += num2;
@@ -660,7 +643,7 @@ namespace TheForest.Buildings.Creation
 				else
 				{
 					num = 0;
-					from = horizontalSegment._p2;
+					a = horizontalSegment._p2;
 				}
 				vector = horizontalSegment._p2;
 				WallArchitect.HorizontalSegment horizontalSegment2 = horizontalSegment;
@@ -751,11 +734,11 @@ namespace TheForest.Buildings.Creation
 				Transform transform = this._logPool.Dequeue();
 				transform.position = position;
 				transform.rotation = rotation;
-				transform.GetComponentInChildren<Renderer>().sharedMaterial = ((!this._canLock && !this._canPlaceLock) ? this._unlockableLogMat : this._logMat);
+				transform.GetComponentInChildren<Renderer>().sharedMaterial = ((!Create.CanLock && !this._canPlaceLock) ? Prefabs.Instance.GhostBlocked : Prefabs.Instance.GhostClear);
 				return transform;
 			}
-			Transform transform2 = (Transform)UnityEngine.Object.Instantiate(this._logPrefab, position, rotation);
-			transform2.GetComponentInChildren<Renderer>().sharedMaterial = ((!this._canLock && !this._canPlaceLock) ? this._unlockableLogMat : this._logMat);
+			Transform transform2 = UnityEngine.Object.Instantiate<Transform>(this._logPrefab, position, rotation);
+			transform2.GetComponentInChildren<Renderer>().sharedMaterial = ((!Create.CanLock && !this._canPlaceLock) ? Prefabs.Instance.GhostBlocked : Prefabs.Instance.GhostClear);
 			return transform2;
 		}
 
@@ -775,7 +758,7 @@ namespace TheForest.Buildings.Creation
 		{
 			get
 			{
-				bool flag = this._multiPointsPositions.Count < this._maxPoints && (this.CurrentSupport == null || this.CurrentSupport.GetMultiPointsPositions(true) != null);
+				bool flag = LocalPlayer.Create.BuildingPlacer.OnDynamicClear && this._multiPointsPositions.Count < this._maxPoints && (this.CurrentSupport == null || this.CurrentSupport.GetMultiPointsPositions(true) != null);
 				if (flag && this._multiPointsPositions.Count > 0)
 				{
 					Vector3 to = base.transform.position - this._multiPointsPositions[this._multiPointsPositions.Count - 1];
@@ -816,7 +799,7 @@ namespace TheForest.Buildings.Creation
 		{
 			get
 			{
-				bool flag = this._multiPointsPositions.Count > 0 && this._multiPointsPositions.Count < this._maxPoints && (this.CurrentSupport == null || this.CurrentSupport.GetMultiPointsPositions(true) != null);
+				bool flag = LocalPlayer.Create.BuildingPlacer.OnDynamicClear && this._multiPointsPositions.Count > 0 && this._multiPointsPositions.Count < this._maxPoints && (this.CurrentSupport == null || this.CurrentSupport.GetMultiPointsPositions(true) != null);
 				if (flag)
 				{
 					Vector3 to = base.transform.position - this._multiPointsPositions[this._multiPointsPositions.Count - 1];
@@ -826,6 +809,21 @@ namespace TheForest.Buildings.Creation
 						Vector3 from = this._multiPointsPositions[this._multiPointsPositions.Count - 2] - this._multiPointsPositions[this._multiPointsPositions.Count - 1];
 						flag = (flag && Vector3.Angle(from, to) >= this._minAngleBetweenEdges);
 					}
+				}
+				return flag;
+			}
+		}
+
+		
+		
+		private bool CanPlaceNoLock
+		{
+			get
+			{
+				bool flag = LocalPlayer.Create.BuildingPlacer.OnDynamicClear && this._multiPointsPositions.Count > 0 && this._multiPointsPositions.Count < this._maxPoints && (this.CurrentSupport == null || this.CurrentSupport.GetMultiPointsPositions(true) != null);
+				if (flag)
+				{
+					flag = ((base.transform.position - this._multiPointsPositions[this._multiPointsPositions.Count - 1]).sqrMagnitude <= this.SqrMinPlaceLockLength);
 				}
 				return flag;
 			}
@@ -1001,9 +999,6 @@ namespace TheForest.Buildings.Creation
 		private bool _saveAutofill;
 
 		
-		private bool _canLock;
-
-		
 		private bool _canPlaceLock;
 
 		
@@ -1041,12 +1036,6 @@ namespace TheForest.Buildings.Creation
 
 		
 		protected Queue<Transform> _newPool;
-
-		
-		protected Material _logMat;
-
-		
-		protected Material _unlockableLogMat;
 
 		
 		[Serializable]

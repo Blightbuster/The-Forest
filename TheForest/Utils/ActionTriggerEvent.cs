@@ -18,7 +18,7 @@ namespace TheForest.Utils
 		{
 			if (!this._noIcon && this._action != InputMappingIcons.Actions.None && (!this._gamepadOnlyIcon || Input.IsGamePad))
 			{
-				ActionIconSystem.RegisterIcon(base.transform, this._action, this._sideIcon, ActionIconSystem.CurrentViewOptions.AllowInBook);
+				ActionIconSystem.RegisterIcon(base.transform, this._action, this._sideIcon, ActionIconSystem.CurrentViewOptions.AllowInBook, false, false);
 			}
 		}
 
@@ -27,7 +27,7 @@ namespace TheForest.Utils
 		{
 			if (this._action != InputMappingIcons.Actions.None)
 			{
-				ActionIconSystem.UnregisterIcon(base.transform);
+				ActionIconSystem.UnregisterIcon(base.transform, false, false);
 			}
 		}
 

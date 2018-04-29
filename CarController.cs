@@ -229,8 +229,8 @@ public class CarController : MonoBehaviour
 	
 	private void CalculateGearFactor()
 	{
-		float to = Mathf.InverseLerp(this.gearDistribution[this.GearNum], this.gearDistribution[this.GearNum + 1], Mathf.Abs(this.AvgPowerWheelRpmFactor));
-		this.GearFactor = Mathf.Lerp(this.GearFactor, to, Time.deltaTime * this.advanced.gearFactorSmoothing);
+		float b = Mathf.InverseLerp(this.gearDistribution[this.GearNum], this.gearDistribution[this.GearNum + 1], Mathf.Abs(this.AvgPowerWheelRpmFactor));
+		this.GearFactor = Mathf.Lerp(this.GearFactor, b, Time.deltaTime * this.advanced.gearFactorSmoothing);
 	}
 
 	
@@ -323,15 +323,15 @@ public class CarController : MonoBehaviour
 		for (int i = 0; i <= this.advanced.numGears; i++)
 		{
 			float num = (float)i / (float)this.advanced.numGears;
-			float to = num * num * num;
-			float to2 = 1f - (1f - num) * (1f - num) * (1f - num);
+			float b = num * num * num;
+			float b2 = 1f - (1f - num) * (1f - num) * (1f - num);
 			if (this.advanced.gearDistributionBias < 0.5f)
 			{
-				num = Mathf.Lerp(num, to, 1f - this.advanced.gearDistributionBias * 2f);
+				num = Mathf.Lerp(num, b, 1f - this.advanced.gearDistributionBias * 2f);
 			}
 			else
 			{
-				num = Mathf.Lerp(num, to2, (this.advanced.gearDistributionBias - 0.5f) * 2f);
+				num = Mathf.Lerp(num, b2, (this.advanced.gearDistributionBias - 0.5f) * 2f);
 			}
 			this.gearDistribution[i] = num;
 		}
@@ -370,8 +370,8 @@ public class CarController : MonoBehaviour
 	private float maxSpeedSteerAngle = 0.23f;
 
 	
-	[Range(0f, 0.5f)]
 	[SerializeField]
+	[Range(0f, 0.5f)]
 	private float maxSpeedSteerResponse = 0.5f;
 
 	

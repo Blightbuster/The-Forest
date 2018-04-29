@@ -39,9 +39,32 @@ public class pmSearchReplace : MonoBehaviour
 	}
 
 	
+	private void Update()
+	{
+		if (this._searchActive && Time.time > this.resetSearchTimer)
+		{
+			float sqrMagnitude = (base.transform.position - this.lastResetPos).sqrMagnitude;
+			if (sqrMagnitude < 20f)
+			{
+				this.resetSearchState();
+			}
+			this.resetSearchTimer = Time.time + 15f;
+			this.lastResetPos = base.transform.position;
+		}
+	}
+
+	
+	private void resetSearchState()
+	{
+		base.StopAllCoroutines();
+		this.ActiveRoutine = base.StartCoroutine(this.goToStartSearchRoutine());
+	}
+
+	
 	private IEnumerator goToStartSearchRoutine()
 	{
 		this._searchActive = true;
+		this.search.StartCoroutine("toLook");
 		this.ai.StartCoroutine(this.ai.setRepathRate(1f));
 		this._doFoodStructure = false;
 		this._attackStructure = false;
@@ -57,9 +80,14 @@ public class pmSearchReplace : MonoBehaviour
 		this.setup.dayCycle.sleepBlocker = true;
 		base.StartCoroutine(this.setup.disableNonActiveFSM("action_searchFSM"));
 		this.setup.pmBrain.SendEvent("toSetSearching");
+		if (this._toRepelArtifact)
+		{
+			this.ActiveRoutine = base.StartCoroutine(this.goToArtifactRoutine(false));
+			yield break;
+		}
 		if (!(this.fsmBrainLeaderGo.Value == null) && this.fsmBrainLeaderGo.Value.activeSelf)
 		{
-			base.StartCoroutine(this.goToFollowLeaderRoutine());
+			this.ActiveRoutine = base.StartCoroutine(this.goToFollowLeaderRoutine());
 			yield break;
 		}
 		if (!this.search.playerAware || this._longSearchBool || this._CloseSearchResetBool)
@@ -68,15 +96,15 @@ public class pmSearchReplace : MonoBehaviour
 			{
 				this._CloseSearchResetBool = false;
 			}
-			base.StartCoroutine(this.goToLongSearchRoutine());
+			this.ActiveRoutine = base.StartCoroutine(this.goToLongSearchRoutine());
 			yield break;
 		}
 		if (this.search.playerAware && this.ai.mainPlayerDist < 50f)
 		{
-			base.StartCoroutine(this.goToLastSightingRoutine());
+			this.ActiveRoutine = base.StartCoroutine(this.goToLastSightingRoutine());
 			yield break;
 		}
-		base.StartCoroutine(this.goToLongSearchRoutine());
+		this.ActiveRoutine = base.StartCoroutine(this.goToLongSearchRoutine());
 		yield break;
 	}
 
@@ -100,19 +128,19 @@ public class pmSearchReplace : MonoBehaviour
 			this.search.setToLeader();
 			if (this._toPlayerNoise)
 			{
-				base.StartCoroutine(this.goToNoiseRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToNoiseRoutine());
 				this._toPlayerNoise = false;
 				yield break;
 			}
 			if (this._toPlaceArt)
 			{
-				base.StartCoroutine(this.goToPlaceArtRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToPlaceArtRoutine());
 				this._toPlaceArt = false;
 				yield break;
 			}
 			if (this._toStructure)
 			{
-				base.StartCoroutine(this.goToBurnStructureRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToBurnStructureRoutine());
 				this._toStructure = false;
 				yield break;
 			}
@@ -126,7 +154,7 @@ public class pmSearchReplace : MonoBehaviour
 			{
 				if (this.setup.search.findCloseTrapTrigger())
 				{
-					base.StartCoroutine(this.goToTrapTriggerRoutine());
+					this.ActiveRoutine = base.StartCoroutine(this.goToTrapTriggerRoutine());
 					yield break;
 				}
 				findTrapTimer = Time.time + 2f;
@@ -149,7 +177,7 @@ public class pmSearchReplace : MonoBehaviour
 			}
 			yield return YieldPresets.WaitPointTwoSeconds;
 		}
-		base.StartCoroutine(this.goToResetRoutine());
+		this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 		yield break;
 		yield break;
 	}
@@ -188,18 +216,18 @@ public class pmSearchReplace : MonoBehaviour
 		{
 			if (this._targetFound)
 			{
-				base.StartCoroutine(this.goToTargetFoundRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToTargetFoundRoutine());
 				this._targetFound = false;
 				yield break;
 			}
 			if (Time.time > timer)
 			{
-				base.StartCoroutine(this.goToResetRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 				yield break;
 			}
 			if (this._toPlayerNoise)
 			{
-				base.StartCoroutine(this.goToNoiseRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToNoiseRoutine());
 				this._toPlayerNoise = false;
 				yield break;
 			}
@@ -212,18 +240,18 @@ public class pmSearchReplace : MonoBehaviour
 			if (this.ai.mainPlayerDist > 80f)
 			{
 				this.search.playerAware = false;
-				base.StartCoroutine(this.goToResetRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 				yield break;
 			}
 			if (this._targetFound)
 			{
-				base.StartCoroutine(this.goToTargetFoundRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToTargetFoundRoutine());
 				this._targetFound = false;
 				yield break;
 			}
 			if (this._toPlayerNoise)
 			{
-				base.StartCoroutine(this.goToNoiseRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToNoiseRoutine());
 				this._toPlayerNoise = false;
 				yield break;
 			}
@@ -237,11 +265,11 @@ public class pmSearchReplace : MonoBehaviour
 		yield return YieldPresets.WaitPointFiveSeconds;
 		if (this._doAction)
 		{
-			base.StartCoroutine(this.goToCloseBushRoutine());
+			this.ActiveRoutine = base.StartCoroutine(this.goToCloseBushRoutine());
 		}
 		else
 		{
-			base.StartCoroutine(this.goToCloseSearchRoutine());
+			this.ActiveRoutine = base.StartCoroutine(this.goToCloseSearchRoutine());
 		}
 		yield return null;
 		yield break;
@@ -262,18 +290,18 @@ public class pmSearchReplace : MonoBehaviour
 			if (Time.time > timer || !this._validPath)
 			{
 				this.ai.StartCoroutine("toStop");
-				base.StartCoroutine(this.goToCloseSearchRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToCloseSearchRoutine());
 				yield break;
 			}
 			if (this._targetFound)
 			{
-				base.StartCoroutine(this.goToTargetFoundRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToTargetFoundRoutine());
 				this._targetFound = false;
 				yield break;
 			}
 			if (this._toPlayerNoise)
 			{
-				base.StartCoroutine(this.goToNoiseRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToNoiseRoutine());
 				this._toPlayerNoise = false;
 				yield break;
 			}
@@ -297,20 +325,20 @@ public class pmSearchReplace : MonoBehaviour
 			}
 			if (this._targetFound)
 			{
-				base.StartCoroutine(this.goToTargetFoundRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToTargetFoundRoutine());
 				this._targetFound = false;
 				yield break;
 			}
 			if (this._toPlayerNoise)
 			{
-				base.StartCoroutine(this.goToNoiseRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToNoiseRoutine());
 				this._toPlayerNoise = false;
 				yield break;
 			}
 			yield return null;
 		}
 		this.animator.SetBool("attackBOOL", false);
-		base.StartCoroutine(this.goToCloseSearchRoutine());
+		this.ActiveRoutine = base.StartCoroutine(this.goToCloseSearchRoutine());
 		yield return null;
 		yield break;
 	}
@@ -333,7 +361,7 @@ public class pmSearchReplace : MonoBehaviour
 		if (!this._doAction)
 		{
 			this._longSearchBool = true;
-			base.StartCoroutine(this.goToStartSearchRoutine());
+			this.ActiveRoutine = base.StartCoroutine(this.goToStartSearchRoutine());
 			yield break;
 		}
 		this.ai.enablePathSearch();
@@ -342,13 +370,13 @@ public class pmSearchReplace : MonoBehaviour
 		{
 			if (this._targetFound)
 			{
-				base.StartCoroutine(this.goToTargetFoundRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToTargetFoundRoutine());
 				this._targetFound = false;
 				yield break;
 			}
 			if (this._toPlayerNoise)
 			{
-				base.StartCoroutine(this.goToNoiseRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToNoiseRoutine());
 				this._toPlayerNoise = false;
 				yield break;
 			}
@@ -367,18 +395,18 @@ public class pmSearchReplace : MonoBehaviour
 			if (this.ai.mainPlayerDist > 80f)
 			{
 				this.search.playerAware = false;
-				base.StartCoroutine(this.goToResetRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 				yield break;
 			}
 			if (this._targetFound)
 			{
-				base.StartCoroutine(this.goToTargetFoundRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToTargetFoundRoutine());
 				this._targetFound = false;
 				yield break;
 			}
 			if (this._toPlayerNoise)
 			{
-				base.StartCoroutine(this.goToNoiseRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToNoiseRoutine());
 				this._toPlayerNoise = false;
 				yield break;
 			}
@@ -393,10 +421,10 @@ public class pmSearchReplace : MonoBehaviour
 		if (this._CloseSearchResetBool)
 		{
 			this._longSearchBool = true;
-			base.StartCoroutine(this.goToStartSearchRoutine());
+			this.ActiveRoutine = base.StartCoroutine(this.goToStartSearchRoutine());
 			yield break;
 		}
-		base.StartCoroutine(this.goToCloseSearchRoutine());
+		this.ActiveRoutine = base.StartCoroutine(this.goToCloseSearchRoutine());
 		yield return null;
 		yield break;
 	}
@@ -413,7 +441,7 @@ public class pmSearchReplace : MonoBehaviour
 		this._doSearchAction = false;
 		if (this._doPatrol)
 		{
-			base.StartCoroutine(this.goToPatrolRoutine());
+			this.ActiveRoutine = base.StartCoroutine(this.goToPatrolRoutine());
 			yield break;
 		}
 		this.resetEncounterAnimParams();
@@ -496,7 +524,7 @@ public class pmSearchReplace : MonoBehaviour
 			this._doSearchAction = false;
 			yield return YieldPresets.WaitOneSecond;
 		}
-		base.StartCoroutine(this.moveToSearchPointRoutine());
+		this.ActiveRoutine = base.StartCoroutine(this.moveToSearchPointRoutine());
 		this._doSearchAction = false;
 		yield break;
 		yield break;
@@ -529,7 +557,7 @@ public class pmSearchReplace : MonoBehaviour
 					{
 						if (this._eatBody)
 						{
-							base.StartCoroutine(this.goToEatBodyRoutine());
+							this.ActiveRoutine = base.StartCoroutine(this.goToEatBodyRoutine());
 							yield break;
 						}
 					}
@@ -547,8 +575,20 @@ public class pmSearchReplace : MonoBehaviour
 			}
 			if (this._toPlayerNoise)
 			{
-				base.StartCoroutine(this.goToNoiseRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToNoiseRoutine());
 				this._toPlayerNoise = false;
+				yield break;
+			}
+			if (this._toAttractArtifact)
+			{
+				this.ActiveRoutine = base.StartCoroutine(this.goToArtifactRoutine(true));
+				this._toAttractArtifact = false;
+				yield break;
+			}
+			if (this._toRepelArtifact)
+			{
+				this.ActiveRoutine = base.StartCoroutine(this.goToArtifactRoutine(false));
+				this._toRepelArtifact = false;
 				yield break;
 			}
 			if (!this._validPath)
@@ -570,11 +610,11 @@ public class pmSearchReplace : MonoBehaviour
 		{
 			if (this.fsmBrainFiremanBool.Value)
 			{
-				base.StartCoroutine(this.goToBurnStructureRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToBurnStructureRoutine());
 			}
 			else
 			{
-				base.StartCoroutine(this.goToStructureRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToStructureRoutine());
 			}
 			this._toStructure = false;
 			yield break;
@@ -584,7 +624,7 @@ public class pmSearchReplace : MonoBehaviour
 		{
 			if (this._toPlayerNoise)
 			{
-				base.StartCoroutine(this.goToNoiseRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToNoiseRoutine());
 				this._toPlayerNoise = false;
 				yield break;
 			}
@@ -618,7 +658,7 @@ public class pmSearchReplace : MonoBehaviour
 			}).TakeOne())
 			{
 			case 0:
-				base.StartCoroutine(this.goToLongSearchRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToLongSearchRoutine());
 				break;
 			case 1:
 				if (this.ai.mainPlayerDist < 200f && !this._encounterCoolDown)
@@ -627,7 +667,7 @@ public class pmSearchReplace : MonoBehaviour
 					{
 						if (this._eatBody)
 						{
-							base.StartCoroutine(this.goToEatBodyRoutine());
+							this.ActiveRoutine = base.StartCoroutine(this.goToEatBodyRoutine());
 							yield break;
 						}
 					}
@@ -637,17 +677,17 @@ public class pmSearchReplace : MonoBehaviour
 						yield break;
 					}
 				}
-				base.StartCoroutine(this.goToLongSearchRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToLongSearchRoutine());
 				break;
 			case 2:
 				this.animator.SetInteger("randInt1", UnityEngine.Random.Range(2, 4));
 				this.animator.SetBool("callBool", true);
 				yield return new WaitForSeconds(UnityEngine.Random.Range(2f, 5f));
 				this.animator.SetBool("callBool", false);
-				base.StartCoroutine(this.goToLongSearchRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToLongSearchRoutine());
 				break;
 			case 3:
-				base.StartCoroutine(this.goToPlaceArtRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToPlaceArtRoutine());
 				break;
 			}
 			yield return null;
@@ -655,7 +695,7 @@ public class pmSearchReplace : MonoBehaviour
 		}
 		if (this.search.playerAware || this.ai.playerDist < 30f)
 		{
-			base.StartCoroutine(this.goToLongSearchRoutine());
+			this.ActiveRoutine = base.StartCoroutine(this.goToLongSearchRoutine());
 			yield break;
 		}
 		this.setup.dayCycle.sleepBlocker = false;
@@ -681,7 +721,7 @@ public class pmSearchReplace : MonoBehaviour
 		{
 			if (this._structureGo == null || !this._structureGo.activeSelf || Time.time > timer || !this._validPath)
 			{
-				base.StartCoroutine(this.goToResetRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 				yield break;
 			}
 			yield return null;
@@ -693,7 +733,7 @@ public class pmSearchReplace : MonoBehaviour
 		{
 			if (this._structureGo == null || !this._structureGo.activeSelf)
 			{
-				base.StartCoroutine(this.goToResetRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 				yield break;
 			}
 			this.doSmoothLookAt(this._structureGo.transform.position, 3f);
@@ -701,7 +741,91 @@ public class pmSearchReplace : MonoBehaviour
 		}
 		this.animator.SetBool("attackBOOL", false);
 		this.search.StartCoroutine("toLook");
-		base.StartCoroutine(this.goToResetRoutine());
+		this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
+		yield return null;
+		yield break;
+	}
+
+	
+	private IEnumerator goToArtifactRoutine(bool attract)
+	{
+		if (attract)
+		{
+			this.search.updateCurrentWaypoint(this._lastArtifactPos);
+			this._doingAttract = true;
+			this._doingRepel = false;
+		}
+		else
+		{
+			base.StartCoroutine(this.search.findPointAwayFromArtifact());
+			this._doingRepel = true;
+			this._doingAttract = false;
+		}
+		this.search.setToWaypoint();
+		this.ai.StartCoroutine("toStop");
+		this.animator.SetBool("ritualBOOL", false);
+		this.animator.SetBool("encounterBOOL", false);
+		this.animator.SetBool("crouchBOOL", false);
+		this.ai.StartCoroutine("toRun");
+		this._toRepelArtifact = false;
+		this._toAttractArtifact = false;
+		this._targetFound = false;
+		this._toPlayerNoise = false;
+		this._validPath = true;
+		this.setup.lastSighting.transform.position = this.search.currentWaypoint.transform.position;
+		float timer = Time.time + 30f;
+		while (this.ai.targetDist > 20f)
+		{
+			if (this._targetFound)
+			{
+				this.ActiveRoutine = base.StartCoroutine(this.goToTargetFoundRoutine());
+				this._targetFound = false;
+				yield break;
+			}
+			if (Time.time > timer)
+			{
+				this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
+				yield break;
+			}
+			if (!this._validPath)
+			{
+				this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
+				yield break;
+			}
+			if (this._toAttractArtifact && !this._doingAttract)
+			{
+				this.ActiveRoutine = base.StartCoroutine(this.goToArtifactRoutine(true));
+				yield break;
+			}
+			if (this._toRepelArtifact && !this._doingRepel)
+			{
+				this.ActiveRoutine = base.StartCoroutine(this.goToArtifactRoutine(false));
+				yield break;
+			}
+			yield return null;
+		}
+		this.setup.lastSighting.transform.position = this.search.currentWaypoint.transform.position;
+		this.ai.StartCoroutine("toStop");
+		this.animator.SetBool("attackBOOL", false);
+		this.animControl.StartCoroutine(this.animControl.smoothChangeIdle(3f));
+		timer = Time.time + UnityEngine.Random.Range(2f, 5f);
+		while (Time.time < timer)
+		{
+			if (this._targetFound)
+			{
+				this.ActiveRoutine = base.StartCoroutine(this.goToTargetFoundRoutine());
+				this._targetFound = false;
+				yield break;
+			}
+			if (this._toPlayerNoise)
+			{
+				this.ActiveRoutine = base.StartCoroutine(this.goToNoiseRoutine());
+				this._toPlayerNoise = false;
+				yield break;
+			}
+			yield return null;
+		}
+		this.ActiveRoutine = base.StartCoroutine(this.goToCloseSearchRoutine());
 		yield return null;
 		yield break;
 	}
@@ -738,24 +862,24 @@ public class pmSearchReplace : MonoBehaviour
 		{
 			if (this._targetFound)
 			{
-				base.StartCoroutine(this.goToTargetFoundRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToTargetFoundRoutine());
 				this._targetFound = false;
 				yield break;
 			}
 			if (Time.time > timer)
 			{
-				base.StartCoroutine(this.goToResetRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 				yield break;
 			}
 			if (this._toPlayerNoise)
 			{
-				base.StartCoroutine(this.goToNoiseRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToNoiseRoutine());
 				this._toPlayerNoise = false;
 				yield break;
 			}
 			if (!this._validPath)
 			{
-				base.StartCoroutine(this.goToResetRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 				yield break;
 			}
 			if (this.setup.pmCombatScript.toRescue)
@@ -774,13 +898,13 @@ public class pmSearchReplace : MonoBehaviour
 		{
 			if (this._targetFound)
 			{
-				base.StartCoroutine(this.goToTargetFoundRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToTargetFoundRoutine());
 				this._targetFound = false;
 				yield break;
 			}
 			if (this._toPlayerNoise)
 			{
-				base.StartCoroutine(this.goToNoiseRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToNoiseRoutine());
 				this._toPlayerNoise = false;
 				yield break;
 			}
@@ -794,11 +918,11 @@ public class pmSearchReplace : MonoBehaviour
 		}
 		if (this.search.playerAware)
 		{
-			base.StartCoroutine(this.goToCloseBushRoutine());
+			this.ActiveRoutine = base.StartCoroutine(this.goToCloseBushRoutine());
 		}
 		else
 		{
-			base.StartCoroutine(this.goToCloseSearchRoutine());
+			this.ActiveRoutine = base.StartCoroutine(this.goToCloseSearchRoutine());
 		}
 		yield return null;
 		yield break;
@@ -809,7 +933,7 @@ public class pmSearchReplace : MonoBehaviour
 	{
 		if (this.ai.mainPlayerDist > 200f || this.search.playerAware)
 		{
-			base.StartCoroutine(this.goToResetRoutine());
+			this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 			yield break;
 		}
 		if (this.fsmBrainLeaderBool.Value)
@@ -831,7 +955,7 @@ public class pmSearchReplace : MonoBehaviour
 		}
 		if (!this._doSearchAction)
 		{
-			base.StartCoroutine(this.goToStartSearchRoutine());
+			this.ActiveRoutine = base.StartCoroutine(this.goToStartSearchRoutine());
 			yield break;
 		}
 		this.ai.enablePathSearch();
@@ -842,18 +966,18 @@ public class pmSearchReplace : MonoBehaviour
 		{
 			if (!this._validPath || Time.time > timer)
 			{
-				base.StartCoroutine(this.goToStartSearchRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToStartSearchRoutine());
 				yield break;
 			}
 			if (this._targetFound)
 			{
-				base.StartCoroutine(this.goToTargetFoundRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToTargetFoundRoutine());
 				this._targetFound = false;
 				yield break;
 			}
 			if (this._toPlayerNoise)
 			{
-				base.StartCoroutine(this.goToNoiseRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToNoiseRoutine());
 				this._toPlayerNoise = false;
 				yield break;
 			}
@@ -873,21 +997,21 @@ public class pmSearchReplace : MonoBehaviour
 			if (this._targetFound)
 			{
 				this.animator.SetBool("ritualBOOL", false);
-				base.StartCoroutine(this.goToTargetFoundRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToTargetFoundRoutine());
 				this._targetFound = false;
 				yield break;
 			}
 			if (this._toPlayerNoise)
 			{
 				this.animator.SetBool("ritualBOOL", false);
-				base.StartCoroutine(this.goToNoiseRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToNoiseRoutine());
 				this._toPlayerNoise = false;
 				yield break;
 			}
 			yield return null;
 		}
 		yield return new WaitForSeconds(UnityEngine.Random.Range(0.1f, 0.9f));
-		base.StartCoroutine(this.goToResetRoutine());
+		this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 		yield return null;
 		yield break;
 	}
@@ -904,7 +1028,7 @@ public class pmSearchReplace : MonoBehaviour
 		yield return YieldPresets.WaitPointFiveSeconds;
 		if (this._noValidTarget || this._structureGo == null)
 		{
-			base.StartCoroutine(this.goToResetRoutine());
+			this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 			yield break;
 		}
 		this.animator.SetBool("stalkingBOOL", false);
@@ -915,7 +1039,7 @@ public class pmSearchReplace : MonoBehaviour
 		{
 			if (this._structureGo == null || Time.time > timer)
 			{
-				base.StartCoroutine(this.goToResetRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 				yield break;
 			}
 			dist = Vector3.Distance(this._structureGo.transform.position, this.tr.position);
@@ -934,7 +1058,7 @@ public class pmSearchReplace : MonoBehaviour
 		{
 			if (this._structureGo == null)
 			{
-				base.StartCoroutine(this.goToResetRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 				yield break;
 			}
 			if (this._structureGo)
@@ -944,7 +1068,7 @@ public class pmSearchReplace : MonoBehaviour
 			yield return null;
 		}
 		this.animator.SetBool("attackBOOL", false);
-		base.StartCoroutine(this.goToRunAwayRoutine());
+		this.ActiveRoutine = base.StartCoroutine(this.goToRunAwayRoutine());
 		yield break;
 	}
 
@@ -975,7 +1099,7 @@ public class pmSearchReplace : MonoBehaviour
 		}
 		if (this._noValidTarget || !this._validPath)
 		{
-			base.StartCoroutine(this.goToResetRoutine());
+			this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 			yield break;
 		}
 		this.animator.SetBool("stalkingBOOL", false);
@@ -1030,7 +1154,7 @@ public class pmSearchReplace : MonoBehaviour
 				{
 					this.animator.SetBool("feedingBOOL", false);
 					this._doFoodStructure = false;
-					base.StartCoroutine(this.goToResetRoutine());
+					this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 					yield break;
 				}
 				if (this._doAction)
@@ -1055,7 +1179,7 @@ public class pmSearchReplace : MonoBehaviour
 		{
 			if (this._structureGo == null)
 			{
-				base.StartCoroutine(this.goToResetRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 				this.animator.SetBool("attackBOOL", false);
 				yield break;
 			}
@@ -1070,7 +1194,7 @@ public class pmSearchReplace : MonoBehaviour
 			}
 			yield return null;
 		}
-		base.StartCoroutine(this.goToRunAwayRoutine());
+		this.ActiveRoutine = base.StartCoroutine(this.goToRunAwayRoutine());
 		yield break;
 	}
 
@@ -1080,7 +1204,7 @@ public class pmSearchReplace : MonoBehaviour
 		if (!this.search.findCloseCaveWayPoint())
 		{
 			this._doPatrol = false;
-			base.StartCoroutine(this.goToResetRoutine());
+			this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 			yield break;
 		}
 		this.animControl.enablePatrolAnimSpeed();
@@ -1097,13 +1221,13 @@ public class pmSearchReplace : MonoBehaviour
 			if (Time.time > timer)
 			{
 				this.animControl.disablePatrolAnimSpeed();
-				base.StartCoroutine(this.goToResetRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 				yield break;
 			}
 			if (this._toPlayerNoise)
 			{
 				this.animControl.disablePatrolAnimSpeed();
-				base.StartCoroutine(this.goToNoiseRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToNoiseRoutine());
 				yield break;
 			}
 			yield return null;
@@ -1112,7 +1236,7 @@ public class pmSearchReplace : MonoBehaviour
 		{
 			this._doPatrol = false;
 			this.animControl.disablePatrolAnimSpeed();
-			base.StartCoroutine(this.goToResetRoutine());
+			this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 			yield break;
 		}
 		this.search.setToWaypoint();
@@ -1123,7 +1247,7 @@ public class pmSearchReplace : MonoBehaviour
 			if (!this._validPath)
 			{
 				this.animControl.disablePatrolAnimSpeed();
-				base.StartCoroutine(this.goToResetRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 				yield break;
 			}
 			if (this.ai.targetDist > 4f && Time.time > waitTimer)
@@ -1139,7 +1263,7 @@ public class pmSearchReplace : MonoBehaviour
 				{
 					this._doPatrol = false;
 					this.animControl.disablePatrolAnimSpeed();
-					base.StartCoroutine(this.goToResetRoutine());
+					this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 					yield break;
 				}
 				this.search.setToWaypoint();
@@ -1153,7 +1277,7 @@ public class pmSearchReplace : MonoBehaviour
 			yield return null;
 		}
 		this.animControl.disablePatrolAnimSpeed();
-		base.StartCoroutine(this.goToNoiseRoutine());
+		this.ActiveRoutine = base.StartCoroutine(this.goToNoiseRoutine());
 		yield break;
 		yield break;
 	}
@@ -1169,7 +1293,7 @@ public class pmSearchReplace : MonoBehaviour
 		{
 			if (Time.time > timer)
 			{
-				base.StartCoroutine(this.goToRandomPointRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToRandomPointRoutine());
 				yield break;
 			}
 			yield return null;
@@ -1185,25 +1309,25 @@ public class pmSearchReplace : MonoBehaviour
 		{
 			if (Time.time > timer || !this._validPath)
 			{
-				base.StartCoroutine(this.goToResetRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 				yield break;
 			}
 			if (this._toPlayerNoise)
 			{
-				base.StartCoroutine(this.goToNoiseRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToNoiseRoutine());
 				this._toPlayerNoise = false;
 				yield break;
 			}
 			if (this._targetFound)
 			{
-				this.goToTargetFoundRoutine();
+				this.ActiveRoutine = base.StartCoroutine(this.goToTargetFoundRoutine());
 				yield break;
 			}
 			yield return null;
 		}
 		this.setup.ai.StartCoroutine("toStop");
 		yield return YieldPresets.WaitPointZeroFiveSeconds;
-		base.StartCoroutine(this.goToResetRoutine());
+		this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 		yield break;
 	}
 
@@ -1220,7 +1344,7 @@ public class pmSearchReplace : MonoBehaviour
 		{
 			if (Time.time > timer)
 			{
-				base.StartCoroutine(this.goToResetRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 				yield break;
 			}
 			yield return null;
@@ -1235,18 +1359,18 @@ public class pmSearchReplace : MonoBehaviour
 		{
 			if (Time.time > timer)
 			{
-				base.StartCoroutine(this.goToResetRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 				yield break;
 			}
 			if (this._toPlayerNoise)
 			{
-				base.StartCoroutine(this.goToNoiseRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToNoiseRoutine());
 				this._toPlayerNoise = false;
 				yield break;
 			}
 			if (this._targetFound)
 			{
-				this.goToTargetFoundRoutine();
+				this.ActiveRoutine = base.StartCoroutine(this.goToTargetFoundRoutine());
 				yield break;
 			}
 			yield return null;
@@ -1254,7 +1378,7 @@ public class pmSearchReplace : MonoBehaviour
 		yield return YieldPresets.WaitPointZeroFiveSeconds;
 		this.ai.StartCoroutine("toStop");
 		yield return YieldPresets.WaitOneSecond;
-		base.StartCoroutine(this.goToResetRoutine());
+		this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 		yield return null;
 		yield break;
 	}
@@ -1367,7 +1491,7 @@ public class pmSearchReplace : MonoBehaviour
 		this.ai.StartCoroutine("toStop");
 		this.animator.SetBool("feedingBOOL", false);
 		this.animator.SetBool("jumpBlockBool", false);
-		base.StartCoroutine(this.goToResetRoutine());
+		this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 		yield return null;
 		yield break;
 	}
@@ -1462,19 +1586,19 @@ public class pmSearchReplace : MonoBehaviour
 		{
 			if (this._targetFound)
 			{
-				base.StartCoroutine(this.goToTargetFoundRoutine());
+				this.ActiveRoutine = base.StartCoroutine(this.goToTargetFoundRoutine());
 				yield break;
 			}
 			if (Time.time > timer || !this._validPath)
 			{
-				this.goToResetRoutine();
+				this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 				yield break;
 			}
 			yield return null;
 		}
 		this.ai.StartCoroutine("toStop");
 		yield return YieldPresets.WaitOneSecond;
-		base.StartCoroutine(this.goToResetRoutine());
+		this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 		yield return null;
 		yield break;
 	}
@@ -1482,7 +1606,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private IEnumerator goToResetRoutine()
 	{
-		base.StartCoroutine(this.goToStartSearchRoutine());
+		this.ActiveRoutine = base.StartCoroutine(this.goToStartSearchRoutine());
 		yield return null;
 		yield break;
 	}
@@ -1504,7 +1628,7 @@ public class pmSearchReplace : MonoBehaviour
 	{
 		if (!this._searchActive)
 		{
-			base.StartCoroutine(this.goToStartSearchRoutine());
+			this.ActiveRoutine = base.StartCoroutine(this.goToStartSearchRoutine());
 		}
 		yield return null;
 		yield break;
@@ -1518,7 +1642,7 @@ public class pmSearchReplace : MonoBehaviour
 			return;
 		}
 		base.StopAllCoroutines();
-		base.StartCoroutine(this.goToResetRoutine());
+		this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
 	}
 
 	
@@ -1575,21 +1699,21 @@ public class pmSearchReplace : MonoBehaviour
 	public void toTargetSpottedEvent()
 	{
 		base.StopAllCoroutines();
-		base.StartCoroutine(this.goToTargetSpottedRoutine());
+		this.ActiveRoutine = base.StartCoroutine(this.goToTargetSpottedRoutine());
 	}
 
 	
 	public void toTargetFoundEvent()
 	{
 		base.StopAllCoroutines();
-		base.StartCoroutine(this.goToTargetFoundRoutine());
+		this.ActiveRoutine = base.StartCoroutine(this.goToTargetFoundRoutine());
 	}
 
 	
 	public void toActivateCloseSearchEvent()
 	{
 		base.StopAllCoroutines();
-		base.StartCoroutine(this.goToCloseSearchRoutine());
+		this.ActiveRoutine = base.StartCoroutine(this.goToCloseSearchRoutine());
 	}
 
 	
@@ -1609,12 +1733,12 @@ public class pmSearchReplace : MonoBehaviour
 		lookAtPos.y = this.tr.position.y;
 		Vector3 vector = lookAtPos - this.tr.position;
 		Quaternion quaternion = this.tr.rotation;
-		Quaternion to = quaternion;
+		Quaternion b = quaternion;
 		if (vector != Vector3.zero && vector.sqrMagnitude > 0f)
 		{
-			to = Quaternion.LookRotation(vector, Vector3.up);
+			b = Quaternion.LookRotation(vector, Vector3.up);
 		}
-		quaternion = Quaternion.Slerp(quaternion, to, speed * Time.deltaTime);
+		quaternion = Quaternion.Slerp(quaternion, b, speed * Time.deltaTime);
 		this.tr.rotation = quaternion;
 	}
 
@@ -1624,12 +1748,12 @@ public class pmSearchReplace : MonoBehaviour
 		lookAtPos.y = this.tr.position.y;
 		Vector3 vector = lookAtPos - this.tr.position;
 		Quaternion quaternion = this.tr.rotation;
-		Quaternion to = quaternion;
+		Quaternion b = quaternion;
 		if (vector != Vector3.zero && vector.sqrMagnitude > 0f)
 		{
-			to = Quaternion.LookRotation(vector, Vector3.up);
+			b = Quaternion.LookRotation(vector, Vector3.up);
 		}
-		quaternion = Quaternion.Slerp(quaternion, to, speed * Time.deltaTime);
+		quaternion = Quaternion.Slerp(quaternion, b, speed * Time.deltaTime);
 		this.tr.rotation = quaternion;
 	}
 
@@ -1656,6 +1780,9 @@ public class pmSearchReplace : MonoBehaviour
 
 	
 	private Transform rootTr;
+
+	
+	public Coroutine ActiveRoutine;
 
 	
 	public GameObject _currentMemberGo;
@@ -1724,6 +1851,18 @@ public class pmSearchReplace : MonoBehaviour
 	public bool _attackStructure;
 
 	
+	public bool _toAttractArtifact;
+
+	
+	public bool _toRepelArtifact;
+
+	
+	public bool _doingAttract;
+
+	
+	public bool _doingRepel;
+
+	
 	public float waypointArriveDist = 13f;
 
 	
@@ -1731,6 +1870,18 @@ public class pmSearchReplace : MonoBehaviour
 
 	
 	public float _targetStopDist;
+
+	
+	public Vector3 _lastArtifactPos;
+
+	
+	public Transform _lastArtifactTr;
+
+	
+	private float resetSearchTimer;
+
+	
+	private Vector3 lastResetPos;
 
 	
 	private FsmGameObject fsmBrainLeaderGo;

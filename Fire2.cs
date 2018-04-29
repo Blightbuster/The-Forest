@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using Bolt;
-using ModAPI;
 using TheForest.Buildings.Interfaces;
 using TheForest.Buildings.World;
 using TheForest.Items;
@@ -9,7 +8,7 @@ using TheForest.Items.Craft;
 using TheForest.Items.Inventory;
 using TheForest.UI;
 using TheForest.Utils;
-using UltimateCheatmenu;
+using TheForest.World;
 using UnityEngine;
 
 
@@ -23,6 +22,10 @@ public class Fire2 : EntityBehaviour<IFireState>, IWetable
 		{
 			this._light = this.FireLight.GetComponent<Light>();
 			this._baseIntensity = this._light.intensity;
+		}
+		if (!this.LightFadeIn && this.FlamesAll)
+		{
+			this.LightFadeIn = this.FlamesAll.GetComponent<LightFadeIn>();
 		}
 		if (this.FlamesScale)
 		{
@@ -124,13 +127,16 @@ public class Fire2 : EntityBehaviour<IFireState>, IWetable
 		{
 			if (BoltNetwork.isRunning)
 			{
-				while (!this.entity.isAttached)
+				while (!base.entity.isAttached)
 				{
 					yield return null;
 				}
 			}
-			this._scaler.Awake();
-			this._scaler.ResetParticleScale(Mathf.Max(Mathf.Clamp01(this.Fuel / (this.FuelMax * 0.5f)), 0.01f));
+			if (this._scaler)
+			{
+				this._scaler.Awake();
+				this._scaler.ResetParticleScale(Mathf.Max(Mathf.Clamp01(this.Fuel / (this.FuelMax * 0.5f)), 0.01f));
+			}
 			if (!BoltNetwork.isRunning)
 			{
 				this.On();
@@ -147,7 +153,7 @@ public class Fire2 : EntityBehaviour<IFireState>, IWetable
 	
 	private void GrabEnter()
 	{
-		if (!BoltNetwork.isRunning || this.entity.isAttached)
+		if (!BoltNetwork.isRunning || base.entity.isAttached)
 		{
 			base.enabled = true;
 			this._proximity = true;
@@ -216,7 +222,7 @@ public class Fire2 : EntityBehaviour<IFireState>, IWetable
 	}
 
 	
-	private void __UpdateLit__Original()
+	private void UpdateLit()
 	{
 		if (!BoltNetwork.isClient)
 		{
@@ -232,27 +238,72 @@ public class Fire2 : EntityBehaviour<IFireState>, IWetable
 		float num = Mathf.Clamp01(this.Fuel / (this.FuelMax * 0.5f));
 		if (this._leafAdded > Time.time)
 		{
-			Vector2 from = new Vector2(0f, this.LeafAddedExtraScale);
-			Vector2 to = new Vector2(this.LeafAddedExtraScale, 0f);
-			Vector2 vector = Vector2.Lerp(from, to, Mathf.Clamp01((this._leafAdded - Time.time) / 2f));
-			Vector2 from2 = new Vector2(0f, this.LeafAddedExtraIntensity);
-			Vector2 to2 = new Vector2(this.LeafAddedExtraIntensity, 0f);
-			Vector2 vector2 = Vector2.Lerp(from2, to2, Mathf.Clamp01((this._leafAdded - Time.time) / 2f));
+			Vector2 a = new Vector2(0f, this.LeafAddedExtraScale);
+			Vector2 b = new Vector2(this.LeafAddedExtraScale, 0f);
+			Vector2 vector = Vector2.Lerp(a, b, Mathf.Clamp01((this._leafAdded - Time.time) / 2f));
+			Vector2 a2 = new Vector2(0f, this.LeafAddedExtraIntensity);
+			Vector2 b2 = new Vector2(this.LeafAddedExtraIntensity, 0f);
+			Vector2 vector2 = Vector2.Lerp(a2, b2, Mathf.Clamp01((this._leafAdded - Time.time) / 2f));
 			if (this._leafAdded - Time.time < 1f)
 			{
-				this._light.intensity = this._baseIntensity * num + vector2.x;
-				this._scaler.particleScale = Mathf.Max(Mathf.Min(num, this._baseScale), 0.01f) + vector.x;
+				float num2 = this._baseIntensity * num + vector2.x;
+				if (this.LightFadeIn)
+				{
+					this.LightFadeIn.TargetIntensity = num2;
+					if (!this.LightFadeIn.ControllingLight)
+					{
+						this._light.intensity = num2;
+					}
+				}
+				else
+				{
+					this._light.intensity = num2;
+				}
+				if (this._scaler)
+				{
+					this._scaler.particleScale = Mathf.Max(Mathf.Min(num, this._baseScale), 0.01f) + vector.x;
+				}
 			}
 			else
 			{
-				this._light.intensity = this._baseIntensity * num + vector2.y;
-				this._scaler.particleScale = Mathf.Max(Mathf.Min(num, this._baseScale), 0.01f) + vector.y;
+				float num3 = this._baseIntensity * num + vector2.y;
+				if (this.LightFadeIn)
+				{
+					this.LightFadeIn.TargetIntensity = num3;
+					if (!this.LightFadeIn.ControllingLight)
+					{
+						this._light.intensity = num3;
+					}
+				}
+				else
+				{
+					this._light.intensity = num3;
+				}
+				if (this._scaler)
+				{
+					this._scaler.particleScale = Mathf.Max(Mathf.Min(num, this._baseScale), 0.01f) + vector.y;
+				}
 			}
 		}
 		else
 		{
-			this._light.intensity = this._baseIntensity * num;
-			this._scaler.particleScale = Mathf.Max(Mathf.Min(num, this._baseScale), 0.01f);
+			float num4 = this._baseIntensity * num;
+			if (this.LightFadeIn)
+			{
+				this.LightFadeIn.TargetIntensity = num4;
+				if (!this.LightFadeIn.ControllingLight)
+				{
+					this._light.intensity = num4;
+				}
+			}
+			else
+			{
+				this._light.intensity = num4;
+			}
+			if (this._scaler)
+			{
+				this._scaler.particleScale = Mathf.Max(Mathf.Min(num, this._baseScale), 0.01f);
+			}
 		}
 		if (BoltNetwork.isClient || this.Fuel > 0.01f)
 		{
@@ -311,12 +362,12 @@ public class Fire2 : EntityBehaviour<IFireState>, IWetable
 		}
 		if (flag && TheForest.Utils.Input.GetButtonDown("Craft") && LocalPlayer.Inventory.RemoveItem(this.FuelItemId, 1, false, true))
 		{
-			LocalPlayer.Sfx.PlayWhoosh();
+			LocalPlayer.Sfx.PlayItemCustomSfx(this.FuelItemId, true);
 			this._leafDelay = Time.time;
 			if (BoltNetwork.isRunning)
 			{
 				FireAddFuelEvent fireAddFuelEvent = FireAddFuelEvent.Create(GlobalTargets.Everyone);
-				fireAddFuelEvent.Target = this.entity;
+				fireAddFuelEvent.Target = base.entity;
 				fireAddFuelEvent.Send();
 			}
 			else
@@ -352,7 +403,7 @@ public class Fire2 : EntityBehaviour<IFireState>, IWetable
 			if (TheForest.Utils.Input.GetButtonDown("Craft"))
 			{
 				LocalPlayer.Inventory.UnequipItemAtSlot(Item.EquipmentSlot.RightHand, false, false, true);
-				LocalPlayer.Sfx.PlayWhoosh();
+				LocalPlayer.Sfx.PlayItemCustomSfx(this.foodItems[num2]._itemId, true);
 				DecayingInventoryItemView.DecayStates decayStateValue = DecayingInventoryItemView.DecayStates.Fresh;
 				if (DecayingInventoryItemView.LastUsed)
 				{
@@ -375,7 +426,7 @@ public class Fire2 : EntityBehaviour<IFireState>, IWetable
 				WeaponStatUpgrade.Types activeBonus = LocalPlayer.Inventory.RightHand.ActiveBonus;
 				LocalPlayer.Inventory.RightHand.ActiveBonus = (WeaponStatUpgrade.Types)(-1);
 				LocalPlayer.Inventory.UnequipItemAtSlot(Item.EquipmentSlot.RightHand, false, false, true);
-				LocalPlayer.Sfx.PlayWhoosh();
+				LocalPlayer.Sfx.PlayItemCustomSfx(this.waterCleaningItem._itemId, true);
 				this.SpawnFoodPrefab(this.waterCleaningItem._cookPrefab, true, (DecayingInventoryItemView.DecayStates)activeBonus);
 				this.Widget.Shutdown();
 			}
@@ -399,7 +450,7 @@ public class Fire2 : EntityBehaviour<IFireState>, IWetable
 				{
 					if (TheForest.Utils.Input.GetButtonDown("Craft") && LocalPlayer.Inventory.RemoveItem(this.CurrentFoodItemId, 1, true, true))
 					{
-						LocalPlayer.Sfx.PlayWhoosh();
+						LocalPlayer.Sfx.PlayItemCustomSfx(this.CurrentFoodItemId, true);
 						DecayingInventoryItemView.DecayStates decayStateValue2 = DecayingInventoryItemView.DecayStates.Fresh;
 						if (DecayingInventoryItemView.LastUsed)
 						{
@@ -483,7 +534,7 @@ public class Fire2 : EntityBehaviour<IFireState>, IWetable
 		Vector3 position = base.transform.position + new Vector3((!center) ? UnityEngine.Random.Range(-0.2f, 0.2f) : 0f, 1.25f, (!center) ? UnityEngine.Random.Range(-0.2f, 0.2f) : 0f);
 		if (!BoltNetwork.isRunning)
 		{
-			Cook cook = (Cook)UnityEngine.Object.Instantiate(foodPrefab, position, Quaternion.identity);
+			Cook cook = UnityEngine.Object.Instantiate<Cook>(foodPrefab, position, Quaternion.identity);
 			cook.transform.parent = base.transform.parent;
 			cook.transform.Rotate(0f, (float)UnityEngine.Random.Range(0, 359), 0f);
 			if (decayStateValue > DecayingInventoryItemView.DecayStates.None && decayStateValue <= DecayingInventoryItemView.DecayStates.DriedSpoilt)
@@ -514,10 +565,10 @@ public class Fire2 : EntityBehaviour<IFireState>, IWetable
 		{
 			this.ModelLit.GetComponent<Renderer>().sharedMaterial = this.MaterialBurnt;
 		}
-		if (BoltNetwork.isRunning && this.entity)
+		if (BoltNetwork.isRunning && base.entity)
 		{
 			DestroyWithTag destroyWithTag = DestroyWithTag.Create(GlobalTargets.OnlyServer);
-			destroyWithTag.Entity = this.entity;
+			destroyWithTag.Entity = base.entity;
 			destroyWithTag.Send();
 		}
 		else
@@ -551,7 +602,7 @@ public class Fire2 : EntityBehaviour<IFireState>, IWetable
 		if (BoltNetwork.isRunning)
 		{
 			FireLightEvent fireLightEvent = FireLightEvent.Create(GlobalTargets.OnlyServer);
-			fireLightEvent.Target = this.entity;
+			fireLightEvent.Target = base.entity;
 			fireLightEvent.Send();
 		}
 		else
@@ -573,8 +624,11 @@ public class Fire2 : EntityBehaviour<IFireState>, IWetable
 			if (this.Fuel < 5f)
 			{
 				this.Fuel = 10f;
-				this._scaler.Awake();
-				this._scaler.ResetParticleScale(Mathf.Clamp01(this.Fuel / (this.FuelMax * 0.5f)));
+				if (this._scaler)
+				{
+					this._scaler.Awake();
+					this._scaler.ResetParticleScale(Mathf.Clamp01(this.Fuel / (this.FuelMax * 0.5f)));
+				}
 			}
 			FMODCommon.PlayOneshotNetworked(this.addFuelEvent, base.transform, FMODCommon.NetworkRole.Any);
 			this.On();
@@ -697,7 +751,7 @@ public class Fire2 : EntityBehaviour<IFireState>, IWetable
 				}
 			}
 		});
-		if (this.entity.isOwner)
+		if (base.entity.isOwner)
 		{
 			base.state.Fuel = this.FuelStart;
 			base.state.Lit = this._lit;
@@ -715,7 +769,7 @@ public class Fire2 : EntityBehaviour<IFireState>, IWetable
 	
 	public override void Detached()
 	{
-		if (this.entity.detachToken is CoopDestroyTagToken)
+		if (base.entity.detachToken is CoopDestroyTagToken)
 		{
 			this._tag.Perform(true);
 		}
@@ -728,7 +782,7 @@ public class Fire2 : EntityBehaviour<IFireState>, IWetable
 	{
 		get
 		{
-			if (BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+			if (BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 			{
 				return base.state.Lit;
 			}
@@ -754,7 +808,7 @@ public class Fire2 : EntityBehaviour<IFireState>, IWetable
 	{
 		get
 		{
-			if (BoltNetwork.isRunning && this.entity.isAttached)
+			if (BoltNetwork.isRunning && base.entity.isAttached)
 			{
 				return base.state.Fuel;
 			}
@@ -831,24 +885,6 @@ public class Fire2 : EntityBehaviour<IFireState>, IWetable
 		get
 		{
 			return (!this.CookingDisabled) ? Scene.HudGui.FireWidget : Scene.HudGui.FireStandWidget;
-		}
-	}
-
-	
-	private void UpdateLit()
-	{
-		try
-		{
-			this.__UpdateLit__Original();
-			if (UCheatmenu.InfFire)
-			{
-				this.Fuel = 120f;
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__UpdateLit__Original();
 		}
 	}
 
@@ -952,6 +988,9 @@ public class Fire2 : EntityBehaviour<IFireState>, IWetable
 
 	
 	public GameObject FearTrigger;
+
+	
+	public LightFadeIn LightFadeIn;
 
 	
 	[Header("FMOD")]

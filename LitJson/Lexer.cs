@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace LitJson
@@ -7,6 +8,12 @@ namespace LitJson
 	
 	internal class Lexer
 	{
+		
+		static Lexer()
+		{
+			Lexer.PopulateFsmTables();
+		}
+
 		
 		public Lexer(TextReader reader)
 		{
@@ -19,12 +26,6 @@ namespace LitJson
 			this.reader = reader;
 			this.fsm_context = new FsmContext();
 			this.fsm_context.L = this;
-		}
-
-		
-		static Lexer()
-		{
-			Lexer.PopulateFsmTables();
 		}
 
 		
@@ -130,37 +131,176 @@ namespace LitJson
 		
 		private static void PopulateFsmTables()
 		{
-			Lexer.fsm_handler_table = new Lexer.StateHandler[]
+			Lexer.StateHandler[] array = new Lexer.StateHandler[28];
+			int num = 0;
+			if (Lexer.<>f__mg$cache0 == null)
 			{
-				new Lexer.StateHandler(Lexer.State1),
-				new Lexer.StateHandler(Lexer.State2),
-				new Lexer.StateHandler(Lexer.State3),
-				new Lexer.StateHandler(Lexer.State4),
-				new Lexer.StateHandler(Lexer.State5),
-				new Lexer.StateHandler(Lexer.State6),
-				new Lexer.StateHandler(Lexer.State7),
-				new Lexer.StateHandler(Lexer.State8),
-				new Lexer.StateHandler(Lexer.State9),
-				new Lexer.StateHandler(Lexer.State10),
-				new Lexer.StateHandler(Lexer.State11),
-				new Lexer.StateHandler(Lexer.State12),
-				new Lexer.StateHandler(Lexer.State13),
-				new Lexer.StateHandler(Lexer.State14),
-				new Lexer.StateHandler(Lexer.State15),
-				new Lexer.StateHandler(Lexer.State16),
-				new Lexer.StateHandler(Lexer.State17),
-				new Lexer.StateHandler(Lexer.State18),
-				new Lexer.StateHandler(Lexer.State19),
-				new Lexer.StateHandler(Lexer.State20),
-				new Lexer.StateHandler(Lexer.State21),
-				new Lexer.StateHandler(Lexer.State22),
-				new Lexer.StateHandler(Lexer.State23),
-				new Lexer.StateHandler(Lexer.State24),
-				new Lexer.StateHandler(Lexer.State25),
-				new Lexer.StateHandler(Lexer.State26),
-				new Lexer.StateHandler(Lexer.State27),
-				new Lexer.StateHandler(Lexer.State28)
-			};
+				Lexer.<>f__mg$cache0 = new Lexer.StateHandler(Lexer.State1);
+			}
+			array[num] = Lexer.<>f__mg$cache0;
+			int num2 = 1;
+			if (Lexer.<>f__mg$cache1 == null)
+			{
+				Lexer.<>f__mg$cache1 = new Lexer.StateHandler(Lexer.State2);
+			}
+			array[num2] = Lexer.<>f__mg$cache1;
+			int num3 = 2;
+			if (Lexer.<>f__mg$cache2 == null)
+			{
+				Lexer.<>f__mg$cache2 = new Lexer.StateHandler(Lexer.State3);
+			}
+			array[num3] = Lexer.<>f__mg$cache2;
+			int num4 = 3;
+			if (Lexer.<>f__mg$cache3 == null)
+			{
+				Lexer.<>f__mg$cache3 = new Lexer.StateHandler(Lexer.State4);
+			}
+			array[num4] = Lexer.<>f__mg$cache3;
+			int num5 = 4;
+			if (Lexer.<>f__mg$cache4 == null)
+			{
+				Lexer.<>f__mg$cache4 = new Lexer.StateHandler(Lexer.State5);
+			}
+			array[num5] = Lexer.<>f__mg$cache4;
+			int num6 = 5;
+			if (Lexer.<>f__mg$cache5 == null)
+			{
+				Lexer.<>f__mg$cache5 = new Lexer.StateHandler(Lexer.State6);
+			}
+			array[num6] = Lexer.<>f__mg$cache5;
+			int num7 = 6;
+			if (Lexer.<>f__mg$cache6 == null)
+			{
+				Lexer.<>f__mg$cache6 = new Lexer.StateHandler(Lexer.State7);
+			}
+			array[num7] = Lexer.<>f__mg$cache6;
+			int num8 = 7;
+			if (Lexer.<>f__mg$cache7 == null)
+			{
+				Lexer.<>f__mg$cache7 = new Lexer.StateHandler(Lexer.State8);
+			}
+			array[num8] = Lexer.<>f__mg$cache7;
+			int num9 = 8;
+			if (Lexer.<>f__mg$cache8 == null)
+			{
+				Lexer.<>f__mg$cache8 = new Lexer.StateHandler(Lexer.State9);
+			}
+			array[num9] = Lexer.<>f__mg$cache8;
+			int num10 = 9;
+			if (Lexer.<>f__mg$cache9 == null)
+			{
+				Lexer.<>f__mg$cache9 = new Lexer.StateHandler(Lexer.State10);
+			}
+			array[num10] = Lexer.<>f__mg$cache9;
+			int num11 = 10;
+			if (Lexer.<>f__mg$cacheA == null)
+			{
+				Lexer.<>f__mg$cacheA = new Lexer.StateHandler(Lexer.State11);
+			}
+			array[num11] = Lexer.<>f__mg$cacheA;
+			int num12 = 11;
+			if (Lexer.<>f__mg$cacheB == null)
+			{
+				Lexer.<>f__mg$cacheB = new Lexer.StateHandler(Lexer.State12);
+			}
+			array[num12] = Lexer.<>f__mg$cacheB;
+			int num13 = 12;
+			if (Lexer.<>f__mg$cacheC == null)
+			{
+				Lexer.<>f__mg$cacheC = new Lexer.StateHandler(Lexer.State13);
+			}
+			array[num13] = Lexer.<>f__mg$cacheC;
+			int num14 = 13;
+			if (Lexer.<>f__mg$cacheD == null)
+			{
+				Lexer.<>f__mg$cacheD = new Lexer.StateHandler(Lexer.State14);
+			}
+			array[num14] = Lexer.<>f__mg$cacheD;
+			int num15 = 14;
+			if (Lexer.<>f__mg$cacheE == null)
+			{
+				Lexer.<>f__mg$cacheE = new Lexer.StateHandler(Lexer.State15);
+			}
+			array[num15] = Lexer.<>f__mg$cacheE;
+			int num16 = 15;
+			if (Lexer.<>f__mg$cacheF == null)
+			{
+				Lexer.<>f__mg$cacheF = new Lexer.StateHandler(Lexer.State16);
+			}
+			array[num16] = Lexer.<>f__mg$cacheF;
+			int num17 = 16;
+			if (Lexer.<>f__mg$cache10 == null)
+			{
+				Lexer.<>f__mg$cache10 = new Lexer.StateHandler(Lexer.State17);
+			}
+			array[num17] = Lexer.<>f__mg$cache10;
+			int num18 = 17;
+			if (Lexer.<>f__mg$cache11 == null)
+			{
+				Lexer.<>f__mg$cache11 = new Lexer.StateHandler(Lexer.State18);
+			}
+			array[num18] = Lexer.<>f__mg$cache11;
+			int num19 = 18;
+			if (Lexer.<>f__mg$cache12 == null)
+			{
+				Lexer.<>f__mg$cache12 = new Lexer.StateHandler(Lexer.State19);
+			}
+			array[num19] = Lexer.<>f__mg$cache12;
+			int num20 = 19;
+			if (Lexer.<>f__mg$cache13 == null)
+			{
+				Lexer.<>f__mg$cache13 = new Lexer.StateHandler(Lexer.State20);
+			}
+			array[num20] = Lexer.<>f__mg$cache13;
+			int num21 = 20;
+			if (Lexer.<>f__mg$cache14 == null)
+			{
+				Lexer.<>f__mg$cache14 = new Lexer.StateHandler(Lexer.State21);
+			}
+			array[num21] = Lexer.<>f__mg$cache14;
+			int num22 = 21;
+			if (Lexer.<>f__mg$cache15 == null)
+			{
+				Lexer.<>f__mg$cache15 = new Lexer.StateHandler(Lexer.State22);
+			}
+			array[num22] = Lexer.<>f__mg$cache15;
+			int num23 = 22;
+			if (Lexer.<>f__mg$cache16 == null)
+			{
+				Lexer.<>f__mg$cache16 = new Lexer.StateHandler(Lexer.State23);
+			}
+			array[num23] = Lexer.<>f__mg$cache16;
+			int num24 = 23;
+			if (Lexer.<>f__mg$cache17 == null)
+			{
+				Lexer.<>f__mg$cache17 = new Lexer.StateHandler(Lexer.State24);
+			}
+			array[num24] = Lexer.<>f__mg$cache17;
+			int num25 = 24;
+			if (Lexer.<>f__mg$cache18 == null)
+			{
+				Lexer.<>f__mg$cache18 = new Lexer.StateHandler(Lexer.State25);
+			}
+			array[num25] = Lexer.<>f__mg$cache18;
+			int num26 = 25;
+			if (Lexer.<>f__mg$cache19 == null)
+			{
+				Lexer.<>f__mg$cache19 = new Lexer.StateHandler(Lexer.State26);
+			}
+			array[num26] = Lexer.<>f__mg$cache19;
+			int num27 = 26;
+			if (Lexer.<>f__mg$cache1A == null)
+			{
+				Lexer.<>f__mg$cache1A = new Lexer.StateHandler(Lexer.State27);
+			}
+			array[num27] = Lexer.<>f__mg$cache1A;
+			int num28 = 27;
+			if (Lexer.<>f__mg$cache1B == null)
+			{
+				Lexer.<>f__mg$cache1B = new Lexer.StateHandler(Lexer.State28);
+			}
+			array[num28] = Lexer.<>f__mg$cache1B;
+			Lexer.fsm_handler_table = array;
 			Lexer.fsm_return_table = new int[]
 			{
 				65542,
@@ -240,14 +380,11 @@ namespace LitJson
 					int num = ctx.L.input_char;
 					switch (num)
 					{
-					case 39:
-						if (!ctx.L.allow_single_quoted_strings)
-						{
-							return false;
-						}
-						ctx.L.input_char = 34;
-						ctx.NextState = 23;
-						ctx.Return = true;
+					case 44:
+						break;
+					case 45:
+						ctx.L.string_buffer.Append((char)ctx.L.input_char);
+						ctx.NextState = 2;
 						return true;
 					default:
 						switch (num)
@@ -268,23 +405,37 @@ namespace LitJson
 									ctx.Return = true;
 									return true;
 								}
-								if (num != 58)
+								if (num != 39)
 								{
-									if (num == 102)
+									if (num != 58)
 									{
-										ctx.NextState = 12;
+										if (num == 102)
+										{
+											ctx.NextState = 12;
+											return true;
+										}
+										if (num == 110)
+										{
+											ctx.NextState = 16;
+											return true;
+										}
+										if (num != 116)
+										{
+											return false;
+										}
+										ctx.NextState = 9;
 										return true;
 									}
-									if (num == 110)
-									{
-										ctx.NextState = 16;
-										return true;
-									}
-									if (num != 116)
+								}
+								else
+								{
+									if (!ctx.L.allow_single_quoted_strings)
 									{
 										return false;
 									}
-									ctx.NextState = 9;
+									ctx.L.input_char = 34;
+									ctx.NextState = 23;
+									ctx.Return = true;
 									return true;
 								}
 								break;
@@ -292,12 +443,6 @@ namespace LitJson
 							break;
 						}
 						break;
-					case 44:
-						break;
-					case 45:
-						ctx.L.string_buffer.Append((char)ctx.L.input_char);
-						ctx.NextState = 2;
-						return true;
 					case 47:
 						if (!ctx.L.allow_comments)
 						{
@@ -510,15 +655,14 @@ namespace LitJson
 				ctx.NextState = 8;
 				return true;
 			}
-			switch (ctx.L.input_char)
+			int num = ctx.L.input_char;
+			if (num != 43 && num != 45)
 			{
-			case 43:
-			case 45:
-				ctx.L.string_buffer.Append((char)ctx.L.input_char);
-				ctx.NextState = 8;
-				return true;
+				return false;
 			}
-			return false;
+			ctx.L.string_buffer.Append((char)ctx.L.input_char);
+			ctx.NextState = 8;
+			return true;
 		}
 
 		
@@ -730,12 +874,11 @@ namespace LitJson
 			int num = ctx.L.input_char;
 			switch (num)
 			{
-			case 110:
 			case 114:
 			case 116:
 				break;
 			default:
-				if (num != 34 && num != 39 && num != 47 && num != 92 && num != 98 && num != 102)
+				if (num != 34 && num != 39 && num != 47 && num != 92 && num != 98 && num != 102 && num != 110)
 				{
 					return false;
 				}
@@ -982,6 +1125,118 @@ namespace LitJson
 
 		
 		private int unichar;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache0;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache1;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache2;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache3;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache4;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache5;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache6;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache7;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache8;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache9;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cacheA;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cacheB;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cacheC;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cacheD;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cacheE;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cacheF;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache10;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache11;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache12;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache13;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache14;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache15;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache16;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache17;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache18;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache19;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache1A;
+
+		
+		[CompilerGenerated]
+		private static Lexer.StateHandler <>f__mg$cache1B;
 
 		
 		

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using TheForest.Items;
 using TheForest.Utils;
 using UnityEngine;
 
@@ -16,25 +18,37 @@ namespace TheForest.UI
 		
 		public void ShowSingle(int itemId, int amountItemId, Transform follow = null, SideIcons sideIcon = SideIcons.None)
 		{
+			bool useFillSprite = false;
 			if (this._rotateIcon.activeSelf)
 			{
 				this._rotateIcon.SetActive(false);
 			}
 			foreach (ItemListWidgetEntry itemListWidgetEntry in this._singleItems)
 			{
-				bool flag = itemListWidgetEntry.MatchItemId(itemId);
-				if (itemListWidgetEntry._icon.gameObject.activeSelf != flag)
+				if (itemListWidgetEntry == null)
 				{
-					itemListWidgetEntry._icon.gameObject.SetActive(flag);
-					this._grid.repositionNow = true;
+					Debug.LogWarning(base.gameObject.GetFullName() + " null items in SingleItems list - potential bug");
 				}
-				if (itemListWidgetEntry._takeIcon)
+				else
 				{
-					itemListWidgetEntry._takeIcon.enabled = (flag && sideIcon == SideIcons.Take);
-				}
-				if (itemListWidgetEntry._craftIcon)
-				{
-					itemListWidgetEntry._craftIcon.enabled = (flag && sideIcon == SideIcons.Craft);
+					bool flag = itemListWidgetEntry.MatchItemId(itemId);
+					if (itemListWidgetEntry._icon.gameObject.activeSelf != flag)
+					{
+						itemListWidgetEntry._icon.gameObject.SetActive(flag);
+						this._grid.repositionNow = true;
+					}
+					if (itemListWidgetEntry._takeIcon)
+					{
+						itemListWidgetEntry._takeIcon.enabled = (flag && sideIcon == SideIcons.Take);
+					}
+					if (itemListWidgetEntry._craftIcon)
+					{
+						itemListWidgetEntry._craftIcon.enabled = (flag && sideIcon == SideIcons.Craft);
+					}
+					if (flag)
+					{
+						useFillSprite = itemListWidgetEntry._useFillSprite;
+					}
 				}
 			}
 			foreach (ItemListWidgetEntry itemListWidgetEntry2 in this._rotationItems)
@@ -77,9 +91,14 @@ namespace TheForest.UI
 						itemListWidgetEntry2._icon.transform.localScale = Vector3.one;
 					}
 					itemListWidgetEntry2._icon.alpha = 1f;
+					useFillSprite = itemListWidgetEntry2._useFillSprite;
 				}
 			}
-			this.UpdateMasterActionIcon(sideIcon);
+			if (this._noValidOptionfallbackIcon && this._noValidOptionfallbackIcon.activeSelf)
+			{
+				this._noValidOptionfallbackIcon.SetActive(false);
+			}
+			this.UpdateMasterActionIcon(sideIcon, useFillSprite);
 			if (this._follow)
 			{
 				this._follow._target = follow;
@@ -101,14 +120,33 @@ namespace TheForest.UI
 		public void ShowList(int itemId, int amountItemId = -1, Transform follow = null, SideIcons sideIcon = SideIcons.None)
 		{
 			int num = 0;
+			bool useFillSprite = false;
 			int num2 = 0;
+			bool flag = false;
 			foreach (ItemListWidgetEntry itemListWidgetEntry in this._rotationItems)
 			{
 				if (itemListWidgetEntry.MatchItemId(itemId))
 				{
+					flag = true;
 					break;
 				}
 				num2++;
+			}
+			if (!flag && (this._missingItems == null || !this._missingItems.Contains(itemId)))
+			{
+				if (this._missingItems == null)
+				{
+					this._missingItems = new List<int>();
+				}
+				this._missingItems.Add(itemId);
+				Debug.LogError(string.Concat(new string[]
+				{
+					"Could not find icon for \"",
+					ItemDatabase.ItemById(itemId)._name,
+					"\" on \"",
+					base.gameObject.GetFullName(),
+					"\""
+				}));
 			}
 			if (this._lastTargetedListEntry >= 0 && ((this._follow && this._follow._target != follow) || (this._checkOwnership && !this._rotationItems[this._lastTargetedListEntry].OwnsAny())))
 			{
@@ -181,21 +219,22 @@ namespace TheForest.UI
 				int num8 = this._rotationItems.Length;
 				while (num8-- > 0)
 				{
-					bool flag;
+					bool flag2;
 					if (num6 < 4 && (!this._checkOwnership || this._rotationItems[num7].OwnsAny()))
 					{
 						num++;
-						flag = (num6 < this._maxDisplayed);
+						flag2 = (num6 < this._maxDisplayed);
 					}
 					else
 					{
-						flag = false;
+						flag2 = false;
 					}
-					if (flag)
+					if (flag2)
 					{
-						bool flag2 = num6 == ((this._maxDisplayed != 4) ? 0 : 1);
-						if (flag2)
+						bool flag3 = num6 == ((this._maxDisplayed != 4) ? 0 : 1);
+						if (flag3)
 						{
+							useFillSprite = this._rotationItems[num7]._useFillSprite;
 							this._lastTargetedListEntry = num7;
 							if (this._checkOwnership && this._labelShowsAmount && this._rotationItems[num7]._amountLabel)
 							{
@@ -209,19 +248,19 @@ namespace TheForest.UI
 						}
 						if (this._rotationItems[num7]._takeIcon)
 						{
-							this._rotationItems[num7]._takeIcon.enabled = (flag2 && sideIcon == SideIcons.Take);
+							this._rotationItems[num7]._takeIcon.enabled = (flag3 && sideIcon == SideIcons.Take);
 						}
 						if (this._rotationItems[num7]._craftIcon)
 						{
-							this._rotationItems[num7]._craftIcon.enabled = (flag2 && sideIcon == SideIcons.Craft);
+							this._rotationItems[num7]._craftIcon.enabled = (flag3 && sideIcon == SideIcons.Craft);
 						}
-						if (this._rotationItems[num7]._amountLabel && this._rotationItems[num7]._amountLabel.enabled != flag2)
+						if (this._rotationItems[num7]._amountLabel && this._rotationItems[num7]._amountLabel.enabled != flag3)
 						{
-							this._rotationItems[num7]._amountLabel.enabled = flag2;
+							this._rotationItems[num7]._amountLabel.enabled = flag3;
 						}
-						if (this._rotationItems[num7]._actionIcon && this._rotationItems[num7]._actionIcon.activeSelf != flag2)
+						if (this._rotationItems[num7]._actionIcon && this._rotationItems[num7]._actionIcon.activeSelf != flag3)
 						{
-							this._rotationItems[num7]._actionIcon.SetActive(flag2);
+							this._rotationItems[num7]._actionIcon.SetActive(flag3);
 							this._grid.repositionNow = true;
 						}
 						if (!this._rotationItems[num7]._icon.gameObject.activeSelf)
@@ -242,7 +281,7 @@ namespace TheForest.UI
 						{
 							this._rotationItems[num7]._icon.alpha = 1f - num5 / this._leavingDuration;
 						}
-						else if (num5 < 1f || flag2)
+						else if (num5 < 1f || flag3)
 						{
 							this._rotationItems[num7]._icon.alpha = 1f - (float)(num6 - ((this._maxDisplayed != 4) ? 0 : 1)) / 3f;
 						}
@@ -263,6 +302,10 @@ namespace TheForest.UI
 						num7 = 0;
 					}
 				}
+				if (this._noValidOptionfallbackIcon && this._noValidOptionfallbackIcon.activeSelf != (num == 0))
+				{
+					this._noValidOptionfallbackIcon.SetActive(num == 0);
+				}
 			}
 			else
 			{
@@ -280,7 +323,7 @@ namespace TheForest.UI
 				base.gameObject.SetActive(true);
 				this._grid.repositionNow = true;
 			}
-			this.UpdateMasterActionIcon(sideIcon);
+			this.UpdateMasterActionIcon(sideIcon, useFillSprite);
 			if (this._follow)
 			{
 				this._follow._target = follow;
@@ -301,13 +344,55 @@ namespace TheForest.UI
 				this._grid.transform.localPosition = Vector3.zero;
 				foreach (UITweener uitweener in this._tweeners)
 				{
-					uitweener.ResetToBeginning();
+					if (uitweener)
+					{
+						uitweener.ResetToBeginning();
+					}
 				}
 			}
 		}
 
 		
-		private void UpdateMasterActionIcon(SideIcons sideIcon)
+		public void ShowNoValidOption(Transform follow = null)
+		{
+			if (this._noValidOptionfallbackIcon)
+			{
+				foreach (ItemListWidgetEntry itemListWidgetEntry in this._rotationItems)
+				{
+					if (itemListWidgetEntry._icon.gameObject.activeSelf)
+					{
+						itemListWidgetEntry._icon.gameObject.SetActive(false);
+					}
+				}
+				foreach (ItemListWidgetEntry itemListWidgetEntry2 in this._singleItems)
+				{
+					if (itemListWidgetEntry2._icon.gameObject.activeSelf)
+					{
+						itemListWidgetEntry2._icon.gameObject.SetActive(false);
+					}
+				}
+				this.UpdateMasterActionIcon(SideIcons.None, false);
+				if (this._rotateIcon.activeSelf)
+				{
+					this._rotateIcon.SetActive(false);
+				}
+				if (!this._noValidOptionfallbackIcon.activeSelf)
+				{
+					this._noValidOptionfallbackIcon.SetActive(true);
+				}
+				if (!base.gameObject.activeSelf)
+				{
+					base.gameObject.SetActive(true);
+				}
+				if (this._follow)
+				{
+					this._follow._target = follow;
+				}
+			}
+		}
+
+		
+		private void UpdateMasterActionIcon(SideIcons sideIcon, bool useFillSprite)
 		{
 			if (this._masterActionIcon)
 			{
@@ -324,7 +409,7 @@ namespace TheForest.UI
 					{
 						this._masterActionIcon.gameObject.SetActive(true);
 					}
-					this._masterActionIcon.ChangeAction((sideIcon != SideIcons.Craft) ? InputMappingIcons.Actions.Take : InputMappingIcons.Actions.Craft);
+					this._masterActionIcon.ChangeAction((sideIcon != SideIcons.Craft) ? InputMappingIcons.Actions.Take : InputMappingIcons.Actions.Craft, useFillSprite);
 				}
 			}
 		}
@@ -337,6 +422,9 @@ namespace TheForest.UI
 
 		
 		public GameObject _rotateIcon;
+
+		
+		public GameObject _noValidOptionfallbackIcon;
 
 		
 		public ItemListWidgetEntry[] _singleItems;
@@ -388,5 +476,8 @@ namespace TheForest.UI
 
 		
 		private bool _fixPrevTargetedEntryPosition;
+
+		
+		private List<int> _missingItems;
 	}
 }

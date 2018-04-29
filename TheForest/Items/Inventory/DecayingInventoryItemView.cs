@@ -10,8 +10,8 @@ using UnityEngine;
 namespace TheForest.Items.Inventory
 {
 	
-	[DoNotSerializePublic]
 	[AddComponentMenu("Items/Inventory/Decaying Item Inventory View")]
+	[DoNotSerializePublic]
 	public class DecayingInventoryItemView : InventoryItemView, ISaveableView
 	{
 		
@@ -156,17 +156,17 @@ namespace TheForest.Items.Inventory
 		{
 			this._prevState = this.DecayProperties._state;
 			this.DecayProperties._state = state;
-			base.NormalMaterial = this.GetMaterialForState(state);
+			Material materialForState = this.GetMaterialForState(state);
 			if (LocalPlayer.Inventory.RightHand == this)
 			{
-				this._held.GetComponentInChildren<Renderer>().sharedMaterial = base.NormalMaterial;
+				this._held.GetComponentInChildren<Renderer>().sharedMaterial = materialForState;
 			}
 			foreach (InventoryItemView.RendererDefinition rendererDefinition in this._renderers)
 			{
-				rendererDefinition._defaultMaterial = base.NormalMaterial;
-				if (!this._hovered)
+				rendererDefinition._defaultMaterial = materialForState;
+				if (!this._hovered && rendererDefinition._renderer.sharedMaterial != rendererDefinition._sheenMaterial)
 				{
-					rendererDefinition._renderer.sharedMaterial = base.NormalMaterial;
+					rendererDefinition._renderer.sharedMaterial = materialForState;
 				}
 			}
 			if (state == DecayingInventoryItemView.DecayStates.None || state >= DecayingInventoryItemView.DecayStates.DriedFresh)
@@ -182,6 +182,7 @@ namespace TheForest.Items.Inventory
 		public override void UseEdible()
 		{
 			InventoryItemView.CombiningItemId = -1;
+			LocalPlayer.Sfx.PlayItemCustomSfx(base.ItemCache, true);
 			LocalPlayer.Sfx.PlayWhoosh();
 			int calories = 0;
 			switch (this.DecayProperties._state)

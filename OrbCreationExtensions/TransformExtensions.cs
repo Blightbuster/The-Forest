@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 namespace OrbCreationExtensions
@@ -19,13 +20,26 @@ namespace OrbCreationExtensions
 			{
 				return trans;
 			}
-			foreach (object obj in trans)
+			IEnumerator enumerator = trans.GetEnumerator();
+			try
 			{
-				Transform trans2 = (Transform)obj;
-				Transform transform = trans2.FindFirstChildWithName(childName);
-				if (transform != null)
+				while (enumerator.MoveNext())
 				{
-					return transform;
+					object obj = enumerator.Current;
+					Transform trans2 = (Transform)obj;
+					Transform transform = trans2.FindFirstChildWithName(childName);
+					if (transform != null)
+					{
+						return transform;
+					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
 				}
 			}
 			return null;
@@ -38,13 +52,26 @@ namespace OrbCreationExtensions
 			{
 				return trans;
 			}
-			foreach (object obj in trans)
+			IEnumerator enumerator = trans.GetEnumerator();
+			try
 			{
-				Transform trans2 = (Transform)obj;
-				Transform transform = trans2.FindFirstChildWhereNameContains(childName);
-				if (transform != null)
+				while (enumerator.MoveNext())
 				{
-					return transform;
+					object obj = enumerator.Current;
+					Transform trans2 = (Transform)obj;
+					Transform transform = trans2.FindFirstChildWhereNameContains(childName);
+					if (transform != null)
+					{
+						return transform;
+					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
 				}
 			}
 			return null;

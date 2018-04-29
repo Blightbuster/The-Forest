@@ -3,9 +3,9 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Stop this FSM. If this FSM was launched by a Run FSM action, it will trigger a Finish event in that state.")]
-	[Note("Stop this FSM. If this FSM was launched by a Run FSM action, it will trigger a Finish event in that state.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Note("Stop this FSM. If this FSM was launched by a Run FSM action, it will trigger a Finish event in that state.")]
+	[Tooltip("Stop this FSM. If this FSM was launched by a Run FSM action, it will trigger a Finish event in that state.")]
 	public class FinishFSM : FsmStateAction
 	{
 		

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets a Game Object's Name.")]
 	[ActionCategory(ActionCategory.GameObject)]
+	[Tooltip("Sets a Game Object's Name.")]
 	public class SetName : FsmStateAction
 	{
 		

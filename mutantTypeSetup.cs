@@ -29,19 +29,6 @@ public class mutantTypeSetup : MonoBehaviour, IBurnable
 		{
 			this.AttachToNetwork(BoltPrefabs.girlMutant_net, StateSerializerTypeIds.IMutantGirlBoss);
 		}
-		if (CoopPeerStarter.DedicatedHost)
-		{
-			AmplifyMotionObject[] componentsInChildren = base.transform.GetComponentsInChildren<AmplifyMotionObject>(true);
-			AmplifyMotionObjectBase[] componentsInChildren2 = base.transform.GetComponentsInChildren<AmplifyMotionObjectBase>(true);
-			foreach (AmplifyMotionObject obj in componentsInChildren)
-			{
-				UnityEngine.Object.Destroy(obj);
-			}
-			foreach (AmplifyMotionObjectBase obj2 in componentsInChildren2)
-			{
-				UnityEngine.Object.Destroy(obj2);
-			}
-		}
 	}
 
 	
@@ -832,7 +819,7 @@ public class mutantTypeSetup : MonoBehaviour, IBurnable
 			{
 				this.setup.pmBrain.FsmVariables.GetFsmGameObject("leaderGo").Value = leader;
 			}
-			leader.SendMessage("addFollower", base.gameObject);
+			leader.SendMessage("addFollower", base.gameObject, SendMessageOptions.DontRequireReceiver);
 		}
 		yield break;
 	}
@@ -939,20 +926,20 @@ public class mutantTypeSetup : MonoBehaviour, IBurnable
 				{
 					this.mutantControl.activeCannibals.Add(base.gameObject);
 				}
-				bool inCaveTest;
+				bool value;
 				if (this.setup.pmSleep)
 				{
-					inCaveTest = this.setup.pmSleep.FsmVariables.GetFsmBool("inCaveBool").Value;
+					value = this.setup.pmSleep.FsmVariables.GetFsmBool("inCaveBool").Value;
 				}
 				else if (this.setup.pmCombat)
 				{
-					inCaveTest = this.setup.pmCombat.FsmVariables.GetFsmBool("inCaveBool").Value;
+					value = this.setup.pmCombat.FsmVariables.GetFsmBool("inCaveBool").Value;
 				}
 				else
 				{
-					inCaveTest = this.setup.pmCombat.FsmVariables.GetFsmBool("inCaveBool").Value;
+					value = this.setup.pmCombat.FsmVariables.GetFsmBool("inCaveBool").Value;
 				}
-				if (inCaveTest)
+				if (value)
 				{
 					if (!this.mutantControl.activeCaveCannibals.Contains(base.gameObject))
 					{
@@ -1256,9 +1243,13 @@ public class mutantTypeSetup : MonoBehaviour, IBurnable
 	private IEnumerator doSpawnDummy()
 	{
 		AnimatorStateInfo state = this.animator.GetCurrentAnimatorStateInfo(0);
-		while (state.shortNameHash == this.setup.animControl.burningLoopHash || state.shortNameHash == this.setup.animControl.burningLoopMirHash || state.shortNameHash == this.setup.animControl.idleToBurningHash)
+		while (this.setup.health.onFire)
 		{
 			state = this.animator.GetCurrentAnimatorStateInfo(0);
+			if (state.shortNameHash == this.setup.animControl.burnToDeathHash || state.shortNameHash == this.setup.animControl.burnToDeathHashMir || state.tagHash == this.setup.animControl.deathHash)
+			{
+				break;
+			}
 			yield return null;
 		}
 		float deadTimer = 0f;
@@ -1272,9 +1263,9 @@ public class mutantTypeSetup : MonoBehaviour, IBurnable
 			this.setup.animator.transform.SendMessage("setupRagDollParts", true, SendMessageOptions.DontRequireReceiver);
 			if (BoltNetwork.isServer)
 			{
-				ragdollActivate ev = ragdollActivate.Create(GlobalTargets.AllClients);
-				ev.Target = base.transform.GetComponent<BoltEntity>();
-				ev.Send();
+				ragdollActivate ragdollActivate = ragdollActivate.Create(GlobalTargets.AllClients);
+				ragdollActivate.Target = base.transform.GetComponent<BoltEntity>();
+				ragdollActivate.Send();
 			}
 		}
 		if (this.ai.male && !this.ai.pale && !this.ai.maleSkinny)
@@ -1283,22 +1274,24 @@ public class mutantTypeSetup : MonoBehaviour, IBurnable
 		}
 		if (this.ai.male && this.setup.propManager.regularStick.activeSelf)
 		{
-			GameObject stick;
+			GameObject gameObject;
 			if (BoltNetwork.isRunning)
 			{
-				stick = (UnityEngine.Object.Instantiate(this.setup.stickPickupMP, this.setup.charLeftWeaponGo.transform.position, this.setup.charLeftWeaponGo.transform.rotation) as GameObject);
+				gameObject = UnityEngine.Object.Instantiate<GameObject>(this.setup.stickPickupMP, this.setup.charLeftWeaponGo.transform.position, this.setup.charLeftWeaponGo.transform.rotation);
 			}
 			else
 			{
-				stick = (UnityEngine.Object.Instantiate(this.setup.stickPickup, this.setup.charLeftWeaponGo.transform.position, this.setup.charLeftWeaponGo.transform.rotation) as GameObject);
+				gameObject = UnityEngine.Object.Instantiate<GameObject>(this.setup.stickPickup, this.setup.charLeftWeaponGo.transform.position, this.setup.charLeftWeaponGo.transform.rotation);
 			}
-			stick.transform.localScale = new Vector3(1f, 1f, 1f);
+			gameObject.transform.localScale = new Vector3(1f, 1f, 1f);
 			this.setup.propManager.regularStick.SetActive(false);
 		}
+		this.ai.StartCoroutine("toStop");
 		if (this.animator.enabled)
 		{
 			while (state.tagHash != this.setup.hashs.deathTag)
 			{
+				this.ai.StartCoroutine("toStop");
 				state = this.animator.GetCurrentAnimatorStateInfo(0);
 				yield return null;
 			}
@@ -1318,6 +1311,7 @@ public class mutantTypeSetup : MonoBehaviour, IBurnable
 		this.getParams.StartCoroutine("spawnDummy", new getAnimatorParams.DummyParams
 		{
 			Angle = this.setup.thisGo.transform.rotation,
+			IsDummyLoad = false,
 			DiedLayingDown = (state.IsName("Base Layer.dyingLoop") || state.IsName("Base Layer.dyringLoopMirror") || state.IsName("Base Layer.dyingToIdle") || state.IsName("Base Layer.dyingToIdleMirror") || state.IsName("Base Layer.dyingToDead") || state.IsName("Base Layer.deathMir1") || state.IsName("Base Layer.hitStomachMir1") || state.IsName("Base Layer.hitFaceRightMir1") || state.IsName("Base Layer.hitFaceLeftMir1") || state.IsName("Base Layer.hitStomach1") || state.IsName("Base Layer.hitFaceRight1") || state.IsName("Base Layer.hitFaceLeft1"))
 		});
 		yield return null;
@@ -1335,7 +1329,7 @@ public class mutantTypeSetup : MonoBehaviour, IBurnable
 				pickupSpawn component = this.props.regularWeapons[i].GetComponent<pickupSpawn>();
 				if (component)
 				{
-					UnityEngine.Object.Instantiate(component.spawnMe, this.setup.charLeftWeaponGo.transform.position, this.setup.charLeftWeaponGo.transform.rotation);
+					UnityEngine.Object.Instantiate<GameObject>(component.spawnMe, this.setup.charLeftWeaponGo.transform.position, this.setup.charLeftWeaponGo.transform.rotation);
 					this.props.regularWeapons[i].SetActive(false);
 					flag = true;
 				}
@@ -1348,7 +1342,7 @@ public class mutantTypeSetup : MonoBehaviour, IBurnable
 				pickupSpawn component2 = this.props.advancedWeapons[j].GetComponent<pickupSpawn>();
 				if (component2)
 				{
-					UnityEngine.Object.Instantiate(component2.spawnMe, this.setup.charLeftWeaponGo.transform.position, this.setup.charLeftWeaponGo.transform.rotation);
+					UnityEngine.Object.Instantiate<GameObject>(component2.spawnMe, this.setup.charLeftWeaponGo.transform.position, this.setup.charLeftWeaponGo.transform.rotation);
 					this.props.advancedWeapons[j].SetActive(false);
 					flag = true;
 				}
@@ -1356,7 +1350,7 @@ public class mutantTypeSetup : MonoBehaviour, IBurnable
 		}
 		if (!flag)
 		{
-			UnityEngine.Object.Instantiate(this.setup.clubPickup, this.setup.charLeftWeaponGo.transform.position, this.setup.charLeftWeaponGo.transform.rotation);
+			UnityEngine.Object.Instantiate<GameObject>(this.setup.clubPickup, this.setup.charLeftWeaponGo.transform.position, this.setup.charLeftWeaponGo.transform.rotation);
 			this.setup.charLeftWeaponGo.SetActive(false);
 		}
 	}
@@ -1499,6 +1493,58 @@ public class mutantTypeSetup : MonoBehaviour, IBurnable
 	public void updateWorldTransformPosition()
 	{
 		this.setup.search.worldPositionTr.position = base.transform.position;
+	}
+
+	
+	private void onArtifactAttract(Vector3 pos)
+	{
+		if (this.inCave)
+		{
+			return;
+		}
+		if (this.setup.pmSearchScript)
+		{
+			this.setup.pmSearchScript._lastArtifactPos = pos;
+			this.setup.pmSearchScript._toAttractArtifact = true;
+		}
+		if (this.setup.pmCombat)
+		{
+			this.setup.pmCombat.SendEvent("toAttract");
+			this.setup.pmCombat.FsmVariables.GetFsmBool("toAttractArtifact").Value = true;
+		}
+		if (this.setup.search)
+		{
+			this.setup.search._lastArtifactPos = pos;
+		}
+	}
+
+	
+	private void onArtifactRepel(Transform artifact)
+	{
+		if (this.inCave)
+		{
+			return;
+		}
+		if (this.setup.pmSearchScript)
+		{
+			this.setup.pmSearchScript._lastArtifactPos = artifact.position;
+			this.setup.pmSearchScript._lastArtifactTr = artifact;
+			this.setup.pmSearchScript._toRepelArtifact = true;
+		}
+		if (this.setup.pmCombatScript)
+		{
+			this.setup.pmCombatScript.toRepelArtifact = true;
+		}
+		if (this.setup.pmCombat)
+		{
+			this.setup.pmCombat.SendEvent("toRepel");
+			this.setup.pmCombat.FsmVariables.GetFsmBool("toRepelArtifact").Value = true;
+			this.setup.pmCombat.FsmVariables.GetFsmBool("timeOutBool").Value = true;
+		}
+		if (this.setup.search)
+		{
+			this.setup.search._lastArtifactPos = artifact.position;
+		}
 	}
 
 	

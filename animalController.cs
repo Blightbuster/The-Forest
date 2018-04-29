@@ -71,6 +71,22 @@ public class animalController : MonoBehaviour, IThreadSafeTask
 	}
 
 	
+	private void OnDestroy()
+	{
+		try
+		{
+			if (this.WsToken != -1)
+			{
+				WorkScheduler.Unregister(this, this.WsToken);
+				this.WsToken = -1;
+			}
+		}
+		catch
+		{
+		}
+	}
+
+	
 	
 	
 	public bool ShouldDoMainThreadRefresh { get; set; }
@@ -346,11 +362,11 @@ public class animalController : MonoBehaviour, IThreadSafeTask
 		{
 			if (this.fishSpawned)
 			{
-				for (int f = 0; f < this.allFish.Count; f++)
+				for (int i = 0; i < this.allFish.Count; i++)
 				{
-					if (this.allFish[f])
+					if (this.allFish[i])
 					{
-						PoolManager.Pools["creatures"].Despawn(this.allFish[f].transform);
+						PoolManager.Pools["creatures"].Despawn(this.allFish[i].transform);
 					}
 				}
 			}
@@ -379,11 +395,11 @@ public class animalController : MonoBehaviour, IThreadSafeTask
 		{
 			if (this.fishSpawned)
 			{
-				for (int f2 = 0; f2 < this.allFish.Count; f2++)
+				for (int j = 0; j < this.allFish.Count; j++)
 				{
-					if (this.allFish[f2])
+					if (this.allFish[j])
 					{
-						PoolManager.Pools["creatures"].Despawn(this.allFish[f2].transform);
+						PoolManager.Pools["creatures"].Despawn(this.allFish[j].transform);
 					}
 				}
 			}

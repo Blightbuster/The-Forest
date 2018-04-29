@@ -10,9 +10,9 @@ public class placedDynamicObjectDisabler : MonoBehaviour
 	{
 		if (this.checkAllPlayers)
 		{
-			if (!Scene.SceneTracker.placedDynamicObjectsAllPlayers.Contains(base.transform))
+			if (!Scene.SceneTracker.placedDynamicObjectsAllPlayers.Contains(this))
 			{
-				Scene.SceneTracker.placedDynamicObjectsAllPlayers.Add(base.transform);
+				Scene.SceneTracker.placedDynamicObjectsAllPlayers.Add(this);
 			}
 		}
 		else if (!Scene.SceneTracker.placedDynamicObjects.Contains(base.transform))
@@ -26,9 +26,9 @@ public class placedDynamicObjectDisabler : MonoBehaviour
 	{
 		if (this.checkAllPlayers)
 		{
-			if (!Scene.SceneTracker.placedDynamicObjectsAllPlayers.Contains(base.transform))
+			if (!Scene.SceneTracker.placedDynamicObjectsAllPlayers.Contains(this))
 			{
-				Scene.SceneTracker.placedDynamicObjectsAllPlayers.Add(base.transform);
+				Scene.SceneTracker.placedDynamicObjectsAllPlayers.Add(this);
 			}
 		}
 		else if (!Scene.SceneTracker.placedDynamicObjects.Contains(base.transform))
@@ -39,4 +39,7 @@ public class placedDynamicObjectDisabler : MonoBehaviour
 
 	
 	public bool checkAllPlayers;
+
+	
+	public bool enableOnDedicatedServer;
 }

@@ -1,17 +1,14 @@
 ﻿using System;
-using ModAPI;
-using ModAPI.Attributes;
 using TheForest.Items.Inventory;
 using TheForest.UI.Multiplayer;
 using TheForest.Utils;
-using UltimateCheatmenu;
 using UnityEngine;
 using UnityEngine.Rendering;
 using uSky;
 
 
-[ExecuteInEditMode]
 [DoNotSerializePublic]
+[ExecuteInEditMode]
 [AddComponentMenu("The Forest/Atmosphere")]
 public class TheForestAtmosphere : MonoBehaviour
 {
@@ -37,7 +34,7 @@ public class TheForestAtmosphere : MonoBehaviour
 		private set
 		{
 			this.windIntensity = value;
-			FMOD_StudioEventEmitter.WindIntensity = value;
+			FMOD_StudioEventEmitter.WindIntensity = ((!LocalPlayer.IsInCaves) ? value : 0f);
 		}
 	}
 
@@ -133,11 +130,32 @@ public class TheForestAtmosphere : MonoBehaviour
 		identity.SetRow(1, vector2);
 		identity.SetRow(2, vector3);
 		identity.SetRow(3, vector4);
+		Vector3[] array = new Vector3[4];
+		Vector3[] array2 = new Vector3[4];
+		camera.CalculateFrustumCorners(new Rect(0f, 0f, 1f, 1f), camera.farClipPlane, Camera.MonoOrStereoscopicEye.Left, array);
+		camera.CalculateFrustumCorners(new Rect(0f, 0f, 1f, 1f), camera.farClipPlane, Camera.MonoOrStereoscopicEye.Right, array2);
+		for (int i = 0; i < 4; i++)
+		{
+			array[i] = camera.transform.TransformVector(array[i]);
+			array2[i] = camera.transform.TransformVector(array2[i]);
+		}
+		Matrix4x4 identity2 = Matrix4x4.identity;
+		identity2.SetRow(0, array[1]);
+		identity2.SetRow(1, array[2]);
+		identity2.SetRow(2, array[3]);
+		identity2.SetRow(3, array[0]);
+		Matrix4x4 identity3 = Matrix4x4.identity;
+		identity3.SetRow(0, array2[1]);
+		identity3.SetRow(1, array2[2]);
+		identity3.SetRow(2, array2[3]);
+		identity3.SetRow(3, array2[0]);
 		if (this.AtmosphereMesh != null)
 		{
 			if (Sunshine.Instance.Ready)
 			{
 				this.InscatteringMaterial.SetMatrix("_FrustumCornersWS", identity);
+				this.InscatteringMaterial.SetMatrix("_FrustumCornersWSLeftEye", identity2);
+				this.InscatteringMaterial.SetMatrix("_FrustumCornersWSRightEye", identity3);
 				this.InscatteringMaterial.SetVector("_CameraWS", camera.transform.position);
 				this.InscatteringMaterial.SetFloat("InscatteringIntensity", this.InscatteringIntensity);
 				this.InscatteringMaterial.SetFloat("InscatteringDistribution", this.InscatteringDistribution);
@@ -201,11 +219,11 @@ public class TheForestAtmosphere : MonoBehaviour
 	}
 
 	
-	private void __Update__Original()
+	private void Update()
 	{
 		if (LocalPlayer.Stats)
 		{
-			this.playerIsInSnowArea = (LocalPlayer.Stats.IsInNorthColdArea() && !LocalPlayer.IsInOverlookArea);
+			this.playerIsInSnowArea = LocalPlayer.Stats.IsInNorthColdArea();
 		}
 		Shader.SetGlobalColor("_AmbientSkyColor", RenderSettings.ambientSkyColor.linear * RenderSettings.ambientIntensity);
 		this.Randomize(false);
@@ -232,29 +250,78 @@ public class TheForestAtmosphere : MonoBehaviour
 				this.FogMinHeight = this.OceanH.position.y;
 			}
 		}
-		if (this.Visibility < this.ForCurrentScaled)
+		if (Application.isPlaying && (CoopPeerStarter.DedicatedHost || !LocalPlayer.AnimControl.endGameCutScene) && !this.overrideVisibility)
 		{
-			this.Visibility += 1f;
+			if (this.Visibility < this.ForCurrentScaled)
+			{
+				this.Visibility += 1f;
+			}
+			else if (this.Visibility > this.ForCurrentScaled)
+			{
+				this.Visibility -= 1f;
+			}
 		}
-		else if (this.Visibility > this.ForCurrentScaled)
+		if (Application.isPlaying && (CoopPeerStarter.DedicatedHost || LocalPlayer.IsInClosedArea || LocalPlayer.AnimControl.exitingACave))
 		{
-			this.Visibility -= 1f;
-		}
-		if (LocalPlayer.IsInClosedArea)
-		{
+			float b = this.CaveAmbientIntensity;
+			float b2 = 0f;
+			float b3 = 0f;
+			Color b4 = Color.black;
+			Color b5 = this.CaveSkyColor;
+			Color b6 = this.CaveEquatorColor;
+			Color b7 = this.CaveGroundColor;
+			Color b8 = this.CaveAddLight1;
+			Vector3 b9 = this.CaveAddLight1Dir;
+			Color b10 = this.CaveAddLight2;
+			Vector3 b11 = this.CaveAddLight2Dir;
+			if (Application.isPlaying && !CoopPeerStarter.DedicatedHost && LocalPlayer.AnimControl.exitingACave)
+			{
+				if (this.isDaytime())
+				{
+					b = Mathf.Lerp(this.SunsetAmbientIntensity, this.DayAmbientIntensity, this.LdotUp);
+					b2 = Mathf.Lerp(this.SunsetSunIntensity, this.DaySunIntensity, this.LdotUp);
+					b3 = Mathf.Lerp(this.SunsetSunBounceIntensity, this.DaySunBounceIntensity, this.LdotUp);
+					b4 = Color.Lerp(this.SunsetBounceColor * this.SunsetSunBounceIntensity, this.DayBounceColor * this.DaySunBounceIntensity, this.LdotUp);
+					b5 = Color.Lerp(this.SunsetColor * this.SunsetAmbientIntensity, this.DayColor * this.DayAmbientIntensity, this.LdotUp);
+					b6 = Color.Lerp(this.SunsetColorEq * this.SunsetAmbientIntensity, this.DayColorEq * this.DayAmbientIntensity, this.LdotUp);
+					b7 = Color.Lerp(this.SunsetColorGround * this.SunsetAmbientIntensity, this.DayColorGround * this.DayAmbientIntensity, this.LdotUp);
+					b8 = Color.Lerp(this.SunsetAddLight1, this.NoonAddLight1, this.LdotUp);
+					b9 = Vector3.Lerp(this.SunsetAddLight1Dir, this.NoonAddLight1Dir, this.LdotUp);
+					b10 = Color.Lerp(this.SunsetAddLight2, this.NoonAddLight2, this.LdotUp);
+					b11 = Vector3.Lerp(this.SunsetAddLight2Dir, this.NoonAddLight2Dir, this.LdotUp);
+				}
+				else
+				{
+					b = Mathf.Lerp(this.SunsetAmbientIntensity, this.NightAmbientIntensity, this.LdotDown);
+					b2 = Mathf.Lerp(this.SunsetSunIntensity, this.NightSunIntensity, this.LdotDown);
+					b3 = Mathf.Lerp(this.SunsetSunBounceIntensity, this.NightSunBounceIntensity, this.LdotDown);
+					b4 = Color.Lerp(this.SunsetBounceColor * this.SunsetSunBounceIntensity, this.NightBounceColor * this.NightSunBounceIntensity, this.LdotDown);
+					b5 = Color.Lerp(this.SunsetColor * this.SunsetAmbientIntensity, this.NightColor * this.NightAmbientIntensity, this.LdotDown);
+					b6 = Color.Lerp(this.SunsetColorEq * this.SunsetAmbientIntensity, this.NightColorEq * this.NightAmbientIntensity, this.LdotDown);
+					b7 = Color.Lerp(this.SunsetColorGround * this.SunsetAmbientIntensity, this.NightColorGround * this.NightAmbientIntensity, this.LdotDown);
+					b8 = Color.Lerp(this.SunsetAddLight1, this.NightAddLight1, this.LdotDown);
+					b9 = Vector3.Lerp(this.SunsetAddLight1Dir, this.NightAddLight1Dir, this.LdotDown);
+					b10 = Color.Lerp(this.SunsetAddLight2, this.NightAddLight2, this.LdotDown);
+					b11 = Vector3.Lerp(this.SunsetAddLight2Dir, this.NightAddLight2Dir, this.LdotDown);
+				}
+			}
 			TheForestAtmosphere.ReflectionAmount = 0.2f;
-			float num = 0.3f;
-			this.temp_AmbientIntensity = Mathf.Lerp(this.SunsetAmbientIntensity, this.CaveAmbientIntensity, Time.deltaTime * num);
-			this.temp_SunIntensity = Mathf.Lerp(this.temp_SunIntensity, 0f, Time.deltaTime * num);
-			this.temp_SunBounceIntensity = Mathf.Lerp(this.temp_SunBounceIntensity, 0f, Time.deltaTime * num);
-			this.temp_BounceColor = Color.Lerp(this.temp_BounceColor, Color.black, Time.deltaTime * num);
-			this.temp_SkyColor = Color.Lerp(this.temp_SkyColor, this.CaveSkyColor, Time.deltaTime * num);
-			this.temp_EquatorColor = Color.Lerp(this.temp_EquatorColor, this.CaveEquatorColor, Time.deltaTime * num);
-			this.temp_GroundColor = Color.Lerp(this.temp_GroundColor, this.CaveGroundColor, Time.deltaTime * num);
-			this.temp_AddLight1 = Color.Lerp(this.SunsetAddLight1, this.CaveAddLight1, Time.deltaTime * num);
-			this.temp_AddLight1Dir = Vector3.Lerp(this.SunsetAddLight1Dir, this.CaveAddLight1Dir, Time.deltaTime * num);
-			this.temp_AddLight2 = Color.Lerp(this.SunsetAddLight2, this.CaveAddLight2, Time.deltaTime * num);
-			this.temp_AddLight2Dir = Vector3.Lerp(this.SunsetAddLight2Dir, this.CaveAddLight2Dir, Time.deltaTime * num);
+			float num = 0.5f;
+			if (Application.isPlaying && !CoopPeerStarter.DedicatedHost && LocalPlayer.AnimControl.exitingACave)
+			{
+				num = 1f;
+			}
+			this.temp_AmbientIntensity = Mathf.Lerp(this.SunsetAmbientIntensity, b, Time.deltaTime * num);
+			this.temp_SunIntensity = Mathf.Lerp(this.temp_SunIntensity, b2, Time.deltaTime * num);
+			this.temp_SunBounceIntensity = Mathf.Lerp(this.temp_SunBounceIntensity, b3, Time.deltaTime * num);
+			this.temp_BounceColor = Color.Lerp(this.temp_BounceColor, b4, Time.deltaTime * num);
+			this.temp_SkyColor = Color.Lerp(this.temp_SkyColor, b5, Time.deltaTime * num);
+			this.temp_EquatorColor = Color.Lerp(this.temp_EquatorColor, b6, Time.deltaTime * num);
+			this.temp_GroundColor = Color.Lerp(this.temp_GroundColor, b7, Time.deltaTime * num);
+			this.temp_AddLight1 = Color.Lerp(this.SunsetAddLight1, b8, Time.deltaTime * num);
+			this.temp_AddLight1Dir = Vector3.Lerp(this.SunsetAddLight1Dir, b9, Time.deltaTime * num);
+			this.temp_AddLight2 = Color.Lerp(this.SunsetAddLight2, b10, Time.deltaTime * num);
+			this.temp_AddLight2Dir = Vector3.Lerp(this.SunsetAddLight2Dir, b11, Time.deltaTime * num);
 			this.SetSHAmbientLighting();
 		}
 		if (this.Sun == null)
@@ -287,7 +354,7 @@ public class TheForestAtmosphere : MonoBehaviour
 			{
 				Sunshine.Instance.ScatterColor = this.FogColor;
 			}
-			if (LocalPlayer.IsInClosedArea)
+			if (LocalPlayer.IsInClosedArea || this.overrideVisibility)
 			{
 				this.FogColor = new Color(0f, 0f, 0f, 0f);
 			}
@@ -425,19 +492,19 @@ public class TheForestAtmosphere : MonoBehaviour
 			{
 			case TheForestQualitySettings.ShadowLevels.High:
 				num11 = 180;
-				goto IL_BF0;
+				goto IL_FA9;
 			case TheForestQualitySettings.ShadowLevels.Medium:
 				num11 = 140;
-				goto IL_BF0;
+				goto IL_FA9;
 			case TheForestQualitySettings.ShadowLevels.Low:
 				num11 = 130;
-				goto IL_BF0;
+				goto IL_FA9;
 			case TheForestQualitySettings.ShadowLevels.Fastest:
 				num11 = 100;
-				goto IL_BF0;
+				goto IL_FA9;
 			}
 			num11 = 60;
-			IL_BF0:
+			IL_FA9:
 			if (this.LowerShadowsAtExtremeLightAngles)
 			{
 				QualitySettings.shadowDistance = Mathf.Lerp(1f, 0.35f, (vector.magnitude - 0.9f) * 10f) * (float)num11;
@@ -466,18 +533,21 @@ public class TheForestAtmosphere : MonoBehaviour
 					this.Sun.intensity *= Mathf.Lerp(1f, 0.625f, Scene.WeatherSystem.CloudCovergage);
 				}
 				this.atmosphereGain = 1f;
-				this.temp_AmbientIntensity = Mathf.Lerp(this.SunsetAmbientIntensity, this.DayAmbientIntensity, this.LdotUp);
-				this.temp_SunIntensity = Mathf.Lerp(this.SunsetSunIntensity, this.DaySunIntensity, this.LdotUp);
-				this.temp_SunBounceIntensity = Mathf.Lerp(this.SunsetSunBounceIntensity, this.DaySunBounceIntensity, this.LdotUp);
-				this.temp_BounceColor = Color.Lerp(this.SunsetBounceColor * this.SunsetSunBounceIntensity, this.DayBounceColor * this.DaySunBounceIntensity, this.LdotUp);
-				this.temp_SkyColor = Color.Lerp(this.SunsetColor * this.SunsetAmbientIntensity, this.DayColor * this.DayAmbientIntensity, this.LdotUp);
-				this.temp_EquatorColor = Color.Lerp(this.SunsetColorEq * this.SunsetAmbientIntensity, this.DayColorEq * this.DayAmbientIntensity, this.LdotUp);
-				this.temp_GroundColor = Color.Lerp(this.SunsetColorGround * this.SunsetAmbientIntensity, this.DayColorGround * this.DayAmbientIntensity, this.LdotUp);
-				this.temp_AddLight1 = Color.Lerp(this.SunsetAddLight1, this.NoonAddLight1, this.LdotUp);
-				this.temp_AddLight1Dir = Vector3.Lerp(this.SunsetAddLight1Dir, this.NoonAddLight1Dir, this.LdotUp);
-				this.temp_AddLight2 = Color.Lerp(this.SunsetAddLight2, this.NoonAddLight2, this.LdotUp);
-				this.temp_AddLight2Dir = Vector3.Lerp(this.SunsetAddLight2Dir, this.NoonAddLight2Dir, this.LdotUp);
-				this.SetSHAmbientLighting();
+				if (Application.isPlaying && !CoopPeerStarter.DedicatedHost && !LocalPlayer.AnimControl.exitingACave)
+				{
+					this.temp_AmbientIntensity = Mathf.Lerp(this.SunsetAmbientIntensity, this.DayAmbientIntensity, this.LdotUp);
+					this.temp_SunIntensity = Mathf.Lerp(this.SunsetSunIntensity, this.DaySunIntensity, this.LdotUp);
+					this.temp_SunBounceIntensity = Mathf.Lerp(this.SunsetSunBounceIntensity, this.DaySunBounceIntensity, this.LdotUp);
+					this.temp_BounceColor = Color.Lerp(this.SunsetBounceColor * this.SunsetSunBounceIntensity, this.DayBounceColor * this.DaySunBounceIntensity, this.LdotUp);
+					this.temp_SkyColor = Color.Lerp(this.SunsetColor * this.SunsetAmbientIntensity, this.DayColor * this.DayAmbientIntensity, this.LdotUp);
+					this.temp_EquatorColor = Color.Lerp(this.SunsetColorEq * this.SunsetAmbientIntensity, this.DayColorEq * this.DayAmbientIntensity, this.LdotUp);
+					this.temp_GroundColor = Color.Lerp(this.SunsetColorGround * this.SunsetAmbientIntensity, this.DayColorGround * this.DayAmbientIntensity, this.LdotUp);
+					this.temp_AddLight1 = Color.Lerp(this.SunsetAddLight1, this.NoonAddLight1, this.LdotUp);
+					this.temp_AddLight1Dir = Vector3.Lerp(this.SunsetAddLight1Dir, this.NoonAddLight1Dir, this.LdotUp);
+					this.temp_AddLight2 = Color.Lerp(this.SunsetAddLight2, this.NoonAddLight2, this.LdotUp);
+					this.temp_AddLight2Dir = Vector3.Lerp(this.SunsetAddLight2Dir, this.NoonAddLight2Dir, this.LdotUp);
+					this.SetSHAmbientLighting();
+				}
 			}
 			else
 			{
@@ -488,6 +558,8 @@ public class TheForestAtmosphere : MonoBehaviour
 			{
 				this.InscatteringMaterial.SetVector("L", this.L);
 				Sunshine.Instance.PostScatterMaterial.SetVector("InscatteringColor", this.Sun.color * this.Sun.intensity);
+				Shader.SetGlobalVector("_LightVecL", this.L);
+				Shader.SetGlobalVector("_InscatteringColor", this.Sun.color * this.Sun.intensity);
 			}
 		}
 		else
@@ -499,25 +571,28 @@ public class TheForestAtmosphere : MonoBehaviour
 				this.Sun.enabled = false;
 			}
 			Sunshine.Instance.SunLight = this.Moon;
-			if (LocalPlayer.IsInOutsideWorld)
+			if (!CoopPeerStarter.DedicatedHost && LocalPlayer.IsInOutsideWorld)
 			{
 				this.Moon.intensity = this.MoonLightIntensity * (1f - Mathf.Pow(1f - this.LdotDown, 2f));
 				this.atmosphereGain = Mathf.Lerp(1f, 0.01f, Mathf.Clamp01(15f * this.LdotDown));
 				TheForestAtmosphere.ReflectionAmount = this.Moon.intensity / 3f;
 				TheForestAtmosphere.Ambient = Color.Lerp(this.SunsetColor, this.NightColor, this.LdotDown);
 				TheForestAtmosphere.AmbientSheen = Color.Lerp(this.SunsetColor, this.NightColor, this.LdotDown);
-				this.temp_AmbientIntensity = Mathf.Lerp(this.SunsetAmbientIntensity, this.NightAmbientIntensity, this.LdotDown);
-				this.temp_SunIntensity = Mathf.Lerp(this.SunsetSunIntensity, this.NightSunIntensity, this.LdotDown);
-				this.temp_SunBounceIntensity = Mathf.Lerp(this.SunsetSunBounceIntensity, this.NightSunBounceIntensity, this.LdotDown);
-				this.temp_BounceColor = Color.Lerp(this.SunsetBounceColor * this.SunsetSunBounceIntensity, this.NightBounceColor * this.NightSunBounceIntensity, this.LdotDown);
-				this.temp_SkyColor = Color.Lerp(this.SunsetColor * this.SunsetAmbientIntensity, this.NightColor * this.NightAmbientIntensity, this.LdotDown);
-				this.temp_EquatorColor = Color.Lerp(this.SunsetColorEq * this.SunsetAmbientIntensity, this.NightColorEq * this.NightAmbientIntensity, this.LdotDown);
-				this.temp_GroundColor = Color.Lerp(this.SunsetColorGround * this.SunsetAmbientIntensity, this.NightColorGround * this.NightAmbientIntensity, this.LdotDown);
-				this.temp_AddLight1 = Color.Lerp(this.SunsetAddLight1, this.NightAddLight1, this.LdotDown);
-				this.temp_AddLight1Dir = Vector3.Lerp(this.SunsetAddLight1Dir, this.NightAddLight1Dir, this.LdotDown);
-				this.temp_AddLight2 = Color.Lerp(this.SunsetAddLight2, this.NightAddLight2, this.LdotDown);
-				this.temp_AddLight2Dir = Vector3.Lerp(this.SunsetAddLight2Dir, this.NightAddLight2Dir, this.LdotDown);
-				this.SetSHAmbientLighting();
+				if (Application.isPlaying && !LocalPlayer.AnimControl.exitingACave)
+				{
+					this.temp_AmbientIntensity = Mathf.Lerp(this.SunsetAmbientIntensity, this.NightAmbientIntensity, this.LdotDown);
+					this.temp_SunIntensity = Mathf.Lerp(this.SunsetSunIntensity, this.NightSunIntensity, this.LdotDown);
+					this.temp_SunBounceIntensity = Mathf.Lerp(this.SunsetSunBounceIntensity, this.NightSunBounceIntensity, this.LdotDown);
+					this.temp_BounceColor = Color.Lerp(this.SunsetBounceColor * this.SunsetSunBounceIntensity, this.NightBounceColor * this.NightSunBounceIntensity, this.LdotDown);
+					this.temp_SkyColor = Color.Lerp(this.SunsetColor * this.SunsetAmbientIntensity, this.NightColor * this.NightAmbientIntensity, this.LdotDown);
+					this.temp_EquatorColor = Color.Lerp(this.SunsetColorEq * this.SunsetAmbientIntensity, this.NightColorEq * this.NightAmbientIntensity, this.LdotDown);
+					this.temp_GroundColor = Color.Lerp(this.SunsetColorGround * this.SunsetAmbientIntensity, this.NightColorGround * this.NightAmbientIntensity, this.LdotDown);
+					this.temp_AddLight1 = Color.Lerp(this.SunsetAddLight1, this.NightAddLight1, this.LdotDown);
+					this.temp_AddLight1Dir = Vector3.Lerp(this.SunsetAddLight1Dir, this.NightAddLight1Dir, this.LdotDown);
+					this.temp_AddLight2 = Color.Lerp(this.SunsetAddLight2, this.NightAddLight2, this.LdotDown);
+					this.temp_AddLight2Dir = Vector3.Lerp(this.SunsetAddLight2Dir, this.NightAddLight2Dir, this.LdotDown);
+					this.SetSHAmbientLighting();
+				}
 			}
 			else
 			{
@@ -527,6 +602,8 @@ public class TheForestAtmosphere : MonoBehaviour
 			{
 				this.InscatteringMaterial.SetVector("L", -this.L);
 				Sunshine.Instance.PostScatterMaterial.SetVector("InscatteringColor", this.Moon.color * this.Moon.intensity / 2f);
+				Shader.SetGlobalVector("_LightVecL", -this.L);
+				Shader.SetGlobalVector("_InscatteringColor", this.Moon.color * this.Moon.intensity / 2f);
 			}
 		}
 		Shader.SetGlobalColor("_FogColor", this.CurrentFogColor);
@@ -630,7 +707,7 @@ public class TheForestAtmosphere : MonoBehaviour
 	}
 
 	
-	private void __ChangeFogAmount__Original()
+	private void ChangeFogAmount()
 	{
 		if (LocalPlayer.IsInEndgame)
 		{
@@ -730,174 +807,6 @@ public class TheForestAtmosphere : MonoBehaviour
 			this.showDebug = !this.showDebug;
 		}
 	}
-
-	
-	[Priority(200)]
-	private void Update()
-	{
-		try
-		{
-			this.__Update__Original();
-			Shader.SetGlobalColor("_AmbientSkyColor", RenderSettings.ambientSkyColor.linear * RenderSettings.ambientIntensity);
-			Shader.SetGlobalFloat("CaveAmount", UCheatmenu.CaveLight);
-			Shader.SetGlobalFloat("_ForestCaveSetting", Mathf.Lerp(1f, -1f, UCheatmenu.CaveLight));
-			if (UCheatmenu.TimeToggle)
-			{
-				TheForestAtmosphere.Instance.RotationSpeed = 1E-05f;
-			}
-			else
-			{
-				TheForestAtmosphere.Instance.RotationSpeed = 0.13f;
-			}
-			if (UCheatmenu.NightLightOriginal < this.MoonBrightness)
-			{
-				UCheatmenu.NightLightOriginal += 0.01f * Time.deltaTime;
-			}
-			else if (UCheatmenu.NightLightOriginal > this.MoonBrightness)
-			{
-				UCheatmenu.NightLightOriginal -= 0.01f * Time.deltaTime;
-			}
-			this.MoonLightIntensity = UCheatmenu.NightLight * UCheatmenu.NightLightOriginal;
-			if (LocalPlayer.IsInCaves)
-			{
-				TheForestAtmosphere.ReflectionAmount = 0.2f;
-				this.temp_AmbientIntensity = Mathf.Lerp(this.SunsetAmbientIntensity, UCheatmenu.CaveLight, Time.deltaTime);
-				this.temp_SunIntensity = Mathf.Lerp(this.temp_SunIntensity, 0f, Time.deltaTime);
-				this.temp_SunBounceIntensity = Mathf.Lerp(this.temp_SunBounceIntensity, 0f, Time.deltaTime);
-				this.temp_BounceColor = Color.Lerp(this.temp_BounceColor, Color.black, Time.deltaTime);
-				this.temp_SkyColor = Color.Lerp(this.temp_SkyColor, this.CaveSkyColor, Time.deltaTime);
-				this.temp_EquatorColor = new Color(UCheatmenu.CaveLight, UCheatmenu.CaveLight, UCheatmenu.CaveLight);
-				this.temp_GroundColor = new Color(UCheatmenu.CaveLight, UCheatmenu.CaveLight, UCheatmenu.CaveLight);
-				this.temp_AddLight1 = Color.Lerp(this.SunsetAddLight1, this.CaveAddLight1, Time.deltaTime);
-				this.temp_AddLight1Dir = Vector3.Lerp(this.SunsetAddLight1Dir, this.CaveAddLight1Dir, Time.deltaTime);
-				this.temp_AddLight2 = Color.Lerp(this.SunsetAddLight2, this.CaveAddLight2, Time.deltaTime);
-				this.temp_AddLight2Dir = Vector3.Lerp(this.SunsetAddLight2Dir, this.CaveAddLight2Dir, Time.deltaTime);
-				this.SetSHAmbientLighting();
-			}
-			if (!UCheatmenu.Fog)
-			{
-				this.FogColor = new Color(0f, 0f, 0f, 0f);
-				if (Sunshine.Instance.Ready)
-				{
-					Sunshine.Instance.ScatterColor = this.FogColor;
-				}
-				if (LocalPlayer.IsInClosedArea)
-				{
-					this.FogColor = new Color(0f, 0f, 0f, 0f);
-				}
-				this.CurrentFogColor = this.FogColor;
-				Shader.SetGlobalColor("_FogColor", this.FogColor);
-				this.ChangeFogAmount();
-				return;
-			}
-			this.FogColor = Color.Lerp(Color.Lerp(new Color(0f, 0f, 0f, 0f), this.NoonFogColor, Mathf.Clamp01(this.LdotUp)), new Color(0f, 0f, 0f, 0f), Mathf.Clamp01(this.LdotDown));
-			if (Sunshine.Instance.Ready)
-			{
-				Sunshine.Instance.ScatterColor = this.FogColor;
-			}
-			if (LocalPlayer.IsInClosedArea)
-			{
-				this.FogColor = new Color(0f, 0f, 0f, 0f);
-			}
-			this.CurrentFogColor = this.FogColor;
-			Shader.SetGlobalColor("_FogColor", this.FogColor);
-			this.ChangeFogAmount();
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__Update__Original();
-		}
-	}
-
-	
-	[Priority(200)]
-	private void ChangeFogAmount()
-	{
-		try
-		{
-			if (!UCheatmenu.Fog)
-			{
-				this.FogCurrent = 300000f;
-				TheForestAtmosphere.Instance.FogCurrent = 300000f;
-				return;
-			}
-			if (LocalPlayer.IsInEndgame)
-			{
-				this.FogCurrent = 900f;
-				TheForestAtmosphere.Instance.FogCurrent = 900f;
-				return;
-			}
-			if (LocalPlayer.IsInCaves)
-			{
-				this.FogCurrent = 3000f;
-				TheForestAtmosphere.Instance.FogCurrent = 3000f;
-				return;
-			}
-			float fogCurrent = (float)UnityEngine.Random.Range(700, 2000);
-			this.FogCurrent = fogCurrent;
-			TheForestAtmosphere.Instance.FogCurrent = fogCurrent;
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__ChangeFogAmount__Original();
-		}
-	}
-
-	
-	private const float n = 1.0003f;
-
-	
-	private const float pn = 0.035f;
-
-	
-	private const float ONE_MINUTE = 60f;
-
-	
-	private const float WIND_BASE_MINIMUM = 0f;
-
-	
-	private const float WIND_BASE_MAXIMUM = 0.4f;
-
-	
-	private const float WIND_BASE_RAMP_TIME_MINIMUM = 60f;
-
-	
-	private const float WIND_BASE_RAMP_TIME_MAXIMUM = 120f;
-
-	
-	private const float WIND_BASE_HOLD_TIME_MINIMUM = 60f;
-
-	
-	private const float WIND_BASE_HOLD_TIME_MAXIMUM = 600f;
-
-	
-	private const float WIND_GUST_MINIMUM = 0.2f;
-
-	
-	private const float WIND_GUST_MAXIMUM = 0.7f;
-
-	
-	private const float WIND_GUST_RAMP_TIME_MINIMUM = 5f;
-
-	
-	private const float WIND_GUST_RAMP_TIME_MAXIMUM = 30f;
-
-	
-	private const float WIND_GUST_INTERVAL_MINIMUM = 15f;
-
-	
-	private const float WIND_GUST_INTERVAL_MAXIMUM = 120f;
-
-	
-	private const float WIND_HEIGHT_MIN = 150f;
-
-	
-	private const float WIND_HEIGHT_MAX = 300f;
-
-	
-	private const float WIND_MAXHEIGHT_RATIO = 2.5f;
 
 	
 	public static TheForestAtmosphere Instance;
@@ -1367,6 +1276,15 @@ public class TheForestAtmosphere : MonoBehaviour
 	private float sunE;
 
 	
+	private const float n = 1.0003f;
+
+	
+	private const float pn = 0.035f;
+
+	
+	public bool overrideVisibility;
+
+	
 	private Clock clock;
 
 	
@@ -1428,6 +1346,54 @@ public class TheForestAtmosphere : MonoBehaviour
 
 	
 	private float windGustIntervalTimer;
+
+	
+	private const float ONE_MINUTE = 60f;
+
+	
+	private const float WIND_BASE_MINIMUM = 0f;
+
+	
+	private const float WIND_BASE_MAXIMUM = 0.4f;
+
+	
+	private const float WIND_BASE_RAMP_TIME_MINIMUM = 60f;
+
+	
+	private const float WIND_BASE_RAMP_TIME_MAXIMUM = 120f;
+
+	
+	private const float WIND_BASE_HOLD_TIME_MINIMUM = 60f;
+
+	
+	private const float WIND_BASE_HOLD_TIME_MAXIMUM = 600f;
+
+	
+	private const float WIND_GUST_MINIMUM = 0.2f;
+
+	
+	private const float WIND_GUST_MAXIMUM = 0.7f;
+
+	
+	private const float WIND_GUST_RAMP_TIME_MINIMUM = 5f;
+
+	
+	private const float WIND_GUST_RAMP_TIME_MAXIMUM = 30f;
+
+	
+	private const float WIND_GUST_INTERVAL_MINIMUM = 15f;
+
+	
+	private const float WIND_GUST_INTERVAL_MAXIMUM = 120f;
+
+	
+	private const float WIND_HEIGHT_MIN = 150f;
+
+	
+	private const float WIND_HEIGHT_MAX = 300f;
+
+	
+	private const float WIND_MAXHEIGHT_RATIO = 2.5f;
 
 	
 	private bool showDebug;

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Rotates a Game Object around each Axis. Use a Vector3 Variable and/or XYZ components. To leave any axis unchanged, set variable to 'None'.")]
 	[ActionCategory(ActionCategory.Transform)]
+	[Tooltip("Rotates a Game Object around each Axis. Use a Vector3 Variable and/or XYZ components. To leave any axis unchanged, set variable to 'None'.")]
 	public class Rotate : FsmStateAction
 	{
 		
@@ -115,8 +115,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The game object to rotate.")]
 		[RequiredField]
+		[Tooltip("The game object to rotate.")]
 		public FsmOwnerDefault gameObject;
 
 		

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Adds supplied Euler angles in degrees to a GameObject's rotation over time.")]
 	[ActionCategory("iTween")]
+	[Tooltip("Adds supplied Euler angles in degrees to a GameObject's rotation over time.")]
 	public class iTweenRotateAdd : iTweenFsmAction
 	{
 		

@@ -3,9 +3,9 @@ using UniLinq;
 using UnityEngine;
 
 
+[DontStore]
 [AddComponentMenu("Storage/Empty Object Identifier")]
 [ExecuteInEditMode]
-[DontStore]
 public class EmptyObjectIdentifier : StoreInformation
 {
 	

@@ -104,13 +104,13 @@ namespace TheForest.Player
 			}
 			for (int i = this._clues.Count - 1; i >= 0; i--)
 			{
-				StoryCluesFolder.ClueItem clue = this._clues[i];
-				if (LocalPlayer.Inventory.Owns(clue._itemId, true))
+				StoryCluesFolder.ClueItem clueItem = this._clues[i];
+				if (LocalPlayer.Inventory.Owns(clueItem._itemId, true))
 				{
-					this._clues.Remove(clue);
-					for (int r = 0; r < clue._renderers.Length; r++)
+					this._clues.Remove(clueItem);
+					for (int j = 0; j < clueItem._renderers.Length; j++)
 					{
-						clue._renderers[r].SetActive(true);
+						clueItem._renderers[j].SetActive(true);
 					}
 				}
 			}

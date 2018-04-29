@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Check if this machine has a public IP address.")]
 	[ActionCategory(ActionCategory.Network)]
+	[Tooltip("Check if this machine has a public IP address.")]
 	public class NetworkHavePublicIpAddress : FsmStateAction
 	{
 		
@@ -33,8 +33,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("True if this machine has a public IP address")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("True if this machine has a public IP address")]
 		public FsmBool havePublicIpAddress;
 
 		

@@ -473,7 +473,7 @@ public class creepyAnimEvents : MonoBehaviour
 		{
 			return;
 		}
-		GameObject item = UnityEngine.Object.Instantiate(this.babySpawnPrefab, this.leftBirthTr.position, Quaternion.identity) as GameObject;
+		GameObject item = UnityEngine.Object.Instantiate<GameObject>(this.babySpawnPrefab, this.leftBirthTr.position, Quaternion.identity);
 		if (this.girlAi)
 		{
 			this.girlAi.spawnedBabies.Add(item);
@@ -487,7 +487,7 @@ public class creepyAnimEvents : MonoBehaviour
 		{
 			return;
 		}
-		GameObject item = UnityEngine.Object.Instantiate(this.babySpawnPrefab, this.rightBirthTr.position, Quaternion.identity) as GameObject;
+		GameObject item = UnityEngine.Object.Instantiate<GameObject>(this.babySpawnPrefab, this.rightBirthTr.position, Quaternion.identity);
 		if (this.girlAi)
 		{
 			this.girlAi.spawnedBabies.Add(item);

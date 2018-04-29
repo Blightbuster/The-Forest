@@ -40,6 +40,12 @@ namespace TheForest.TaskSystem
 		}
 
 		
+		public virtual void Clone(ACondition other)
+		{
+			this._done = other._done;
+		}
+
+		
 		public bool _allowInMp = true;
 
 		

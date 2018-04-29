@@ -1,13 +1,11 @@
 ﻿using System;
-using ModAPI;
-using UltimateCheatmenu;
 using UnityEngine;
 
 namespace Ceto
 {
 	
-	[RequireComponent(typeof(Camera))]
 	[AddComponentMenu("Ceto/Camera/UnderWaterPostEffect")]
+	[RequireComponent(typeof(Camera))]
 	public class UnderWaterPostEffect : MonoBehaviour
 	{
 		
@@ -19,7 +17,7 @@ namespace Ceto
 		}
 
 		
-		private void __LateUpdate__Original()
+		private void LateUpdate()
 		{
 			Camera component = base.GetComponent<Camera>();
 			this.m_underWaterIsVisible = this.UnderWaterIsVisible(component);
@@ -92,13 +90,13 @@ namespace Ceto
 			identity.SetRow(2, vector3);
 			identity.SetRow(3, vector4);
 			this.m_material.SetMatrix("_FrustumCorners", identity);
-			Color color = Color.white;
+			Color value = Color.white;
 			if (this.attenuateBySun)
 			{
-				color = Ocean.Instance.SunColor() * Mathf.Max(0f, Vector3.Dot(Vector3.up, Ocean.Instance.SunDir()));
+				value = Ocean.Instance.SunColor() * Mathf.Max(0f, Vector3.Dot(Vector3.up, Ocean.Instance.SunDir()));
 			}
-			this.m_material.SetColor("_MultiplyCol", color);
-			RenderTexture temporary = RenderTexture.GetTemporary(source.width, source.height, 0);
+			this.m_material.SetColor("_MultiplyCol", value);
+			RenderTexture temporary = RenderTexture.GetTemporary(source.width, source.height, 0, RenderTextureFormat.Default);
 			this.CustomGraphicsBlit(source, temporary, this.m_material, 0);
 			this.m_imageBlur.BlurIterations = this.blurIterations;
 			this.m_imageBlur.BlurMode = this.blurMode;
@@ -165,26 +163,6 @@ namespace Ceto
 				}
 			}
 			return false;
-		}
-
-		
-		private void LateUpdate()
-		{
-			try
-			{
-				this.__LateUpdate__Original();
-				if (UCheatmenu.NoUnderwaterBlur)
-				{
-					this.blurIterations = 0;
-					return;
-				}
-				this.blurIterations = 3;
-			}
-			catch (Exception ex)
-			{
-				Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-				this.__LateUpdate__Original();
-			}
 		}
 
 		

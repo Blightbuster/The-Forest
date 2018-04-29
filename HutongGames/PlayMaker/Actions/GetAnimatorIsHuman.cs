@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Returns true if the current rig is humanoid, false if it is generic. Can also sends events")]
 	[ActionCategory("Animator")]
+	[Tooltip("Returns true if the current rig is humanoid, false if it is generic. Can also sends events")]
 	public class GetAnimatorIsHuman : FsmStateAction
 	{
 		
@@ -56,15 +56,15 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The Target. An Animator component is required")]
-		[CheckForComponent(typeof(Animator))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animator))]
+		[Tooltip("The Target. An Animator component is required")]
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("True if the current rig is humanoid, False if it is generic")]
-		[UIHint(UIHint.Variable)]
 		[ActionSection("Results")]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("True if the current rig is humanoid, False if it is generic")]
 		public FsmBool isHuman;
 
 		

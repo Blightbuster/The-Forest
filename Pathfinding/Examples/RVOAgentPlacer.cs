@@ -14,21 +14,21 @@ namespace Pathfinding.Examples
 			yield return null;
 			for (int i = 0; i < this.agents; i++)
 			{
-				float angle = (float)i / (float)this.agents * 3.14159274f * 2f;
-				Vector3 pos = new Vector3((float)Math.Cos((double)angle), 0f, (float)Math.Sin((double)angle)) * this.ringSize;
-				Vector3 antipodal = -pos + this.goalOffset;
-				GameObject go = UnityEngine.Object.Instantiate(this.prefab, Vector3.zero, Quaternion.Euler(0f, angle + 180f, 0f)) as GameObject;
-				RVOExampleAgent ag = go.GetComponent<RVOExampleAgent>();
-				if (ag == null)
+				float num = (float)i / (float)this.agents * 3.14159274f * 2f;
+				Vector3 vector = new Vector3((float)Math.Cos((double)num), 0f, (float)Math.Sin((double)num)) * this.ringSize;
+				Vector3 target = -vector + this.goalOffset;
+				GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.prefab, Vector3.zero, Quaternion.Euler(0f, num + 180f, 0f));
+				RVOExampleAgent component = gameObject.GetComponent<RVOExampleAgent>();
+				if (component == null)
 				{
 					Debug.LogError("Prefab does not have an RVOExampleAgent component attached");
 					yield break;
 				}
-				go.transform.parent = base.transform;
-				go.transform.position = pos;
-				ag.repathRate = this.repathRate;
-				ag.SetTarget(antipodal);
-				ag.SetColor(this.GetColor(angle));
+				gameObject.transform.parent = base.transform;
+				gameObject.transform.position = vector;
+				component.repathRate = this.repathRate;
+				component.SetTarget(target);
+				component.SetColor(this.GetColor(num));
 			}
 			yield break;
 		}
@@ -38,9 +38,6 @@ namespace Pathfinding.Examples
 		{
 			return AstarMath.HSVToRGB(angle * 57.2957764f, 0.8f, 0.6f);
 		}
-
-		
-		private const float rad2Deg = 57.2957764f;
 
 		
 		public int agents = 100;
@@ -59,5 +56,8 @@ namespace Pathfinding.Examples
 
 		
 		public float repathRate = 1f;
+
+		
+		private const float rad2Deg = 57.2957764f;
 	}
 }

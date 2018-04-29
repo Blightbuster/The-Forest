@@ -23,6 +23,12 @@ namespace TheForest.UI
 		}
 
 		
+		public void SetText(string text)
+		{
+			this._label.text = text;
+		}
+
+		
 		
 		public virtual string Text
 		{

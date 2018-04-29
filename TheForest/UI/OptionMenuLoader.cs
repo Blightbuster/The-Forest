@@ -14,12 +14,29 @@ namespace TheForest.UI
 			transform.localPosition = Vector3.zero;
 			transform.localScale = Vector3.one;
 			OptionMenuTweens component = transform.GetComponent<OptionMenuTweens>();
-			component._backwardTweener.tweenTarget = base.gameObject;
-			component._forwardTweener.tweenTarget = this._mainMenuGO;
-			if (component._controlSettingsBackwardTweener)
+			for (int i = 0; i < component._backwardTweener.Length; i++)
 			{
-				component._controlSettingsBackwardTweener.tweenTarget = base.gameObject;
-				component._controlSettingsForwardTweener.tweenTarget = this._controlSettingsGO;
+				if (component._backwardTweener[i] != null)
+				{
+					component._backwardTweener[i].tweenTarget = base.gameObject;
+				}
+			}
+			for (int j = 0; j < component._forwardTweener.Length; j++)
+			{
+				if (component._forwardTweener[j] != null)
+				{
+					component._forwardTweener[j].tweenTarget = this._mainMenuGO;
+				}
+			}
+			if (component._centerOnScreen)
+			{
+				UIRoot componentInParent = base.GetComponentInParent<UIRoot>();
+				component.transform.position = componentInParent.transform.position;
+				TweenTransform component2 = base.GetComponent<TweenTransform>();
+				if (component2)
+				{
+					component.transform.position -= component2.to.position - component2.from.position;
+				}
 			}
 		}
 

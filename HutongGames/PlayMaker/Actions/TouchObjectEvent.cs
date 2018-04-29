@@ -32,7 +32,7 @@ namespace HutongGames.PlayMaker.Actions
 		{
 			if (Camera.main == null)
 			{
-				this.LogError("No MainCamera defined!");
+				base.LogError("No MainCamera defined!");
 				base.Finish();
 				return;
 			}
@@ -81,14 +81,14 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
+		[RequiredField]
 		[CheckForComponent(typeof(Collider))]
 		[Tooltip("The Game Object to detect touches on.")]
-		[RequiredField]
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("How far from the camera is the Game Object pickable.")]
 		[RequiredField]
+		[Tooltip("How far from the camera is the Game Object pickable.")]
 		public FsmFloat pickDistance;
 
 		
@@ -117,14 +117,14 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmEvent touchCanceled;
 
 		
-		[Tooltip("Store the fingerId of the touch.")]
-		[UIHint(UIHint.Variable)]
 		[ActionSection("Store Results")]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the fingerId of the touch.")]
 		public FsmInt storeFingerId;
 
 		
-		[Tooltip("Store the world position where the object was touched.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the world position where the object was touched.")]
 		public FsmVector3 storeHitPoint;
 
 		

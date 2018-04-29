@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the Right n characters from a String.")]
 	[ActionCategory(ActionCategory.String)]
+	[Tooltip("Gets the Right n characters from a String.")]
 	public class GetStringRight : FsmStateAction
 	{
 		
@@ -48,16 +48,16 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmString stringVariable;
 
 		
 		public FsmInt charCount;
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmString storeResult;
 
 		

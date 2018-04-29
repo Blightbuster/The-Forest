@@ -8,8 +8,8 @@ using UnityEngine;
 namespace TheForest.Buildings.Creation
 {
 	
-	[DoNotSerializePublic]
 	[AddComponentMenu("Buildings/Creation/Wall Defensive Chunk Architect")]
+	[DoNotSerializePublic]
 	public class StickFenceChunkArchitect : WallChunkArchitect
 	{
 		
@@ -40,6 +40,18 @@ namespace TheForest.Buildings.Creation
 				this._wallRoot.gameObject.AddComponent<WeaponHitSfxInfo>()._sfx = SfxInfo.SfxTypes.HitWood;
 				this._wallRoot.gameObject.AddComponent<gridObjectBlocker>();
 				this._wallRoot.gameObject.AddComponent<BuildingHealthHitRelay>();
+				BuildingHealth component = base.GetComponent<BuildingHealth>();
+				if (component)
+				{
+					component._renderersRoot = this._wallRoot.gameObject;
+					if (BoltNetwork.isRunning)
+					{
+						component.SetMpRandomDistortColliders(new Collider[]
+						{
+							boxCollider
+						});
+					}
+				}
 			}
 		}
 

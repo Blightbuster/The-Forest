@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the Rotation of a Game Object and stores it in a Vector3 Variable or each Axis in a Float Variable")]
 	[ActionCategory(ActionCategory.Transform)]
+	[Tooltip("Gets the Rotation of a Game Object and stores it in a Vector3 Variable or each Axis in a Float Variable")]
 	public class GetRotation : FsmStateAction
 	{
 		
@@ -74,8 +74,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmQuaternion quaternion;
 
 		
-		[Title("Euler Angles")]
 		[UIHint(UIHint.Variable)]
+		[Title("Euler Angles")]
 		public FsmVector3 vector;
 
 		

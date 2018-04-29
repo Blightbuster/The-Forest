@@ -50,9 +50,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The float variable to test.")]
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("The float variable to test.")]
 		public FsmFloat floatVariable;
 
 		

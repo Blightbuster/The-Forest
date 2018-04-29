@@ -34,9 +34,9 @@ public class ResetTraps : EntityBehaviour<IBuildingState>
 		yield return null;
 		if (this.ResetIcon && !base.GetComponent<DelayedActionSheenBillboard>())
 		{
-			DelayedActionSheenBillboard delayedIcon = base.gameObject.AddComponent<DelayedActionSheenBillboard>();
-			delayedIcon._icon = this.ResetIcon.GetComponent<SheenBillboard>();
-			delayedIcon.enabled = this.ItemCost.gameObject.activeSelf;
+			DelayedActionSheenBillboard delayedActionSheenBillboard = base.gameObject.AddComponent<DelayedActionSheenBillboard>();
+			delayedActionSheenBillboard._icon = this.ResetIcon.GetComponent<SheenBillboard>();
+			delayedActionSheenBillboard.enabled = this.ItemCost.gameObject.activeSelf;
 		}
 		base.enabled = this.ItemCost.gameObject.activeSelf;
 		yield break;
@@ -50,9 +50,9 @@ public class ResetTraps : EntityBehaviour<IBuildingState>
 		{
 			if (this.ResetIcon)
 			{
-				if (this.PickupIcon.activeSelf != (!this.ItemCost.IsCompleted && PlayerPreferences.ShowHud))
+				if (this.PickupIcon.activeSelf)
 				{
-					this.PickupIcon.SetActive(!this.ItemCost.IsCompleted && PlayerPreferences.ShowHud);
+					this.PickupIcon.SetActive(false);
 				}
 				if (this.ResetIcon.activeSelf != (this.ItemCost.IsCompleted && PlayerPreferences.ShowHud))
 				{
@@ -82,7 +82,7 @@ public class ResetTraps : EntityBehaviour<IBuildingState>
 		this.SheenIcon.SetActive(false);
 		if (this.ItemCost)
 		{
-			this.PickupIcon.SetActive(!this.ItemCost.IsCompleted && PlayerPreferences.ShowHud);
+			this.PickupIcon.SetActive(false);
 			this.ResetIcon.SetActive(this.ItemCost.IsCompleted && PlayerPreferences.ShowHud);
 		}
 		else
@@ -119,7 +119,7 @@ public class ResetTraps : EntityBehaviour<IBuildingState>
 		if (BoltNetwork.isRunning)
 		{
 			ResetTrap resetTrap = ResetTrap.Raise(GlobalTargets.OnlyServer);
-			resetTrap.TargetTrap = this.entity;
+			resetTrap.TargetTrap = base.entity;
 			resetTrap.Send();
 		}
 		else
@@ -145,7 +145,7 @@ public class ResetTraps : EntityBehaviour<IBuildingState>
 		}
 		if (!BoltNetwork.isRunning)
 		{
-			GameObject gameObject = (GameObject)UnityEngine.Object.Instantiate(this.Built, this.Ghost.transform.position, this.Ghost.transform.rotation);
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.Built, this.Ghost.transform.position, this.Ghost.transform.rotation);
 			BuildingHealth componentInParent = base.GetComponentInParent<BuildingHealth>();
 			quickBuild component = gameObject.GetComponent<quickBuild>();
 			if (componentInParent && componentInParent.Hp < componentInParent._maxHP && component)

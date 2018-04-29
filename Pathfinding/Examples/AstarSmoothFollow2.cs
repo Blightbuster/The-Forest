@@ -10,24 +10,24 @@ namespace Pathfinding.Examples
 		
 		private void LateUpdate()
 		{
-			Vector3 to;
+			Vector3 b;
 			if (this.staticOffset)
 			{
-				to = this.target.position + new Vector3(0f, this.height, this.distance);
+				b = this.target.position + new Vector3(0f, this.height, this.distance);
 			}
 			else if (this.followBehind)
 			{
-				to = this.target.TransformPoint(0f, this.height, -this.distance);
+				b = this.target.TransformPoint(0f, this.height, -this.distance);
 			}
 			else
 			{
-				to = this.target.TransformPoint(0f, this.height, this.distance);
+				b = this.target.TransformPoint(0f, this.height, this.distance);
 			}
-			base.transform.position = Vector3.Lerp(base.transform.position, to, Time.deltaTime * this.damping);
+			base.transform.position = Vector3.Lerp(base.transform.position, b, Time.deltaTime * this.damping);
 			if (this.smoothRotation)
 			{
-				Quaternion to2 = Quaternion.LookRotation(this.target.position - base.transform.position, this.target.up);
-				base.transform.rotation = Quaternion.Slerp(base.transform.rotation, to2, Time.deltaTime * this.rotationDamping);
+				Quaternion b2 = Quaternion.LookRotation(this.target.position - base.transform.position, this.target.up);
+				base.transform.rotation = Quaternion.Slerp(base.transform.rotation, b2, Time.deltaTime * this.rotationDamping);
 			}
 			else
 			{

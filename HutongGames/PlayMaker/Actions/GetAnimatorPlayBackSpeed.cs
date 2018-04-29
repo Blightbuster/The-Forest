@@ -4,9 +4,9 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[HelpUrl("https:
-	[Tooltip("Gets the playback speed of the Animator. 1 is normal playback speed")]
 	[ActionCategory("Animator")]
+	[Tooltip("Gets the playback speed of the Animator. 1 is normal playback speed")]
+	[HelpUrl("https:
 	public class GetAnimatorPlayBackSpeed : FsmStateAction
 	{
 		
@@ -55,15 +55,15 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
+		[RequiredField]
 		[CheckForComponent(typeof(Animator))]
 		[Tooltip("The Target. An Animator component is required")]
-		[RequiredField]
 		public FsmOwnerDefault gameObject;
 
 		
+		[RequiredField]
 		[UIHint(UIHint.Variable)]
 		[Tooltip("The playBack speed of the animator. 1 is normal playback speed")]
-		[RequiredField]
 		public FsmFloat playBackSpeed;
 
 		

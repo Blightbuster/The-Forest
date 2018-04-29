@@ -14,14 +14,8 @@ namespace TheForest.Buildings.Creation
 	
 	[AddComponentMenu("Buildings/Creation/Floor Architect")]
 	[DoNotSerializePublic]
-	public class FloorArchitect : EntityBehaviour, IEntityReplicationFilter, IHoleStructure, IStructureSupport, ICoopStructure, IRoof
+	public class FloorArchitect : EntityBehaviour, IStructureSupport, IHoleStructure, ICoopStructure, IRoof, IEntityReplicationFilter
 	{
-		
-		bool IEntityReplicationFilter.AllowReplicationTo(BoltConnection connection)
-		{
-			return this.CurrentSupport == null || connection.ExistsOnRemote((this.CurrentSupport as MonoBehaviour).GetComponent<BoltEntity>()) == ExistsResult.Yes;
-		}
-
 		
 		private void Awake()
 		{
@@ -71,7 +65,7 @@ namespace TheForest.Buildings.Creation
 				{
 					if (this._autoSupported)
 					{
-						this._logMat = base.GetComponent<FoundationArchitect>().LogMat;
+						this._logMat = Prefabs.Instance.GhostClear;
 					}
 					else
 					{
@@ -144,7 +138,7 @@ namespace TheForest.Buildings.Creation
 						}
 						this._multiPointsPositions.RemoveAt(this._multiPointsPositions.Count - 1);
 					}
-					flag4 = ((this._autoSupported || (this.CurrentSupport != null && this.CurrentSupport.GetMultiPointsPositions(false) != null && Mathf.Abs(vector.y - this.SupportHeight) < this._closureSnappingDistance)) && (this._multiPointsPositions.Count == 0 || Mathf.Abs(this._multiPointsPositions[0].y - this.SupportHeight) < this._closureSnappingDistance) && this._multiPointsPositions.Count < this._maxPoints);
+					flag4 = (LocalPlayer.Create.BuildingPlacer.OnDynamicClear && (this._autoSupported || (this.CurrentSupport != null && this.CurrentSupport.GetMultiPointsPositions(false) != null && Mathf.Abs(vector.y - this.SupportHeight) < this._closureSnappingDistance)) && (this._multiPointsPositions.Count == 0 || Mathf.Abs(this._multiPointsPositions[0].y - this.SupportHeight) < this._closureSnappingDistance) && this._multiPointsPositions.Count < this._maxPoints);
 					if (flag4 && this._multiPointsPositions.Count > 0)
 					{
 						Vector3 vector2 = vector - this._multiPointsPositions[this._multiPointsPositions.Count - 1];
@@ -191,7 +185,7 @@ namespace TheForest.Buildings.Creation
 					{
 						flag3 |= (this._multiPointsPositions.Count >= 2 && flag4 && !flag2);
 					}
-					bool flag7 = !flag2 && this._multiPointsPositions.Count > 2 && Vector3.Distance(this._multiPointsPositions.First<Vector3>(), this._multiPointsPositions.Last<Vector3>()) > this._minChunkLength;
+					bool flag7 = LocalPlayer.Create.BuildingPlacer.OnDynamicClear && !flag2 && this._multiPointsPositions.Count > 2 && Vector3.Distance(this._multiPointsPositions.First<Vector3>(), this._multiPointsPositions.Last<Vector3>()) > this._minChunkLength;
 					if (flag7 && (TheForest.Utils.Input.GetButtonDown("Rotate") || TheForest.Utils.Input.GetButtonDown("Build")))
 					{
 						this._multiPointsPositions.Add(this._multiPointsPositions.First<Vector3>());
@@ -403,30 +397,47 @@ namespace TheForest.Buildings.Creation
 				Transform ghostRoot = this._floorRoot;
 				Transform transform = ghostRoot;
 				transform.name += "Ghost";
-				Transform logGhostPrefab = this._logPrefabs[0];
-				this._logPrefabs[0] = Prefabs.Instance.LogFloorBuiltPrefab;
-				this._logPool = new Stack<Transform>();
-				this._newPool = new Stack<Transform>();
-				this._floorRoot = new GameObject("FloorRootBuilt").transform;
-				this.SpawnFloor();
-				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.<>f__this._logItemId);
-				List<GameObject> logStacks = new List<GameObject>();
-				foreach (object obj in this._floorRoot)
+				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.$this._logItemId);
+				List<GameObject> logs = new List<GameObject>();
+				int amount = 0;
+				IEnumerator enumerator = this._floorRoot.GetEnumerator();
+				try
 				{
-					Transform logStack = (Transform)obj;
-					logStack.gameObject.SetActive(false);
-					logStacks.Add(logStack.gameObject);
+					while (enumerator.MoveNext())
+					{
+						object obj = enumerator.Current;
+						Transform transform2 = (Transform)obj;
+						amount++;
+						IEnumerator enumerator2 = transform2.GetEnumerator();
+						try
+						{
+							while (enumerator2.MoveNext())
+							{
+								object obj2 = enumerator2.Current;
+								Transform transform3 = (Transform)obj2;
+								logs.Add(transform3.GetComponentInChildren<Renderer>().gameObject);
+							}
+						}
+						finally
+						{
+							IDisposable disposable;
+							if ((disposable = (enumerator2 as IDisposable)) != null)
+							{
+								disposable.Dispose();
+							}
+						}
+					}
 				}
-				if (ri._renderers != null)
+				finally
 				{
-					ri._renderers = logStacks.Union(ri._renderers).ToArray<GameObject>();
+					IDisposable disposable2;
+					if ((disposable2 = (enumerator as IDisposable)) != null)
+					{
+						disposable2.Dispose();
+					}
 				}
-				else
-				{
-					ri._renderers = logStacks.ToArray();
-				}
-				ri._amount += this._floorRoot.childCount;
-				this._logPrefabs[0] = logGhostPrefab;
+				ri._amount += amount;
+				ri.AddRuntimeObjects(logs.AsEnumerable<GameObject>().Reverse<GameObject>(), Prefabs.Instance.LogFloorBuiltPrefab.GetComponentInChildren<Renderer>().sharedMaterial);
 				this._floorRoot.transform.parent = base.transform;
 				ghostRoot.transform.parent = base.transform;
 				BoxCollider bc;
@@ -492,23 +503,17 @@ namespace TheForest.Buildings.Creation
 		
 		private void CheckTargetingSupport(PrefabIdentifier structureRoot)
 		{
-			IStructureSupport structureSupport;
-			if (structureRoot)
+			IStructureSupport structureSupport = (!structureRoot) ? null : structureRoot.GetComponent<IStructureSupport>();
+			if (structureSupport != null)
 			{
-				IStructureSupport component = structureRoot.GetComponent<IStructureSupport>();
-				structureSupport = component;
-			}
-			else
-			{
-				structureSupport = null;
-			}
-			IStructureSupport structureSupport2 = structureSupport;
-			if (structureSupport2 != null)
-			{
-				if ((this.CurrentSupport == null || this.CurrentSupport.GetLevel() - structureSupport2.GetLevel() < this._closureSnappingDistance) && (this._autoSupported || !this._autofillmode || !(structureSupport2 as MonoBehaviour).GetComponent<FloorArchitect>()))
+				if ((this.CurrentSupport == null || this.CurrentSupport.GetLevel() - structureSupport.GetLevel() < this._closureSnappingDistance) && (this._autoSupported || !this._autofillmode || !(structureSupport as MonoBehaviour).GetComponent<FloorArchitect>()))
 				{
 					base.GetComponent<Renderer>().enabled = false;
-					this.CurrentSupport = structureSupport2;
+					this.CurrentSupport = structureSupport;
+					if (this.CurrentSupport != null)
+					{
+						LocalPlayer.Create.BuildingPlacer.ForcedParent = (this.CurrentSupport as MonoBehaviour).gameObject;
+					}
 					this.SupportHeight = this.CurrentSupport.GetLevel() - 0.35f;
 					this.UpdateAutoFill(false);
 				}
@@ -1001,7 +1006,7 @@ namespace TheForest.Buildings.Creation
 				transform.rotation = rotation;
 				return transform;
 			}
-			Transform transform2 = (Transform)UnityEngine.Object.Instantiate(this._logPrefabs[UnityEngine.Random.Range(0, this._logPrefabs.Length)], position, rotation);
+			Transform transform2 = UnityEngine.Object.Instantiate<Transform>(this._logPrefabs[UnityEngine.Random.Range(0, this._logPrefabs.Length)], position, rotation);
 			if (!this._wasBuilt)
 			{
 				if (!this._wasPlaced)
@@ -1167,10 +1172,10 @@ namespace TheForest.Buildings.Creation
 		
 		public override void Attached()
 		{
-			if (!this.entity.isOwner)
+			if (!base.entity.isOwner)
 			{
 				IBuildingDestructibleState buildingDestructibleState;
-				if (this.entity.TryFindState<IBuildingDestructibleState>(out buildingDestructibleState))
+				if (base.entity.TryFindState<IBuildingDestructibleState>(out buildingDestructibleState))
 				{
 					buildingDestructibleState.AddCallback("Token", new PropertyCallbackSimple(this.OnTokenUpdated));
 				}
@@ -1196,7 +1201,7 @@ namespace TheForest.Buildings.Creation
 		private void OnTokenUpdated()
 		{
 			IBuildingDestructibleState buildingDestructibleState;
-			if (this.entity.TryFindState<IBuildingDestructibleState>(out buildingDestructibleState))
+			if (base.entity.TryFindState<IBuildingDestructibleState>(out buildingDestructibleState))
 			{
 				this.CustomToken = buildingDestructibleState.Token;
 			}
@@ -1224,6 +1229,12 @@ namespace TheForest.Buildings.Creation
 					this.CreateStructure(false);
 				}
 			}
+		}
+
+		
+		bool IEntityReplicationFilter.AllowReplicationTo(BoltConnection connection)
+		{
+			return this.CurrentSupport == null || connection.ExistsOnRemote((this.CurrentSupport as MonoBehaviour).GetComponent<BoltEntity>()) == ExistsResult.Yes;
 		}
 
 		

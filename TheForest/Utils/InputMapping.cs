@@ -210,6 +210,14 @@ namespace TheForest.Utils
 							{
 								list[num][0] = list[num][0].Replace("</buttonMaps>", "<ActionElementMap><actionCategoryId>0</actionCategoryId><actionId>51</actionId><elementType>1</elementType><elementIdentifierId>18</elementIdentifierId><axisRange>1</axisRange><axisContribution>0</axisContribution><keyboardKeyCode>0</keyboardKeyCode></ActionElementMap></buttonMaps>");
 							}
+							if (!list[num][0].Contains("<actionId>53</actionId>"))
+							{
+								list[num][0] = list[num][0].Replace("</buttonMaps>", "<ActionElementMap><actionCategoryId>2/actionCategoryId><actionId>53</actionId><elementType>1</elementType><elementIdentifierId>4</elementIdentifierId><axisRange>0</axisRange><axisContribution>0</axisContribution><keyboardKeyCode>0</keyboardKeyCode></ActionElementMap></buttonMaps>");
+							}
+							if (!list[num][0].Contains("<actionId>54</actionId>"))
+							{
+								list[num][0] = list[num][0].Replace("</buttonMaps>", "<ActionElementMap><actionCategoryId>2</actionCategoryId><actionId>54</actionId><elementType>1</elementType><elementIdentifierId>6</elementIdentifierId><axisRange>1</axisRange><axisContribution>0</axisContribution><keyboardKeyCode>0</keyboardKeyCode></ActionElementMap></buttonMaps>");
+							}
 						}
 						else
 						{
@@ -228,6 +236,14 @@ namespace TheForest.Utils
 							if (!list[num][0].Contains("<actionId>51</actionId>"))
 							{
 								list[num][0] = list[num][0].Replace("</buttonMaps>", "<ActionElementMap><actionCategoryId>0</actionCategoryId><actionId>51</actionId><elementType>1</elementType><elementIdentifierId>16</elementIdentifierId><axisRange>1</axisRange><axisContribution>0</axisContribution><keyboardKeyCode>0</keyboardKeyCode></ActionElementMap></buttonMaps>");
+							}
+							if (!list[num][0].Contains("<actionId>53</actionId>"))
+							{
+								list[num][0] = list[num][0].Replace("</buttonMaps>", "<ActionElementMap><actionCategoryId>2</actionCategoryId><actionId>53</actionId><elementType>1</elementType><elementIdentifierId>4</elementIdentifierId><axisRange>0</axisRange><axisContribution>0</axisContribution><keyboardKeyCode>0</keyboardKeyCode></ActionElementMap></buttonMaps>");
+							}
+							if (!list[num][0].Contains("<actionId>54</actionId>"))
+							{
+								list[num][0] = list[num][0].Replace("</buttonMaps>", "<ActionElementMap><actionCategoryId>2</actionCategoryId><actionId>54</actionId><elementType>1</elementType><elementIdentifierId>6</elementIdentifierId><axisRange>1</axisRange><axisContribution>0</axisContribution><keyboardKeyCode>0</keyboardKeyCode></ActionElementMap></buttonMaps>");
 							}
 						}
 					}
@@ -479,12 +495,12 @@ namespace TheForest.Utils
 		}
 
 		
-		private const string playerPrefsBaseKey = "UserRemapping_v3";
-
-		
 		private static InputMapping instance;
 
 		
 		private static bool holdLoadingMaps;
+
+		
+		private const string playerPrefsBaseKey = "UserRemapping_v3";
 	}
 }

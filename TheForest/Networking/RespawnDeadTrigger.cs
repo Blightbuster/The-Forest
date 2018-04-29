@@ -27,6 +27,8 @@ namespace TheForest.Networking
 		
 		private void OnDisable()
 		{
+			this._sheenIcon.SetActive(true);
+			this._pickupIcon.SetActive(false);
 			if (LocalPlayer.Tuts)
 			{
 				LocalPlayer.Tuts.HideReviveMP();
@@ -54,12 +56,12 @@ namespace TheForest.Networking
 					LocalPlayer.Sfx.PlayTwinkle();
 					PlayerHealed playerHealed = PlayerHealed.Create(GlobalTargets.Others);
 					playerHealed.HealingItemId = this._healItemId;
-					playerHealed.HealTarget = this.entity;
+					playerHealed.HealTarget = base.entity;
 					playerHealed.Send();
 					this.OnEnable();
 					this.GrabExit();
 					base.gameObject.SetActive(false);
-					EventRegistry.Achievements.Publish(TfEvent.Achievements.RevivedPlayer, this.entity.source.RemoteEndPoint.SteamId.Id);
+					EventRegistry.Achievements.Publish(TfEvent.Achievements.RevivedPlayer, base.entity.source.RemoteEndPoint.SteamId.Id);
 				}
 				else if (!this._pickupIcon.activeSelf)
 				{
@@ -106,7 +108,7 @@ namespace TheForest.Networking
 			if (Vector3.Distance(base.transform.position, LocalPlayer.Transform.position) < this._maxKillDistance)
 			{
 				HitPlayer hitPlayer = HitPlayer.Create(GlobalTargets.Others);
-				hitPlayer.Target = this.entity;
+				hitPlayer.Target = base.entity;
 				hitPlayer.Send();
 				LocalPlayer.Inventory.Attacked.RemoveListener(new UnityAction(this.LocalPlayerAttacked));
 				this.OnEnable();

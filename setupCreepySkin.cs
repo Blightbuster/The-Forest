@@ -25,6 +25,26 @@ public class setupCreepySkin : MonoBehaviour
 	}
 
 	
+	private void setRagdollBloody()
+	{
+		this.bloodPropertyBlock = new MaterialPropertyBlock();
+		this.skin.GetPropertyBlock(this.bloodPropertyBlock);
+		this.bloodPropertyBlock.SetFloat("_Damage1", 1f);
+		this.bloodPropertyBlock.SetFloat("_Damage2", 1f);
+		this.bloodPropertyBlock.SetFloat("_Damage3", 1f);
+		this.bloodPropertyBlock.SetFloat("_Damage4", 1f);
+		this.skin.SetPropertyBlock(this.bloodPropertyBlock);
+		if (this.cutBodySkin)
+		{
+			this.cutBodySkin.SetPropertyBlock(this.bloodPropertyBlock);
+		}
+		if (this.cutHeadSkin)
+		{
+			this.cutHeadSkin.SetPropertyBlock(this.bloodPropertyBlock);
+		}
+	}
+
+	
 	private void setSkinDamageProperty(MaterialPropertyBlock block)
 	{
 		if (this.skin)
@@ -38,6 +58,12 @@ public class setupCreepySkin : MonoBehaviour
 
 	
 	public SkinnedMeshRenderer skin;
+
+	
+	public SkinnedMeshRenderer cutBodySkin;
+
+	
+	public SkinnedMeshRenderer cutHeadSkin;
 
 	
 	public bool explodedPrefab;

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Begins a ScrollView. Use GUILayoutEndScrollView at the end of the block.")]
 	[ActionCategory(ActionCategory.GUILayout)]
+	[Tooltip("Begins a ScrollView. Use GUILayoutEndScrollView at the end of the block.")]
 	public class GUILayoutBeginScrollView : GUILayoutAction
 	{
 		
@@ -35,9 +35,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("Assign a Vector2 variable to store the scroll position of this view.")]
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("Assign a Vector2 variable to store the scroll position of this view.")]
 		public FsmVector2 scrollPosition;
 
 		

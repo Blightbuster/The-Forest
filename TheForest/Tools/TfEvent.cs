@@ -76,6 +76,14 @@ namespace TheForest.Tools
 				return TfEvent.Achievements.SleptInYacht;
 			case TfEvent.Types.ExploredCaveArea:
 				return TfEvent.ExploredCaveArea;
+			case TfEvent.Types.EnterSnowCave:
+				return TfEvent.EnterSnowCave;
+			case TfEvent.Types.ExitSnowCave:
+				return TfEvent.ExitSnowCave;
+			case TfEvent.Types.InspectedPlant:
+				return TfEvent.InspectedPlant;
+			case TfEvent.Types.Endgame_Shutdown2ndArtifact:
+				return TfEvent.Endgame.Shutdown2ndArtifact;
 			default:
 				return null;
 			}
@@ -196,6 +204,15 @@ namespace TheForest.Tools
 		public static readonly object ExploredCaveArea = new object();
 
 		
+		public static readonly object EnterSnowCave = new object();
+
+		
+		public static readonly object ExitSnowCave = new object();
+
+		
+		public static readonly object InspectedPlant = new object();
+
+		
 		public class Achievements
 		{
 			
@@ -296,10 +313,13 @@ namespace TheForest.Tools
 		public class Endgame
 		{
 			
-			public static object FireDetected = new object();
+			public static readonly object FireDetected = new object();
 
 			
-			public static object Completed = new object();
+			public static readonly object Completed = new object();
+
+			
+			public static readonly object Shutdown2ndArtifact = new object();
 		}
 
 		
@@ -370,7 +390,15 @@ namespace TheForest.Tools
 			
 			Achievements_SleptInYacht,
 			
-			ExploredCaveArea
+			ExploredCaveArea,
+			
+			EnterSnowCave,
+			
+			ExitSnowCave,
+			
+			InspectedPlant,
+			
+			Endgame_Shutdown2ndArtifact
 		}
 	}
 }

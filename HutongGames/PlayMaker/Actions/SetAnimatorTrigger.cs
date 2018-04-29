@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets a trigger parameter to active or inactive. Triggers are parameters that act mostly like booleans, but get resets to inactive when they are used in a transition.")]
 	[ActionCategory("Animator")]
+	[Tooltip("Sets a trigger parameter to active or inactive. Triggers are parameters that act mostly like booleans, but get resets to inactive when they are used in a transition.")]
 	public class SetAnimatorTrigger : FsmStateAction
 	{
 		
@@ -44,9 +44,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
+		[RequiredField]
 		[CheckForComponent(typeof(Animator))]
 		[Tooltip("The target. An Animator component is required")]
-		[RequiredField]
 		public FsmOwnerDefault gameObject;
 
 		

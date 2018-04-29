@@ -16,6 +16,7 @@ public class mutantNetAnimatorControl : MonoBehaviour
 		this.stats = base.transform.parent.GetComponent<targetStats>();
 		this.animator.applyRootMotion = false;
 		this.controller = base.transform.parent.GetComponent<CapsuleCollider>();
+		this.cmfx = base.transform.parent.GetComponent<CoopMutantFX>();
 	}
 
 	
@@ -105,6 +106,23 @@ public class mutantNetAnimatorControl : MonoBehaviour
 		else
 		{
 			this.stats.targetDown = false;
+		}
+		if (this.currState0.tagHash == this.deathHash && this.currState0.shortNameHash != this.nooseTrapDeathHash && this.currState0.normalizedTime > 0.95f && this.cmfx && this.cmfx.FX_Fire1 && this.cmfx.FX_Fire1.activeSelf && !this.netDisableFireFollow)
+		{
+			this.cmfx.FX_Fire1.SendMessage("netDisableFollowTarget", SendMessageOptions.DontRequireReceiver);
+			if (this.cmfx.FX_Fire2)
+			{
+				this.cmfx.FX_Fire2.SendMessage("netDisableFollowTarget", SendMessageOptions.DontRequireReceiver);
+			}
+			if (this.cmfx.FX_Fire3)
+			{
+				this.cmfx.FX_Fire3.SendMessage("netDisableFollowTarget", SendMessageOptions.DontRequireReceiver);
+			}
+			if (this.cmfx.FX_Fire4)
+			{
+				this.cmfx.FX_Fire4.SendMessage("netDisableFollowTarget", SendMessageOptions.DontRequireReceiver);
+			}
+			this.netDisableFireFollow = true;
 		}
 		if (this.currState0.tagHash == this.inTrapHash)
 		{
@@ -222,7 +240,7 @@ public class mutantNetAnimatorControl : MonoBehaviour
 	}
 
 	
-	private Animator animator;
+	public Animator animator;
 
 	
 	private AnimatorStateInfo currState0;
@@ -238,6 +256,9 @@ public class mutantNetAnimatorControl : MonoBehaviour
 
 	
 	private targetStats stats;
+
+	
+	private CoopMutantFX cmfx;
 
 	
 	private Transform rootTr;
@@ -277,6 +298,9 @@ public class mutantNetAnimatorControl : MonoBehaviour
 
 	
 	private int feedingHash = Animator.StringToHash("feeding2");
+
+	
+	private int nooseTrapDeathHash = Animator.StringToHash("nooseTrapDeath");
 
 	
 	private Vector3 currPos;
@@ -322,4 +346,7 @@ public class mutantNetAnimatorControl : MonoBehaviour
 
 	
 	private bool fixTriggerOffset;
+
+	
+	private bool netDisableFireFollow;
 }

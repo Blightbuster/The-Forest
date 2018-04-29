@@ -17,40 +17,40 @@ namespace TheForest.Buildings.World
 		{
 			if (BoltNetwork.isRunning)
 			{
-				while (!this.entity.isAttached)
+				while (!base.entity.isAttached)
 				{
 					yield return null;
 				}
 			}
-			if (!BoltNetwork.isRunning || this.entity.isAttached)
+			if (!BoltNetwork.isRunning || base.entity.isAttached)
 			{
 				yield return null;
 				if (this._treeId >= 0)
 				{
-					CoopTreeId tid = CoopPlayerCallbacks.AllTrees.FirstOrDefault((CoopTreeId i) => i.Id == this.<>f__this._treeId);
+					CoopTreeId tid = CoopPlayerCallbacks.AllTrees.FirstOrDefault((CoopTreeId i) => i.Id == this.$this._treeId);
 					if (!tid)
 					{
 						yield return YieldPresets.WaitThreeSeconds;
-						tid = CoopPlayerCallbacks.AllTrees.FirstOrDefault((CoopTreeId i) => i.Id == this.<>f__this._treeId);
+						tid = CoopPlayerCallbacks.AllTrees.FirstOrDefault((CoopTreeId i) => i.Id == this.$this._treeId);
 					}
 					if (tid)
 					{
-						LOD_Trees lt = tid.GetComponent<LOD_Trees>();
-						lt.AddTreeCutDownTarget(base.gameObject);
+						LOD_Trees component = tid.GetComponent<LOD_Trees>();
+						component.AddTreeCutDownTarget(base.gameObject);
 					}
 				}
 				if (this._treeId2 >= 0)
 				{
-					CoopTreeId tid2 = CoopPlayerCallbacks.AllTrees.FirstOrDefault((CoopTreeId i) => i.Id == this.<>f__this._treeId2);
+					CoopTreeId tid2 = CoopPlayerCallbacks.AllTrees.FirstOrDefault((CoopTreeId i) => i.Id == this.$this._treeId2);
 					if (!tid2)
 					{
 						yield return YieldPresets.WaitThreeSeconds;
-						tid2 = CoopPlayerCallbacks.AllTrees.FirstOrDefault((CoopTreeId i) => i.Id == this.<>f__this._treeId2);
+						tid2 = CoopPlayerCallbacks.AllTrees.FirstOrDefault((CoopTreeId i) => i.Id == this.$this._treeId2);
 					}
 					if (tid2)
 					{
-						LOD_Trees lt2 = tid2.GetComponent<LOD_Trees>();
-						lt2.AddTreeCutDownTarget(base.gameObject);
+						LOD_Trees component2 = tid2.GetComponent<LOD_Trees>();
+						component2.AddTreeCutDownTarget(base.gameObject);
 					}
 				}
 			}
@@ -70,9 +70,9 @@ namespace TheForest.Buildings.World
 				fallingT = trunk.GetComponentInChildren<Rigidbody>().transform;
 			}
 			base.transform.parent = fallingT;
-			foreach (Collider c in base.GetComponentsInChildren<Collider>())
+			foreach (Collider collider in base.GetComponentsInChildren<Collider>())
 			{
-				c.enabled = false;
+				collider.enabled = false;
 			}
 			if (!BoltNetwork.isClient)
 			{

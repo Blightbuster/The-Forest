@@ -20,10 +20,10 @@ public class CarGUI : MonoBehaviour
 	}
 
 	
-	private const float MphtoMps = 2.237f;
+	public CarController car;
 
 	
-	public CarController car;
+	private const float MphtoMps = 2.237f;
 
 	
 	private string display = "{0:0} mph \nGear: {1:0}/{2:0}\nRevs {3:0%}\nThrottle: {4:0%}\n";

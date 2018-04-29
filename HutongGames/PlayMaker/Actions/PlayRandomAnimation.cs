@@ -51,14 +51,14 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			if (string.IsNullOrEmpty(animName))
 			{
-				this.LogWarning("Missing animName!");
+				base.LogWarning("Missing animName!");
 				base.Finish();
 				return;
 			}
 			this.anim = base.animation[animName];
 			if (this.anim == null)
 			{
-				this.LogWarning("Missing animation: " + animName);
+				base.LogWarning("Missing animation: " + animName);
 				base.Finish();
 				return;
 			}
@@ -112,8 +112,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Animation))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animation))]
 		[Tooltip("Game Object to play the animation on.")]
 		public FsmOwnerDefault gameObject;
 
@@ -131,8 +131,8 @@ namespace HutongGames.PlayMaker.Actions
 		public PlayMode playMode;
 
 		
-		[Tooltip("Time taken to blend to this animation.")]
 		[HasFloatSlider(0f, 5f)]
+		[Tooltip("Time taken to blend to this animation.")]
 		public FsmFloat blendTime;
 
 		

@@ -37,8 +37,8 @@ public class BreakStoneSimple : MonoBehaviour
 	{
 		if (!BoltNetwork.isClient && !this.HiddenCache)
 		{
-			bool exploded = GlobalDataSaver.GetInt(base.transform.ToGeoHash() + "_exploded", 0) == 1;
-			if (exploded)
+			bool flag = GlobalDataSaver.GetInt(base.transform.ToGeoHash() + "_exploded", 0) == 1;
+			if (flag)
 			{
 				this.SetExplodedMp();
 				this.DoExplodeFinal();
@@ -100,7 +100,7 @@ public class BreakStoneSimple : MonoBehaviour
 			this.InsidePos.gameObject.SetActive(true);
 			if (this.HiddenCache && this.WorldItem.Length > 0)
 			{
-				this.MyItem = (UnityEngine.Object.Instantiate(this.WorldItem[UnityEngine.Random.Range(0, this.WorldItem.Length - 1)], this.InsidePos.position, this.InsidePos.rotation) as GameObject);
+				this.MyItem = UnityEngine.Object.Instantiate<GameObject>(this.WorldItem[UnityEngine.Random.Range(0, this.WorldItem.Length - 1)], this.InsidePos.position, this.InsidePos.rotation);
 				this.MyItem.transform.parent = this.InsidePos.transform;
 			}
 			if (this.SpawnWhenExplode != null && this.SpawnWhenExplode.Length > 0)
@@ -113,7 +113,7 @@ public class BreakStoneSimple : MonoBehaviour
 					{
 						vector.y = num + 0.2f;
 					}
-					this.MyItem = (UnityEngine.Object.Instantiate(original, vector, this.InsidePos.rotation) as GameObject);
+					this.MyItem = UnityEngine.Object.Instantiate<GameObject>(original, vector, this.InsidePos.rotation);
 					this.MyItem.transform.parent = this.InsidePos.transform;
 				}
 			}

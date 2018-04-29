@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Serialization;
 using UniLinq;
 using UnityEngine;
@@ -29,11 +30,22 @@ public static class JSONLevelSerializer
 		JSONLevelSerializer.StoreComponent = delegate
 		{
 		};
+		JSONLevelSerializer._collectionCount = 0;
 		JSONLevelSerializer.Progress = delegate
 		{
 		};
-		JSONLevelSerializer.webClient.UploadDataCompleted += JSONLevelSerializer.HandleWebClientUploadDataCompleted;
-		JSONLevelSerializer.webClient.UploadStringCompleted += JSONLevelSerializer.HandleWebClientUploadStringCompleted;
+		WebClient webClient = JSONLevelSerializer.webClient;
+		if (JSONLevelSerializer.<>f__mg$cache0 == null)
+		{
+			JSONLevelSerializer.<>f__mg$cache0 = new UploadDataCompletedEventHandler(JSONLevelSerializer.HandleWebClientUploadDataCompleted);
+		}
+		webClient.UploadDataCompleted += JSONLevelSerializer.<>f__mg$cache0;
+		WebClient webClient2 = JSONLevelSerializer.webClient;
+		if (JSONLevelSerializer.<>f__mg$cache1 == null)
+		{
+			JSONLevelSerializer.<>f__mg$cache1 = new UploadStringCompletedEventHandler(JSONLevelSerializer.HandleWebClientUploadStringCompleted);
+		}
+		webClient2.UploadStringCompleted += JSONLevelSerializer.<>f__mg$cache1;
 		JSONLevelSerializer._stopCases.Add(typeof(PrefabIdentifier));
 		UnitySerializer.AddPrivateType(typeof(AnimationClip));
 		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
@@ -69,41 +81,6 @@ public static class JSONLevelSerializer
 			JSONLevelSerializer.SavedGames = new Index<string, List<JSONLevelSerializer.SaveEntry>>();
 		}
 	}
-
-	
-	
-	
-	public static event Action Deserialized;
-
-	
-	
-	
-	public static event Action GameSaved;
-
-	
-	
-	
-	public static event Action SuspendingSerialization;
-
-	
-	
-	
-	public static event Action ResumingSerialization;
-
-	
-	
-	
-	public static event JSONLevelSerializer.StoreQuery Store;
-
-	
-	
-	
-	public static event JSONLevelSerializer.StoreComponentQuery StoreComponent;
-
-	
-	
-	
-	public static event Action<string, float> Progress;
 
 	
 	
@@ -189,29 +166,29 @@ public static class JSONLevelSerializer
 	
 	public static void SaveObjectTreeToServer(string uri, GameObject rootOfTree, string userName = "", string password = "", Action<Exception> onComplete = null)
 	{
-		JSONLevelSerializer.<SaveObjectTreeToServer>c__AnonStorey3E4 <SaveObjectTreeToServer>c__AnonStorey3E = new JSONLevelSerializer.<SaveObjectTreeToServer>c__AnonStorey3E4();
-		<SaveObjectTreeToServer>c__AnonStorey3E.rootOfTree = rootOfTree;
-		<SaveObjectTreeToServer>c__AnonStorey3E.userName = userName;
-		<SaveObjectTreeToServer>c__AnonStorey3E.password = password;
-		<SaveObjectTreeToServer>c__AnonStorey3E.uri = uri;
-		<SaveObjectTreeToServer>c__AnonStorey3E.onComplete = onComplete;
-		JSONLevelSerializer.<SaveObjectTreeToServer>c__AnonStorey3E4 <SaveObjectTreeToServer>c__AnonStorey3E2 = <SaveObjectTreeToServer>c__AnonStorey3E;
+		JSONLevelSerializer.<SaveObjectTreeToServer>c__AnonStorey5 <SaveObjectTreeToServer>c__AnonStorey = new JSONLevelSerializer.<SaveObjectTreeToServer>c__AnonStorey5();
+		<SaveObjectTreeToServer>c__AnonStorey.rootOfTree = rootOfTree;
+		<SaveObjectTreeToServer>c__AnonStorey.userName = userName;
+		<SaveObjectTreeToServer>c__AnonStorey.password = password;
+		<SaveObjectTreeToServer>c__AnonStorey.uri = uri;
+		<SaveObjectTreeToServer>c__AnonStorey.onComplete = onComplete;
+		JSONLevelSerializer.<SaveObjectTreeToServer>c__AnonStorey5 <SaveObjectTreeToServer>c__AnonStorey2 = <SaveObjectTreeToServer>c__AnonStorey;
 		Action<Exception> onComplete2;
-		if ((onComplete2 = <SaveObjectTreeToServer>c__AnonStorey3E.onComplete) == null)
+		if ((onComplete2 = <SaveObjectTreeToServer>c__AnonStorey.onComplete) == null)
 		{
 			onComplete2 = delegate
 			{
 			};
 		}
-		<SaveObjectTreeToServer>c__AnonStorey3E2.onComplete = onComplete2;
+		<SaveObjectTreeToServer>c__AnonStorey2.onComplete = onComplete2;
 		Action action = delegate
 		{
-			string data = <SaveObjectTreeToServer>c__AnonStorey3E.rootOfTree.SaveObjectTree();
+			string data = <SaveObjectTreeToServer>c__AnonStorey.rootOfTree.SaveObjectTree();
 			Action upload = delegate
 			{
 				JSONLevelSerializer.uploadCount++;
-				JSONLevelSerializer.webClient.Credentials = new NetworkCredential(<SaveObjectTreeToServer>c__AnonStorey3E.userName, <SaveObjectTreeToServer>c__AnonStorey3E.password);
-				JSONLevelSerializer.webClient.UploadStringAsync(new Uri(<SaveObjectTreeToServer>c__AnonStorey3E.uri), null, data, <SaveObjectTreeToServer>c__AnonStorey3E.onComplete);
+				JSONLevelSerializer.webClient.Credentials = new NetworkCredential(<SaveObjectTreeToServer>c__AnonStorey.userName, <SaveObjectTreeToServer>c__AnonStorey.password);
+				JSONLevelSerializer.webClient.UploadStringAsync(new Uri(<SaveObjectTreeToServer>c__AnonStorey.uri), null, data, <SaveObjectTreeToServer>c__AnonStorey.onComplete);
 			};
 			JSONLevelSerializer.DoWhenReady(upload);
 		};
@@ -263,11 +240,11 @@ public static class JSONLevelSerializer
 	
 	public static void SerializeLevelToServer(string uri, string userName = "", string password = "", Action<Exception> onComplete = null)
 	{
-		JSONLevelSerializer.<SerializeLevelToServer>c__AnonStorey3E7 <SerializeLevelToServer>c__AnonStorey3E = new JSONLevelSerializer.<SerializeLevelToServer>c__AnonStorey3E7();
-		<SerializeLevelToServer>c__AnonStorey3E.uri = uri;
-		<SerializeLevelToServer>c__AnonStorey3E.userName = userName;
-		<SerializeLevelToServer>c__AnonStorey3E.password = password;
-		<SerializeLevelToServer>c__AnonStorey3E.onComplete = onComplete;
+		JSONLevelSerializer.<SerializeLevelToServer>c__AnonStorey8 <SerializeLevelToServer>c__AnonStorey = new JSONLevelSerializer.<SerializeLevelToServer>c__AnonStorey8();
+		<SerializeLevelToServer>c__AnonStorey.uri = uri;
+		<SerializeLevelToServer>c__AnonStorey.userName = userName;
+		<SerializeLevelToServer>c__AnonStorey.password = password;
+		<SerializeLevelToServer>c__AnonStorey.onComplete = onComplete;
 		object guard = JSONLevelSerializer.Guard;
 		lock (guard)
 		{
@@ -275,24 +252,24 @@ public static class JSONLevelSerializer
 			{
 				Loom.QueueOnMainThread(delegate
 				{
-					JSONLevelSerializer.SerializeLevelToServer(<SerializeLevelToServer>c__AnonStorey3E.uri, <SerializeLevelToServer>c__AnonStorey3E.userName, <SerializeLevelToServer>c__AnonStorey3E.password, <SerializeLevelToServer>c__AnonStorey3E.onComplete);
+					JSONLevelSerializer.SerializeLevelToServer(<SerializeLevelToServer>c__AnonStorey.uri, <SerializeLevelToServer>c__AnonStorey.userName, <SerializeLevelToServer>c__AnonStorey.password, <SerializeLevelToServer>c__AnonStorey.onComplete);
 				}, 0.5f);
 			}
 			else
 			{
 				JSONLevelSerializer.uploadCount++;
-				JSONLevelSerializer.<SerializeLevelToServer>c__AnonStorey3E7 <SerializeLevelToServer>c__AnonStorey3E2 = <SerializeLevelToServer>c__AnonStorey3E;
+				JSONLevelSerializer.<SerializeLevelToServer>c__AnonStorey8 <SerializeLevelToServer>c__AnonStorey2 = <SerializeLevelToServer>c__AnonStorey;
 				Action<Exception> onComplete2;
-				if ((onComplete2 = <SerializeLevelToServer>c__AnonStorey3E.onComplete) == null)
+				if ((onComplete2 = <SerializeLevelToServer>c__AnonStorey.onComplete) == null)
 				{
 					onComplete2 = delegate
 					{
 					};
 				}
-				<SerializeLevelToServer>c__AnonStorey3E2.onComplete = onComplete2;
+				<SerializeLevelToServer>c__AnonStorey2.onComplete = onComplete2;
 				string data = JSONLevelSerializer.SerializeLevel();
-				JSONLevelSerializer.webClient.Credentials = new NetworkCredential(<SerializeLevelToServer>c__AnonStorey3E.userName, <SerializeLevelToServer>c__AnonStorey3E.password);
-				JSONLevelSerializer.webClient.UploadStringAsync(new Uri(<SerializeLevelToServer>c__AnonStorey3E.uri), null, data, <SerializeLevelToServer>c__AnonStorey3E.onComplete);
+				JSONLevelSerializer.webClient.Credentials = new NetworkCredential(<SerializeLevelToServer>c__AnonStorey.userName, <SerializeLevelToServer>c__AnonStorey.password);
+				JSONLevelSerializer.webClient.UploadStringAsync(new Uri(<SerializeLevelToServer>c__AnonStorey.uri), null, data, <SerializeLevelToServer>c__AnonStorey.onComplete);
 			}
 		}
 	}
@@ -392,6 +369,26 @@ public static class JSONLevelSerializer
 	}
 
 	
+	
+	
+	public static event Action Deserialized;
+
+	
+	
+	
+	public static event Action GameSaved;
+
+	
+	
+	
+	public static event Action SuspendingSerialization;
+
+	
+	
+	
+	public static event Action ResumingSerialization;
+
+	
 	internal static void InvokeDeserialized()
 	{
 		JSONLevelSerializer._suspensionCount = 0;
@@ -404,6 +401,16 @@ public static class JSONLevelSerializer
 			gameObject.SendMessage("OnDeserialized", null, SendMessageOptions.DontRequireReceiver);
 		}
 	}
+
+	
+	
+	
+	public static event JSONLevelSerializer.StoreQuery Store;
+
+	
+	
+	
+	public static event JSONLevelSerializer.StoreComponentQuery StoreComponent;
 
 	
 	public static void Resume()
@@ -419,7 +426,13 @@ public static class JSONLevelSerializer
 	
 	public static void Checkpoint()
 	{
-		JSONLevelSerializer.SaveGame("Resume", false, new Action<string, bool>(JSONLevelSerializer.PerformSaveCheckPoint));
+		string name = "Resume";
+		bool urgent = false;
+		if (JSONLevelSerializer.<>f__mg$cache2 == null)
+		{
+			JSONLevelSerializer.<>f__mg$cache2 = new Action<string, bool>(JSONLevelSerializer.PerformSaveCheckPoint);
+		}
+		JSONLevelSerializer.SaveGame(name, urgent, JSONLevelSerializer.<>f__mg$cache2);
 	}
 
 	
@@ -501,7 +514,16 @@ public static class JSONLevelSerializer
 	
 	public static void SaveGame(string name, bool urgent, Action<string, bool> perform)
 	{
-		perform = (perform ?? new Action<string, bool>(JSONLevelSerializer.PerformSave));
+		Action<string, bool> action;
+		if ((action = perform) == null)
+		{
+			if (JSONLevelSerializer.<>f__mg$cache3 == null)
+			{
+				JSONLevelSerializer.<>f__mg$cache3 = new Action<string, bool>(JSONLevelSerializer.PerformSave);
+			}
+			action = JSONLevelSerializer.<>f__mg$cache3;
+		}
+		perform = action;
 		if (urgent || !JSONLevelSerializer.IsSuspended || JSONLevelSerializer.SerializationMode != JSONLevelSerializer.SerializationModes.SerializeWhenFree)
 		{
 			perform(name, urgent);
@@ -687,6 +709,11 @@ public static class JSONLevelSerializer
 		JSONLevelSerializer.GetComponentsInChildrenWithClause(go.transform, list);
 		return list;
 	}
+
+	
+	
+	
+	public static event Action<string, float> Progress;
 
 	
 	public static string SerializeLevel(bool urgent, string id)
@@ -975,7 +1002,31 @@ public static class JSONLevelSerializer
 	private static int uploadCount;
 
 	
-	private static int _collectionCount = 0;
+	private static int _collectionCount;
+
+	
+	[CompilerGenerated]
+	private static UploadDataCompletedEventHandler <>f__mg$cache0;
+
+	
+	[CompilerGenerated]
+	private static UploadStringCompletedEventHandler <>f__mg$cache1;
+
+	
+	[CompilerGenerated]
+	private static Action<string, bool> <>f__mg$cache2;
+
+	
+	[CompilerGenerated]
+	private static Action<string, bool> <>f__mg$cache3;
+
+	
+	
+	public delegate void StoreQuery(GameObject go, ref bool store);
+
+	
+	
+	public delegate void StoreComponentQuery(Component component, ref bool store);
 
 	
 	public enum SerializationModes
@@ -1188,12 +1239,4 @@ public static class JSONLevelSerializer
 		
 		public string ParentName;
 	}
-
-	
-	
-	public delegate void StoreQuery(GameObject go, ref bool store);
-
-	
-	
-	public delegate void StoreComponentQuery(Component component, ref bool store);
 }

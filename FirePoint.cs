@@ -95,12 +95,25 @@ public class FirePoint : MonoBehaviour
 			{
 				transform.GetComponent<ParticleSystem>().enableEmission = false;
 			}
-			foreach (object obj in transform)
+			IEnumerator enumerator = transform.GetEnumerator();
+			try
 			{
-				Transform transform2 = (Transform)obj;
-				if (transform2.GetComponent<ParticleSystem>())
+				while (enumerator.MoveNext())
 				{
-					transform2.GetComponent<ParticleSystem>().enableEmission = false;
+					object obj = enumerator.Current;
+					Transform transform2 = (Transform)obj;
+					if (transform2.GetComponent<ParticleSystem>())
+					{
+						transform2.GetComponent<ParticleSystem>().enableEmission = false;
+					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
 				}
 			}
 		}

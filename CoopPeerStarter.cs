@@ -71,6 +71,7 @@ public class CoopPeerStarter : GlobalEventListener
 		BoltNetwork.RegisterTokenClass<CoopJoinDedicatedServerFailed>();
 		BoltNetwork.RegisterTokenClass<CoopWeaponUpgradesToken>();
 		BoltNetwork.RegisterTokenClass<CoopSyncGirlPickupToken>();
+		BoltNetwork.RegisterTokenClass<CoopRagdollToken>();
 	}
 
 	
@@ -115,8 +116,10 @@ public class CoopPeerStarter : GlobalEventListener
 		{
 			BoltNetwork.UpdateSceneObjectsLookup();
 		}
-		catch (Exception)
+		catch (Exception exception)
 		{
+			Debug.LogError("Failed to attach scene objects, ask on slack for a CoopPeerStarter MP debug ASAP");
+			Debug.LogException(exception);
 		}
 		BoltNetwork.SetCanReceiveEntities(true);
 		UnityEngine.Object.Destroy(base.gameObject);
@@ -144,9 +147,35 @@ public class CoopPeerStarter : GlobalEventListener
 	
 	protected void Update()
 	{
-		switch (this.mapState)
+		CoopPeerStarter.MapState mapState = this.mapState;
+		if (mapState != CoopPeerStarter.MapState.Begin)
 		{
-		case CoopPeerStarter.MapState.Begin:
+			if (mapState != CoopPeerStarter.MapState.Loading)
+			{
+				if (mapState == CoopPeerStarter.MapState.Done)
+				{
+					try
+					{
+						BoltNetwork.UpdateSceneObjectsLookup();
+					}
+					catch (Exception)
+					{
+					}
+					Camera componentInChildren = base.GetComponentInChildren<Camera>();
+					if (componentInChildren)
+					{
+						componentInChildren.enabled = false;
+					}
+					base.StartCoroutine(this.LoadingDone());
+					this.mapState = CoopPeerStarter.MapState.Playing;
+				}
+			}
+			else if (!this.GetAsync() || this.GetAsync().isDone)
+			{
+				this.mapState = CoopPeerStarter.MapState.Done;
+			}
+		}
+		else
 		{
 			CoopPlayerCallbacks.ClearTrees();
 			LoadAsync async = this.GetAsync();
@@ -155,32 +184,6 @@ public class CoopPeerStarter : GlobalEventListener
 				async.gameObject.SetActive(true);
 				this.mapState = CoopPeerStarter.MapState.Loading;
 			}
-			break;
-		}
-		case CoopPeerStarter.MapState.Loading:
-			if (!this.GetAsync() || this.GetAsync().isDone)
-			{
-				this.mapState = CoopPeerStarter.MapState.Done;
-			}
-			break;
-		case CoopPeerStarter.MapState.Done:
-		{
-			try
-			{
-				BoltNetwork.UpdateSceneObjectsLookup();
-			}
-			catch (Exception)
-			{
-			}
-			Camera componentInChildren = base.GetComponentInChildren<Camera>();
-			if (componentInChildren)
-			{
-				componentInChildren.enabled = false;
-			}
-			base.StartCoroutine(this.LoadingDone());
-			this.mapState = CoopPeerStarter.MapState.Playing;
-			break;
-		}
 		}
 	}
 

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using TheForest.World;
 using UnityEngine;
 
@@ -52,7 +51,7 @@ public class treeDealDamage : MonoBehaviour
 			float y = (this._col.bounds.center.z - Terrain.activeTerrain.transform.position.z) / Terrain.activeTerrain.terrainData.size.z;
 			Vector3 interpolatedNormal = Terrain.activeTerrain.terrainData.GetInterpolatedNormal(x, y);
 			Quaternion rotation = Quaternion.LookRotation(Vector3.Cross(base.transform.forward, interpolatedNormal), interpolatedNormal);
-			UnityEngine.Object.Instantiate(this.treeDust, this._col.bounds.center, rotation);
+			UnityEngine.Object.Instantiate<GameObject>(this.treeDust, this._col.bounds.center, rotation);
 		}
 		base.StartCoroutine("calculateDamage", other.gameObject);
 	}
@@ -73,35 +72,9 @@ public class treeDealDamage : MonoBehaviour
 			string tag = other.gameObject.tag;
 			if (tag != null)
 			{
-				if (treeDealDamage.<>f__switch$map6 == null)
+				if (tag == "structure" || tag == "SLTier1" || tag == "SLTier2" || tag == "SLTier3")
 				{
-					treeDealDamage.<>f__switch$map6 = new Dictionary<string, int>(4)
-					{
-						{
-							"structure",
-							0
-						},
-						{
-							"SLTier1",
-							0
-						},
-						{
-							"SLTier2",
-							0
-						},
-						{
-							"SLTier3",
-							0
-						}
-					};
-				}
-				int num;
-				if (treeDealDamage.<>f__switch$map6.TryGetValue(tag, out num))
-				{
-					if (num == 0)
-					{
-						base.StartCoroutine("calculateDamage", other.gameObject);
-					}
+					base.StartCoroutine("calculateDamage", other.gameObject);
 				}
 			}
 		}
@@ -125,59 +98,33 @@ public class treeDealDamage : MonoBehaviour
 				{
 					this.damage = (this._col.bounds.center - this.currPos).magnitude * this._rb.mass * 70f;
 				}
-				int sendDamage = (int)this.damage;
+				int num = (int)this.damage;
 				if (this.damage > 15f)
 				{
 					if (target.CompareTag("playerHitDetect"))
 					{
-						target.SendMessageUpwards("hitFromEnemy", sendDamage, SendMessageOptions.DontRequireReceiver);
+						target.SendMessageUpwards("hitFromEnemy", num, SendMessageOptions.DontRequireReceiver);
 					}
 					else
 					{
 						string tag = target.tag;
 						if (tag != null)
 						{
-							if (treeDealDamage.<>f__switch$map7 == null)
+							if (tag == "structure" || tag == "SLTier1" || tag == "SLTier2" || tag == "SLTier3")
 							{
-								treeDealDamage.<>f__switch$map7 = new Dictionary<string, int>(4)
-								{
-									{
-										"structure",
-										0
-									},
-									{
-										"SLTier1",
-										0
-									},
-									{
-										"SLTier2",
-										0
-									},
-									{
-										"SLTier3",
-										0
-									}
-								};
-							}
-							int num;
-							if (treeDealDamage.<>f__switch$map7.TryGetValue(tag, out num))
-							{
-								if (num == 0)
-								{
-									target.SendMessage("LocalizedHit", new LocalizedHitData(this._col.bounds.center, 100000f), SendMessageOptions.DontRequireReceiver);
-									goto IL_277;
-								}
+								target.SendMessage("LocalizedHit", new LocalizedHitData(this._col.bounds.center, 100000f), SendMessageOptions.DontRequireReceiver);
+								goto IL_258;
 							}
 						}
 						if (!target.gameObject.CompareTag("Player"))
 						{
-							target.SendMessage("Hit", sendDamage, SendMessageOptions.DontRequireReceiver);
+							target.SendMessage("Hit", num, SendMessageOptions.DontRequireReceiver);
 						}
 					}
 				}
 			}
 		}
-		IL_277:
+		IL_258:
 		yield break;
 	}
 

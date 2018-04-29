@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Check if an item is contains in a particula PlayMaker ArrayList Proxy component")]
 	[ActionCategory("ArrayMaker/ArrayList")]
+	[Tooltip("Check if an item is contains in a particula PlayMaker ArrayList Proxy component")]
 	public class ArrayListContains : ArrayListActions
 	{
 		
@@ -91,27 +91,27 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
+		[ActionSection("Set up")]
 		[RequiredField]
 		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
-		[ActionSection("Set up")]
 		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
-		[UIHint(UIHint.FsmString)]
 		[Tooltip("Author defined Reference of the PlayMaker ArrayList Proxy component (necessary if several component coexists on the same GameObject)")]
+		[UIHint(UIHint.FsmString)]
 		public FsmString reference;
 
 		
-		[Tooltip("The variable to check.")]
 		[ActionSection("Data")]
 		[RequiredField]
+		[Tooltip("The variable to check.")]
 		public FsmVar variable;
 
 		
-		[UIHint(UIHint.Variable)]
-		[Tooltip("Store in a bool wether it contains or not that element (described below)")]
 		[ActionSection("Result")]
+		[Tooltip("Store in a bool wether it contains or not that element (described below)")]
+		[UIHint(UIHint.Variable)]
 		public FsmBool isContained;
 
 		
@@ -120,8 +120,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmEvent isContainedEvent;
 
 		
-		[UIHint(UIHint.FsmEvent)]
 		[Tooltip("Event sent if this arraList does not contains that element ( described below)")]
+		[UIHint(UIHint.FsmEvent)]
 		public FsmEvent isNotContainedEvent;
 	}
 }

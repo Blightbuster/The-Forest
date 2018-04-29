@@ -8,28 +8,8 @@ namespace Rewired.UI.ControlMapper
 {
 	
 	[AddComponentMenu("")]
-	public class CustomSlider : Slider, ICancelHandler, IEventSystemHandler, ICustomSelectable
+	public class CustomSlider : Slider, ICustomSelectable, ICancelHandler, IEventSystemHandler
 	{
-		
-		
-		
-		private event UnityAction _CancelEvent;
-
-		
-		
-		
-		public event UnityAction CancelEvent
-		{
-			add
-			{
-				this._CancelEvent = (UnityAction)Delegate.Combine(this._CancelEvent, value);
-			}
-			remove
-			{
-				this._CancelEvent = (UnityAction)Delegate.Remove(this._CancelEvent, value);
-			}
-		}
-
 		
 		
 		
@@ -146,6 +126,26 @@ namespace Rewired.UI.ControlMapper
 		}
 
 		
+		
+		
+		private event UnityAction _CancelEvent;
+
+		
+		
+		
+		public event UnityAction CancelEvent
+		{
+			add
+			{
+				this._CancelEvent += value;
+			}
+			remove
+			{
+				this._CancelEvent -= value;
+			}
+		}
+
+		
 		public override Selectable FindSelectableOnLeft()
 		{
 			if ((base.navigation.mode & Navigation.Mode.Horizontal) != Navigation.Mode.None || this._autoNavLeft)
@@ -206,17 +206,24 @@ namespace Rewired.UI.ControlMapper
 				string disabledHighlightedTrigger = this._disabledHighlightedTrigger;
 				if (base.gameObject.activeInHierarchy)
 				{
-					switch (base.transition)
+					Selectable.Transition transition = base.transition;
+					if (transition != Selectable.Transition.ColorTint)
 					{
-					case Selectable.Transition.ColorTint:
+						if (transition != Selectable.Transition.SpriteSwap)
+						{
+							if (transition == Selectable.Transition.Animation)
+							{
+								this.TriggerAnimation(disabledHighlightedTrigger);
+							}
+						}
+						else
+						{
+							this.DoSpriteSwap(disabledHighlightedSprite);
+						}
+					}
+					else
+					{
 						this.StartColorTween(disabledHighlightedColor * base.colors.colorMultiplier, instant);
-						break;
-					case Selectable.Transition.SpriteSwap:
-						this.DoSpriteSwap(disabledHighlightedSprite);
-						break;
-					case Selectable.Transition.Animation:
-						this.TriggerAnimation(disabledHighlightedTrigger);
-						break;
 					}
 				}
 			}

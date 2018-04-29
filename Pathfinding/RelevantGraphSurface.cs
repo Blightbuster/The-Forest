@@ -4,8 +4,8 @@ using UnityEngine;
 namespace Pathfinding
 {
 	
-	[HelpURL("http:
 	[AddComponentMenu("Pathfinding/Navmesh/RelevantGraphSurface")]
+	[HelpURL("http:
 	public class RelevantGraphSurface : MonoBehaviour
 	{
 		

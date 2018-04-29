@@ -56,13 +56,13 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The first Bool variable.")]
 		[RequiredField]
+		[Tooltip("The first Bool variable.")]
 		public FsmBool bool1;
 
 		
-		[Tooltip("The second Bool variable.")]
 		[RequiredField]
+		[Tooltip("The second Bool variable.")]
 		public FsmBool bool2;
 
 		
@@ -70,9 +70,9 @@ namespace HutongGames.PlayMaker.Actions
 		public BoolOperator.Operation operation;
 
 		
-		[Tooltip("Store the result in a Bool Variable.")]
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the result in a Bool Variable.")]
 		public FsmBool storeResult;
 
 		

@@ -8,7 +8,7 @@ public class TestLoading : MonoBehaviour
 	
 	private void Start()
 	{
-		UnityEngine.Object.DontDestroyOnLoad(this);
+		UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		base.Invoke("LoadLevel", 0.3f);
 	}
 

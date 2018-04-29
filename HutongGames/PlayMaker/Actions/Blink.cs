@@ -73,8 +73,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject to blink on/off.")]
 		[RequiredField]
+		[Tooltip("The GameObject to blink on/off.")]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -83,8 +83,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat timeOff;
 
 		
-		[Tooltip("Time to stay on in seconds.")]
 		[HasFloatSlider(0f, 5f)]
+		[Tooltip("Time to stay on in seconds.")]
 		public FsmFloat timeOn;
 
 		

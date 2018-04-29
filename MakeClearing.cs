@@ -25,7 +25,31 @@ public class MakeClearing : MonoBehaviour
 	}
 
 	
-	public void Start()
+	private void Start()
+	{
+		if (this.ShouldCutGrass)
+		{
+			this.startGrassClearing();
+		}
+	}
+
+	
+	private void startGrassClearing()
+	{
+		int stepCount = this.GetStepCount();
+		for (int i = 0; i < stepCount; i++)
+		{
+			float progress = (float)i / (float)stepCount;
+			Vector3 position = this.GetPosition(progress);
+			if (this.ShouldCutGrass)
+			{
+				NeoGrassCutter.Cut(position, this.Radius, false);
+			}
+		}
+	}
+
+	
+	public void startClearing()
 	{
 		int stepCount = this.GetStepCount();
 		LOD_Base[] array = UnityEngine.Object.FindObjectsOfType<LOD_Base>();
@@ -54,7 +78,8 @@ public class MakeClearing : MonoBehaviour
 					{
 						coopTreeId = lod_Base2.GetComponent<CoopTreeId>();
 					}
-					UnityEngine.Object.Destroy(lod_Base2);
+					Debug.Log(lod_Base2 + " CLEARED");
+					UnityEngine.Object.DestroyImmediate(lod_Base2);
 					if (coopTreeId)
 					{
 						coopTreeId.Goto_Removed();

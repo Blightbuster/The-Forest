@@ -16,9 +16,9 @@ public class BoltAOI : EntityBehaviour
 	
 	public override void SimulateOwner()
 	{
-		if (BoltNetwork.frame % 30 == 0 && BoltNetwork.scopeMode == ScopeMode.Manual && base.enabled && this.entity.controller != null)
+		if (BoltNetwork.frame % 30 == 0 && BoltNetwork.scopeMode == ScopeMode.Manual && base.enabled && base.entity.controller != null)
 		{
-			BoltPOI.UpdateScope(this, this.entity.controller);
+			BoltPOI.UpdateScope(this, base.entity.controller);
 		}
 	}
 

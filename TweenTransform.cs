@@ -6,6 +6,24 @@ using UnityEngine;
 public class TweenTransform : UITweener
 {
 	
+	
+	
+	public static int ActiveTransformTweener { get; private set; }
+
+	
+	protected void OnEnable()
+	{
+		TweenTransform.ActiveTransformTweener++;
+	}
+
+	
+	protected override void OnDisable()
+	{
+		TweenTransform.ActiveTransformTweener--;
+		base.OnDisable();
+	}
+
+	
 	protected override void OnUpdate(float factor, bool isFinished)
 	{
 		if (this.to != null)

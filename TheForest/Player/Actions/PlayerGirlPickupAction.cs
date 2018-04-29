@@ -37,11 +37,11 @@ namespace TheForest.Player.Actions
 			girlAnimator.enabled = true;
 			if (BoltNetwork.isRunning)
 			{
-				syncGirlPickup ev = syncGirlPickup.Create(GlobalTargets.Others);
-				ev.playerTarget = base.transform.root.GetComponent<BoltEntity>();
-				ev.target = this.girlGo.GetComponent<BoltEntity>();
-				ev.syncPickupAnimation = true;
-				ev.Send();
+				syncGirlPickup syncGirlPickup = syncGirlPickup.Create(GlobalTargets.Others);
+				syncGirlPickup.playerTarget = base.transform.root.GetComponent<BoltEntity>();
+				syncGirlPickup.target = this.girlGo.GetComponent<BoltEntity>();
+				syncGirlPickup.syncPickupAnimation = true;
+				syncGirlPickup.Send();
 			}
 			while (this.currState2.shortNameHash == this.idleToGirlHash)
 			{
@@ -61,10 +61,10 @@ namespace TheForest.Player.Actions
 				}
 				else
 				{
-					syncGirlPickup destroy = syncGirlPickup.Create(GlobalTargets.Others);
-					destroy.target = this.girlGo.GetComponent<BoltEntity>();
-					destroy.destroyPickup = true;
-					destroy.Send();
+					syncGirlPickup syncGirlPickup2 = syncGirlPickup.Create(GlobalTargets.Others);
+					syncGirlPickup2.target = this.girlGo.GetComponent<BoltEntity>();
+					syncGirlPickup2.destroyPickup = true;
+					syncGirlPickup2.Send();
 					this.girlGo = null;
 				}
 				this.disablePlayerLocked();
@@ -123,31 +123,31 @@ namespace TheForest.Player.Actions
 			}
 			if (BoltNetwork.isClient)
 			{
-				syncGirlPickup ev = syncGirlPickup.Create(GlobalTargets.Everyone);
-				ev.target = base.transform.root.GetComponent<BoltEntity>();
-				ev.playerTarget = base.transform.root.GetComponent<BoltEntity>();
-				ev.spawnGirl = true;
-				ev.syncPutDownAnimation = true;
-				ev.Send();
+				syncGirlPickup syncGirlPickup = syncGirlPickup.Create(GlobalTargets.Everyone);
+				syncGirlPickup.target = base.transform.root.GetComponent<BoltEntity>();
+				syncGirlPickup.playerTarget = base.transform.root.GetComponent<BoltEntity>();
+				syncGirlPickup.spawnGirl = true;
+				syncGirlPickup.syncPutDownAnimation = true;
+				syncGirlPickup.Send();
 			}
 			else
 			{
-				CoopSyncGirlPickupToken token = new CoopSyncGirlPickupToken();
-				token.putDown = true;
-				token.pickup = false;
-				token.playerTarget = base.transform.root.GetComponent<BoltEntity>();
-				GameObject spawn = null;
+				CoopSyncGirlPickupToken coopSyncGirlPickupToken = new CoopSyncGirlPickupToken();
+				coopSyncGirlPickupToken.putDown = true;
+				coopSyncGirlPickupToken.pickup = false;
+				coopSyncGirlPickupToken.playerTarget = base.transform.root.GetComponent<BoltEntity>();
+				GameObject gameObject;
 				if (BoltNetwork.isRunning)
 				{
-					spawn = BoltNetwork.Instantiate(Resources.Load("CutScene/girl_Pickup") as GameObject, token, LocalPlayer.PlayerBase.transform.position, LocalPlayer.PlayerBase.transform.rotation).gameObject;
+					gameObject = BoltNetwork.Instantiate(Resources.Load("CutScene/girl_Pickup") as GameObject, coopSyncGirlPickupToken, LocalPlayer.PlayerBase.transform.position, LocalPlayer.PlayerBase.transform.rotation).gameObject;
 				}
 				else
 				{
-					spawn = (GameObject)UnityEngine.Object.Instantiate(Resources.Load("CutScene/girl_Pickup"), LocalPlayer.PlayerBase.transform.position, LocalPlayer.PlayerBase.transform.rotation);
+					gameObject = (GameObject)UnityEngine.Object.Instantiate(Resources.Load("CutScene/girl_Pickup"), LocalPlayer.PlayerBase.transform.position, LocalPlayer.PlayerBase.transform.rotation);
 				}
-				Animator girlAnimator = spawn.GetComponentInChildren<Animator>();
-				girlAnimator.enabled = true;
-				girlAnimator.CrossFade("Base Layer.putDownGirl", 0f, 0, this.currState2.normalizedTime);
+				Animator componentInChildren = gameObject.GetComponentInChildren<Animator>();
+				componentInChildren.enabled = true;
+				componentInChildren.CrossFade("Base Layer.putDownGirl", 0f, 0, this.currState2.normalizedTime);
 			}
 			this.girlHeld.SetActive(false);
 			while (this.currState2.shortNameHash == this.putDownGirlHash)
@@ -176,6 +176,7 @@ namespace TheForest.Player.Actions
 			Vector3 fixLocalPos = new Vector3(0f, -2.344841f, 0f);
 			if (!this.spectator)
 			{
+				LocalPlayer.Inventory.LockEquipmentSlot(Item.EquipmentSlot.LeftHand);
 				LocalPlayer.ScriptSetup.forceLocalPos.enabled = false;
 				this.ActorAnimator = LocalPlayer.Animator;
 				this.enablePlayerLocked();
@@ -189,12 +190,14 @@ namespace TheForest.Player.Actions
 				{
 					LocalPlayer.Transform.position = Vector3.Slerp(LocalPlayer.Transform.position, playerPos, t);
 					LocalPlayer.Transform.rotation = Quaternion.Slerp(LocalPlayer.Transform.rotation, pos.rotation, t);
+					LocalPlayer.Inventory.LockEquipmentSlot(Item.EquipmentSlot.LeftHand);
 				}
 				t += Time.deltaTime;
 				yield return null;
 			}
 			if (!this.spectator)
 			{
+				LocalPlayer.Inventory.LockEquipmentSlot(Item.EquipmentSlot.LeftHand);
 				LocalPlayer.Transform.position = playerPos;
 				LocalPlayer.Transform.rotation = pos.rotation;
 				LocalPlayer.PlayerBase.transform.localPosition = fixLocalPos;
@@ -207,11 +210,11 @@ namespace TheForest.Player.Actions
 			}
 			if (!this.spectator)
 			{
-				syncGirlPickup ev = syncGirlPickup.Create(GlobalTargets.OnlyServer);
-				ev.dedicatedSpawn = true;
-				ev.spawnPos = this.ActorAnimator.transform.position;
-				ev.spawnRot = this.ActorAnimator.transform.rotation;
-				ev.Send();
+				syncGirlPickup syncGirlPickup = syncGirlPickup.Create(GlobalTargets.OnlyServer);
+				syncGirlPickup.dedicatedSpawn = true;
+				syncGirlPickup.spawnPos = this.ActorAnimator.transform.position;
+				syncGirlPickup.spawnRot = this.ActorAnimator.transform.rotation;
+				syncGirlPickup.Send();
 			}
 			GameObject spawn;
 			Animator girlAnimator;
@@ -222,10 +225,10 @@ namespace TheForest.Player.Actions
 				yield return null;
 				yield return null;
 				yield return null;
-				syncGirlPickup ev2 = syncGirlPickup.Create(GlobalTargets.Everyone);
-				ev2.target = spawn.GetComponent<BoltEntity>();
-				ev2.toMachine = true;
-				ev2.Send();
+				syncGirlPickup ev = syncGirlPickup.Create(GlobalTargets.Everyone);
+				ev.target = spawn.GetComponent<BoltEntity>();
+				ev.toMachine = true;
+				ev.Send();
 				girlAnimator = spawn.GetComponentInChildren<Animator>();
 				enableWithDelay ewd = spawn.GetComponent<enableWithDelay>();
 				if (ewd)
@@ -246,6 +249,7 @@ namespace TheForest.Player.Actions
 				this.currState2 = this.ActorAnimator.GetCurrentAnimatorStateInfo(2);
 				if (!this.spectator)
 				{
+					LocalPlayer.Inventory.LockEquipmentSlot(Item.EquipmentSlot.LeftHand);
 					LocalPlayer.Rigidbody.velocity = Vector3.zero;
 					LocalPlayer.PlayerBase.transform.localPosition = fixLocalPos;
 					LocalPlayer.Animator.SetLayerWeightReflected(3, 0f);
@@ -276,6 +280,7 @@ namespace TheForest.Player.Actions
 			{
 				if (!this.spectator)
 				{
+					LocalPlayer.Inventory.LockEquipmentSlot(Item.EquipmentSlot.LeftHand);
 					if (this.currState2.normalizedTime > 0.328f && !spawnKey && !BoltNetwork.isClient)
 					{
 						if (girlAnimator)
@@ -292,6 +297,7 @@ namespace TheForest.Player.Actions
 			if (!this.spectator)
 			{
 				this.disablePlayerLocked();
+				LocalPlayer.Inventory.UnlockEquipmentSlot(Item.EquipmentSlot.LeftHand);
 				LocalPlayer.AnimControl.useRootMotion = false;
 				LocalPlayer.AnimControl.useRootRotation = false;
 				LocalPlayer.AnimControl.holdingGirl = false;
@@ -333,29 +339,29 @@ namespace TheForest.Player.Actions
 				this.currState2 = LocalPlayer.Animator.GetCurrentAnimatorStateInfo(2);
 				if (this.girlGo)
 				{
-					Animator ga = this.girlGo.GetComponentInChildren<Animator>();
-					if (ga)
+					Animator componentInChildren = this.girlGo.GetComponentInChildren<Animator>();
+					if (componentInChildren)
 					{
-						base.StartCoroutine(this.resetGirlAnimation(ga));
+						base.StartCoroutine(this.resetGirlAnimation(componentInChildren));
 					}
 					this.girlGo.SendMessage("enableThisGo", SendMessageOptions.DontRequireReceiver);
 					if (this.girlTrigger)
 					{
 						this.girlTrigger.SendMessage("resetPickup", SendMessageOptions.DontRequireReceiver);
 					}
-					syncGirlPickup ev = syncGirlPickup.Create(GlobalTargets.Everyone);
-					ev.target = this.girlGo.GetComponent<BoltEntity>();
-					ev.enableTrigger = true;
-					ev.Send();
+					syncGirlPickup syncGirlPickup = syncGirlPickup.Create(GlobalTargets.Everyone);
+					syncGirlPickup.target = this.girlGo.GetComponent<BoltEntity>();
+					syncGirlPickup.enableTrigger = true;
+					syncGirlPickup.Send();
 				}
 				else if (this.currState2.shortNameHash != this.putDownGirlHash)
 				{
 					if (BoltNetwork.isClient)
 					{
-						syncGirlPickup ev2 = syncGirlPickup.Create(GlobalTargets.Everyone);
-						ev2.target = base.transform.root.GetComponent<BoltEntity>();
-						ev2.spawnGirl = true;
-						ev2.Send();
+						syncGirlPickup syncGirlPickup2 = syncGirlPickup.Create(GlobalTargets.Everyone);
+						syncGirlPickup2.target = base.transform.root.GetComponent<BoltEntity>();
+						syncGirlPickup2.spawnGirl = true;
+						syncGirlPickup2.Send();
 					}
 					else
 					{

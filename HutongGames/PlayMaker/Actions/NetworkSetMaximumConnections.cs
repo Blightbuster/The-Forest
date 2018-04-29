@@ -19,7 +19,7 @@ namespace HutongGames.PlayMaker.Actions
 		{
 			if (this.maximumConnections.Value < -1)
 			{
-				this.LogWarning("Network Maximum connections can not be less than -1");
+				base.LogWarning("Network Maximum connections can not be less than -1");
 				this.maximumConnections.Value = -1;
 			}
 			Network.maxConnections = this.maximumConnections.Value;

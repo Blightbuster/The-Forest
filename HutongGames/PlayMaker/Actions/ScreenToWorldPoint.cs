@@ -50,7 +50,7 @@ namespace HutongGames.PlayMaker.Actions
 		{
 			if (Camera.main == null)
 			{
-				this.LogError("No MainCamera defined!");
+				base.LogError("No MainCamera defined!");
 				base.Finish();
 				return;
 			}
@@ -84,8 +84,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("Screen position as a vector.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Screen position as a vector.")]
 		public FsmVector3 screenVector;
 
 		
@@ -105,8 +105,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmBool normalized;
 
 		
-		[Tooltip("Store the world position in a vector3 variable.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the world position in a vector3 variable.")]
 		public FsmVector3 storeWorldVector;
 
 		
@@ -115,13 +115,13 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat storeWorldX;
 
 		
-		[Tooltip("Store the world Y position in a float variable.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the world Y position in a float variable.")]
 		public FsmFloat storeWorldY;
 
 		
-		[Tooltip("Store the world Z position in a float variable.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the world Z position in a float variable.")]
 		public FsmFloat storeWorldZ;
 
 		

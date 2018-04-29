@@ -59,7 +59,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			if (base.renderer.material == null)
 			{
-				this.LogError("Missing Material!");
+				base.LogError("Missing Material!");
 				return;
 			}
 			if (this.materialIndex.Value == 0)
@@ -75,8 +75,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Renderer))]
 		[Tooltip("The GameObject that the material is applied to.")]
+		[CheckForComponent(typeof(Renderer))]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -88,8 +88,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmMaterial material;
 
 		
-		[Tooltip("A named color parameter in the shader.")]
 		[UIHint(UIHint.NamedColor)]
+		[Tooltip("A named color parameter in the shader.")]
 		public FsmString namedColor;
 
 		

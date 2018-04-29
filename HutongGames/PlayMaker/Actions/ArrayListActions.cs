@@ -33,12 +33,12 @@ namespace HutongGames.PlayMaker.Actions
 		{
 			if (this.proxy == null)
 			{
-				this.LogError("ArrayList proxy is null");
+				base.LogError("ArrayList proxy is null");
 				return false;
 			}
 			if (this.proxy.arrayList == null)
 			{
-				this.LogError("ArrayList undefined");
+				base.LogError("ArrayList undefined");
 				return false;
 			}
 			return true;

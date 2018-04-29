@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Set the value of a Game Object Variable in another FSM. Accept null reference")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Set the value of a Game Object Variable in another FSM. Accept null reference")]
 	public class SetFsmGameObject : FsmStateAction
 	{
 		
@@ -51,7 +51,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			else
 			{
-				this.LogWarning("Could not find variable: " + this.variableName.Value);
+				base.LogWarning("Could not find variable: " + this.variableName.Value);
 			}
 		}
 
@@ -67,8 +67,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("Optional name of FSM on Game Object")]
 		[UIHint(UIHint.FsmName)]
+		[Tooltip("Optional name of FSM on Game Object")]
 		public FsmString fsmName;
 
 		

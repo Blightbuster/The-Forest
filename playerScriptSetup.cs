@@ -120,6 +120,10 @@ public class playerScriptSetup : MonoBehaviour
 			{
 				this.leftHandHeld = transform;
 			}
+			if (transform.name == "rightHandHeld")
+			{
+				this.rightHandHeld = transform;
+			}
 			if (transform.name == "char_RightHand")
 			{
 				this.rightHandWrist = transform;
@@ -163,7 +167,7 @@ public class playerScriptSetup : MonoBehaviour
 		{
 			this.pmControl.FsmVariables.GetFsmGameObject("inventoryGo").Value = this.inventoryGo;
 		}
-		if (!this.sceneInfo.allPlayers.Contains(base.transform.parent.gameObject))
+		if (!ForestVR.Prototype && !this.sceneInfo.allPlayers.Contains(base.transform.parent.gameObject))
 		{
 			this.sceneInfo.allPlayers.Add(base.transform.parent.gameObject);
 		}
@@ -286,6 +290,9 @@ public class playerScriptSetup : MonoBehaviour
 
 	
 	public Transform leftHandHeld;
+
+	
+	public Transform rightHandHeld;
 
 	
 	public Transform leftHandWrist;

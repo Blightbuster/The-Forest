@@ -90,6 +90,9 @@ public static class SunshineKeywords
 	}
 
 	
+	private static SunshineKeywords.ChangeTracker cascadeCount = new SunshineKeywords.ChangeTracker();
+
+	
 	private const string FILTER_DISABLED = "SUNSHINE_DISABLED";
 
 	
@@ -105,6 +108,16 @@ public static class SunshineKeywords
 	private const string FILTER_PCF_4x4 = "SUNSHINE_FILTER_PCF_4x4";
 
 	
+	private static readonly string[] FILTER_STYLES = new string[]
+	{
+		"SUNSHINE_DISABLED",
+		"SUNSHINE_FILTER_HARD",
+		"SUNSHINE_FILTER_PCF_2x2",
+		"SUNSHINE_FILTER_PCF_3x3",
+		"SUNSHINE_FILTER_PCF_4x4"
+	};
+
+	
 	private const string SCATTER_QUALITY_LOW = "SUNSHINE_FILTER_HARD";
 
 	
@@ -117,25 +130,6 @@ public static class SunshineKeywords
 	private const string SCATTER_QUALITY_VERYHIGH = "SUNSHINE_FILTER_PCF_4x4";
 
 	
-	private const string SUNSHINE_SCATTER_BLENDNOW_ON = "SUNSHINE_SCATTER_BLENDNOW_ON";
-
-	
-	private const string SUNSHINE_SCATTER_BLENDNOW_OFF = "SUNSHINE_SCATTER_BLENDNOW_OFF";
-
-	
-	private static SunshineKeywords.ChangeTracker cascadeCount = new SunshineKeywords.ChangeTracker();
-
-	
-	private static readonly string[] FILTER_STYLES = new string[]
-	{
-		"SUNSHINE_DISABLED",
-		"SUNSHINE_FILTER_HARD",
-		"SUNSHINE_FILTER_PCF_2x2",
-		"SUNSHINE_FILTER_PCF_3x3",
-		"SUNSHINE_FILTER_PCF_4x4"
-	};
-
-	
 	private static readonly string[] SCATTER_QUALITIES = new string[]
 	{
 		"SUNSHINE_FILTER_HARD",
@@ -143,6 +137,12 @@ public static class SunshineKeywords
 		"SUNSHINE_FILTER_PCF_3x3",
 		"SUNSHINE_FILTER_PCF_4x4"
 	};
+
+	
+	private const string SUNSHINE_SCATTER_BLENDNOW_ON = "SUNSHINE_SCATTER_BLENDNOW_ON";
+
+	
+	private const string SUNSHINE_SCATTER_BLENDNOW_OFF = "SUNSHINE_SCATTER_BLENDNOW_OFF";
 
 	
 	private static SunshineKeywords.ChangeTracker scatterBlendNow = new SunshineKeywords.ChangeTracker();

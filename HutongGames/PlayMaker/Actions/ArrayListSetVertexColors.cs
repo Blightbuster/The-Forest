@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 namespace HutongGames.PlayMaker.Actions
@@ -58,11 +59,24 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			this._colors = new Color[this.proxy.arrayList.Count];
 			int num = 0;
-			foreach (object obj in this.proxy.arrayList)
+			IEnumerator enumerator = this.proxy.arrayList.GetEnumerator();
+			try
 			{
-				Color color = (Color)obj;
-				this._colors[num] = color;
-				num++;
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Color color = (Color)obj;
+					this._colors[num] = color;
+					num++;
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 			this._mesh.colors = this._colors;
 		}
@@ -79,9 +93,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString reference;
 
 		
-		[CheckForComponent(typeof(MeshFilter))]
-		[Tooltip("The GameObject to set the mesh colors to")]
 		[ActionSection("Target")]
+		[Tooltip("The GameObject to set the mesh colors to")]
+		[CheckForComponent(typeof(MeshFilter))]
 		public FsmGameObject mesh;
 
 		

@@ -3,8 +3,8 @@ using UnityEngine;
 using UnityEngine.Rendering;
 
 
-[RequireComponent(typeof(Camera))]
 [ExecuteInEditMode]
+[RequireComponent(typeof(Camera))]
 public class FarShadowCascade : MonoBehaviour
 {
 	
@@ -34,7 +34,7 @@ public class FarShadowCascade : MonoBehaviour
 	private void Init()
 	{
 		this.m_shadowMatrix = Matrix4x4.identity;
-		this.m_depthShader = Shader.Find("Hidden/Far Shadow Depth Only");
+		this.m_depthShader = Shader.Find("Hidden/Far Shadow Depth Only_5_6");
 		if (this.shadowCameraGO == null)
 		{
 			this.shadowCameraGO = new GameObject("__Far_Shadow Camera - " + base.name);
@@ -95,7 +95,7 @@ public class FarShadowCascade : MonoBehaviour
 			this.m_shadowTexture = new RenderTexture((int)this.shadowMapSize, (int)this.shadowMapSize, 16, RenderTextureFormat.Shadowmap, RenderTextureReadWrite.Linear);
 			this.m_shadowTexture.filterMode = FilterMode.Bilinear;
 			this.m_shadowTexture.useMipMap = false;
-			this.m_shadowTexture.generateMips = false;
+			this.m_shadowTexture.autoGenerateMips = false;
 			this.lightCamera.targetTexture = this.m_shadowTexture;
 		}
 	}
@@ -114,20 +114,24 @@ public class FarShadowCascade : MonoBehaviour
 	
 	private void SetFarShadowMatrix(float focusRadius, float fardistance)
 	{
-		this.lightCamera.projectionMatrix = GL.GetGPUProjectionMatrix(Matrix4x4.Ortho(-focusRadius, focusRadius, -focusRadius, focusRadius, 0f, focusRadius * 2f), false);
-		bool flag = SystemInfo.graphicsDeviceType == GraphicsDeviceType.Direct3D9;
-		bool flag2 = flag || SystemInfo.graphicsDeviceType == GraphicsDeviceType.Direct3D11;
-		float num = (!flag) ? 0f : (0.5f / (float)this.shadowMapSize);
-		float z = (!flag2) ? 0.5f : 1f;
-		float num2 = (!flag2) ? 0.5f : 0f;
-		float num3 = -this.FarCascadeDepthBias;
+		this.lightCamera.projectionMatrix = Matrix4x4.Ortho(-focusRadius, focusRadius, -focusRadius, focusRadius, 0f, focusRadius * 2f);
+		bool flag = SystemInfo.graphicsDeviceType == GraphicsDeviceType.Direct3D9 || SystemInfo.graphicsDeviceType == GraphicsDeviceType.Direct3D11;
+		float num = 0f;
+		float num2 = (!SystemInfo.usesReversedZBuffer) ? (-this.FarCascadeDepthBias) : this.FarCascadeDepthBias;
 		this.m_shadowSpaceMatrix.SetRow(0, new Vector4(0.5f, 0f, 0f, 0.5f + num));
 		this.m_shadowSpaceMatrix.SetRow(1, new Vector4(0f, 0.5f, 0f, 0.5f + num));
-		this.m_shadowSpaceMatrix.SetRow(2, new Vector4(0f, 0f, z, num2 + num3));
+		this.m_shadowSpaceMatrix.SetRow(2, new Vector4(0f, 0f, 0.5f, 0.5f + num2));
 		this.m_shadowSpaceMatrix.SetRow(3, new Vector4(0f, 0f, 0f, 1f));
 		Matrix4x4 worldToCameraMatrix = this.lightCamera.worldToCameraMatrix;
-		Matrix4x4 gpuprojectionMatrix = GL.GetGPUProjectionMatrix(this.lightCamera.projectionMatrix, false);
-		this.m_shadowMatrix = this.m_shadowSpaceMatrix * gpuprojectionMatrix * worldToCameraMatrix;
+		Matrix4x4 rhs = Matrix4x4.Ortho(-focusRadius, focusRadius, -focusRadius, focusRadius, 0f, focusRadius * 2f);
+		if (SystemInfo.usesReversedZBuffer)
+		{
+			rhs[2, 0] = -rhs[2, 0];
+			rhs[2, 1] = -rhs[2, 1];
+			rhs[2, 2] = -rhs[2, 2];
+			rhs[2, 3] = -rhs[2, 3];
+		}
+		this.m_shadowMatrix = this.m_shadowSpaceMatrix * rhs * worldToCameraMatrix;
 	}
 
 	

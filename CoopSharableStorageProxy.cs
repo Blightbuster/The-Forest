@@ -11,7 +11,7 @@ public class CoopSharableStorageProxy : EntityBehaviour<IPlayerState>
 	
 	private void Start()
 	{
-		if (!this._initialized && this.entity.isAttached)
+		if (!this._initialized && base.entity.isAttached)
 		{
 			this.Attached();
 		}

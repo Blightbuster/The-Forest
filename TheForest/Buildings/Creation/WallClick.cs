@@ -95,7 +95,7 @@ namespace TheForest.Buildings.Creation
 			}
 			else
 			{
-				Transform transform = treeHealth.transform.FindChild("TreeHouseBuild");
+				Transform transform = treeHealth.transform.Find("TreeHouseBuild");
 				if (transform && this.Target != transform)
 				{
 					this.Lock();

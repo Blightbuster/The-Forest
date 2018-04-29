@@ -29,7 +29,7 @@ namespace HutongGames.PlayMaker.Actions
 			this.aComponent = go.GetComponent(this.component.Value);
 			if (this.aComponent == null)
 			{
-				this.LogError("No such component: " + this.component.Value);
+				base.LogError("No such component: " + this.component.Value);
 			}
 			else
 			{
@@ -38,14 +38,14 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject that owns the Component.")]
 		[RequiredField]
+		[Tooltip("The GameObject that owns the Component.")]
 		public FsmOwnerDefault gameObject;
 
 		
+		[RequiredField]
 		[UIHint(UIHint.ScriptComponent)]
 		[Tooltip("The name of the Component to destroy.")]
-		[RequiredField]
 		public FsmString component;
 
 		

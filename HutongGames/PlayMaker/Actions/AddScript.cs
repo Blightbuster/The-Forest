@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Adds a Script to a Game Object. Use this to change the behaviour of objects on the fly. Optionally remove the Script on exiting the state.")]
 	[ActionCategory(ActionCategory.ScriptControl)]
+	[Tooltip("Adds a Script to a Game Object. Use this to change the behaviour of objects on the fly. Optionally remove the Script on exiting the state.")]
 	public class AddScript : FsmStateAction
 	{
 		
@@ -41,7 +41,7 @@ namespace HutongGames.PlayMaker.Actions
 			this.addedComponent = go.AddComponent(AddScript.GetType(this.script.Value));
 			if (this.addedComponent == null)
 			{
-				this.LogError("Can't add script: " + this.script.Value);
+				base.LogError("Can't add script: " + this.script.Value);
 			}
 		}
 

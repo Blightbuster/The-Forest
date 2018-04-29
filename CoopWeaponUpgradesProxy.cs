@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Bolt;
 using TheForest.Items.Craft;
 using TheForest.Items.Inventory;
@@ -11,7 +12,7 @@ public class CoopWeaponUpgradesProxy : EntityBehaviour<IWeaponUpgradeProxyState>
 	
 	public override void Attached()
 	{
-		if (!this.entity.isOwner)
+		if (!base.entity.isOwner)
 		{
 			this.SetTargetItem();
 			if (!this._heldItemGo)
@@ -63,10 +64,23 @@ public class CoopWeaponUpgradesProxy : EntityBehaviour<IWeaponUpgradeProxyState>
 			this.SetTargetItem();
 			if (this._mirror)
 			{
-				foreach (object obj in this._mirror)
+				IEnumerator enumerator = this._mirror.GetEnumerator();
+				try
 				{
-					Transform transform = (Transform)obj;
-					UnityEngine.Object.Destroy(transform.gameObject);
+					while (enumerator.MoveNext())
+					{
+						object obj = enumerator.Current;
+						Transform transform = (Transform)obj;
+						UnityEngine.Object.Destroy(transform.gameObject);
+					}
+				}
+				finally
+				{
+					IDisposable disposable;
+					if ((disposable = (enumerator as IDisposable)) != null)
+					{
+						disposable.Dispose();
+					}
 				}
 				CoopWeaponUpgradesToken coopWeaponUpgradesToken = (CoopWeaponUpgradesToken)base.state.Token;
 				foreach (UpgradeViewReceiver.UpgradeViewData upgradeViewData in coopWeaponUpgradesToken.Views)

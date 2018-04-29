@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using Pathfinding.Util;
@@ -89,17 +90,30 @@ namespace Pathfinding
 				{
 					flag = true;
 				}
-				foreach (object obj in this.astar.astarData.GetUpdateableGraphs())
+				IEnumerator enumerator = this.astar.astarData.GetUpdateableGraphs().GetEnumerator();
+				try
 				{
-					IUpdatableGraph updatableGraph = (IUpdatableGraph)obj;
-					NavGraph graph = updatableGraph as NavGraph;
-					if (graphUpdateObject.nnConstraint == null || graphUpdateObject.nnConstraint.SuitableGraph(this.astar.astarData.GetGraphIndex(graph), graph))
+					while (enumerator.MoveNext())
 					{
-						GraphUpdateProcessor.GUOSingle item = default(GraphUpdateProcessor.GUOSingle);
-						item.order = GraphUpdateProcessor.GraphUpdateOrder.GraphUpdate;
-						item.obj = graphUpdateObject;
-						item.graph = updatableGraph;
-						this.graphUpdateQueueRegular.Enqueue(item);
+						object obj = enumerator.Current;
+						IUpdatableGraph updatableGraph = (IUpdatableGraph)obj;
+						NavGraph graph = updatableGraph as NavGraph;
+						if (graphUpdateObject.nnConstraint == null || graphUpdateObject.nnConstraint.SuitableGraph(this.astar.astarData.GetGraphIndex(graph), graph))
+						{
+							GraphUpdateProcessor.GUOSingle item = default(GraphUpdateProcessor.GUOSingle);
+							item.order = GraphUpdateProcessor.GraphUpdateOrder.GraphUpdate;
+							item.obj = graphUpdateObject;
+							item.graph = updatableGraph;
+							this.graphUpdateQueueRegular.Enqueue(item);
+						}
+					}
+				}
+				finally
+				{
+					IDisposable disposable;
+					if ((disposable = (enumerator as IDisposable)) != null)
+					{
+						disposable.Dispose();
 					}
 				}
 			}

@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Activates/deactivates a Game Object. Use this to hide/show areas, or enable/disable many Behaviours at once.")]
 	[ActionCategory(ActionCategory.GameObject)]
+	[Tooltip("Activates/deactivates a Game Object. Use this to hide/show areas, or enable/disable many Behaviours at once.")]
 	public class ActivateGameObject : FsmStateAction
 	{
 		
@@ -77,10 +78,23 @@ namespace HutongGames.PlayMaker.Actions
 		public void SetActiveRecursively(GameObject go, bool state)
 		{
 			go.SetActive(state);
-			foreach (object obj in go.transform)
+			IEnumerator enumerator = go.transform.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				this.SetActiveRecursively(transform.gameObject, state);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					this.SetActiveRecursively(transform.gameObject, state);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 

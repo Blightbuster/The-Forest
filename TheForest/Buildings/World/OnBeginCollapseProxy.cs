@@ -11,11 +11,14 @@ namespace TheForest.Buildings.World
 		{
 			if (this._target)
 			{
-				this._target.SendMessage("OnBeginCollapse", SendMessageOptions.DontRequireReceiver);
+				this._target.SendMessage(this._message, SendMessageOptions.DontRequireReceiver);
 			}
 		}
 
 		
 		public GameObject _target;
+
+		
+		public string _message = "OnBeginCollapse";
 	}
 }

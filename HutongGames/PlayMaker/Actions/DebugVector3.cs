@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Logs the value of a Vector3 Variable in the PlayMaker Log Window.")]
 	[ActionCategory(ActionCategory.Debug)]
+	[Tooltip("Logs the value of a Vector3 Variable in the PlayMaker Log Window.")]
 	public class DebugVector3 : FsmStateAction
 	{
 		
@@ -31,8 +31,8 @@ namespace HutongGames.PlayMaker.Actions
 		public LogLevel logLevel;
 
 		
-		[Tooltip("Prints the value of a Vector3 variable in the PlayMaker log window.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Prints the value of a Vector3 variable in the PlayMaker log window.")]
 		public FsmVector3 vector3Variable;
 	}
 }

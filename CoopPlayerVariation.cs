@@ -1,4 +1,5 @@
 ﻿using System;
+using TheForest.Utils;
 using UnityEngine;
 
 
@@ -6,11 +7,18 @@ using UnityEngine;
 public class CoopPlayerVariation
 {
 	
-	public void Init()
+	public void Init(SkinnedMeshRenderer hat, SkinnedMeshRenderer top, SkinnedMeshRenderer pants)
 	{
-		this._armColorBlock = new MaterialPropertyBlock();
+		this._hat = hat;
+		this._top = top;
+		this._pants = pants;
+		this._armsColorBlock = new MaterialPropertyBlock();
 		this._headColorBlock = new MaterialPropertyBlock();
+		this._armsBloodBlock = new MaterialPropertyBlock();
 		this._colorPropertyId = Shader.PropertyToID("_Color");
+		this._armBloodVal = 0f;
+		this.SetArmSkinBlood(this._armBloodVal);
+		this._lerpSkinColor = this.NormalSkin;
 	}
 
 	
@@ -22,54 +30,56 @@ public class CoopPlayerVariation
 		}
 		if (!on)
 		{
-			this.ResetSkinColor();
 			this.SetHair(-1);
+			this.ResetSkinColor();
 		}
 	}
 
 	
-	public void SetMeshes(SkinnedMeshRenderer tShirtMesh, SkinnedMeshRenderer pantsMesh)
+	public void SetMeshes(Mesh hatMesh, Mesh topMesh, Transform[] topBones, Mesh pantsMesh)
 	{
-		this._tShirtMesh = tShirtMesh;
-		this._pantsMesh = pantsMesh;
+		if (hatMesh)
+		{
+			this._hat.sharedMesh = hatMesh;
+		}
+		this._hat.enabled = hatMesh;
+		if (topMesh)
+		{
+			this._top.sharedMesh = topMesh;
+			this._top.bones = topBones;
+		}
+		this._top.enabled = topMesh;
+		if (pantsMesh)
+		{
+			this._pants.sharedMesh = pantsMesh;
+		}
+		this._pants.enabled = pantsMesh;
 	}
 
 	
-	public void SetMaterials(Material tShirtClean, Material tShirtRed, Material pantsClean, Material pantsRed)
+	public void SetMaterials(Material[] hatClean, Material[] hatRed, Material[] topClean, Material[] topRed, Material[] tShirtClean, Material[] tShirtRed, Material[] pantsClean, Material[] pantsRed)
 	{
+		this._hatMaterialClean = hatClean;
+		this._hatMaterialRed = hatRed;
+		this._topMaterialClean = topClean;
+		this._topMaterialRed = topRed;
 		this._tShirtMaterialClean = tShirtClean;
 		this._tShirtMaterialRed = tShirtRed;
 		this._pantsMaterialClean = pantsClean;
 		this._pantsMaterialRed = pantsRed;
-		this.SetBodyMaterial(this._tShirtMaterialClean, this._pantsMaterialClean);
+		this.SetBodyMaterial(this._hatMaterialClean, this._topMaterialClean, this._tShirtMaterialClean, this._pantsMaterialClean);
 	}
 
 	
-	public void SetBodyOptions(BodyOptions pants, BodyOptions tshirt, BodyOptions arms)
+	public void SetBodyOptions(BodyOptions tshirt, BodyOptions arms, BodyOptions pants, BodyOptions shoes)
 	{
-		if (this._pantsMesh && this._pantsMesh.gameObject.activeSelf != (pants == BodyOptions.Default))
-		{
-			this._pantsMesh.gameObject.SetActive(pants == BodyOptions.Default);
-		}
-		if (this._tShirtMesh && this._tShirtMesh.gameObject.activeSelf != (tshirt == BodyOptions.Default))
-		{
-			this._tShirtMesh.gameObject.SetActive(tshirt == BodyOptions.Default);
-		}
-		if (this.TShirtNoArms && this.TShirtNoArms.gameObject.activeSelf != (tshirt == BodyOptions.NoArms))
-		{
-			this.TShirtNoArms.gameObject.SetActive(tshirt == BodyOptions.NoArms);
-		}
-		if (this.Hands)
-		{
-			if (this.Arms.gameObject.activeSelf != (arms != BodyOptions.JustHands))
-			{
-				this.Arms.gameObject.SetActive(arms != BodyOptions.JustHands);
-			}
-			if (this.Hands.gameObject.activeSelf != (arms == BodyOptions.JustHands))
-			{
-				this.Hands.gameObject.SetActive(arms == BodyOptions.JustHands);
-			}
-		}
+		this.TShirt.SetActiveSelfSafe(tshirt == BodyOptions.Default);
+		this.TShirtNoArms.SetActiveSelfSafe(tshirt == BodyOptions.NoArms);
+		bool flag = arms == BodyOptions.JustHands;
+		this.Arms.SetActiveSelfSafe(!flag);
+		this.Hands.SetActiveSelfSafe(flag);
+		this._pants.SetActiveSelfSafe(pants == BodyOptions.Default);
+		this.Shoes.SetActiveSelfSafe(shoes == BodyOptions.Default);
 	}
 
 	
@@ -79,7 +89,7 @@ public class CoopPlayerVariation
 		for (int i = 0; i < this.Hair.Length; i++)
 		{
 			bool flag = i == hair;
-			if (this.Hair[i].activeSelf != flag)
+			if (this.Hair[i] && this.Hair[i].activeSelf != flag)
 			{
 				this.Hair[i].SetActive(flag);
 			}
@@ -92,124 +102,179 @@ public class CoopPlayerVariation
 		this.ResetSkinColor();
 		if (red)
 		{
-			if (this.Arms)
-			{
-				this.Arms.sharedMaterial = this.MaterialArmsRed;
-			}
-			if (this.Hands)
-			{
-				this.Hands.sharedMaterial = this.MaterialArmsRed;
-			}
-			this.SetBodyMaterial(this._tShirtMaterialRed, this._pantsMaterialRed);
-			this.SetHeadMaterial(this.MaterialHeadRed, cold);
+			this.ApplyRedSkin(cold);
 		}
 		else if (blood)
 		{
-			if (!red)
-			{
-				if (this.Arms)
-				{
-					this.Arms.sharedMaterial = this.MaterialArmsBloody;
-				}
-				if (this.Hands)
-				{
-					this.Hands.sharedMaterial = this.MaterialArmsBloody;
-				}
-				this.SetHeadMaterial(this.MaterialHeadBloody, cold);
-			}
+			this.ApplyBloodSkin(cold);
 		}
 		else if (mud)
 		{
-			if (!red)
-			{
-				if (this.Arms)
-				{
-					this.Arms.sharedMaterial = this.MaterialArmsMuddy;
-				}
-				if (this.Hands)
-				{
-					this.Hands.sharedMaterial = this.MaterialArmsMuddy;
-				}
-				if (this._tShirtMaterialClean)
-				{
-					this.SetBodyMaterial(this._tShirtMaterialClean, this._pantsMaterialClean);
-				}
-				this.SetHeadMaterial(this.MaterialHeadMuddy, cold);
-			}
+			this.ApplyMudSkin(cold);
 		}
 		else
 		{
-			if (this.Arms)
-			{
-				this.Arms.sharedMaterial = this.MaterialArmsClean;
-			}
-			if (this.Hands)
-			{
-				this.Hands.sharedMaterial = this.MaterialArmsClean;
-			}
-			if (this._tShirtMaterialClean)
-			{
-				this.SetBodyMaterial(this._tShirtMaterialClean, this._pantsMaterialClean);
-			}
-			this.SetHeadMaterial(this.MaterialHeadClean, cold);
+			this.ApplyCleanSkin(cold);
+		}
+		this.UpdateSkinColor(cold);
+	}
+
+	
+	private void ApplyCleanSkin(bool cold)
+	{
+		this._armBloodVal = Mathf.Lerp(this._armBloodVal, 0f, Time.deltaTime / 2f);
+		if (this._armBloodVal < 0.05f)
+		{
+			this._armBloodVal = 0f;
 		}
 		if (this.Arms)
 		{
-			this.Arms.GetPropertyBlock(this._armColorBlock);
-			this._armColorBlock.SetColor(this._colorPropertyId, (!cold) ? this.NormalSkin : this.ColdSkin);
-			this.Arms.SetPropertyBlock(this._armColorBlock);
+			this.Arms.sharedMaterial = this.MaterialArmsClean;
+			this.SetArmSkinBlood(this._armBloodVal);
 		}
 		if (this.Hands)
 		{
-			this.Hands.GetPropertyBlock(this._armColorBlock);
-			this._armColorBlock.SetColor(this._colorPropertyId, (!cold) ? this.NormalSkin : this.ColdSkin);
-			this.Hands.SetPropertyBlock(this._armColorBlock);
+			this.Hands.sharedMaterial = this.MaterialArmsClean;
+			this.SetArmSkinBlood(this._armBloodVal);
+		}
+		if (this.IsValid(this._tShirtMaterialClean))
+		{
+			this.SetBodyMaterial(this._hatMaterialClean, this._topMaterialClean, this._tShirtMaterialClean, this._pantsMaterialClean);
+		}
+		this.SetHeadMaterial(this.MaterialHeadClean, cold);
+	}
+
+	
+	private void ApplyMudSkin(bool cold)
+	{
+		if (this.Arms)
+		{
+			this.Arms.sharedMaterial = this.MaterialArmsMuddy;
+		}
+		if (this.Hands)
+		{
+			this.Hands.sharedMaterial = this.MaterialArmsMuddy;
+		}
+		if (this.IsValid(this._tShirtMaterialClean))
+		{
+			this.SetBodyMaterial(this._hatMaterialClean, this._topMaterialClean, this._tShirtMaterialClean, this._pantsMaterialClean);
+		}
+		this.SetHeadMaterial(this.MaterialHeadMuddy, cold);
+	}
+
+	
+	private void ApplyBloodSkin(bool cold)
+	{
+		if (this.Arms)
+		{
+			this.Arms.sharedMaterial = this.MaterialArmsBloody;
+			this._armBloodVal = 0.5f;
+			this.SetArmSkinBlood(this._armBloodVal);
+		}
+		if (this.Hands)
+		{
+			this.Hands.sharedMaterial = this.MaterialArmsBloody;
+			this._armBloodVal = 0.5f;
+			this.SetArmSkinBlood(this._armBloodVal);
+		}
+		this.SetHeadMaterial(this.MaterialHeadBloody, cold);
+	}
+
+	
+	private void ApplyRedSkin(bool cold)
+	{
+		if (this.Arms)
+		{
+			this.Arms.sharedMaterial = this.MaterialArmsRed;
+		}
+		if (this.Hands)
+		{
+			this.Hands.sharedMaterial = this.MaterialArmsRed;
+		}
+		this.SetBodyMaterial(this._hatMaterialRed, this._topMaterialRed, this._tShirtMaterialRed, this._pantsMaterialRed);
+		this.SetHeadMaterial(this.MaterialHeadRed, cold);
+	}
+
+	
+	private void UpdateSkinColor(bool cold)
+	{
+		this._lerpSkinColor = Color.Lerp(this._lerpSkinColor, (!cold) ? this.NormalSkin : this.ColdSkin, Time.deltaTime / 2f);
+		if (this.Arms)
+		{
+			this.Arms.GetPropertyBlock(this._armsColorBlock);
+			this._armsColorBlock.SetColor(this._colorPropertyId, this._lerpSkinColor);
+			this.Arms.SetPropertyBlock(this._armsColorBlock);
+		}
+		if (this.Hands)
+		{
+			this.Hands.GetPropertyBlock(this._armsColorBlock);
+			this._armsColorBlock.SetColor(this._colorPropertyId, this._lerpSkinColor);
+			this.Hands.SetPropertyBlock(this._armsColorBlock);
 		}
 	}
 
 	
 	private void SetHeadMaterial(Material mat, bool cold)
 	{
-		if (this.Head)
+		if (this.Head == null)
 		{
-			this.Head.sharedMaterial = ((!mat) ? this.MaterialHeadClean : mat);
-			this.Head.GetPropertyBlock(this._headColorBlock);
-			this._headColorBlock.SetColor(this._colorPropertyId, (!cold) ? this.NormalSkin : this.ColdSkin);
-			this.Head.SetPropertyBlock(this._headColorBlock);
+			return;
+		}
+		this.Head.sharedMaterial = ((!mat) ? this.MaterialHeadClean : mat);
+		this.Head.GetPropertyBlock(this._headColorBlock);
+		this._headColorBlock.SetColor(this._colorPropertyId, this._lerpSkinColor);
+		this.Head.SetPropertyBlock(this._headColorBlock);
+	}
+
+	
+	private void SetBodyMaterial(Material[] hatMat, Material[] topMat, Material[] tshirtMat, Material[] pantsMat)
+	{
+		if (this._hat && this.IsValid(hatMat))
+		{
+			this._hat.sharedMaterials = hatMat;
+		}
+		if (this._top && this.IsValid(topMat))
+		{
+			this._top.sharedMaterials = topMat;
+		}
+		if (this.TShirt && this.IsValid(tshirtMat))
+		{
+			this.TShirt.sharedMaterials = tshirtMat;
+		}
+		if (this.TShirtNoArms && this.IsValid(tshirtMat))
+		{
+			this.TShirtNoArms.sharedMaterials = tshirtMat;
+		}
+		if (this._pants && this.IsValid(pantsMat))
+		{
+			this._pants.sharedMaterials = pantsMat;
 		}
 	}
 
 	
-	private void SetBodyMaterial(Material bodyMat, Material pantsMat)
+	private bool IsValid(Material[] matArray)
 	{
-		if (this._pantsMesh && this._pantsMesh.gameObject.activeSelf)
-		{
-			this._pantsMesh.sharedMaterial = pantsMat;
-		}
-		if (this._tShirtMesh && this._tShirtMesh.gameObject.activeSelf)
-		{
-			this._tShirtMesh.sharedMaterial = bodyMat;
-		}
-		if (this.TShirtNoArms && this.TShirtNoArms.gameObject.activeSelf)
-		{
-			this.TShirtNoArms.sharedMaterial = bodyMat;
-		}
+		return matArray != null && matArray.Length > 0;
 	}
 
 	
 	public void ResetSkinColor()
 	{
+		if (ForestVR.Prototype)
+		{
+			return;
+		}
 		if (this.Arms)
 		{
-			this.Arms.GetPropertyBlock(this._armColorBlock);
-			this._armColorBlock.SetColor(this._colorPropertyId, this.NormalSkin);
-			this.Arms.SetPropertyBlock(this._armColorBlock);
+			this.Arms.GetPropertyBlock(this._armsColorBlock);
+			this._armsColorBlock.SetColor(this._colorPropertyId, this.NormalSkin);
+			this.Arms.SetPropertyBlock(this._armsColorBlock);
 		}
 		if (this.Hands)
 		{
-			this.Hands.GetPropertyBlock(this._armColorBlock);
-			this._armColorBlock.SetColor(this._colorPropertyId, this.NormalSkin);
-			this.Hands.SetPropertyBlock(this._armColorBlock);
+			this.Hands.GetPropertyBlock(this._armsColorBlock);
+			this._armsColorBlock.SetColor(this._colorPropertyId, this.NormalSkin);
+			this.Hands.SetPropertyBlock(this._armsColorBlock);
 		}
 		if (this.Head)
 		{
@@ -217,6 +282,34 @@ public class CoopPlayerVariation
 			this._headColorBlock.SetColor(this._colorPropertyId, this.NormalSkin);
 			this.Head.SetPropertyBlock(this._headColorBlock);
 		}
+	}
+
+	
+	public void SetArmSkinBlood(float amount)
+	{
+		if (this.Arms != null)
+		{
+			this.Arms.GetPropertyBlock(this._armsBloodBlock);
+			this._armsBloodBlock.SetFloat("_Damage1", amount);
+			this._armsBloodBlock.SetFloat("_Damage2", amount);
+			this._armsBloodBlock.SetFloat("_Damage3", amount);
+			this._armsBloodBlock.SetFloat("_Damage4", amount);
+			this.Arms.SetPropertyBlock(this._armsBloodBlock);
+		}
+		if (this.Hands != null)
+		{
+			this.Hands.GetPropertyBlock(this._armsBloodBlock);
+			this._armsBloodBlock.SetFloat("_Damage1", amount);
+			this._armsBloodBlock.SetFloat("_Damage2", amount);
+			this._armsBloodBlock.SetFloat("_Damage3", amount);
+			this._armsBloodBlock.SetFloat("_Damage4", amount);
+			this.Hands.SetPropertyBlock(this._armsBloodBlock);
+		}
+	}
+
+	
+	private void tranferArmBlood()
+	{
 	}
 
 	
@@ -265,38 +358,46 @@ public class CoopPlayerVariation
 	public Material BodyMaterialRed;
 
 	
-	[Header("deprecated")]
-	public SkinnedMeshRenderer TShirtDefault;
+	public SkinnedMeshRenderer Shoes;
 
 	
 	public SkinnedMeshRenderer TShirtNoArms;
 
 	
-	public SkinnedMeshRenderer Pants;
+	public SkinnedMeshRenderer TShirt;
 
 	
-	public SkinnedMeshRenderer Body;
+	private Material[] _tShirtMaterialClean;
 
 	
-	public Material[] BodyMaterialsClean;
+	private Material[] _tShirtMaterialRed;
 
 	
-	private SkinnedMeshRenderer _tShirtMesh;
+	private SkinnedMeshRenderer _hat;
 
 	
-	private Material _tShirtMaterialClean;
+	private Material[] _hatMaterialClean;
 
 	
-	private Material _tShirtMaterialRed;
+	private Material[] _hatMaterialRed;
 
 	
-	private SkinnedMeshRenderer _pantsMesh;
+	private SkinnedMeshRenderer _top;
 
 	
-	private Material _pantsMaterialClean;
+	private Material[] _topMaterialClean;
 
 	
-	private Material _pantsMaterialRed;
+	private Material[] _topMaterialRed;
+
+	
+	private SkinnedMeshRenderer _pants;
+
+	
+	private Material[] _pantsMaterialClean;
+
+	
+	private Material[] _pantsMaterialRed;
 
 	
 	private int _hair;
@@ -305,8 +406,17 @@ public class CoopPlayerVariation
 	private int _colorPropertyId;
 
 	
-	private MaterialPropertyBlock _armColorBlock;
+	private MaterialPropertyBlock _armsColorBlock;
 
 	
 	private MaterialPropertyBlock _headColorBlock;
+
+	
+	private MaterialPropertyBlock _armsBloodBlock;
+
+	
+	private float _armBloodVal;
+
+	
+	private Color _lerpSkinColor;
 }

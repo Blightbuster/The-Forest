@@ -58,8 +58,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmGameObject gameObject;
 
 		
-		[UIHint(UIHint.Tag)]
 		[CompoundArray("Tag Switches", "Compare Tag", "Send Event")]
+		[UIHint(UIHint.Tag)]
 		public FsmString[] compareTo;
 
 		

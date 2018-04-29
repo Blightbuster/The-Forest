@@ -13,7 +13,7 @@ public class yachtWobbleSetup : MonoBehaviour
 	
 	private void setupWobble()
 	{
-		GameObject gameObject = (GameObject)UnityEngine.Object.Instantiate((GameObject)Resources.Load("CutScene/yachtWobblePrefab"), base.transform.position, Quaternion.identity);
+		GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>((GameObject)Resources.Load("CutScene/yachtWobblePrefab"), base.transform.position, Quaternion.identity);
 		Vector3 position = base.transform.position + base.transform.up * -30f;
 		gameObject.transform.position = position;
 		gameObject.transform.parent = base.transform.parent;

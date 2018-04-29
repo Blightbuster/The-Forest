@@ -173,13 +173,9 @@ public class enemyWeaponMelee : MonoBehaviour
 			Vector3 position = this.rootTr.position;
 			position.y += 3.3f;
 			Vector3 direction = other.transform.position - position;
-			RaycastHit[] array = Physics.RaycastAll(position, direction, direction.magnitude, this.enemyHitMask);
-			for (int i = 0; i < array.Length; i++)
+			if (Physics.Raycast(position, direction, out this.hit, direction.magnitude, this.enemyHitMask, QueryTriggerInteraction.Ignore))
 			{
-				if ((array[i].transform.gameObject.layer == 11 || array[i].transform.gameObject.layer == 13 || array[i].transform.gameObject.layer == 17 || array[i].transform.gameObject.layer == 20 || array[i].transform.gameObject.layer == 21 || array[i].transform.gameObject.layer == 25) && !array[i].collider.isTrigger)
-				{
-					return;
-				}
+				return;
 			}
 			if (!this.creepy_male && !this.creepy && !this.creepy_baby && !this.creepy_fat && this.events && componentInParent)
 			{
@@ -575,6 +571,9 @@ public class enemyWeaponMelee : MonoBehaviour
 
 	
 	public bool enemyAtStructure;
+
+	
+	private RaycastHit hit;
 
 	
 	public bool leader;

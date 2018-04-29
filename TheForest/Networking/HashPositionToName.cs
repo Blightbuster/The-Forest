@@ -12,7 +12,7 @@ namespace TheForest.Networking
 		public override void Attached()
 		{
 			base.name = HashPositionToName.GetHash(base.transform.position);
-			if (BoltNetwork.isServer && !this.entity.isOwner)
+			if (BoltNetwork.isServer && !base.entity.isOwner)
 			{
 				BoltNetwork.Instantiate(Prefabs.Instance.HashPositionToNamePrefab, base.transform.position, base.transform.rotation);
 				BoltNetwork.Destroy(base.gameObject);

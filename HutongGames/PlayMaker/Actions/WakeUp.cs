@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Forces a Game Object's Rigid Body to wake up.")]
 	[ActionCategory(ActionCategory.Physics)]
+	[Tooltip("Forces a Game Object's Rigid Body to wake up.")]
 	public class WakeUp : ComponentAction<Rigidbody>
 	{
 		
@@ -32,8 +32,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Rigidbody))]
 		[RequiredField]
+		[CheckForComponent(typeof(Rigidbody))]
 		public FsmOwnerDefault gameObject;
 	}
 }

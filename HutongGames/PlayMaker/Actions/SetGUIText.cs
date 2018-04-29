@@ -42,8 +42,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(GUIText))]
 		[RequiredField]
+		[CheckForComponent(typeof(GUIText))]
 		public FsmOwnerDefault gameObject;
 
 		

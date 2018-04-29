@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Bolt;
 using TheForest.Buildings.Interfaces;
 using TheForest.Items;
@@ -42,7 +43,7 @@ public class DryingRack : EntityBehaviour, IWetable
 				if (TheForest.Utils.Input.GetButtonDown("Craft"))
 				{
 					LocalPlayer.Inventory.UnequipItemAtSlot(Item.EquipmentSlot.RightHand, false, false, true);
-					LocalPlayer.Sfx.PlayWhoosh();
+					LocalPlayer.Sfx.PlayItemCustomSfx(this.foodItems[num2]._itemId, true);
 					this.SpawnFoodPrefab(this.foodItems[num2]._cookPrefab);
 					Scene.HudGui.DryingRackWidget.Shutdown();
 				}
@@ -58,7 +59,7 @@ public class DryingRack : EntityBehaviour, IWetable
 				{
 					if (TheForest.Utils.Input.GetButtonDown("Craft") && LocalPlayer.Inventory.RemoveItem(this.CurrentFoodItemId, 1, true, true))
 					{
-						LocalPlayer.Sfx.PlayWhoosh();
+						LocalPlayer.Sfx.PlayItemCustomSfx(this.CurrentFoodItemId, true);
 						this.SpawnFoodPrefab(this.CurrentFoodprefab);
 					}
 					else
@@ -103,7 +104,7 @@ public class DryingRack : EntityBehaviour, IWetable
 	
 	public void GrabEnter()
 	{
-		base.enabled = (!BoltNetwork.isRunning || this.entity.isAttached);
+		base.enabled = (!BoltNetwork.isRunning || base.entity.isAttached);
 		if (base.enabled)
 		{
 			this._currentFoodItemNum--;
@@ -159,41 +160,54 @@ public class DryingRack : EntityBehaviour, IWetable
 		vector = this.dryingGrid.transform.TransformPoint(vector);
 		Vector3 vector2 = vector + (LocalPlayer.MainCamTr.position - vector).normalized * 0.4f + new Vector3(0f, -1f, 0f);
 		float num = this.gridChunkSize.magnitude * 0.75f;
-		foreach (object obj in base.transform.parent)
+		IEnumerator enumerator = base.transform.parent.GetEnumerator();
+		try
 		{
-			Transform transform = (Transform)obj;
-			Cook component = transform.GetComponent<Cook>();
-			if (component && Vector3.Distance(vector, transform.position) < num)
+			while (enumerator.MoveNext())
 			{
-				if (component.PickupTrigger && component.CurrentStatus >= Cook.Status.Cooked)
+				object obj = enumerator.Current;
+				Transform transform = (Transform)obj;
+				Cook component = transform.GetComponent<Cook>();
+				if (component && Vector3.Distance(vector, transform.position) < num)
 				{
-					if (this._lastActivePickup != component.PickupTrigger)
+					if (component.PickupTrigger && component.CurrentStatus >= Cook.Status.Cooked)
+					{
+						if (this._lastActivePickup != component.PickupTrigger)
+						{
+							if (this._lastActivePickup)
+							{
+								this._lastActivePickup.SendMessage("GrabExit", SendMessageOptions.DontRequireReceiver);
+							}
+							component.PickupTrigger.SendMessage("GrabEnter", SendMessageOptions.DontRequireReceiver);
+							this._lastActivePickup = component.PickupTrigger;
+						}
+					}
+					else if (this._lastActivePickup != component.RawPickupTrigger)
 					{
 						if (this._lastActivePickup)
 						{
 							this._lastActivePickup.SendMessage("GrabExit", SendMessageOptions.DontRequireReceiver);
 						}
-						component.PickupTrigger.SendMessage("GrabEnter", SendMessageOptions.DontRequireReceiver);
-						this._lastActivePickup = component.PickupTrigger;
+						component.RawPickupTrigger.SendMessage("GrabEnter", SendMessageOptions.DontRequireReceiver);
+						this._lastActivePickup = component.RawPickupTrigger;
 					}
-				}
-				else if (this._lastActivePickup != component.RawPickupTrigger)
-				{
-					if (this._lastActivePickup)
+					if (this._lastActivePickup && this._lastActivePickup._myPickUp)
 					{
-						this._lastActivePickup.SendMessage("GrabExit", SendMessageOptions.DontRequireReceiver);
+						this._lastActivePickup._myPickUp.transform.position = vector2 + this.Icons.transform.GetChild(0).localPosition;
 					}
-					component.RawPickupTrigger.SendMessage("GrabEnter", SendMessageOptions.DontRequireReceiver);
-					this._lastActivePickup = component.RawPickupTrigger;
+					this.Icons.transform.position = vector2;
+					Scene.HudGui.DryingRackWidget.ShowSingle(component._itemId, this.Icons.transform, SideIcons.Take);
+					this.Icons.gameObject.SetActive(false);
+					return false;
 				}
-				if (this._lastActivePickup && this._lastActivePickup._myPickUp)
-				{
-					this._lastActivePickup._myPickUp.transform.position = vector2 + this.Icons.transform.GetChild(0).localPosition;
-				}
-				this.Icons.transform.position = vector2;
-				Scene.HudGui.DryingRackWidget.ShowSingle(component._itemId, this.Icons.transform, SideIcons.Take);
-				this.Icons.gameObject.SetActive(false);
-				return false;
+			}
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = (enumerator as IDisposable)) != null)
+			{
+				disposable.Dispose();
 			}
 		}
 		if (Time.time > this._nextAddFood)
@@ -253,7 +267,7 @@ public class DryingRack : EntityBehaviour, IWetable
 		}
 		else
 		{
-			Cook cook = (Cook)UnityEngine.Object.Instantiate(foodPrefab, this.dryingGrid.transform.TransformPoint(position), Quaternion.identity);
+			Cook cook = UnityEngine.Object.Instantiate<Cook>(foodPrefab, this.dryingGrid.transform.TransformPoint(position), Quaternion.identity);
 			cook.transform.parent = base.transform.parent;
 		}
 	}

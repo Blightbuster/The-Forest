@@ -18,17 +18,20 @@ namespace TheForest.Utils
 			if (CullingGrid.Instance != this)
 			{
 				CullingGrid.Instance = this;
-				this._offset = new Vector3((float)(-(float)this._gridSize / 2 * this._gridWorldSize), 0f, (float)(-(float)this._gridSize / 2 * this._gridWorldSize));
+				this._offset = new Vector2((float)(-(float)this._gridSize / 2) * this._gridWorldSize, (float)(-(float)this._gridSize / 2) * this._gridWorldSize);
 				this._rendererGrid = new CullingGrid.Cell[this._gridSize, this._gridSize];
 				for (int i = 0; i < this._gridSize; i++)
 				{
 					for (int j = 0; j < this._gridSize; j++)
 					{
-						this._rendererGrid[i, j] = new CullingGrid.Cell();
+						CullingGrid.Cell cell = new CullingGrid.Cell();
+						cell._cellCenter = this.GridCenterToWorld(i, j);
+						this._rendererGrid[i, j] = cell;
 					}
 				}
+				this._activeCells = new List<CullingGrid.Cell>();
+				this._workCells = new List<CullingGrid.Cell>();
 				this._circlePosition = Vector2.zero;
-				this._circle2Position = Vector2.zero;
 			}
 		}
 
@@ -37,49 +40,54 @@ namespace TheForest.Utils
 		{
 			if (LocalPlayer.Transform)
 			{
-				float finalRadius = this.GetFinalRadius();
-				float circle2Radius = this._circle2Radius;
-				float x = Mathf.Min(this._circlePosition.x - finalRadius - 1f, this._circle2Position.x - circle2Radius - 1f);
-				float num = Mathf.Max(this._circlePosition.x + finalRadius + 1f, this._circle2Position.x + circle2Radius + 1f);
-				float y = Mathf.Min(this._circlePosition.y - finalRadius - 1f, this._circle2Position.y - circle2Radius - 1f);
-				float num2 = Mathf.Max(this._circlePosition.y + finalRadius + 1f, this._circle2Position.y + circle2Radius + 1f);
-				Vector2 a = new Vector2(x, y);
-				while (a.x < num)
+				Vector3 position = LocalPlayer.Transform.position;
+				this._circlePosition.x = position.x;
+				this._circlePosition.y = position.z;
+				Vector2 vector = new Vector2(this._gridWorldSize, this._gridWorldSize);
+				float magnitude = vector.magnitude;
+				float num = this._onRadius + magnitude;
+				int num2 = Mathf.Clamp(this.WorldToGridXRounded(this._circlePosition.x - num), 0, this._gridSize);
+				int num3 = Mathf.Clamp(this.WorldToGridXRounded(this._circlePosition.x + num) + 1, 0, this._gridSize);
+				int num4 = Mathf.Clamp(this.WorldToGridYRounded(this._circlePosition.y - num), 0, this._gridSize);
+				int num5 = Mathf.Clamp(this.WorldToGridYRounded(this._circlePosition.y + num) + 1, 0, this._gridSize);
+				this._frameCount++;
+				for (int i = num2; i < num3; i++)
 				{
-					a.y = y;
-					while (a.y < num2)
+					for (int j = num4; j < num5; j++)
 					{
-						if (a.x >= 0f && a.x < (float)this._gridSize && a.y >= 0f && a.y < (float)this._gridSize)
+						CullingGrid.Cell cell = this._rendererGrid[i, j];
+						cell._distance = Vector2.Distance(cell._cellCenter, this._circlePosition);
+						bool flag = cell._distance <= num;
+						if (flag)
 						{
-							bool flag = Vector2.Distance(a, this._circlePosition) <= finalRadius || Vector2.Distance(a, this._circle2Position) <= circle2Radius;
-							CullingGrid.Cell cell = this._rendererGrid[Mathf.FloorToInt(a.x), Mathf.FloorToInt(a.y)];
-							if (cell._enabled != flag)
+							cell._activeAt = this._frameCount;
+							if (!cell._enabled)
 							{
-								bool enabled = flag;
-								List<Renderer> renderers = cell._renderers;
-								int count = renderers.Count;
-								for (int i = 0; i < count; i++)
-								{
-									renderers[i].enabled = enabled;
-								}
-								cell._enabled = enabled;
+								this._activeCells.Add(cell);
 							}
 						}
-						a.y += 1f;
 					}
-					a.x += 1f;
 				}
-				this._prevCirclePosition = this._circlePosition;
-				this._prevCircle2Position = this._circle2Position;
-				Vector3 from = LocalPlayer.Transform.position + LocalPlayer.Transform.forward * this._circleOffset * (float)this._gridWorldSize;
-				this._circlePosition.x = (float)this.WorldToGridXRounded(from.x);
-				this._circlePosition.y = (float)this.WorldToGridYRounded(from.z);
-				Vector3 a2 = (!Clock.Dark) ? Scene.Atmosphere.Sun.transform.forward : Scene.Atmosphere.Moon.transform.forward;
-				a2.y = 0f;
-				Vector3 a3 = Vector3.Lerp(from, LocalPlayer.Transform.position, a2.magnitude);
-				Vector3 vector = a3 + a2 * this._circle2Offset * (float)this._gridWorldSize;
-				this._circle2Position.x = (float)this.WorldToGridXRounded(vector.x);
-				this._circle2Position.y = (float)this.WorldToGridYRounded(vector.z);
+				foreach (CullingGrid.Cell cell2 in this._activeCells)
+				{
+					cell2._distance = Vector2.Distance(cell2._cellCenter, this._circlePosition);
+				}
+				this._activeCells.Sort((CullingGrid.Cell x, CullingGrid.Cell y) => x._distance.CompareTo(y._distance));
+				foreach (CullingGrid.Cell cell3 in this._activeCells)
+				{
+					bool flag2 = cell3._activeAt == this._frameCount;
+					if (cell3._enabled != flag2)
+					{
+						List<Renderer> renderers = cell3._renderers;
+						int count = renderers.Count;
+						for (int k = 0; k < count; k++)
+						{
+							renderers[k].enabled = flag2;
+						}
+						cell3._enabled = flag2;
+					}
+				}
+				this._activeCells.RemoveAll((CullingGrid.Cell c) => !c._enabled);
 			}
 		}
 
@@ -175,62 +183,53 @@ namespace TheForest.Utils
 		
 		private int WorldToGridX(float xPosition)
 		{
-			return Mathf.FloorToInt((xPosition - this._offset.x) / (float)this._gridWorldSize);
+			return Mathf.FloorToInt((xPosition - this._offset.x) / this._gridWorldSize);
 		}
 
 		
 		private int WorldToGridY(float zPosition)
 		{
-			return Mathf.FloorToInt((zPosition - this._offset.z) / (float)this._gridWorldSize);
+			return Mathf.FloorToInt((zPosition - this._offset.y) / this._gridWorldSize);
 		}
 
 		
 		private int WorldToGridXRounded(float xPosition)
 		{
-			return Mathf.RoundToInt((xPosition - this._offset.x) / (float)this._gridWorldSize);
+			return Mathf.RoundToInt((xPosition - this._offset.x) / this._gridWorldSize);
 		}
 
 		
 		private int WorldToGridYRounded(float zPosition)
 		{
-			return Mathf.RoundToInt((zPosition - this._offset.z) / (float)this._gridWorldSize);
+			return Mathf.RoundToInt((zPosition - this._offset.y) / this._gridWorldSize);
 		}
 
 		
 		private float GridToWorldX(float xPosition)
 		{
-			return xPosition * (float)this._gridWorldSize + this._offset.x;
+			return xPosition * this._gridWorldSize + this._offset.x;
 		}
 
 		
 		private float GridToWorldZ(float yPosition)
 		{
-			return yPosition * (float)this._gridWorldSize + this._offset.z;
+			return yPosition * this._gridWorldSize + this._offset.y;
 		}
 
 		
-		private float GetFinalRadius()
+		private Vector2 GridCenterToWorld(int x, int y)
 		{
-			return this._circleRadius;
+			return this._offset + this._gridWorldSize * new Vector2((float)x + 0.5f, (float)y + 0.5f);
 		}
 
 		
 		public int _gridSize = 25;
 
 		
-		public int _gridWorldSize = 35;
+		public float _gridWorldSize = 75f;
 
 		
-		public float _circleRadius = 7f;
-
-		
-		public float _circleOffset = 3f;
-
-		
-		public float _circle2Radius = 2.5f;
-
-		
-		public float _circle2Offset = -1f;
+		public float _onRadius = 300f;
 
 		
 		[Header("Gizmos")]
@@ -249,28 +248,37 @@ namespace TheForest.Utils
 		public float _currentlyInRadiusRendererCount;
 
 		
-		private Vector3 _offset;
+		private Vector2 _offset;
 
 		
 		private CullingGrid.Cell[,] _rendererGrid;
 
 		
-		private Vector2 _prevCirclePosition;
-
-		
-		private Vector2 _prevCircle2Position;
-
-		
 		private Vector2 _circlePosition;
 
 		
-		private Vector2 _circle2Position;
+		private List<CullingGrid.Cell> _activeCells;
+
+		
+		private List<CullingGrid.Cell> _workCells;
+
+		
+		private int _frameCount;
 
 		
 		public class Cell
 		{
 			
 			public bool _enabled;
+
+			
+			public int _activeAt;
+
+			
+			public float _distance;
+
+			
+			public Vector2 _cellCenter = Vector2.zero;
 
 			
 			public List<Renderer> _renderers = new List<Renderer>();

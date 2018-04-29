@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Bolt;
 using TheForest.Audio;
 using TheForest.Items;
@@ -29,12 +30,12 @@ namespace TheForest.Buildings.World
 				Scene.HudGui.RackWidgets[(int)this._type].ShowSingle(this._currentTakeItem, this.CurrentTakeItemId, this._slots[this.CurrentSlot]._slotTr, SideIcons.Take);
 				if (TheForest.Utils.Input.GetButtonDown("Take") && (LocalPlayer.Inventory.AddItem(this.CurrentTakeItemId, 1, false, false, null) || LocalPlayer.Inventory.FakeDrop(this.CurrentTakeItemId, null)))
 				{
-					LocalPlayer.Sfx.PlayWhoosh();
+					LocalPlayer.Sfx.PlayItemCustomSfx(this.CurrentTakeItemId, true);
 					this.CurrentTakeIcon.SetActive(false);
 					if (BoltNetwork.isRunning)
 					{
 						ItemHolderTakeItem itemHolderTakeItem = ItemHolderTakeItem.Create(GlobalTargets.OnlyServer);
-						itemHolderTakeItem.Target = this.entity;
+						itemHolderTakeItem.Target = base.entity;
 						itemHolderTakeItem.Player = LocalPlayer.Entity;
 						itemHolderTakeItem.ContentType = this.CurrentSlot;
 						itemHolderTakeItem.ContentValue = this.CurrentTakeItemId;
@@ -72,7 +73,7 @@ namespace TheForest.Buildings.World
 						if (BoltNetwork.isRunning)
 						{
 							ItemHolderAddItem itemHolderAddItem = ItemHolderAddItem.Create(GlobalTargets.OnlyServer);
-							itemHolderAddItem.Target = this.entity;
+							itemHolderAddItem.Target = base.entity;
 							itemHolderAddItem.ContentType = this.CurrentSlot;
 							itemHolderAddItem.ContentInfo = num;
 							itemHolderAddItem.Send();
@@ -85,7 +86,7 @@ namespace TheForest.Buildings.World
 				}
 			}
 			bool flag = this.CanToggleNextAddItem();
-			if (flag && TheForest.Utils.Input.GetButtonDown("Rotate"))
+			if (flag && (TheForest.Utils.Input.GetButtonDown("Rotate") || num == -1))
 			{
 				LocalPlayer.Sfx.PlayWhoosh();
 				this.ToggleNextAddItem();
@@ -123,7 +124,7 @@ namespace TheForest.Buildings.World
 		
 		public void GrabEnter(Transform proxy)
 		{
-			base.enabled = (!BoltNetwork.isRunning || this.entity.isAttached);
+			base.enabled = (!BoltNetwork.isRunning || base.entity.isAttached);
 			this._icons.transform.position = proxy.position + base.transform.TransformDirection(new Vector3(0f, -0.5f, 0.5f));
 			if (base.enabled)
 			{
@@ -161,12 +162,10 @@ namespace TheForest.Buildings.World
 				if (LocalPlayer.Inventory.Owns(this._slots[this.CurrentSlot]._items[num2]._itemId, this._allowFallback))
 				{
 					this._currentAddItem = num2;
-					this.UpdateIcons();
 					return;
 				}
 			}
 			this._currentAddItem = Mathf.Clamp(this._currentAddItem, 0, this._slots[this.CurrentSlot]._items.Length - 1);
-			this.UpdateIcons();
 		}
 
 		
@@ -184,14 +183,6 @@ namespace TheForest.Buildings.World
 				}
 			}
 			return false;
-		}
-
-		
-		private void UpdateIcons()
-		{
-			Item item = ItemDatabase.ItemById(this.CurrentAddItemId);
-			this._addIcon.sharedMaterial = item._addMat;
-			this._takeIcon.sharedMaterial = item._takeMat;
 		}
 
 		
@@ -301,12 +292,25 @@ namespace TheForest.Buildings.World
 			gameObject.transform.localRotation = ((!component) ? inventoryItemView._held.transform.localRotation : component.RealLocalRotation);
 			gameObject.gameObject.layer = base.transform.parent.gameObject.layer;
 			gameObject.SetActive(true);
-			foreach (object obj in gameObject.transform)
+			IEnumerator enumerator = gameObject.transform.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				if (transform.name == "collide" || transform.GetComponent<BurnableCloth>())
+				while (enumerator.MoveNext())
 				{
-					UnityEngine.Object.Destroy(transform.gameObject);
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					if (transform.name == "collide" || transform.GetComponent<BurnableCloth>())
+					{
+						UnityEngine.Object.Destroy(transform.gameObject);
+					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
 				}
 			}
 			foreach (MonoBehaviour obj2 in gameObject.GetComponents<MonoBehaviour>())
@@ -321,11 +325,18 @@ namespace TheForest.Buildings.World
 		{
 			InventoryItemView inventoryItemView = LocalPlayer.Inventory.InventoryItemViewsCache[itemId][0];
 			InventoryItemView inventoryItemView2 = UnityEngine.Object.Instantiate<InventoryItemView>(inventoryItemView);
-			Vector3 position = parent.position;
-			position.y += LocalPlayer.Inventory._inventoryGO.transform.InverseTransformPoint(inventoryItemView.transform.position).y;
 			inventoryItemView2.transform.localScale = inventoryItemView.transform.lossyScale;
 			inventoryItemView2.transform.parent = parent;
-			inventoryItemView2.transform.position = position;
+			if (inventoryItemView._modelOffsetTr)
+			{
+				inventoryItemView2.transform.localPosition = inventoryItemView._modelOffsetTr.localPosition;
+			}
+			else
+			{
+				Vector3 position = parent.position;
+				position.y += LocalPlayer.Inventory._inventoryGO.transform.InverseTransformPoint(inventoryItemView.transform.position).y;
+				inventoryItemView2.transform.position = position;
+			}
 			inventoryItemView2.transform.rotation = base.transform.parent.rotation * Quaternion.Inverse(inventoryItemView.transform.rotation);
 			inventoryItemView2.gameObject.layer = base.transform.parent.gameObject.layer;
 			inventoryItemView2.gameObject.SetActive(true);
@@ -361,7 +372,7 @@ namespace TheForest.Buildings.World
 		{
 			if (this._storedItemIds[contentType] == contentValue)
 			{
-				this.entity.Freeze(false);
+				base.entity.Freeze(false);
 				base.state.ItemCount[contentType] = 0;
 			}
 			else
@@ -389,7 +400,7 @@ namespace TheForest.Buildings.World
 				if (item.CanFallbackTo(contentInfo))
 				{
 					base.state.ItemCount[contentType] = contentInfo;
-					this.entity.Freeze(false);
+					base.entity.Freeze(false);
 				}
 			}
 		}

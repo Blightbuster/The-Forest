@@ -32,11 +32,11 @@ public class CoopTreeCut : CoopBase<ITreeCutState>
 		});
 		base.state.AddCallback("Damage", delegate
 		{
-			if (this.entity.isOwner && base.state.Damage == 16f)
+			if (base.entity.isOwner && base.state.Damage == 16f)
 			{
-				this.entity.DestroyDelayed(10f);
-				BoltEntity boltEntity = BoltNetwork.Instantiate(this.CoopTree.NetworkFallPrefab, this.entity.transform.position, this.entity.transform.rotation);
-				boltEntity.GetState<ITreeFallState>().CutTree = this.entity;
+				base.entity.DestroyDelayed(10f);
+				BoltEntity boltEntity = BoltNetwork.Instantiate(this.CoopTree.NetworkFallPrefab, base.entity.transform.position, base.entity.transform.rotation);
+				boltEntity.GetState<ITreeFallState>().CutTree = base.entity;
 				boltEntity.GetComponent<Rigidbody>().AddForce(new Vector3(UnityEngine.Random.value * 0.01f, 0f, UnityEngine.Random.value * 0.01f), ForceMode.VelocityChange);
 			}
 		});

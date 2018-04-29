@@ -12,7 +12,7 @@ public class targetStats : EntityBehaviour<IPlayerState>
 		{
 			return;
 		}
-		if (!this.entity.isOwner)
+		if (!base.entity.isOwner)
 		{
 			base.state.AddCallback("inWater", new PropertyCallbackSimple(this.inWaterChanged));
 			base.state.AddCallback("onRaft", new PropertyCallbackSimple(this.onRaftChanged));
@@ -52,7 +52,7 @@ public class targetStats : EntityBehaviour<IPlayerState>
 		{
 			return;
 		}
-		if (BoltNetwork.isRunning && this.entity && this.entity.isAttached && this.entity.isOwner)
+		if (BoltNetwork.isRunning && base.entity && base.entity.isAttached && base.entity.isOwner)
 		{
 			base.state.inWater = this.inWater;
 			base.state.onRaft = this.onRaft;

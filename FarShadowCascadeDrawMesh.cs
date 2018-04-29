@@ -3,8 +3,8 @@ using UnityEngine;
 using UnityEngine.Rendering;
 
 
-[RequireComponent(typeof(Camera))]
 [ExecuteInEditMode]
+[RequireComponent(typeof(Camera))]
 public class FarShadowCascadeDrawMesh : MonoBehaviour
 {
 	
@@ -97,7 +97,7 @@ public class FarShadowCascadeDrawMesh : MonoBehaviour
 			this.m_shadowTexture = new RenderTexture((int)this.shadowMapSize, (int)this.shadowMapSize, 16, RenderTextureFormat.Shadowmap, RenderTextureReadWrite.Linear);
 			this.m_shadowTexture.filterMode = FilterMode.Bilinear;
 			this.m_shadowTexture.useMipMap = false;
-			this.m_shadowTexture.generateMips = false;
+			this.m_shadowTexture.autoGenerateMips = false;
 			this.lightCamera.targetTexture = this.m_shadowTexture;
 		}
 	}

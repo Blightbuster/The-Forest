@@ -7,9 +7,9 @@ using UnityEngine.UI;
 namespace Rewired.UI.ControlMapper
 {
 	
-	[RequireComponent(typeof(Selectable))]
 	[AddComponentMenu("")]
-	public class ScrollRectSelectableChild : MonoBehaviour, IEventSystemHandler, ISelectHandler
+	[RequireComponent(typeof(Selectable))]
+	public class ScrollRectSelectableChild : MonoBehaviour, ISelectHandler, IEventSystemHandler
 	{
 		
 		

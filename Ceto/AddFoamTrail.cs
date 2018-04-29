@@ -39,17 +39,20 @@ namespace Ceto
 		
 		private float Rotation()
 		{
-			switch (this.rotation)
+			AddFoamTrail.ROTATION rotation = this.rotation;
+			if (rotation == AddFoamTrail.ROTATION.NONE)
 			{
-			case AddFoamTrail.ROTATION.NONE:
-				return 0f;
-			case AddFoamTrail.ROTATION.RANDOM:
-				return UnityEngine.Random.Range(0f, 360f);
-			case AddFoamTrail.ROTATION.RELATIVE:
-				return base.transform.eulerAngles.y;
-			default:
 				return 0f;
 			}
+			if (rotation == AddFoamTrail.ROTATION.RANDOM)
+			{
+				return UnityEngine.Random.Range(0f, 360f);
+			}
+			if (rotation != AddFoamTrail.ROTATION.RELATIVE)
+			{
+				return 0f;
+			}
+			return base.transform.eulerAngles.y;
 		}
 
 		

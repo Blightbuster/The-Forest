@@ -20,6 +20,9 @@ public class CoopDedicatedServerList : MonoBehaviour
 	{
 		if (this._response == null)
 		{
+			this._listSteamServer = new List<CoopDedicatedServerList.SteamServerData>();
+			this._previusInstantiateServerRowIsFinished = true;
+			this._dragUI.scrollView.ResetPosition();
 			this.OnDisable();
 			this._mainUI.RefreshBrowserOverride = new Action(this.ForceRefresh);
 			this._dragUI.gameObject.SetActive(false);
@@ -28,18 +31,44 @@ public class CoopDedicatedServerList : MonoBehaviour
 			{
 				this._spinner.SetActive(true);
 			}
-			switch (this._source)
+			CoopDedicatedServerList.Source source = this._source;
+			if (source != CoopDedicatedServerList.Source.Internet)
 			{
-			case CoopDedicatedServerList.Source.Internet:
-				this.FetchInternetServers();
-				break;
-			case CoopDedicatedServerList.Source.Favorites:
-				this.FetchFavoritesServers();
-				break;
-			case CoopDedicatedServerList.Source.Lan:
-				this.FetchLanServers();
-				break;
+				if (source != CoopDedicatedServerList.Source.Lan)
+				{
+					if (source == CoopDedicatedServerList.Source.Favorites)
+					{
+						this.FetchFavoritesServers();
+					}
+				}
+				else
+				{
+					this.FetchLanServers();
+				}
 			}
+			else
+			{
+				this.FetchInternetServers();
+			}
+		}
+	}
+
+	
+	private void Update()
+	{
+		if (!this._skipFrame)
+		{
+			if (this._listSteamServer.Count > 0 && this._previusInstantiateServerRowIsFinished)
+			{
+				this._skipFrame = true;
+				this._previusInstantiateServerRowIsFinished = false;
+				this.ProcessServerResponded(this._listSteamServer[0]._hRequest, this._listSteamServer[0]._iServer);
+				this._listSteamServer.RemoveAt(0);
+			}
+		}
+		else
+		{
+			this._skipFrame = false;
 		}
 	}
 
@@ -160,6 +189,12 @@ public class CoopDedicatedServerList : MonoBehaviour
 	
 	private void ServerResponded(HServerListRequest hRequest, int iServer)
 	{
+		this._listSteamServer.Add(new CoopDedicatedServerList.SteamServerData(hRequest, iServer));
+	}
+
+	
+	private void ProcessServerResponded(HServerListRequest hRequest, int iServer)
+	{
 		this.listCount++;
 		gameserveritem_t serverDetails = SteamMatchmakingServers.GetServerDetails(hRequest, iServer);
 		if (serverDetails.m_nAppID == 242760u || serverDetails.m_nAppID == 556450u)
@@ -167,6 +202,8 @@ public class CoopDedicatedServerList : MonoBehaviour
 			MpDedicatedServerRow mpDedicatedServerRow = UnityEngine.Object.Instantiate<MpDedicatedServerRow>(this._rowPrefab);
 			mpDedicatedServerRow.transform.parent = this._mainUI._gameBrowserScreenDS._grid.transform;
 			mpDedicatedServerRow.transform.localScale = this._rowPrefab.transform.localScale;
+			mpDedicatedServerRow.gameObject.SetActive(true);
+			this._previusInstantiateServerRowIsFinished = true;
 			mpDedicatedServerRow._gameName.text = serverDetails.GetServerName();
 			mpDedicatedServerRow._ip.text = serverDetails.m_NetAdr.GetConnectionAddressString();
 			mpDedicatedServerRow._ping.text = serverDetails.m_nPing + "ms";
@@ -210,11 +247,14 @@ public class CoopDedicatedServerList : MonoBehaviour
 	
 	private void ServerFailedToRespond(HServerListRequest hRequest, int iServer)
 	{
+		Debug.LogWarning("CoopDedicatedServerList::ServerFailedToRespond");
 		try
 		{
 		}
-		catch
+		catch (Exception ex)
 		{
+			Debug.LogError("CoopDedicatedServerList::ServerFailedToRespond " + ex.Message);
+			Debug.LogError("CoopDedicatedServerList::ServerFailedToRespond " + ex.StackTrace);
 		}
 	}
 
@@ -551,6 +591,32 @@ public class CoopDedicatedServerList : MonoBehaviour
 
 	
 	private List<Action<MpGameRow>> _sortOptions = new List<Action<MpGameRow>>();
+
+	
+	private List<CoopDedicatedServerList.SteamServerData> _listSteamServer = new List<CoopDedicatedServerList.SteamServerData>();
+
+	
+	private bool _previusInstantiateServerRowIsFinished = true;
+
+	
+	private bool _skipFrame;
+
+	
+	private class SteamServerData
+	{
+		
+		public SteamServerData(HServerListRequest hRequest, int iServer)
+		{
+			this._hRequest = hRequest;
+			this._iServer = iServer;
+		}
+
+		
+		public HServerListRequest _hRequest;
+
+		
+		public int _iServer;
+	}
 
 	
 	public enum Source

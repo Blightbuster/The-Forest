@@ -41,6 +41,18 @@ namespace Ceto
 		protected abstract int AddToHashCode(int hashcode);
 
 		
+		public static bool operator ==(WaveSpectrumConditionKey k1, WaveSpectrumConditionKey k2)
+		{
+			return object.ReferenceEquals(k1, k2) || (k1 != null && k2 != null && k1.Size == k2.Size && k1.NumGrids == k2.NumGrids && k1.WindDir == k2.WindDir && k1.SpectrumType == k2.SpectrumType && k1.Matches(k2));
+		}
+
+		
+		public static bool operator !=(WaveSpectrumConditionKey k1, WaveSpectrumConditionKey k2)
+		{
+			return !(k1 == k2);
+		}
+
+		
 		public override bool Equals(object o)
 		{
 			WaveSpectrumConditionKey k = o as WaveSpectrumConditionKey;
@@ -62,18 +74,6 @@ namespace Ceto
 			num = num * 37 + this.WindDir.GetHashCode();
 			num = num * 37 + this.SpectrumType.GetHashCode();
 			return this.AddToHashCode(num);
-		}
-
-		
-		public static bool operator ==(WaveSpectrumConditionKey k1, WaveSpectrumConditionKey k2)
-		{
-			return object.ReferenceEquals(k1, k2) || (k1 != null && k2 != null && k1.Size == k2.Size && k1.NumGrids == k2.NumGrids && k1.WindDir == k2.WindDir && k1.SpectrumType == k2.SpectrumType && k1.Matches(k2));
-		}
-
-		
-		public static bool operator !=(WaveSpectrumConditionKey k1, WaveSpectrumConditionKey k2)
-		{
-			return !(k1 == k2);
 		}
 	}
 }

@@ -64,12 +64,12 @@ public class UIToggledObjects : MonoBehaviour
 	public List<GameObject> deactivate;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private GameObject target;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private bool inverse;
 }

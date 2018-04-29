@@ -26,6 +26,10 @@ namespace TheForest.Items.Inventory
 			}
 			set
 			{
+				if (this._activeBonus == value)
+				{
+					return;
+				}
 				this._activeBonus = value;
 				this.ActiveBonusChanged(value);
 			}
@@ -142,14 +146,14 @@ namespace TheForest.Items.Inventory
 		}
 
 		
-		[SerializeThis]
 		[FieldReset((WeaponStatUpgrade.Types)(-1))]
 		[SerializeField]
+		[SerializeThis]
 		protected WeaponStatUpgrade.Types _activeBonus = (WeaponStatUpgrade.Types)(-1);
 
 		
-		[SerializeThis]
 		[SerializeField]
+		[SerializeThis]
 		protected float _activeBonusValue;
 	}
 }

@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Set mesh vertex positions based on vector3 found in an arrayList")]
 	[ActionCategory("ArrayMaker/ArrayList")]
+	[Tooltip("Set mesh vertex positions based on vector3 found in an arrayList")]
 	public class ArrayListSetVertexPositions : ArrayListActions
 	{
 		
@@ -58,18 +59,31 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			this._vertices = new Vector3[this.proxy.arrayList.Count];
 			int num = 0;
-			foreach (object obj in this.proxy.arrayList)
+			IEnumerator enumerator = this.proxy.arrayList.GetEnumerator();
+			try
 			{
-				Vector3 vector = (Vector3)obj;
-				this._vertices[num] = vector;
-				num++;
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Vector3 vector = (Vector3)obj;
+					this._vertices[num] = vector;
+					num++;
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 			this._mesh.vertices = this._vertices;
 		}
 
 		
-		[RequiredField]
 		[ActionSection("Set up")]
+		[RequiredField]
 		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
 		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
@@ -79,9 +93,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString reference;
 
 		
+		[ActionSection("Target")]
 		[Tooltip("The GameObject to set the mesh vertex positions to")]
 		[CheckForComponent(typeof(MeshFilter))]
-		[ActionSection("Target")]
 		public FsmGameObject mesh;
 
 		

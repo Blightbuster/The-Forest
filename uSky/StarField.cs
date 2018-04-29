@@ -12,8 +12,8 @@ namespace uSky
 		public Mesh InitializeStarfield()
 		{
 			float num = (!(Camera.main != null)) ? ((!(Camera.current != null)) ? 990f : Camera.current.farClipPlane) : (Camera.main.farClipPlane - 10f);
-			float num2 = 5200f;
-			float size = num2 / 100f * this.starSizeScale;
+			num = 5200f;
+			float size = num / 100f * this.starSizeScale;
 			TextAsset textAsset = Resources.Load<TextAsset>("StarsData");
 			if (textAsset == null)
 			{
@@ -38,7 +38,7 @@ namespace uSky
 					{
 						CombineInstance item = default(CombineInstance);
 						item.mesh = this.createQuad(size);
-						item.transform = this.BillboardMatrix(array[i].position * num2);
+						item.transform = this.BillboardMatrix(array[i].position * num);
 						Color[] colors = new Color[]
 						{
 							array[i].color,
@@ -66,7 +66,6 @@ namespace uSky
 				}
 			}
 			this.starQuad.Clear();
-			mesh.Optimize();
 			mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 2E+09f);
 			return mesh;
 		}

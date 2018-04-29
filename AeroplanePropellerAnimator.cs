@@ -39,9 +39,6 @@ public class AeroplanePropellerAnimator : MonoBehaviour
 	}
 
 	
-	private const float RpmToDps = 60f;
-
-	
 	[SerializeField]
 	private Transform propellorModel;
 
@@ -72,4 +69,7 @@ public class AeroplanePropellerAnimator : MonoBehaviour
 
 	
 	private int propellorBlurState = -1;
+
+	
+	private const float RpmToDps = 60f;
 }

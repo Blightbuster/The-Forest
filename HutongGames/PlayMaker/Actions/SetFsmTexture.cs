@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Set the value of a Texture Variable in another FSM.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Set the value of a Texture Variable in another FSM.")]
 	public class SetFsmTexture : FsmStateAction
 	{
 		
@@ -47,7 +47,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			if (this.fsm == null)
 			{
-				this.LogWarning("Could not find FSM: " + this.fsmName.Value);
+				base.LogWarning("Could not find FSM: " + this.fsmName.Value);
 				return;
 			}
 			FsmTexture fsmTexture = this.fsm.FsmVariables.FindFsmTexture(this.variableName.Value);
@@ -57,7 +57,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			else
 			{
-				this.LogWarning("Could not find variable: " + this.variableName.Value);
+				base.LogWarning("Could not find variable: " + this.variableName.Value);
 			}
 		}
 
@@ -68,8 +68,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject that owns the FSM.")]
 		[RequiredField]
+		[Tooltip("The GameObject that owns the FSM.")]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -79,8 +79,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("The name of the FSM variable.")]
 		[UIHint(UIHint.FsmTexture)]
+		[Tooltip("The name of the FSM variable.")]
 		public FsmString variableName;
 
 		

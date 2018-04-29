@@ -41,19 +41,6 @@ public class animalAI : MonoBehaviour
 				this.pmMove = playMakerFSM;
 			}
 		}
-		if (CoopPeerStarter.DedicatedHost)
-		{
-			AmplifyMotionObject[] componentsInChildren = base.transform.GetComponentsInChildren<AmplifyMotionObject>(true);
-			AmplifyMotionObjectBase[] componentsInChildren2 = base.transform.GetComponentsInChildren<AmplifyMotionObjectBase>(true);
-			foreach (AmplifyMotionObject obj in componentsInChildren)
-			{
-				UnityEngine.Object.Destroy(obj);
-			}
-			foreach (AmplifyMotionObjectBase obj2 in componentsInChildren2)
-			{
-				UnityEngine.Object.Destroy(obj2);
-			}
-		}
 	}
 
 	
@@ -233,7 +220,7 @@ public class animalAI : MonoBehaviour
 			return;
 		}
 		this.ragdollSpawned = true;
-		Transform transform = ((GameObject)UnityEngine.Object.Instantiate(this.BurntRagdoll, base.transform.position, base.transform.rotation)).transform;
+		Transform transform = UnityEngine.Object.Instantiate<GameObject>(this.BurntRagdoll, base.transform.position, base.transform.rotation).transform;
 		transform.localScale = base.transform.localScale;
 		if (PoolManager.Pools["creatures"].IsSpawned(this.rootTr))
 		{
@@ -421,7 +408,7 @@ public class animalAI : MonoBehaviour
 	
 	private IEnumerator doMovement()
 	{
-		IL_74C:
+		IL_754:
 		while (this.doMove)
 		{
 			if (this.spawnFunctions.turtle && this.avatar && this.target && this.avatar.GetBool("swimming"))
@@ -473,8 +460,8 @@ public class animalAI : MonoBehaviour
 			}
 			while (this.currentWaypoint < this.path.vectorPath.Count - 1)
 			{
-				float dist = this.XZSqrMagnitude(this.path.vectorPath[this.currentWaypoint], this.Tr.position);
-				if (dist >= this.nextWaypointDistance * this.nextWaypointDistance)
+				float num = this.XZSqrMagnitude(this.path.vectorPath[this.currentWaypoint], this.Tr.position);
+				if (num >= this.nextWaypointDistance * this.nextWaypointDistance)
 				{
 					IL_3B6:
 					this.currentDir = (this.avatar.rootRotation * Vector3.forward).normalized;
@@ -542,7 +529,7 @@ public class animalAI : MonoBehaviour
 					this.fsmSmoothPathDir.Value = this.smoothedDir;
 					this.fsmPathDir.Value = this.absDir;
 					yield return null;
-					goto IL_74C;
+					goto IL_754;
 				}
 				this.currentWaypoint++;
 			}

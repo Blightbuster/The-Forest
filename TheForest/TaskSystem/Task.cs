@@ -53,6 +53,13 @@ namespace TheForest.TaskSystem
 		}
 
 		
+		public virtual void Clone(Task other)
+		{
+			this._available = other._available;
+			base.Clone(other);
+		}
+
+		
 		[SerializeThis]
 		public bool _available;
 	}

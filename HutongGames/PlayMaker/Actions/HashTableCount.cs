@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Count the number of items ( key/value pairs) in a PlayMaker HashTable Proxy component (PlayMakerHashTableProxy).")]
 	[ActionCategory("ArrayMaker/HashTable")]
+	[Tooltip("Count the number of items ( key/value pairs) in a PlayMaker HashTable Proxy component (PlayMakerHashTableProxy).")]
 	public class HashTableCount : HashTableActions
 	{
 		
@@ -36,10 +36,10 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The gameObject with the PlayMaker HashTable Proxy component")]
-		[RequiredField]
-		[CheckForComponent(typeof(PlayMakerHashTableProxy))]
 		[ActionSection("Set up")]
+		[RequiredField]
+		[Tooltip("The gameObject with the PlayMaker HashTable Proxy component")]
+		[CheckForComponent(typeof(PlayMakerHashTableProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -47,10 +47,10 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString reference;
 
 		
-		[RequiredField]
-		[Tooltip("The number of items in that hashTable")]
 		[ActionSection("Result")]
+		[RequiredField]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The number of items in that hashTable")]
 		public FsmInt count;
 	}
 }

@@ -37,6 +37,7 @@ namespace TheForest.Items.Special
 				}
 				return true;
 			}
+			Scene.HudGui.RewindCamcorderIcon.SetActive(enable);
 			base.StopCoroutine("PlayVideoTapeRoutine");
 			this.StopVideo();
 			this.OnDeactivating();
@@ -163,7 +164,7 @@ namespace TheForest.Items.Special
 		
 		private IEnumerator DelayedStop(bool equipPrevious)
 		{
-			LocalPlayer.Sfx.PlayWhoosh();
+			LocalPlayer.Sfx.PlayItemCustomSfx(this._itemId, true);
 			LocalPlayer.Animator.SetBoolReflected("camCorderHeld", false);
 			yield return YieldPresets.WaitPointNineSeconds;
 			this._videoPlayer.gameObject.SetActive(false);

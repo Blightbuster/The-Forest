@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Bolt;
-using ModAPI;
 using TheForest.Buildings.Utils;
 using TheForest.Buildings.World;
 using TheForest.Utils;
@@ -24,7 +24,7 @@ namespace TheForest.Buildings.Creation
 		}
 
 		
-		private void __Update__Original()
+		private void Update()
 		{
 			this.CheckNodesforNearbyTargets();
 			if (this._previews.Count > 0)
@@ -303,7 +303,7 @@ namespace TheForest.Buildings.Creation
 								return false;
 							}
 							FloorArchitect floorArchitect = holeStructure as FloorArchitect;
-							FloorArchitect floorArchitect2 = (FloorArchitect)UnityEngine.Object.Instantiate(this._previewFloor, floorArchitect.transform.position, floorArchitect.transform.rotation);
+							FloorArchitect floorArchitect2 = UnityEngine.Object.Instantiate<FloorArchitect>(this._previewFloor, floorArchitect.transform.position, floorArchitect.transform.rotation);
 							floorArchitect.OnBuilt(floorArchitect2.gameObject);
 							floorArchitect2._wasBuilt = false;
 							this._previews.Add(floorArchitect2);
@@ -316,7 +316,7 @@ namespace TheForest.Buildings.Creation
 								return false;
 							}
 							RoofArchitect roofArchitect = holeStructure as RoofArchitect;
-							RoofArchitect roofArchitect2 = (RoofArchitect)UnityEngine.Object.Instantiate(this._previewRoof, roofArchitect.transform.position, roofArchitect.transform.rotation);
+							RoofArchitect roofArchitect2 = UnityEngine.Object.Instantiate<RoofArchitect>(this._previewRoof, roofArchitect.transform.position, roofArchitect.transform.rotation);
 							roofArchitect.OnBuilt(roofArchitect2.gameObject);
 							roofArchitect2._wasBuilt = false;
 							this._previews.Add(roofArchitect2);
@@ -338,7 +338,7 @@ namespace TheForest.Buildings.Creation
 								return false;
 							}
 							RaftArchitect raftArchitect = holeStructure as RaftArchitect;
-							RaftArchitect raftArchitect2 = (RaftArchitect)UnityEngine.Object.Instantiate(this._previewRaft, raftArchitect.transform.position, raftArchitect.transform.rotation);
+							RaftArchitect raftArchitect2 = UnityEngine.Object.Instantiate<RaftArchitect>(this._previewRaft, raftArchitect.transform.position, raftArchitect.transform.rotation);
 							raftArchitect.OnBuilt(raftArchitect2.gameObject);
 							this._previews.Add(raftArchitect2);
 							item = raftArchitect2.AddSquareHole(base.transform.position, base.transform.rotation.y, this._holeSize);
@@ -372,7 +372,7 @@ namespace TheForest.Buildings.Creation
 							}
 							else
 							{
-								destroyTarget._ghost = (GameObject)UnityEngine.Object.Instantiate(blueprintByPrefabId._ghostPrefab, pi.transform.position, pi.transform.rotation);
+								destroyTarget._ghost = UnityEngine.Object.Instantiate<GameObject>(blueprintByPrefabId._ghostPrefab, pi.transform.position, pi.transform.rotation);
 							}
 							destroyTarget._ghost.transform.parent = pi.transform;
 							int layer = LayerMask.NameToLayer("TransparentFX");
@@ -384,11 +384,23 @@ namespace TheForest.Buildings.Creation
 							}
 							else
 							{
-								Renderer[] componentsInChildren = destroyTarget._ghost.GetComponentsInChildren<Renderer>();
-								foreach (Renderer renderer in componentsInChildren)
+								Craft_Structure componentInChildren = destroyTarget._ghost.GetComponentInChildren<Craft_Structure>();
+								if (componentInChildren && componentInChildren._requiredIngredients.Count > 0)
 								{
-									renderer.gameObject.layer = layer;
-									renderer.sharedMaterial = this._overlayMaterial;
+									for (int i = 0; i < componentInChildren._requiredIngredients.Count; i++)
+									{
+										Craft_Structure.BuildIngredients buildIngredients = componentInChildren._requiredIngredients[i];
+										buildIngredients.SetGhostMaterial(this._overlayMaterial);
+									}
+								}
+								else
+								{
+									Renderer[] componentsInChildren = destroyTarget._ghost.GetComponentsInChildren<Renderer>();
+									foreach (Renderer renderer in componentsInChildren)
+									{
+										renderer.gameObject.layer = layer;
+										renderer.sharedMaterial = this._overlayMaterial;
+									}
 								}
 							}
 							Transform transform = destroyTarget._ghost.transform.Find("Trigger");
@@ -512,12 +524,25 @@ namespace TheForest.Buildings.Creation
 				}
 				return true;
 			}
-			foreach (object obj in tr)
+			IEnumerator enumerator = tr.GetEnumerator();
+			try
 			{
-				Transform tr2 = (Transform)obj;
-				if (this.DetailledNodeCheck(node, tr2))
+				while (enumerator.MoveNext())
 				{
-					return true;
+					object obj = enumerator.Current;
+					Transform tr2 = (Transform)obj;
+					if (this.DetailledNodeCheck(node, tr2))
+					{
+						return true;
+					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
 				}
 			}
 			return false;
@@ -541,25 +566,6 @@ namespace TheForest.Buildings.Creation
 				{
 					LocalPlayer.Create.BuildingPlacer.Clear = true;
 				}
-			}
-		}
-
-		
-		private void Update()
-		{
-			try
-			{
-				if (UnityEngine.Input.mouseScrollDelta != Vector2.zero)
-				{
-					this._holeSize = new Vector2(Mathf.Clamp(this._holeSize.x + UnityEngine.Input.mouseScrollDelta.y / 2f, 1f, 50f), Mathf.Clamp(this._holeSize.y + UnityEngine.Input.mouseScrollDelta.y / 2f, 1f, 50f));
-					this._renderer.transform.localScale = new Vector3(Mathf.Clamp(this._renderer.transform.localScale.x + UnityEngine.Input.mouseScrollDelta.y / 4f, 0.5f, 25f), this._renderer.transform.localScale.y, Mathf.Clamp(this._renderer.transform.localScale.z + UnityEngine.Input.mouseScrollDelta.y / 4f, 0.5f, 25f));
-				}
-				this.__Update__Original();
-			}
-			catch (Exception ex)
-			{
-				Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-				this.__Update__Original();
 			}
 		}
 

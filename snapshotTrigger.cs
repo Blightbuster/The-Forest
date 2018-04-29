@@ -23,7 +23,7 @@ public class snapshotTrigger : MonoBehaviour
 	}
 
 	
-	[Range(0f, 100f)]
 	[Header("Parameter Controls")]
+	[Range(0f, 100f)]
 	public float intensityLevel;
 }

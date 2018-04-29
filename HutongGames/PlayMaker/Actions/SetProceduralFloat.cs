@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Set a named float property in a Substance material. NOTE: Use Rebuild Textures after setting Substance properties.")]
 	[ActionCategory("Substance")]
+	[Tooltip("Set a named float property in a Substance material. NOTE: Use Rebuild Textures after setting Substance properties.")]
 	public class SetProceduralFloat : FsmStateAction
 	{
 		
@@ -39,7 +39,7 @@ namespace HutongGames.PlayMaker.Actions
 			ProceduralMaterial proceduralMaterial = this.substanceMaterial.Value as ProceduralMaterial;
 			if (proceduralMaterial == null)
 			{
-				this.LogError("Not a substance material!");
+				base.LogError("Not a substance material!");
 				return;
 			}
 			proceduralMaterial.SetProceduralFloat(this.floatProperty.Value, this.floatValue.Value);

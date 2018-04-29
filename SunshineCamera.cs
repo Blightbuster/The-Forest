@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.VR;
 
 
 [ExecuteInEditMode]
@@ -111,25 +112,32 @@ public class SunshineCamera : MonoBehaviour
 			return false;
 		}
 		bool flag = this.refreshRequested;
-		switch (Sunshine.Instance.UpdateInterval)
+		SunshineUpdateInterval updateInterval = Sunshine.Instance.UpdateInterval;
+		if (updateInterval != SunshineUpdateInterval.EveryFrame)
 		{
-		case SunshineUpdateInterval.EveryFrame:
-			flag = true;
-			break;
-		case SunshineUpdateInterval.AfterXFrames:
-			flag = (flag || Time.frameCount <= 3 || Time.frameCount % Sunshine.Instance.UpdateIntervalFrames == 0);
-			break;
-		case SunshineUpdateInterval.AfterXMovement:
-			if (Time.frameCount <= 3)
+			if (updateInterval != SunshineUpdateInterval.AfterXFrames)
 			{
-				flag = true;
+				if (updateInterval == SunshineUpdateInterval.AfterXMovement)
+				{
+					if (Time.frameCount <= 3)
+					{
+						flag = true;
+					}
+					else
+					{
+						Vector3 vector = boundsOrigin - this.lastBoundsOrigin;
+						flag = (flag || vector.sqrMagnitude >= Sunshine.Instance.UpdateIntervalMovement * Sunshine.Instance.UpdateIntervalMovement);
+					}
+				}
 			}
 			else
 			{
-				Vector3 vector = boundsOrigin - this.lastBoundsOrigin;
-				flag = (flag || vector.sqrMagnitude >= Sunshine.Instance.UpdateIntervalMovement * Sunshine.Instance.UpdateIntervalMovement);
+				flag = (flag || Time.frameCount <= 3 || Time.frameCount % Sunshine.Instance.UpdateIntervalFrames == 0);
 			}
-			break;
+		}
+		else
+		{
+			flag = true;
 		}
 		if (flag)
 		{
@@ -301,45 +309,100 @@ public class SunshineCamera : MonoBehaviour
 		lhs = SunshineMath.ToRectSpaceProjection(Sunshine.Instance.CascadeRect(0)) * Sunshine.Instance.SunLightCamera.projectionMatrix;
 		SunshineMath.SetLinearDepthProjection(ref lhs, Sunshine.Instance.SunLightCamera.farClipPlane);
 		Matrix4x4 matrix4x = lhs * Sunshine.Instance.SunLightCamera.worldToCameraMatrix;
-		Matrix4x4 mat = matrix4x * this.AttachedCamera.cameraToWorldMatrix;
-		Shader.SetGlobalMatrix("sunshine_CameraVToSunVP", mat);
+		Matrix4x4 value = matrix4x * this.AttachedCamera.cameraToWorldMatrix;
+		Shader.SetGlobalMatrix("sunshine_CameraVToSunVP", value);
 		Shader.SetGlobalMatrix("sunshine_WorldToSunVP", matrix4x);
 		float num = (float)Sunshine.Instance.Lightmap.width;
 		Shader.SetGlobalVector("sunshine_ShadowParamsAndHalfTexel", new Vector4(Sunshine.Instance.SunLight.shadowStrength, Sunshine.Instance.CascadeFade, 0.5f / num, 0.5f / num));
 		this.ConfigureCascadeClips(this.AttachedCamera.farClipPlane);
-		Vector3 position = (!this.AttachedCamera.orthographic) ? base.transform.position : this.AttachedCamera.ViewportToWorldPoint(new Vector3(0f, 0f, 0f));
-		Vector3 position2 = this.AttachedCamera.ViewportToWorldPoint(new Vector3(0f, 0f, this.AttachedCamera.farClipPlane));
-		Vector3 position3 = this.AttachedCamera.ViewportToWorldPoint(new Vector3(1f, 0f, this.AttachedCamera.farClipPlane));
-		Vector3 position4 = this.AttachedCamera.ViewportToWorldPoint(new Vector3(0f, 1f, this.AttachedCamera.farClipPlane));
+		Vector3 position = this.AttachedCamera.ViewportToWorldPoint(new Vector3(0f, 0f, this.AttachedCamera.farClipPlane));
+		Vector3 position2 = this.AttachedCamera.ViewportToWorldPoint(new Vector3(1f, 0f, this.AttachedCamera.farClipPlane));
+		Vector3 position3 = this.AttachedCamera.ViewportToWorldPoint(new Vector3(0f, 1f, this.AttachedCamera.farClipPlane));
 		Transform transform = Sunshine.Instance.SunLightCamera.transform;
-		Vector3 vector = transform.InverseTransformPoint(position);
-		Vector3 vector2 = transform.InverseTransformPoint(position2);
-		Vector3 vector3 = transform.InverseTransformPoint(position3);
-		Vector3 vector4 = transform.InverseTransformPoint(position4);
-		Vector2 vector5 = SunshineMath.xy(Sunshine.Instance.SunLightCamera.WorldToViewportPoint(position));
-		Vector2 vector6 = SunshineMath.xy(Sunshine.Instance.SunLightCamera.WorldToViewportPoint(position2));
-		Vector2 vector7 = SunshineMath.xy(Sunshine.Instance.SunLightCamera.WorldToViewportPoint(position3));
-		Vector2 vector8 = SunshineMath.xy(Sunshine.Instance.SunLightCamera.WorldToViewportPoint(position4));
+		Vector3 position4 = (!this.AttachedCamera.orthographic) ? base.transform.position : this.AttachedCamera.ViewportToWorldPoint(new Vector3(0f, 0f, 0f));
+		Vector3 vector = transform.InverseTransformPoint(position4);
+		Vector3 vector2 = transform.InverseTransformPoint(position);
+		Vector3 vector3 = transform.InverseTransformPoint(position2);
+		Vector3 vector4 = transform.InverseTransformPoint(position3);
+		Vector2 vector5 = SunshineMath.xy(Sunshine.Instance.SunLightCamera.WorldToViewportPoint(position4));
+		Vector2 vector6 = SunshineMath.xy(Sunshine.Instance.SunLightCamera.WorldToViewportPoint(position));
+		Vector2 vector7 = SunshineMath.xy(Sunshine.Instance.SunLightCamera.WorldToViewportPoint(position2));
+		Vector2 vector8 = SunshineMath.xy(Sunshine.Instance.SunLightCamera.WorldToViewportPoint(position3));
 		Vector4 vector9 = new Vector4(vector6.x, vector6.y, vector2.z / Sunshine.Instance.SunLightCamera.farClipPlane, vector.y);
 		Vector4 vector10 = new Vector4(vector5.x, vector5.y, vector.z / Sunshine.Instance.SunLightCamera.farClipPlane, vector.y);
-		Vector4 vec = vector9 - vector10;
-		Vector4 vec2 = new Vector4(vector7.x, vector7.y, vector3.z / Sunshine.Instance.SunLightCamera.farClipPlane, vector3.y) - vector9;
-		Vector4 vec3 = new Vector4(vector8.x, vector8.y, vector4.z / Sunshine.Instance.SunLightCamera.farClipPlane, vector4.y) - vector9;
+		Vector4 value2 = vector9 - vector10;
+		Vector4 value3 = new Vector4(vector7.x, vector7.y, vector3.z / Sunshine.Instance.SunLightCamera.farClipPlane, vector3.y) - vector9;
+		Vector4 value4 = new Vector4(vector8.x, vector8.y, vector4.z / Sunshine.Instance.SunLightCamera.farClipPlane, vector4.y) - vector9;
 		Rect rect = Sunshine.Instance.CascadeRect(0);
 		SunshineMath.ShadowCoordDataInRect(ref vector10, ref rect);
-		SunshineMath.ShadowCoordDataRayInRect(ref vec, ref rect);
-		SunshineMath.ShadowCoordDataRayInRect(ref vec2, ref rect);
-		SunshineMath.ShadowCoordDataRayInRect(ref vec3, ref rect);
+		SunshineMath.ShadowCoordDataRayInRect(ref value2, ref rect);
+		SunshineMath.ShadowCoordDataRayInRect(ref value3, ref rect);
+		SunshineMath.ShadowCoordDataRayInRect(ref value4, ref rect);
 		Shader.SetGlobalFloat("sunshine_IsOrthographic", (!this.AttachedCamera.orthographic) ? 0f : 1f);
 		Shader.SetGlobalVector("sunshine_ShadowCoordDepthStart", vector10);
-		Shader.SetGlobalVector("sunshine_ShadowCoordDepthRayZ", vec);
-		Shader.SetGlobalVector("sunshine_ShadowCoordDepthRayU", vec2);
-		Shader.SetGlobalVector("sunshine_ShadowCoordDepthRayV", vec3);
+		Shader.SetGlobalVector("sunshine_ShadowCoordDepthRayZ", value2);
+		Shader.SetGlobalVector("sunshine_ShadowCoordDepthRayU", value3);
+		Shader.SetGlobalVector("sunshine_ShadowCoordDepthRayV", value4);
+		if (ForestVR.Enabled)
+		{
+			Vector3 a = Quaternion.Inverse(InputTracking.GetLocalRotation(VRNode.LeftEye)) * InputTracking.GetLocalPosition(VRNode.LeftEye);
+			Vector3 b = Quaternion.Inverse(InputTracking.GetLocalRotation(VRNode.RightEye)) * InputTracking.GetLocalPosition(VRNode.RightEye);
+			Vector3 vector11 = (a - b) * 0.5f;
+			Matrix4x4 cameraToWorldMatrix = this.AttachedCamera.cameraToWorldMatrix;
+			Vector3 vector12 = cameraToWorldMatrix.MultiplyPoint(-vector11);
+			Vector3 vector13 = cameraToWorldMatrix.MultiplyPoint(vector11);
+			position4 = vector12;
+			Vector3[] array = new Vector3[4];
+			Vector3[] array2 = new Vector3[4];
+			this.AttachedCamera.CalculateFrustumCorners(new Rect(0f, 0f, 1f, 1f), this.AttachedCamera.farClipPlane, Camera.MonoOrStereoscopicEye.Left, array);
+			position = this.AttachedCamera.transform.TransformVector(array[0]);
+			position2 = this.AttachedCamera.transform.TransformVector(array[3]);
+			position3 = this.AttachedCamera.transform.TransformVector(array[1]);
+			vector = transform.InverseTransformPoint(position4);
+			vector2 = transform.InverseTransformPoint(position);
+			vector3 = transform.InverseTransformPoint(position2);
+			vector4 = transform.InverseTransformPoint(position3);
+			vector5 = SunshineMath.xy(Sunshine.Instance.SunLightCamera.WorldToViewportPoint(position4));
+			vector6 = SunshineMath.xy(Sunshine.Instance.SunLightCamera.WorldToViewportPoint(position));
+			vector7 = SunshineMath.xy(Sunshine.Instance.SunLightCamera.WorldToViewportPoint(position2));
+			vector8 = SunshineMath.xy(Sunshine.Instance.SunLightCamera.WorldToViewportPoint(position3));
+			vector9 = new Vector4(vector6.x, vector6.y, vector2.z / Sunshine.Instance.SunLightCamera.farClipPlane, vector.y);
+			Vector4 value5 = new Vector4(vector5.x, vector5.y, vector.z / Sunshine.Instance.SunLightCamera.farClipPlane, vector.y);
+			Vector4 value6 = vector9 - vector10;
+			Vector4 value7 = new Vector4(vector7.x, vector7.y, vector3.z / Sunshine.Instance.SunLightCamera.farClipPlane, vector3.y) - vector9;
+			Vector4 value8 = new Vector4(vector8.x, vector8.y, vector4.z / Sunshine.Instance.SunLightCamera.farClipPlane, vector4.y) - vector9;
+			position4 = vector13;
+			this.AttachedCamera.CalculateFrustumCorners(new Rect(0f, 0f, 1f, 1f), this.AttachedCamera.farClipPlane, Camera.MonoOrStereoscopicEye.Right, array2);
+			position = this.AttachedCamera.transform.TransformVector(array2[0]);
+			position2 = this.AttachedCamera.transform.TransformVector(array2[3]);
+			position3 = this.AttachedCamera.transform.TransformVector(array2[1]);
+			vector = transform.InverseTransformPoint(position4);
+			vector2 = transform.InverseTransformPoint(position);
+			vector3 = transform.InverseTransformPoint(position2);
+			vector4 = transform.InverseTransformPoint(position3);
+			vector5 = SunshineMath.xy(Sunshine.Instance.SunLightCamera.WorldToViewportPoint(position4));
+			vector6 = SunshineMath.xy(Sunshine.Instance.SunLightCamera.WorldToViewportPoint(position));
+			vector7 = SunshineMath.xy(Sunshine.Instance.SunLightCamera.WorldToViewportPoint(position2));
+			vector8 = SunshineMath.xy(Sunshine.Instance.SunLightCamera.WorldToViewportPoint(position3));
+			vector9 = new Vector4(vector6.x, vector6.y, vector2.z / Sunshine.Instance.SunLightCamera.farClipPlane, vector.y);
+			Vector4 value9 = new Vector4(vector5.x, vector5.y, vector.z / Sunshine.Instance.SunLightCamera.farClipPlane, vector.y);
+			Vector4 value10 = vector9 - vector10;
+			Vector4 value11 = new Vector4(vector7.x, vector7.y, vector3.z / Sunshine.Instance.SunLightCamera.farClipPlane, vector3.y) - vector9;
+			Vector4 value12 = new Vector4(vector8.x, vector8.y, vector4.z / Sunshine.Instance.SunLightCamera.farClipPlane, vector4.y) - vector9;
+			Shader.SetGlobalVector("L_sunshine_ShadowCoordDepthStart", value5);
+			Shader.SetGlobalVector("L_sunshine_ShadowCoordDepthRayZ", value6);
+			Shader.SetGlobalVector("L_sunshine_ShadowCoordDepthRayU", value7);
+			Shader.SetGlobalVector("L_sunshine_ShadowCoordDepthRayV", value8);
+			Shader.SetGlobalVector("R_sunshine_ShadowCoordDepthStart", value9);
+			Shader.SetGlobalVector("R_sunshine_ShadowCoordDepthRayZ", value10);
+			Shader.SetGlobalVector("R_sunshine_ShadowCoordDepthRayU", value11);
+			Shader.SetGlobalVector("R_sunshine_ShadowCoordDepthRayV", value12);
+		}
 		float num2 = Sunshine.Instance.SunLightCamera.orthographicSize * 2f;
-		Vector2 vector11 = new Vector2(num2, num2);
-		vector11.x /= rect.width;
-		vector11.y /= rect.height;
-		Vector3 v = new Vector3(vector11.x, vector11.y, Sunshine.Instance.SunLightCamera.farClipPlane) / this.AttachedCamera.farClipPlane;
+		Vector2 vector14 = new Vector2(num2, num2);
+		vector14.x /= rect.width;
+		vector14.y /= rect.height;
+		Vector3 v = new Vector3(vector14.x, vector14.y, Sunshine.Instance.SunLightCamera.farClipPlane) / this.AttachedCamera.farClipPlane;
 		Shader.SetGlobalVector("sunshine_ShadowToWorldScale", v);
 		Matrix4x4 zero = Matrix4x4.zero;
 		Vector3 position5 = Sunshine.Instance.SunLightCamera.ViewportToWorldPoint(new Vector3(0f, 0f, 0f));
@@ -350,9 +413,9 @@ public class SunshineCamera : MonoBehaviour
 			if (i > 0)
 			{
 				Camera camera = Sunshine.Instance.SunLightCameras[i];
-				Vector3 vector12 = camera.WorldToViewportPoint(position5);
-				Vector3 vector13 = camera.WorldToViewportPoint(position6);
-				v2 = new Vector4(vector12.x, vector12.y, vector13.x, vector13.y);
+				Vector3 vector15 = camera.WorldToViewportPoint(position5);
+				Vector3 vector16 = camera.WorldToViewportPoint(position6);
+				v2 = new Vector4(vector15.x, vector15.y, vector16.x, vector16.y);
 			}
 			Rect rect2 = Sunshine.Instance.CascadeRect(i);
 			v2.x = rect2.xMin + rect2.width * v2.x;
@@ -418,9 +481,13 @@ public class SunshineCamera : MonoBehaviour
 			Sunshine.Instance.SunLight.shadows = LightShadows.None;
 			Sunshine.Instance.SunLight.renderMode = LightRenderMode.ForcePixel;
 		}
-		if (Sunshine.Instance.RequiresPostprocessing && (this.AttachedCamera.depthTextureMode & DepthTextureMode.Depth) == DepthTextureMode.None && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.Depth))
+		if (Sunshine.Instance.RequiresPostprocessing)
 		{
-			this.AttachedCamera.depthTextureMode |= DepthTextureMode.Depth;
+			if ((this.AttachedCamera.depthTextureMode & DepthTextureMode.Depth) == DepthTextureMode.None && SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.Depth))
+			{
+				this.AttachedCamera.depthTextureMode |= DepthTextureMode.Depth;
+			}
+			this.AttachedCamera.depthTextureMode |= DepthTextureMode.DepthNormals;
 		}
 	}
 
@@ -498,7 +565,7 @@ public class SunshineCamera : MonoBehaviour
 					{
 						temporary.filterMode = FilterMode.Point;
 						temporary.wrapMode = TextureWrapMode.Clamp;
-						SunshinePostprocess.Blit(source, temporary, Sunshine.Instance.PostScatterMaterial, SunshinePostScatterPass.DrawScatter);
+						Graphics.Blit(Texture2D.blackTexture, temporary, Sunshine.Instance.PostScatterMaterial, SunshinePostScatterPass.DrawScatter);
 						if (flag)
 						{
 							Sunshine.Instance.PostBlurMaterial.SetFloat("BlurDepthTollerance", Sunshine.Instance.ScatterBlurDepthTollerance);

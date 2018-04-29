@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Add several items to a PlayMaker Array List Proxy component")]
 	[ActionCategory("ArrayMaker/ArrayList")]
+	[Tooltip("Add several items to a PlayMaker Array List Proxy component")]
 	public class ArrayListAddRange : ArrayListActions
 	{
 		
@@ -39,15 +39,15 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[RequiredField]
 		[ActionSection("Set up")]
+		[RequiredField]
 		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
 		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
-		[UIHint(UIHint.FsmString)]
 		[Tooltip("Author defined Reference of the PlayMaker ArrayList Proxy component (necessary if several component coexists on the same GameObject)")]
+		[UIHint(UIHint.FsmString)]
 		public FsmString reference;
 
 		

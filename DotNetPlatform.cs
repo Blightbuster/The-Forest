@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using UdpKit;
 using UniLinq;
 
@@ -71,8 +72,12 @@ public class DotNetPlatform : UdpPlatform
 		{
 			throw new ArgumentException("host name was empty", "host");
 		}
-		return (from x in Dns.GetHostAddresses(host)
-		select DotNetPlatform.ConvertAddress(x)).ToArray<UdpIPv4Address>();
+		IEnumerable<IPAddress> hostAddresses = Dns.GetHostAddresses(host);
+		if (DotNetPlatform.<>f__mg$cache0 == null)
+		{
+			DotNetPlatform.<>f__mg$cache0 = new Func<IPAddress, UdpIPv4Address>(DotNetPlatform.ConvertAddress);
+		}
+		return hostAddresses.Select(DotNetPlatform.<>f__mg$cache0).ToArray<UdpIPv4Address>();
 	}
 
 	
@@ -282,7 +287,7 @@ public class DotNetPlatform : UdpPlatform
 				}
 				break;
 			}
-			IL_182:
+			IL_184:
 			i++;
 			continue;
 			IL_59:
@@ -313,7 +318,7 @@ public class DotNetPlatform : UdpPlatform
 					}
 				}
 			}
-			goto IL_182;
+			goto IL_184;
 		}
 		if (strict)
 		{
@@ -321,6 +326,10 @@ public class DotNetPlatform : UdpPlatform
 		}
 		return IPAddress.Any;
 	}
+
+	
+	[CompilerGenerated]
+	private static Func<IPAddress, UdpIPv4Address> <>f__mg$cache0;
 
 	
 	private class PrecisionTimer

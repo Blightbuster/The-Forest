@@ -47,8 +47,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Renderer))]
 		[RequiredField]
+		[CheckForComponent(typeof(Renderer))]
 		[Tooltip("The GameObject to test.")]
 		public FsmOwnerDefault gameObject;
 
@@ -61,8 +61,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmEvent falseEvent;
 
 		
-		[Tooltip("Store the result in a bool variable.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the result in a bool variable.")]
 		public FsmBool storeResult;
 
 		

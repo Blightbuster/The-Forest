@@ -421,13 +421,17 @@ namespace Pathfinding
 					stringBuilder.Append("\n\tF: ");
 					stringBuilder.Append(pathNode.F);
 					stringBuilder.Append("\n\tPoint: ");
-					stringBuilder.Append(this.endPoint.ToString());
+					StringBuilder stringBuilder2 = stringBuilder;
+					Vector3 vector = this.endPoint;
+					stringBuilder2.Append(vector.ToString());
 					stringBuilder.Append("\n\tGraph: ");
 					stringBuilder.Append(this.endNode.GraphIndex);
 				}
 				stringBuilder.Append("\nStart Node");
 				stringBuilder.Append("\n\tPoint: ");
-				stringBuilder.Append(this.startPoint.ToString());
+				StringBuilder stringBuilder3 = stringBuilder;
+				Vector3 vector2 = this.startPoint;
+				stringBuilder3.Append(vector2.ToString());
 				stringBuilder.Append("\n\tGraph: ");
 				if (this.startNode != null)
 				{

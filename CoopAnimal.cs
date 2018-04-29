@@ -67,6 +67,11 @@ public class CoopAnimal : CoopBase<IAnimalState>
 			{
 				this.skin.sharedMaterial = this.snowMaterial;
 			}
+			AnimalTypeTrigger component = base.transform.GetComponent<AnimalTypeTrigger>();
+			if (component && component._type == AnimalType.EuropeanRabbit)
+			{
+				component._type = AnimalType.snowRabbit;
+			}
 			this.isSnow = true;
 		}
 		else
@@ -163,7 +168,7 @@ public class CoopAnimal : CoopBase<IAnimalState>
 		if (BoltNetwork.isServer)
 		{
 			syncAnimalState syncAnimalState = syncAnimalState.Create(GlobalTargets.AllClients);
-			syncAnimalState.target = this.entity;
+			syncAnimalState.target = base.entity;
 			syncAnimalState.onSnow = this.isSnow;
 			syncAnimalState.Send();
 		}

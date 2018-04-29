@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Bolt;
 using TheForest.Audio;
 using TheForest.Items;
@@ -216,7 +217,7 @@ namespace TheForest.Buildings.World
 					}
 					break;
 				case 2:
-					if (LocalPlayer.AnimControl.carry)
+					if (LocalPlayer.AnimControl.carry && !BoltNetwork.isRunning)
 					{
 						return (MultiHolder.ContentTypes)result;
 					}
@@ -241,7 +242,7 @@ namespace TheForest.Buildings.World
 		
 		private void RefreshMassAndDrag()
 		{
-			if (BoltNetwork.isRunning && this.entity && this.entity.isAttached && this.entity.isOwner && !base.state.IsReal)
+			if (BoltNetwork.isRunning && base.entity && base.entity.isAttached && base.entity.isOwner && !base.state.IsReal)
 			{
 				return;
 			}
@@ -266,7 +267,7 @@ namespace TheForest.Buildings.World
 					{
 						ItemHolderTakeItem itemHolderTakeItem = ItemHolderTakeItem.Create(GlobalTargets.OnlyServer);
 						itemHolderTakeItem.ContentType = (int)this._contentTypeActual;
-						itemHolderTakeItem.Target = this.entity;
+						itemHolderTakeItem.Target = base.entity;
 						itemHolderTakeItem.Player = LocalPlayer.Entity;
 						itemHolderTakeItem.Send();
 					}
@@ -294,7 +295,7 @@ namespace TheForest.Buildings.World
 					{
 						ItemHolderAddItem itemHolderAddItem = ItemHolderAddItem.Create(GlobalTargets.OnlyServer);
 						itemHolderAddItem.ContentType = 3;
-						itemHolderAddItem.Target = this.entity;
+						itemHolderAddItem.Target = base.entity;
 						itemHolderAddItem.Send();
 					}
 					else
@@ -323,7 +324,7 @@ namespace TheForest.Buildings.World
 					{
 						ItemHolderTakeItem itemHolderTakeItem = ItemHolderTakeItem.Create(GlobalTargets.OnlyServer);
 						itemHolderTakeItem.ContentType = (int)this._contentTypeActual;
-						itemHolderTakeItem.Target = this.entity;
+						itemHolderTakeItem.Target = base.entity;
 						itemHolderTakeItem.Player = LocalPlayer.Entity;
 						itemHolderTakeItem.Send();
 					}
@@ -351,7 +352,7 @@ namespace TheForest.Buildings.World
 					{
 						ItemHolderAddItem itemHolderAddItem = ItemHolderAddItem.Create(GlobalTargets.OnlyServer);
 						itemHolderAddItem.ContentType = 4;
-						itemHolderAddItem.Target = this.entity;
+						itemHolderAddItem.Target = base.entity;
 						itemHolderAddItem.Send();
 					}
 					else
@@ -380,7 +381,7 @@ namespace TheForest.Buildings.World
 					{
 						ItemHolderTakeItem itemHolderTakeItem = ItemHolderTakeItem.Create(GlobalTargets.OnlyServer);
 						itemHolderTakeItem.ContentType = (int)this._contentTypeActual;
-						itemHolderTakeItem.Target = this.entity;
+						itemHolderTakeItem.Target = base.entity;
 						itemHolderTakeItem.Player = LocalPlayer.Entity;
 						itemHolderTakeItem.Send();
 					}
@@ -408,7 +409,7 @@ namespace TheForest.Buildings.World
 					{
 						ItemHolderAddItem itemHolderAddItem = ItemHolderAddItem.Create(GlobalTargets.OnlyServer);
 						itemHolderAddItem.ContentType = 1;
-						itemHolderAddItem.Target = this.entity;
+						itemHolderAddItem.Target = base.entity;
 						itemHolderAddItem.Send();
 					}
 					else
@@ -432,7 +433,7 @@ namespace TheForest.Buildings.World
 				if (TheForest.Utils.Input.GetButtonDown("Take"))
 				{
 					TakeBody takeBody = TakeBody.Create(GlobalTargets.OnlyServer);
-					takeBody.Sled = this.entity;
+					takeBody.Sled = base.entity;
 					if (base.state.Body2)
 					{
 						takeBody.Body = base.state.Body2;
@@ -457,7 +458,7 @@ namespace TheForest.Buildings.World
 					GameObject placedBodyGo = LocalPlayer.AnimControl.placedBodyGo;
 					AddBody addBody = AddBody.Create(GlobalTargets.OnlyServer);
 					addBody.Body = placedBodyGo.GetComponentInChildren<BoltEntity>();
-					addBody.Sled = this.entity;
+					addBody.Sled = base.entity;
 					addBody.Send();
 					LocalPlayer.AnimControl.heldBodyGo.SetActive(false);
 					LocalPlayer.Animator.SetBoolReflected("bodyHeld", false);
@@ -510,10 +511,12 @@ namespace TheForest.Buildings.World
 					placedBodyGo.SetActive(true);
 					this.DisableBodyCollisions(placedBodyGo);
 					MultiHolder.GetTriggerChild(placedBodyGo.transform).gameObject.SetActive(false);
+					dummyAnimatorControl dummyAnimatorControl = placedBodyGo.GetComponent<dummyAnimatorControl>() ?? placedBodyGo.GetComponentInChildren<dummyAnimatorControl>();
+					dummyAnimatorControl.BodyCollider.enabled = false;
+					dummyAnimatorControl.burnTrigger.gameObject.SetActive(false);
 					placedBodyGo.transform.position = this.MutantBodySlots[this._contentActual].transform.position;
 					placedBodyGo.transform.rotation = this.MutantBodySlots[this._contentActual].transform.rotation;
 					placedBodyGo.transform.parent = base.transform.root;
-					dummyAnimatorControl dummyAnimatorControl = placedBodyGo.GetComponent<dummyAnimatorControl>() ?? placedBodyGo.GetComponentInChildren<dummyAnimatorControl>();
 					dummyAnimatorControl.Invoke("disableControl", 2.5f);
 					dummyAnimatorControl.bodyOnSled = true;
 					placedBodyGo.SendMessage("dropFromCarry", false, SendMessageOptions.DontRequireReceiver);
@@ -663,21 +666,47 @@ namespace TheForest.Buildings.World
 			if (!transform)
 			{
 				int num = LayerMask.NameToLayer("PickUp");
-				foreach (object obj in t)
+				IEnumerator enumerator = t.GetEnumerator();
+				try
 				{
-					Transform transform2 = (Transform)obj;
-					foreach (object obj2 in transform2)
+					while (enumerator.MoveNext())
 					{
-						Transform transform3 = (Transform)obj2;
-						if (transform3.gameObject.layer == num)
+						object obj = enumerator.Current;
+						Transform transform2 = (Transform)obj;
+						IEnumerator enumerator2 = transform2.GetEnumerator();
+						try
 						{
-							transform = transform3;
+							while (enumerator2.MoveNext())
+							{
+								object obj2 = enumerator2.Current;
+								Transform transform3 = (Transform)obj2;
+								if (transform3.gameObject.layer == num)
+								{
+									transform = transform3;
+									break;
+								}
+							}
+						}
+						finally
+						{
+							IDisposable disposable;
+							if ((disposable = (enumerator2 as IDisposable)) != null)
+							{
+								disposable.Dispose();
+							}
+						}
+						if (transform)
+						{
 							break;
 						}
 					}
-					if (transform)
+				}
+				finally
+				{
+					IDisposable disposable2;
+					if ((disposable2 = (enumerator as IDisposable)) != null)
 					{
-						break;
+						disposable2.Dispose();
 					}
 				}
 			}
@@ -735,11 +764,11 @@ namespace TheForest.Buildings.World
 		
 		public override void Attached()
 		{
-			if (!BoltNetwork.isServer || this.entity.isOwner)
+			if (!BoltNetwork.isServer || base.entity.isOwner)
 			{
 			}
 			base.state.AddCallback("LogCount", new PropertyCallbackSimple(this.ItemCountChangedMP));
-			if (BoltNetwork.isServer && this.entity.isOwner && this._content == MultiHolder.ContentTypes.Body)
+			if (BoltNetwork.isServer && base.entity.isOwner && this._content == MultiHolder.ContentTypes.Body)
 			{
 				int contentAmount = this._contentAmount;
 				for (int i = 0; i < contentAmount; i++)
@@ -758,7 +787,7 @@ namespace TheForest.Buildings.World
 		
 		private bool MP_CanInterract()
 		{
-			if (!this.entity || !this.entity.isAttached || !Grabber.FocusedItem || !Grabber.FocusedItem.gameObject.Equals(base.gameObject))
+			if (!base.entity || !base.entity.isAttached || !Grabber.FocusedItem || !Grabber.FocusedItem.gameObject.Equals(base.gameObject))
 			{
 				return false;
 			}
@@ -766,7 +795,7 @@ namespace TheForest.Buildings.World
 			{
 				return !base.state.GrabbedBy;
 			}
-			return !this.entity.isOwner;
+			return !base.entity.isOwner;
 		}
 
 		
@@ -803,7 +832,7 @@ namespace TheForest.Buildings.World
 					}
 					playerAddItem.Send();
 				}
-				if (this.entity.isOwner)
+				if (base.entity.isOwner)
 				{
 					this._contentActual = Mathf.Max(this._contentActual - 1, 0);
 					if (this._contentActual == 0)
@@ -814,8 +843,8 @@ namespace TheForest.Buildings.World
 				}
 				else
 				{
-					ItemHolderTakeItem itemHolderTakeItem = ItemHolderTakeItem.Create(this.entity.source);
-					itemHolderTakeItem.Target = this.entity;
+					ItemHolderTakeItem itemHolderTakeItem = ItemHolderTakeItem.Create(base.entity.source);
+					itemHolderTakeItem.Target = base.entity;
 					itemHolderTakeItem.ContentType = (int)this._contentTypeActual;
 					itemHolderTakeItem.Send();
 				}
@@ -832,7 +861,7 @@ namespace TheForest.Buildings.World
 				{
 					this._contentActual = 0;
 				}
-				if (this.entity.isOwner)
+				if (base.entity.isOwner)
 				{
 					this._contentTypeActual = MultiHolder.ContentTypes.Log;
 					if (this._contentActual < this.LogRender.Length)
@@ -849,8 +878,8 @@ namespace TheForest.Buildings.World
 				}
 				else
 				{
-					ItemHolderAddItem itemHolderAddItem = ItemHolderAddItem.Create(this.entity.source);
-					itemHolderAddItem.Target = this.entity;
+					ItemHolderAddItem itemHolderAddItem = ItemHolderAddItem.Create(base.entity.source);
+					itemHolderAddItem.Target = base.entity;
 					itemHolderAddItem.ContentType = 1;
 					itemHolderAddItem.Send();
 				}
@@ -861,7 +890,7 @@ namespace TheForest.Buildings.World
 				{
 					this._contentActual = 0;
 				}
-				if (this.entity.isOwner)
+				if (base.entity.isOwner)
 				{
 					this._contentTypeActual = MultiHolder.ContentTypes.Rock;
 					if (this._contentActual < this.RockRender.Length)
@@ -878,9 +907,9 @@ namespace TheForest.Buildings.World
 				}
 				else
 				{
-					ItemHolderAddItem itemHolderAddItem2 = ItemHolderAddItem.Create(this.entity.source);
+					ItemHolderAddItem itemHolderAddItem2 = ItemHolderAddItem.Create(base.entity.source);
 					itemHolderAddItem2.ContentType = 3;
-					itemHolderAddItem2.Target = this.entity;
+					itemHolderAddItem2.Target = base.entity;
 					itemHolderAddItem2.Send();
 				}
 			}
@@ -890,7 +919,7 @@ namespace TheForest.Buildings.World
 				{
 					this._contentActual = 0;
 				}
-				if (this.entity.isOwner)
+				if (base.entity.isOwner)
 				{
 					this._contentTypeActual = MultiHolder.ContentTypes.Stick;
 					if (this._contentActual < this.StickRender.Length)
@@ -907,9 +936,9 @@ namespace TheForest.Buildings.World
 				}
 				else
 				{
-					ItemHolderAddItem itemHolderAddItem3 = ItemHolderAddItem.Create(this.entity.source);
+					ItemHolderAddItem itemHolderAddItem3 = ItemHolderAddItem.Create(base.entity.source);
 					itemHolderAddItem3.ContentType = 4;
-					itemHolderAddItem3.Target = this.entity;
+					itemHolderAddItem3.Target = base.entity;
 					itemHolderAddItem3.Send();
 				}
 			}
@@ -992,7 +1021,7 @@ namespace TheForest.Buildings.World
 			}
 			set
 			{
-				if (BoltNetwork.isRunning && this.entity && this.entity.isAttached && this.entity.isOwner)
+				if (BoltNetwork.isRunning && base.entity && base.entity.isAttached && base.entity.isOwner)
 				{
 					base.state.ContentType = (int)value;
 				}

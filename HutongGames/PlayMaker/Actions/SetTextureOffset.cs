@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the Offset of a named texture in a Game Object's Material. Useful for scrolling texture effects.")]
 	[ActionCategory(ActionCategory.Material)]
+	[Tooltip("Sets the Offset of a named texture in a Game Object's Material. Useful for scrolling texture effects.")]
 	public class SetTextureOffset : ComponentAction<Renderer>
 	{
 		
@@ -45,7 +45,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			if (base.renderer.material == null)
 			{
-				this.LogError("Missing Material!");
+				base.LogError("Missing Material!");
 				return;
 			}
 			if (this.materialIndex.Value == 0)
@@ -61,16 +61,16 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Renderer))]
 		[RequiredField]
+		[CheckForComponent(typeof(Renderer))]
 		public FsmOwnerDefault gameObject;
 
 		
 		public FsmInt materialIndex;
 
 		
-		[UIHint(UIHint.NamedColor)]
 		[RequiredField]
+		[UIHint(UIHint.NamedColor)]
 		public FsmString namedTexture;
 
 		

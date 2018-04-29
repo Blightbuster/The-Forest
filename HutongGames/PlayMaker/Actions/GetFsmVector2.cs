@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Get the value of a Vector2 Variable from another FSM.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Get the value of a Vector2 Variable from another FSM.")]
 	public class GetFsmVector2 : FsmStateAction
 	{
 		
@@ -71,8 +71,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString fsmName;
 
 		
-		[UIHint(UIHint.FsmVector2)]
 		[RequiredField]
+		[UIHint(UIHint.FsmVector2)]
 		public FsmString variableName;
 
 		

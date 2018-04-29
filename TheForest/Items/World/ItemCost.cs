@@ -8,19 +8,18 @@ namespace TheForest.Items.World
 	public class ItemCost : MonoBehaviour
 	{
 		
-		private void Awake()
+		private void OnEnable()
 		{
-			this._iconPos = this._icon.transform.localPosition;
-			if (!PlayerPreferences.ShowHud)
+			if (PlayerPreferences.ShowHud && !this.IsCompleted)
 			{
-				this._icon.gameObject.SetActive(false);
+				Scene.HudGui.TrapReArmIngredientsFollow.SetTarget(base.transform, null);
 			}
 		}
 
 		
-		private void OnEnable()
+		private void OnDisable()
 		{
-			this._icon.transform.position = this._iconPos;
+			Scene.HudGui.TrapReArmIngredientsFollow.Shutdown();
 		}
 
 		
@@ -28,33 +27,21 @@ namespace TheForest.Items.World
 		{
 			bool flag = this._currentAmount < this._totalRequiredAmount;
 			bool flag2 = flag && LocalPlayer.Inventory.Owns(this._itemId, true);
-			this._icon.color = ((flag && !flag2) ? this._red : this._white);
+			if (!flag || flag2)
+			{
+				Scene.HudGui.TrapReArmIngredients.SetAvailableIngredientColor();
+			}
+			else
+			{
+				Scene.HudGui.TrapReArmIngredients.SetMissingIngredientColor();
+			}
 			if (flag2 && TheForest.Utils.Input.GetButtonDown("Take") && LocalPlayer.Inventory.RemoveItem(this._itemId, 1, false, true))
 			{
 				this._currentAmount++;
-				LocalPlayer.Sfx.PlayWhoosh();
-			}
-			this.UpdateDisplay(this._currentAmount, this._totalRequiredAmount);
-		}
-
-		
-		public void UpdateDisplay(int amount, int total)
-		{
-			if (amount == total || !PlayerPreferences.ShowHud)
-			{
-				if (this._icon.gameObject.activeSelf)
+				LocalPlayer.Sfx.PlayItemCustomSfx(this._itemId, true);
+				if (this._currentAmount >= this._totalRequiredAmount)
 				{
-					this._icon.gameObject.SetActive(false);
-				}
-			}
-			else if (this._displayedCount != amount || this._displayedTotalCount != total)
-			{
-				this._text.text = amount + "/" + total;
-				this._displayedCount = amount;
-				this._displayedTotalCount = total;
-				if (!this._icon.gameObject.activeSelf)
-				{
-					this._icon.gameObject.SetActive(true);
+					base.enabled = false;
 				}
 			}
 		}
@@ -70,18 +57,6 @@ namespace TheForest.Items.World
 		}
 
 		
-		public GUITexture _icon;
-
-		
-		public GUIText _text;
-
-		
-		public Color _white;
-
-		
-		public Color _red;
-
-		
 		[ItemIdPicker]
 		public int _itemId;
 
@@ -90,9 +65,6 @@ namespace TheForest.Items.World
 
 		
 		public int _totalRequiredAmount = 1;
-
-		
-		private Vector3 _iconPos;
 
 		
 		private int _displayedCount;

@@ -6,6 +6,7 @@ using TheForest.Items.Core;
 using TheForest.Items.Inventory;
 using TheForest.Networking;
 using TheForest.Player;
+using TheForest.Player.Clothing;
 using TheForest.Tools;
 using TheForest.Utils;
 using TheForest.World;
@@ -129,6 +130,8 @@ namespace TheForest.Save
 				{
 					PlayerRespawnMP.Instance._bringUpPauseMenu = false;
 				}
+				Debug.Log("player disconnect from objects");
+				LocalPlayer.AnimControl.disconnectFromObject();
 				LocalPlayer.Inventory.CurrentView = PlayerInventory.PlayerViews.WakingUp;
 				Scene.Cams.DeadCam.SetActive(true);
 				Scene.HudGui.ShowHud(false);
@@ -207,8 +210,12 @@ namespace TheForest.Save
 				EventRegistry.Player.Publish(TfEvent.ExitEndgame, null);
 				LocalPlayer.GameObject.SendMessage("NotInACave");
 				PlayerInventory inventory = LocalPlayer.Inventory;
+				PlayerClothing clothing = LocalPlayer.Clothing;
 				AchievementsManager achievements = LocalPlayer.Achievements;
+				SurvivalBookTodo componentInChildren = LocalPlayer.SpecialItems.GetComponentInChildren<SurvivalBookTodo>();
 				string name = LocalPlayer.Entity.GetState<IPlayerState>().name;
+				bool value = LocalPlayer.SavedData.ReachedLowSanityThreshold;
+				bool value2 = LocalPlayer.SavedData.ExitedEndgame;
 				LocalPlayer.Inventory.HideAllEquiped(false, false);
 				LocalPlayer.Inventory.enabled = false;
 				if (Scene.SceneTracker.allPlayers.Contains(LocalPlayer.GameObject))
@@ -244,11 +251,14 @@ namespace TheForest.Save
 					}
 				}
 				Transform transform = base.transform;
-				GameObject gameObject3 = (GameObject)UnityEngine.Object.Instantiate(Prefabs.Instance.PlayerPrefab, transform.position, transform.rotation);
+				GameObject gameObject3 = UnityEngine.Object.Instantiate<GameObject>(Prefabs.Instance.PlayerPrefab, transform.position, transform.rotation);
 				gameObject3.transform.localEulerAngles = new Vector3(0f, gameObject3.transform.localEulerAngles.y, 0f);
 				gameObject3.name = Prefabs.Instance.PlayerPrefab.name;
 				LocalPlayer.Inventory.SetQuickSelectItemIds(inventory.QuickSelectItemIds);
 				LocalPlayer.Achievements.Clone(achievements);
+				LocalPlayer.SpecialItems.GetComponentInChildren<SurvivalBookTodo>().Clone(componentInChildren);
+				LocalPlayer.SavedData.ReachedLowSanityThreshold.SetValue(value);
+				LocalPlayer.SavedData.ExitedEndgame.SetValue(value2);
 				LocalPlayer.FpCharacter.UnLockView();
 				LocalPlayer.CamFollowHead.enableMouseControl(false);
 				LocalPlayer.MainCamTr.localEulerAngles = Vector3.zero;
@@ -270,11 +280,13 @@ namespace TheForest.Save
 				LocalPlayer.Inventory.enabled = true;
 				LocalPlayer.Transform.SendMessage("enableMpRenderers");
 				LocalPlayer.Transform.SendMessage("playerLoadedFromRespawn");
-				StealItemTrigger stealItemTrigger = (StealItemTrigger)UnityEngine.Object.Instantiate(Prefabs.Instance.DeadBackpackPrefab, gameObject2.transform.position, gameObject2.transform.rotation);
+				this._addedItems = false;
+				StealItemTrigger stealItemTrigger = UnityEngine.Object.Instantiate<StealItemTrigger>(Prefabs.Instance.DeadBackpackPrefab, gameObject2.transform.position, gameObject2.transform.rotation);
 				stealItemTrigger._entity = entity;
 				stealItemTrigger.transform.parent = gameObject2.transform;
 				gameObject2.AddComponent<DeathMPTut>();
-				ItemStorage cis = gameObject2.AddComponent<ItemStorage>();
+				ItemStorage itemStorage = gameObject2.AddComponent<ItemStorage>();
+				itemStorage._acceptedTypes = ~Item.Types.Story;
 				for (int k = inventory._possessedItems.Count - 1; k >= 0; k--)
 				{
 					InventoryItem inventoryItem = inventory._possessedItems[k];
@@ -283,7 +295,7 @@ namespace TheForest.Save
 						if (inventoryItem.MaxAmount == 1)
 						{
 							InventoryItemView inventoryItemView = inventory.InventoryItemViewsCache[inventoryItem._itemId][0];
-							this.AddItemToStorage(inventoryItem._itemId, inventoryItem._amount, cis, inventoryItemView.Properties);
+							this.AddItemToStorage(inventoryItem._itemId, inventoryItem._amount, itemStorage, inventoryItemView.Properties);
 						}
 						else if (inventoryItem.MaxAmount > 0 && inventoryItem.MaxAmount < 2147483647)
 						{
@@ -293,12 +305,12 @@ namespace TheForest.Save
 								inventory.SortInventoryViewsByBonus(inventoryItemView2, inventoryItemView2.Properties.ActiveBonus, true);
 								int amount = inventory.AmountOfItemWithBonus(inventoryItem._itemId, inventoryItemView2.Properties.ActiveBonus);
 								inventory.RemoveItem(inventoryItem._itemId, amount, true, false);
-								this.AddItemToStorage(inventoryItem._itemId, amount, cis, inventoryItemView2.Properties);
+								this.AddItemToStorage(inventoryItem._itemId, amount, itemStorage, inventoryItemView2.Properties);
 							}
 						}
 						else
 						{
-							this.AddItemToStorage(inventoryItem._itemId, inventoryItem._amount, cis, null);
+							this.AddItemToStorage(inventoryItem._itemId, inventoryItem._amount, itemStorage, null);
 						}
 					}
 				}
@@ -307,8 +319,13 @@ namespace TheForest.Save
 					InventoryItemView inventoryItemView3 = inventory.EquipmentSlots[l];
 					if (inventoryItemView3 && inventoryItemView3._itemId > 0)
 					{
-						this.AddItemToStorage(inventoryItemView3._itemId, 1, cis, inventoryItemView3.Properties);
+						this.AddItemToStorage(inventoryItemView3._itemId, 1, itemStorage, inventoryItemView3.Properties);
 					}
+				}
+				clothing.DropAll(gameObject2.transform.position, true, true);
+				if (!this._addedItems)
+				{
+					UnityEngine.Object.Destroy(gameObject2);
 				}
 				animalAI[] array2 = UnityEngine.Object.FindObjectsOfType<animalAI>();
 				foreach (animalAI animalAI in array2)
@@ -350,6 +367,7 @@ namespace TheForest.Save
 					if (!item.MatchType(Item.Types.Story))
 					{
 						cis.Add(itemId, amount, properties);
+						this._addedItems = true;
 					}
 					else if (amount > 0)
 					{
@@ -375,10 +393,23 @@ namespace TheForest.Save
 		private void SetLayerRecursively(Transform tr, LayerMask layer)
 		{
 			tr.gameObject.layer = layer;
-			foreach (object obj in tr)
+			IEnumerator enumerator = tr.GetEnumerator();
+			try
 			{
-				Transform tr2 = (Transform)obj;
-				this.SetLayerRecursively(tr2, layer);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform tr2 = (Transform)obj;
+					this.SetLayerRecursively(tr2, layer);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 
@@ -428,6 +459,9 @@ namespace TheForest.Save
 
 		
 		private bool _bringUpPauseMenu;
+
+		
+		private bool _addedItems;
 
 		
 		private static PlayerRespawnMP _instance;

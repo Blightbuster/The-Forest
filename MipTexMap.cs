@@ -25,18 +25,17 @@ public class MipTexMap : MonoBehaviour
 			texture2D.SetPixels(array, i);
 		}
 		texture2D.Apply(false, true);
-		int num3 = size;
-		if (num3 != 64)
+		if (size != 64)
 		{
-			if (num3 != 128)
+			if (size != 128)
 			{
-				if (num3 != 256)
+				if (size != 256)
 				{
-					if (num3 != 512)
+					if (size != 512)
 					{
-						if (num3 != 1024)
+						if (size != 1024)
 						{
-							if (num3 != 2048)
+							if (size != 2048)
 							{
 								MipTexMap.mipFilterTex512 = texture2D;
 							}
@@ -75,18 +74,17 @@ public class MipTexMap : MonoBehaviour
 	public static Texture2D GetTex(int size)
 	{
 		size = Mathf.ClosestPowerOfTwo(size);
-		int num = size;
-		if (num != 64)
+		if (size != 64)
 		{
-			if (num != 128)
+			if (size != 128)
 			{
-				if (num != 256)
+				if (size != 256)
 				{
-					if (num != 512)
+					if (size != 512)
 					{
-						if (num != 1024)
+						if (size != 1024)
 						{
-							if (num != 2048)
+							if (size != 2048)
 							{
 								if (MipTexMap.mipFilterTex512)
 								{

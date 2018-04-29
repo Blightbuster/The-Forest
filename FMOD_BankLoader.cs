@@ -30,15 +30,15 @@ public class FMOD_BankLoader : MonoBehaviour
 		FMOD_BankLoader.sPendingLoads--;
 		if (FMOD_BankLoader.sPendingLoads == 0)
 		{
-			FMOD_StudioEventEmitter[] emitters = FMOD_StudioEventEmitter.sAwaitingBankLoad.ToArray();
-			for (int j = emitters.Length - 1; j >= 0; j--)
+			FMOD_StudioEventEmitter[] array = FMOD_StudioEventEmitter.sAwaitingBankLoad.ToArray();
+			for (int j = array.Length - 1; j >= 0; j--)
 			{
-				emitters[j].Activate();
+				array[j].Activate();
 			}
-			LinearEmitter[] linearEmitters = LinearEmitter.sAwaitingBankLoad.ToArray();
-			for (int k = linearEmitters.Length - 1; k >= 0; k--)
+			LinearEmitter[] array2 = LinearEmitter.sAwaitingBankLoad.ToArray();
+			for (int k = array2.Length - 1; k >= 0; k--)
 			{
-				linearEmitters[k].Activate();
+				array2[k].Activate();
 			}
 			FMOD_Listener.ProcessPreloadRequests();
 		}

@@ -50,9 +50,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat Value;
 
 		
+		[RequiredField]
 		[UIHint(UIHint.Variable)]
 		[Tooltip("The resulting angle. Note:If you want degrees, simply check RadToDeg")]
-		[RequiredField]
 		public FsmFloat angle;
 
 		

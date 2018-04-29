@@ -102,16 +102,6 @@ namespace RadicalLibrary
 		}
 
 		
-		
-		public bool IsComplete
-		{
-			get
-			{
-				return (Time.time - this._startTime) / this.Duration >= 1f;
-			}
-		}
-
-		
 		public static implicit operator float(SmoothFloat obj)
 		{
 			return obj.Value;
@@ -121,6 +111,16 @@ namespace RadicalLibrary
 		public static implicit operator SmoothFloat(float f)
 		{
 			return new SmoothFloat(f);
+		}
+
+		
+		
+		public bool IsComplete
+		{
+			get
+			{
+				return (Time.time - this._startTime) / this.Duration >= 1f;
+			}
 		}
 
 		

@@ -52,9 +52,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat floatVariable;
 
 		
-		[Tooltip("A string variable to store the converted value.")]
 		[RequiredField]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("A string variable to store the converted value.")]
 		public FsmString stringVariable;
 
 		

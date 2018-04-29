@@ -5,7 +5,7 @@ using TheForest.Utils.Settings;
 using UnityEngine;
 
 
-public class mutantHitReceiver : MonoBehaviour, IBurnable, IWetable
+public class mutantHitReceiver : MonoBehaviour, IWetable, IBurnable
 {
 	
 	private void Awake()

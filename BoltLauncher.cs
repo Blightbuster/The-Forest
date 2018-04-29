@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using BoltInternal;
 using UdpKit;
 using UnityEngine;
@@ -94,6 +95,10 @@ public static class BoltLauncher
 	
 	public static void Shutdown()
 	{
+		if (!BoltNetwork.isRunning)
+		{
+			return;
+		}
 		Debug.Log("Bolt shutdown");
 		BoltNetworkInternal.__Shutdown();
 	}
@@ -103,11 +108,31 @@ public static class BoltLauncher
 	{
 		BoltNetworkInternal.DebugDrawer = new UnityDebugDrawer();
 		BoltNetworkInternal.UsingUnityPro = true;
-		BoltNetworkInternal.GetSceneName = new Func<int, string>(BoltLauncher.GetSceneName);
-		BoltNetworkInternal.GetSceneIndex = new Func<string, int>(BoltLauncher.GetSceneIndex);
-		BoltNetworkInternal.GetGlobalBehaviourTypes = new Func<List<STuple<BoltGlobalBehaviourAttribute, Type>>>(BoltLauncher.GetGlobalBehaviourTypes);
-		BoltNetworkInternal.EnvironmentSetup = new Action(BoltNetworkInternal_User.EnvironmentSetup);
-		BoltNetworkInternal.EnvironmentReset = new Action(BoltNetworkInternal_User.EnvironmentReset);
+		if (BoltLauncher.<>f__mg$cache0 == null)
+		{
+			BoltLauncher.<>f__mg$cache0 = new Func<int, string>(BoltLauncher.GetSceneName);
+		}
+		BoltNetworkInternal.GetSceneName = BoltLauncher.<>f__mg$cache0;
+		if (BoltLauncher.<>f__mg$cache1 == null)
+		{
+			BoltLauncher.<>f__mg$cache1 = new Func<string, int>(BoltLauncher.GetSceneIndex);
+		}
+		BoltNetworkInternal.GetSceneIndex = BoltLauncher.<>f__mg$cache1;
+		if (BoltLauncher.<>f__mg$cache2 == null)
+		{
+			BoltLauncher.<>f__mg$cache2 = new Func<List<STuple<BoltGlobalBehaviourAttribute, Type>>>(BoltLauncher.GetGlobalBehaviourTypes);
+		}
+		BoltNetworkInternal.GetGlobalBehaviourTypes = BoltLauncher.<>f__mg$cache2;
+		if (BoltLauncher.<>f__mg$cache3 == null)
+		{
+			BoltLauncher.<>f__mg$cache3 = new Action(BoltNetworkInternal_User.EnvironmentSetup);
+		}
+		BoltNetworkInternal.EnvironmentSetup = BoltLauncher.<>f__mg$cache3;
+		if (BoltLauncher.<>f__mg$cache4 == null)
+		{
+			BoltLauncher.<>f__mg$cache4 = new Action(BoltNetworkInternal_User.EnvironmentReset);
+		}
+		BoltNetworkInternal.EnvironmentReset = BoltLauncher.<>f__mg$cache4;
 		BoltNetworkInternal.__Initialize(modes, endpoint, config, BoltLauncher.CreateUdpPlatform(), null);
 	}
 
@@ -166,4 +191,24 @@ public static class BoltLauncher
 
 	
 	private static UdpPlatform UserAssignedPlatform;
+
+	
+	[CompilerGenerated]
+	private static Func<int, string> <>f__mg$cache0;
+
+	
+	[CompilerGenerated]
+	private static Func<string, int> <>f__mg$cache1;
+
+	
+	[CompilerGenerated]
+	private static Func<List<STuple<BoltGlobalBehaviourAttribute, Type>>> <>f__mg$cache2;
+
+	
+	[CompilerGenerated]
+	private static Action <>f__mg$cache3;
+
+	
+	[CompilerGenerated]
+	private static Action <>f__mg$cache4;
 }

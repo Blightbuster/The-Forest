@@ -63,8 +63,8 @@ namespace Pathfinding.RVO
 		public bool doubleBuffering;
 
 		
-		[Range(0f, 0.2f)]
 		[Tooltip("Bias agents to pass each other on the right side.\nIf the desired velocity of an agent puts it on a collision course with another agent or an obstacle its desired velocity will be rotated this number of radians (1 radian is approximately 57°) to the right. This helps to break up symmetries and makes it possible to resolve some situations much faster.\n\nWhen many agents have the same goal this can however have the side effect that the group clustered around the target point may as a whole start to spin around the target point.")]
+		[Range(0f, 0.2f)]
 		public float symmetryBreakingBias = 0.1f;
 
 		

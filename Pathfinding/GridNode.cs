@@ -58,13 +58,13 @@ namespace Pathfinding
 		
 		public void SetConnectionInternal(int dir, bool value)
 		{
-			this.gridFlags = (ushort)(((int)this.gridFlags & ~(1 << dir)) | ((!value) ? 0 : 1) << (dir & 31));
+			this.gridFlags = (ushort)(((int)this.gridFlags & ~(1 << dir)) | ((!value) ? 0 : 1) << 0 << (dir & 31));
 		}
 
 		
 		public void SetAllConnectionInternal(int connections)
 		{
-			this.gridFlags = (ushort)(((int)this.gridFlags & -256) | connections);
+			this.gridFlags = (ushort)(((int)this.gridFlags & -256) | connections << 0);
 		}
 
 		
@@ -339,6 +339,9 @@ namespace Pathfinding
 		}
 
 		
+		private static GridGraph[] _gridGraphs = new GridGraph[0];
+
+		
 		private const int GridFlagsConnectionOffset = 0;
 
 		
@@ -352,8 +355,5 @@ namespace Pathfinding
 
 		
 		private const int GridFlagsEdgeNodeMask = 1024;
-
-		
-		private static GridGraph[] _gridGraphs = new GridGraph[0];
 	}
 }

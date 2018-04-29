@@ -12,7 +12,7 @@ public class OctreeTests : MonoBehaviour
 			float x = (UnityEngine.Random.value - 0.5f) * 2f * 1500f;
 			float y = (UnityEngine.Random.value - 0.5f) * 2f * 1500f;
 			float z = (UnityEngine.Random.value - 0.5f) * 2f * 1500f;
-			UnityEngine.Object.Instantiate(this.testObject, new Vector3(x, y, z), Quaternion.identity);
+			UnityEngine.Object.Instantiate<GameObject>(this.testObject, new Vector3(x, y, z), Quaternion.identity);
 		}
 	}
 

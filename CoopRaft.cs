@@ -9,7 +9,7 @@ public class CoopRaft : EntityBehaviour<IRaftState>
 	
 	public override void Attached()
 	{
-		if (this.entity.IsOwner())
+		if (base.entity.IsOwner())
 		{
 			base.state.Transform.SetTransforms(base.transform);
 		}
@@ -34,7 +34,7 @@ public class CoopRaft : EntityBehaviour<IRaftState>
 	
 	private bool IsBeingDriven()
 	{
-		if (this.entity.isAttached)
+		if (base.entity.isAttached)
 		{
 			foreach (BoltEntity exists in base.state.GrabbedBy)
 			{
@@ -57,7 +57,7 @@ public class CoopRaft : EntityBehaviour<IRaftState>
 	
 	private void LateUpdate()
 	{
-		if (this.entity.IsAttached() && !this.entity.IsOwner())
+		if (base.entity.IsAttached() && !base.entity.IsOwner())
 		{
 			if (this.interpolate)
 			{

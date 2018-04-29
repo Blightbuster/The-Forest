@@ -143,45 +143,43 @@ namespace Pathfinding
 		
 		public uint CalculateHScore(GraphNode node)
 		{
-			switch (this.heuristic)
+			Heuristic heuristic = this.heuristic;
+			uint num;
+			if (heuristic == Heuristic.Euclidean)
 			{
-			case Heuristic.Manhattan:
+				num = (uint)((float)(this.GetHTarget() - node.position).costMagnitude * this.heuristicScale);
+				if (this.hTargetNode != null)
+				{
+					num = Math.Max(num, AstarPath.active.euclideanEmbedding.GetHeuristic(node.NodeIndex, this.hTargetNode.NodeIndex));
+				}
+				return num;
+			}
+			if (heuristic == Heuristic.Manhattan)
 			{
 				Int3 position = node.position;
-				uint num = (uint)((float)(Math.Abs(this.hTarget.x - position.x) + Math.Abs(this.hTarget.y - position.y) + Math.Abs(this.hTarget.z - position.z)) * this.heuristicScale);
+				num = (uint)((float)(Math.Abs(this.hTarget.x - position.x) + Math.Abs(this.hTarget.y - position.y) + Math.Abs(this.hTarget.z - position.z)) * this.heuristicScale);
 				if (this.hTargetNode != null)
 				{
 					num = Math.Max(num, AstarPath.active.euclideanEmbedding.GetHeuristic(node.NodeIndex, this.hTargetNode.NodeIndex));
 				}
 				return num;
 			}
-			case Heuristic.DiagonalManhattan:
+			if (heuristic != Heuristic.DiagonalManhattan)
 			{
-				Int3 @int = this.GetHTarget() - node.position;
-				@int.x = Math.Abs(@int.x);
-				@int.y = Math.Abs(@int.y);
-				@int.z = Math.Abs(@int.z);
-				int num2 = Math.Min(@int.x, @int.z);
-				int num3 = Math.Max(@int.x, @int.z);
-				uint num = (uint)((float)(14 * num2 / 10 + (num3 - num2) + @int.y) * this.heuristicScale);
-				if (this.hTargetNode != null)
-				{
-					num = Math.Max(num, AstarPath.active.euclideanEmbedding.GetHeuristic(node.NodeIndex, this.hTargetNode.NodeIndex));
-				}
-				return num;
-			}
-			case Heuristic.Euclidean:
-			{
-				uint num = (uint)((float)(this.GetHTarget() - node.position).costMagnitude * this.heuristicScale);
-				if (this.hTargetNode != null)
-				{
-					num = Math.Max(num, AstarPath.active.euclideanEmbedding.GetHeuristic(node.NodeIndex, this.hTargetNode.NodeIndex));
-				}
-				return num;
-			}
-			default:
 				return 0u;
 			}
+			Int3 @int = this.GetHTarget() - node.position;
+			@int.x = Math.Abs(@int.x);
+			@int.y = Math.Abs(@int.y);
+			@int.z = Math.Abs(@int.z);
+			int num2 = Math.Min(@int.x, @int.z);
+			int num3 = Math.Max(@int.x, @int.z);
+			num = (uint)((float)(14 * num2 / 10 + (num3 - num2) + @int.y) * this.heuristicScale);
+			if (this.hTargetNode != null)
+			{
+				num = Math.Max(num, AstarPath.active.euclideanEmbedding.GetHeuristic(node.NodeIndex, this.hTargetNode.NodeIndex));
+			}
+			return num;
 		}
 
 		

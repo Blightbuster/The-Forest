@@ -74,14 +74,14 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject to measure from.")]
 		[RequiredField]
+		[Tooltip("The GameObject to measure from.")]
 		public FsmOwnerDefault gameObject;
 
 		
+		[RequiredField]
 		[UIHint(UIHint.Tag)]
 		[Tooltip("Only consider objects with this Tag. NOTE: It's generally a lot quicker to find objects with a Tag!")]
-		[RequiredField]
 		public FsmString withTag;
 
 		
@@ -93,13 +93,13 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmBool mustBeVisible;
 
 		
-		[Tooltip("Store the closest object.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the closest object.")]
 		public FsmGameObject storeObject;
 
 		
-		[Tooltip("Store the distance to the closest object.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the distance to the closest object.")]
 		public FsmFloat storeDistance;
 
 		

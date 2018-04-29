@@ -10,8 +10,8 @@ public class CoopConstructionExBridge : EntityBehaviour
 	{
 		this.arch = base.GetComponent<BridgeArchitect>();
 		this.arch.WasPlaced = true;
-		this.arch.CustomToken = this.entity.attachToken;
-		this.entity.SendMessage("OnDeserialized");
+		this.arch.CustomToken = base.entity.attachToken;
+		base.entity.SendMessage("OnDeserialized");
 	}
 
 	

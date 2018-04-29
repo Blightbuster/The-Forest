@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Get the last ping time to the given player in milliseconds. \nIf the player can't be found -1 will be returned. Pings are automatically sent out every couple of seconds.")]
 	[ActionCategory(ActionCategory.Network)]
+	[Tooltip("Get the last ping time to the given player in milliseconds. \nIf the player can't be found -1 will be returned. Pings are automatically sent out every couple of seconds.")]
 	public class NetworkGetLastPing : FsmStateAction
 	{
 		
@@ -60,9 +60,9 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[ActionSection("Setup")]
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
 		[Tooltip("The Index of the player in the network connections list.")]
+		[UIHint(UIHint.Variable)]
 		public FsmInt playerIndex;
 
 		

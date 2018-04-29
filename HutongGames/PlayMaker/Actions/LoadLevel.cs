@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Loads a Level by Name. NOTE: Before you can load a level, you have to add it to the list of levels defined in File->Build Settings...")]
 	[ActionCategory(ActionCategory.Level)]
+	[Tooltip("Loads a Level by Name. NOTE: Before you can load a level, you have to add it to the list of levels defined in File->Build Settings...")]
 	public class LoadLevel : FsmStateAction
 	{
 		
@@ -48,7 +48,7 @@ namespace HutongGames.PlayMaker.Actions
 				Application.LoadLevel(this.levelName.Value);
 				Debug.Log("LoadLevel: " + this.levelName.Value);
 			}
-			this.Log("LOAD COMPLETE");
+			base.Log("LOAD COMPLETE");
 			base.Fsm.Event(this.loadedEvent);
 			base.Finish();
 		}

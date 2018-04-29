@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Instantly changes a GameObject's scale then returns it to it's starting scale over time.")]
 	[ActionCategory("iTween")]
+	[Tooltip("Instantly changes a GameObject's scale then returns it to it's starting scale over time.")]
 	public class iTweenScaleFrom : iTweenFsmAction
 	{
 		

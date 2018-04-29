@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Start a server.")]
 	[ActionCategory(ActionCategory.Network)]
+	[Tooltip("Start a server.")]
 	public class StartServer : FsmStateAction
 	{
 		
@@ -37,7 +37,7 @@ namespace HutongGames.PlayMaker.Actions
 			if (networkConnectionError != NetworkConnectionError.NoError)
 			{
 				this.errorString.Value = networkConnectionError.ToString();
-				this.LogError(this.errorString.Value);
+				base.LogError(this.errorString.Value);
 				base.Fsm.Event(this.errorEvent);
 			}
 			base.Finish();
@@ -70,8 +70,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmBool runInBackground;
 
 		
-		[Tooltip("Event to send in case of an error creating the server.")]
 		[ActionSection("Errors")]
+		[Tooltip("Event to send in case of an error creating the server.")]
 		public FsmEvent errorEvent;
 
 		

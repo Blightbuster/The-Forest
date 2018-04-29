@@ -10,7 +10,7 @@ public class CoopConstructionExWallChunk : EntityBehaviour<IWallChunkConstructio
 	
 	public override void Attached()
 	{
-		CoopWallChunkToken coopWallChunkToken = (CoopWallChunkToken)this.entity.attachToken;
+		CoopWallChunkToken coopWallChunkToken = (CoopWallChunkToken)base.entity.attachToken;
 		WallChunkArchitect component = base.GetComponent<WallChunkArchitect>();
 		component.transform.position = coopWallChunkToken.P1;
 		component.transform.LookAt(coopWallChunkToken.P2);
@@ -29,7 +29,7 @@ public class CoopConstructionExWallChunk : EntityBehaviour<IWallChunkConstructio
 		component.WasPlaced = true;
 		component.MultipointPositions = ((coopWallChunkToken.PointsPositions == null) ? null : coopWallChunkToken.PointsPositions.ToList<Vector3>());
 		base.state.AddCallback("Addition", new PropertyCallbackSimple(this.AdditionChanged));
-		this.entity.SendMessage("OnDeserialized");
+		base.entity.SendMessage("OnDeserialized");
 	}
 
 	

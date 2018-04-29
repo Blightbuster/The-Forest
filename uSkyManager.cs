@@ -94,7 +94,6 @@ public class uSkyManager : MonoBehaviour
 	private void Start()
 	{
 		this.InitPIDs();
-		this.InitSun();
 		if (this.SkyboxMaterial != null)
 		{
 			this.InitMaterial(this.SkyboxMaterial);
@@ -119,17 +118,9 @@ public class uSkyManager : MonoBehaviour
 	
 	private void Update()
 	{
-		if (this.SkyUpdate)
+		if (this.SkyUpdate && this.SkyboxMaterial != null)
 		{
-			if (this.Timeline >= 24f)
-			{
-				this.Timeline %= 24f;
-			}
-			if (this.SkyboxMaterial != null)
-			{
-				this.InitSun();
-				this.InitMaterial(this.SkyboxMaterial);
-			}
+			this.InitMaterial(this.SkyboxMaterial);
 		}
 		if (this.EnableNightSky && this.starsMesh != null && this.starMaterial != null && this.SunDir.y < 0.2f && LocalPlayer.MainCam != null)
 		{
@@ -168,9 +159,29 @@ public class uSkyManager : MonoBehaviour
 	
 	private void InitMaterial(Material mat)
 	{
+		Vector3 zero = Vector3.zero;
+		Vector3 betaR_RayleighOffset = this.betaR_RayleighOffset;
+		zero.x = Mathf.Exp(-betaR_RayleighOffset.x);
+		zero.y = Mathf.Exp(-betaR_RayleighOffset.y);
+		zero.z = Mathf.Exp(-betaR_RayleighOffset.z);
+		Vector3 skyMultiplier = this.skyMultiplier;
+		Color getNightZenithColor = this.getNightZenithColor;
+		Vector3 a = new Vector3(getNightZenithColor.r, getNightZenithColor.g, getNightZenithColor.b);
+		a.x *= (2f - getNightZenithColor.r) * zero.x;
+		a.y *= (2f - getNightZenithColor.g) * zero.y;
+		a.z *= (2f - getNightZenithColor.b) * zero.z;
+		Vector3 vector = Vector3.Lerp(a, Vector3.one - zero, skyMultiplier.x) * 0.75f * skyMultiplier.y;
+		vector.x = Mathf.LinearToGammaSpace(vector.x);
+		vector.y = Mathf.LinearToGammaSpace(vector.y);
+		vector.z = Mathf.LinearToGammaSpace(vector.z);
+		float a2 = Vector3.Dot(this.LinearLuminanceConst, vector);
+		vector.x = Mathf.Lerp(a2, vector.x, this.ReflectionSaturation);
+		vector.y = Mathf.Lerp(a2, vector.y, this.ReflectionSaturation);
+		vector.z = Mathf.Lerp(a2, vector.z, this.ReflectionSaturation);
+		Shader.SetGlobalVector("_SkyReflectionFinalColor", vector);
 		mat.SetVector(this.SunDirPID, this.SunDir);
 		mat.SetMatrix(this.Moon_wtlPID, this.getMoonMatrix);
-		mat.SetVector(this.betaRPID, this.betaR_RayleighOffset);
+		mat.SetVector(this.betaRPID, betaR_RayleighOffset);
 		mat.SetVector(this.betaMPID, this.BetaM);
 		mat.SetVector(this.SkyMultiplierPID, this.skyMultiplier);
 		mat.SetFloat(this.SunSizePID, 32f / this.SunSize);
@@ -238,7 +249,7 @@ public class uSkyManager : MonoBehaviour
 			Vector3 vector = this.variableRangeWavelengths * 1E-09f;
 			Vector3 a = new Vector3(Mathf.Pow(vector.x, 4f), Mathf.Pow(vector.y, 4f), Mathf.Pow(vector.z, 4f));
 			Vector3 vector2 = 7.635E+25f * a * 5.755f;
-			float num = 8f * Mathf.Pow(3.14159274f, 3f) * Mathf.Pow(0.0006002188f, 2f) * 6.105f;
+			float num = 8f * Mathf.Pow(3.14159274f, 3f) * Mathf.Pow(0.0006001896f, 2f) * 6.105f;
 			return 1000f * new Vector3(num / vector2.x, num / vector2.y, num / vector2.z);
 		}
 	}
@@ -413,13 +424,13 @@ public class uSkyManager : MonoBehaviour
 	public bool SkyUpdate = true;
 
 	
-	[Tooltip("This value controls the light vertically. It represents sunrise/day and sunset/night time( Rotation X )")]
 	[Range(0f, 24f)]
+	[Tooltip("This value controls the light vertically. It represents sunrise/day and sunset/night time( Rotation X )")]
 	public float Timeline = 17f;
 
 	
-	[Tooltip("This value controls the light horizionally.( Rotation Y )")]
 	[Range(-180f, 180f)]
+	[Tooltip("This value controls the light horizionally.( Rotation Y )")]
 	public float Longitude;
 
 	
@@ -429,18 +440,18 @@ public class uSkyManager : MonoBehaviour
 	public float Exposure = 1f;
 
 	
-	[Tooltip("Rayleigh scattering is caused by particles in the atmosphere (up to 8 km). It produces typical earth-like sky colors (reddish/yellowish colors at sun set, and the like).")]
 	[Range(0f, 5f)]
+	[Tooltip("Rayleigh scattering is caused by particles in the atmosphere (up to 8 km). It produces typical earth-like sky colors (reddish/yellowish colors at sun set, and the like).")]
 	public float RayleighScattering = 1f;
 
 	
-	[Tooltip("Mie scattering is caused by aerosols in the lower atmosphere (up to 1.2 km). It is for haze and halos around the sun on foggy days.")]
 	[Range(0f, 5f)]
+	[Tooltip("Mie scattering is caused by aerosols in the lower atmosphere (up to 1.2 km). It is for haze and halos around the sun on foggy days.")]
 	public float MieScattering = 1f;
 
 	
-	[Tooltip("The anisotropy factor controls the sun's appearance in the sky.The closer this value gets to 1.0, the sharper and smaller the sun spot will be. Higher values cause more fuzzy and bigger sun spots.")]
 	[Range(0f, 0.9995f)]
+	[Tooltip("The anisotropy factor controls the sun's appearance in the sky.The closer this value gets to 1.0, the sharper and smaller the sun spot will be. Higher values cause more fuzzy and bigger sun spots.")]
 	public float SunAnisotropyFactor = 0.76f;
 
 	
@@ -492,8 +503,8 @@ public class uSkyManager : MonoBehaviour
 	public Color NightHorizonColor = new Color(0.43f, 0.47f, 0.5f, 1f);
 
 	
-	[Tooltip("This controls the intensity of the Stars field in night sky.")]
 	[Range(0f, 5f)]
+	[Tooltip("This controls the intensity of the Stars field in night sky.")]
 	public float StarIntensity = 1f;
 
 	
@@ -523,8 +534,8 @@ public class uSkyManager : MonoBehaviour
 	public Material SkyboxMaterial;
 
 	
-	[Tooltip("It will automatically assign the current skybox material to Render Settings.")]
 	[SerializeField]
+	[Tooltip("It will automatically assign the current skybox material to Render Settings.")]
 	private bool _AutoApplySkybox = true;
 
 	
@@ -535,6 +546,10 @@ public class uSkyManager : MonoBehaviour
 	
 	[Tooltip("Toggle it if the Main Camera is using HDR mode and Tonemapping image effect.")]
 	public bool Tonemapping;
+
+	
+	[Range(0f, 1f)]
+	public float ReflectionSaturation = 0.25f;
 
 	
 	private Vector3 euler;
@@ -598,6 +613,9 @@ public class uSkyManager : MonoBehaviour
 
 	
 	private int StarIntensityPID;
+
+	
+	private Vector3 LinearLuminanceConst = new Vector3(0.0396819152f, 0.4580218f, 0.00609653955f);
 
 	
 	private Material m_starMaterial;

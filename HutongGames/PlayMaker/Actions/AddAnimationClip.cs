@@ -51,20 +51,20 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Animation))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animation))]
 		[Tooltip("The GameObject to add the Animation Clip to.")]
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("The animation clip to add. NOTE: Make sure the clip is compatible with the object's hierarchy.")]
-		[ObjectType(typeof(AnimationClip))]
 		[RequiredField]
+		[ObjectType(typeof(AnimationClip))]
+		[Tooltip("The animation clip to add. NOTE: Make sure the clip is compatible with the object's hierarchy.")]
 		public FsmObject animationClip;
 
 		
-		[Tooltip("Name the animation. Used by other actions to reference this animation.")]
 		[RequiredField]
+		[Tooltip("Name the animation. Used by other actions to reference this animation.")]
 		public FsmString animationName;
 
 		

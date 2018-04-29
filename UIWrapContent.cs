@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 
@@ -39,11 +40,21 @@ public class UIWrapContent : MonoBehaviour
 		}
 		if (this.mHorizontal)
 		{
-			this.mChildren.Sort(new Comparison<Transform>(UIGrid.SortHorizontal));
+			List<Transform> list = this.mChildren;
+			if (UIWrapContent.<>f__mg$cache0 == null)
+			{
+				UIWrapContent.<>f__mg$cache0 = new Comparison<Transform>(UIGrid.SortHorizontal);
+			}
+			list.Sort(UIWrapContent.<>f__mg$cache0);
 		}
 		else
 		{
-			this.mChildren.Sort(new Comparison<Transform>(UIGrid.SortVertical));
+			List<Transform> list2 = this.mChildren;
+			if (UIWrapContent.<>f__mg$cache1 == null)
+			{
+				UIWrapContent.<>f__mg$cache1 = new Comparison<Transform>(UIGrid.SortVertical);
+			}
+			list2.Sort(UIWrapContent.<>f__mg$cache1);
 		}
 		this.ResetChildPositions();
 	}
@@ -61,7 +72,12 @@ public class UIWrapContent : MonoBehaviour
 		{
 			this.mChildren.Add(this.mTrans.GetChild(i));
 		}
-		this.mChildren.Sort(new Comparison<Transform>(UIGrid.SortByName));
+		List<Transform> list = this.mChildren;
+		if (UIWrapContent.<>f__mg$cache2 == null)
+		{
+			UIWrapContent.<>f__mg$cache2 = new Comparison<Transform>(UIGrid.SortByName);
+		}
+		list.Sort(UIWrapContent.<>f__mg$cache2);
 		this.ResetChildPositions();
 	}
 
@@ -290,6 +306,18 @@ public class UIWrapContent : MonoBehaviour
 
 	
 	protected List<Transform> mChildren = new List<Transform>();
+
+	
+	[CompilerGenerated]
+	private static Comparison<Transform> <>f__mg$cache0;
+
+	
+	[CompilerGenerated]
+	private static Comparison<Transform> <>f__mg$cache1;
+
+	
+	[CompilerGenerated]
+	private static Comparison<Transform> <>f__mg$cache2;
 
 	
 	

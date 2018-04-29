@@ -14,8 +14,8 @@ namespace TheForest.Player.Actions
 		
 		private void Start()
 		{
-			this.climbHash = Animator.StringToHash("climbing");
-			this.climbIdleHash = Animator.StringToHash("climbIdle");
+			this._climbHash = Animator.StringToHash("climbing");
+			this._climbIdleHash = Animator.StringToHash("climbIdle");
 		}
 
 		
@@ -24,6 +24,7 @@ namespace TheForest.Player.Actions
 			FsmBool fsmBool = this._player.PM.FsmVariables.GetFsmBool("climbBool");
 			if (!fsmBool.Value && !this.doingClimb && !LocalPlayer.FpCharacter.Sitting)
 			{
+				LocalPlayer.AnimControl.enteringACave = true;
 				LocalPlayer.CamFollowHead.stopAllCameraShake();
 				LocalPlayer.Animator.SetBoolReflected("resetClimbBool", false);
 				LocalPlayer.Animator.SetIntegerReflected("climbTypeInt", 0);
@@ -59,7 +60,7 @@ namespace TheForest.Player.Actions
 				this._player.PM.SendEvent("toClimb");
 				fsmBool.Value = true;
 				this.doingClimb = true;
-				this.enteredTop = false;
+				this._enteredTop = false;
 				base.StartCoroutine("stickToRope", trn);
 				this._currentRopeRoot = trn.parent;
 			}
@@ -71,6 +72,7 @@ namespace TheForest.Player.Actions
 			FsmBool fsmBool = this._player.PM.FsmVariables.GetFsmBool("climbBool");
 			if (!fsmBool.Value && !this.doingClimb && !LocalPlayer.FpCharacter.Sitting)
 			{
+				LocalPlayer.AnimControl.enteringACave = true;
 				base.StartCoroutine(this.blockRopeGroundCheck());
 				LocalPlayer.CamFollowHead.stopAllCameraShake();
 				LocalPlayer.Animator.SetBoolReflected("resetClimbBool", false);
@@ -88,10 +90,10 @@ namespace TheForest.Player.Actions
 				exitClimb componentInChildren2 = trn.parent.GetComponentInChildren<exitClimb>();
 				if (componentInChildren2)
 				{
-					this.exitTopTrigger = componentInChildren2.GetComponent<Collider>();
-					if (this.exitTopTrigger)
+					this._exitTopTrigger = componentInChildren2.GetComponent<Collider>();
+					if (this._exitTopTrigger)
 					{
-						this.exitTopTrigger.enabled = false;
+						this._exitTopTrigger.enabled = false;
 					}
 				}
 				Vector3 vector = trn.position + trn.forward * this.ropeAttachTopOffsetZ;
@@ -105,7 +107,7 @@ namespace TheForest.Player.Actions
 						LocalPlayer.Inventory.Logs.PutDown(false, true, false, null);
 					}
 				}
-				this.lastClimbDownPos = LocalPlayer.Transform.position.y;
+				this._lastClimbDownPos = LocalPlayer.Transform.position.y;
 				this._player.PM.FsmVariables.GetFsmVector3("attachPos").Value = vector;
 				this._player.transform.position = vector;
 				this._player.transform.rotation = trn.rotation;
@@ -118,9 +120,9 @@ namespace TheForest.Player.Actions
 				this._player.StashEquipedWeapon(false);
 				this._player.PM.SendEvent("toClimb");
 				LocalPlayer.Animator.SetBoolReflected("jumpBool", false);
-				this.enteredTop = true;
+				this._enteredTop = true;
 				base.StartCoroutine("stickToRope", trn);
-				if (trn.GetComponentInParent<CaveOptimizer>())
+				if (trn.root.name == "Caves")
 				{
 					base.StartCoroutine(this.enableDoingClimbAndDelayCavePropsLoading());
 				}
@@ -151,9 +153,16 @@ namespace TheForest.Player.Actions
 		{
 			CaveOptimizer.CanLoadOnRope = false;
 			float timer = Time.time + 10f;
-			while (LocalPlayer.Animator.GetCurrentAnimatorStateInfo(0).shortNameHash != this.climbIdleNameHash)
+			while (LocalPlayer.Animator.GetCurrentAnimatorStateInfo(0).shortNameHash != this._climbIdleNameHash)
 			{
-				timer += Time.deltaTime;
+				if (timer - Time.time < 9f)
+				{
+					if (!Scene.HudGui.LoadingCavesInfo.activeSelf)
+					{
+						Scene.HudGui.LoadingCavesInfo.SetActive(true);
+					}
+					Scene.HudGui.LoadingCavesFill.fillAmount = Mathf.Max(0.1f, (1f - (timer - Time.time) / 10f) * 0.25f);
+				}
 				if (Time.time > timer)
 				{
 					break;
@@ -163,15 +172,28 @@ namespace TheForest.Player.Actions
 			CaveOptimizer.CanLoadOnRope = true;
 			if (this._player.PM.FsmVariables.GetFsmBool("climbBool").Value)
 			{
-				float finalClimbDist = this.lastClimbDownPos - LocalPlayer.Transform.position.y;
-				Vector3 newPlayerPos = LocalPlayer.Transform.position;
-				if ((double)finalClimbDist < 6.4)
+				float num = this._lastClimbDownPos - LocalPlayer.Transform.position.y;
+				Vector3 position = LocalPlayer.Transform.position;
+				if ((double)num < 6.4)
 				{
-					newPlayerPos.y = this.lastClimbDownPos - 6.4823f;
-					LocalPlayer.Transform.position = newPlayerPos;
+					position.y = this._lastClimbDownPos - 6.4823f;
+					LocalPlayer.Transform.position = position;
 				}
 				this.doingClimb = true;
 			}
+			timer = Time.time + 1f;
+			while (Time.time < timer)
+			{
+				Scene.HudGui.LoadingCavesFill.fillAmount = Mathf.Max(0.1f, 0.25f + (1f - (timer - Time.time) / 1f) * 0.75f);
+				if (Scene.HudGui.LoadingCavesFill.fillAmount >= 1f)
+				{
+					Scene.HudGui.LoadingCavesInfo.SetActive(false);
+					break;
+				}
+				yield return null;
+			}
+			Scene.HudGui.LoadingCavesInfo.SetActive(false);
+			Scene.HudGui.Grid.repositionNow = true;
 			yield break;
 		}
 
@@ -241,10 +263,10 @@ namespace TheForest.Player.Actions
 		
 		private void resetTopExitTrigger()
 		{
-			if (this.exitTopTrigger)
+			if (this._exitTopTrigger)
 			{
-				this.exitTopTrigger.enabled = true;
-				this.exitTopTrigger = null;
+				this._exitTopTrigger.enabled = true;
+				this._exitTopTrigger = null;
 			}
 		}
 
@@ -263,6 +285,11 @@ namespace TheForest.Player.Actions
 			base.StopCoroutine("stickToRope");
 			this.resetTopExitTrigger();
 			this._bottomTriggerTr = null;
+			LocalPlayer.AnimControl.enteringACave = false;
+			if (BoltNetwork.isRunning)
+			{
+				base.StartCoroutine(this.restorePlayerCollisions());
+			}
 		}
 
 		
@@ -287,7 +314,7 @@ namespace TheForest.Player.Actions
 		{
 			Vector3 position = LocalPlayer.Transform.position;
 			position.y += 3.4f;
-			this.onRopeAttachPos = position;
+			this._onRopeAttachPos = position;
 			LocalPlayer.Transform.position = position;
 		}
 
@@ -296,44 +323,44 @@ namespace TheForest.Player.Actions
 		{
 			float terrainHeight = Terrain.activeTerrain.SampleHeight(trn.position);
 			bool flag = !LocalPlayer.IsInCaves && !trn.GetComponentInParent<CaveOptimizer>();
-			this.onRopeAttachPos = trn.position - trn.forward * this.onRopeOffset;
-			this.onRopeAttachPos.y = this._player.transform.position.y;
+			this._onRopeAttachPos = trn.position - trn.forward * this.onRopeOffset;
+			this._onRopeAttachPos.y = this._player.transform.position.y;
 			int fixedCount = 0;
 			while (!(trn == null))
 			{
-				if (LocalPlayer.Animator.GetCurrentAnimatorStateInfo(0).tagHash == this.climbHash || LocalPlayer.Animator.GetCurrentAnimatorStateInfo(0).tagHash == this.climbIdleHash)
+				if (LocalPlayer.Animator.GetCurrentAnimatorStateInfo(0).tagHash == this._climbHash || LocalPlayer.Animator.GetCurrentAnimatorStateInfo(0).tagHash == this._climbIdleHash)
 				{
 					LocalPlayer.AnimControl.lockGravity = true;
 					LocalPlayer.Rigidbody.isKinematic = true;
-					this.onRopeAttachPos = trn.position - trn.forward * this.onRopeOffset;
-					if (this.enteredTop)
+					this._onRopeAttachPos = trn.position - trn.forward * this.onRopeOffset;
+					if (this._enteredTop)
 					{
-						if (this.exitTopTrigger)
+						if (this._exitTopTrigger)
 						{
-							this.onRopeAttachPos.y = this.exitTopTrigger.transform.position.y - 4f;
+							this._onRopeAttachPos.y = this._exitTopTrigger.transform.position.y - 4f;
 							fixedCount++;
 							if (fixedCount > 6)
 							{
-								this.enteredTop = false;
+								this._enteredTop = false;
 							}
 						}
 					}
 					else
 					{
-						this.onRopeAttachPos.y = this._player.transform.position.y;
-						if (this.exitTopTrigger && !this.exitTopTrigger.enabled)
+						this._onRopeAttachPos.y = this._player.transform.position.y;
+						if (this._exitTopTrigger && !this._exitTopTrigger.enabled)
 						{
-							this.exitTopTrigger.enabled = true;
-							this.exitTopTrigger = null;
+							this._exitTopTrigger.enabled = true;
+							this._exitTopTrigger = null;
 						}
 					}
-					this._player.transform.position = this.onRopeAttachPos;
+					this._player.transform.position = this._onRopeAttachPos;
 					this._player.transform.rotation = trn.rotation;
 				}
 				if (this._bottomTriggerTr)
 				{
-					float bottomDist = LocalPlayer.Transform.position.y - this._bottomTriggerTr.position.y;
-					if (bottomDist < -3f)
+					float num = LocalPlayer.Transform.position.y - this._bottomTriggerTr.position.y;
+					if (num < -3f)
 					{
 						this.exitClimbRopeGround(false);
 						yield break;
@@ -344,6 +371,43 @@ namespace TheForest.Player.Actions
 			this.doingClimb = true;
 			this.exitClimbRopeGround(false);
 			yield break;
+			yield break;
+		}
+
+		
+		private IEnumerator restorePlayerCollisions()
+		{
+			for (int i = 0; i < Scene.SceneTracker.allPlayers.Count; i++)
+			{
+				if (Scene.SceneTracker.allPlayers[i] && Scene.SceneTracker.allPlayers[i].CompareTag("PlayerNet") && LocalPlayer.GameObject.activeSelf)
+				{
+					Collider component = Scene.SceneTracker.allPlayers[i].GetComponent<Collider>();
+					if (LocalPlayer.AnimControl.playerHeadCollider.enabled && component.gameObject.activeSelf && component.enabled)
+					{
+						Physics.IgnoreCollision(LocalPlayer.AnimControl.playerHeadCollider, component, false);
+					}
+					if (LocalPlayer.AnimControl.playerCollider.enabled && component.gameObject.activeSelf && component.enabled)
+					{
+						Physics.IgnoreCollision(LocalPlayer.AnimControl.playerCollider, component, false);
+					}
+				}
+			}
+			float t = 0f;
+			while (t < 1f)
+			{
+				for (int j = 0; j < Scene.SceneTracker.allPlayers.Count; j++)
+				{
+					if (Scene.SceneTracker.allPlayers[j].GetComponent<Collider>().bounds.Intersects(LocalPlayer.AnimControl.playerCollider.bounds))
+					{
+						LocalPlayer.FpCharacter.hitByEnemy = true;
+						LocalPlayer.Rigidbody.drag = 200f;
+					}
+				}
+				t += Time.deltaTime;
+				yield return null;
+			}
+			LocalPlayer.FpCharacter.hitByEnemy = false;
+			LocalPlayer.Rigidbody.drag = 0f;
 			yield break;
 		}
 
@@ -369,19 +433,19 @@ namespace TheForest.Player.Actions
 		public bool doingClimb;
 
 		
-		private int climbHash;
+		private int _climbHash;
 
 		
-		private int climbIdleHash;
+		private int _climbIdleHash;
 
 		
-		private int climbIdleNameHash = Animator.StringToHash("ropClimbidle");
+		private int _climbIdleNameHash = Animator.StringToHash("ropClimbidle");
 
 		
-		private Vector3 onRopeAttachPos;
+		private Vector3 _onRopeAttachPos;
 
 		
-		private float lastClimbDownPos;
+		private float _lastClimbDownPos;
 
 		
 		private Transform _currentRopeRoot;
@@ -390,9 +454,9 @@ namespace TheForest.Player.Actions
 		private Transform _bottomTriggerTr;
 
 		
-		private Collider exitTopTrigger;
+		private Collider _exitTopTrigger;
 
 		
-		private bool enteredTop;
+		private bool _enteredTop;
 	}
 }

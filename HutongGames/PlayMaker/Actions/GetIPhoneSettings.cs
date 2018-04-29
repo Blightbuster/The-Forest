@@ -40,18 +40,18 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString getName;
 
 		
-		[Tooltip("The model of the device (Read Only).")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The model of the device (Read Only).")]
 		public FsmString getModel;
 
 		
-		[Tooltip("The name of the operating system running on the device (Read Only).")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The name of the operating system running on the device (Read Only).")]
 		public FsmString getSystemName;
 
 		
-		[Tooltip("The generation of the device (Read Only).")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The generation of the device (Read Only).")]
 		public FsmString getGeneration;
 	}
 }

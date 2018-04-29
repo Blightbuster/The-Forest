@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets a Bool Variable to True or False randomly.")]
 	[ActionCategory(ActionCategory.Math)]
+	[Tooltip("Sets a Bool Variable to True or False randomly.")]
 	public class RandomBool : FsmStateAction
 	{
 		

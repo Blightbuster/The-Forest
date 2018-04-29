@@ -8,6 +8,7 @@ using TheForest.Tools;
 using TheForest.UI;
 using TheForest.Utils;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 [BoltGlobalBehaviour(BoltNetworkModes.Client)]
@@ -22,6 +23,10 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(CreepHitPlayer evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Server))
+		{
+			return;
+		}
 		LocalPlayer.GameObject.SendMessage("Explosion", evnt.damage, SendMessageOptions.DontRequireReceiver);
 		if (evnt.Type == 11)
 		{
@@ -47,10 +52,9 @@ public class CoopClientCallbacks : GlobalEventListener
 							CoopClientCallbacks.ServerNotResponding();
 						}
 					}
-					catch (Exception ex)
+					catch (Exception exception)
 					{
-						Exception exn = ex;
-						Debug.LogException(exn);
+						Debug.LogException(exception);
 					}
 				}
 				else if (CoopClientCallbacks.invokedServerNotResponding)
@@ -103,11 +107,11 @@ public class CoopClientCallbacks : GlobalEventListener
 				BoltLauncher.Shutdown();
 				UnityEngine.Object.Destroy(base.gameObject);
 				SteamUser.TerminateGameConnection(SteamClientDSConfig.EndPoint.Address.Packed, SteamClientDSConfig.EndPoint.Port);
-				Application.LoadLevel("TitleScene");
+				this.ReturnToTitle();
 			}
-			else if (!Scene.FinishGameLoad)
+			else if (!TheForest.Utils.Scene.FinishGameLoad)
 			{
-				Application.LoadLevel("TitleScene");
+				this.ReturnToTitle();
 			}
 		}
 		else
@@ -131,7 +135,7 @@ public class CoopClientCallbacks : GlobalEventListener
 					BoltLauncher.Shutdown();
 					SteamClientConfig.KickMessage = "Incorrect password";
 					UnityEngine.Object.Destroy(base.gameObject);
-					Application.LoadLevel("TitleScene");
+					this.ReturnToTitle();
 				}
 			}
 			if (CoopClientCallbacks.OnDisconnected != null)
@@ -142,12 +146,26 @@ public class CoopClientCallbacks : GlobalEventListener
 		if (SteamClientDSConfig.isDedicatedClient)
 		{
 			SteamUser.TerminateGameConnection(SteamClientDSConfig.EndPoint.Address.Packed, SteamClientDSConfig.EndPoint.Port);
+			this.ReturnToTitle();
+		}
+	}
+
+	
+	private void ReturnToTitle()
+	{
+		if (!SceneManager.GetSceneByName("TitleScene").isLoaded)
+		{
+			SceneManager.LoadScene("TitleScene", LoadSceneMode.Single);
 		}
 	}
 
 	
 	public override void OnEvent(ServerStatusInfo evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		Debug.Log("Receive server status code: " + evnt.Status);
 		SteamDSConfig.ReceiveServerStatus(evnt.Status);
 	}
@@ -155,6 +173,10 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(SetMasterClient evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		Debug.Log("Setting this client. Is master? " + evnt.IsMaster);
 		SteamClientDSConfig.isDSFirstClient = evnt.IsMaster;
 	}
@@ -162,6 +184,10 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(ItemHolderTakeItem evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.Target)
 		{
 			Component[] componentsInChildren = evnt.Target.GetComponentsInChildren(typeof(MultiHolder), true);
@@ -175,6 +201,10 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(PerformRepairBuilding evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.Building)
 		{
 			evnt.Building.GetComponentInChildren<BuildingHealth>().RespawnBuilding();
@@ -184,6 +214,10 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(ItemHolderAddItem evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.Target)
 		{
 			Component[] componentsInChildren = evnt.Target.GetComponentsInChildren(typeof(MultiHolder), true);
@@ -197,6 +231,10 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(FireAddFuelEvent evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.Target && evnt.Target.GetComponentInChildren<Fire2>())
 		{
 			evnt.Target.GetComponentInChildren<Fire2>().AddFuel_Complete();
@@ -248,6 +286,10 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(DroppedBody evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.Target)
 		{
 			if (evnt.dropFromTrap)
@@ -263,6 +305,10 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(ragdollActivate evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.Target)
 		{
 			evnt.Target.SendMessage("enableNetRagDoll", SendMessageOptions.DontRequireReceiver);
@@ -272,18 +318,33 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(storeRagDollName evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		evnt.Target.SendMessage("getRagDollName", evnt.name, SendMessageOptions.DontRequireReceiver);
 	}
 
 	
 	public override void OnEvent(mutantPoison evnt)
 	{
-		evnt.target.SendMessage("setSkinColor", evnt.skinColor, SendMessageOptions.DontRequireReceiver);
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
+		if (evnt.target != null)
+		{
+			evnt.target.SendMessage("setSkinColor", evnt.skinColor, SendMessageOptions.DontRequireReceiver);
+		}
 	}
 
 	
 	public override void OnEvent(CutTriggerActivated evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.Trap)
 		{
 			Component[] componentsInChildren = evnt.Trap.GetComponentsInChildren(typeof(trapTrigger), true);
@@ -297,12 +358,20 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(ValidSleepTime evnt)
 	{
-		Scene.Clock.NextSleepTime = evnt.NextSleepTime;
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
+		TheForest.Utils.Scene.Clock.NextSleepTime = evnt.NextSleepTime;
 	}
 
 	
 	public override void OnEvent(TriggerFishTrap evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		Debug.Log("TriggerFishTrap client");
 		if (evnt.Trap != null)
 		{
@@ -325,6 +394,10 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(SetTrappedEnemy evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.Enemy != null && evnt.Trap != null)
 		{
 			mutantScriptSetup componentInChildren = evnt.Enemy.gameObject.transform.root.GetComponentInChildren<mutantScriptSetup>();
@@ -354,6 +427,10 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(SetCorpsePosition evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.Corpse)
 		{
 			if (evnt.Corpse.transform.parent != null)
@@ -385,6 +462,10 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(RockThrowerActivated evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.Target)
 		{
 			evnt.Target.SendMessage("disableTrigger");
@@ -394,6 +475,10 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(RockThrowerDeActivated evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.Target)
 		{
 			evnt.Target.SendMessage("enableTrigger");
@@ -403,6 +488,10 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(RockThrowerAnimate evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.Target)
 		{
 			coopRockThrower component = evnt.Target.GetComponent<coopRockThrower>();
@@ -416,18 +505,30 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(playerBlock evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		evnt.target.gameObject.SendMessage("forcePlayerBlock", SendMessageOptions.DontRequireReceiver);
 	}
 
 	
 	public override void OnEvent(SkinnedAnimal evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		evnt.Target.SendMessage("setSkinnedState", SendMessageOptions.DontRequireReceiver);
 	}
 
 	
 	public override void OnEvent(syncPlayerRenderers evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (LocalPlayer.Transform)
 		{
 			CoopMecanimReplicator componentInChildren = LocalPlayer.Transform.GetComponentInChildren<CoopMecanimReplicator>();
@@ -448,6 +549,10 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(playerSyncAttack evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.target)
 		{
 			CoopPlayerClientHitPrediction component = evnt.target.GetComponent<CoopPlayerClientHitPrediction>();
@@ -461,6 +566,10 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(playerSyncJump evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.target)
 		{
 			CoopPlayerClientHitPrediction component = evnt.target.GetComponent<CoopPlayerClientHitPrediction>();
@@ -474,6 +583,10 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(updateMecanimRemoteState evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.Target)
 		{
 			CoopMecanimReplicator component = evnt.Target.GetComponent<CoopMecanimReplicator>();
@@ -491,6 +604,10 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(syncGirlPickup evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.target)
 		{
 			if (evnt.destroyPickup)
@@ -528,6 +645,10 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(syncAnimalState evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.target)
 		{
 			CoopAnimal componentInChildren = evnt.target.GetComponentInChildren<CoopAnimal>();
@@ -541,12 +662,20 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(spawnTreeDust evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		Prefabs.Instance.SpawnWoodChopPS(evnt.position, evnt.rotation);
 	}
 
 	
 	public override void OnEvent(setupEndBoss evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.bossActive > 0)
 		{
 			if (evnt.bossActive == 1)
@@ -574,13 +703,17 @@ public class CoopClientCallbacks : GlobalEventListener
 		}
 		if (evnt.spawnBoss)
 		{
-			Scene.SceneTracker.endBossSpawned = true;
+			TheForest.Utils.Scene.SceneTracker.endBossSpawned = true;
 		}
 	}
 
 	
 	public override void OnEvent(arrowFireSync evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.Target)
 		{
 			evnt.Target.SendMessage("enableArrowFire", SendMessageOptions.DontRequireReceiver);
@@ -590,6 +723,10 @@ public class CoopClientCallbacks : GlobalEventListener
 	
 	public override void OnEvent(stuckArrowsSync evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		if (evnt.target)
 		{
 			arrowStickToTarget arrowStickToTarget = evnt.target.GetComponent<arrowStickToTarget>();
@@ -616,11 +753,11 @@ public class CoopClientCallbacks : GlobalEventListener
 				GameObject gameObject;
 				if (type != 1)
 				{
-					gameObject = (GameObject)UnityEngine.Object.Instantiate(arrowStickToTarget.fakeArrowPickup, evnt.target.transform.position, evnt.target.transform.rotation);
+					gameObject = UnityEngine.Object.Instantiate<GameObject>(arrowStickToTarget.fakeArrowPickup, evnt.target.transform.position, evnt.target.transform.rotation);
 				}
 				else
 				{
-					gameObject = (GameObject)UnityEngine.Object.Instantiate(arrowStickToTarget.fakeArrowBonePickup, evnt.target.transform.position, evnt.target.transform.rotation);
+					gameObject = UnityEngine.Object.Instantiate<GameObject>(arrowStickToTarget.fakeArrowBonePickup, evnt.target.transform.position, evnt.target.transform.rotation);
 				}
 				gameObject.transform.parent = arrowStickToTarget.stickToJoints[evnt.index];
 				gameObject.transform.localPosition = evnt.pos;
@@ -637,11 +774,35 @@ public class CoopClientCallbacks : GlobalEventListener
 	}
 
 	
+	public override void OnEvent(HitCorpse evnt)
+	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
+		if (evnt.Entity && evnt.creepyCorpse)
+		{
+			DamageCorpseSimple componentInChildren = evnt.Entity.GetComponentInChildren<DamageCorpseSimple>();
+			if (componentInChildren)
+			{
+				componentInChildren.DoLocalCut(evnt.Damage);
+			}
+		}
+	}
+
+	
 	public override void OnEvent(SetJoiningTimeOfDay evnt)
 	{
+		if (!this.ValidateSender(evnt, SenderTypes.Any))
+		{
+			return;
+		}
 		Debug.Log("Setting joining time of day to " + evnt.TimeOfDay);
 		CoopWeatherProxy.JoiningTimeOfDay = evnt.TimeOfDay;
-		Scene.Atmosphere.TimeOfDay = evnt.TimeOfDay;
+		if (TheForest.Utils.Scene.Atmosphere)
+		{
+			TheForest.Utils.Scene.Atmosphere.TimeOfDay = evnt.TimeOfDay;
+		}
 	}
 
 	

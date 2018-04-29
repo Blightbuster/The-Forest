@@ -11,7 +11,7 @@ public class CoopRack : EntityBehaviour<IWeaponRackState>
 	public override void Attached()
 	{
 		base.state.AddCallback("Slots[]", new PropertyCallback(this.SlotChanged));
-		if (this.entity.isOwner)
+		if (base.entity.isOwner)
 		{
 			base.StartCoroutine(this.UpdateSlots());
 		}
@@ -20,7 +20,7 @@ public class CoopRack : EntityBehaviour<IWeaponRackState>
 	
 	private IEnumerator UpdateSlots()
 	{
-		while (this.entity.isAttached)
+		while (base.entity.isAttached)
 		{
 			for (int i = 0; i < this.Slots.Length; i++)
 			{

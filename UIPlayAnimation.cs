@@ -317,8 +317,8 @@ public class UIPlayAnimation : MonoBehaviour
 	private GameObject eventReceiver;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private string callWhenFinished;
 
 	

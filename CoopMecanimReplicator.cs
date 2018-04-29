@@ -64,7 +64,7 @@ public class CoopMecanimReplicator : EntityBehaviour<IWorldCharacter>
 			}
 		}
 		base.state.SetAnimator(this.TargetAnimator);
-		if (!this.entity.IsOwner())
+		if (!base.entity.IsOwner())
 		{
 			base.state.AddCallback("MecanimLayerHashes[]", new PropertyCallbackSimple(this.UpdateMecanimPropertiesFromState));
 			base.state.AddCallback("MecanimLayerTimes[]", new PropertyCallbackSimple(this.UpdateMecanimPropertiesFromState));
@@ -74,7 +74,7 @@ public class CoopMecanimReplicator : EntityBehaviour<IWorldCharacter>
 			this.TransitionData.Init();
 		}
 		this.vis = base.transform.GetComponentInChildren<mutantVis>();
-		if (!this.isDummy && this.useEventBasedSync && !this.entity.isOwner)
+		if (!this.isDummy && this.useEventBasedSync && !base.entity.isOwner)
 		{
 			this.forceStateUpdate();
 		}
@@ -94,7 +94,29 @@ public class CoopMecanimReplicator : EntityBehaviour<IWorldCharacter>
 			MecanimLayerConfig mecanimLayerConfig = this.LayersToSync[i];
 			if (mecanimLayerConfig.Hash != 0)
 			{
-				this.ApplyHashToRemote(mecanimLayerConfig.LayerIndex, mecanimLayerConfig.Hash, false, 0.1f, false);
+				this.ApplyHashToRemote(mecanimLayerConfig.LayerIndex, mecanimLayerConfig.Hash, false, 0.2f, false);
+			}
+		}
+		for (int j = 0; j < this.LayersToSync.Length; j++)
+		{
+			if (this.LayersToSync[j].Hash_Recv != base.state.MecanimLayerHashes[j])
+			{
+				MecanimLayerConfig mecanimLayerConfig2 = this.LayersToSync[j];
+				this.ApplyHashToRemote(mecanimLayerConfig2.LayerIndex, base.state.MecanimLayerHashes[j], false, 0.2f, false);
+				Debug.Log("forced a SYNC on " + base.gameObject.name);
+			}
+		}
+	}
+
+	
+	public void ForceStatelayerSync()
+	{
+		for (int i = 0; i < this.LayersToSync.Length; i++)
+		{
+			if (this.LayersToSync[i].Hash_Recv != base.state.MecanimLayerHashes[i])
+			{
+				MecanimLayerConfig mecanimLayerConfig = this.LayersToSync[i];
+				this.ApplyHashToRemote(mecanimLayerConfig.LayerIndex, base.state.MecanimLayerHashes[i], false, base.state.MecanimLayerTimes[i], false);
 			}
 		}
 	}
@@ -136,9 +158,9 @@ public class CoopMecanimReplicator : EntityBehaviour<IWorldCharacter>
 		{
 			return;
 		}
-		if (this.entity.IsAttached())
+		if (base.entity.IsAttached())
 		{
-			if (this.entity.isOwner)
+			if (base.entity.isOwner)
 			{
 				if (this.useEventBasedSync && !this.isDummy)
 				{
@@ -171,7 +193,7 @@ public class CoopMecanimReplicator : EntityBehaviour<IWorldCharacter>
 			{
 				this.UpdateRemote(null, null);
 			}
-			if (!this.entity.isOwner && !this.isPlayer && this.useEventBasedSync && Time.time > this.farUpdateTimer && LocalPlayer.Transform)
+			if (!base.entity.isOwner && !this.isPlayer && this.useEventBasedSync && Time.time > this.farUpdateTimer && LocalPlayer.Transform)
 			{
 				float sqrMagnitude = (LocalPlayer.Transform.position - base.transform.position).sqrMagnitude;
 				AnimatorStateInfo currentAnimatorStateInfo = this.TargetAnimator.GetCurrentAnimatorStateInfo(0);
@@ -181,13 +203,21 @@ public class CoopMecanimReplicator : EntityBehaviour<IWorldCharacter>
 					this.farUpdateTimer = Time.time + 2f;
 				}
 			}
+			if (!base.entity.isOwner && this.isNetPlayer && Time.time > this.playerUpdateTimer)
+			{
+				if (this.TargetAnimator.GetLayerWeight(2) > 0.5f)
+				{
+					this.ForceStatelayerSync();
+				}
+				this.playerUpdateTimer = Time.time + 1f;
+			}
 		}
 	}
 
 	
 	private void UpdateOwner()
 	{
-		if (this.entity.IsOwner())
+		if (base.entity.IsOwner())
 		{
 			base.state.MecanimSpeed = this.TargetAnimator.speed;
 			for (int i = 0; i < this.LayersToSync.Length; i++)
@@ -230,14 +260,14 @@ public class CoopMecanimReplicator : EntityBehaviour<IWorldCharacter>
 	
 	public void forceStateUpdate()
 	{
-		if (this.entity.IsOwner())
+		if (base.entity.IsOwner())
 		{
 			for (int i = 0; i < this.LayersToSync.Length; i++)
 			{
 				MecanimLayerConfig mecanimLayerConfig = this.LayersToSync[i];
 				AnimatorStateInfo currentAnimatorStateInfo = this.TargetAnimator.GetCurrentAnimatorStateInfo(mecanimLayerConfig.LayerIndex);
 				int fullPathHash = currentAnimatorStateInfo.fullPathHash;
-				base.StartCoroutine(this.sendTransitionEventDelayed(currentAnimatorStateInfo.fullPathHash, mecanimLayerConfig.LayerIndex, currentAnimatorStateInfo.normalizedTime, this.entity, false, 0));
+				base.StartCoroutine(this.sendTransitionEventDelayed(currentAnimatorStateInfo.fullPathHash, mecanimLayerConfig.LayerIndex, currentAnimatorStateInfo.normalizedTime, base.entity, false, 0));
 			}
 		}
 	}
@@ -245,7 +275,7 @@ public class CoopMecanimReplicator : EntityBehaviour<IWorldCharacter>
 	
 	private void UpdateOwnerWithEvents()
 	{
-		if (this.entity.IsOwner())
+		if (base.entity.IsOwner())
 		{
 			base.state.MecanimSpeed = this.TargetAnimator.speed;
 			for (int i = 0; i < this.LayersToSync.Length; i++)
@@ -274,11 +304,11 @@ public class CoopMecanimReplicator : EntityBehaviour<IWorldCharacter>
 						{
 							if ((animatorStateInfo.tagHash == this.runHash || animatorStateInfo.tagHash == this.walkHash) && !this.isPlayer)
 							{
-								base.StartCoroutine(this.sendTransitionEventDelayed(animatorStateInfo.fullPathHash, mecanimLayerConfig.LayerIndex, animatorStateInfo.normalizedTime, this.entity, animatorTransitionInfo.anyState, 7));
+								base.StartCoroutine(this.sendTransitionEventDelayed(animatorStateInfo.fullPathHash, mecanimLayerConfig.LayerIndex, animatorStateInfo.normalizedTime, base.entity, animatorTransitionInfo.anyState, 7));
 							}
 							else
 							{
-								base.StartCoroutine(this.sendTransitionEventDelayed(animatorStateInfo.fullPathHash, mecanimLayerConfig.LayerIndex, animatorStateInfo.normalizedTime, this.entity, animatorTransitionInfo.anyState, 0));
+								base.StartCoroutine(this.sendTransitionEventDelayed(animatorStateInfo.fullPathHash, mecanimLayerConfig.LayerIndex, animatorStateInfo.normalizedTime, base.entity, animatorTransitionInfo.anyState, 0));
 							}
 						}
 						base.state.MecanimLayerHashes[i] = (mecanimLayerConfig.Hash = animatorStateInfo.fullPathHash);
@@ -324,9 +354,9 @@ public class CoopMecanimReplicator : EntityBehaviour<IWorldCharacter>
 	{
 		if (this.isAnimal)
 		{
-			this.entity = base.transform.parent.GetComponent<BoltEntity>();
+			base.entity = base.transform.parent.GetComponent<BoltEntity>();
 		}
-		if (this.entity.IsAttached())
+		if (base.entity.IsAttached())
 		{
 			this.TargetAnimator.speed = base.state.MecanimSpeed;
 			AnimatorStateInfo currentAnimatorStateInfo = this.TargetAnimator.GetCurrentAnimatorStateInfo(layer);
@@ -379,7 +409,7 @@ public class CoopMecanimReplicator : EntityBehaviour<IWorldCharacter>
 	
 	private void UpdateRemoteLayers(float? transitionDuration, float? stateNormalizedTime)
 	{
-		if (this.entity.IsAttached())
+		if (base.entity.IsAttached())
 		{
 			this.TargetAnimator.speed = base.state.MecanimSpeed;
 			for (int i = 0; i < this.LayersToSync.Length; i++)
@@ -398,7 +428,7 @@ public class CoopMecanimReplicator : EntityBehaviour<IWorldCharacter>
 	
 	private void UpdateRemote(float? transitionDuration, float? stateNormalizedTime)
 	{
-		if (this.entity.IsAttached())
+		if (base.entity.IsAttached())
 		{
 			this.TargetAnimator.speed = base.state.MecanimSpeed;
 			for (int i = 0; i < this.LayersToSync.Length; i++)
@@ -476,8 +506,8 @@ public class CoopMecanimReplicator : EntityBehaviour<IWorldCharacter>
 	public MecanimTransitionOverride[] TransitionOverrides;
 
 	
-	[SerializeField]
 	[Range(0f, 1f)]
+	[SerializeField]
 	public float CrossFadeMultiplier = 0.9f;
 
 	
@@ -506,6 +536,9 @@ public class CoopMecanimReplicator : EntityBehaviour<IWorldCharacter>
 
 	
 	private float farUpdateTimer;
+
+	
+	private float playerUpdateTimer;
 
 	
 	private int runHash = Animator.StringToHash("running");

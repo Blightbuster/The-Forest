@@ -32,22 +32,22 @@ public class trapTrigger : EntityBehaviour
 	
 	public override void Attached()
 	{
-		if (this.entity.isOwner)
+		if (base.entity.isOwner)
 		{
-			if (this.entity.StateIs<ITrapLargeState>())
+			if (base.entity.StateIs<ITrapLargeState>())
 			{
-				this.entity.GetState<ITrapLargeState>().Sprung = this.sprung;
+				base.entity.GetState<ITrapLargeState>().Sprung = this.sprung;
 			}
-			if (this.entity.StateIs<ITrapRabbitState>())
+			if (base.entity.StateIs<ITrapRabbitState>())
 			{
-				this.entity.GetState<ITrapRabbitState>().Sprung = this.sprung;
+				base.entity.GetState<ITrapRabbitState>().Sprung = this.sprung;
 			}
 		}
 		else
 		{
-			if (this.entity.StateIs<ITrapLargeState>())
+			if (base.entity.StateIs<ITrapLargeState>())
 			{
-				ITrapLargeState state = this.entity.GetState<ITrapLargeState>();
+				ITrapLargeState state = base.entity.GetState<ITrapLargeState>();
 				this.SprungTag = state.Sprung;
 				if (state.Sprung)
 				{
@@ -60,9 +60,9 @@ public class trapTrigger : EntityBehaviour
 					state.AddCallback("CanReset", new PropertyCallbackSimple(this.OnCanResetChanged));
 				}
 			}
-			if (this.entity.StateIs<ITrapRabbitState>())
+			if (base.entity.StateIs<ITrapRabbitState>())
 			{
-				ITrapRabbitState state2 = this.entity.GetState<ITrapRabbitState>();
+				ITrapRabbitState state2 = base.entity.GetState<ITrapRabbitState>();
 				this.SprungTag = state2.Sprung;
 				if (state2.Sprung)
 				{
@@ -76,7 +76,7 @@ public class trapTrigger : EntityBehaviour
 	
 	private void OnCanCutDownChanged()
 	{
-		ITrapLargeState state = this.entity.GetState<ITrapLargeState>();
+		ITrapLargeState state = base.entity.GetState<ITrapLargeState>();
 		if (state.CanCutDown)
 		{
 			this.cutTrigger.SetActive(true);
@@ -90,7 +90,7 @@ public class trapTrigger : EntityBehaviour
 	
 	private void OnCanResetChanged()
 	{
-		ITrapLargeState state = this.entity.GetState<ITrapLargeState>();
+		ITrapLargeState state = base.entity.GetState<ITrapLargeState>();
 		if (state.CanReset)
 		{
 			this.resetTrigger.SetActive(true);
@@ -104,9 +104,9 @@ public class trapTrigger : EntityBehaviour
 	
 	private void Update()
 	{
-		if (this.entity.IsAttached() && this.entity.isOwner && this.largeNoose)
+		if (base.entity.IsAttached() && base.entity.isOwner && this.largeNoose)
 		{
-			ITrapLargeState state = this.entity.GetState<ITrapLargeState>();
+			ITrapLargeState state = base.entity.GetState<ITrapLargeState>();
 			state.CanCutDown = this.cutTrigger.activeInHierarchy;
 			state.CanReset = this.resetTrigger.activeInHierarchy;
 		}
@@ -308,9 +308,9 @@ public class trapTrigger : EntityBehaviour
 		yield return new WaitForSeconds(1f);
 		if (this.largeNoose)
 		{
-			Vector3 pos = this.noosePivot.transform.position + -0.2f * this.noosePivot.transform.right + -0f * this.noosePivot.transform.forward;
-			pos.y = base.transform.root.position.y + -0.15f;
-			this.trappedMutants[0].transform.position = pos;
+			Vector3 position = this.noosePivot.transform.position + -0.2f * this.noosePivot.transform.right + -0f * this.noosePivot.transform.forward;
+			position.y = base.transform.root.position.y + -0.15f;
+			this.trappedMutants[0].transform.position = position;
 		}
 		Animator dummyAnim = this.trappedMutants[0].GetComponent<Animator>();
 		dummyAnim.enabled = true;
@@ -557,7 +557,7 @@ public class trapTrigger : EntityBehaviour
 			}
 			if (this.IsPlayerInRange())
 			{
-				GameObject newAnimal = this.SpawnTrappedAnimal(this.TrappedName);
+				GameObject gameObject = this.SpawnTrappedAnimal(this.TrappedName);
 			}
 		}
 		else
@@ -637,11 +637,11 @@ public class trapTrigger : EntityBehaviour
 	
 	private void OnSprungMP(bool byPassAnim)
 	{
-		if (this.entity.StateIs<ITrapLargeState>() && this.entity.GetState<ITrapLargeState>().Sprung)
+		if (base.entity.StateIs<ITrapLargeState>() && base.entity.GetState<ITrapLargeState>().Sprung)
 		{
 			this.TriggerLargeTrap(byPassAnim);
 		}
-		if (this.entity.StateIs<ITrapRabbitState>() && this.entity.GetState<ITrapRabbitState>().Sprung)
+		if (base.entity.StateIs<ITrapRabbitState>() && base.entity.GetState<ITrapRabbitState>().Sprung)
 		{
 			this.TriggerRabbitTrap(byPassAnim);
 		}
@@ -982,10 +982,10 @@ public class trapTrigger : EntityBehaviour
 			}
 			this.switchNooseRope();
 			base.Invoke("EnableCutTrigger", 1.5f);
-			if (this.entity.IsOwner() && this.largeNoose)
+			if (base.entity.IsOwner() && this.largeNoose)
 			{
-				this.entity.GetState<ITrapLargeState>().CanCutDown = true;
-				this.entity.GetState<ITrapLargeState>().CanReset = false;
+				base.entity.GetState<ITrapLargeState>().CanCutDown = true;
+				base.entity.GetState<ITrapLargeState>().CanReset = false;
 			}
 			if (other && (other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("PlayerNet")))
 			{
@@ -1047,15 +1047,15 @@ public class trapTrigger : EntityBehaviour
 			{
 				componentInParent.gameObject.tag = "Untagged";
 			}
-			if (BoltNetwork.isRunning && this.entity.isAttached && this.entity.isOwner)
+			if (BoltNetwork.isRunning && base.entity.isAttached && base.entity.isOwner)
 			{
-				if (this.entity.StateIs<ITrapLargeState>())
+				if (base.entity.StateIs<ITrapLargeState>())
 				{
-					this.entity.GetState<ITrapLargeState>().Sprung = this.sprung;
+					base.entity.GetState<ITrapLargeState>().Sprung = this.sprung;
 				}
-				if (this.entity.StateIs<ITrapRabbitState>())
+				if (base.entity.StateIs<ITrapRabbitState>())
 				{
-					this.entity.GetState<ITrapRabbitState>().Sprung = this.sprung;
+					base.entity.GetState<ITrapRabbitState>().Sprung = this.sprung;
 				}
 			}
 		}
@@ -1103,16 +1103,16 @@ public class trapTrigger : EntityBehaviour
 				{
 					TriggerLargeTrap triggerLargeTrap = global::TriggerLargeTrap.Create(GlobalTargets.OnlyServer);
 					triggerLargeTrap.Player = LocalPlayer.Entity;
-					triggerLargeTrap.Trap = this.entity;
+					triggerLargeTrap.Trap = base.entity;
 					triggerLargeTrap.Send();
 					this.TriggerLargeTrap(null);
 				}
 			}
 			else
 			{
-				if (this.MpHostCheck && this.entity && this.entity.isAttached && this.entity.StateIs<ITrapLargeState>())
+				if (this.MpHostCheck && base.entity && base.entity.isAttached && base.entity.StateIs<ITrapLargeState>())
 				{
-					this.entity.GetState<ITrapLargeState>().Sprung = true;
+					base.entity.GetState<ITrapLargeState>().Sprung = true;
 				}
 				this.TriggerLargeTrap(other);
 			}
@@ -1173,9 +1173,9 @@ public class trapTrigger : EntityBehaviour
 					EventRegistry.Achievements.Publish(TfEvent.Achievements.FishTrapped, null);
 				}
 				this.TriggerRabbitTrap(false);
-				if (this.MpHostCheck && this.entity && this.entity.isAttached && this.entity.StateIs<ITrapRabbitState>())
+				if (this.MpHostCheck && base.entity && base.entity.isAttached && base.entity.StateIs<ITrapRabbitState>())
 				{
-					this.entity.GetState<ITrapRabbitState>().Sprung = true;
+					base.entity.GetState<ITrapRabbitState>().Sprung = true;
 				}
 			}
 			if (flag2)
@@ -1298,9 +1298,9 @@ public class trapTrigger : EntityBehaviour
 			if (this.MpHostCheck)
 			{
 				this.TriggerRabbitTrap(false);
-				if (this.entity && this.entity.isAttached && this.entity.StateIs<ITrapRabbitState>())
+				if (base.entity && base.entity.isAttached && base.entity.StateIs<ITrapRabbitState>())
 				{
-					this.entity.GetState<ITrapRabbitState>().Sprung = true;
+					base.entity.GetState<ITrapRabbitState>().Sprung = true;
 				}
 			}
 			else if (this.MpClientCheck && !this.sprung)
@@ -1514,7 +1514,7 @@ public class trapTrigger : EntityBehaviour
 	public void releaseNooseTrapMP()
 	{
 		CutTriggerActivated cutTriggerActivated = CutTriggerActivated.Create(GlobalTargets.OnlyServer);
-		cutTriggerActivated.Trap = this.entity;
+		cutTriggerActivated.Trap = base.entity;
 		cutTriggerActivated.Send();
 	}
 
@@ -1524,10 +1524,10 @@ public class trapTrigger : EntityBehaviour
 		if (this.resetTrigger)
 		{
 			this.resetTrigger.SetActive(true);
-			if (this.entity.IsOwner() && this.largeNoose)
+			if (base.entity.IsOwner() && this.largeNoose)
 			{
-				this.entity.GetState<ITrapLargeState>().CanCutDown = false;
-				this.entity.GetState<ITrapLargeState>().CanReset = true;
+				base.entity.GetState<ITrapLargeState>().CanCutDown = false;
+				base.entity.GetState<ITrapLargeState>().CanReset = true;
 			}
 		}
 		if (this.largeSwingingRock && this.navBlockerGo)
@@ -1969,10 +1969,10 @@ public class trapTrigger : EntityBehaviour
 			{
 				this.animator.SetIntegerReflected("direction", 0);
 			}
-			if (this.entity.IsOwner())
+			if (base.entity.IsOwner())
 			{
-				this.entity.GetState<ITrapLargeState>().CanCutDown = true;
-				this.entity.GetState<ITrapLargeState>().CanReset = false;
+				base.entity.GetState<ITrapLargeState>().CanCutDown = true;
+				base.entity.GetState<ITrapLargeState>().CanReset = false;
 			}
 		}
 	}

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Transforms 2d input into a 3d world space vector. E.g., can be used to transform input from a touch joystick to a movement vector.")]
 	[ActionCategory(ActionCategory.Input)]
+	[Tooltip("Transforms 2d input into a 3d world space vector. E.g., can be used to transform input from a touch joystick to a movement vector.")]
 	public class TransformInputToWorldSpace : FsmStateAction
 	{
 		
@@ -26,40 +26,49 @@ namespace HutongGames.PlayMaker.Actions
 			Vector3 a2 = default(Vector3);
 			if (this.relativeTo.Value == null)
 			{
-				switch (this.mapToPlane)
+				TransformInputToWorldSpace.AxisPlane axisPlane = this.mapToPlane;
+				if (axisPlane != TransformInputToWorldSpace.AxisPlane.XZ)
 				{
-				case TransformInputToWorldSpace.AxisPlane.XZ:
+					if (axisPlane != TransformInputToWorldSpace.AxisPlane.XY)
+					{
+						if (axisPlane == TransformInputToWorldSpace.AxisPlane.YZ)
+						{
+							a = Vector3.up;
+							a2 = Vector3.forward;
+						}
+					}
+					else
+					{
+						a = Vector3.up;
+						a2 = Vector3.right;
+					}
+				}
+				else
+				{
 					a = Vector3.forward;
 					a2 = Vector3.right;
-					break;
-				case TransformInputToWorldSpace.AxisPlane.XY:
-					a = Vector3.up;
-					a2 = Vector3.right;
-					break;
-				case TransformInputToWorldSpace.AxisPlane.YZ:
-					a = Vector3.up;
-					a2 = Vector3.forward;
-					break;
 				}
 			}
 			else
 			{
 				Transform transform = this.relativeTo.Value.transform;
-				switch (this.mapToPlane)
+				TransformInputToWorldSpace.AxisPlane axisPlane2 = this.mapToPlane;
+				if (axisPlane2 != TransformInputToWorldSpace.AxisPlane.XZ)
 				{
-				case TransformInputToWorldSpace.AxisPlane.XZ:
+					if (axisPlane2 == TransformInputToWorldSpace.AxisPlane.XY || axisPlane2 == TransformInputToWorldSpace.AxisPlane.YZ)
+					{
+						a = Vector3.up;
+						a.z = 0f;
+						a = a.normalized;
+						a2 = transform.TransformDirection(Vector3.right);
+					}
+				}
+				else
+				{
 					a = transform.TransformDirection(Vector3.forward);
 					a.y = 0f;
 					a = a.normalized;
 					a2 = new Vector3(a.z, 0f, -a.x);
-					break;
-				case TransformInputToWorldSpace.AxisPlane.XY:
-				case TransformInputToWorldSpace.AxisPlane.YZ:
-					a = Vector3.up;
-					a.z = 0f;
-					a = a.normalized;
-					a2 = transform.TransformDirection(Vector3.right);
-					break;
 				}
 			}
 			float d = (!this.horizontalInput.IsNone) ? this.horizontalInput.Value : 0f;
@@ -79,8 +88,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat horizontalInput;
 
 		
-		[Tooltip("The vertical input.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The vertical input.")]
 		public FsmFloat verticalInput;
 
 		

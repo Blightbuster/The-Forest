@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Randomly shakes a GameObject's scale by a diminishing amount over time.")]
 	[ActionCategory("iTween")]
+	[Tooltip("Randomly shakes a GameObject's scale by a diminishing amount over time.")]
 	public class iTweenShakeScale : iTweenFsmAction
 	{
 		

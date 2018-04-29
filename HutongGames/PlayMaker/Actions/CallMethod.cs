@@ -136,8 +136,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("Store the component in an Object variable.\nNOTE: Set theObject variable's Object Type to get a component of that type. E.g., set Object Type to UnityEngine.AudioListener to get the AudioListener component on the camera.")]
 		[ObjectType(typeof(MonoBehaviour))]
+		[Tooltip("Store the component in an Object variable.\nNOTE: Set theObject variable's Object Type to get a component of that type. E.g., set Object Type to UnityEngine.AudioListener to get the AudioListener component on the camera.")]
 		public FsmObject behaviour;
 
 		
@@ -149,9 +149,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmVar[] parameters;
 
 		
-		[Tooltip("Store the result of the method call.")]
-		[UIHint(UIHint.Variable)]
 		[ActionSection("Store Result")]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the result of the method call.")]
 		public FsmVar storeResult;
 
 		

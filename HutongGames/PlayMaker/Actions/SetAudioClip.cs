@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the Audio Clip played by the AudioSource component on a Game Object.")]
 	[ActionCategory(ActionCategory.Audio)]
+	[Tooltip("Sets the Audio Clip played by the AudioSource component on a Game Object.")]
 	public class SetAudioClip : ComponentAction<AudioSource>
 	{
 		
@@ -28,13 +28,13 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("The GameObject with the AudioSource component.")]
 		[CheckForComponent(typeof(AudioSource))]
+		[Tooltip("The GameObject with the AudioSource component.")]
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("The AudioClip to set.")]
 		[ObjectType(typeof(AudioClip))]
+		[Tooltip("The AudioClip to set.")]
 		public FsmObject audioClip;
 	}
 }

@@ -10,7 +10,7 @@ namespace Rewired.UI.ControlMapper
 		
 		public void Initialize()
 		{
-			if (!this._initialized)
+			if (this._initialized)
 			{
 				return;
 			}
@@ -476,6 +476,12 @@ namespace Rewired.UI.ControlMapper
 		}
 
 		
+		public string GetJoystickElementAssignmentPollingWindowMessage_FullAxisFieldOnly(string actionName)
+		{
+			return string.Format(this._joystickElementAssignmentPollingWindowMessage_fullAxisFieldOnly, actionName);
+		}
+
+		
 		public string GetKeyboardElementAssignmentPollingWindowMessage(string actionName)
 		{
 			return string.Format(this._keyboardElementAssignmentPollingWindowMessage, actionName);
@@ -485,6 +491,12 @@ namespace Rewired.UI.ControlMapper
 		public string GetMouseElementAssignmentPollingWindowMessage(string actionName)
 		{
 			return string.Format(this._mouseElementAssignmentPollingWindowMessage, actionName);
+		}
+
+		
+		public string GetMouseElementAssignmentPollingWindowMessage_FullAxisFieldOnly(string actionName)
+		{
+			return string.Format(this._mouseElementAssignmentPollingWindowMessage_fullAxisFieldOnly, actionName);
 		}
 
 		
@@ -583,9 +595,14 @@ namespace Rewired.UI.ControlMapper
 		private string _elementAssignmentPrePollingWindowMessage = "First center or zero all sticks and axes and press any button or wait for the timer to finish.";
 
 		
-		[Tooltip("{0} = Action Name")]
 		[SerializeField]
+		[Tooltip("{0} = Action Name")]
 		private string _joystickElementAssignmentPollingWindowMessage = "Now press a button or move an axis to assign it to {0}.";
+
+		
+		[SerializeField]
+		[Tooltip("This text is only displayed when split-axis fields have been disabled and the user clicks on the full-axis field. Button/key/D-pad input cannot be assigned to a full-axis field.\n{0} = Action Name")]
+		private string _joystickElementAssignmentPollingWindowMessage_fullAxisFieldOnly = "Now move an axis to assign it to {0}.";
 
 		
 		[SerializeField]
@@ -599,6 +616,11 @@ namespace Rewired.UI.ControlMapper
 
 		
 		[SerializeField]
+		[Tooltip("This text is only displayed when split-axis fields have been disabled and the user clicks on the full-axis field. Button/key/D-pad input cannot be assigned to a full-axis field.\n{0} = Action Name")]
+		private string _mouseElementAssignmentPollingWindowMessage_fullAxisFieldOnly = "Move an axis to assign it to {0}.";
+
+		
+		[SerializeField]
 		private string _elementAssignmentConflictWindowMessage = "Assignment Conflict";
 
 		
@@ -607,8 +629,8 @@ namespace Rewired.UI.ControlMapper
 		private string _elementAlreadyInUseBlocked = "{0} is already in use cannot be replaced.";
 
 		
-		[Tooltip("{0} = Element Name")]
 		[SerializeField]
+		[Tooltip("{0} = Element Name")]
 		private string _elementAlreadyInUseCanReplace = "{0} is already in use. Do you want to replace it?";
 
 		
@@ -621,8 +643,8 @@ namespace Rewired.UI.ControlMapper
 		private string _mouseAssignmentConflictWindowTitle = "Mouse Assignment";
 
 		
-		[Tooltip("{0} = Other Player Name\n{1} = This Player Name")]
 		[SerializeField]
+		[Tooltip("{0} = Other Player Name\n{1} = This Player Name")]
 		private string _mouseAssignmentConflictWindowMessage = "The mouse is already assigned to {0}. Do you want to assign the mouse to {1} instead?";
 
 		
@@ -634,8 +656,8 @@ namespace Rewired.UI.ControlMapper
 		private string _calibrateAxisStep1WindowTitle = "Calibrate Zero";
 
 		
-		[Tooltip("{0} = Axis Name")]
 		[SerializeField]
+		[Tooltip("{0} = Axis Name")]
 		private string _calibrateAxisStep1WindowMessage = "Center or zero {0} and press any button or wait for the timer to finish.";
 
 		
@@ -643,8 +665,8 @@ namespace Rewired.UI.ControlMapper
 		private string _calibrateAxisStep2WindowTitle = "Calibrate Range";
 
 		
-		[Tooltip("{0} = Axis Name")]
 		[SerializeField]
+		[Tooltip("{0} = Axis Name")]
 		private string _calibrateAxisStep2WindowMessage = "Move {0} through its entire range then press any button or wait for the timer to finish.";
 
 		
@@ -656,8 +678,8 @@ namespace Rewired.UI.ControlMapper
 		private string _restoreDefaultsWindowTitle = "Restore Defaults";
 
 		
-		[Tooltip("Message for a single player game.")]
 		[SerializeField]
+		[Tooltip("Message for a single player game.")]
 		private string _restoreDefaultsWindowMessage_onePlayer = "This will restore the default input configuration. Are you sure you want to do this?";
 
 		

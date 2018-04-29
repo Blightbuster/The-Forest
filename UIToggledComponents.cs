@@ -4,8 +4,8 @@ using UnityEngine;
 
 
 [ExecuteInEditMode]
-[AddComponentMenu("NGUI/Interaction/Toggled Components")]
 [RequireComponent(typeof(UIToggle))]
+[AddComponentMenu("NGUI/Interaction/Toggled Components")]
 public class UIToggledComponents : MonoBehaviour
 {
 	
@@ -58,12 +58,12 @@ public class UIToggledComponents : MonoBehaviour
 	public List<MonoBehaviour> deactivate;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private MonoBehaviour target;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	private bool inverse;
 }

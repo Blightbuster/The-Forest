@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sends events when a GUI Texture or GUI Text is touched. Optionally filter by a fingerID.")]
 	[ActionCategory(ActionCategory.Device)]
+	[Tooltip("Sends events when a GUI Texture or GUI Text is touched. Optionally filter by a fingerID.")]
 	public class TouchGUIEvent : FsmStateAction
 	{
 		
@@ -123,21 +123,26 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			Rect screenRect = this.guiElement.GetScreenRect();
 			Vector3 value = default(Vector3);
-			switch (this.relativeTo)
+			TouchGUIEvent.OffsetOptions offsetOptions = this.relativeTo;
+			if (offsetOptions != TouchGUIEvent.OffsetOptions.TopLeft)
 			{
-			case TouchGUIEvent.OffsetOptions.TopLeft:
+				if (offsetOptions != TouchGUIEvent.OffsetOptions.Center)
+				{
+					if (offsetOptions == TouchGUIEvent.OffsetOptions.TouchStart)
+					{
+						value = touchPos - this.touchStartPos;
+					}
+				}
+				else
+				{
+					Vector3 b = new Vector3(screenRect.x + screenRect.width * 0.5f, screenRect.y + screenRect.height * 0.5f, 0f);
+					value = touchPos - b;
+				}
+			}
+			else
+			{
 				value.x = touchPos.x - screenRect.x;
 				value.y = touchPos.y - screenRect.y;
-				break;
-			case TouchGUIEvent.OffsetOptions.Center:
-			{
-				Vector3 b = new Vector3(screenRect.x + screenRect.width * 0.5f, screenRect.y + screenRect.height * 0.5f, 0f);
-				value = touchPos - b;
-				break;
-			}
-			case TouchGUIEvent.OffsetOptions.TouchStart:
-				value = touchPos - this.touchStartPos;
-				break;
 			}
 			if (this.normalizeOffset.Value)
 			{
@@ -148,8 +153,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(GUIElement))]
 		[RequiredField]
+		[CheckForComponent(typeof(GUIElement))]
 		[Tooltip("The Game Object that owns the GUI Texture or GUI Text.")]
 		public FsmOwnerDefault gameObject;
 
@@ -183,9 +188,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmEvent notTouching;
 
 		
-		[Tooltip("Store the fingerId of the touch.")]
-		[UIHint(UIHint.Variable)]
 		[ActionSection("Store Results")]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the fingerId of the touch.")]
 		public FsmInt storeFingerId;
 
 		
@@ -211,8 +216,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmBool normalizeOffset;
 
 		
-		[Tooltip("Repeate every frame.")]
 		[ActionSection("")]
+		[Tooltip("Repeate every frame.")]
 		public bool everyFrame;
 
 		

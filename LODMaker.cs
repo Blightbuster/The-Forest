@@ -38,7 +38,7 @@ public static class LODMaker
 	{
 		float num = 0.12f / (0.5f + aMaxWeight);
 		sideLengthWeight = 3f * num * smallTrianglesFirst;
-		oldAngleWeight = 0.1f * num * smallTrianglesFirst;
+		oldAngleWeight = 0.1f * num * protectSubMeshesAndSharpEdges;
 		newAngleWeight = 0.4f * num;
 		uvWeight = 800f * num * protectUvs;
 		areaDiffWeight = 10f * num;
@@ -426,27 +426,35 @@ public static class LODMaker
 				}
 			}
 		}
-		for (int num14 = 0; num14 < ts.Length; num14++)
+		for (int num14 = 0; num14 < array7.Length; num14++)
 		{
-			list[array7[ts[num14]]].Add(num14 / 3);
-		}
-		float num15 = maxWeight * (0.8f + (float)vs.Length / 65536f * 0.2f);
-		float num16 = 0f;
-		int num17 = 0;
-		for (int num18 = 0; num18 < ts.Length; num18 += 3)
-		{
-			int num19 = ts[num18];
-			int num20 = ts[num18 + 1];
-			int num21 = ts[num18 + 2];
-			if (num19 != num20 && num20 != num21 && num21 != num19)
+			if (array7[array7[num14]] == num14)
 			{
-				num16 += LODMaker.Area(vs[array6[num19]].Product(zero), vs[array6[num20]].Product(zero), vs[array6[num21]].Product(zero));
-				num17++;
+				array7[num14] = num14;
 			}
 		}
-		if (num17 > 0)
+		for (int num15 = 0; num15 < ts.Length; num15++)
 		{
-			num16 /= (float)num17;
+			list[array7[ts[num15]]].Add(num15 / 3);
+		}
+		float num16 = maxWeight * (0.8f + (float)vs.Length / 65536f * 0.2f);
+		num16 *= 4f - Mathf.Clamp01((float)vs.Length / 4096f) * 3f;
+		float num17 = 0f;
+		int num18 = 0;
+		for (int num19 = 0; num19 < ts.Length; num19 += 3)
+		{
+			int num20 = ts[num19];
+			int num21 = ts[num19 + 1];
+			int num22 = ts[num19 + 2];
+			if (num20 != num21 && num21 != num22 && num22 != num20)
+			{
+				num17 += LODMaker.Area(vs[array6[num20]].Product(zero), vs[array6[num21]].Product(zero), vs[array6[num22]].Product(zero));
+				num18++;
+			}
+		}
+		if (num18 > 0)
+		{
+			num17 /= (float)num18;
 		}
 		int[] array14 = new int[]
 		{
@@ -466,181 +474,179 @@ public static class LODMaker
 			2,
 			0
 		};
-		for (int num22 = 0; num22 < 3; num22++)
+		for (int num23 = 0; num23 < 3; num23++)
 		{
-			float num23 = num16 * (float)num22 * 0.5f;
-			float num24 = num16 * (float)(num22 + 1) * 0.5f;
-			if (num22 >= 2)
+			float num24 = num17 * (float)num23 * 0.5f;
+			float num25 = num17 * (float)(num23 + 1) * 0.5f;
+			if (num23 >= 2)
 			{
-				num24 = float.PositiveInfinity;
+				num25 = float.PositiveInfinity;
 			}
-			for (int num25 = 0; num25 < ts.Length; num25 += 3)
+			for (int num26 = 0; num26 < ts.Length; num26 += 3)
 			{
-				int num26 = ts[num25];
-				int num27 = ts[num25 + 1];
-				int num28 = ts[num25 + 2];
-				if (num26 != num27 && num27 != num28 && num28 != num26)
+				int num27 = ts[num26];
+				int num28 = ts[num26 + 1];
+				int num29 = ts[num26 + 2];
+				if (num27 != num28 && num28 != num29 && num29 != num27)
 				{
 					int[] array16 = new int[]
 					{
-						num26,
-						num27,
 						num27,
 						num28,
 						num28,
-						num26
+						num29,
+						num29,
+						num27
 					};
 					int[] array17 = new int[]
 					{
-						num27,
-						num26,
 						num28,
 						num27,
-						num26,
-						num28
+						num29,
+						num28,
+						num27,
+						num29
 					};
 					float[] array18 = new float[6];
 					float[] array19 = new float[]
 					{
-						(vs[array6[num26]] - vs[array6[num27]]).Product(zero).magnitude,
 						(vs[array6[num27]] - vs[array6[num28]]).Product(zero).magnitude,
-						(vs[array6[num28]] - vs[array6[num26]]).Product(zero).magnitude
+						(vs[array6[num28]] - vs[array6[num29]]).Product(zero).magnitude,
+						(vs[array6[num29]] - vs[array6[num27]]).Product(zero).magnitude
 					};
-					float num29 = LODMaker.Area(vs[array6[num26]].Product(zero), vs[array6[num27]].Product(zero), vs[array6[num28]].Product(zero));
-					if (num29 >= num23 && num29 < num24)
+					float num30 = LODMaker.Area(vs[array6[num27]].Product(zero), vs[array6[num28]].Product(zero), vs[array6[num29]].Product(zero));
+					if (num30 >= num24 && num30 < num25)
 					{
-						num29 = Mathf.Sqrt(num29);
-						for (int num30 = 0; num30 < 6; num30++)
-						{
-							array18[num30] += num29 * sideLengthWeight;
-						}
+						num30 = Mathf.Sqrt(num30);
 						for (int num31 = 0; num31 < 6; num31++)
 						{
-							array18[num31] += array19[num31 / 2] * sideLengthWeight;
+							array18[num31] += num30 * sideLengthWeight;
 						}
 						for (int num32 = 0; num32 < 6; num32++)
 						{
-							array18[num32] += array13[array16[num32]] * num29 * vertexWeight;
+							array18[num32] += array19[num32 / 2] * sideLengthWeight;
 						}
 						for (int num33 = 0; num33 < 6; num33++)
 						{
-							if (num33 / 2 * 2 == num33)
+							array18[num33] += array13[array16[num33]] * num30 * vertexWeight;
+						}
+						for (int num34 = 0; num34 < 6; num34++)
+						{
+							if (num34 / 2 * 2 == num34)
 							{
-								float num34 = LODMaker.GetNormalDiffForCorners(ns, array16[num33 / 2 * 2], array17[num33 / 2 * 2]) * array19[num33 / 2] * normalWeight;
-								array18[num33] += num34;
-								array18[num33 + 1] += num34;
+								float num35 = LODMaker.GetNormalDiffForCorners(ns, array16[num34 / 2 * 2], array17[num34 / 2 * 2]) * array19[num34 / 2] * normalWeight;
+								array18[num34] += num35;
+								array18[num34 + 1] += num35;
 							}
 						}
-						int[] adjacentTriangles = LODMaker.GetAdjacentTriangles(ts, num25, list, array7, array, trianglesPerGroup);
-						if (LODMaker.AnyWeightOK(array18, num15))
+						int[] adjacentTriangles = LODMaker.GetAdjacentTriangles(ts, num26, list, array7, array, trianglesPerGroup);
+						if (LODMaker.AnyWeightOK(array18, num16))
 						{
 							float[] array20 = new float[3];
 							Vector3[] array21 = new Vector3[3];
-							for (int num35 = 0; num35 < 3; num35++)
+							for (int num36 = 0; num36 < 3; num36++)
 							{
-								LODMaker.GetTotalAngleAndCenterDistanceForCorner(adjacentTriangles, vs, array6, array16[num35 * 2], array3, ref array20[num35], ref array21[num35]);
+								LODMaker.GetTotalAngleAndCenterDistanceForCorner(adjacentTriangles, vs, array6, array16[num36 * 2], array3, ref array20[num36], ref array21[num36]);
 							}
-							for (int num36 = 0; num36 < 6; num36++)
+							for (int num37 = 0; num37 < 6; num37++)
 							{
-								if (array18[num36] < num15)
-								{
-									array18[num36] += LODMaker.AngleDiff(array20[array15[num36]]) * array19[num36 / 2] * num29 * oldAngleWeight;
-								}
+								float num38 = Mathf.Abs(array20[array15[num37]] - 360f);
+								array18[num37] += num38 * num38 * array19[num37 / 2] * num30 * oldAngleWeight * 1f;
 							}
-							if (LODMaker.AnyWeightOK(array18, num15))
+							if (LODMaker.AnyWeightOK(array18, num16))
 							{
-								for (int num37 = 0; num37 < 6; num37++)
+								for (int num39 = 0; num39 < 6; num39++)
 								{
-									if (array18[num37] < num15)
+									if (array18[num39] < num16)
 									{
-										float num38 = 0f;
+										float num40 = 0f;
 										Vector3 zero2 = Vector3.zero;
 										bool flag = false;
-										LODMaker.GetTotalAngleAndCenterDistanceForNewCorner(adjacentTriangles, vs, array6, array7, array16[num37], array17[num37], array3, maxWeight, ref num38, ref zero2, ref flag);
+										LODMaker.GetTotalAngleAndCenterDistanceForNewCorner(adjacentTriangles, vs, array6, array7, array16[num39], array17[num39], array3, maxWeight, ref num40, ref zero2, ref flag);
 										if (flag)
 										{
-											array18[num37] += 100f * num29;
+											array18[num39] += 100f * num30;
 										}
-										if (Mathf.Abs(num38) < 10f)
+										if (Mathf.Abs(num40) < 10f)
 										{
-											array18[num37] += LODMaker.AngleCornerDiff(num38 - array20[array14[num37]]) * Mathf.Sqrt(array19[num37 / 2]) * newAngleWeight;
+											array18[num39] += LODMaker.AngleCornerDiff(num40 - array20[array14[num39]]) * Mathf.Sqrt(array19[num39 / 2]) * newAngleWeight;
 										}
 										else
 										{
-											array18[num37] += LODMaker.AngleDiff(num38 - array20[array14[num37]]) * Mathf.Sqrt(array19[num37 / 2]) * newAngleWeight;
+											array18[num39] += LODMaker.AngleDiff(num40 - array20[array14[num39]]) * Mathf.Sqrt(array19[num39 / 2]) * newAngleWeight;
 										}
 										if (ns != null && ns.Length > 0)
 										{
-											array18[num37] += Vector3.Project(vs[array6[array16[num37]]] - vs[array6[array17[num37]]], ns[array16[num37]]).magnitude * (zero2 - array21[array14[num37]]).magnitude * centerDistanceWeight;
+											array18[num39] += Vector3.Project(vs[array6[array16[num39]]] - vs[array6[array17[num39]]], ns[array16[num39]]).magnitude * (zero2 - array21[array14[num39]]).magnitude * centerDistanceWeight;
 										}
 									}
 								}
-								if (LODMaker.AnyWeightOK(array18, num15))
+								if (LODMaker.AnyWeightOK(array18, num16))
 								{
-									float num39 = LODMaker.Area(vs[array6[num26]], vs[array6[num27]], vs[array6[num28]]);
-									for (int num40 = 0; num40 < 6; num40++)
+									float num41 = LODMaker.Area(vs[array6[num27]], vs[array6[num28]], vs[array6[num29]]);
+									for (int num42 = 0; num42 < 6; num42++)
 									{
-										if (array18[num40] < num15)
+										if (array18[num42] < num16)
 										{
-											float num41 = 0f;
-											float num42 = 0f;
 											float num43 = 0f;
+											float num44 = 0f;
+											float num45 = 0f;
 											float f = 0f;
-											LODMaker.GetUVStretchAndAreaForCorner(adjacentTriangles, vs, array6, array7, uv1s, array16[num40], array17[num40], ref num42, ref num41, ref f, ref num43);
-											array18[num40] += num42 * 10f * uvWeight;
-											array18[num40] += (Mathf.Pow(Mathf.Abs(f) + 1f, 2f) - 1f) * 30f * uvWeight;
-											if (num39 <= 0f)
+											LODMaker.GetUVStretchAndAreaForCorner(adjacentTriangles, vs, array6, array7, uv1s, array16[num42], array17[num42], ref num44, ref num43, ref f, ref num45);
+											array18[num42] += num44 * 10f * uvWeight;
+											array18[num42] += (Mathf.Pow(Mathf.Abs(f) + 1f, 2f) - 1f) * 30f * uvWeight;
+											if (num41 <= 0f)
 											{
-												num39 = Mathf.Max(num41, num43);
+												num41 = Mathf.Max(num43, num45);
 											}
-											if (num39 > 0f)
+											if (num41 > 0f)
 											{
-												if (num41 / num39 > 1f)
+												if (num43 / num41 > 1f)
 												{
-													array18[num40] += num41 / num39 * 0.5f * areaDiffWeight;
+													array18[num42] += num43 / num41 * 0.5f * areaDiffWeight;
 												}
-												array18[num40] += (Mathf.Pow(Mathf.Abs(num43 / num39) + 1f, 2f) - 1f) * 0.5f * areaDiffWeight;
+												array18[num42] += (Mathf.Pow(Mathf.Abs(num45 / num41) + 1f, 2f) - 1f) * 0.5f * areaDiffWeight;
 											}
 										}
 									}
 								}
 							}
 						}
-						if (LODMaker.AnyWeightOK(array18, num15))
+						if (LODMaker.AnyWeightOK(array18, num16))
 						{
-							for (int num44 = 0; num44 < 6; num44++)
+							for (int num46 = 0; num46 < 6; num46++)
 							{
-								array18[num44] *= 0.05f + 0.95f * array19[num44 / 2];
+								array18[num46] *= 0.05f + 0.95f * array19[num46 / 2];
 							}
-							int num45 = -1;
-							float num46 = float.PositiveInfinity;
-							for (int num47 = 0; num47 < 6; num47++)
+							int num47 = -1;
+							float num48 = float.PositiveInfinity;
+							for (int num49 = 0; num49 < 6; num49++)
 							{
-								if (array18[num47] < num46)
+								if (array18[num49] < num48)
 								{
-									num46 = array18[num47];
-									num45 = num47;
+									num48 = array18[num49];
+									num47 = num49;
 								}
 							}
-							switch (num45)
+							switch (num47)
 							{
 							case 0:
-								LODMaker.MergeVertices(ref num26, num27, array5, vs, ts, uv1s, uv2s, uv3s, uv4s, colors32, array4, array6, array7, array8, array9, array10, array11, array12, list, num > 1);
-								break;
-							case 1:
-								LODMaker.MergeVertices(ref num27, num26, array5, vs, ts, uv1s, uv2s, uv3s, uv4s, colors32, array4, array6, array7, array8, array9, array10, array11, array12, list, num > 1);
-								break;
-							case 2:
 								LODMaker.MergeVertices(ref num27, num28, array5, vs, ts, uv1s, uv2s, uv3s, uv4s, colors32, array4, array6, array7, array8, array9, array10, array11, array12, list, num > 1);
 								break;
-							case 3:
+							case 1:
 								LODMaker.MergeVertices(ref num28, num27, array5, vs, ts, uv1s, uv2s, uv3s, uv4s, colors32, array4, array6, array7, array8, array9, array10, array11, array12, list, num > 1);
 								break;
+							case 2:
+								LODMaker.MergeVertices(ref num28, num29, array5, vs, ts, uv1s, uv2s, uv3s, uv4s, colors32, array4, array6, array7, array8, array9, array10, array11, array12, list, num > 1);
+								break;
+							case 3:
+								LODMaker.MergeVertices(ref num29, num28, array5, vs, ts, uv1s, uv2s, uv3s, uv4s, colors32, array4, array6, array7, array8, array9, array10, array11, array12, list, num > 1);
+								break;
 							case 4:
-								LODMaker.MergeVertices(ref num28, num26, array5, vs, ts, uv1s, uv2s, uv3s, uv4s, colors32, array4, array6, array7, array8, array9, array10, array11, array12, list, num > 1);
+								LODMaker.MergeVertices(ref num29, num27, array5, vs, ts, uv1s, uv2s, uv3s, uv4s, colors32, array4, array6, array7, array8, array9, array10, array11, array12, list, num > 1);
 								break;
 							case 5:
-								LODMaker.MergeVertices(ref num26, num28, array5, vs, ts, uv1s, uv2s, uv3s, uv4s, colors32, array4, array6, array7, array8, array9, array10, array11, array12, list, num > 1);
+								LODMaker.MergeVertices(ref num27, num29, array5, vs, ts, uv1s, uv2s, uv3s, uv4s, colors32, array4, array6, array7, array8, array9, array10, array11, array12, list, num > 1);
 								break;
 							}
 						}
@@ -783,7 +789,7 @@ public static class LODMaker
 		int num = 0;
 		for (int i = 0; i < ts.Length; i++)
 		{
-			if (ts[i] == vertexIdx)
+			if (ts[i] == vertexIdx || vs[ts[i]] == vs[vertexIdx])
 			{
 				int num2 = i / 3 * 3;
 				int num3 = ts[num2];
@@ -794,13 +800,13 @@ public static class LODMaker
 				{
 					int num6 = vertexIdx;
 					int num7 = vertexIdx;
-					if (num3 != vertexIdx)
+					if (num3 != vertexIdx && vs[num3] != vs[vertexIdx])
 					{
 						num6 = num3;
 					}
-					if (num4 != vertexIdx)
+					if (num4 != vertexIdx && vs[num4] != vs[vertexIdx])
 					{
-						if (num6 == vertexIdx)
+						if (num6 == vertexIdx || vs[num6] == vs[vertexIdx])
 						{
 							num6 = num4;
 						}
@@ -809,7 +815,7 @@ public static class LODMaker
 							num7 = ts[num2 + 1];
 						}
 					}
-					if (num5 != vertexIdx)
+					if (num5 != vertexIdx && vs[num5] != vs[vertexIdx])
 					{
 						num7 = num5;
 					}
@@ -1079,7 +1085,7 @@ public static class LODMaker
 			int num3 = list[i] * 3;
 			for (int j = 0; j < 3; j++)
 			{
-				if (triangles[num3 + j] == oldV)
+				if (movedVs[triangles[num3 + j]] == movedVs[oldV])
 				{
 					triangles[num3 + j] = newV;
 				}
@@ -1107,38 +1113,32 @@ public static class LODMaker
 	
 	private static void MoveVertex(int oldV, int newV, int[] movedVs, int[] uniqueVs, int[] movedUv1s, int[] movedUv2s, int[] movedUv3s, int[] movedUv4s, int[] movedColors)
 	{
-		movedVs[oldV] = movedVs[newV];
-		movedVs[movedVs[oldV]] = movedVs[newV];
-		movedVs[uniqueVs[oldV]] = movedVs[newV];
-		if (movedUv1s.Length > 0)
+		for (int i = 0; i < movedVs.Length; i++)
 		{
-			movedUv1s[oldV] = movedUv1s[newV];
-			movedUv1s[movedVs[oldV]] = movedUv1s[newV];
-			movedUv1s[uniqueVs[oldV]] = movedUv1s[newV];
-		}
-		if (movedUv2s.Length > 0)
-		{
-			movedUv2s[oldV] = movedUv2s[newV];
-			movedUv2s[movedVs[oldV]] = movedUv2s[newV];
-			movedUv2s[uniqueVs[oldV]] = movedUv2s[newV];
-		}
-		if (movedUv3s.Length > 0)
-		{
-			movedUv3s[oldV] = movedUv3s[newV];
-			movedUv3s[movedVs[oldV]] = movedUv3s[newV];
-			movedUv3s[uniqueVs[oldV]] = movedUv3s[newV];
-		}
-		if (movedUv4s.Length > 0)
-		{
-			movedUv4s[oldV] = movedUv4s[newV];
-			movedUv4s[movedVs[oldV]] = movedUv4s[newV];
-			movedUv4s[uniqueVs[oldV]] = movedUv4s[newV];
-		}
-		if (movedColors.Length > 0)
-		{
-			movedColors[oldV] = movedColors[newV];
-			movedColors[movedVs[oldV]] = movedColors[newV];
-			movedColors[uniqueVs[oldV]] = movedColors[newV];
+			if (movedVs[i] == movedVs[oldV])
+			{
+				movedVs[i] = movedVs[newV];
+				if (movedUv1s.Length > i)
+				{
+					movedUv1s[i] = movedUv1s[newV];
+				}
+				if (movedUv2s.Length > 0)
+				{
+					movedUv2s[i] = movedUv2s[newV];
+				}
+				if (movedUv3s.Length > 0)
+				{
+					movedUv3s[i] = movedUv3s[newV];
+				}
+				if (movedUv4s.Length > 0)
+				{
+					movedUv4s[i] = movedUv4s[newV];
+				}
+				if (movedColors.Length > 0)
+				{
+					movedColors[i] = movedColors[newV];
+				}
+			}
 		}
 	}
 
@@ -1304,10 +1304,8 @@ public static class LODMaker
 				{
 					for (int l = 0; l < list2.Count; l++)
 					{
-						int num2;
-						int index = num2 = list2[l];
-						num2 = ts[num2];
-						ts[index] = num2 - num;
+						int index;
+						ts[index = list2[l]] = ts[index] - num;
 					}
 				}
 			}
@@ -1386,12 +1384,9 @@ public static class LODMaker
 				{
 					for (int m = 0; m < list4.Count; m++)
 					{
-						List<int> list7;
-						List<int> list6 = list7 = subMeshes[list4[m]];
-						int num2;
-						int index = num2 = list5[m];
-						num2 = list7[num2];
-						list6[index] = num2 - num;
+						List<int> list6;
+						int index;
+						(list6 = subMeshes[list4[m]])[index = list5[m]] = list6[index] - num;
 					}
 				}
 			}
@@ -1471,12 +1466,9 @@ public static class LODMaker
 				{
 					for (int l = 0; l < list4.Count; l++)
 					{
-						List<int> list7;
-						List<int> list6 = list7 = subMeshes[list4[l]];
-						int num2;
-						int index = num2 = list5[l];
-						num2 = list7[num2];
-						list6[index] = num2 - num;
+						List<int> list6;
+						int index;
+						(list6 = subMeshes[list4[l]])[index = list5[l]] = list6[index] - num;
 					}
 				}
 			}
@@ -1614,7 +1606,7 @@ public static class LODMaker
 	
 	private static void RemoveMiniTriangleGroups(float removeSmallParts, Vector3 sizeMultiplier, float aMaxWeight, List<Vector3> newVs, List<int> newTs, int[] subMeshOffsets, List<int> newTGrps)
 	{
-		float num = (aMaxWeight * 0.5f < 1f) ? Mathf.Pow(aMaxWeight * 0.5f, 3f) : (aMaxWeight * 0.5f);
+		float num = (aMaxWeight * 0.3f < 1f) ? Mathf.Pow(aMaxWeight * 0.3f, 1.5f) : (aMaxWeight * 0.3f);
 		float num2 = 0f;
 		List<int> list = new List<int>();
 		List<int> list2 = new List<int>();
@@ -1861,22 +1853,23 @@ public static class LODMaker
 		int i = Mathf.Min(orderedVertices.Count, limitSearchRange) / 2;
 		int num = i;
 		int num2 = 1;
-		while (i >= 0 && i < limitSearchRange && i < orderedVertices.Count)
+		int num3 = 0;
+		while (i >= 0 && i < limitSearchRange && i < orderedVertices.Count && num3 < 100000)
 		{
-			int num3 = orderedVertices[i];
-			Vector3 vector = vs[num3];
-			int num4 = num;
-			int num5 = num2;
-			num = Mathf.Max(num4 / 2, 1);
+			int num4 = orderedVertices[i];
+			Vector3 vector = vs[num4];
+			int num5 = num;
+			int num6 = num2;
+			num = Mathf.Max(num5 / 2, 1);
 			if (vector.y < y)
 			{
-				if ((num5 == -1 && num4 == 1) || num4 == 0)
+				if ((num6 == -1 && num5 == 1) || num5 == 0)
 				{
 					i++;
 					while (i < limitSearchRange && i < orderedVertices.Count)
 					{
-						num3 = orderedVertices[i];
-						if (vs[num3].y >= y)
+						num4 = orderedVertices[i];
+						if (vs[num4].y >= y)
 						{
 							break;
 						}
@@ -1892,8 +1885,8 @@ public static class LODMaker
 				{
 					for (i--; i >= 0; i--)
 					{
-						num3 = orderedVertices[i];
-						if (vs[num3].y < y)
+						num4 = orderedVertices[i];
+						if (vs[num4].y < y)
 						{
 							break;
 						}
@@ -1903,6 +1896,7 @@ public static class LODMaker
 				num2 = -1;
 			}
 			i += num2 * num;
+			num3++;
 		}
 		return -1;
 	}
@@ -1963,312 +1957,6 @@ public static class LODMaker
 			result = (pointOnPlane - fromPos).InProduct(normalPlane) / direction.InProduct(normalPlane);
 		}
 		return result;
-	}
-
-	
-	private static void LogVectors(string msg, int[] idxs, Vector3[] vs, int decimals)
-	{
-		string text = string.Concat(new object[]
-		{
-			msg,
-			" (",
-			idxs.Length,
-			"):\n"
-		});
-		for (int i = 0; i < idxs.Length; i++)
-		{
-			text = string.Concat(new object[]
-			{
-				text,
-				string.Empty,
-				i,
-				": ",
-				vs[idxs[i]].MakeString(decimals),
-				"\n"
-			});
-		}
-		LODMaker.Log(text);
-	}
-
-	
-	private static void LogArray(string msg, List<Vector3> vs, int decimals)
-	{
-		string text = string.Concat(new object[]
-		{
-			msg,
-			" (",
-			vs.Count,
-			"):\n"
-		});
-		for (int i = 0; i < vs.Count; i++)
-		{
-			text = string.Concat(new object[]
-			{
-				text,
-				string.Empty,
-				i,
-				": ",
-				vs[i].MakeString(decimals),
-				"\n"
-			});
-		}
-		LODMaker.Log(text);
-	}
-
-	
-	private static void LogArray(string msg, Vector3[] vs, int decimals)
-	{
-		string text = string.Concat(new object[]
-		{
-			msg,
-			" (",
-			vs.Length,
-			"):\n"
-		});
-		for (int i = 0; i < vs.Length; i++)
-		{
-			text = string.Concat(new object[]
-			{
-				text,
-				string.Empty,
-				i,
-				": ",
-				vs[i].MakeString(decimals),
-				"\n"
-			});
-		}
-		LODMaker.Log(text);
-	}
-
-	
-	private static void LogArray(string msg, Vector2[] vs, int decimals)
-	{
-		string text = string.Concat(new object[]
-		{
-			msg,
-			" (",
-			vs.Length,
-			"):\n"
-		});
-		for (int i = 0; i < vs.Length; i++)
-		{
-			text = string.Concat(new object[]
-			{
-				text,
-				string.Empty,
-				i,
-				": ",
-				vs[i].MakeString(decimals),
-				"\n"
-			});
-		}
-		LODMaker.Log(text);
-	}
-
-	
-	private static void LogTriArray(string msg, List<int> ts)
-	{
-		string text = string.Concat(new object[]
-		{
-			msg,
-			" (",
-			ts.Count,
-			"):\n"
-		});
-		for (int i = 0; i < ts.Count; i += 3)
-		{
-			text = string.Concat(new object[]
-			{
-				text,
-				ts[i],
-				", ",
-				ts[i + 1],
-				", ",
-				ts[i + 2],
-				"\n"
-			});
-		}
-		LODMaker.Log(text);
-	}
-
-	
-	private static void LogTriArray(string msg, int[] ts)
-	{
-		string text = string.Concat(new object[]
-		{
-			msg,
-			" (",
-			ts.Length,
-			"):\n"
-		});
-		for (int i = 0; i < ts.Length; i += 3)
-		{
-			text = string.Concat(new object[]
-			{
-				text,
-				ts[i],
-				", ",
-				ts[i + 1],
-				", ",
-				ts[i + 2],
-				"\n"
-			});
-		}
-		LODMaker.Log(text);
-	}
-
-	
-	private static void LogArray(string msg, List<Color32> ts)
-	{
-		string text = string.Concat(new object[]
-		{
-			msg,
-			" (",
-			ts.Count,
-			"):\n"
-		});
-		for (int i = 0; i < ts.Count; i++)
-		{
-			text = text + ts[i] + "\n";
-		}
-		LODMaker.Log(text);
-	}
-
-	
-	private static void LogArray(string msg, Color32[] ts)
-	{
-		string text = string.Concat(new object[]
-		{
-			msg,
-			" (",
-			ts.Length,
-			"):\n"
-		});
-		for (int i = 0; i < ts.Length; i++)
-		{
-			text = text + ts[i] + "\n";
-		}
-		LODMaker.Log(text);
-	}
-
-	
-	private static void LogArray(string msg, List<int> ts)
-	{
-		string text = string.Concat(new object[]
-		{
-			msg,
-			" (",
-			ts.Count,
-			"):\n"
-		});
-		for (int i = 0; i < ts.Count; i++)
-		{
-			text = text + ts[i] + "\n";
-		}
-		LODMaker.Log(text);
-	}
-
-	
-	private static void LogArray(string msg, List<List<int>> ts)
-	{
-		string text = string.Concat(new object[]
-		{
-			msg,
-			" (",
-			ts.Count,
-			"):\n"
-		});
-		for (int i = 0; i < ts.Count; i++)
-		{
-			List<int> list = ts[i];
-			for (int j = 0; j < list.Count; j++)
-			{
-				text = text + list[j] + ",";
-			}
-			text += "\n";
-		}
-		LODMaker.Log(text);
-	}
-
-	
-	private static void LogArray(string msg, int[] ts)
-	{
-		string text = string.Concat(new object[]
-		{
-			msg,
-			" (",
-			ts.Length,
-			"):\n"
-		});
-		for (int i = 0; i < ts.Length; i++)
-		{
-			text = text + ts[i] + "\n";
-		}
-		LODMaker.Log(text);
-	}
-
-	
-	private static void LogArray(string msg, float[] fs)
-	{
-		string text = string.Concat(new object[]
-		{
-			msg,
-			" (",
-			fs.Length,
-			"):\n"
-		});
-		for (int i = 0; i < fs.Length; i++)
-		{
-			text = text + fs[i] + "\n";
-		}
-		LODMaker.Log(text);
-	}
-
-	
-	private static void LogArray(string msg, bool[] ts)
-	{
-		string text = string.Concat(new object[]
-		{
-			msg,
-			" (",
-			ts.Length,
-			"):\n"
-		});
-		for (int i = 0; i < ts.Length; i += 3)
-		{
-			text = text + ts[i] + "\n";
-		}
-		LODMaker.Log(text);
-	}
-
-	
-	private static string LogWeights(string msg, float[] w)
-	{
-		string text = msg + ": ";
-		text = string.Concat(new string[]
-		{
-			text,
-			" weight 0-1: ",
-			w[0].MakeString(1),
-			" / ",
-			w[1].MakeString(1)
-		});
-		text = string.Concat(new string[]
-		{
-			text,
-			" | weight 1>2: ",
-			w[2].MakeString(1),
-			" / ",
-			w[3].MakeString(1)
-		});
-		return string.Concat(new string[]
-		{
-			text,
-			" | weight 2>0: ",
-			w[4].MakeString(1),
-			" / ",
-			w[5].MakeString(1)
-		});
 	}
 
 	

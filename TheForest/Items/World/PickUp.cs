@@ -166,7 +166,7 @@ namespace TheForest.Items.World
 			{
 				if (this._positionHashSaving)
 				{
-					if (GlobalDataSaver.GetInt(SceneUtils.PositionToLongHash(base.transform.position), 0) == 1)
+					if (GlobalDataSaver.GetInt(base.transform.ToGeoHash(), 0) == 1)
 					{
 						this.ClearOut(false);
 					}
@@ -267,12 +267,35 @@ namespace TheForest.Items.World
 					componentInChildren.transform.parent = null;
 				}
 			}
+			if (this._firstTimePickup)
+			{
+				if (LocalPlayer.Animator)
+				{
+					LocalPlayer.Animator.SetBool("firstTimePickup", true);
+				}
+			}
+			else if (LocalPlayer.Animator)
+			{
+				LocalPlayer.Animator.SetBool("firstTimePickup", false);
+			}
+			if (base.transform.parent)
+			{
+				artifactBallPlacedController componentInParent = base.transform.GetComponentInParent<artifactBallPlacedController>();
+				if (componentInParent)
+				{
+					componentInParent.setHeldArtifactState();
+				}
+			}
+			if (this._hairSprayFuel && LocalPlayer.Stats.hairSprayFuel.CurrentFuel < LocalPlayer.Stats.hairSprayFuel.MaxFuelCapacity)
+			{
+				LocalPlayer.Stats.hairSprayFuel.CurrentFuel = LocalPlayer.Stats.hairSprayFuel.MaxFuelCapacity;
+			}
 			this.CheckTrappedAnimal();
 			if (this.MainEffect() || this._destroyIfFull)
 			{
 				if (this._positionHashSaving)
 				{
-					GlobalDataSaver.SetInt(SceneUtils.PositionToLongHash(base.transform.position), 1);
+					GlobalDataSaver.SetInt(base.transform.ToGeoHash(), 1);
 				}
 				this.CollectBonuses();
 				if (this._spiderDice && UnityEngine.Random.Range(0, 4) == 2)
@@ -288,7 +311,7 @@ namespace TheForest.Items.World
 					}
 					if (!BoltNetwork.isRunning || !this._spawnAfterPickupPrefab.GetComponent<BoltEntity>())
 					{
-						UnityEngine.Object.Instantiate(this._spawnAfterPickupPrefab, vector, Quaternion.identity);
+						UnityEngine.Object.Instantiate<GameObject>(this._spawnAfterPickupPrefab, vector, Quaternion.identity);
 					}
 					else
 					{
@@ -298,7 +321,7 @@ namespace TheForest.Items.World
 					{
 						if (!BoltNetwork.isRunning || !this._spawnAfterPickupPrefab2.GetComponent<BoltEntity>())
 						{
-							UnityEngine.Object.Instantiate(this._spawnAfterPickupPrefab2, vector, Quaternion.identity);
+							UnityEngine.Object.Instantiate<GameObject>(this._spawnAfterPickupPrefab2, vector, Quaternion.identity);
 						}
 						else
 						{
@@ -315,7 +338,7 @@ namespace TheForest.Items.World
 			{
 				if (this._positionHashSaving)
 				{
-					GlobalDataSaver.SetInt(SceneUtils.PositionToLongHash(base.transform.position), 1);
+					GlobalDataSaver.SetInt(base.transform.ToGeoHash(), 1);
 				}
 				if (this._spawnAfterPickupPrefab)
 				{
@@ -326,7 +349,7 @@ namespace TheForest.Items.World
 					}
 					if (!BoltNetwork.isRunning || !this._spawnAfterPickupPrefab.GetComponent<BoltEntity>())
 					{
-						UnityEngine.Object.Instantiate(this._spawnAfterPickupPrefab, vector2, Quaternion.identity);
+						UnityEngine.Object.Instantiate<GameObject>(this._spawnAfterPickupPrefab, vector2, Quaternion.identity);
 					}
 					else
 					{
@@ -336,7 +359,7 @@ namespace TheForest.Items.World
 					{
 						if (!BoltNetwork.isRunning || !this._spawnAfterPickupPrefab2.GetComponent<BoltEntity>())
 						{
-							UnityEngine.Object.Instantiate(this._spawnAfterPickupPrefab2, vector2, Quaternion.identity);
+							UnityEngine.Object.Instantiate<GameObject>(this._spawnAfterPickupPrefab2, vector2, Quaternion.identity);
 						}
 						else
 						{
@@ -370,12 +393,17 @@ namespace TheForest.Items.World
 		
 		protected virtual bool MainEffect()
 		{
+			bool flag = LocalPlayer.Inventory.HasOwned(this._itemId);
 			if (LocalPlayer.Inventory.AddItem(this._itemId, this._amount, this._preventAutoEquip, false, this._properties))
 			{
 				if (this._forceAutoEquip)
 				{
 					LocalPlayer.Inventory.UnlockEquipmentSlot(Item.EquipmentSlot.RightHand);
 					LocalPlayer.Inventory.Equip(this._itemId, false);
+				}
+				else if (!flag)
+				{
+					LocalPlayer.Inventory.SheenItem(this._itemId, this._properties, true);
 				}
 				return true;
 			}
@@ -445,10 +473,23 @@ namespace TheForest.Items.World
 			{
 				component.enabled = enabled;
 			}
-			foreach (object obj in t)
+			IEnumerator enumerator = t.GetEnumerator();
+			try
 			{
-				Transform t2 = (Transform)obj;
-				this.ToggleRenderers(t2, enabled);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform t2 = (Transform)obj;
+					this.ToggleRenderers(t2, enabled);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 
@@ -629,6 +670,12 @@ namespace TheForest.Items.World
 
 		
 		public bool _unparentArrows;
+
+		
+		public bool _firstTimePickup;
+
+		
+		public bool _hairSprayFuel;
 
 		
 		private bool startedSkinning;

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Transforms a Position from a Game Object's local space to world space.")]
 	[ActionCategory(ActionCategory.Transform)]
+	[Tooltip("Transforms a Position from a Game Object's local space to world space.")]
 	public class TransformPoint : FsmStateAction
 	{
 		

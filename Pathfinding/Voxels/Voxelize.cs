@@ -518,18 +518,24 @@ namespace Pathfinding.Voxels
 					int num6 = x;
 					int cornerHeight = this.GetCornerHeight(x, z, i, num, ref flag);
 					int num7 = z;
-					switch (num)
+					if (num != 0)
 					{
-					case 0:
+						if (num != 1)
+						{
+							if (num == 2)
+							{
+								num6++;
+							}
+						}
+						else
+						{
+							num6++;
+							num7 += this.voxelArea.width;
+						}
+					}
+					else
+					{
 						num7 += this.voxelArea.width;
-						break;
-					case 1:
-						num6++;
-						num7 += this.voxelArea.width;
-						break;
-					case 2:
-						num6++;
-						break;
 					}
 					int num8 = 0;
 					CompactVoxelSpan compactVoxelSpan = this.voxelArea.compactSpans[i];
@@ -2251,39 +2257,6 @@ namespace Pathfinding.Voxels
 		}
 
 		
-		public const uint NotConnected = 63u;
-
-		
-		private const int MaxLayers = 65535;
-
-		
-		private const int MaxRegions = 500;
-
-		
-		private const int UnwalkableArea = 0;
-
-		
-		private const ushort BorderReg = 32768;
-
-		
-		private const int RC_BORDER_VERTEX = 65536;
-
-		
-		private const int RC_AREA_BORDER = 131072;
-
-		
-		private const int VERTEX_BUCKET_COUNT = 4096;
-
-		
-		public const int RC_CONTOUR_TESS_WALL_EDGES = 1;
-
-		
-		public const int RC_CONTOUR_TESS_AREA_EDGES = 2;
-
-		
-		private const int ContourRegMask = 65535;
-
-		
 		private static List<int[]> intArrCache = new List<int[]>();
 
 		
@@ -2339,6 +2312,39 @@ namespace Pathfinding.Voxels
 
 		
 		private Vector3 voxelOffset;
+
+		
+		public const uint NotConnected = 63u;
+
+		
+		private const int MaxLayers = 65535;
+
+		
+		private const int MaxRegions = 500;
+
+		
+		private const int UnwalkableArea = 0;
+
+		
+		private const ushort BorderReg = 32768;
+
+		
+		private const int RC_BORDER_VERTEX = 65536;
+
+		
+		private const int RC_AREA_BORDER = 131072;
+
+		
+		private const int VERTEX_BUCKET_COUNT = 4096;
+
+		
+		public const int RC_CONTOUR_TESS_WALL_EDGES = 1;
+
+		
+		public const int RC_CONTOUR_TESS_AREA_EDGES = 2;
+
+		
+		private const int ContourRegMask = 65535;
 
 		
 		private readonly Vector3 cellScale;

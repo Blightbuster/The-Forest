@@ -6,8 +6,8 @@ using UnityEngine;
 namespace TheForest.Buildings.Creation
 {
 	
-	[DoNotSerializePublic]
 	[AddComponentMenu("Buildings/Creation/Bridge Anchor")]
+	[DoNotSerializePublic]
 	public class StructureAnchor : MonoBehaviour
 	{
 		

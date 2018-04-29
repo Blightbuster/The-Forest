@@ -173,7 +173,7 @@ public abstract class UITweener : MonoBehaviour
 	}
 
 	
-	private void OnDisable()
+	protected virtual void OnDisable()
 	{
 		this.mStarted = false;
 	}

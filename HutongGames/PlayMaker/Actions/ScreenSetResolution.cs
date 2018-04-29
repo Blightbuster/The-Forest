@@ -57,8 +57,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmInt height;
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("The current resolution refresh rate")]
+		[UIHint(UIHint.Variable)]
 		public FsmInt preferedRefreshRate;
 
 		

@@ -44,50 +44,50 @@ namespace TheForest.Items.Inventory
 			{
 				foreach (ActiveBonusMassSaver.ItemData itemData in this._itemsData)
 				{
-					List<InventoryItemView> views = LocalPlayer.Inventory.InventoryItemViewsCache[itemData._itemid];
-					int i = 0;
-					int setBonusMax = Mathf.Min(itemData._viewsData.Length, views.Count);
-					int unsetBonusMax = views.Count;
-					while (i < setBonusMax)
+					List<InventoryItemView> list = LocalPlayer.Inventory.InventoryItemViewsCache[itemData._itemid];
+					int j = 0;
+					int num = Mathf.Min(itemData._viewsData.Length, list.Count);
+					int count = list.Count;
+					while (j < num)
 					{
-						views[i].Properties.ActiveBonusValue = itemData._viewsData[i]._activeBonusValue;
-						if (views[i] is ISaveableView)
+						list[j].Properties.ActiveBonusValue = itemData._viewsData[j]._activeBonusValue;
+						if (list[j] is ISaveableView)
 						{
-							(views[i] as ISaveableView).ApplySavedData(itemData._viewsData[i]);
+							(list[j] as ISaveableView).ApplySavedData(itemData._viewsData[j]);
 						}
-						views[i].ActiveBonus = itemData._viewsData[i]._activeBonus;
-						i++;
+						list[j].ActiveBonus = itemData._viewsData[j]._activeBonus;
+						j++;
 					}
-					while (i < unsetBonusMax)
+					while (j < count)
 					{
-						views[i].Properties.ActiveBonusValue = 0f;
-						if (views[i] is ISaveableView)
+						list[j].Properties.ActiveBonusValue = 0f;
+						if (list[j] is ISaveableView)
 						{
-							(views[i] as ISaveableView).ApplySavedData(null);
+							(list[j] as ISaveableView).ApplySavedData(null);
 						}
-						views[i].ActiveBonus = (WeaponStatUpgrade.Types)(-1);
-						i++;
+						list[j].ActiveBonus = (WeaponStatUpgrade.Types)(-1);
+						j++;
 					}
 				}
 			}
 			this._itemsData = null;
 			if (this._itemsProperties != null)
 			{
-				foreach (ActiveBonusMassSaver.ItemData2 itemProperties in this._itemsProperties)
+				foreach (ActiveBonusMassSaver.ItemData2 itemData2 in this._itemsProperties)
 				{
-					List<InventoryItemView> views2 = LocalPlayer.Inventory.InventoryItemViewsCache[itemProperties._itemid];
-					int j = 0;
-					int setBonusMax2 = Mathf.Min(itemProperties._viewsData.Length, views2.Count);
-					int unsetBonusMax2 = views2.Count;
-					while (j < setBonusMax2)
+					List<InventoryItemView> list2 = LocalPlayer.Inventory.InventoryItemViewsCache[itemData2._itemid];
+					int l = 0;
+					int num2 = Mathf.Min(itemData2._viewsData.Length, list2.Count);
+					int count2 = list2.Count;
+					while (l < num2)
 					{
-						views2[j].Properties.Copy(itemProperties._viewsData[j]);
-						j++;
+						list2[l].Properties.Copy(itemData2._viewsData[l]);
+						l++;
 					}
-					while (j < unsetBonusMax2)
+					while (l < count2)
 					{
-						views2[j].Properties.Copy(ItemProperties.Any);
-						j++;
+						list2[l].Properties.Copy(ItemProperties.Any);
+						l++;
 					}
 				}
 			}

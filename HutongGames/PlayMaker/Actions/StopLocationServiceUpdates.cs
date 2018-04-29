@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Stops location service updates. This could be useful for saving battery life.")]
 	[ActionCategory(ActionCategory.Device)]
+	[Tooltip("Stops location service updates. This could be useful for saving battery life.")]
 	public class StopLocationServiceUpdates : FsmStateAction
 	{
 		

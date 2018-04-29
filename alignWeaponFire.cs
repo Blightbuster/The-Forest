@@ -6,11 +6,20 @@ using UnityEngine;
 public class alignWeaponFire : MonoBehaviour
 {
 	
+	private void Awake()
+	{
+		if (CoopPeerStarter.DedicatedHost)
+		{
+			base.enabled = false;
+		}
+	}
+
+	
 	private void LateUpdate()
 	{
 		if (LocalPlayer.MainCamTr && !this.target)
 		{
-			this.target = LocalPlayer.MainCam.transform.Find("followMe").transform;
+			this.target = LocalPlayer.MainCamTr.Find("followMe").transform;
 		}
 		if (this.net)
 		{

@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections;
 using Bolt;
+using TheForest.Items;
 using TheForest.Items.Inventory;
 using TheForest.Utils;
+using TheForest.World;
 using UnityEngine;
 
 
@@ -30,12 +33,13 @@ public class RaftPush : EntityBehaviour<IRaftState>
 			this._rb = base.GetComponentInParent<Rigidbody>();
 		}
 		this._raftOnLand = base.GetComponentInParent<raftOnLand>();
+		this._floor = base.transform.GetComponentInParent<DynamicFloor>();
 	}
 
 	
 	private void Update()
 	{
-		if (this._state == RaftPush.States.DriverStanding || this._state == RaftPush.States.Idle)
+		if ((this._state == RaftPush.States.DriverStanding || this._state == RaftPush.States.Idle) && !this._doingOutOfWorld)
 		{
 			this.allowDirection = false;
 		}
@@ -85,7 +89,7 @@ public class RaftPush : EntityBehaviour<IRaftState>
 			LocalPlayer.Transform.rotation = this._driverPos.rotation;
 			LocalPlayer.Animator.SetLayerWeightReflected(2, 1f);
 		}
-		if (TheForest.Utils.Input.GetButtonDown("Take"))
+		if (TheForest.Utils.Input.GetButtonDown("Take") && !this._doingOutOfWorld)
 		{
 			if (flag)
 			{
@@ -118,31 +122,38 @@ public class RaftPush : EntityBehaviour<IRaftState>
 				}
 			}
 		}
-		else if (this._state == RaftPush.States.DriverLocked)
+		else if (this._state == RaftPush.States.DriverLocked && !this._doingOutOfWorld)
 		{
+			RaftPush.MoveDirection moveDirection = RaftPush.MoveDirection.None;
 			bool flag2 = false;
-			RaftPush.MoveDirection movement = RaftPush.MoveDirection.None;
-			float axis = TheForest.Utils.Input.GetAxis("Horizontal");
-			if (!BoltNetwork.isRunning)
+			if (Vector3.Angle(this._raft.transform.up, Vector3.up) > 45f)
 			{
-				this.axisDirection = axis;
+				flag2 = true;
 			}
-			if (TheForest.Utils.Input.GetButton("Fire1") || TheForest.Utils.Input.GetButton("AltFire"))
+			float num = TheForest.Utils.Input.GetAxis("Horizontal");
+			if (flag2)
 			{
-				if (this.CheckDistanceFromOceanCenter())
+				num = 0f;
+			}
+			this.axisDirection = num;
+			this.moveDirection = moveDirection;
+			if ((TheForest.Utils.Input.GetButton("Fire1") || TheForest.Utils.Input.GetButton("AltFire")) && !flag2)
+			{
+				if (this.CheckDistanceFromOceanCollision() || LocalPlayer.AnimControl.doneOutOfWorldRoutine || !LocalPlayer.Inventory.Owns(LocalPlayer.AnimControl._timmyPhotoId, true))
 				{
-					movement = ((!TheForest.Utils.Input.GetButton("Fire1")) ? RaftPush.MoveDirection.Backward : RaftPush.MoveDirection.Forward);
-					if (!BoltNetwork.isRunning)
-					{
-						this.allowDirection = true;
-						this.moveDirection = movement;
-					}
+					moveDirection = ((!TheForest.Utils.Input.GetButton("Fire1")) ? RaftPush.MoveDirection.Backward : RaftPush.MoveDirection.Forward);
+					this.allowDirection = true;
+					this.moveDirection = moveDirection;
 					this._driver.enablePaddleOnRaft(true);
-					flag2 = true;
 				}
 				else
 				{
 					this.allowDirection = false;
+					this._driver.enablePaddleOnRaft(false);
+					if (!this._doingOutOfWorld)
+					{
+						base.StartCoroutine(this.outOfWorldRoutine());
+					}
 				}
 			}
 			else
@@ -150,22 +161,13 @@ public class RaftPush : EntityBehaviour<IRaftState>
 				this.allowDirection = false;
 				this._driver.enablePaddleOnRaft(false);
 			}
-			if (BoltNetwork.isRunning && (!Mathf.Approximately(axis, 0f) || flag2))
-			{
-				RaftControl raftControl = RaftControl.Create(GlobalTargets.OnlyServer);
-				raftControl.OarId = this._oarId;
-				raftControl.Rotation = axis;
-				raftControl.Movement = (int)movement;
-				raftControl.Raft = base.GetComponentInParent<BoltEntity>();
-				raftControl.Send();
-			}
 		}
 		else if (this._state == RaftPush.States.Auto)
 		{
 			this._direction = Scene.OceanCeto.transform.position - base.transform.position;
 			this._direction.Normalize();
 			this._raft.GetComponent<Rigidbody>().AddForce(this._direction * this._speed * 5f, ForceMode.Impulse);
-			if (this.CheckDistanceFromOceanCenter())
+			if (this.CheckDistanceFromOceanCollision())
 			{
 				this._state = RaftPush.States.DriverLocked;
 			}
@@ -183,13 +185,34 @@ public class RaftPush : EntityBehaviour<IRaftState>
 				return;
 			}
 		}
-		if (this.allowDirection)
+		if (!BoltNetwork.isRunning)
 		{
-			this.PushRaft(this.moveDirection);
+			if (this.allowDirection)
+			{
+				this.PushRaft(this.moveDirection);
+			}
+			if (this._state == RaftPush.States.DriverLocked && !BoltNetwork.isRunning && !this._doingOutOfWorld)
+			{
+				this.TurnRaft(this.axisDirection);
+			}
 		}
-		if (this._state == RaftPush.States.DriverLocked && !BoltNetwork.isRunning)
+		else if (this._state == RaftPush.States.DriverLocked && !this._doingOutOfWorld)
 		{
-			this.TurnRaft(this.axisDirection);
+			this.UpdateDirectionMp(this.axisDirection, this.moveDirection);
+		}
+	}
+
+	
+	private void UpdateDirectionMp(float axisD, RaftPush.MoveDirection dir)
+	{
+		if (BoltNetwork.isRunning && (!Mathf.Approximately(axisD, 0f) || this.allowDirection))
+		{
+			RaftControl raftControl = RaftControl.Create(GlobalTargets.OnlyServer);
+			raftControl.OarId = this._oarId;
+			raftControl.Rotation = axisD;
+			raftControl.Movement = (int)dir;
+			raftControl.Raft = base.GetComponentInParent<BoltEntity>();
+			raftControl.Send();
 		}
 	}
 
@@ -255,6 +278,7 @@ public class RaftPush : EntityBehaviour<IRaftState>
 		LocalPlayer.FpCharacter.enabled = false;
 		LocalPlayer.AnimControl.controller.useGravity = false;
 		LocalPlayer.AnimControl.controller.isKinematic = true;
+		LocalPlayer.AnimControl.blockInventoryOpen = true;
 		LocalPlayer.AnimControl.controller.Sleep();
 		LocalPlayer.AnimControl.playerCollider.enabled = false;
 		LocalPlayer.AnimControl.playerHeadCollider.enabled = false;
@@ -277,7 +301,7 @@ public class RaftPush : EntityBehaviour<IRaftState>
 	private void offRaft()
 	{
 		this._buoyancy.ForceValidateTriggers = false;
-		if (LocalPlayer.GameObject != null)
+		if (LocalPlayer.AnimControl != null)
 		{
 			LocalPlayer.AnimControl.oarHeld.SetActive(false);
 			LocalPlayer.AnimControl.currRaft = null;
@@ -295,7 +319,12 @@ public class RaftPush : EntityBehaviour<IRaftState>
 		}
 		base.GetComponent<Collider>().enabled = false;
 		base.GetComponent<Collider>().enabled = true;
-		if (BoltNetwork.isRunning && this.entity.isAttached && base.state.GrabbedBy[this._oarId] == LocalPlayer.Entity)
+		if (this._floor)
+		{
+			this._floor.refreshPlayerOffset();
+			this._floor.enabled = true;
+		}
+		if (BoltNetwork.isRunning && base.entity.isAttached && base.state.GrabbedBy[this._oarId] == LocalPlayer.Entity)
 		{
 			RaftGrab raftGrab = RaftGrab.Create(GlobalTargets.OnlyServer);
 			raftGrab.OarId = this._oarId;
@@ -321,6 +350,7 @@ public class RaftPush : EntityBehaviour<IRaftState>
 		this._driver.OffRaft();
 		this._driver = null;
 		this._state = RaftPush.States.Idle;
+		LocalPlayer.Transform.parent = Scene.SceneTracker.transform;
 		LocalPlayer.Transform.parent = null;
 		LocalPlayer.AnimControl.controller.useGravity = true;
 		LocalPlayer.AnimControl.controller.isKinematic = false;
@@ -334,6 +364,7 @@ public class RaftPush : EntityBehaviour<IRaftState>
 		LocalPlayer.CamRotator.rotationRange = new Vector2(LocalPlayer.FpCharacter.minCamRotationRange, 0f);
 		LocalPlayer.ScriptSetup.pmControl.FsmVariables.GetFsmBool("paddleBool").Value = false;
 		LocalPlayer.Animator.SetBoolReflected("paddleBool", false);
+		LocalPlayer.AnimControl.blockInventoryOpen = false;
 		this.stickToRaft = false;
 		LocalPlayer.Transform.localEulerAngles = new Vector3(0f, LocalPlayer.Transform.localEulerAngles.y, 0f);
 		this._canLockIcon.gameObject.SetActive(false);
@@ -370,7 +401,12 @@ public class RaftPush : EntityBehaviour<IRaftState>
 		vector = Vector3.SmoothDamp(vector, target, ref zero, this._dampSpeed);
 		if (this.UseRelativeForce)
 		{
-			this._rb.AddForceAtPosition(vector * (0.016666f / Time.fixedDeltaTime), base.transform.position, this._forceMode);
+			Vector3 position = base.transform.position;
+			if (this._buoyancy.OverrideCenterOfMass != null)
+			{
+				position.y = this._buoyancy.OverrideCenterOfMass.position.y;
+			}
+			this._rb.AddForceAtPosition(vector * (0.016666f / Time.fixedDeltaTime), position, this._forceMode);
 		}
 		else
 		{
@@ -387,7 +423,7 @@ public class RaftPush : EntityBehaviour<IRaftState>
 	
 	public void TurnRaft(float axis)
 	{
-		if (!this._relativeForce || !BoltNetwork.isRunning || Scene.SceneTracker.allPlayers.Count < 2)
+		if (!this._relativeForce || Scene.SceneTracker.allPlayers.Count < 2)
 		{
 			float target = axis * (this._rotateForce * 2f) * Mathf.Clamp(this._rb.velocity.normalized.magnitude, 0.1f, 1f);
 			float num = 0f;
@@ -400,7 +436,70 @@ public class RaftPush : EntityBehaviour<IRaftState>
 	
 	private bool CheckDistanceFromOceanCenter()
 	{
-		return Vector3.Distance(base.transform.position, Scene.OceanCeto.transform.position) < this._distanceFromOceanCenter;
+		float num = Vector3.Distance(base.transform.position, Scene.OceanCeto.transform.position);
+		Debug.Log("ocean dist = " + num);
+		return num < this._distanceFromOceanCenter;
+	}
+
+	
+	private bool CheckDistanceFromOceanCollision()
+	{
+		if (!Scene.SceneTracker)
+		{
+			return true;
+		}
+		for (int i = 0; i < Scene.SceneTracker.oceanCollision.Length; i++)
+		{
+			if (Scene.SceneTracker.oceanCollision[i].transform.InverseTransformPoint(base.transform.position).x > -5f)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	
+	private IEnumerator outOfWorldRoutine()
+	{
+		this._doingOutOfWorld = true;
+		LocalPlayer.AnimControl.endGameCutScene = true;
+		LocalPlayer.Create.Grabber.gameObject.SetActive(false);
+		LocalPlayer.AnimControl.doneOutOfWorldRoutine = true;
+		yield return YieldPresets.WaitTwoSeconds;
+		Vector3 oarPos = LocalPlayer.AnimControl.oarHeld.transform.localPosition;
+		Quaternion oarRot = LocalPlayer.AnimControl.oarHeld.transform.localRotation;
+		Transform oarParent = LocalPlayer.AnimControl.oarHeld.transform.parent;
+		LocalPlayer.AnimControl.oarHeld.transform.parent = LocalPlayer.Transform;
+		LocalPlayer.Animator.SetBool("lookAtPhoto", true);
+		yield return YieldPresets.WaitPointFiveSeconds;
+		LocalPlayer.AnimControl.heldTimmyPhotoGo.SetActive(true);
+		yield return YieldPresets.WaitFiveSeconds;
+		LocalPlayer.Animator.SetBool("lookAtPhoto", false);
+		yield return YieldPresets.WaitPointFiveSeconds;
+		LocalPlayer.AnimControl.heldTimmyPhotoGo.SetActive(false);
+		yield return YieldPresets.WaitPointFiveSeconds;
+		LocalPlayer.AnimControl.oarHeld.transform.parent = oarParent;
+		LocalPlayer.AnimControl.oarHeld.transform.localPosition = oarPos;
+		LocalPlayer.AnimControl.oarHeld.transform.localRotation = oarRot;
+		LocalPlayer.Animator.SetBool("paddleIdleBool", true);
+		this._driver.enablePaddleOnRaft(true);
+		yield return YieldPresets.WaitPointFiveSeconds;
+		float timer = Time.time + 2.5f;
+		while (Time.time < timer)
+		{
+			this.allowDirection = true;
+			this.moveDirection = RaftPush.MoveDirection.Backward;
+			this._driver.enablePaddleOnRaft(true);
+			yield return null;
+		}
+		this.moveDirection = RaftPush.MoveDirection.None;
+		this.allowDirection = false;
+		this._driver.enablePaddleOnRaft(false);
+		this._doingOutOfWorld = false;
+		LocalPlayer.AnimControl.endGameCutScene = false;
+		LocalPlayer.Create.Grabber.gameObject.SetActive(true);
+		yield return null;
+		yield break;
 	}
 
 	
@@ -509,6 +608,10 @@ public class RaftPush : EntityBehaviour<IRaftState>
 	public ForceMode _forceMode;
 
 	
+	[ItemIdPicker]
+	public int _photoId;
+
+	
 	public RaftPush.States _state;
 
 	
@@ -516,6 +619,9 @@ public class RaftPush : EntityBehaviour<IRaftState>
 
 	
 	private FirstPersonCharacter _driver;
+
+	
+	private DynamicFloor _floor;
 
 	
 	private float _prevMass;
@@ -528,6 +634,9 @@ public class RaftPush : EntityBehaviour<IRaftState>
 
 	
 	private bool stickToRaft;
+
+	
+	private bool _doingOutOfWorld;
 
 	
 	private bool allowDirection;

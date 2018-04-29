@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Clamps the value of Float Variable to a Min/Max range.")]
 	[ActionCategory(ActionCategory.Math)]
+	[Tooltip("Clamps the value of Float Variable to a Min/Max range.")]
 	public class FloatClamp : FsmStateAction
 	{
 		
@@ -41,8 +41,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("Float variable to clamp.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Float variable to clamp.")]
 		public FsmFloat floatVariable;
 
 		
@@ -51,8 +51,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat minValue;
 
 		
-		[Tooltip("The maximum value.")]
 		[RequiredField]
+		[Tooltip("The maximum value.")]
 		public FsmFloat maxValue;
 
 		

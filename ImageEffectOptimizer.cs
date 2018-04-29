@@ -1,30 +1,28 @@
 ﻿using System;
-using AmplifyMotion;
 using Ceto;
 using CetoTF;
-using ScionEngine;
-using Smaa;
 using TheForest.Utils;
 using UnityEngine;
-using UnityStandardAssets.ImageEffects;
+using UnityEngine.PostProcessing;
 
 
-[ExecuteInEditMode]
+[RequireComponent(typeof(PostProcessingBehaviour))]
 public class ImageEffectOptimizer : MonoBehaviour
 {
 	
-	private void OnEnable()
+	private void Awake()
 	{
-		this.MyCamera = base.gameObject.GetComponent<Camera>();
-		this.MyCamera.eventMask = 0;
+		PostProcessingBehaviour component = base.GetComponent<PostProcessingBehaviour>();
+		if (component && component.profile)
+		{
+			component.profile = UnityEngine.Object.Instantiate<PostProcessingProfile>(component.profile);
+			this.postProcessingProfile = component.profile;
+		}
+		Camera component2 = base.gameObject.GetComponent<Camera>();
+		component2.eventMask = 0;
 		this.frostEffect = base.GetComponent<Frost>();
-		this.ScionStuff = base.GetComponent<ScionPostProcess>();
 		this.bleedEffect = base.GetComponent<BleedBehavior>();
-		this.aa_FXAA = base.GetComponent<Antialiasing>();
-		this.aa_SMAA = base.GetComponent<SMAA>();
-		this.amplifyMotion = base.GetComponent<AmplifyMotionEffect>();
-		this.sessao = base.GetComponent<SESSAO>();
-		this.hbao = base.GetComponent<HBAO>();
+		this.amplifyOcclusion = base.GetComponent<AmplifyOcclusionEffect>();
 		this.waterViz = base.gameObject.GetComponent<WaterViz>();
 		this.waterBlur = base.gameObject.GetComponent<WaterBlurEffect>();
 		this.waterBlurCeto = base.gameObject.GetComponent<UnderWaterPostEffect>();
@@ -41,6 +39,19 @@ public class ImageEffectOptimizer : MonoBehaviour
 	
 	private void Update()
 	{
+		if (this.postProcessingProfile)
+		{
+			ColorGradingModel.Settings settings = this.postProcessingProfile.colorGrading.settings;
+			if (Clock.Dark || LocalPlayer.IsInCaves)
+			{
+				settings.basic.postExposure = Mathf.SmoothDamp(settings.basic.postExposure, PlayerPreferences.GammaCavesAndNight, ref this.gammaVelocity, 3f);
+			}
+			else
+			{
+				settings.basic.postExposure = Mathf.SmoothDamp(settings.basic.postExposure, PlayerPreferences.GammaWorldAndDay, ref this.gammaVelocity, 3f);
+			}
+			this.postProcessingProfile.colorGrading.settings = settings;
+		}
 		if (this.farShadowCascade)
 		{
 			bool flag = TheForestQualitySettings.UserSettings.FarShadowMode == TheForestQualitySettings.FarShadowModes.On && !LocalPlayer.IsInClosedArea;
@@ -49,17 +60,12 @@ public class ImageEffectOptimizer : MonoBehaviour
 				this.farShadowCascade.enableFarShadows = flag;
 			}
 		}
-		if (PlayerPreferences.ColorGrading >= 0 && PlayerPreferences.ColorGrading < this.AmplifyColorGradients.Length)
+		if (this.postProcessingProfile && PlayerPreferences.ColorGrading >= 0 && PlayerPreferences.ColorGrading < this.AmplifyColorGradients.Length)
 		{
-			this.ScionStuff.colorGradingTex1 = this.AmplifyColorGradients[PlayerPreferences.ColorGrading];
-		}
-		if (LocalPlayer.Inventory && LocalPlayer.Inventory.enabled)
-		{
-			float num = (!LocalPlayer.Stats.IsInNorthColdArea()) ? 0.5f : 1.75f;
-			if (!Mathf.Approximately(this.ScionStuff.exposureCompensation, num))
-			{
-				this.ScionStuff.exposureCompensation = Mathf.Lerp(this.ScionStuff.exposureCompensation, num, Time.deltaTime);
-			}
+			this.postProcessingProfile.userLut.enabled = true;
+			UserLutModel.Settings settings2 = this.postProcessingProfile.userLut.settings;
+			settings2.lut = this.AmplifyColorGradients[PlayerPreferences.ColorGrading];
+			this.postProcessingProfile.userLut.settings = settings2;
 		}
 		if (this.frostEffect)
 		{
@@ -81,107 +87,75 @@ public class ImageEffectOptimizer : MonoBehaviour
 		{
 			antiAliasingTechnique = TheForestQualitySettings.AntiAliasingTechnique.None;
 		}
-		if (this.aa_FXAA)
+		if (this.postProcessingProfile)
 		{
-			this.aa_FXAA.enabled = (antiAliasingTechnique == TheForestQualitySettings.AntiAliasingTechnique.FXAA);
-		}
-		if (this.aa_SMAA)
-		{
-			this.aa_SMAA.enabled = (antiAliasingTechnique == TheForestQualitySettings.AntiAliasingTechnique.SMAA);
-		}
-		if (this.amplifyMotion)
-		{
-			this.amplifyMotion.enabled = (!this.SkipMotionBlur && TheForestQualitySettings.UserSettings.MotionBlur != TheForestQualitySettings.MotionBlurQuality.None);
-			switch (TheForestQualitySettings.UserSettings.MotionBlur)
+			bool flag2 = !ForestVR.Enabled && antiAliasingTechnique != TheForestQualitySettings.AntiAliasingTechnique.None;
+			this.postProcessingProfile.antialiasing.enabled = flag2;
+			if (flag2)
 			{
-			case TheForestQualitySettings.MotionBlurQuality.Low:
-				this.amplifyMotion.QualityLevel = Quality.Mobile;
-				this.amplifyMotion.QualitySteps = 2;
-				break;
-			case TheForestQualitySettings.MotionBlurQuality.Medium:
-				this.amplifyMotion.QualityLevel = Quality.Standard;
-				this.amplifyMotion.QualitySteps = 2;
-				break;
-			case TheForestQualitySettings.MotionBlurQuality.High:
-				this.amplifyMotion.QualityLevel = Quality.Standard;
-				this.amplifyMotion.QualitySteps = 3;
-				break;
-			case TheForestQualitySettings.MotionBlurQuality.Ultra:
-				this.amplifyMotion.QualityLevel = Quality.SoftEdge_SM3;
-				this.amplifyMotion.QualitySteps = 3;
-				break;
-			}
-		}
-		if (this.MyCamera)
-		{
-			this.MyCamera.renderingPath = RenderingPath.DeferredLighting;
-			switch (TheForestQualitySettings.UserSettings.MyRenderType)
-			{
-			case TheForestQualitySettings.RendererType.Deferred:
-				this.MyCamera.renderingPath = RenderingPath.DeferredShading;
-				break;
-			case TheForestQualitySettings.RendererType.LegacyDeferred:
-				this.MyCamera.renderingPath = RenderingPath.DeferredLighting;
-				break;
-			case TheForestQualitySettings.RendererType.Forward:
-				this.MyCamera.renderingPath = RenderingPath.Forward;
-				break;
-			}
-		}
-		if (PlayerPreferences.is32bit)
-		{
-			this.ScionStuff.bloomDownsamples = 4;
-		}
-		TheForestQualitySettings.SEBloomTechnique sebloom = TheForestQualitySettings.UserSettings.SEBloom;
-		if (sebloom != TheForestQualitySettings.SEBloomTechnique.Normal)
-		{
-			if (sebloom == TheForestQualitySettings.SEBloomTechnique.None)
-			{
-				this.ScionStuff.bloom = false;
-			}
-		}
-		else
-		{
-			this.ScionStuff.bloom = true;
-		}
-		TheForestQualitySettings.ChromaticAberration ca = TheForestQualitySettings.UserSettings.CA;
-		if (ca != TheForestQualitySettings.ChromaticAberration.Normal)
-		{
-			if (ca == TheForestQualitySettings.ChromaticAberration.None)
-			{
-				this.ScionStuff.chromaticAberration = false;
-			}
-		}
-		else
-		{
-			this.ScionStuff.chromaticAberration = true;
-		}
-		TheForestQualitySettings.FilmGrain fg = TheForestQualitySettings.UserSettings.Fg;
-		if (fg != TheForestQualitySettings.FilmGrain.Normal)
-		{
-			if (fg == TheForestQualitySettings.FilmGrain.None)
-			{
-				this.ScionStuff.grainIntensity = 0f;
-			}
-		}
-		else
-		{
-			this.ScionStuff.grainIntensity = 0.07f;
-		}
-		TheForestQualitySettings.Dof dofTech = TheForestQualitySettings.UserSettings.DofTech;
-		if (dofTech != TheForestQualitySettings.Dof.Normal)
-		{
-			if (dofTech == TheForestQualitySettings.Dof.None)
-			{
-				if (this.ScionStuff.depthOfField)
+				AntialiasingModel.Settings settings3 = this.postProcessingProfile.antialiasing.settings;
+				if (antiAliasingTechnique != TheForestQualitySettings.AntiAliasingTechnique.FXAA)
 				{
-					this.ScionStuff.depthOfField = false;
+					if (antiAliasingTechnique == TheForestQualitySettings.AntiAliasingTechnique.TAA)
+					{
+						settings3.method = AntialiasingModel.Method.Taa;
+					}
 				}
+				else
+				{
+					settings3.method = AntialiasingModel.Method.Fxaa;
+				}
+				this.postProcessingProfile.antialiasing.settings = settings3;
 			}
 		}
-		else if (!this.ScionStuff.depthOfField)
+		if (this.postProcessingProfile)
 		{
-			this.ScionStuff.depthOfField = true;
+			bool flag3 = !ForestVR.Enabled && !this.SkipMotionBlur && TheForestQualitySettings.UserSettings.MotionBlur != TheForestQualitySettings.MotionBlurQuality.None;
+			this.postProcessingProfile.motionBlur.enabled = flag3;
+			if (flag3)
+			{
+				MotionBlurModel.Settings settings4 = this.postProcessingProfile.motionBlur.settings;
+				switch (TheForestQualitySettings.UserSettings.MotionBlur)
+				{
+				case TheForestQualitySettings.MotionBlurQuality.Low:
+					settings4.sampleCount = 4;
+					break;
+				case TheForestQualitySettings.MotionBlurQuality.Medium:
+					settings4.sampleCount = 8;
+					break;
+				case TheForestQualitySettings.MotionBlurQuality.High:
+					settings4.sampleCount = 16;
+					break;
+				case TheForestQualitySettings.MotionBlurQuality.Ultra:
+					settings4.sampleCount = 32;
+					break;
+				}
+				this.postProcessingProfile.motionBlur.settings = settings4;
+			}
+		}
+		if (this.postProcessingProfile)
+		{
+			bool flag4 = !ForestVR.Enabled && TheForestQualitySettings.UserSettings.screenSpaceReflection == TheForestQualitySettings.ScreenSpaceReflection.On;
+			flag4 = (flag4 && LocalPlayer.IsInEndgame);
+			this.postProcessingProfile.screenSpaceReflection.enabled = flag4;
+		}
+		if (this.postProcessingProfile)
+		{
+		}
+		if (this.postProcessingProfile)
+		{
+			bool enabled = !ForestVR.Enabled && TheForestQualitySettings.UserSettings.Fg == TheForestQualitySettings.FilmGrain.Normal;
+			this.postProcessingProfile.grain.enabled = enabled;
+		}
+		if (this.postProcessingProfile)
+		{
+			bool enabled2 = TheForestQualitySettings.UserSettings.CA == TheForestQualitySettings.ChromaticAberration.Normal;
+			this.postProcessingProfile.chromaticAberration.enabled = enabled2;
+		}
+		if (this.postProcessingProfile)
+		{
+			bool enabled3 = TheForestQualitySettings.UserSettings.SEBloom == TheForestQualitySettings.SEBloomTechnique.Normal;
+			this.postProcessingProfile.bloom.enabled = enabled3;
 		}
 		if (Application.isPlaying)
 		{
@@ -202,8 +176,8 @@ public class ImageEffectOptimizer : MonoBehaviour
 				Sunshine.Instance.ScatterSamplingQuality = TheForestQualitySettings.UserSettings.ScatterSamplingQuality;
 				if (this.SunshineOccluders.value != 0)
 				{
-					bool flag2 = TheForestQualitySettings.UserSettings.SunshineOcclusion == TheForestQualitySettings.SunshineOcclusionOn.On || LocalPlayer.IsInCaves;
-					Sunshine.Instance.Occluders = ((!flag2) ? 0 : this.SunshineOccluders.value);
+					bool flag5 = TheForestQualitySettings.UserSettings.SunshineOcclusion == TheForestQualitySettings.SunshineOcclusionOn.On || LocalPlayer.IsInCaves;
+					Sunshine.Instance.Occluders = ((!flag5) ? 0 : this.SunshineOccluders.value);
 				}
 				else
 				{
@@ -216,52 +190,59 @@ public class ImageEffectOptimizer : MonoBehaviour
 		{
 			ssaotechnique = TheForestQualitySettings.SSAOTechnique.Off;
 		}
-		if (this.sessao && (TheForestQualitySettings.UserSettings.SSAOType == TheForestQualitySettings.SSAOTypes.SESSAO || !this.hbao))
+		if (this.amplifyOcclusion && (TheForestQualitySettings.UserSettings.SSAOType == TheForestQualitySettings.SSAOTypes.AMPLIFY || !this.postProcessingProfile))
 		{
-			this.sessao.enabled = (ssaotechnique != TheForestQualitySettings.SSAOTechnique.Off);
-			if (this.hbao)
+			this.amplifyOcclusion.enabled = (!ForestVR.Enabled && ssaotechnique != TheForestQualitySettings.SSAOTechnique.Off);
+			if (this.postProcessingProfile)
 			{
-				this.hbao.enabled = false;
+				this.postProcessingProfile.ambientOcclusion.enabled = false;
 			}
-			switch (ssaotechnique)
+			if (ssaotechnique != TheForestQualitySettings.SSAOTechnique.Ultra)
 			{
-			case TheForestQualitySettings.SSAOTechnique.Ultra:
-				this.sessao.halfSampling = false;
-				break;
-			case TheForestQualitySettings.SSAOTechnique.High:
-			case TheForestQualitySettings.SSAOTechnique.Low:
-				this.sessao.halfSampling = true;
-				break;
+				if (ssaotechnique != TheForestQualitySettings.SSAOTechnique.High)
+				{
+					if (ssaotechnique == TheForestQualitySettings.SSAOTechnique.Low)
+					{
+						this.amplifyOcclusion.SampleCount = AmplifyOcclusionBase.SampleCountLevel.Low;
+					}
+				}
+				else
+				{
+					this.amplifyOcclusion.SampleCount = AmplifyOcclusionBase.SampleCountLevel.High;
+				}
+			}
+			else
+			{
+				this.amplifyOcclusion.SampleCount = AmplifyOcclusionBase.SampleCountLevel.VeryHigh;
 			}
 		}
-		else if (this.hbao && (TheForestQualitySettings.UserSettings.SSAOType == TheForestQualitySettings.SSAOTypes.HBAO || !this.sessao))
+		else if (this.postProcessingProfile && (TheForestQualitySettings.UserSettings.SSAOType == TheForestQualitySettings.SSAOTypes.UNITY || !this.amplifyOcclusion))
 		{
-			this.hbao.enabled = (ssaotechnique != TheForestQualitySettings.SSAOTechnique.Off);
-			if (this.sessao)
+			this.postProcessingProfile.ambientOcclusion.enabled = (!ForestVR.Enabled && ssaotechnique != TheForestQualitySettings.SSAOTechnique.Off);
+			if (this.amplifyOcclusion)
 			{
-				this.sessao.enabled = false;
+				this.amplifyOcclusion.enabled = false;
 			}
-			switch (ssaotechnique)
+			AmbientOcclusionModel.Settings settings5 = this.postProcessingProfile.ambientOcclusion.settings;
+			if (ssaotechnique != TheForestQualitySettings.SSAOTechnique.Ultra)
 			{
-			case TheForestQualitySettings.SSAOTechnique.Ultra:
-				if (this.hbao.generalSettings.quality != HBAO.Quality.Highest)
+				if (ssaotechnique != TheForestQualitySettings.SSAOTechnique.High)
 				{
-					this.hbao.ApplyPreset(HBAO.Preset.HighestQuality);
+					if (ssaotechnique == TheForestQualitySettings.SSAOTechnique.Low)
+					{
+						settings5.sampleCount = AmbientOcclusionModel.SampleCount.Lowest;
+					}
 				}
-				break;
-			case TheForestQualitySettings.SSAOTechnique.High:
-				if (this.hbao.generalSettings.quality != HBAO.Quality.Medium)
+				else
 				{
-					this.hbao.ApplyPreset(HBAO.Preset.FastestPerformance);
+					settings5.sampleCount = AmbientOcclusionModel.SampleCount.Medium;
 				}
-				break;
-			case TheForestQualitySettings.SSAOTechnique.Low:
-				if (this.hbao.generalSettings.quality != HBAO.Quality.Lowest)
-				{
-					this.hbao.ApplyPreset(HBAO.Preset.FastestPerformance);
-				}
-				break;
 			}
+			else
+			{
+				settings5.sampleCount = AmbientOcclusionModel.SampleCount.High;
+			}
+			this.postProcessingProfile.ambientOcclusion.settings = settings5;
 		}
 		if (LocalPlayer.WaterEngine)
 		{
@@ -274,9 +255,31 @@ public class ImageEffectOptimizer : MonoBehaviour
 			else if (TheForestQualitySettings.UserSettings.OceanQuality != this.CurrentOceanQuality)
 			{
 				this.CurrentOceanQuality = ((!PlayerPreferences.is32bit) ? TheForestQualitySettings.UserSettings.OceanQuality : TheForestQualitySettings.OceanQualities.Flat);
-				switch (TheForestQualitySettings.UserSettings.OceanQuality)
+				TheForestQualitySettings.OceanQualities oceanQuality = TheForestQualitySettings.UserSettings.OceanQuality;
+				if (oceanQuality != TheForestQualitySettings.OceanQualities.WaveDisplacementHigh)
 				{
-				case TheForestQualitySettings.OceanQualities.WaveDisplacementHigh:
+					if (oceanQuality != TheForestQualitySettings.OceanQualities.WaveDisplacementLow)
+					{
+						if (oceanQuality == TheForestQualitySettings.OceanQualities.Flat)
+						{
+							Scene.OceanFlat.SetActive(true);
+							Scene.OceanCeto.SetActive(false);
+							this.waterBlurCeto.enabled = false;
+						}
+					}
+					else
+					{
+						Scene.OceanFlat.SetActive(false);
+						Scene.OceanCeto.SetActive(true);
+						this.waterBlurCeto.enabled = true;
+						if (OceanQualitySettings.Instance != null)
+						{
+							OceanQualitySettings.Instance.QualityChanged(CETO_QUALITY_SETTING.LOW);
+						}
+					}
+				}
+				else
+				{
 					Scene.OceanFlat.SetActive(false);
 					Scene.OceanCeto.SetActive(true);
 					this.waterBlurCeto.enabled = true;
@@ -284,21 +287,6 @@ public class ImageEffectOptimizer : MonoBehaviour
 					{
 						OceanQualitySettings.Instance.QualityChanged(CETO_QUALITY_SETTING.HIGH);
 					}
-					break;
-				case TheForestQualitySettings.OceanQualities.WaveDisplacementLow:
-					Scene.OceanFlat.SetActive(false);
-					Scene.OceanCeto.SetActive(true);
-					this.waterBlurCeto.enabled = true;
-					if (OceanQualitySettings.Instance != null)
-					{
-						OceanQualitySettings.Instance.QualityChanged(CETO_QUALITY_SETTING.LOW);
-					}
-					break;
-				case TheForestQualitySettings.OceanQualities.Flat:
-					Scene.OceanFlat.SetActive(true);
-					Scene.OceanCeto.SetActive(false);
-					this.waterBlurCeto.enabled = false;
-					break;
 				}
 			}
 		}
@@ -319,34 +307,16 @@ public class ImageEffectOptimizer : MonoBehaviour
 	public bool SkipMotionBlur { get; set; }
 
 	
-	private Camera MyCamera;
-
-	
 	private Frost frostEffect;
 
 	
 	private BleedBehavior bleedEffect;
 
 	
-	private ScionPostProcess ScionStuff;
-
-	
-	private Antialiasing aa_FXAA;
-
-	
-	private SMAA aa_SMAA;
-
-	
-	private AmplifyMotionEffect amplifyMotion;
-
-	
 	private bool CausticsBool;
 
 	
-	private SESSAO sessao;
-
-	
-	private HBAO hbao;
+	private AmplifyOcclusionEffect amplifyOcclusion;
 
 	
 	private LayerMask SunshineOccluders;
@@ -377,6 +347,9 @@ public class ImageEffectOptimizer : MonoBehaviour
 
 	
 	public Texture2D[] AmplifyColorGradients;
+
+	
+	private PostProcessingProfile postProcessingProfile;
 
 	
 	private float gammaVelocity;

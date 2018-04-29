@@ -32,9 +32,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The float variable to multiply.")]
 		[RequiredField]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The float variable to multiply.")]
 		public FsmFloat floatVariable;
 
 		

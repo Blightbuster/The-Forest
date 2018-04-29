@@ -4,8 +4,8 @@ using TheForest.Utils;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sends an Event when a Button is pressed.")]
 	[ActionCategory(ActionCategory.Input)]
+	[Tooltip("Sends an Event when a Button is pressed.")]
 	public class GetButtonDown : FsmStateAction
 	{
 		
@@ -28,8 +28,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The name of the button. Set in the Unity Input Manager.")]
 		[RequiredField]
+		[Tooltip("The name of the button. Set in the Unity Input Manager.")]
 		public FsmString buttonName;
 
 		
@@ -37,8 +37,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmEvent sendEvent;
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("Set to True if the button is pressed.")]
+		[UIHint(UIHint.Variable)]
 		public FsmBool storeResult;
 	}
 }

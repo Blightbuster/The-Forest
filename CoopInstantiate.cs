@@ -23,7 +23,7 @@ public class CoopInstantiate : MonoBehaviour
 		}
 		else if (this.InSP)
 		{
-			UnityEngine.Object.Instantiate(this.Prefab, base.transform.position, base.transform.rotation);
+			UnityEngine.Object.Instantiate<GameObject>(this.Prefab, base.transform.position, base.transform.rotation);
 		}
 	}
 

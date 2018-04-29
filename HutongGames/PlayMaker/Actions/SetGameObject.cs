@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the value of a Game Object Variable.")]
 	[ActionCategory(ActionCategory.GameObject)]
+	[Tooltip("Sets the value of a Game Object Variable.")]
 	public class SetGameObject : FsmStateAction
 	{
 		
@@ -32,8 +32,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmGameObject variable;
 
 		

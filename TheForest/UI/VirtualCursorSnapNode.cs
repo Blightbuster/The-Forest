@@ -21,6 +21,10 @@ namespace TheForest.UI
 		
 		private void OnEnable()
 		{
+			if (ForestVR.Prototype)
+			{
+				return;
+			}
 			this.CanBeSnapedTo = true;
 			if (this.CheckLayer())
 			{

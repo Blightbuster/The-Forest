@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Compare 2 Object Variables and send events based on the result.")]
 	[ActionCategory(ActionCategory.Logic)]
+	[Tooltip("Compare 2 Object Variables and send events based on the result.")]
 	public class ObjectCompare : FsmStateAction
 	{
 		
@@ -43,8 +43,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmObject objectVariable;
 
 		

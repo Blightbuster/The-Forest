@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -51,13 +52,26 @@ public static class SkinnedMeshTools
 		{
 			return ThisGObj.transform;
 		}
-		foreach (object obj in ThisGObj)
+		IEnumerator enumerator = ThisGObj.GetEnumerator();
+		try
 		{
-			Transform thisGObj = (Transform)obj;
-			Transform transform = SkinnedMeshTools.FindChildByName(ThisName, thisGObj);
-			if (transform != null)
+			while (enumerator.MoveNext())
 			{
-				return transform;
+				object obj = enumerator.Current;
+				Transform thisGObj = (Transform)obj;
+				Transform transform = SkinnedMeshTools.FindChildByName(ThisName, thisGObj);
+				if (transform != null)
+				{
+					return transform;
+				}
+			}
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = (enumerator as IDisposable)) != null)
+			{
+				disposable.Dispose();
 			}
 		}
 		return null;

@@ -2,9 +2,9 @@
 using UnityEngine;
 
 
+[ExecuteInEditMode]
 [RequireComponent(typeof(Camera))]
 [AddComponentMenu("Image Effects/SSSSS")]
-[ExecuteInEditMode]
 public class SSSSS : MonoBehaviour
 {
 	

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets an Integer Variable to a random value between Min/Max.")]
 	[ActionCategory(ActionCategory.Math)]
+	[Tooltip("Sets an Integer Variable to a random value between Min/Max.")]
 	public class RandomInt : FsmStateAction
 	{
 		
@@ -33,8 +33,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmInt max;
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmInt storeResult;
 
 		

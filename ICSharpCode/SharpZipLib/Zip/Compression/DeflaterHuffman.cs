@@ -6,17 +6,6 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 	public class DeflaterHuffman
 	{
 		
-		public DeflaterHuffman(DeflaterPending pending)
-		{
-			this.pending = pending;
-			this.literalTree = new DeflaterHuffman.Tree(this, 286, 257, 15);
-			this.distTree = new DeflaterHuffman.Tree(this, 30, 1, 15);
-			this.blTree = new DeflaterHuffman.Tree(this, 19, 4, 7);
-			this.d_buf = new short[16384];
-			this.l_buf = new byte[16384];
-		}
-
-		
 		static DeflaterHuffman()
 		{
 			int i = 0;
@@ -47,6 +36,17 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 				DeflaterHuffman.staticDCodes[i] = DeflaterHuffman.BitReverse(i << 11);
 				DeflaterHuffman.staticDLength[i] = 5;
 			}
+		}
+
+		
+		public DeflaterHuffman(DeflaterPending pending)
+		{
+			this.pending = pending;
+			this.literalTree = new DeflaterHuffman.Tree(this, 286, 257, 15);
+			this.distTree = new DeflaterHuffman.Tree(this, 30, 1, 15);
+			this.blTree = new DeflaterHuffman.Tree(this, 19, 4, 7);
+			this.d_buf = new short[16384];
+			this.l_buf = new byte[16384];
 		}
 
 		
@@ -111,7 +111,7 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 		
 		public void FlushStoredBlock(byte[] stored, int storedOffset, int storedLength, bool lastBlock)
 		{
-			this.pending.WriteBits(0 + ((!lastBlock) ? 0 : 1), 3);
+			this.pending.WriteBits((!lastBlock) ? 0 : 1, 3);
 			this.pending.AlignToByte();
 			this.pending.WriteShort(storedLength);
 			this.pending.WriteShort(~storedLength);

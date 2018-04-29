@@ -71,8 +71,8 @@ namespace HutongGames.PlayMaker.Actions
 		public GetTimeInfo.TimeInfo getInfo;
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmFloat storeValue;
 
 		

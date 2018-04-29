@@ -88,8 +88,8 @@ public class WorkScheduler : MonoBehaviour, IWorkScheduler
 						this.currentQuality = 0f;
 					}
 					this.fps = Mathf.Lerp(this.fps, 1f / Time.smoothDeltaTime, 0.05f);
-					float to = Mathf.Clamp(this.TargetFPS / this.fps, 0.75f, 5f);
-					this.currentQuality = Mathf.Lerp(this.currentQuality, to, 0.1f);
+					float b = Mathf.Clamp(this.TargetFPS / this.fps, 0.75f, 5f);
+					this.currentQuality = Mathf.Lerp(this.currentQuality, b, 0.1f);
 					this.currentQuality = Mathf.Max(0.33f, this.currentQuality);
 				}
 				else
@@ -423,7 +423,7 @@ public class WorkScheduler : MonoBehaviour, IWorkScheduler
 		this.xMax = 2 - Mathf.Max(this.xPlayer + 2 - (this.GridSize - 1), 0);
 		this.yMax = 2 - Mathf.Max(this.yPlayer + 2 - (this.GridSize - 1), 0);
 		long maxTicks = remainingTicks * 3L / 4L / 5L;
-		long maxTicks2 = remainingTicks * 1L / 4L / 12L;
+		long maxTicks2 = remainingTicks / 4L / 12L;
 		if (swipe)
 		{
 			this.xPlayer = 0;

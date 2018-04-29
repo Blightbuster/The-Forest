@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Transforms position from world space to a Game Object's local space. The opposite of TransformPoint.")]
 	[ActionCategory(ActionCategory.Transform)]
+	[Tooltip("Transforms position from world space to a Game Object's local space. The opposite of TransformPoint.")]
 	public class InverseTransformPoint : FsmStateAction
 	{
 		

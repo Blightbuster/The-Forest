@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the Mass of a Game Object's Rigid Body.")]
 	[ActionCategory(ActionCategory.Physics)]
+	[Tooltip("Gets the Mass of a Game Object's Rigid Body.")]
 	public class GetMass : ComponentAction<Rigidbody>
 	{
 		
@@ -34,8 +34,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("The GameObject that owns the Rigidbody")]
 		[CheckForComponent(typeof(Rigidbody))]
+		[Tooltip("The GameObject that owns the Rigidbody")]
 		public FsmOwnerDefault gameObject;
 
 		

@@ -182,9 +182,9 @@ public class mutantTargetFunctions : MonoBehaviour
 			yield break;
 		}
 		relativePos = new Vector3(relativePos.x, this.thisTr.position.y, relativePos.z);
-		Vector3 localTarget = this.thisTr.InverseTransformPoint(relativePos);
-		float angle = Mathf.Atan2(localTarget.x, localTarget.z) * 57.29578f;
-		if (angle < 80f && angle > -80f)
+		Vector3 vector = this.thisTr.InverseTransformPoint(relativePos);
+		float num = Mathf.Atan2(vector.x, vector.z) * 57.29578f;
+		if (num < 80f && num > -80f)
 		{
 			this.setup.pmCombat.SendEvent("toRunBackAttack");
 			this.setup.pmCombatScript.runLongAttack = true;

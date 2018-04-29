@@ -8,6 +8,12 @@ namespace LitJson
 	public class JsonReader
 	{
 		
+		static JsonReader()
+		{
+			JsonReader.PopulateParseTable();
+		}
+
+		
 		public JsonReader(string json_text) : this(new StringReader(json_text), true)
 		{
 		}
@@ -35,12 +41,6 @@ namespace LitJson
 			this.end_of_json = false;
 			this.reader = reader;
 			this.reader_is_owned = owned;
-		}
-
-		
-		static JsonReader()
-		{
-			JsonReader.PopulateParseTable();
 		}
 
 		

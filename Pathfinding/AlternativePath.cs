@@ -4,8 +4,8 @@ using UnityEngine;
 namespace Pathfinding
 {
 	
-	[HelpURL("http:
 	[AddComponentMenu("Pathfinding/Modifiers/Alternative Path")]
+	[HelpURL("http:
 	[Serializable]
 	public class AlternativePath : MonoModifier
 	{

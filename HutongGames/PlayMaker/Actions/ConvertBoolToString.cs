@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Converts a Bool value to a String value.")]
 	[ActionCategory(ActionCategory.Convert)]
+	[Tooltip("Converts a Bool value to a String value.")]
 	public class ConvertBoolToString : FsmStateAction
 	{
 		
@@ -40,15 +40,15 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The Bool variable to test.")]
 		[RequiredField]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The Bool variable to test.")]
 		public FsmBool boolVariable;
 
 		
-		[Tooltip("The String variable to set based on the Bool variable value.")]
 		[RequiredField]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The String variable to set based on the Bool variable value.")]
 		public FsmString stringVariable;
 
 		

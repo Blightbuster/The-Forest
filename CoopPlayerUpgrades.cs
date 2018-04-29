@@ -42,7 +42,7 @@ public class CoopPlayerUpgrades : EntityBehaviour<IPlayerState>
 	
 	private void Update()
 	{
-		if (this.entity.IsAttached() && this.entity.isOwner)
+		if (base.entity.IsAttached() && base.entity.isOwner)
 		{
 			for (int i = 0; i < this.UpgradableItems.Length; i++)
 			{

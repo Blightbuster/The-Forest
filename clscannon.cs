@@ -21,7 +21,7 @@ public class clscannon : MonoBehaviour
 	{
 		if (this.vargamcannonballspawn != null && this.vargamcannonball != null && this.vargamcannonballspawn != null && Time.timeSinceLevelLoad - this.varlastfired > this.vargamfirerate)
 		{
-			this.varcannonball = (UnityEngine.Object.Instantiate(this.vargamcannonball, this.vargamcannonballspawn.transform.position, this.vargamcannonballspawn.transform.rotation) as Transform);
+			this.varcannonball = UnityEngine.Object.Instantiate<Transform>(this.vargamcannonball, this.vargamcannonballspawn.transform.position, this.vargamcannonballspawn.transform.rotation);
 			this.varcannonball.transform.parent = base.transform;
 			this.varcannonball.GetComponent<Rigidbody>().isKinematic = false;
 			if (this.varcannonball.GetComponent<clscannonball>() != null)
@@ -39,7 +39,7 @@ public class clscannon : MonoBehaviour
 	{
 		if (this.vargamactor != null && this.vargamactorspawnpoint != null)
 		{
-			UnityEngine.Object.Instantiate(this.vargamactor, this.vargamactorspawnpoint.position, Quaternion.identity);
+			UnityEngine.Object.Instantiate<Transform>(this.vargamactor, this.vargamactorspawnpoint.position, Quaternion.identity);
 		}
 	}
 

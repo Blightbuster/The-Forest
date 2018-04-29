@@ -53,8 +53,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmVector3 worldDirection;
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmVector3 storeResult;
 
 		

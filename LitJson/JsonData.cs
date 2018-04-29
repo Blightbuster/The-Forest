@@ -7,7 +7,7 @@ using System.IO;
 namespace LitJson
 {
 	
-	public class JsonData : IEnumerable, IList, ICollection, IDictionary, IOrderedDictionary, IEquatable<JsonData>, IJsonWrapper
+	public class JsonData : IJsonWrapper, IEquatable<JsonData>, IList, IOrderedDictionary, ICollection, IEnumerable, IDictionary
 	{
 		
 		public JsonData()
@@ -83,6 +83,86 @@ namespace LitJson
 		{
 			this.type = JsonType.String;
 			this.inst_string = str;
+		}
+
+		
+		
+		public int Count
+		{
+			get
+			{
+				return this.EnsureCollection().Count;
+			}
+		}
+
+		
+		
+		public bool IsArray
+		{
+			get
+			{
+				return this.type == JsonType.Array;
+			}
+		}
+
+		
+		
+		public bool IsBoolean
+		{
+			get
+			{
+				return this.type == JsonType.Boolean;
+			}
+		}
+
+		
+		
+		public bool IsDouble
+		{
+			get
+			{
+				return this.type == JsonType.Double;
+			}
+		}
+
+		
+		
+		public bool IsInt
+		{
+			get
+			{
+				return this.type == JsonType.Int;
+			}
+		}
+
+		
+		
+		public bool IsLong
+		{
+			get
+			{
+				return this.type == JsonType.Long;
+			}
+		}
+
+		
+		
+		public bool IsObject
+		{
+			get
+			{
+				return this.type == JsonType.Object;
+			}
+		}
+
+		
+		
+		public bool IsString
+		{
+			get
+			{
+				return this.type == JsonType.String;
+			}
 		}
 
 		
@@ -307,6 +387,148 @@ namespace LitJson
 				JsonData value2 = this.ToJsonData(value);
 				this[index] = value2;
 			}
+		}
+
+		
+		public JsonData this[string prop_name]
+		{
+			get
+			{
+				this.EnsureDictionary();
+				return this.inst_object[prop_name];
+			}
+			set
+			{
+				this.EnsureDictionary();
+				KeyValuePair<string, JsonData> keyValuePair = new KeyValuePair<string, JsonData>(prop_name, value);
+				if (this.inst_object.ContainsKey(prop_name))
+				{
+					for (int i = 0; i < this.object_list.Count; i++)
+					{
+						if (this.object_list[i].Key == prop_name)
+						{
+							this.object_list[i] = keyValuePair;
+							break;
+						}
+					}
+				}
+				else
+				{
+					this.object_list.Add(keyValuePair);
+				}
+				this.inst_object[prop_name] = value;
+				this.json = null;
+			}
+		}
+
+		
+		public JsonData this[int index]
+		{
+			get
+			{
+				this.EnsureCollection();
+				if (this.type == JsonType.Array)
+				{
+					return this.inst_array[index];
+				}
+				return this.object_list[index].Value;
+			}
+			set
+			{
+				this.EnsureCollection();
+				if (this.type == JsonType.Array)
+				{
+					this.inst_array[index] = value;
+				}
+				else
+				{
+					KeyValuePair<string, JsonData> keyValuePair = this.object_list[index];
+					KeyValuePair<string, JsonData> value2 = new KeyValuePair<string, JsonData>(keyValuePair.Key, value);
+					this.object_list[index] = value2;
+					this.inst_object[keyValuePair.Key] = value;
+				}
+				this.json = null;
+			}
+		}
+
+		
+		public static implicit operator JsonData(bool data)
+		{
+			return new JsonData(data);
+		}
+
+		
+		public static implicit operator JsonData(double data)
+		{
+			return new JsonData(data);
+		}
+
+		
+		public static implicit operator JsonData(int data)
+		{
+			return new JsonData(data);
+		}
+
+		
+		public static implicit operator JsonData(long data)
+		{
+			return new JsonData(data);
+		}
+
+		
+		public static implicit operator JsonData(string data)
+		{
+			return new JsonData(data);
+		}
+
+		
+		public static explicit operator bool(JsonData data)
+		{
+			if (data.type != JsonType.Boolean)
+			{
+				throw new InvalidCastException("Instance of JsonData doesn't hold a double");
+			}
+			return data.inst_boolean;
+		}
+
+		
+		public static explicit operator double(JsonData data)
+		{
+			if (data.type != JsonType.Double)
+			{
+				throw new InvalidCastException("Instance of JsonData doesn't hold a double");
+			}
+			return data.inst_double;
+		}
+
+		
+		public static explicit operator int(JsonData data)
+		{
+			if (data.type != JsonType.Int)
+			{
+				throw new InvalidCastException("Instance of JsonData doesn't hold an int");
+			}
+			return data.inst_int;
+		}
+
+		
+		public static explicit operator long(JsonData data)
+		{
+			if (data.type != JsonType.Long)
+			{
+				throw new InvalidCastException("Instance of JsonData doesn't hold an int");
+			}
+			return data.inst_long;
+		}
+
+		
+		public static explicit operator string(JsonData data)
+		{
+			if (data.type != JsonType.String)
+			{
+				throw new InvalidCastException("Instance of JsonData doesn't hold a string");
+			}
+			return data.inst_string;
 		}
 
 		
@@ -540,148 +762,6 @@ namespace LitJson
 		}
 
 		
-		
-		public int Count
-		{
-			get
-			{
-				return this.EnsureCollection().Count;
-			}
-		}
-
-		
-		
-		public bool IsArray
-		{
-			get
-			{
-				return this.type == JsonType.Array;
-			}
-		}
-
-		
-		
-		public bool IsBoolean
-		{
-			get
-			{
-				return this.type == JsonType.Boolean;
-			}
-		}
-
-		
-		
-		public bool IsDouble
-		{
-			get
-			{
-				return this.type == JsonType.Double;
-			}
-		}
-
-		
-		
-		public bool IsInt
-		{
-			get
-			{
-				return this.type == JsonType.Int;
-			}
-		}
-
-		
-		
-		public bool IsLong
-		{
-			get
-			{
-				return this.type == JsonType.Long;
-			}
-		}
-
-		
-		
-		public bool IsObject
-		{
-			get
-			{
-				return this.type == JsonType.Object;
-			}
-		}
-
-		
-		
-		public bool IsString
-		{
-			get
-			{
-				return this.type == JsonType.String;
-			}
-		}
-
-		
-		public JsonData this[string prop_name]
-		{
-			get
-			{
-				this.EnsureDictionary();
-				return this.inst_object[prop_name];
-			}
-			set
-			{
-				this.EnsureDictionary();
-				KeyValuePair<string, JsonData> keyValuePair = new KeyValuePair<string, JsonData>(prop_name, value);
-				if (this.inst_object.ContainsKey(prop_name))
-				{
-					for (int i = 0; i < this.object_list.Count; i++)
-					{
-						if (this.object_list[i].Key == prop_name)
-						{
-							this.object_list[i] = keyValuePair;
-							break;
-						}
-					}
-				}
-				else
-				{
-					this.object_list.Add(keyValuePair);
-				}
-				this.inst_object[prop_name] = value;
-				this.json = null;
-			}
-		}
-
-		
-		public JsonData this[int index]
-		{
-			get
-			{
-				this.EnsureCollection();
-				if (this.type == JsonType.Array)
-				{
-					return this.inst_array[index];
-				}
-				return this.object_list[index].Value;
-			}
-			set
-			{
-				this.EnsureCollection();
-				if (this.type == JsonType.Array)
-				{
-					this.inst_array[index] = value;
-				}
-				else
-				{
-					KeyValuePair<string, JsonData> keyValuePair = this.object_list[index];
-					KeyValuePair<string, JsonData> value2 = new KeyValuePair<string, JsonData>(keyValuePair.Key, value);
-					this.object_list[index] = value2;
-					this.inst_object[keyValuePair.Key] = value;
-				}
-				this.json = null;
-			}
-		}
-
-		
 		private ICollection EnsureCollection()
 		{
 			if (this.type == JsonType.Array)
@@ -773,9 +853,22 @@ namespace LitJson
 			if (obj.IsArray)
 			{
 				writer.WriteArrayStart();
-				foreach (object obj2 in obj)
+				IEnumerator enumerator = obj.GetEnumerator();
+				try
 				{
-					JsonData.WriteJson((JsonData)obj2, writer);
+					while (enumerator.MoveNext())
+					{
+						object obj2 = enumerator.Current;
+						JsonData.WriteJson((JsonData)obj2, writer);
+					}
+				}
+				finally
+				{
+					IDisposable disposable;
+					if ((disposable = (enumerator as IDisposable)) != null)
+					{
+						disposable.Dispose();
+					}
 				}
 				writer.WriteArrayEnd();
 				return;
@@ -783,11 +876,24 @@ namespace LitJson
 			if (obj.IsObject)
 			{
 				writer.WriteObjectStart();
-				foreach (object obj3 in obj)
+				IDictionaryEnumerator enumerator2 = obj.GetEnumerator();
+				try
 				{
-					DictionaryEntry dictionaryEntry = (DictionaryEntry)obj3;
-					writer.WritePropertyName((string)dictionaryEntry.Key);
-					JsonData.WriteJson((JsonData)dictionaryEntry.Value, writer);
+					while (enumerator2.MoveNext())
+					{
+						object obj3 = enumerator2.Current;
+						DictionaryEntry dictionaryEntry = (DictionaryEntry)obj3;
+						writer.WritePropertyName((string)dictionaryEntry.Key);
+						JsonData.WriteJson((JsonData)dictionaryEntry.Value, writer);
+					}
+				}
+				finally
+				{
+					IDisposable disposable2;
+					if ((disposable2 = (enumerator2 as IDisposable)) != null)
+					{
+						disposable2.Dispose();
+					}
 				}
 				writer.WriteObjectEnd();
 				return;
@@ -939,86 +1045,6 @@ namespace LitJson
 			default:
 				return "Uninitialized JsonData";
 			}
-		}
-
-		
-		public static implicit operator JsonData(bool data)
-		{
-			return new JsonData(data);
-		}
-
-		
-		public static implicit operator JsonData(double data)
-		{
-			return new JsonData(data);
-		}
-
-		
-		public static implicit operator JsonData(int data)
-		{
-			return new JsonData(data);
-		}
-
-		
-		public static implicit operator JsonData(long data)
-		{
-			return new JsonData(data);
-		}
-
-		
-		public static implicit operator JsonData(string data)
-		{
-			return new JsonData(data);
-		}
-
-		
-		public static explicit operator bool(JsonData data)
-		{
-			if (data.type != JsonType.Boolean)
-			{
-				throw new InvalidCastException("Instance of JsonData doesn't hold a double");
-			}
-			return data.inst_boolean;
-		}
-
-		
-		public static explicit operator double(JsonData data)
-		{
-			if (data.type != JsonType.Double)
-			{
-				throw new InvalidCastException("Instance of JsonData doesn't hold a double");
-			}
-			return data.inst_double;
-		}
-
-		
-		public static explicit operator int(JsonData data)
-		{
-			if (data.type != JsonType.Int)
-			{
-				throw new InvalidCastException("Instance of JsonData doesn't hold an int");
-			}
-			return data.inst_int;
-		}
-
-		
-		public static explicit operator long(JsonData data)
-		{
-			if (data.type != JsonType.Long)
-			{
-				throw new InvalidCastException("Instance of JsonData doesn't hold an int");
-			}
-			return data.inst_long;
-		}
-
-		
-		public static explicit operator string(JsonData data)
-		{
-			if (data.type != JsonType.String)
-			{
-				throw new InvalidCastException("Instance of JsonData doesn't hold a string");
-			}
-			return data.inst_string;
 		}
 
 		

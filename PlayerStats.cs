@@ -5,15 +5,13 @@ using System.Diagnostics;
 using Bolt;
 using FMOD.Studio;
 using HutongGames.PlayMaker;
-using ModAPI;
-using ModAPI.Attributes;
 using Pathfinding;
 using TheForest.Buildings.World;
 using TheForest.Interfaces;
 using TheForest.Items;
 using TheForest.Items.Inventory;
 using TheForest.Items.Utils;
-using TheForest.Player;
+using TheForest.Player.Clothing;
 using TheForest.Save;
 using TheForest.Tools;
 using TheForest.UI;
@@ -21,10 +19,9 @@ using TheForest.Utils;
 using TheForest.Utils.Settings;
 using TheForest.World;
 using TheForest.World.Areas;
-using UltimateCheatmenu;
-using UniLinq;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 using UnityStandardAssets.ImageEffects;
 
 
@@ -43,11 +40,21 @@ public class PlayerStats : MonoBehaviour, IBurnable
 
 	
 	
+	public bool Warmsuit
+	{
+		get
+		{
+			return this.CurrentArmorTypes[0] == PlayerStats.ArmorTypes.Warmsuit;
+		}
+	}
+
+	
+	
 	private bool Warm
 	{
 		get
 		{
-			return this.SunWarmth || this.FireWarmth || this.IsLit || this.BuildingWarmth > 0;
+			return this.SunWarmth || this.FireWarmth || this.IsLit || this.BuildingWarmth > 0 || this.Warmsuit;
 		}
 	}
 
@@ -90,12 +97,25 @@ public class PlayerStats : MonoBehaviour, IBurnable
 			return 0;
 		case PlayerStats.ArmorTypes.DeerSkin:
 			return 1;
+		default:
+			if (type != PlayerStats.ArmorTypes.Warmsuit)
+			{
+				return -1;
+			}
+			return 4;
 		case PlayerStats.ArmorTypes.Leaves:
 			return 2;
 		case PlayerStats.ArmorTypes.Bone:
 			return 3;
+		case PlayerStats.ArmorTypes.Creepy:
+			return 5;
 		}
-		return -1;
+	}
+
+	
+	private void OnSerializing()
+	{
+		UnityEngine.Debug.Log("Serializing PlayerStats");
 	}
 
 	
@@ -105,26 +125,28 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		int armor = 0;
 		for (int i = 0; i < this.CurrentArmorTypes.Length; i++)
 		{
-			PlayerStats.ArmorTypes type = this.CurrentArmorTypes[i];
-			if (type == (PlayerStats.ArmorTypes)(-1))
+			PlayerStats.ArmorTypes armorTypes = this.CurrentArmorTypes[i];
+			if (armorTypes == (PlayerStats.ArmorTypes)(-1))
 			{
-				type = (this.CurrentArmorTypes[i] = PlayerStats.ArmorTypes.None);
+				armorTypes = (this.CurrentArmorTypes[i] = PlayerStats.ArmorTypes.None);
 			}
-			this.ArmorModel[i].SetActive(type > PlayerStats.ArmorTypes.None);
-			this.LeafArmorModel[i].SetActive(type == PlayerStats.ArmorTypes.Leaves);
-			this.BoneArmorModel[i].SetActive(type == PlayerStats.ArmorTypes.Bone);
-			if (type > PlayerStats.ArmorTypes.None)
+			int armorSetIndex = this.GetArmorSetIndex(armorTypes);
+			PlayerStats.ArmorSet armorSet = (armorSetIndex == -1) ? null : this.ArmorSets[armorSetIndex];
+			if (armorSet != null)
 			{
 				minArmorVis = i + 1;
-				PlayerStats.ArmorSet set = this.ArmorSets[this.GetArmorSetIndex(type)];
-				this.ArmorModel[i].GetComponent<Renderer>().sharedMaterial = set.Mat;
 				if (this.CurrentArmorHP[i] == 0)
 				{
-					this.CurrentArmorHP[i] = set.HP;
+					this.CurrentArmorHP[i] = armorSet.HP;
 				}
-				armor += set.HP;
+				armor += armorSet.HP;
+				this.ToggleArmorPiece(armorSet.ModelType, armorSet.Mat, i, true);
+				this.ToggleArmorPiece(armorSet.ModelType2, armorSet.Mat2, i, true);
+				ItemUtils.ApplyEffectsToStats(armorSet.Effects, true, 1);
+				this.ArmorVis++;
 			}
 		}
+		this.WarmsuitModel.SetActive(this.Warmsuit);
 		if (this.ArmorVis > minArmorVis)
 		{
 			this.ArmorVis = minArmorVis;
@@ -140,10 +162,10 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		bool isStarving = this.DaySurvived >= (float)this.StarvationSettings.StartDay && this.Fullness < 0.2f && this.Starvation > 0f;
 		if (isStarving)
 		{
-			Scene.HudGui.StomachStarvation.gameObject.SetActive(true);
-			Scene.HudGui.StomachStarvation.fillAmount = Mathf.Lerp(0.21f, 0.81f, this.Starvation);
+			TheForest.Utils.Scene.HudGui.StomachStarvation.gameObject.SetActive(true);
+			TheForest.Utils.Scene.HudGui.StomachStarvation.fillAmount = Mathf.Lerp(0.21f, 0.81f, this.Starvation);
 		}
-		Scene.HudGui.Hydration.fillAmount = 1f - this.Thirst;
+		TheForest.Utils.Scene.HudGui.Hydration.fillAmount = 1f - this.Thirst;
 		this.AirBreathing.CurrentRebreatherAir = Mathf.Min(this.AirBreathing.CurrentRebreatherAir, this.AirBreathing.MaxRebreatherAirCapacity);
 		this.OverridePrefabSetup();
 		yield break;
@@ -155,15 +177,16 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		BleedBehavior.BloodAmount = 0f;
 		BleedBehavior.BloodReductionRatio = 1f;
 		this.explodeHash = Animator.StringToHash("explode");
-		this.DSpots = GameObject.FindWithTag("DeadSpots").GetComponent<DeadSpotController>();
-		this.Hud = Scene.HudGui;
+		GameObject gameObject = GameObject.FindWithTag("DeadSpots");
+		this.DSpots = ((!(gameObject == null)) ? gameObject.GetComponent<DeadSpotController>() : null);
+		this.Hud = TheForest.Utils.Scene.HudGui;
 		this.Ocean = GameObject.FindWithTag("Ocean");
-		this.mutantControl = Scene.MutantControler;
-		this.sceneInfo = Scene.SceneTracker;
+		this.mutantControl = TheForest.Utils.Scene.MutantControler;
+		this.sceneInfo = TheForest.Utils.Scene.SceneTracker;
 		this.Player = base.gameObject.GetComponent<PlayerInventory>();
 		this.camFollow = base.GetComponentInChildren<camFollowHead>();
 		this.hitReaction = base.GetComponent<playerHitReactions>();
-		this.Atmos = Scene.Atmosphere;
+		this.Atmos = TheForest.Utils.Scene.Atmosphere;
 		this.FrostScript = LocalPlayer.MainCam.GetComponent<Frost>();
 		this.Tuts = LocalPlayer.Tuts;
 		this.Sfx = LocalPlayer.Sfx;
@@ -174,126 +197,38 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		this.PlayerVariations = base.GetComponent<CoopPlayerVariations>();
 		if (!LevelSerializer.IsDeserializing && BoltNetwork.isRunning)
 		{
-			int num = this.PlayerVariations.BodyVariationCount;
-			int num2 = UnityEngine.Random.Range(1, num);
-			int i = 0;
-			bool flag = true;
-			while (i <= num)
+			int bodyVariationCount = this.PlayerVariations.BodyVariationCount;
+			int num = UnityEngine.Random.Range(1, bodyVariationCount);
+			int i;
+			for (i = 0; i <= bodyVariationCount; i++)
 			{
-				if ((CoopServerInfo.Instance.state.UsedPlayerVariations & 1 << (num2 + i) % num) == 0)
-				{
-					break;
-				}
-				i++;
-			}
-			num2 = (num2 + i) % num;
-			int num3 = this.PlayerVariations.TShirts.Sum((CoopPlayerVariations.ClothVariations ts) => ts.Materials.Length);
-			int j = this.PlayerVariations.Pants.Sum((CoopPlayerVariations.ClothVariations ts) => ts.Materials.Length);
-			this.PlayerVariation = num2 / (num3 * j);
-			if (this.PlayerVariation != 0)
-			{
-				flag = false;
-			}
-			int num4 = num2 % (num3 * j);
-			int num5 = 0;
-			int num6 = 0;
-			int num7 = 0;
-			while (this.PlayerVariations.TShirts[num5].Materials.Length * j <= num4)
-			{
-				num4 -= this.PlayerVariations.TShirts[num5].Materials.Length * j;
-				num5++;
-			}
-			while (j <= num4)
-			{
-				num4 -= j;
-				num6++;
-			}
-			while (this.PlayerVariations.Pants[num7].Materials.Length <= num4)
-			{
-				num4 -= this.PlayerVariations.Pants[num7].Materials.Length;
-				num7++;
-			}
-			int playerVariationPantsMat = num4;
-			this.PlayerVariationTShirtType = num5;
-			this.PlayerVariationTShirtMat = num6;
-			this.PlayerVariationPantsType = num7;
-			this.PlayerVariationPantsMat = playerVariationPantsMat;
-			this.PlayerVariationHair = num2 % this.PlayerVariations.Variations[this.PlayerVariation].Hair.Length;
-			PlayerCloting playerCloting = PlayerCloting.Default;
-			num = this.PlayerVariations.ClothingVariationCount;
-			int num8 = num2;
-			num2 = UnityEngine.Random.Range(1, num);
-			for (i = 0; i <= num; i++)
-			{
-				if ((CoopServerInfo.Instance.state.UsedPlayerClothingVariations & 1 << (num2 + i) % num) == 0)
+				if ((CoopServerInfo.Instance.state.UsedPlayerVariations & 1 << (num + i) % bodyVariationCount) == 0)
 				{
 					break;
 				}
 			}
-			num2 = (num2 + i) % num;
-			if (AccountInfo.StoryCompleted && num2 == 0)
-			{
-				playerCloting |= PlayerCloting.Blacksuit;
-			}
-			else if (num2 == 1 && num5 == 0)
-			{
-				playerCloting |= PlayerCloting.Jacket;
-			}
-			else if ((num2 == 2 || num2 == 3 || num2 == 4) && num5 == 0)
-			{
-				playerCloting |= PlayerCloting.Vest;
-				this.PlayerClothingVariation = num2 - 2;
-			}
-			else if (num2 == 5 || num2 == 6 || num2 == 7)
-			{
-				playerCloting |= PlayerCloting.Hoodie;
-				this.PlayerClothingVariation = num2 - 5;
-			}
-			else if (num2 == 8 && num5 == 0)
-			{
-				playerCloting |= PlayerCloting.ShirtOpen;
-				this.PlayerClothingVariation = num2 - 8;
-			}
-			else if (num2 == 9)
-			{
-				playerCloting |= PlayerCloting.ShirtClosed;
-				this.PlayerClothingVariation = num2 - 9;
-			}
-			else if (num2 == 10 && num5 == 0)
-			{
-				playerCloting |= PlayerCloting.JacketLow;
-				this.PlayerClothingVariation = num2 - 10;
-			}
-			else if (num2 == 11)
-			{
-				playerCloting |= PlayerCloting.HoodieUp;
-				this.PlayerClothingVariation = num2 - 11;
-				flag = false;
-			}
-			else
-			{
-				this.PlayerClothingVariation = num2;
-			}
-			num8 += num2;
-			if (flag && num8 % 5 == 0)
-			{
-				playerCloting |= (PlayerCloting)(16 << num8 / 3 % this.PlayerVariations.Beanies.Length);
-			}
-			this.PlayerVariationExtras = playerCloting;
+			num = (num + i) % bodyVariationCount;
+			this.PlayerVariation = num / 20;
+			this.PlayerVariationHair = num % this.PlayerVariations.Variations[this.PlayerVariation].Hair.Length;
+			LocalPlayer.Clothing.CheckInit();
+			LocalPlayer.Clothing.AddClothingOutfit(ClothingItemDatabase.GetRandomOutfit(this.PlayerVariation == 0), true);
 		}
-		if (this.CurrentArmorTypes == null || this.CurrentArmorTypes.Length != this.ArmorModel.Length)
+		if (this.CurrentArmorTypes == null || this.CurrentArmorTypes.Length != 10)
 		{
-			this.CurrentArmorTypes = new PlayerStats.ArmorTypes[this.ArmorModel.Length];
-			for (int k = 0; k < this.CurrentArmorTypes.Length; k++)
+			this.CurrentArmorTypes = new PlayerStats.ArmorTypes[10];
+			for (int j = 0; j < this.CurrentArmorTypes.Length; j++)
 			{
-				this.CurrentArmorTypes[k] = PlayerStats.ArmorTypes.None;
-				this.ArmorModel[k].SetActive(false);
+				this.CurrentArmorTypes[j] = PlayerStats.ArmorTypes.None;
+				if (j < this.ArmorModel.Length)
+				{
+					this.ArmorModel[j].SetActive(false);
+				}
 			}
 			this.UpdateArmorNibbles();
 		}
-		if (this.CurrentArmorHP == null || this.CurrentArmorHP.Length != this.ArmorModel.Length)
+		if (this.CurrentArmorHP == null || this.CurrentArmorHP.Length != 10)
 		{
-			this.CurrentArmorHP = new int[this.ArmorModel.Length];
+			this.CurrentArmorHP = new int[10];
 		}
 		this.CaveDoors = GameObject.FindGameObjectsWithTag("CaveDoor");
 	}
@@ -326,7 +261,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		base.InvokeRepeating("CheckStats", 2f, 2f);
 		base.InvokeRepeating("Life", 1f, 1f);
 		base.InvokeRepeating("GetTired", 2f, 2f);
-		if (Scene.Cams.SleepCam.activeSelf)
+		if (TheForest.Utils.Scene.Cams.SleepCam.activeSelf)
 		{
 			this.Health = 18f;
 			this.HealthTarget = 18f;
@@ -337,7 +272,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 			this.IsBloody = true;
 			this.PlayerVariations.UpdateSkinVariation(this.IsBloody, LocalPlayer.TargetFunctions.coveredInMud, this.IsRed, this.IsCold);
 			base.Invoke("CheckArmsStart", 2f);
-			Scene.Cams.SleepCam.SetActive(false);
+			TheForest.Utils.Scene.Cams.SleepCam.SetActive(false);
 		}
 		else
 		{
@@ -497,13 +432,13 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	
 	public bool IsInNorthColdArea()
 	{
-		return !(Scene.WeatherSystem == null) && ((!Scene.WeatherSystem.UsingSnow) ? (Mathf.Floor(base.transform.position.y) > 160f && Mathf.Floor(base.transform.position.z) < -300f) : (Mathf.Ceil(base.transform.position.y) > 160f && Mathf.Ceil(base.transform.position.z) < -300f));
+		return !(TheForest.Utils.Scene.WeatherSystem == null) && !LocalPlayer.IsInCaves && ((!TheForest.Utils.Scene.WeatherSystem.UsingSnow) ? (Mathf.Floor(base.transform.position.y) > 160f && Mathf.Floor(base.transform.position.z) < -300f) : (Mathf.Ceil(base.transform.position.y) > 160f && Mathf.Ceil(base.transform.position.z) < -300f));
 	}
 
 	
-	private void __Update__Original()
+	private void Update()
 	{
-		if (Scene.Atmosphere == null)
+		if (TheForest.Utils.Scene.Atmosphere == null)
 		{
 			return;
 		}
@@ -511,7 +446,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		{
 			return;
 		}
-		float num = LocalPlayer.Stats.DaySurvived + Scene.Atmosphere.DeltaTimeOfDay;
+		float num = LocalPlayer.Stats.DaySurvived + TheForest.Utils.Scene.Atmosphere.DeltaTimeOfDay;
 		if (Mathf.FloorToInt(num) != Mathf.FloorToInt(LocalPlayer.Stats.DaySurvived))
 		{
 			LocalPlayer.Stats.DaySurvived = num;
@@ -522,16 +457,16 @@ public class PlayerStats : MonoBehaviour, IBurnable
 			LocalPlayer.Stats.DaySurvived = num;
 		}
 		LocalPlayer.ScriptSetup.targetInfo.isRed = this.IsRed;
-		float to;
+		float b;
 		if (this.coldSwitch && !LocalPlayer.AnimControl.coldOffsetBool)
 		{
-			to = 1f;
+			b = 1f;
 		}
 		else
 		{
-			to = 0f;
+			b = 0f;
 		}
-		this.coldFloatBlend = Mathf.Lerp(this.coldFloatBlend, to, Time.deltaTime * 10f);
+		this.coldFloatBlend = Mathf.Lerp(this.coldFloatBlend, b, Time.deltaTime * 10f);
 		if (this.coldFloatBlend > 0.01f)
 		{
 			this.animator.SetFloatReflected("coldFloat", this.coldFloatBlend);
@@ -557,7 +492,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 			this.SetCold(false);
 			this.FrostScript.coverage = 0f;
 		}
-		if (this.IsInNorthColdArea() && !this.Warm && !LocalPlayer.IsInEndgame)
+		if (this.IsInNorthColdArea() && !this.Warm)
 		{
 			this.SetCold(true);
 		}
@@ -653,9 +588,11 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		this.EnergyResult = this.Energy / 100f + (100f - this.Energy) / 100f * 0.5f;
 		int num3 = 0;
 		int num4 = 0;
-		for (int i = 0; i < this.CurrentArmorTypes.Length; i++)
+		int i = 0;
+		while (i < this.CurrentArmorTypes.Length)
 		{
-			switch (this.CurrentArmorTypes[i])
+			PlayerStats.ArmorTypes armorTypes = this.CurrentArmorTypes[i];
+			switch (armorTypes)
 			{
 			case PlayerStats.ArmorTypes.LizardSkin:
 			case PlayerStats.ArmorTypes.Leaves:
@@ -663,9 +600,23 @@ public class PlayerStats : MonoBehaviour, IBurnable
 				num3++;
 				break;
 			case PlayerStats.ArmorTypes.DeerSkin:
-				num4++;
+				goto IL_591;
+			default:
+				if (armorTypes == PlayerStats.ArmorTypes.Warmsuit)
+				{
+					goto IL_591;
+				}
+				break;
+			case PlayerStats.ArmorTypes.Creepy:
+				num3++;
 				break;
 			}
+			IL_5B2:
+			i++;
+			continue;
+			IL_591:
+			num4++;
+			goto IL_5B2;
 		}
 		this.ColdArmorResult = (float)num4 / 10f / 2f + 0.5f;
 		this.ArmorResult = (float)num3 / 10f / 2f + this.ColdArmorResult;
@@ -676,7 +627,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		this.Hud.HealthBarTarget.fillAmount = this.HealthTargetResult;
 		this.Hud.EnergyBar.fillAmount = this.EnergyResult;
 		float num5 = (this.Fullness - 0.2f) / 0.8f;
-		Scene.HudGui.Stomach.fillAmount = Mathf.Lerp(0.21f, 0.81f, num5);
+		TheForest.Utils.Scene.HudGui.Stomach.fillAmount = Mathf.Lerp(0.21f, 0.81f, num5);
 		if ((double)num5 < 0.5)
 		{
 			this.Hud.StomachOutline.SetActive(true);
@@ -693,9 +644,9 @@ public class PlayerStats : MonoBehaviour, IBurnable
 			}
 			this.Hud.StomachOutline.SetActive(false);
 		}
-		if (!Scene.Atmosphere.Sleeping || this.Fullness > this.StarvationSettings.SleepingFullnessThreshold)
+		if (!TheForest.Utils.Scene.Atmosphere.Sleeping || this.Fullness > this.StarvationSettings.SleepingFullnessThreshold)
 		{
-			this.Fullness -= Scene.Atmosphere.DeltaTimeOfDay * 1.35f;
+			this.Fullness -= TheForest.Utils.Scene.Atmosphere.DeltaTimeOfDay * 1.35f;
 		}
 		if (!Cheats.NoSurvival)
 		{
@@ -705,17 +656,17 @@ public class PlayerStats : MonoBehaviour, IBurnable
 				{
 					this.Fullness = 0.19f;
 				}
-				if (this.DaySurvived >= (float)this.StarvationSettings.StartDay && !this.Dead && !Scene.Atmosphere.Sleeping && LocalPlayer.Inventory.enabled)
+				if (this.DaySurvived >= (float)this.StarvationSettings.StartDay && !this.Dead && !TheForest.Utils.Scene.Atmosphere.Sleeping && LocalPlayer.Inventory.enabled)
 				{
-					if (!Scene.HudGui.StomachStarvation.gameObject.activeSelf)
+					if (!TheForest.Utils.Scene.HudGui.StomachStarvation.gameObject.activeSelf)
 					{
 						if (this.Starvation == 0f)
 						{
 							this.StarvationCurrentDuration = this.StarvationSettings.Duration;
 						}
-						Scene.HudGui.StomachStarvation.gameObject.SetActive(true);
+						TheForest.Utils.Scene.HudGui.StomachStarvation.gameObject.SetActive(true);
 					}
-					this.Starvation += Scene.Atmosphere.DeltaTimeOfDay / this.StarvationCurrentDuration;
+					this.Starvation += TheForest.Utils.Scene.Atmosphere.DeltaTimeOfDay / this.StarvationCurrentDuration;
 					if (this.Starvation >= 1f)
 					{
 						if (!this.StarvationSettings.TakingDamage)
@@ -724,32 +675,32 @@ public class PlayerStats : MonoBehaviour, IBurnable
 							LocalPlayer.Tuts.ShowStarvationTut();
 						}
 						this.Hit(this.StarvationSettings.Damage, true, PlayerStats.DamageType.Physical);
-						Scene.HudGui.StomachStarvationTween.ResetToBeginning();
-						Scene.HudGui.StomachStarvationTween.PlayForward();
+						TheForest.Utils.Scene.HudGui.StomachStarvationTween.ResetToBeginning();
+						TheForest.Utils.Scene.HudGui.StomachStarvationTween.PlayForward();
 						this.Starvation = 0f;
 						this.StarvationCurrentDuration *= this.StarvationSettings.DurationDecay;
 					}
-					Scene.HudGui.StomachStarvation.fillAmount = Mathf.Lerp(0.21f, 0.81f, this.Starvation);
+					TheForest.Utils.Scene.HudGui.StomachStarvation.fillAmount = Mathf.Lerp(0.21f, 0.81f, this.Starvation);
 				}
 			}
-			else if (this.Starvation > 0f || Scene.HudGui.StomachStarvation.gameObject.activeSelf)
+			else if (this.Starvation > 0f || TheForest.Utils.Scene.HudGui.StomachStarvation.gameObject.activeSelf)
 			{
 				this.Starvation = 0f;
 				this.StarvationCurrentDuration = this.StarvationSettings.Duration;
 				this.StarvationSettings.TakingDamage = false;
 				LocalPlayer.Tuts.StarvationTutOff();
-				Scene.HudGui.StomachStarvation.gameObject.SetActive(false);
+				TheForest.Utils.Scene.HudGui.StomachStarvation.gameObject.SetActive(false);
 			}
 		}
 		else
 		{
 			this.Fullness = 1f;
-			if (this.Starvation > 0f || Scene.HudGui.StomachStarvation.gameObject.activeSelf)
+			if (this.Starvation > 0f || TheForest.Utils.Scene.HudGui.StomachStarvation.gameObject.activeSelf)
 			{
 				this.Starvation = 0f;
 				this.StarvationCurrentDuration = this.StarvationSettings.Duration;
 				this.StarvationSettings.TakingDamage = false;
-				Scene.HudGui.StomachStarvation.gameObject.SetActive(false);
+				TheForest.Utils.Scene.HudGui.StomachStarvation.gameObject.SetActive(false);
 			}
 		}
 		if (this.Fullness > 1f)
@@ -762,9 +713,9 @@ public class PlayerStats : MonoBehaviour, IBurnable
 			{
 				if (this.Thirst >= 1f)
 				{
-					if (!Scene.HudGui.ThirstDamageTimer.gameObject.activeSelf)
+					if (!TheForest.Utils.Scene.HudGui.ThirstDamageTimer.gameObject.activeSelf)
 					{
-						Scene.HudGui.ThirstDamageTimer.gameObject.SetActive(true);
+						TheForest.Utils.Scene.HudGui.ThirstDamageTimer.gameObject.SetActive(true);
 					}
 					if (this.ThirstCurrentDuration <= 0f)
 					{
@@ -776,13 +727,13 @@ public class PlayerStats : MonoBehaviour, IBurnable
 						}
 						this.Hit(Mathf.CeilToInt((float)this.ThirstSettings.Damage * GameSettings.Survival.ThirstDamageRatio), true, PlayerStats.DamageType.Physical);
 						BleedBehavior.BloodAmount += 0.6f;
-						Scene.HudGui.ThirstDamageTimerTween.ResetToBeginning();
-						Scene.HudGui.ThirstDamageTimerTween.PlayForward();
+						TheForest.Utils.Scene.HudGui.ThirstDamageTimerTween.ResetToBeginning();
+						TheForest.Utils.Scene.HudGui.ThirstDamageTimerTween.PlayForward();
 					}
 					else
 					{
 						this.ThirstCurrentDuration -= Time.deltaTime;
-						Scene.HudGui.ThirstDamageTimer.fillAmount = 1f - this.ThirstCurrentDuration / this.ThirstSettings.DamageDelay;
+						TheForest.Utils.Scene.HudGui.ThirstDamageTimer.fillAmount = 1f - this.ThirstCurrentDuration / this.ThirstSettings.DamageDelay;
 					}
 				}
 				else if (this.Thirst < 0f)
@@ -791,44 +742,44 @@ public class PlayerStats : MonoBehaviour, IBurnable
 				}
 				else
 				{
-					if (!Scene.Atmosphere.Sleeping || this.Thirst < this.ThirstSettings.SleepingThirstThreshold)
+					if (!TheForest.Utils.Scene.Atmosphere.Sleeping || this.Thirst < this.ThirstSettings.SleepingThirstThreshold)
 					{
-						this.Thirst += Scene.Atmosphere.DeltaTimeOfDay / this.ThirstSettings.Duration * GameSettings.Survival.ThirstRatio;
+						this.Thirst += TheForest.Utils.Scene.Atmosphere.DeltaTimeOfDay / this.ThirstSettings.Duration * GameSettings.Survival.ThirstRatio;
 					}
 					if (this.Thirst > this.ThirstSettings.TutorialThreshold)
 					{
 						LocalPlayer.Tuts.ShowThirstyTut();
-						Scene.HudGui.ThirstOutline.SetActive(true);
+						TheForest.Utils.Scene.HudGui.ThirstOutline.SetActive(true);
 					}
 					else
 					{
 						LocalPlayer.Tuts.HideThirstyTut();
-						Scene.HudGui.ThirstOutline.SetActive(false);
+						TheForest.Utils.Scene.HudGui.ThirstOutline.SetActive(false);
 					}
 					if (this.ThirstSettings.TakingDamage)
 					{
 						this.ThirstSettings.TakingDamage = false;
 						LocalPlayer.Tuts.ThirstTutOff();
 					}
-					if (Scene.HudGui.ThirstDamageTimer.gameObject.activeSelf)
+					if (TheForest.Utils.Scene.HudGui.ThirstDamageTimer.gameObject.activeSelf)
 					{
-						Scene.HudGui.ThirstDamageTimer.gameObject.SetActive(false);
+						TheForest.Utils.Scene.HudGui.ThirstDamageTimer.gameObject.SetActive(false);
 					}
 				}
-				Scene.HudGui.Hydration.fillAmount = 1f - this.Thirst;
+				TheForest.Utils.Scene.HudGui.Hydration.fillAmount = 1f - this.Thirst;
 			}
 		}
-		else if (Scene.HudGui.Hydration.fillAmount != 1f)
+		else if (TheForest.Utils.Scene.HudGui.Hydration.fillAmount != 1f)
 		{
-			Scene.HudGui.Hydration.fillAmount = 1f;
+			TheForest.Utils.Scene.HudGui.Hydration.fillAmount = 1f;
 		}
 		bool flag = false;
 		bool flag2 = false;
 		if (LocalPlayer.WaterViz.ScreenCoverage > this.AirBreathing.ScreenCoverageThreshold && !this.Dead)
 		{
-			if (!Scene.HudGui.AirReserve.gameObject.activeSelf)
+			if (!TheForest.Utils.Scene.HudGui.AirReserve.gameObject.activeSelf)
 			{
-				Scene.HudGui.AirReserve.gameObject.SetActive(true);
+				TheForest.Utils.Scene.HudGui.AirReserve.gameObject.SetActive(true);
 			}
 			if (!this.AirBreathing.UseRebreather && this.AirBreathing.RebreatherIsEquipped && this.AirBreathing.CurrentRebreatherAir > 0f)
 			{
@@ -838,7 +789,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 			{
 				flag = true;
 				this.AirBreathing.CurrentRebreatherAir -= Time.deltaTime;
-				Scene.HudGui.AirReserve.fillAmount = this.AirBreathing.CurrentRebreatherAir / this.AirBreathing.MaxRebreatherAirCapacity;
+				TheForest.Utils.Scene.HudGui.AirReserve.fillAmount = this.AirBreathing.CurrentRebreatherAir / this.AirBreathing.MaxRebreatherAirCapacity;
 				if (this.AirBreathing.CurrentRebreatherAir < 0f)
 				{
 					this.AirBreathing.CurrentLungAir = 0f;
@@ -846,14 +797,14 @@ public class PlayerStats : MonoBehaviour, IBurnable
 				}
 				else if (this.AirBreathing.CurrentRebreatherAir < this.AirBreathing.OutOfAirWarningThreshold)
 				{
-					if (!Scene.HudGui.AirReserveOutline.activeSelf)
+					if (!TheForest.Utils.Scene.HudGui.AirReserveOutline.activeSelf)
 					{
-						Scene.HudGui.AirReserveOutline.SetActive(true);
+						TheForest.Utils.Scene.HudGui.AirReserveOutline.SetActive(true);
 					}
 				}
-				else if (Scene.HudGui.AirReserveOutline.activeSelf)
+				else if (TheForest.Utils.Scene.HudGui.AirReserveOutline.activeSelf)
 				{
-					Scene.HudGui.AirReserveOutline.SetActive(false);
+					TheForest.Utils.Scene.HudGui.AirReserveOutline.SetActive(false);
 				}
 			}
 			else
@@ -876,10 +827,10 @@ public class PlayerStats : MonoBehaviour, IBurnable
 				if ((double)this.AirBreathing.CurrentLungAir > this.AirBreathing.CurrentLungAirTimer.Elapsed.TotalSeconds * (double)this.Skills.LungBreathingRatio)
 				{
 					this.Skills.TotalLungBreathingDuration += Time.deltaTime;
-					Scene.HudGui.AirReserve.fillAmount = Mathf.Lerp(Scene.HudGui.AirReserve.fillAmount, this.AirBreathing.CurrentAirPercent, Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime));
-					if (!Scene.HudGui.AirReserveOutline.activeSelf)
+					TheForest.Utils.Scene.HudGui.AirReserve.fillAmount = Mathf.Lerp(TheForest.Utils.Scene.HudGui.AirReserve.fillAmount, this.AirBreathing.CurrentAirPercent, Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime));
+					if (!TheForest.Utils.Scene.HudGui.AirReserveOutline.activeSelf)
 					{
-						Scene.HudGui.AirReserveOutline.SetActive(true);
+						TheForest.Utils.Scene.HudGui.AirReserveOutline.SetActive(true);
 					}
 				}
 				else if (!Cheats.NoSurvival)
@@ -895,17 +846,17 @@ public class PlayerStats : MonoBehaviour, IBurnable
 					{
 						this.AirBreathing.DamageCounter = 0f;
 						this.DeadTimes++;
-						Scene.HudGui.AirReserve.gameObject.SetActive(false);
-						Scene.HudGui.AirReserveOutline.SetActive(false);
+						TheForest.Utils.Scene.HudGui.AirReserve.gameObject.SetActive(false);
+						TheForest.Utils.Scene.HudGui.AirReserveOutline.SetActive(false);
 					}
-					else if (!Scene.HudGui.AirReserveOutline.activeSelf)
+					else if (!TheForest.Utils.Scene.HudGui.AirReserveOutline.activeSelf)
 					{
-						Scene.HudGui.AirReserveOutline.SetActive(true);
+						TheForest.Utils.Scene.HudGui.AirReserveOutline.SetActive(true);
 					}
 				}
 			}
 		}
-		else if (this.AirBreathing.CurrentLungAir < this.AirBreathing.MaxLungAirCapacityFinal || Scene.HudGui.AirReserve.gameObject.activeSelf)
+		else if (this.AirBreathing.CurrentLungAir < this.AirBreathing.MaxLungAirCapacityFinal || TheForest.Utils.Scene.HudGui.AirReserve.gameObject.activeSelf)
 		{
 			if (this.GaspForAirEvent.Length > 0 && FMOD_StudioSystem.instance && !this.Dead)
 			{
@@ -924,8 +875,8 @@ public class PlayerStats : MonoBehaviour, IBurnable
 			this.AirBreathing.CurrentLungAirTimer.Stop();
 			this.AirBreathing.CurrentLungAirTimer.Reset();
 			this.AirBreathing.CurrentLungAir = this.AirBreathing.MaxLungAirCapacityFinal;
-			Scene.HudGui.AirReserve.gameObject.SetActive(false);
-			Scene.HudGui.AirReserveOutline.SetActive(false);
+			TheForest.Utils.Scene.HudGui.AirReserve.gameObject.SetActive(false);
+			TheForest.Utils.Scene.HudGui.AirReserveOutline.SetActive(false);
 		}
 		if (flag)
 		{
@@ -962,11 +913,11 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		if (this.Health < this.HealthTarget)
 		{
 			this.Health = Mathf.MoveTowards(this.Health, this.HealthTarget, GameSettings.Survival.HealthRegenPerSecond * Time.deltaTime);
-			Scene.HudGui.HealthBarTarget.enabled = true;
+			TheForest.Utils.Scene.HudGui.HealthBarTarget.enabled = true;
 		}
 		else
 		{
-			Scene.HudGui.HealthBarTarget.enabled = false;
+			TheForest.Utils.Scene.HudGui.HealthBarTarget.enabled = false;
 		}
 		if (this.Health < 20f)
 		{
@@ -1011,7 +962,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		{
 			this.Stamina = this.Energy;
 		}
-		if (this.CheckingBlood && Scene.SceneTracker.proxyAttackers.arrayList.Count > 0)
+		if (this.CheckingBlood && TheForest.Utils.Scene.SceneTracker.proxyAttackers.arrayList.Count > 0)
 		{
 			this.StopBloodCheck();
 		}
@@ -1044,7 +995,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 					this.FrostScript.coverage = 0.491f;
 				}
 			}
-			else if (!Cheats.NoSurvival && Scene.Clock.ElapsedGameTime >= (float)this.FrostDamageSettings.StartDay && LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Book && LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Inventory && !LocalPlayer.AnimControl.doShellRideMode)
+			else if (!Cheats.NoSurvival && TheForest.Utils.Scene.Clock.ElapsedGameTime >= (float)this.FrostDamageSettings.StartDay && LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Book && LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Inventory && !LocalPlayer.AnimControl.doShellRideMode)
 			{
 				if (!LocalPlayer.FpCharacter.jumping && (!LocalPlayer.AnimControl.onRope || !LocalPlayer.AnimControl.VerticalMovement) && !this.IsLit && LocalPlayer.Rigidbody.velocity.sqrMagnitude < 0.3f && !this.Dead)
 				{
@@ -1268,13 +1219,28 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	
 	private void SetCold(bool cold)
 	{
-		if (cold && !this.IsCold && Scene.SceneTracker && Scene.SceneTracker.proxyAttackers != null && Scene.SceneTracker.proxyAttackers.arrayList.Count < 1 && this.FrostDamageSettings.NextCheckArms < Scene.Clock.ElapsedGameTime)
+		if (cold && !this.IsCold && TheForest.Utils.Scene.SceneTracker && TheForest.Utils.Scene.SceneTracker.proxyAttackers != null && TheForest.Utils.Scene.SceneTracker.proxyAttackers.arrayList.Count < 1 && this.FrostDamageSettings.NextCheckArms < TheForest.Utils.Scene.Clock.ElapsedGameTime)
 		{
-			this.FrostDamageSettings.NextCheckArms = Scene.Clock.ElapsedGameTime + 1f;
+			this.FrostDamageSettings.NextCheckArms = TheForest.Utils.Scene.Clock.ElapsedGameTime + 1f;
 			base.StartCoroutine(this.CheckArmsRoutine());
 		}
 		this.IsCold = cold;
 		this.PlayerVariations.UpdateSkinVariation(this.IsBloody, LocalPlayer.TargetFunctions.coveredInMud, this.IsRed, this.IsCold);
+		base.StopCoroutine("SetColdRoutine");
+		base.StartCoroutine("SetColdRoutine");
+	}
+
+	
+	private IEnumerator SetColdRoutine()
+	{
+		float t = 0f;
+		while (t < 4f)
+		{
+			this.PlayerVariations.UpdateSkinVariation(this.IsBloody, LocalPlayer.TargetFunctions.coveredInMud, this.IsRed, this.IsCold);
+			t += Time.deltaTime;
+			yield return null;
+		}
+		yield break;
 	}
 
 	
@@ -1320,8 +1286,10 @@ public class PlayerStats : MonoBehaviour, IBurnable
 			this.CheckingBlood = true;
 			base.Invoke("CheckBlood", 10f);
 			this.IsBloody = !this.IsRed;
+			base.StopCoroutine("GotCleanRoutine");
 			this.PlayerVariations.UpdateSkinVariation(this.IsBloody, LocalPlayer.TargetFunctions.coveredInMud, this.IsRed, this.IsCold);
 			LocalPlayer.Inventory.BloodyWeapon();
+			UnityEngine.Debug.Log("player set bloody");
 		}
 	}
 
@@ -1390,7 +1358,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	
 	private void CheckBlood()
 	{
-		if (Scene.SceneTracker.proxyAttackers.arrayList.Count < 1)
+		if (TheForest.Utils.Scene.SceneTracker.proxyAttackers.arrayList.Count < 1)
 		{
 			this.Tuts.BloodyTut();
 			this.CheckingBlood = false;
@@ -1447,8 +1415,21 @@ public class PlayerStats : MonoBehaviour, IBurnable
 			{
 				this.IsRed = false;
 			}
-			this.PlayerVariations.UpdateSkinVariation(this.IsBloody, LocalPlayer.TargetFunctions.coveredInMud, this.IsRed, this.IsCold);
+			base.StartCoroutine("GotCleanRoutine");
 		}
+	}
+
+	
+	private IEnumerator GotCleanRoutine()
+	{
+		float t = 0f;
+		while (t < 5f)
+		{
+			this.PlayerVariations.UpdateSkinVariation(this.IsBloody, LocalPlayer.TargetFunctions.coveredInMud, this.IsRed, this.IsCold);
+			t += Time.deltaTime;
+			yield return null;
+		}
+		yield break;
 	}
 
 	
@@ -1456,9 +1437,9 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	{
 		if (!BoltNetwork.isClient || SteamClientDSConfig.isDSFirstClient)
 		{
-			for (int i = 0; i < Scene.SceneTracker.allPlayers.Count; i++)
+			for (int i = 0; i < TheForest.Utils.Scene.SceneTracker.allPlayers.Count; i++)
 			{
-				Transform transform = Scene.SceneTracker.allPlayers[i].transform;
+				Transform transform = TheForest.Utils.Scene.SceneTracker.allPlayers[i].transform;
 				Transform transform2 = this.mutantControl.findClosestEnemy(transform);
 				if (transform2 && !LocalPlayer.IsInCaves && (LocalPlayer.ScriptSetup.targetFunctions.visibleEnemies.Count > 0 || Vector3.Distance(transform.position, transform2.transform.position) < 65f))
 				{
@@ -1478,15 +1459,15 @@ public class PlayerStats : MonoBehaviour, IBurnable
 					}
 				}
 			}
-			Scene.MutantSpawnManager.offsetSleepAmounts();
-			Scene.MutantControler.startSetupFamilies();
+			TheForest.Utils.Scene.MutantSpawnManager.offsetSleepAmounts();
+			TheForest.Utils.Scene.MutantControler.startSetupFamilies();
 			EventRegistry.Player.Publish(TfEvent.Slept, null);
 		}
 		base.Invoke("TurnOffSleepCam", 3f);
 		this.Tired = 0f;
 		this.Atmos.TimeLapse();
-		Scene.HudGui.ToggleAllHud(false);
-		Scene.Cams.SleepCam.SetActive(true);
+		TheForest.Utils.Scene.HudGui.ToggleAllHud(false);
+		TheForest.Utils.Scene.Cams.SleepCam.SetActive(true);
 		this.Energy += 100f;
 		return true;
 	}
@@ -1500,11 +1481,11 @@ public class PlayerStats : MonoBehaviour, IBurnable
 			SaveSlotSelectionScreen.OnSlotCanceled.AddListener(new UnityAction(this.OnSaveSlotSelectionCanceled));
 			LocalPlayer.Inventory.TogglePauseMenu();
 			LocalPlayer.Inventory.enabled = false;
-			Scene.HudGui.SaveSlotSelectionScreen.SetActive(true);
+			TheForest.Utils.Scene.HudGui.SaveSlotSelectionScreen.SetActive(true);
 		}
 		else
 		{
-			Scene.Cams.SaveCam.SetActive(true);
+			TheForest.Utils.Scene.Cams.SaveCam.SetActive(true);
 			base.Invoke("TurnOffSaveCam", 1f);
 			PlayerSpawn.SaveMpCharacter(base.gameObject);
 		}
@@ -1519,7 +1500,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		}
 		else
 		{
-			Scene.Cams.SaveCam.SetActive(false);
+			TheForest.Utils.Scene.Cams.SaveCam.SetActive(false);
 		}
 	}
 
@@ -1528,35 +1509,36 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	{
 		LocalPlayer.Inventory.CurrentView = PlayerInventory.PlayerViews.Pause;
 		LocalPlayer.Inventory.TogglePauseMenu();
-		Scene.HudGui.SaveSlotSelectionScreen.SetActive(false);
-		Scene.Cams.SaveCam.SetActive(true);
+		TheForest.Utils.Input.UpdateControlMapping();
+		TheForest.Utils.Scene.HudGui.SaveSlotSelectionScreen.SetActive(false);
+		TheForest.Utils.Scene.Cams.SaveCam.SetActive(true);
 		if (!LocalPlayer.IsInOverlookArea)
 		{
 			if (PlayerPreferences.MemorySafeSaveMode)
 			{
-				Scene.GreebleZonesManager.ForcedUnload(true);
-				Scene.GreebleZonesManager.CheckInCave();
-				foreach (SceneUnloadInCave sl in Scene.SceneLoaders)
+				TheForest.Utils.Scene.GreebleZonesManager.ForcedUnload(true);
+				TheForest.Utils.Scene.GreebleZonesManager.CheckInCave();
+				foreach (SceneUnloadInCave sceneUnloadInCave in TheForest.Utils.Scene.SceneLoaders)
 				{
-					sl.ForcedUnload(true);
-					sl.CheckInCave();
+					sceneUnloadInCave.ForcedUnload(true);
+					sceneUnloadInCave.CheckInCave();
 				}
 				yield return null;
-				yield return UnityEngine.Resources.UnloadUnusedAssets();
+				yield return Resources.UnloadUnusedAssets();
 				yield return null;
 				GC.Collect();
 				yield return null;
 			}
-			foreach (itemConstrainToHand itemSlot in LocalPlayer.ItemSlots)
+			foreach (itemConstrainToHand itemConstrainToHand in LocalPlayer.ItemSlots)
 			{
-				foreach (GameObject item in itemSlot.Available)
+				foreach (GameObject gameObject in itemConstrainToHand.Available)
 				{
-					if (item && !item.gameObject.activeSelf)
+					if (gameObject && !gameObject.gameObject.activeSelf)
 					{
-						FakeParent fp = item.GetComponent<FakeParent>();
-						if (fp)
+						FakeParent component = gameObject.GetComponent<FakeParent>();
+						if (component)
 						{
-							fp.ReParent();
+							component.ReParent();
 						}
 					}
 				}
@@ -1573,23 +1555,23 @@ public class PlayerStats : MonoBehaviour, IBurnable
 			if (PlayerPreferences.MemorySafeSaveMode)
 			{
 				yield return null;
-				Scene.GreebleZonesManager.ForcedUnload(false);
-				foreach (SceneUnloadInCave sl2 in Scene.SceneLoaders)
+				TheForest.Utils.Scene.GreebleZonesManager.ForcedUnload(false);
+				foreach (SceneUnloadInCave sceneUnloadInCave2 in TheForest.Utils.Scene.SceneLoaders)
 				{
-					sl2.ForcedUnload(false);
+					sceneUnloadInCave2.ForcedUnload(false);
 				}
 				yield return YieldPresets.WaitPointThreeSeconds;
 			}
-			foreach (itemConstrainToHand itemSlot2 in LocalPlayer.ItemSlots)
+			foreach (itemConstrainToHand itemConstrainToHand2 in LocalPlayer.ItemSlots)
 			{
-				foreach (GameObject item2 in itemSlot2.Available)
+				foreach (GameObject gameObject2 in itemConstrainToHand2.Available)
 				{
-					if (item2 && !item2.gameObject.activeSelf)
+					if (gameObject2 && !gameObject2.gameObject.activeSelf)
 					{
-						FakeParent fp2 = item2.GetComponent<FakeParent>();
-						if (fp2)
+						FakeParent component2 = gameObject2.GetComponent<FakeParent>();
+						if (component2)
 						{
-							fp2.UnParent();
+							component2.UnParent();
 						}
 					}
 				}
@@ -1600,7 +1582,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 			UnityEngine.Debug.Log("It is not possible to save the game while in the overlook area");
 		}
 		yield return null;
-		Scene.Cams.SaveCam.SetActive(false);
+		TheForest.Utils.Scene.Cams.SaveCam.SetActive(false);
 		SaveSlotSelectionScreen.OnSlotSelected.RemoveListener(new UnityAction(this.OnSaveSlotSelected));
 		SaveSlotSelectionScreen.OnSlotSelected.RemoveListener(new UnityAction(this.OnSaveSlotSelectionCanceled));
 		LocalPlayer.Inventory.enabled = true;
@@ -1612,9 +1594,10 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	{
 		LocalPlayer.Inventory.CurrentView = PlayerInventory.PlayerViews.Pause;
 		LocalPlayer.Inventory.TogglePauseMenu();
+		TheForest.Utils.Input.UpdateControlMapping();
 		LocalPlayer.Inventory.enabled = true;
-		Scene.HudGui.SaveSlotSelectionScreen.SetActive(false);
-		Scene.Cams.SaveCam.SetActive(false);
+		TheForest.Utils.Scene.HudGui.SaveSlotSelectionScreen.SetActive(false);
+		TheForest.Utils.Scene.Cams.SaveCam.SetActive(false);
 		SaveSlotSelectionScreen.OnSlotSelected.RemoveListener(new UnityAction(this.OnSaveSlotSelected));
 		SaveSlotSelectionScreen.OnSlotSelected.RemoveListener(new UnityAction(this.OnSaveSlotSelectionCanceled));
 	}
@@ -1622,14 +1605,14 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	
 	private void TurnOffSleepCam()
 	{
-		Scene.HudGui.ToggleAllHud(true);
-		Scene.Cams.SleepCam.SetActive(false);
+		TheForest.Utils.Scene.HudGui.ToggleAllHud(true);
+		TheForest.Utils.Scene.Cams.SleepCam.SetActive(false);
 	}
 
 	
 	private void TurnOffSaveCam()
 	{
-		Scene.Cams.SaveCam.SetActive(false);
+		TheForest.Utils.Scene.Cams.SaveCam.SetActive(false);
 	}
 
 	
@@ -1648,15 +1631,15 @@ public class PlayerStats : MonoBehaviour, IBurnable
 				GraphNode node = AstarPath.active.GetNearest(hit.point).node;
 				if (node.Walkable)
 				{
-					foreach (GameObject member in mType.spawner.allMembers)
+					foreach (GameObject gameObject in mType.spawner.allMembers)
 					{
-						if (member)
+						if (gameObject)
 						{
-							targetStats ts = member.GetComponent<targetStats>();
-							if (ts && !ts.targetDown)
+							targetStats component = gameObject.GetComponent<targetStats>();
+							if (component && !component.targetDown)
 							{
-								member.transform.position = new Vector3(hit.point.x + UnityEngine.Random.Range(-7f, 7f), hit.point.y + 7f, hit.point.z + UnityEngine.Random.Range(-7f, 7f));
-								member.SendMessage("updateWorldTransformPosition", SendMessageOptions.DontRequireReceiver);
+								gameObject.transform.position = new Vector3(hit.point.x + UnityEngine.Random.Range(-7f, 7f), hit.point.y + 7f, hit.point.z + UnityEngine.Random.Range(-7f, 7f));
+								gameObject.SendMessage("updateWorldTransformPosition", SendMessageOptions.DontRequireReceiver);
 							}
 						}
 					}
@@ -1673,8 +1656,8 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	public void GoToSleepFake()
 	{
 		this.Tired -= 10f;
-		Scene.HudGui.ToggleAllHud(false);
-		Scene.Cams.SleepCam.SetActive(true);
+		TheForest.Utils.Scene.HudGui.ToggleAllHud(false);
+		TheForest.Utils.Scene.Cams.SleepCam.SetActive(true);
 		this.Energy += 10f;
 		base.Invoke("WakeFake", (!BoltNetwork.isClient) ? 4f : 3.6f);
 	}
@@ -1682,8 +1665,8 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	
 	private void WakeFake()
 	{
-		Scene.HudGui.ToggleAllHud(true);
-		Scene.Cams.SleepCam.SetActive(false);
+		TheForest.Utils.Scene.HudGui.ToggleAllHud(true);
+		TheForest.Utils.Scene.Cams.SleepCam.SetActive(false);
 		this.Sfx.PlayWokenByEnemies();
 	}
 
@@ -1693,8 +1676,8 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		if (this.Atmos.Sleeping)
 		{
 			this.Atmos.NoTimeLapse();
-			float num = Scene.Clock.ElapsedGameTime - Scene.Clock.NextSleepTime;
-			Scene.Clock.NextSleepTime = Scene.Clock.ElapsedGameTime + 0.95f - num;
+			float num = TheForest.Utils.Scene.Clock.ElapsedGameTime - TheForest.Utils.Scene.Clock.NextSleepTime;
+			TheForest.Utils.Scene.Clock.NextSleepTime = TheForest.Utils.Scene.Clock.ElapsedGameTime + 0.95f - num;
 			this.Sanity.OnSlept(num * 24f);
 			this.FoodPoisoning.Cure();
 		}
@@ -1785,7 +1768,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	}
 
 	
-	private void __Fell__Original()
+	private void Fell()
 	{
 		this.Health -= 200f;
 		this.HealthTarget = this.Health;
@@ -1813,7 +1796,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	}
 
 	
-	public void __hitFromEnemy__Original(int getDamage)
+	public void hitFromEnemy(int getDamage)
 	{
 		if (this.animator.GetCurrentAnimatorStateInfo(0).tagHash == this.enterCaveHash)
 		{
@@ -1951,7 +1934,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		if (this.NextAdrenalineRush < Time.realtimeSinceStartup)
 		{
 			this.NextAdrenalineRush = Time.realtimeSinceStartup + 120f;
-			Scene.HudGui.EnergyFlash.SetActive(true);
+			TheForest.Utils.Scene.HudGui.EnergyFlash.SetActive(true);
 			float totalRegenAmount = (100f - this.Stamina) / 2f;
 			float remainingRegenAmount = totalRegenAmount;
 			while (remainingRegenAmount > 0f)
@@ -1965,95 +1948,163 @@ public class PlayerStats : MonoBehaviour, IBurnable
 				}
 				yield return null;
 			}
-			Scene.HudGui.EnergyFlash.SetActive(false);
+			TheForest.Utils.Scene.HudGui.EnergyFlash.SetActive(false);
 		}
 		yield break;
 	}
 
 	
+	private void ToggleArmorPiece(PlayerStats.ArmorTypes modelType, Material mat, int index, bool onoff)
+	{
+		if (modelType != PlayerStats.ArmorTypes.None)
+		{
+			GameObject armorPiece = this.GetArmorPiece(modelType, index);
+			if (armorPiece)
+			{
+				if (armorPiece.activeSelf != onoff)
+				{
+					armorPiece.SetActive(onoff);
+				}
+				if (onoff && mat)
+				{
+					armorPiece.GetComponent<Renderer>().sharedMaterial = mat;
+				}
+			}
+		}
+	}
+
+	
 	private GameObject GetArmorPiece(PlayerStats.ArmorTypes modelType, int index)
 	{
-		if (modelType != PlayerStats.ArmorTypes.Bone)
+		if (modelType == PlayerStats.ArmorTypes.Bone)
 		{
-			return this.ArmorModel[index];
+			return (index >= this.BoneArmorModel.Length) ? null : this.BoneArmorModel[index];
 		}
-		return this.BoneArmorModel[index];
+		if (modelType == PlayerStats.ArmorTypes.Creepy)
+		{
+			return (index >= this.CreepyArmorModel.Length) ? null : this.CreepyArmorModel[index];
+		}
+		if (modelType == PlayerStats.ArmorTypes.Leaves)
+		{
+			return (index >= this.LeafArmorModel.Length) ? null : this.LeafArmorModel[index];
+		}
+		if (modelType != PlayerStats.ArmorTypes.Warmsuit)
+		{
+			return (index >= this.ArmorModel.Length) ? null : this.ArmorModel[index];
+		}
+		return this.WarmsuitModel;
 	}
 
 	
 	public void AddArmorVisible(PlayerStats.ArmorTypes type)
 	{
 		int armorSetIndex = this.GetArmorSetIndex(type);
-		PlayerStats.ArmorSet armorSet = this.ArmorSets[armorSetIndex];
-		for (int i = 0; i < this.ArmorModel.Length; i++)
+		PlayerStats.ArmorSet armorSet = (armorSetIndex == -1) ? null : this.ArmorSets[armorSetIndex];
+		if (type == PlayerStats.ArmorTypes.Warmsuit)
 		{
-			int num = (int)Mathf.Repeat((float)(this.ArmorVis + i), (float)this.ArmorModel.Length);
-			if (this.CurrentArmorTypes[num] == PlayerStats.ArmorTypes.None)
+			for (int i = 0; i < 10; i++)
 			{
-				this.CurrentArmorTypes[num] = type;
-				if (armorSet.ModelType != PlayerStats.ArmorTypes.None)
+				int num = i;
+				if (this.CurrentArmorTypes[num] != PlayerStats.ArmorTypes.None)
 				{
-					GameObject armorPiece = this.GetArmorPiece(armorSet.ModelType, num);
-					armorPiece.SetActive(true);
-					armorPiece.GetComponent<Renderer>().sharedMaterial = armorSet.Mat;
+					PlayerStats.ArmorTypes type2 = this.CurrentArmorTypes[num];
+					int armorSetIndex2 = this.GetArmorSetIndex(type2);
+					PlayerStats.ArmorSet armorSet2 = this.ArmorSets[armorSetIndex2];
+					this.ToggleArmorPiece(armorSet2.ModelType, armorSet2.Mat, num, false);
+					this.ToggleArmorPiece(armorSet2.ModelType2, armorSet2.Mat2, num, false);
+					ItemUtils.ApplyEffectsToStats(armorSet2.Effects, false, 1);
+					if (armorSet2.HP - this.CurrentArmorHP[num] < 4 && !this.Player.AddItem(armorSet2.ItemId, 1, false, false, null))
+					{
+						LocalPlayer.Inventory.FakeDrop(armorSet2.ItemId, null);
+					}
+					this.CurrentArmorTypes[num] = PlayerStats.ArmorTypes.None;
 				}
-				this.LeafArmorModel[num].SetActive(type == PlayerStats.ArmorTypes.Leaves);
-				this.BoneArmorModel[num].SetActive(type == PlayerStats.ArmorTypes.Bone);
-				this.CurrentArmorHP[num] = armorSet.HP;
-				this.ArmorVis = num + 1;
-				this.UpdateArmorNibbles();
-				ItemUtils.ApplyEffectsToStats(armorSet.Effects, true, 1);
-				return;
 			}
-		}
-		if (this.ArmorVis == this.ArmorModel.Length)
-		{
 			this.ArmorVis = 0;
+			this.CurrentArmorTypes[0] = PlayerStats.ArmorTypes.Warmsuit;
+			this.GetArmorPiece(PlayerStats.ArmorTypes.Warmsuit, 0).SetActive(true);
+			ItemUtils.ApplyEffectsToStats(armorSet.Effects, true, 1);
+			this.UpdateArmorNibbles();
+			LocalPlayer.Clothing.RefreshVisibleClothing();
 		}
-		if (this.CurrentArmorTypes[this.ArmorVis] != PlayerStats.ArmorTypes.None)
+		else
 		{
-			PlayerStats.ArmorTypes type2 = this.CurrentArmorTypes[this.ArmorVis];
-			int armorSetIndex2 = this.GetArmorSetIndex(type2);
-			PlayerStats.ArmorSet armorSet2 = this.ArmorSets[armorSetIndex2];
-			if (armorSet2.ModelType != armorSet.ModelType && armorSet2.ModelType != PlayerStats.ArmorTypes.None)
+			if (!this.Warmsuit)
 			{
-				this.GetArmorPiece(armorSet2.ModelType, this.ArmorVis).SetActive(false);
+				for (int j = 0; j < 10; j++)
+				{
+					int num2 = (int)Mathf.Repeat((float)(this.ArmorVis + j), 10f);
+					if (this.CurrentArmorTypes[num2] == PlayerStats.ArmorTypes.None)
+					{
+						this.CurrentArmorTypes[num2] = type;
+						if (armorSet != null)
+						{
+							this.ToggleArmorPiece(armorSet.ModelType, armorSet.Mat, num2, true);
+							this.ToggleArmorPiece(armorSet.ModelType2, armorSet.Mat2, num2, true);
+							this.CurrentArmorHP[num2] = armorSet.HP;
+							this.ArmorVis = num2 + 1;
+							ItemUtils.ApplyEffectsToStats(armorSet.Effects, true, 1);
+						}
+						this.UpdateArmorNibbles();
+						return;
+					}
+				}
 			}
-			ItemUtils.ApplyEffectsToStats(armorSet2.Effects, false, 1);
-			if (armorSet2.HP - this.CurrentArmorHP[this.ArmorVis] < 4)
+			if (this.ArmorVis == 10)
 			{
-				this.Player.AddItem(armorSet2.ItemId, 1, false, false, null);
+				this.ArmorVis = 0;
 			}
+			if (this.CurrentArmorTypes[this.ArmorVis] != PlayerStats.ArmorTypes.None)
+			{
+				PlayerStats.ArmorTypes type3 = this.CurrentArmorTypes[this.ArmorVis];
+				int armorSetIndex3 = this.GetArmorSetIndex(type3);
+				PlayerStats.ArmorSet armorSet3 = this.ArmorSets[armorSetIndex3];
+				this.ToggleArmorPiece(armorSet3.ModelType, armorSet3.Mat, this.ArmorVis, false);
+				this.ToggleArmorPiece(armorSet3.ModelType2, armorSet3.Mat2, this.ArmorVis, false);
+				ItemUtils.ApplyEffectsToStats(armorSet3.Effects, false, 1);
+				if (armorSet3.HP - this.CurrentArmorHP[this.ArmorVis] < 4 && !this.Warmsuit && !this.Player.AddItem(armorSet3.ItemId, 1, false, false, null))
+				{
+					LocalPlayer.Inventory.FakeDrop(armorSet3.ItemId, null);
+				}
+				if (this.Warmsuit)
+				{
+					this.CurrentArmorTypes[this.ArmorVis] = PlayerStats.ArmorTypes.None;
+					LocalPlayer.Inventory.UnequipItemAtSlot(Item.EquipmentSlot.FullBody, false, true, false);
+					LocalPlayer.Clothing.RefreshVisibleClothing();
+				}
+			}
+			this.CurrentArmorHP[this.ArmorVis] = ((armorSet == null) ? 0 : armorSet.HP);
+			this.CurrentArmorTypes[this.ArmorVis] = type;
+			if (armorSet != null)
+			{
+				this.ToggleArmorPiece(armorSet.ModelType, armorSet.Mat, this.ArmorVis, true);
+				this.ToggleArmorPiece(armorSet.ModelType2, armorSet.Mat2, this.ArmorVis, true);
+				ItemUtils.ApplyEffectsToStats(armorSet.Effects, true, 1);
+				this.ArmorVis++;
+			}
+			this.UpdateArmorNibbles();
 		}
-		this.CurrentArmorHP[this.ArmorVis] = armorSet.HP;
-		this.CurrentArmorTypes[this.ArmorVis] = type;
-		if (armorSet.ModelType != PlayerStats.ArmorTypes.None)
-		{
-			GameObject armorPiece2 = this.GetArmorPiece(armorSet.ModelType, this.ArmorVis);
-			armorPiece2.SetActive(true);
-			armorPiece2.GetComponent<Renderer>().sharedMaterial = armorSet.Mat;
-		}
-		this.LeafArmorModel[this.ArmorVis].SetActive(type == PlayerStats.ArmorTypes.Leaves);
-		this.BoneArmorModel[this.ArmorVis].SetActive(type == PlayerStats.ArmorTypes.Bone);
-		ItemUtils.ApplyEffectsToStats(armorSet.Effects, true, 1);
-		this.ArmorVis++;
-		this.UpdateArmorNibbles();
 	}
 
 	
 	private void UpdateArmorNibbles()
 	{
-		for (int i = 0; i < Scene.HudGui.ArmorNibbles.Length; i++)
+		for (int i = 0; i < TheForest.Utils.Scene.HudGui.ArmorNibbles.Length; i++)
 		{
-			int num = (int)Mathf.Repeat((float)(Scene.HudGui.ArmorNibbles.Length - (i - this.ArmorVis + 1)), (float)Scene.HudGui.ArmorNibbles.Length);
-			if (this.CurrentArmorTypes[num] == PlayerStats.ArmorTypes.None)
+			int num = (int)Mathf.Repeat((float)(TheForest.Utils.Scene.HudGui.ArmorNibbles.Length - (i - this.ArmorVis + 1)), (float)TheForest.Utils.Scene.HudGui.ArmorNibbles.Length);
+			if (this.Warmsuit)
 			{
-				Scene.HudGui.ArmorNibbles[i].enabled = false;
+				TheForest.Utils.Scene.HudGui.ArmorNibbles[i].enabled = true;
+				TheForest.Utils.Scene.HudGui.ArmorNibbles[i].color = this.GetArmorSetColor(this.CurrentArmorTypes[0]);
+			}
+			else if (this.CurrentArmorTypes[num] == PlayerStats.ArmorTypes.None)
+			{
+				TheForest.Utils.Scene.HudGui.ArmorNibbles[i].enabled = false;
 			}
 			else
 			{
-				Scene.HudGui.ArmorNibbles[i].enabled = true;
-				Scene.HudGui.ArmorNibbles[i].color = this.GetArmorSetColor(this.CurrentArmorTypes[num]);
+				TheForest.Utils.Scene.HudGui.ArmorNibbles[i].enabled = true;
+				TheForest.Utils.Scene.HudGui.ArmorNibbles[i].color = this.GetArmorSetColor(this.CurrentArmorTypes[num]);
 			}
 		}
 	}
@@ -2072,7 +2123,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		PlayerStats.ArmorTypes armorTypes = PlayerStats.ArmorTypes.LizardSkin | PlayerStats.ArmorTypes.DeerSkin | PlayerStats.ArmorTypes.Leaves | PlayerStats.ArmorTypes.Bone;
 		for (int i = 0; i < this.CurrentArmorTypes.Length; i++)
 		{
-			int num = (int)Mathf.Repeat((float)(this.ArmorVis + i), (float)this.ArmorModel.Length);
+			int num = (int)Mathf.Repeat((float)(this.ArmorVis + i), 10f);
 			if ((this.CurrentArmorTypes[num] & armorTypes) != PlayerStats.ArmorTypes.None)
 			{
 				this.CurrentArmorHP[num] -= damage;
@@ -2080,11 +2131,11 @@ public class PlayerStats : MonoBehaviour, IBurnable
 				{
 					return 0;
 				}
-				ItemUtils.ApplyEffectsToStats(this.ArmorSets[this.GetArmorSetIndex(this.CurrentArmorTypes[num])].Effects, false, 1);
 				int armorSetIndex = this.GetArmorSetIndex(this.CurrentArmorTypes[num]);
-				this.ArmorModel[num].SetActive(false);
-				this.LeafArmorModel[num].SetActive(false);
-				this.BoneArmorModel[num].SetActive(false);
+				PlayerStats.ArmorSet armorSet = this.ArmorSets[armorSetIndex];
+				ItemUtils.ApplyEffectsToStats(armorSet.Effects, false, 1);
+				this.ToggleArmorPiece(armorSet.ModelType, armorSet.Mat, num, false);
+				this.ToggleArmorPiece(armorSet.ModelType2, armorSet.Mat2, num, false);
 				this.CurrentArmorTypes[num] = PlayerStats.ArmorTypes.None;
 				this.UpdateArmorNibbles();
 				if (this.CurrentArmorHP[num] == 0)
@@ -2099,7 +2150,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	}
 
 	
-	private void __Explosion__Original(float dist)
+	private void Explosion(float dist)
 	{
 		if (this.isExplode || LocalPlayer.AnimControl.endGameCutScene)
 		{
@@ -2175,7 +2226,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	}
 
 	
-	private void __HitFromPlayMaker__Original(int damage)
+	private void HitFromPlayMaker(int damage)
 	{
 		this.Hit(damage, false, PlayerStats.DamageType.Physical);
 	}
@@ -2192,7 +2243,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	}
 
 	
-	public void __Hit__Original(int damage, bool ignoreArmor, PlayerStats.DamageType type = PlayerStats.DamageType.Physical)
+	public void Hit(int damage, bool ignoreArmor, PlayerStats.DamageType type = PlayerStats.DamageType.Physical)
 	{
 		if (LocalPlayer.Inventory.CurrentView >= PlayerInventory.PlayerViews.World)
 		{
@@ -2257,7 +2308,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	}
 
 	
-	public void __HitShark__Original(int damage)
+	public void HitShark(int damage)
 	{
 		this.HealthChange((float)(-(float)damage));
 		BleedBehavior.BloodAmount += Mathf.Clamp01(3f * (float)damage / this.Health) * 0.9f;
@@ -2286,7 +2337,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		LocalPlayer.CamRotator.enabled = false;
 		LocalPlayer.MainRotator.enabled = false;
 		this.Player.Close();
-		Scene.HudGui.DropButton.SetActive(false);
+		TheForest.Utils.Scene.HudGui.DropButton.SetActive(false);
 		LocalPlayer.Inventory.enabled = false;
 		LocalPlayer.FpCharacter.enabled = false;
 		LocalPlayer.MainRotator.enabled = false;
@@ -2327,7 +2378,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	}
 
 	
-	private void __FallDownDead__Original()
+	private void FallDownDead()
 	{
 		float time = 4f;
 		if (LocalPlayer.AnimControl.swimming)
@@ -2339,8 +2390,8 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		LocalPlayer.FpCharacter.HandleLanded();
 		LocalPlayer.SpecialActions.SendMessage("forceGirlReset");
 		LocalPlayer.ScriptSetup.pmControl.FsmVariables.GetFsmBool("seatedBool").Value = false;
-		Scene.SceneTracker.DisableMusic();
-		Scene.HudGui.DropButton.SetActive(false);
+		TheForest.Utils.Scene.SceneTracker.DisableMusic();
+		TheForest.Utils.Scene.HudGui.DropButton.SetActive(false);
 		LocalPlayer.Inventory.enabled = false;
 		if (LocalPlayer.AnimControl.carry)
 		{
@@ -2396,7 +2447,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	}
 
 	
-	private void __KnockOut__Original()
+	private void KnockOut()
 	{
 		BleedBehavior.BloodAmount += 1f;
 		BleedBehavior.BloodReductionRatio = (Mathf.Clamp01(this.Health / 100f) + 0.1f) * ((!this.IsHealthInGreyZone) ? 1f : 0.5f);
@@ -2409,21 +2460,21 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	
 	private void CutSceneBlack()
 	{
-		Scene.Cams.SleepCam.SetActive(true);
+		TheForest.Utils.Scene.Cams.SleepCam.SetActive(true);
 		base.Invoke("CutSceneWake", 2f);
 	}
 
 	
 	private void CutSceneWake()
 	{
-		Scene.Cams.SleepCam.SetActive(false);
+		TheForest.Utils.Scene.Cams.SleepCam.SetActive(false);
 		base.Invoke("CutSceneBlackToMorning", 8f);
 	}
 
 	
 	private void CutSceneBlackToMorning()
 	{
-		Scene.Cams.SleepCam.SetActive(true);
+		TheForest.Utils.Scene.Cams.SleepCam.SetActive(true);
 		base.StartCoroutine(this.WakeFromKnockOut(false, YieldPresets.WaitFourSeconds));
 	}
 
@@ -2432,7 +2483,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	{
 		float num = float.PositiveInfinity;
 		Transform result = null;
-		foreach (Transform transform in Scene.SceneTracker.dragMarkers)
+		foreach (Transform transform in TheForest.Utils.Scene.SceneTracker.dragMarkers)
 		{
 			float sqrMagnitude = (transform.position - base.transform.position).sqrMagnitude;
 			if (sqrMagnitude < num)
@@ -2453,7 +2504,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		this.HealthTarget = 28f;
 		this.Energy = 11f;
 		this.camFollow.followAnim = true;
-		Scene.MutantControler.StartCoroutine("removeAllEnemies");
+		TheForest.Utils.Scene.MutantControler.StartCoroutine("removeAllEnemies");
 		LocalPlayer.Animator.transform.GetComponent<ForceLocalPosZero>().enabled = false;
 		Transform marker = this.getClosestDragMarker();
 		Vector3 pos = marker.position;
@@ -2470,8 +2521,8 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		LocalPlayer.AnimControl.injured = true;
 		LocalPlayer.AnimControl.useRootMotion = true;
 		LocalPlayer.AnimControl.lockGravity = true;
-		this.mutant1 = (GameObject)UnityEngine.Object.Instantiate((GameObject)UnityEngine.Resources.Load("CutScene/player_ANIM_dragAway_MUTANT1"), marker.position, marker.rotation);
-		this.mutant2 = (GameObject)UnityEngine.Object.Instantiate((GameObject)UnityEngine.Resources.Load("CutScene/player_ANIM_dragAway_MUTANT2"), marker.position, marker.rotation);
+		this.mutant1 = UnityEngine.Object.Instantiate<GameObject>((GameObject)Resources.Load("CutScene/player_ANIM_dragAway_MUTANT1"), marker.position, marker.rotation);
+		this.mutant2 = UnityEngine.Object.Instantiate<GameObject>((GameObject)Resources.Load("CutScene/player_ANIM_dragAway_MUTANT2"), marker.position, marker.rotation);
 		LocalPlayer.MainRotator.enabled = false;
 		LocalPlayer.CamRotator.enabled = false;
 		LocalPlayer.FpCharacter.enabled = false;
@@ -2498,17 +2549,19 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		this.camFollow.followAnim = true;
 		LocalPlayer.Animator.transform.rotation = marker.transform.rotation;
 		LocalPlayer.Animator.transform.position = marker.transform.position;
+		LocalPlayer.vrPlayerControl.centerVrSpaceAroundHead();
+		LocalPlayer.vrPlayerControl.rotateVrSpaceToPlayer();
 		base.StartCoroutine("forcePlayerPosToMarker", marker);
 		LayerMask getCamCulling = LocalPlayer.MainCam.cullingMask;
 		LocalPlayer.MainCam.cullingMask = this.dragAwayCullingMask;
-		Scene.Cams.SleepCam.SetActive(false);
+		TheForest.Utils.Scene.Cams.SleepCam.SetActive(false);
 		yield return YieldPresets.WaitTenSeconds;
-		Scene.Cams.SleepCam.SetActive(true);
+		TheForest.Utils.Scene.Cams.SleepCam.SetActive(true);
 		base.StopCoroutine("forcePlayerPosToMarker");
 		base.StopCoroutine("forcePlayerPosToMutant");
 		UnityEngine.Object.Destroy(this.mutant1);
 		UnityEngine.Object.Destroy(this.mutant2);
-		UnityEngine.Resources.UnloadUnusedAssets();
+		Resources.UnloadUnusedAssets();
 		LocalPlayer.Animator.SetBoolReflected("dragAwayBool", false);
 		LocalPlayer.Transform.localEulerAngles = new Vector3(0f, 0f, 0f);
 		LocalPlayer.Animator.transform.localEulerAngles = new Vector3(0f, 0f, 0f);
@@ -2532,7 +2585,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		LocalPlayer.Inventory.enabled = true;
 		yield return YieldPresets.WaitTwoSeconds;
 		this.doneDragScene = true;
-		base.Invoke("KillPlayer", 0f + ((!BoltNetwork.isRunning) ? 0.1f : 1f));
+		base.Invoke("KillPlayer", (!BoltNetwork.isRunning) ? 0.1f : 1f);
 		yield return YieldPresets.WaitPointOneSeconds;
 		LocalPlayer.MainCam.cullingMask = getCamCulling;
 		base.StartCoroutine(this.WakeFromKnockOut(this.Dead, YieldPresets.WaitThreeSeconds));
@@ -2557,9 +2610,9 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		LocalPlayer.Inventory.StashEquipedWeapon(false);
 		yield return YieldPresets.WaitOneSecond;
 		LocalPlayer.Inventory.enabled = false;
-		LocalPlayer.Transform.position = Scene.SceneTracker.playerHangingMarkers[0].transform.position;
-		LocalPlayer.Transform.rotation = Scene.SceneTracker.playerHangingMarkers[0].transform.rotation;
-		GameObject timmy = (GameObject)UnityEngine.Object.Instantiate((GameObject)UnityEngine.Resources.Load("CutScene/axeCutScenePickup"), Scene.SceneTracker.timmyCaveMarkers[0].transform.position, Scene.SceneTracker.timmyCaveMarkers[0].transform.rotation);
+		LocalPlayer.Transform.position = TheForest.Utils.Scene.SceneTracker.playerHangingMarkers[0].transform.position;
+		LocalPlayer.Transform.rotation = TheForest.Utils.Scene.SceneTracker.playerHangingMarkers[0].transform.rotation;
+		GameObject timmy = UnityEngine.Object.Instantiate<GameObject>((GameObject)Resources.Load("CutScene/axeCutScenePickup"), TheForest.Utils.Scene.SceneTracker.timmyCaveMarkers[0].transform.position, TheForest.Utils.Scene.SceneTracker.timmyCaveMarkers[0].transform.rotation);
 		LocalPlayer.ScriptSetup.pmControl.FsmVariables.GetFsmBool("seatedBool").Value = false;
 		LocalPlayer.AnimControl.useRootMotion = true;
 		LocalPlayer.AnimControl.lockGravity = true;
@@ -2575,7 +2628,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		LocalPlayer.MainRotator.enabled = false;
 		BleedBehavior.BloodAmount = 0f;
 		yield return YieldPresets.WaitPointTwoSeconds;
-		GameObject rope = (GameObject)UnityEngine.Object.Instantiate((GameObject)UnityEngine.Resources.Load("CutScene/hangingPlayerRopeGo"), LocalPlayer.PlayerBase.transform.position, LocalPlayer.PlayerBase.transform.rotation);
+		GameObject rope = UnityEngine.Object.Instantiate<GameObject>((GameObject)Resources.Load("CutScene/hangingPlayerRopeGo"), LocalPlayer.PlayerBase.transform.position, LocalPlayer.PlayerBase.transform.rotation);
 		rope.transform.parent = LocalPlayer.ScriptSetup.hipsJnt.transform;
 		rope.transform.localPosition = new Vector3(0.04f, 3.39f, -0.03f);
 		rope.transform.localEulerAngles = new Vector3(-1.08f, 179.48f, -179.87f);
@@ -2583,12 +2636,12 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		LocalPlayer.CamFollowHead.followAnim = true;
 		LocalPlayer.CamRotator.rotationRange = new Vector2(0f, 0f);
 		yield return YieldPresets.WaitPointTwoSeconds;
-		Scene.Cams.SleepCam.SetActive(false);
-		Scene.Cams.CaveDeadCam.SetActive(false);
-		Scene.Cams.DeadCam.SetActive(false);
+		TheForest.Utils.Scene.Cams.SleepCam.SetActive(false);
+		TheForest.Utils.Scene.Cams.CaveDeadCam.SetActive(false);
+		TheForest.Utils.Scene.Cams.DeadCam.SetActive(false);
 		LocalPlayer.PlayerDeadCam.SetActive(false);
 		yield return YieldPresets.WaitOneSecond;
-		Scene.HudGui.ActionIconCams.enabled = true;
+		TheForest.Utils.Scene.HudGui.ActionIconCams.enabled = true;
 		LocalPlayer.Tuts.ShowLighter();
 		LocalPlayer.Inventory.enabled = true;
 		AnimatorStateInfo currState3 = LocalPlayer.Animator.GetCurrentAnimatorStateInfo(3);
@@ -2678,7 +2731,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		LocalPlayer.Inventory.enabled = true;
 		LocalPlayer.Inventory.Equip(LocalPlayer.AnimControl._planeAxeId, false);
 		LocalPlayer.GreebleRoot.SetActive(true);
-		Scene.HudGui.ShowHud(true);
+		TheForest.Utils.Scene.HudGui.ShowHud(true);
 		yield return YieldPresets.WaitFourSeconds;
 		EventRegistry.Player.Publish(TfEvent.StoryProgress, GameStats.StoryElements.HangingScene);
 		yield break;
@@ -2687,7 +2740,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	
 	public IEnumerator EndgameWakeUp()
 	{
-		Scene.Cams.CaveDeadCam.SetActive(true);
+		TheForest.Utils.Scene.Cams.CaveDeadCam.SetActive(true);
 		LocalPlayer.Create.CloseTheBook(false);
 		LocalPlayer.Inventory.StashLeftHand();
 		LocalPlayer.Inventory.StashEquipedWeapon(false);
@@ -2747,8 +2800,8 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		}
 		this.animator.SetBoolReflected("wakeUp", false);
 		LocalPlayer.PlayerDeadCam.SetActive(false);
-		Scene.Cams.DeadCam.SetActive(false);
-		Scene.Cams.CaveDeadCam.SetActive(false);
+		TheForest.Utils.Scene.Cams.DeadCam.SetActive(false);
+		TheForest.Utils.Scene.Cams.CaveDeadCam.SetActive(false);
 		LocalPlayer.Inventory.CurrentView = PlayerInventory.PlayerViews.World;
 		while (this.animator.GetCurrentAnimatorStateInfo(2).shortNameHash == wakeUpHash)
 		{
@@ -2757,9 +2810,9 @@ public class PlayerStats : MonoBehaviour, IBurnable
 			LocalPlayer.Animator.SetLayerWeightReflected(4, 0f);
 			yield return null;
 		}
-		Scene.HudGui.ShowHud(true);
-		Scene.HudGui.MpRespawnLabel.gameObject.SetActive(false);
-		Scene.HudGui.MpRespawnMaxTimer.gameObject.SetActive(false);
+		TheForest.Utils.Scene.HudGui.ShowHud(true);
+		TheForest.Utils.Scene.HudGui.MpRespawnLabel.gameObject.SetActive(false);
+		TheForest.Utils.Scene.HudGui.MpRespawnMaxTimer.gameObject.SetActive(false);
 		LocalPlayer.MainCam.farClipPlane = oldfar;
 		LocalPlayer.MainCam.nearClipPlane = oldnear;
 		LocalPlayer.MainRotator.rotationRange = new Vector2(0f, 999f);
@@ -2821,9 +2874,9 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		this.Fullness = 0f;
 		this.Starvation = 0f;
 		this.StarvationCurrentDuration = this.StarvationSettings.Duration * 2f;
-		Scene.HudGui.StomachStarvation.gameObject.SetActive(true);
+		TheForest.Utils.Scene.HudGui.StomachStarvation.gameObject.SetActive(true);
 		this.Thirst = 0.35f;
-		Scene.HudGui.Hydration.fillAmount = 1f - this.Thirst;
+		TheForest.Utils.Scene.HudGui.Hydration.fillAmount = 1f - this.Thirst;
 		this.IsBloody = true;
 		this.PlayerVariations.UpdateSkinVariation(true, false, false, false);
 	}
@@ -2843,15 +2896,15 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		}
 		this.Starvation = 0f;
 		this.StarvationCurrentDuration = this.StarvationSettings.Duration * 2f;
-		Scene.HudGui.StomachStarvation.gameObject.SetActive(true);
+		TheForest.Utils.Scene.HudGui.StomachStarvation.gameObject.SetActive(true);
 		this.Thirst = 0.35f;
-		Scene.HudGui.Hydration.fillAmount = 1f - this.Thirst;
+		TheForest.Utils.Scene.HudGui.Hydration.fillAmount = 1f - this.Thirst;
 		this.Atmos.FogMaxHeight = 400f;
 		this.Atmos.TimeOfDay = 302f;
-		Scene.Atmosphere.ForceSunRotationUpdate = true;
+		TheForest.Utils.Scene.Atmosphere.ForceSunRotationUpdate = true;
 		base.Invoke("CheckArmsStart", 2f);
-		Scene.HudGui.ShowHud(!this.doneDragScene);
-		Scene.Cams.SleepCam.SetActive(false);
+		TheForest.Utils.Scene.HudGui.ShowHud(!this.doneDragScene);
+		TheForest.Utils.Scene.Cams.SleepCam.SetActive(false);
 		this.camFollow.followAnim = false;
 		LocalPlayer.FpCharacter.enabled = true;
 		LocalPlayer.FpCharacter.UnLockView();
@@ -2903,9 +2956,9 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		if (!BoltNetwork.isRunning)
 		{
 			this.camFollow.followAnim = false;
-			Scene.HudGui.ShowHud(false);
-			Scene.Cams.SleepCam.SetActive(true);
-			if (this.DeadTimes == 0 && !LocalPlayer.IsInCaves && (!Scene.IsInSinkhole(LocalPlayer.Transform.position) || Terrain.activeTerrain.SampleHeight(LocalPlayer.Transform.position) < LocalPlayer.Transform.position.y))
+			TheForest.Utils.Scene.HudGui.ShowHud(false);
+			TheForest.Utils.Scene.Cams.SleepCam.SetActive(true);
+			if (this.DeadTimes == 0 && !LocalPlayer.IsInCaves && (!TheForest.Utils.Scene.IsInSinkhole(LocalPlayer.Transform.position) || Terrain.activeTerrain.SampleHeight(LocalPlayer.Transform.position) < LocalPlayer.Transform.position.y))
 			{
 				base.StartCoroutine(this.dragAwayCutScene());
 			}
@@ -2939,7 +2992,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	}
 
 	
-	private void __hitFallDown__Original()
+	private void hitFallDown()
 	{
 		this.pmDamage.SendEvent("toHit");
 		this.pm.SendEvent("toDeath");
@@ -2953,7 +3006,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	}
 
 	
-	private void __HitFire__Original()
+	private void HitFire()
 	{
 		this.Hit(Mathf.RoundToInt(4f * this.Flammable * GameSettings.Survival.FireDamageRatio), false, PlayerStats.DamageType.Fire);
 		if (LocalPlayer.AnimControl.skinningAnimal)
@@ -2969,7 +3022,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	}
 
 	
-	private void __Bleed__Original()
+	private void Bleed()
 	{
 		if (this.animator.GetCurrentAnimatorStateInfo(0).tagHash == this.enterCaveHash)
 		{
@@ -3002,7 +3055,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	}
 
 	
-	public void __Poison__Original()
+	public void Poison()
 	{
 		base.CancelInvoke("HitPoison");
 		base.CancelInvoke("disablePoison");
@@ -3025,7 +3078,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	}
 
 	
-	private void __HitPoison__Original()
+	private void HitPoison()
 	{
 		int min = 2;
 		int max = 4;
@@ -3034,7 +3087,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	}
 
 	
-	private void __Burn__Original()
+	private void Burn()
 	{
 		if (this.animator.GetCurrentAnimatorStateInfo(0).tagHash == this.enterCaveHash || LocalPlayer.AnimControl.swimming)
 		{
@@ -3081,8 +3134,8 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	{
 		if (!BoltNetwork.isRunning)
 		{
-			Scene.HudGui.ShowHud(false);
-			Scene.Cams.DeadCam.SetActive(true);
+			TheForest.Utils.Scene.HudGui.ShowHud(false);
+			TheForest.Utils.Scene.Cams.DeadCam.SetActive(true);
 			LocalPlayer.PlayerDeadCam.SetActive(true);
 			LocalPlayer.AnimControl.enabled = false;
 			if (LocalPlayer.AnimControl.swimming)
@@ -3105,7 +3158,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	}
 
 	
-	private void __KillPlayer__Original()
+	private void KillPlayer()
 	{
 		base.CancelInvoke("HitPoison");
 		base.CancelInvoke("disablePoison");
@@ -3139,8 +3192,8 @@ public class PlayerStats : MonoBehaviour, IBurnable
 			}
 			else if (this.DeadTimes > 1)
 			{
-				Scene.HudGui.ShowHud(false);
-				Scene.Cams.DeadCam.SetActive(true);
+				TheForest.Utils.Scene.HudGui.ShowHud(false);
+				TheForest.Utils.Scene.Cams.DeadCam.SetActive(true);
 				LocalPlayer.PlayerDeadCam.SetActive(true);
 				if (Cheats.PermaDeath)
 				{
@@ -3181,7 +3234,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 				rigidbody.position = position;
 				LocalPlayer.FpCharacter.enabled = true;
 				LocalPlayer.Create.Grabber.gameObject.SetActive(true);
-				Scene.Cams.CaveDeadCam.SetActive(true);
+				TheForest.Utils.Scene.Cams.CaveDeadCam.SetActive(true);
 				this.camFollow.followAnim = false;
 				this.hitReaction.Invoke("disableControllerFreeze", 4f);
 				LocalPlayer.ActiveAreaInfo.SetCurrentCave(CaveNames.Cave02);
@@ -3192,12 +3245,12 @@ public class PlayerStats : MonoBehaviour, IBurnable
 				this.FrostScript.coverage = 0f;
 				this.SetCold(false);
 				this.Atmos.TimeOfDay = 1f;
-				Scene.Atmosphere.ForceSunRotationUpdate = true;
+				TheForest.Utils.Scene.Atmosphere.ForceSunRotationUpdate = true;
 				this.Starvation = 0f;
 				this.StarvationCurrentDuration = this.StarvationSettings.Duration * 2f;
-				Scene.HudGui.StomachStarvation.gameObject.SetActive(true);
+				TheForest.Utils.Scene.HudGui.StomachStarvation.gameObject.SetActive(true);
 				this.Thirst = 0.35f;
-				Scene.HudGui.Hydration.fillAmount = 1f - this.Thirst;
+				TheForest.Utils.Scene.HudGui.Hydration.fillAmount = 1f - this.Thirst;
 			}
 		}
 		else
@@ -3234,11 +3287,11 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	private IEnumerator resetPlayerFromHeal()
 	{
 		PlayerRespawnMP.offsetDeathTime();
-		Scene.HudGui.ShowHud(true);
-		Scene.Cams.DeadCam.SetActive(false);
+		TheForest.Utils.Scene.HudGui.ShowHud(true);
+		TheForest.Utils.Scene.Cams.DeadCam.SetActive(false);
 		LocalPlayer.PlayerDeadCam.SetActive(false);
-		Scene.HudGui.MpRespawnLabel.gameObject.SetActive(false);
-		Scene.HudGui.MpRespawnMaxTimer.gameObject.SetActive(false);
+		TheForest.Utils.Scene.HudGui.MpRespawnLabel.gameObject.SetActive(false);
+		TheForest.Utils.Scene.HudGui.MpRespawnMaxTimer.gameObject.SetActive(false);
 		LocalPlayer.Inventory.CurrentView = PlayerInventory.PlayerViews.World;
 		yield return YieldPresets.WaitOneSecond;
 		AnimatorStateInfo state2 = this.animator.GetCurrentAnimatorStateInfo(2);
@@ -3267,6 +3320,10 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		Physics.IgnoreCollision(tc, LocalPlayer.Transform.GetComponent<SphereCollider>(), true);
 		Physics.IgnoreCollision(tc, LocalPlayer.Transform.GetComponent<CapsuleCollider>(), true);
 		LocalPlayer.ScriptSetup.sceneInfo.EnableMusic();
+		for (int i = 0; i < TheForest.Utils.Scene.SceneTracker.caveEntrances.Count; i++)
+		{
+			TheForest.Utils.Scene.SceneTracker.caveEntrances[i].disableCaveBlack();
+		}
 		if (this.Ocean)
 		{
 			this.Ocean.SetActive(false);
@@ -3282,9 +3339,9 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	
 	private void GameOver()
 	{
-		Scene.Cams.DeadCam.SetActive(false);
+		TheForest.Utils.Scene.Cams.DeadCam.SetActive(false);
 		LocalPlayer.PlayerDeadCam.SetActive(false);
-		Application.LoadLevel("TitleScene");
+		SceneManager.LoadScene("TitleScene", LoadSceneMode.Single);
 	}
 
 	
@@ -3356,7 +3413,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	
 	public void InACave()
 	{
-		Scene.Clock.IsCave();
+		TheForest.Utils.Scene.Clock.IsCave();
 		if (this.Ocean)
 		{
 			this.Ocean.SetActive(false);
@@ -3397,14 +3454,14 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	
 	private void doRemoveWorldMutants()
 	{
-		Scene.MutantControler.StartCoroutine("removeWorldMutants");
+		TheForest.Utils.Scene.MutantControler.StartCoroutine("removeWorldMutants");
 		this.delayedMutantSpawnCheck = false;
 	}
 
 	
 	public void NotInACave()
 	{
-		Scene.Clock.IsNotCave();
+		TheForest.Utils.Scene.Clock.IsNotCave();
 		if (this.Ocean)
 		{
 			this.Ocean.SetActive(true);
@@ -3447,32 +3504,29 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	
 	private void Life()
 	{
-		if (Scene.WeatherSystem == null)
+		if (TheForest.Utils.Scene.WeatherSystem == null)
 		{
 			return;
 		}
-		if (!LocalPlayer.IsInCaves && Scene.WeatherSystem.Raining && !this.Warm && Clock.Dark)
+		if (!LocalPlayer.IsInCaves && TheForest.Utils.Scene.WeatherSystem.Raining && !this.Warm && Clock.Dark)
 		{
 			this.SetCold(true);
 		}
 		if (this.Warm)
 		{
 			this.Tuts.CloseColdTut();
-			this.coldSwitch = false;
 			if (this.FrostScript.coverage <= 0f && this.IsCold)
 			{
 				this.SetCold(false);
 			}
+			this.coldSwitch = false;
 		}
-		if ((this.IsCold || this.IsInNorthColdArea()) && !LocalPlayer.IsInEndgame)
+		if ((this.IsCold || this.IsInNorthColdArea()) && !LocalPlayer.IsInEndgame && this.IsCold && !this.Warm)
 		{
-			if (this.IsCold && !this.Warm)
-			{
-				this.Tuts.ColdTut();
-			}
+			this.Tuts.ColdTut();
 			this.coldSwitch = true;
 		}
-		if (!Clock.Dark && !Scene.WeatherSystem.Raining && !LocalPlayer.IsInCaves && !this.IsInNorthColdArea())
+		if (!Clock.Dark && !TheForest.Utils.Scene.WeatherSystem.Raining && !LocalPlayer.IsInCaves && !this.IsInNorthColdArea())
 		{
 			if (!this.SunWarmth)
 			{
@@ -3647,13 +3701,13 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	}
 
 	
-	public void __HitFood__Original()
+	public void HitFood()
 	{
 		this.Hit(2 * GameSettings.Survival.HitFoodDamageRatio, true, PlayerStats.DamageType.Poison);
 	}
 
 	
-	public void __HitFoodDelayed__Original(int damage)
+	public void HitFoodDelayed(int damage)
 	{
 		base.StartCoroutine(this.HitFoodRoutine(damage));
 	}
@@ -3920,361 +3974,6 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	public bool IsFightingBoss { get; set; }
 
 	
-	[ModAPI.Attributes.Priority(1000)]
-	private void hitFallDown()
-	{
-		try
-		{
-			if (!UCheatmenu.GodMode)
-			{
-				this.__hitFallDown__Original();
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__hitFallDown__Original();
-		}
-	}
-
-	
-	[ModAPI.Attributes.Priority(1000)]
-	private void HitFire()
-	{
-		try
-		{
-			if (!UCheatmenu.GodMode)
-			{
-				this.__HitFire__Original();
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__HitFire__Original();
-		}
-	}
-
-	
-	[ModAPI.Attributes.Priority(1000)]
-	public void hitFromEnemy(int getDamage)
-	{
-		try
-		{
-			if (!UCheatmenu.GodMode)
-			{
-				this.__hitFromEnemy__Original(getDamage);
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__hitFromEnemy__Original(getDamage);
-		}
-	}
-
-	
-	[ModAPI.Attributes.Priority(1000)]
-	public void HitShark(int damage)
-	{
-		try
-		{
-			if (!UCheatmenu.GodMode)
-			{
-				this.__HitShark__Original(damage);
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__HitShark__Original(damage);
-		}
-	}
-
-	
-	[ModAPI.Attributes.Priority(1000)]
-	private void FallDownDead()
-	{
-		try
-		{
-			if (!UCheatmenu.GodMode)
-			{
-				this.__FallDownDead__Original();
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__FallDownDead__Original();
-		}
-	}
-
-	
-	[ModAPI.Attributes.Priority(1000)]
-	private void HitFromPlayMaker(int damage)
-	{
-		try
-		{
-			if (!UCheatmenu.GodMode)
-			{
-				this.__HitFromPlayMaker__Original(damage);
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__HitFromPlayMaker__Original(damage);
-		}
-	}
-
-	
-	[ModAPI.Attributes.Priority(1000)]
-	private void Fell()
-	{
-		try
-		{
-			if (!UCheatmenu.GodMode)
-			{
-				this.__Fell__Original();
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__Fell__Original();
-		}
-	}
-
-	
-	[ModAPI.Attributes.Priority(1000)]
-	private void KnockOut()
-	{
-		try
-		{
-			if (!UCheatmenu.GodMode)
-			{
-				this.__KnockOut__Original();
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__KnockOut__Original();
-		}
-	}
-
-	
-	[ModAPI.Attributes.Priority(1000)]
-	private void Bleed()
-	{
-		try
-		{
-			if (!UCheatmenu.GodMode)
-			{
-				this.__Bleed__Original();
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__Bleed__Original();
-		}
-	}
-
-	
-	[ModAPI.Attributes.Priority(1000)]
-	public void Poison()
-	{
-		try
-		{
-			if (!UCheatmenu.GodMode)
-			{
-				this.__Poison__Original();
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__Poison__Original();
-		}
-	}
-
-	
-	[ModAPI.Attributes.Priority(1000)]
-	private void HitPoison()
-	{
-		try
-		{
-			if (!UCheatmenu.GodMode)
-			{
-				this.__HitPoison__Original();
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__HitPoison__Original();
-		}
-	}
-
-	
-	[ModAPI.Attributes.Priority(1000)]
-	public void Hit(int damage, bool ignoreArmor, PlayerStats.DamageType type)
-	{
-		try
-		{
-			if (!UCheatmenu.GodMode)
-			{
-				this.__Hit__Original(damage, ignoreArmor, type);
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__Hit__Original(damage, ignoreArmor, type);
-		}
-	}
-
-	
-	private void Update()
-	{
-		try
-		{
-			if (UCheatmenu.SleepTimer)
-			{
-				if (!BoltNetwork.isClient && Scene.SceneTracker.allPlayers.Count >= 1)
-				{
-					Scene.MutantSpawnManager.offsetSleepAmounts();
-					Scene.MutantControler.startSetupFamilies();
-					EventRegistry.Player.Publish(TfEvent.Slept, null);
-					this.NextSleepTime = Scene.Clock.ElapsedGameTime;
-					base.Invoke("TurnOffSleepCam", 3f);
-					this.Tired = 0f;
-					this.Atmos.TimeLapse();
-					Scene.HudGui.ToggleAllHud(false);
-					Scene.Cams.SleepCam.SetActive(true);
-					this.Energy += 100f;
-					UCheatmenu.SleepTimer = false;
-					return;
-				}
-				this.Wake();
-				UCheatmenu.SleepTimer = false;
-			}
-			if (UCheatmenu.GodMode)
-			{
-				this.IsBloody = false;
-				this.FireWarmth = true;
-				this.SunWarmth = true;
-				this.IsCold = false;
-				this.Health = 100f;
-				this.Armor = 100;
-				this.Fullness = 1f;
-				this.Stamina = 100f;
-				this.Energy = 100f;
-				this.Hunger = 0;
-				this.Thirst = 0f;
-				this.Starvation = 0f;
-				this.AirBreathing.CurrentLungAir = 300f;
-			}
-			if (UCheatmenu.UnlimitedFuel)
-			{
-				this.Fuel.CurrentFuel = 120f;
-			}
-			this.__Update__Original();
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__Update__Original();
-		}
-	}
-
-	
-	private void KillPlayer()
-	{
-		try
-		{
-			if (!UCheatmenu.GodMode)
-			{
-				this.__KillPlayer__Original();
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__KillPlayer__Original();
-		}
-	}
-
-	
-	public void HitFood()
-	{
-		try
-		{
-			if (!UCheatmenu.GodMode)
-			{
-				this.__HitFood__Original();
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__HitFood__Original();
-		}
-	}
-
-	
-	public void HitFoodDelayed(int damage)
-	{
-		try
-		{
-			if (!UCheatmenu.GodMode)
-			{
-				this.__HitFoodDelayed__Original(damage);
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__HitFoodDelayed__Original(damage);
-		}
-	}
-
-	
-	private void Explosion(float dist)
-	{
-		try
-		{
-			if (!UCheatmenu.GodMode)
-			{
-				this.__Explosion__Original(dist);
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__Explosion__Original(dist);
-		}
-	}
-
-	
-	private void Burn()
-	{
-		try
-		{
-			if (!UCheatmenu.GodMode)
-			{
-				this.__Burn__Original();
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__Burn__Original();
-		}
-	}
-
-	
 	[Header("Vitals")]
 	public float BodyTemp = 37f;
 
@@ -4317,8 +4016,8 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	public int ArmorVis;
 
 	
-	[SerializeThis]
 	[Range(0f, 1f)]
+	[SerializeThis]
 	public float ColdArmor;
 
 	
@@ -4394,6 +4093,10 @@ public class PlayerStats : MonoBehaviour, IBurnable
 
 	
 	[SerializeThis]
+	public PlayerStats.hairsprayFuelData hairSprayFuel;
+
+	
+	[SerializeThis]
 	public PlayerStats.SkillData Skills;
 
 	
@@ -4434,8 +4137,14 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	public GameObject[] BoneArmorModel;
 
 	
-	[Space(20f)]
+	public GameObject[] CreepyArmorModel;
+
+	
+	public GameObject WarmsuitModel;
+
+	
 	[Header("Variations")]
+	[Space(20f)]
 	public Renderer MyBody;
 
 	
@@ -4616,7 +4325,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	private float coldFloatBlend;
 
 	
-	private bool coldSwitch;
+	public bool coldSwitch;
 
 	
 	private bool reloadedFromRespawn;
@@ -4733,8 +4442,8 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	private CoopPlayerVariations PlayerVariations;
 
 	
-	[HideInInspector]
 	[SerializeThis]
+	[HideInInspector]
 	public int PlayerVariation;
 
 	
@@ -4743,8 +4452,8 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	public int PlayerVariationBody;
 
 	
-	[HideInInspector]
 	[SerializeThis]
+	[HideInInspector]
 	public int PlayerVariationTShirtType;
 
 	
@@ -4758,8 +4467,8 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	public int PlayerVariationPantsType;
 
 	
-	[HideInInspector]
 	[SerializeThis]
+	[HideInInspector]
 	public int PlayerVariationPantsMat;
 
 	
@@ -4773,9 +4482,12 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	public PlayerCloting PlayerVariationExtras;
 
 	
-	[HideInInspector]
 	[SerializeThis]
+	[HideInInspector]
 	public int PlayerClothingVariation;
+
+	
+	private const int ArmorSlots = 10;
 
 	
 	private Coroutine checkItemRoutine;
@@ -4817,7 +4529,11 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		
 		Leaves = 4,
 		
-		Bone = 8
+		Bone = 8,
+		
+		Creepy = 9,
+		
+		Warmsuit = 16
 	}
 
 	
@@ -4829,6 +4545,15 @@ public class PlayerStats : MonoBehaviour, IBurnable
 
 		
 		public PlayerStats.ArmorTypes ModelType = PlayerStats.ArmorTypes.LizardSkin;
+
+		
+		public Material Mat;
+
+		
+		public PlayerStats.ArmorTypes ModelType2;
+
+		
+		public Material Mat2;
 
 		
 		public Color NibbleColor;
@@ -4843,9 +4568,6 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		
 		[NameFromProperty("_type", 0)]
 		public StatEffect[] Effects;
-
-		
-		public Material Mat;
 	}
 
 	
@@ -4922,6 +4644,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		
 		public RandomRange DamageChance = new RandomRange
 		{
+			_min = 0,
 			_max = 15
 		};
 
@@ -5014,6 +4737,36 @@ public class PlayerStats : MonoBehaviour, IBurnable
 
 		
 		public bool TakingDamage;
+	}
+
+	
+	[DoNotSerializePublic]
+	[Serializable]
+	public class hairsprayFuelData
+	{
+		
+		
+		
+		[SerializeThis]
+		public float CurrentFuel
+		{
+			get
+			{
+				return this._currentFuel;
+			}
+			set
+			{
+				this._currentFuel = ((!Cheats.UnlimitedHairspray) ? value : this.MaxFuelCapacity);
+			}
+		}
+
+		
+		[UnityEngine.Tooltip("In real life seconds")]
+		public float MaxFuelCapacity = 30f;
+
+		
+		[UnityEngine.Tooltip("In real life seconds")]
+		private float _currentFuel = 30f;
 	}
 
 	
@@ -5154,8 +4907,8 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		public float MaxWeight = 305f;
 
 		
-		[SerializeThis]
 		[Header("Runtime data")]
+		[SerializeThis]
 		public int LastStrengthUpdateDay;
 
 		
@@ -5199,9 +4952,11 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		public float UndereatingPoints;
 
 		
+		[SerializeThis]
 		public float DailyStartStrength;
 
 		
+		[SerializeThis]
 		public float DailyStartWeight;
 	}
 
@@ -5224,25 +4979,28 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		{
 			if (Time.timeScale > 0f)
 			{
-				if (LocalPlayer.FpCharacter.jumping && !LocalPlayer.FpCharacter.Sitting)
+				if (GameSetup.IsHardSurvivalMode)
 				{
-					this.CaloriesBurntChange(this.JumpingCaloriesPerSecond * Time.deltaTime);
-				}
-				if (LocalPlayer.FpCharacter.swimming && LocalPlayer.Stats.Stamina > 0f && LocalPlayer.Rigidbody.velocity.sqrMagnitude > 1f)
-				{
-					this.CaloriesBurntChange((this.SwimmingCaloriesPerSecond + ((!LocalPlayer.FpCharacter.running) ? 0f : this.RunningCaloriesPerSecond)) * Time.deltaTime);
-				}
-				else if (LocalPlayer.FpCharacter.running && LocalPlayer.Stats.Stamina > 0f && LocalPlayer.Rigidbody.velocity.sqrMagnitude > 1f)
-				{
-					this.CaloriesBurntChange((this.RunningCaloriesPerSecond + (float)LocalPlayer.Inventory.Logs.Amount * 1.5f * this.CarryLogCaloriesPerSecond) * Time.deltaTime);
-				}
-				else if (LocalPlayer.FpCharacter.Grounded && LocalPlayer.Rigidbody.velocity.sqrMagnitude > 0.3f)
-				{
-					this.CaloriesBurntChange((this.WalkingCaloriesPerSecond + (float)LocalPlayer.Inventory.Logs.Amount * this.CarryLogCaloriesPerSecond) * Time.deltaTime);
-				}
-				else if (LocalPlayer.FpCharacter.Grounded)
-				{
-					this.CaloriesBurntChange(this.StationnaryCaloriesPerSecond * Time.deltaTime);
+					if (LocalPlayer.FpCharacter.jumping && !LocalPlayer.FpCharacter.Sitting)
+					{
+						this.CaloriesBurntChange(this.JumpingCaloriesPerSecond * Time.deltaTime);
+					}
+					if (LocalPlayer.FpCharacter.swimming && LocalPlayer.Stats.Stamina > 0f && LocalPlayer.Rigidbody.velocity.sqrMagnitude > 1f)
+					{
+						this.CaloriesBurntChange((this.SwimmingCaloriesPerSecond + ((!LocalPlayer.FpCharacter.running) ? 0f : this.RunningCaloriesPerSecond)) * Time.deltaTime);
+					}
+					else if (LocalPlayer.FpCharacter.running && LocalPlayer.Stats.Stamina > 0f && LocalPlayer.Rigidbody.velocity.sqrMagnitude > 1f)
+					{
+						this.CaloriesBurntChange((this.RunningCaloriesPerSecond + (float)LocalPlayer.Inventory.Logs.Amount * 1.5f * this.CarryLogCaloriesPerSecond) * Time.deltaTime);
+					}
+					else if (LocalPlayer.FpCharacter.Grounded && LocalPlayer.Rigidbody.velocity.sqrMagnitude > 0.3f)
+					{
+						this.CaloriesBurntChange((this.WalkingCaloriesPerSecond + (float)LocalPlayer.Inventory.Logs.Amount * this.CarryLogCaloriesPerSecond) * Time.deltaTime);
+					}
+					else if (LocalPlayer.FpCharacter.Grounded)
+					{
+						this.CaloriesBurntChange(this.StationnaryCaloriesPerSecond * Time.deltaTime);
+					}
 				}
 				if (this.NextResolutionTime == -1)
 				{
@@ -5283,8 +5041,15 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		
 		public void OnFighting()
 		{
-			this.CaloriesBurntChange(this.FightActionCalories);
-			this.StrengthChange(this.FightActionStrength * Mathf.Sign((float)this.GetRawExcessCalories()));
+			if (GameSetup.IsHardSurvivalMode)
+			{
+				this.CaloriesBurntChange(this.FightActionCalories);
+				this.StrengthChange(this.FightActionStrength * Mathf.Sign((float)this.GetRawExcessCalories()));
+			}
+			else
+			{
+				this.StrengthChange(this.FightActionStrength);
+			}
 		}
 
 		
@@ -5305,13 +5070,19 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		
 		private void CaloriesEatenChange(float value)
 		{
-			this.CurrentCaloriesEatenCount += value;
+			if (GameSetup.IsHardSurvivalMode)
+			{
+				this.CurrentCaloriesEatenCount += value;
+			}
 		}
 
 		
 		private void CaloriesBurntChange(float value)
 		{
-			this.CurrentCaloriesBurntCount += value;
+			if (GameSetup.IsHardSurvivalMode)
+			{
+				this.CurrentCaloriesBurntCount += value;
+			}
 		}
 
 		
@@ -5358,17 +5129,20 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		
 		private void Resolve()
 		{
-			int excessCaloriesFinal = this.GetExcessCaloriesFinal();
-			if (excessCaloriesFinal > 0)
+			if (GameSetup.IsHardSurvivalMode)
 			{
-				this.WeightChange((float)excessCaloriesFinal * this.WeightGainPerExcessCalory);
+				int excessCaloriesFinal = this.GetExcessCaloriesFinal();
+				if (excessCaloriesFinal > 0)
+				{
+					this.WeightChange((float)excessCaloriesFinal * this.WeightGainPerExcessCalory);
+				}
+				else
+				{
+					this.WeightChange((float)excessCaloriesFinal * this.WeightLossPerMissingCalory);
+				}
+				this.CurrentCaloriesBurntCount = 0f;
+				this.CurrentCaloriesEatenCount = 0f;
 			}
-			else
-			{
-				this.WeightChange((float)excessCaloriesFinal * this.WeightLossPerMissingCalory);
-			}
-			this.CurrentCaloriesBurntCount = 0f;
-			this.CurrentCaloriesEatenCount = 0f;
 			LocalPlayer.Stats.PhysicalStrength.DailyStartStrength = LocalPlayer.Stats.PhysicalStrength.CurrentStrength;
 			LocalPlayer.Stats.PhysicalStrength.DailyStartWeight = LocalPlayer.Stats.PhysicalStrength.CurrentWeight;
 		}
@@ -5413,8 +5187,8 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		public float FightActionStrength = 0.0047f;
 
 		
-		[SerializeThis]
 		[Header("Runtime data")]
+		[SerializeThis]
 		public float CurrentCaloriesBurntCount;
 
 		
@@ -5579,9 +5353,14 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		}
 
 		
-		private void SanityChange(float value)
+		internal void SanityChange(float value)
 		{
 			this.CurrentSanity = Mathf.Clamp(this.CurrentSanity + value, 0f, 100f);
+			if (this.CurrentSanity < 50f && !LocalPlayer.SavedData.ReachedLowSanityThreshold)
+			{
+				LocalPlayer.SavedData.ReachedLowSanityThreshold.SetValue(true);
+				LocalPlayer.Tuts.ShowNewBuildingsAvailableTut();
+			}
 		}
 
 		

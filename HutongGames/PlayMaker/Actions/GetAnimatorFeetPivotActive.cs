@@ -45,15 +45,15 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Animator))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animator))]
 		[Tooltip("The Target. An Animator component is required")]
 		public FsmOwnerDefault gameObject;
 
 		
 		[RequiredField]
-		[Tooltip("The feet pivot Blending. At 0% blending point is body mass center. At 100% blending point is feet pivot")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The feet pivot Blending. At 0% blending point is body mass center. At 100% blending point is feet pivot")]
 		public FsmFloat feetPivotActive;
 
 		

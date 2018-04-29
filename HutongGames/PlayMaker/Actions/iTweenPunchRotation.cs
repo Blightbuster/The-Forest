@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Applies a jolt of force to a GameObject's rotation and wobbles it back to its initial rotation. NOTE: Due to the way iTween utilizes the Transform.Rotate method, PunchRotation works best with single axis usage rather than punching with a Vector3.")]
 	[ActionCategory("iTween")]
+	[Tooltip("Applies a jolt of force to a GameObject's rotation and wobbles it back to its initial rotation. NOTE: Due to the way iTween utilizes the Transform.Rotate method, PunchRotation works best with single axis usage rather than punching with a Vector3.")]
 	public class iTweenPunchRotation : iTweenFsmAction
 	{
 		
@@ -93,8 +93,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString id;
 
 		
-		[Tooltip("A vector punch range.")]
 		[RequiredField]
+		[Tooltip("A vector punch range.")]
 		public FsmVector3 vector;
 
 		

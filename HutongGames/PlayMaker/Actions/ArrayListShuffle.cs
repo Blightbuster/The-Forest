@@ -5,8 +5,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Shuffle elements from an ArrayList Proxy component")]
 	[ActionCategory("ArrayMaker/ArrayList")]
+	[Tooltip("Shuffle elements from an ArrayList Proxy component")]
 	public class ArrayListShuffle : ArrayListActions
 	{
 		
@@ -58,9 +58,9 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[ActionSection("Set up")]
-		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		[RequiredField]
 		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component to shuffle")]
+		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 
 		

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Destroy the object across the network.\n\nThe object is destroyed locally and remotely.\n\nOptionally remove any RPCs accociated with the object.")]
 	[ActionCategory(ActionCategory.Network)]
+	[Tooltip("Destroy the object across the network.\n\nThe object is destroyed locally and remotely.\n\nOptionally remove any RPCs accociated with the object.")]
 	public class NetworkDestroy : ComponentAction<NetworkView>
 	{
 		
@@ -38,8 +38,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(NetworkView))]
 		[RequiredField]
+		[CheckForComponent(typeof(NetworkView))]
 		[Tooltip("The Game Object to destroy.\nNOTE: The Game Object must have a NetworkView attached.")]
 		public FsmOwnerDefault gameObject;
 

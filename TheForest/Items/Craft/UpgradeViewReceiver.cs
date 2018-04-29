@@ -30,6 +30,10 @@ namespace TheForest.Items.Craft
 				UnityEngine.Object.Destroy(base.gameObject);
 				return;
 			}
+			if (base.gameObject.layer != 0)
+			{
+				base.gameObject.layer = 0;
+			}
 			if (this._currentUpgrades == null)
 			{
 				this._currentUpgrades = new List<UpgradeViewReceiver.UpgradeViewData>();

@@ -92,77 +92,77 @@ public class CoopMutantDummy : EntityBehaviour<IMutantState>
 		yield return new WaitForFixedUpdate();
 		float closestDist = float.PositiveInfinity;
 		GameObject closestStoredToken = null;
-		for (int z = 0; z < Scene.SceneTracker.storedRagDollPrefabs.Count; z++)
+		for (int i = 0; i < Scene.SceneTracker.storedRagDollPrefabs.Count; i++)
 		{
-			if (Scene.SceneTracker.storedRagDollPrefabs[z] != null)
+			if (Scene.SceneTracker.storedRagDollPrefabs[i] != null)
 			{
-				float dist = Vector3.Distance(base.transform.position, Scene.SceneTracker.storedRagDollPrefabs[z].transform.position);
+				float dist = Vector3.Distance(base.transform.position, Scene.SceneTracker.storedRagDollPrefabs[i].transform.position);
 				if (dist < closestDist)
 				{
 					closestDist = dist;
-					closestStoredToken = Scene.SceneTracker.storedRagDollPrefabs[z];
+					closestStoredToken = Scene.SceneTracker.storedRagDollPrefabs[i];
 				}
 			}
 		}
 		if (closestStoredToken)
 		{
-			storeLocalMutantInfo2 slmi = closestStoredToken.transform.GetComponent<storeLocalMutantInfo2>();
+			storeLocalMutantInfo2 component = closestStoredToken.transform.GetComponent<storeLocalMutantInfo2>();
 			if (!this.ast)
 			{
 				this.ast = base.transform.GetComponent<arrowStickToTarget>();
 			}
 			if (!this.ast)
 			{
-				arrowStickToTarget[] allAst = base.transform.GetComponentsInChildren<arrowStickToTarget>(true);
-				if (allAst != null && allAst.Length > 0 && allAst[0])
+				arrowStickToTarget[] componentsInChildren = base.transform.GetComponentsInChildren<arrowStickToTarget>(true);
+				if (componentsInChildren != null && componentsInChildren.Length > 0 && componentsInChildren[0])
 				{
-					this.ast = allAst[0];
+					this.ast = componentsInChildren[0];
 				}
 			}
 			if (this.ast)
 			{
-				int index = 0;
-				foreach (KeyValuePair<Transform, int> attachStat in slmi.stuckArrowsIndex)
+				int num = 0;
+				foreach (KeyValuePair<Transform, int> keyValuePair in component.stuckArrowsIndex)
 				{
-					if (attachStat.Key)
+					if (keyValuePair.Key)
 					{
-						attachStat.Key.parent = this.ast.stickToJoints[attachStat.Value];
-						attachStat.Key.localPosition = slmi.stuckArrowPos[index];
-						attachStat.Key.localRotation = slmi.stuckArrowRot[index];
-						fakeArrowSetup fas = attachStat.Key.GetComponent<fakeArrowSetup>();
-						if (fas && BoltNetwork.isRunning)
+						keyValuePair.Key.parent = this.ast.stickToJoints[keyValuePair.Value];
+						keyValuePair.Key.localPosition = component.stuckArrowPos[num];
+						keyValuePair.Key.localRotation = component.stuckArrowRot[num];
+						fakeArrowSetup component2 = keyValuePair.Key.GetComponent<fakeArrowSetup>();
+						if (component2 && BoltNetwork.isRunning)
 						{
-							fas.storedIndex = this.ast.stuckArrows.Count;
-							fas.entityTarget = base.transform.root.GetComponent<BoltEntity>();
+							component2.storedIndex = this.ast.stuckArrows.Count;
+							component2.entityTarget = base.transform.root.GetComponent<BoltEntity>();
 						}
-						int newIndex = this.ast.stuckArrows.Count;
-						this.ast.stuckArrows.Add(attachStat.Key, newIndex);
-						index++;
+						int count = this.ast.stuckArrows.Count;
+						this.ast.stuckArrows.Add(keyValuePair.Key, count);
+						num++;
 					}
 				}
 			}
-			if (slmi.onFire)
+			if (component.fireIndex.Count > 0)
 			{
-				base.transform.SendMessage("enableFire", SendMessageOptions.DontRequireReceiver);
+				base.StartCoroutine(this.transferClientFire(component));
 			}
 			if (this.ragDollJoints.Length == 0)
 			{
 				yield break;
 			}
-			CoopMutantMaterialSync cmms = base.GetComponent<CoopMutantMaterialSync>();
-			if (cmms)
+			CoopMutantMaterialSync component3 = base.GetComponent<CoopMutantMaterialSync>();
+			if (component3)
 			{
-				cmms.setSkinColor(slmi.matColor);
+				component3.setSkinColor(component.matColor);
 			}
 			if (this.rootTr)
 			{
-				this.rootTr.rotation = slmi.rootRotation;
-				this.rootTr.position = slmi.rootPosition;
-				if (slmi.jointAngles.Count > 0)
+				this.rootTr.rotation = component.rootRotation;
+				this.rootTr.position = component.rootPosition;
+				if (component.jointAngles.Count > 0)
 				{
-					for (int i = 0; i < this.ragDollJoints.Length; i++)
+					for (int j = 0; j < this.ragDollJoints.Length; j++)
 					{
-						this.ragDollJoints[i].localRotation = slmi.jointAngles[i];
+						this.ragDollJoints[j].localRotation = component.jointAngles[j];
 					}
 				}
 			}
@@ -193,9 +193,9 @@ public class CoopMutantDummy : EntityBehaviour<IMutantState>
 		{
 			base.state.Transform.SetTransforms(base.transform);
 		}
-		if (!this.entity.isOwner)
+		if (!base.entity.isOwner)
 		{
-			CoopMutantDummyToken coopMutantDummyToken = this.entity.attachToken as CoopMutantDummyToken;
+			CoopMutantDummyToken coopMutantDummyToken = base.entity.attachToken as CoopMutantDummyToken;
 			if (coopMutantDummyToken != null)
 			{
 				base.transform.localScale = coopMutantDummyToken.Scale;
@@ -247,6 +247,10 @@ public class CoopMutantDummy : EntityBehaviour<IMutantState>
 							if (component)
 							{
 								component.setSkinColor(component3.matColor);
+							}
+							if (component3.fireIndex.Count > 0)
+							{
+								base.StartCoroutine(this.transferClientFire(component3));
 							}
 							if (!this.ast)
 							{
@@ -313,6 +317,50 @@ public class CoopMutantDummy : EntityBehaviour<IMutantState>
 				}
 			}
 		}
+	}
+
+	
+	private IEnumerator transferClientFire(storeLocalMutantInfo2 store)
+	{
+		mutantTransferFire mtf = base.transform.GetComponent<mutantTransferFire>();
+		if (mtf && mtf.allBones.Count > 0)
+		{
+			if (store == null || store.fireIndex.Count == 0)
+			{
+				yield break;
+			}
+			float targetDist = float.PositiveInfinity;
+			Transform key = null;
+			foreach (KeyValuePair<Transform, int> keyValuePair in store.fireIndex)
+			{
+				if (key == null)
+				{
+					key = keyValuePair.Key;
+				}
+			}
+			float timer = Time.time + 2f;
+			while (targetDist > 10f)
+			{
+				if (Time.time > timer)
+				{
+					yield break;
+				}
+				targetDist = Vector3.Distance(key.position, base.transform.position);
+				yield return null;
+			}
+			int indexCount = 0;
+			foreach (KeyValuePair<Transform, int> keyValuePair2 in store.fireIndex)
+			{
+				if (keyValuePair2.Key && keyValuePair2.Key.gameObject.activeSelf)
+				{
+					keyValuePair2.Key.parent = mtf.allBones[keyValuePair2.Value];
+					keyValuePair2.Key.localPosition = store.firePos[indexCount];
+					keyValuePair2.Key.localRotation = store.fireRot[indexCount];
+					indexCount++;
+				}
+			}
+		}
+		yield break;
 	}
 
 	

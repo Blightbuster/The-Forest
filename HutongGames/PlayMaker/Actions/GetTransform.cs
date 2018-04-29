@@ -47,9 +47,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmGameObject gameObject;
 
 		
+		[RequiredField]
 		[UIHint(UIHint.Variable)]
 		[ObjectType(typeof(Transform))]
-		[RequiredField]
 		public FsmObject storeTransform;
 
 		

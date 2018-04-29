@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Perform a raycast into the scene using screen coordinates and stores the results. Use Ray Distance to set how close the camera must be to pick the object. NOTE: Uses the MainCamera!")]
 	[ActionCategory(ActionCategory.Input)]
+	[Tooltip("Perform a raycast into the scene using screen coordinates and stores the results. Use Ray Distance to set how close the camera must be to pick the object. NOTE: Uses the MainCamera!")]
 	public class ScreenPick : FsmStateAction
 	{
 		
@@ -56,7 +56,7 @@ namespace HutongGames.PlayMaker.Actions
 		{
 			if (Camera.main == null)
 			{
-				this.LogError("No MainCamera defined!");
+				base.LogError("No MainCamera defined!");
 				base.Finish();
 				return;
 			}
@@ -140,8 +140,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat storeDistance;
 
 		
-		[Tooltip("Pick only from these layers.")]
 		[UIHint(UIHint.Layer)]
+		[Tooltip("Pick only from these layers.")]
 		public FsmInt[] layerMask;
 
 		

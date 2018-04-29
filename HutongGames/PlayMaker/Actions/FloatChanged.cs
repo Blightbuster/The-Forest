@@ -49,8 +49,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmEvent changedEvent;
 
 		
-		[Tooltip("Set to True if the float variable changes.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Set to True if the float variable changes.")]
 		public FsmBool storeResult;
 
 		

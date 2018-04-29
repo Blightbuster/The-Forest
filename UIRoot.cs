@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-[AddComponentMenu("NGUI/UI/Root")]
 [ExecuteInEditMode]
+[AddComponentMenu("NGUI/UI/Root")]
 public class UIRoot : MonoBehaviour
 {
 	
@@ -78,17 +78,19 @@ public class UIRoot : MonoBehaviour
 			Vector2 screenSize2 = NGUITools.screenSize;
 			float num3 = screenSize2.x / screenSize2.y;
 			float num4 = (float)this.manualWidth / (float)this.manualHeight;
-			switch (constraint)
+			if (constraint == UIRoot.Constraint.FitWidth)
 			{
-			case UIRoot.Constraint.Fit:
-				return (num4 <= num3) ? this.manualHeight : Mathf.RoundToInt((float)this.manualWidth / num3);
-			case UIRoot.Constraint.Fill:
-				return (num4 >= num3) ? this.manualHeight : Mathf.RoundToInt((float)this.manualWidth / num3);
-			case UIRoot.Constraint.FitWidth:
 				return Mathf.RoundToInt((float)this.manualWidth / num3);
-			default:
+			}
+			if (constraint == UIRoot.Constraint.Fit)
+			{
+				return (num4 <= num3) ? this.manualHeight : Mathf.RoundToInt((float)this.manualWidth / num3);
+			}
+			if (constraint != UIRoot.Constraint.Fill)
+			{
 				return this.manualHeight;
 			}
+			return (num4 >= num3) ? this.manualHeight : Mathf.RoundToInt((float)this.manualWidth / num3);
 		}
 	}
 

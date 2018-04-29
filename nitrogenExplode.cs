@@ -70,7 +70,7 @@ public class nitrogenExplode : MonoBehaviour
 				component2.isKinematic = false;
 				component2.useGravity = true;
 			}
-			this.spawnedBomb = (UnityEngine.Object.Instantiate(this.ExplodeGo, base.transform.position, base.transform.rotation) as GameObject);
+			this.spawnedBomb = UnityEngine.Object.Instantiate<GameObject>(this.ExplodeGo, base.transform.position, base.transform.rotation);
 			this.spawnedBomb.SendMessage("setWaitTime", this.waitTime, SendMessageOptions.DontRequireReceiver);
 			base.Invoke("CleanUp", (float)this.waitTime);
 		}

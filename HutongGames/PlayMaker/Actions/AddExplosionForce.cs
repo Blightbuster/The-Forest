@@ -55,8 +55,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Rigidbody))]
 		[RequiredField]
+		[CheckForComponent(typeof(Rigidbody))]
 		[Tooltip("The GameObject to add the explosion force to.")]
 		public FsmOwnerDefault gameObject;
 
@@ -66,13 +66,13 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmVector3 center;
 
 		
-		[Tooltip("The strength of the explosion.")]
 		[RequiredField]
+		[Tooltip("The strength of the explosion.")]
 		public FsmFloat force;
 
 		
-		[Tooltip("The radius of the explosion. Force falls off linearly with distance.")]
 		[RequiredField]
+		[Tooltip("The radius of the explosion. Force falls off linearly with distance.")]
 		public FsmFloat radius;
 
 		

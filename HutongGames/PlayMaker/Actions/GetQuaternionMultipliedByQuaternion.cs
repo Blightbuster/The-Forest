@@ -3,9 +3,9 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[HelpUrl("https:
 	[ActionCategory("Quaternion")]
 	[Tooltip("Get the quaternion from a quaternion multiplied by a quaternion.")]
+	[HelpUrl("https:
 	public class GetQuaternionMultipliedByQuaternion : FsmStateAction
 	{
 		
@@ -40,19 +40,19 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The first quaternion to multiply")]
 		[RequiredField]
+		[Tooltip("The first quaternion to multiply")]
 		public FsmQuaternion quaternionA;
 
 		
-		[Tooltip("The second quaternion to multiply")]
 		[RequiredField]
+		[Tooltip("The second quaternion to multiply")]
 		public FsmQuaternion quaternionB;
 
 		
-		[Tooltip("The resulting quaternion")]
 		[RequiredField]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The resulting quaternion")]
 		public FsmQuaternion result;
 
 		

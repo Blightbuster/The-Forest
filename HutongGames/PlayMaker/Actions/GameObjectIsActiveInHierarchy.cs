@@ -50,9 +50,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject variable to test.")]
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("The GameObject variable to test.")]
 		public FsmGameObject gameObject;
 
 		

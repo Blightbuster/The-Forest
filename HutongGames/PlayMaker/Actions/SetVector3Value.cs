@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the value of a Vector3 Variable.")]
 	[ActionCategory(ActionCategory.Vector3)]
+	[Tooltip("Sets the value of a Vector3 Variable.")]
 	public class SetVector3Value : FsmStateAction
 	{
 		
@@ -32,8 +32,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmVector3 vector3Variable;
 
 		

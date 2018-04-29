@@ -253,11 +253,11 @@ public class mutantController : MonoBehaviour, IMutantController
 			base.Invoke("resetSetupBreak", 1f);
 			if (this.activeCannibals.Count > 0)
 			{
-				foreach (GameObject go in this.activeCannibals)
+				foreach (GameObject gameObject in this.activeCannibals)
 				{
-					if (go)
+					if (gameObject)
 					{
-						Scene.ActiveMB.StartCoroutine(this.despawnGo(go));
+						Scene.ActiveMB.StartCoroutine(this.despawnGo(gameObject));
 					}
 				}
 			}
@@ -265,19 +265,19 @@ public class mutantController : MonoBehaviour, IMutantController
 			{
 				yield return null;
 			}
-			foreach (GameObject go2 in this.allWorldSpawns)
+			foreach (GameObject gameObject2 in this.allWorldSpawns)
 			{
-				if (go2)
+				if (gameObject2)
 				{
-					UnityEngine.Object.Destroy(go2);
+					UnityEngine.Object.Destroy(gameObject2);
 				}
 			}
-			foreach (GameObject go3 in this.allCaveSpawns)
+			foreach (GameObject gameObject3 in this.allCaveSpawns)
 			{
-				if (go3)
+				if (gameObject3)
 				{
-					spawnMutants spawn = go3.GetComponent<spawnMutants>();
-					spawn.enabled = false;
+					spawnMutants component = gameObject3.GetComponent<spawnMutants>();
+					component.enabled = false;
 				}
 			}
 			this.count = 0;
@@ -310,9 +310,9 @@ public class mutantController : MonoBehaviour, IMutantController
 		this.allPaleSpawns.RemoveAll((GameObject o) => o == null);
 		this.allCreepySpawns.RemoveAll((GameObject o) => o == null);
 		this.allSkinnedSpawns.RemoveAll((GameObject o) => o == null);
-		foreach (GameObject go in this.allWorldSpawns)
+		foreach (GameObject gameObject in this.allWorldSpawns)
 		{
-			go.SendMessage("updateSpawnConditions", SendMessageOptions.DontRequireReceiver);
+			gameObject.SendMessage("updateSpawnConditions", SendMessageOptions.DontRequireReceiver);
 		}
 		this.setDayConditions();
 		if (Clock.Day == 0 && Scene.Atmosphere.TimeOfDay > 270f && Scene.Atmosphere.TimeOfDay < 359f && !LocalPlayer.IsInCaves)
@@ -373,7 +373,7 @@ public class mutantController : MonoBehaviour, IMutantController
 						yield return null;
 					}
 					this.lastValidSpawn = spawnPoint;
-					GameObject newSpawn = UnityEngine.Object.Instantiate(this.spawnGo, spawnPoint.position, spawnPoint.rotation) as GameObject;
+					GameObject newSpawn = UnityEngine.Object.Instantiate<GameObject>(this.spawnGo, spawnPoint.position, spawnPoint.rotation);
 					spawnMutants spawn = newSpawn.GetComponent<spawnMutants>();
 					if (this.allCreepySpawns.Count < this.spawnManager.desiredCreepy)
 					{
@@ -425,11 +425,11 @@ public class mutantController : MonoBehaviour, IMutantController
 					this.sortCaveSpawnsByDistance(LocalPlayer.Transform);
 					if (this.allCaveSpawns[this.count] != null)
 					{
-						spawnMutants spawn2 = this.allCaveSpawns[this.count].GetComponent<spawnMutants>();
-						if (!spawn2.enabled)
+						spawnMutants component = this.allCaveSpawns[this.count].GetComponent<spawnMutants>();
+						if (!component.enabled)
 						{
-							spawn2.enabled = true;
-							spawn2.invokeSpawn();
+							component.enabled = true;
+							component.invokeSpawn();
 							if (!this.activeFamilies.Contains(this.allCaveSpawns[this.count]))
 							{
 								this.activeFamilies.Add(this.allCaveSpawns[this.count]);
@@ -443,11 +443,11 @@ public class mutantController : MonoBehaviour, IMutantController
 				yield return YieldPresets.WaitForFixedUpdate;
 				yield return YieldPresets.WaitForFixedUpdate;
 				yield return YieldPresets.WaitForFixedUpdate;
-				foreach (GameObject go2 in this.allWorldSpawns)
+				foreach (GameObject gameObject2 in this.allWorldSpawns)
 				{
-					if (go2)
+					if (gameObject2)
 					{
-						go2.SendMessage("updateSpawnConditions", SendMessageOptions.DontRequireReceiver);
+						gameObject2.SendMessage("updateSpawnConditions", SendMessageOptions.DontRequireReceiver);
 					}
 				}
 			}
@@ -478,11 +478,11 @@ public class mutantController : MonoBehaviour, IMutantController
 				this.sortCaveSpawnsByDistance(LocalPlayer.Transform);
 				if (this.allCaveSpawns[this.count] != null)
 				{
-					spawnMutants spawn = this.allCaveSpawns[this.count].GetComponent<spawnMutants>();
-					if (!spawn.enabled)
+					spawnMutants component = this.allCaveSpawns[this.count].GetComponent<spawnMutants>();
+					if (!component.enabled)
 					{
-						spawn.enabled = true;
-						spawn.invokeSpawn();
+						component.enabled = true;
+						component.invokeSpawn();
 						if (!this.activeFamilies.Contains(this.allCaveSpawns[this.count]))
 						{
 							this.activeFamilies.Add(this.allCaveSpawns[this.count]);
@@ -936,11 +936,11 @@ public class mutantController : MonoBehaviour, IMutantController
 		yield return YieldPresets.WaitForFixedUpdate;
 		if (this.activeCannibals.Count > 0)
 		{
-			foreach (GameObject go in this.activeCannibals)
+			foreach (GameObject gameObject in this.activeCannibals)
 			{
-				if (go && LocalPlayer.Transform && Vector3.Distance(go.transform.position, LocalPlayer.Transform.position) > 75f)
+				if (gameObject && LocalPlayer.Transform && Vector3.Distance(gameObject.transform.position, LocalPlayer.Transform.position) > 75f)
 				{
-					Scene.ActiveMB.StartCoroutine(this.despawnGo(go));
+					Scene.ActiveMB.StartCoroutine(this.despawnGo(gameObject));
 				}
 			}
 		}
@@ -959,21 +959,21 @@ public class mutantController : MonoBehaviour, IMutantController
 		yield return YieldPresets.WaitForFixedUpdate;
 		if (this.activeCannibals.Count > 0)
 		{
-			foreach (GameObject go in this.activeCannibals)
+			foreach (GameObject gameObject in this.activeCannibals)
 			{
-				if (go)
+				if (gameObject)
 				{
-					Scene.ActiveMB.StartCoroutine(this.despawnGo(go));
+					Scene.ActiveMB.StartCoroutine(this.despawnGo(gameObject));
 				}
 			}
 		}
 		if (this.activeBabies.Count > 0)
 		{
-			foreach (GameObject go2 in this.activeBabies)
+			foreach (GameObject gameObject2 in this.activeBabies)
 			{
-				if (go2)
+				if (gameObject2)
 				{
-					Scene.ActiveMB.StartCoroutine(this.despawnGo(go2));
+					Scene.ActiveMB.StartCoroutine(this.despawnGo(gameObject2));
 				}
 			}
 		}
@@ -981,19 +981,19 @@ public class mutantController : MonoBehaviour, IMutantController
 		{
 			yield return null;
 		}
-		foreach (GameObject go3 in this.allWorldSpawns)
+		foreach (GameObject gameObject3 in this.allWorldSpawns)
 		{
-			if (go3)
+			if (gameObject3)
 			{
-				UnityEngine.Object.Destroy(go3);
+				UnityEngine.Object.Destroy(gameObject3);
 			}
 		}
-		foreach (GameObject go4 in this.allCaveSpawns)
+		foreach (GameObject gameObject4 in this.allCaveSpawns)
 		{
-			if (go4)
+			if (gameObject4)
 			{
-				spawnMutants spawn = go4.GetComponent<spawnMutants>();
-				spawn.enabled = false;
+				spawnMutants component = gameObject4.GetComponent<spawnMutants>();
+				component.enabled = false;
 			}
 		}
 		this.count = 0;
@@ -1016,11 +1016,11 @@ public class mutantController : MonoBehaviour, IMutantController
 		yield return YieldPresets.WaitForFixedUpdate;
 		if (this.activeWorldCannibals.Count > 0)
 		{
-			foreach (GameObject go in this.activeWorldCannibals)
+			foreach (GameObject gameObject in this.activeWorldCannibals)
 			{
-				if (go)
+				if (gameObject)
 				{
-					Scene.ActiveMB.StartCoroutine(this.despawnGo(go));
+					Scene.ActiveMB.StartCoroutine(this.despawnGo(gameObject));
 				}
 			}
 		}
@@ -1028,11 +1028,11 @@ public class mutantController : MonoBehaviour, IMutantController
 		{
 			yield return null;
 		}
-		foreach (GameObject go2 in this.allWorldSpawns)
+		foreach (GameObject gameObject2 in this.allWorldSpawns)
 		{
-			if (go2)
+			if (gameObject2)
 			{
-				UnityEngine.Object.Destroy(go2);
+				UnityEngine.Object.Destroy(gameObject2);
 			}
 		}
 		this.count = 0;
@@ -1055,11 +1055,11 @@ public class mutantController : MonoBehaviour, IMutantController
 		yield return YieldPresets.WaitForFixedUpdate;
 		if (this.activeCaveCannibals.Count > 0)
 		{
-			foreach (GameObject go in this.activeCaveCannibals)
+			foreach (GameObject gameObject in this.activeCaveCannibals)
 			{
-				if (go)
+				if (gameObject)
 				{
-					Scene.ActiveMB.StartCoroutine(this.despawnGo(go));
+					Scene.ActiveMB.StartCoroutine(this.despawnGo(gameObject));
 				}
 			}
 		}
@@ -1068,12 +1068,12 @@ public class mutantController : MonoBehaviour, IMutantController
 		{
 			yield return null;
 		}
-		foreach (GameObject go2 in this.allCaveSpawns)
+		foreach (GameObject gameObject2 in this.allCaveSpawns)
 		{
-			if (go2)
+			if (gameObject2)
 			{
-				spawnMutants spawn = go2.GetComponent<spawnMutants>();
-				spawn.enabled = false;
+				spawnMutants component = gameObject2.GetComponent<spawnMutants>();
+				component.enabled = false;
 			}
 		}
 		yield break;
@@ -1137,7 +1137,7 @@ public class mutantController : MonoBehaviour, IMutantController
 				{
 					this.spawnCounter = this.spawnCounterMin;
 				}
-				GameObject newSpawn = UnityEngine.Object.Instantiate(this.spawnGo, spawnPoint.position, spawnPoint.rotation) as GameObject;
+				GameObject newSpawn = UnityEngine.Object.Instantiate<GameObject>(this.spawnGo, spawnPoint.position, spawnPoint.rotation);
 				spawnMutants spawn = newSpawn.GetComponent<spawnMutants>();
 				if (this.initMutantSpawnerCallback != null)
 				{
@@ -1189,11 +1189,11 @@ public class mutantController : MonoBehaviour, IMutantController
 					allSpawned = true;
 				}
 			}
-			foreach (GameObject go in this.allWorldSpawns)
+			foreach (GameObject gameObject in this.allWorldSpawns)
 			{
-				if (go)
+				if (gameObject)
 				{
-					go.SendMessage("updateSpawnConditions", SendMessageOptions.DontRequireReceiver);
+					gameObject.SendMessage("updateSpawnConditions", SendMessageOptions.DontRequireReceiver);
 				}
 			}
 		}
@@ -1221,7 +1221,7 @@ public class mutantController : MonoBehaviour, IMutantController
 			{
 				this.spawnCounter = this.spawnCounterMin;
 			}
-			GameObject newSpawn = UnityEngine.Object.Instantiate(this.spawnGo, spawnPoint.position, spawnPoint.rotation) as GameObject;
+			GameObject newSpawn = UnityEngine.Object.Instantiate<GameObject>(this.spawnGo, spawnPoint.position, spawnPoint.rotation);
 			spawnMutants spawn = newSpawn.GetComponent<spawnMutants>();
 			if (this.initMutantSpawnerCallback != null)
 			{
@@ -1231,24 +1231,24 @@ public class mutantController : MonoBehaviour, IMutantController
 			}
 			else
 			{
-				int rand = UnityEngine.Random.Range(0, 15);
-				if (rand < 3)
+				int num = UnityEngine.Random.Range(0, 15);
+				if (num < 3)
 				{
 					this.setupSkinnySpawn(spawn);
 				}
-				else if (rand > 3 && rand < 5)
+				else if (num > 3 && num < 5)
 				{
 					this.setupSkinnyPaleSpawn(spawn);
 				}
-				else if (rand > 5 && rand < 9)
+				else if (num > 5 && num < 9)
 				{
 					this.setupRegularSpawn(spawn);
 				}
-				else if (rand > 9 && rand < 12)
+				else if (num > 9 && num < 12)
 				{
 					this.setupPaleSpawn(spawn);
 				}
-				else if (rand > 12 && rand < 14)
+				else if (num > 12 && num < 14)
 				{
 					this.setupCreepySpawn(spawn);
 				}
@@ -1312,12 +1312,9 @@ public class mutantController : MonoBehaviour, IMutantController
 				{
 					if (dictionary.ContainsKey(list[l]))
 					{
-						Dictionary<uint, int> dictionary3;
-						Dictionary<uint, int> dictionary2 = dictionary3 = dictionary;
-						uint key2;
-						uint key = key2 = list[l];
-						int num2 = dictionary3[key2];
-						dictionary2[key] = num2 + 1;
+						Dictionary<uint, int> dictionary2;
+						uint key;
+						(dictionary2 = dictionary)[key = list[l]] = dictionary2[key] + 1;
 						if (dictionary[list[l]] > dictionary[this.mostCommonArea[j]])
 						{
 							this.mostCommonArea[j] = list[l];

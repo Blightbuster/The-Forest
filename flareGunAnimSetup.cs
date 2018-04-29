@@ -15,7 +15,7 @@ public class flareGunAnimSetup : MonoBehaviour
 	
 	private void OnEnable()
 	{
-		if (!base.transform.root.GetComponent<CoopPlayerVariations>())
+		if (!base.transform.GetComponentInParent<CoopPlayerVariations>())
 		{
 			this._animator = base.transform.GetComponent<Animator>();
 			if (this._animator)
@@ -186,7 +186,7 @@ public class flareGunAnimSetup : MonoBehaviour
 		if (base.enabled && base.gameObject.activeSelf && !this.blockAmmoSpawn)
 		{
 			this.blockAmmoSpawn = true;
-			GameObject gameObject = UnityEngine.Object.Instantiate(this._ammoSpawn, this._ammoEmpty.transform.position, this._ammoEmpty.transform.rotation) as GameObject;
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this._ammoSpawn, this._ammoEmpty.transform.position, this._ammoEmpty.transform.rotation);
 			gameObject.GetComponent<Rigidbody>().AddForce(this._ammoEmpty.transform.forward * -1f * (0.016666f / Time.fixedDeltaTime), ForceMode.VelocityChange);
 			gameObject.GetComponent<Rigidbody>().AddTorque(this._ammoEmpty.transform.right * -3f, ForceMode.VelocityChange);
 			this._ammoEmpty.SetActive(false);

@@ -23,7 +23,7 @@ public class LogHolder : EntityBehaviour<IItemHolderState>
 	
 	private void Update()
 	{
-		bool flag = this.Logs > 0 && LocalPlayer.Inventory.Logs.Amount < 2 && (!BoltNetwork.isRunning || this.entity.isAttached);
+		bool flag = this.Logs > 0 && LocalPlayer.Inventory.Logs.Amount < 2 && (!BoltNetwork.isRunning || base.entity.isAttached);
 		if (flag && TheForest.Utils.Input.GetButtonDown("Take"))
 		{
 			if (!BoltNetwork.isRunning)
@@ -38,19 +38,19 @@ public class LogHolder : EntityBehaviour<IItemHolderState>
 			else
 			{
 				ItemHolderTakeItem itemHolderTakeItem = ItemHolderTakeItem.Create(GlobalTargets.OnlyServer);
-				itemHolderTakeItem.Target = this.entity;
+				itemHolderTakeItem.Target = base.entity;
 				itemHolderTakeItem.Player = LocalPlayer.Entity;
 				itemHolderTakeItem.Send();
 			}
 		}
-		bool flag2 = this.Logs < 7 && LocalPlayer.Inventory.Logs.Amount > 0 && (!BoltNetwork.isRunning || this.entity.isAttached);
+		bool flag2 = this.Logs < 7 && LocalPlayer.Inventory.Logs.Amount > 0 && (!BoltNetwork.isRunning || base.entity.isAttached);
 		if (flag2 && TheForest.Utils.Input.GetButtonDown("Craft"))
 		{
 			LocalPlayer.Inventory.Logs.PutDown(false, false, true, null);
 			if (BoltNetwork.isRunning)
 			{
 				ItemHolderAddItem itemHolderAddItem = ItemHolderAddItem.Create(GlobalTargets.OnlyServer);
-				itemHolderAddItem.Target = this.entity;
+				itemHolderAddItem.Target = base.entity;
 				itemHolderAddItem.Send();
 			}
 			else
@@ -175,18 +175,6 @@ public class LogHolder : EntityBehaviour<IItemHolderState>
 		{
 			this.LogRender[j].SetActive(true);
 		}
-	}
-
-	
-	public void addLogs()
-	{
-		this.Logs++;
-	}
-
-	
-	public void ResetLogs()
-	{
-		this.Logs = 0;
 	}
 
 	

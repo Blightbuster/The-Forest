@@ -90,8 +90,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(GUIElement))]
 		[RequiredField]
+		[CheckForComponent(typeof(GUIElement))]
 		[Tooltip("The GameObject that has a GUITexture or GUIText component.")]
 		public FsmOwnerDefault gameObject;
 
@@ -120,8 +120,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmEvent hitEvent;
 
 		
-		[Tooltip("Store the result of the Hit Test in a bool variable (true/false).")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the result of the Hit Test in a bool variable (true/false).")]
 		public FsmBool storeResult;
 
 		

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Connect a joint to a game object.")]
 	[ActionCategory(ActionCategory.Physics)]
+	[Tooltip("Connect a joint to a game object.")]
 	public class SetJointConnectedBody : FsmStateAction
 	{
 		

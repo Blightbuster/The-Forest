@@ -17,7 +17,7 @@ public class CoopCharacterScale : EntityBehaviour<IWorldCharacter>
 	
 	public override void Attached()
 	{
-		if (!this.entity.IsOwner())
+		if (!base.entity.IsOwner())
 		{
 			base.state.AddCallback("CharacterScale", new PropertyCallbackSimple(this.OnCharacterScaleChanged));
 		}
@@ -26,7 +26,7 @@ public class CoopCharacterScale : EntityBehaviour<IWorldCharacter>
 	
 	private void Update()
 	{
-		if (this.entity.IsOwner())
+		if (base.entity.IsOwner())
 		{
 			base.state.CharacterScale = this.ApplyTo.localScale;
 		}

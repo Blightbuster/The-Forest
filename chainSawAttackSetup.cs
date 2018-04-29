@@ -98,7 +98,7 @@ public class chainSawAttackSetup : MonoBehaviour
 	
 	private void Update()
 	{
-		float to = 0.2f;
+		float b = 0.2f;
 		AnimatorStateInfo currentAnimatorStateInfo = this.playerAnimator.GetCurrentAnimatorStateInfo(1);
 		AnimatorStateInfo currentAnimatorStateInfo2 = this.playerAnimator.GetCurrentAnimatorStateInfo(2);
 		if (currentAnimatorStateInfo.shortNameHash == this.toIdleHash)
@@ -109,9 +109,19 @@ public class chainSawAttackSetup : MonoBehaviour
 			}
 			if (currentAnimatorStateInfo.normalizedTime > 0.5f)
 			{
-				to = 7f;
+				b = 7f;
 			}
-			this.chainSawAnimator.CrossFade("Base Layer.toIdle", 0f, 0, currentAnimatorStateInfo.normalizedTime);
+			if (!this.netPrefab)
+			{
+				if (LocalPlayer.Stats.Fuel.CurrentFuel > 0f)
+				{
+					this.chainSawAnimator.CrossFade("Base Layer.toIdle", 0f, 0, currentAnimatorStateInfo.normalizedTime);
+				}
+			}
+			else if (this.playerAnimator.GetFloat("fuel") > 0.1f)
+			{
+				this.chainSawAnimator.CrossFade("Base Layer.toIdle", 0f, 0, currentAnimatorStateInfo.normalizedTime);
+			}
 			if (!this.netPrefab)
 			{
 				this.playerAnimator.SetBool("cancelCheckArms", true);
@@ -158,7 +168,7 @@ public class chainSawAttackSetup : MonoBehaviour
 						this.attackTimer = Time.time + 0.05f;
 					}
 				}
-				to = 7f;
+				b = 7f;
 			}
 			else
 			{
@@ -210,6 +220,11 @@ public class chainSawAttackSetup : MonoBehaviour
 					this.setCuttingFleshParameter(0f);
 					this.setCuttingTreeParameter(0f);
 				}
+				if (!this.netPrefab && TheForest.Utils.Input.GetButton("AltFire"))
+				{
+					b = 8f;
+					this.SetCuttingParameter(0.8f);
+				}
 				UnityUtil.ERRCHECK(this.eventInstance.set3DAttributes(base.transform.to3DAttributes()));
 			}
 		}
@@ -218,13 +233,14 @@ public class chainSawAttackSetup : MonoBehaviour
 			bool flag = LocalPlayer.Inventory.CurrentView == PlayerInventory.PlayerViews.World;
 			if (LocalPlayer.Stats.Fuel.CurrentFuel <= 0f)
 			{
-				to = 0f;
+				this.chainSawAnimator.SetBool("empty", true);
+				b = 0f;
 				if (this.active)
 				{
 					this.active = false;
 					this.StopEvent();
 					this.sawCollider.enabled = false;
-					this.playerAnimator.SetFloat("fuel", 0f);
+					this.playerAnimator.SetFloatReflected("fuel", 0f);
 					this.playerAnimator.SetBool("attack", false);
 					this.playerAnimator.SetBool("sawAttack", false);
 					if (this.smokeGo)
@@ -246,10 +262,11 @@ public class chainSawAttackSetup : MonoBehaviour
 				{
 					this.active = true;
 				}
+				this.chainSawAnimator.SetBool("empty", false);
 				LocalPlayer.Inventory.CancelReloadDelay();
 				if (!this.netPrefab)
 				{
-					this.playerAnimator.SetFloat("fuel", 1f);
+					this.playerAnimator.SetFloatReflected("fuel", 1f);
 				}
 				if (this.smokeGo)
 				{
@@ -279,7 +296,8 @@ public class chainSawAttackSetup : MonoBehaviour
 		{
 			if (this.playerAnimator.GetFloat("fuel") <= 0.1f)
 			{
-				to = 0f;
+				this.chainSawAnimator.SetBool("empty", true);
+				b = 0f;
 				if (this.netActive)
 				{
 					this.StopEvent();
@@ -296,11 +314,12 @@ public class chainSawAttackSetup : MonoBehaviour
 				{
 					this.smokeGo.SetActive(true);
 				}
+				this.chainSawAnimator.SetBool("empty", false);
 				this.netActive = true;
 			}
 		}
-		this.chainSpeed = Mathf.Lerp(this.chainSpeed, to, Time.deltaTime * 2f);
-		this.chainSawAnimator.SetFloat("chainSpeed", this.chainSpeed);
+		this.chainSpeed = Mathf.Lerp(this.chainSpeed, b, Time.deltaTime * 2f);
+		this.chainSawAnimator.SetFloatReflected("chainSpeed", this.chainSpeed);
 	}
 
 	

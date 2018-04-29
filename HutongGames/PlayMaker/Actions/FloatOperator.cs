@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Performs math operations on 2 Floats: Add, Subtract, Multiply, Divide, Min, Max.")]
 	[ActionCategory(ActionCategory.Math)]
+	[Tooltip("Performs math operations on 2 Floats: Add, Subtract, Multiply, Divide, Min, Max.")]
 	public class FloatOperator : FsmStateAction
 	{
 		
@@ -68,8 +68,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat float1;
 
 		
-		[Tooltip("The second float.")]
 		[RequiredField]
+		[Tooltip("The second float.")]
 		public FsmFloat float2;
 
 		
@@ -77,9 +77,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FloatOperator.Operation operation;
 
 		
-		[Tooltip("Store the result of the operation in a float variable.")]
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the result of the operation in a float variable.")]
 		public FsmFloat storeResult;
 
 		

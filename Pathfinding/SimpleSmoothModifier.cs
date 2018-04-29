@@ -6,9 +6,9 @@ using UnityEngine;
 namespace Pathfinding
 {
 	
+	[AddComponentMenu("Pathfinding/Modifiers/Simple Smooth")]
 	[RequireComponent(typeof(Seeker))]
 	[HelpURL("http:
-	[AddComponentMenu("Pathfinding/Modifiers/Simple Smooth")]
 	[Serializable]
 	public class SimpleSmoothModifier : MonoModifier
 	{
@@ -198,12 +198,12 @@ namespace Pathfinding
 				float num3 = 0f;
 				for (int j = 0; j < path.Count - 1; j++)
 				{
-					Vector3 vector = path[j];
-					Vector3 vector2 = path[j + 1];
-					float num4 = Vector3.Distance(vector, vector2);
+					Vector3 a = path[j];
+					Vector3 b = path[j + 1];
+					float num4 = Vector3.Distance(a, b);
 					while (num3 < num4)
 					{
-						list.Add(Vector3.Lerp(vector, vector2, num3 / num4));
+						list.Add(Vector3.Lerp(a, b, num3 / num4));
 						num3 += this.maxSegmentLength;
 					}
 					num3 -= num4;
@@ -232,12 +232,12 @@ namespace Pathfinding
 			{
 				for (int m = 0; m < this.iterations; m++)
 				{
-					Vector3 a = list[0];
+					Vector3 a2 = list[0];
 					for (int n = 1; n < list.Count - 1; n++)
 					{
-						Vector3 vector3 = list[n];
-						list[n] = Vector3.Lerp(vector3, (a + list[n + 1]) / 2f, this.strength);
-						a = vector3;
+						Vector3 vector = list[n];
+						list[n] = Vector3.Lerp(vector, (a2 + list[n + 1]) / 2f, this.strength);
+						a2 = vector;
 					}
 				}
 			}

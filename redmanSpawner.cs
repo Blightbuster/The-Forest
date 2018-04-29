@@ -48,12 +48,12 @@ public class redmanSpawner : MonoBehaviour
 			float dist = Vector3.Distance(LocalPlayer.Transform.position, this.yachtSpawn.transform.position);
 			if (dist < 390f && dist > 150f && !this.doneYacht)
 			{
-				this.redMan = (GameObject)UnityEngine.Object.Instantiate((GameObject)Resources.Load("CutScene/redman_cutscene_prefab"), this.yachtSpawn.transform.position, this.yachtSpawn.transform.rotation);
+				this.redMan = UnityEngine.Object.Instantiate<GameObject>((GameObject)Resources.Load("CutScene/redman_cutscene_prefab"), this.yachtSpawn.transform.position, this.yachtSpawn.transform.rotation);
 				this.redMan.transform.parent = this.yachtSpawn.transform;
-				redmanSetup setup = this.redMan.GetComponent<redmanSetup>();
+				redmanSetup component = this.redMan.GetComponent<redmanSetup>();
 				this.animator = this.redMan.GetComponent<Animator>();
 				this.animator.SetBool("yachtScene", true);
-				setup.useIk = true;
+				component.useIk = true;
 				this.leaveTime = Time.time;
 				this.doneYacht = true;
 			}
@@ -97,8 +97,8 @@ public class redmanSpawner : MonoBehaviour
 			yield return YieldPresets.WaitTwoSeconds;
 			yield return YieldPresets.WaitPointOneSeconds;
 		}
-		this.redMan = (GameObject)UnityEngine.Object.Instantiate((GameObject)Resources.Load("CutScene/redman_cutscene_prefab"), this.caveSpawn1.transform.position, this.caveSpawn1.transform.rotation);
-		redmanSetup setup = this.redMan.GetComponent<redmanSetup>();
+		this.redMan = UnityEngine.Object.Instantiate<GameObject>((GameObject)Resources.Load("CutScene/redman_cutscene_prefab"), this.caveSpawn1.transform.position, this.caveSpawn1.transform.rotation);
+		redmanSetup component = this.redMan.GetComponent<redmanSetup>();
 		this.animator = this.redMan.GetComponent<Animator>();
 		this.animator.SetBool("caveWalk1", true);
 		base.StartCoroutine(this.removeRedman(this.redMan, 10f));
@@ -130,8 +130,8 @@ public class redmanSpawner : MonoBehaviour
 			float dist = Vector3.Distance(LocalPlayer.Transform.position, this.caveSpawn2.transform.position);
 			if (dist < 160f && dist > 100f && angle < 60f && angle > -60f && !this.doneCave2)
 			{
-				this.redMan = (GameObject)UnityEngine.Object.Instantiate((GameObject)Resources.Load("CutScene/redman_cutscene_prefab"), this.caveSpawn2.transform.position, this.caveSpawn2.transform.rotation);
-				redmanSetup setup = this.redMan.GetComponent<redmanSetup>();
+				this.redMan = UnityEngine.Object.Instantiate<GameObject>((GameObject)Resources.Load("CutScene/redman_cutscene_prefab"), this.caveSpawn2.transform.position, this.caveSpawn2.transform.rotation);
+				redmanSetup component = this.redMan.GetComponent<redmanSetup>();
 				this.redMan.transform.localScale = new Vector3(1.15f, 1.15f, 1.15f);
 				this.animator = this.redMan.GetComponent<Animator>();
 				this.animator.SetBool("caveWalk2", true);
@@ -186,7 +186,7 @@ public class redmanSpawner : MonoBehaviour
 	
 	private IEnumerator doRedmanOnCliff(Transform pos)
 	{
-		GameObject red = (GameObject)UnityEngine.Object.Instantiate((GameObject)Resources.Load("CutScene/redman_cutscene_prefab"), pos.position, pos.rotation);
+		GameObject red = UnityEngine.Object.Instantiate<GameObject>((GameObject)Resources.Load("CutScene/redman_cutscene_prefab"), pos.position, pos.rotation);
 		redmanSetup setup = red.GetComponent<redmanSetup>();
 		red.transform.localScale = new Vector3(1.15f, 1.15f, 1.15f);
 		this.animator = red.GetComponent<Animator>();

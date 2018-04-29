@@ -83,19 +83,19 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("Array of colors to defining the gradient.")]
 		[RequiredField]
+		[Tooltip("Array of colors to defining the gradient.")]
 		public FsmColor[] colors;
 
 		
-		[Tooltip("Point on the gradient to sample. Should be between 0 and the number of colors in the gradient.")]
 		[RequiredField]
+		[Tooltip("Point on the gradient to sample. Should be between 0 and the number of colors in the gradient.")]
 		public FsmFloat sampleAt;
 
 		
+		[RequiredField]
 		[UIHint(UIHint.Variable)]
 		[Tooltip("Store the sampled color in a Color variable.")]
-		[RequiredField]
 		public FsmColor storeColor;
 
 		

@@ -6,20 +6,11 @@ using UnityEngine;
 public class raftOnLand : MonoBehaviour
 {
 	
-	private void Awake()
+	private void OnEnable()
 	{
-		if (CoopPeerStarter.DedicatedHost)
+		if (BoltNetwork.isServer)
 		{
-			AmplifyMotionObject[] componentsInChildren = base.transform.GetComponentsInChildren<AmplifyMotionObject>(true);
-			AmplifyMotionObjectBase[] componentsInChildren2 = base.transform.GetComponentsInChildren<AmplifyMotionObjectBase>(true);
-			foreach (AmplifyMotionObject obj in componentsInChildren)
-			{
-				UnityEngine.Object.Destroy(obj);
-			}
-			foreach (AmplifyMotionObjectBase obj2 in componentsInChildren2)
-			{
-				UnityEngine.Object.Destroy(obj2);
-			}
+			base.StartCoroutine(this.fixBounceOnSpawn());
 		}
 	}
 
@@ -35,6 +26,24 @@ public class raftOnLand : MonoBehaviour
 		{
 			base.StartCoroutine(this.WaitAttachMP());
 		}
+	}
+
+	
+	public IEnumerator fixBounceOnSpawn()
+	{
+		this._rb = base.transform.GetComponent<Rigidbody>();
+		this._storeDrag = this._rb.drag;
+		float t = 0f;
+		while (t < 1f)
+		{
+			this._rb.drag = 100f;
+			this._rb.angularDrag = 100f;
+			t += Time.deltaTime;
+			yield return null;
+		}
+		this._rb.drag = this._storeDrag;
+		this._rb.angularDrag = this._storeDrag;
+		yield break;
 	}
 
 	
@@ -107,25 +116,13 @@ public class raftOnLand : MonoBehaviour
 	public RaftPush _push;
 
 	
+	public Transform BuildContainer;
+
+	
 	private Rigidbody _rb;
 
 	
-	private float setWobble;
-
-	
-	private float slope = 0.5f;
-
-	
-	private float interval = 1f;
-
-	
-	private float smooth = 0.5f;
-
-	
-	private float tNext;
-
-	
-	private float dir = 1f;
+	private float _storeDrag;
 
 	
 	private IRaftState raftState;

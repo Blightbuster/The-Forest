@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
+[ExecuteInEditMode]
 [RequireComponent(typeof(UISprite))]
 [AddComponentMenu("NGUI/UI/Sprite Animation")]
-[ExecuteInEditMode]
 public class UISpriteAnimation : MonoBehaviour
 {
 	
@@ -164,8 +164,8 @@ public class UISpriteAnimation : MonoBehaviour
 	}
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	protected int mFPS = 30;
 
 	

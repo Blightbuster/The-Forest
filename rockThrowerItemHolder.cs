@@ -89,7 +89,7 @@ public class rockThrowerItemHolder : EntityEventListener<IRockThrowerState>
 					if (BoltNetwork.isRunning)
 					{
 						ItemHolderTakeItem itemHolderTakeItem = ItemHolderTakeItem.Create(GlobalTargets.OnlyServer);
-						itemHolderTakeItem.Target = this.entity;
+						itemHolderTakeItem.Target = base.entity;
 						itemHolderTakeItem.ContentType = contentType;
 						itemHolderTakeItem.Player = LocalPlayer.Entity;
 						itemHolderTakeItem.Send();
@@ -131,7 +131,7 @@ public class rockThrowerItemHolder : EntityEventListener<IRockThrowerState>
 					{
 						ItemHolderAddItem itemHolderAddItem = ItemHolderAddItem.Create(GlobalTargets.OnlyServer);
 						itemHolderAddItem.ContentType = num;
-						itemHolderAddItem.Target = this.entity;
+						itemHolderAddItem.Target = base.entity;
 						itemHolderAddItem.Send();
 					}
 					else
@@ -169,7 +169,7 @@ public class rockThrowerItemHolder : EntityEventListener<IRockThrowerState>
 	
 	private void GrabEnter()
 	{
-		base.enabled = (!BoltNetwork.isRunning || this.entity.isAttached);
+		base.enabled = (!BoltNetwork.isRunning || base.entity.isAttached);
 	}
 
 	
@@ -199,7 +199,7 @@ public class rockThrowerItemHolder : EntityEventListener<IRockThrowerState>
 		{
 			if (this.Items > 0)
 			{
-				this.entity.Freeze(false);
+				base.entity.Freeze(false);
 				base.state.ItemCount = (this.Items = Mathf.Max(0, this.Items - 1));
 				this.am.rockAmmo[this.ammoLoaded].SetActive(true);
 				this.am.rockAmmo[this.ammoLoaded].SendMessage("setupAmmoType", type);
@@ -234,7 +234,7 @@ public class rockThrowerItemHolder : EntityEventListener<IRockThrowerState>
 	{
 		if (this.Items > 0)
 		{
-			this.entity.Freeze(false);
+			base.entity.Freeze(false);
 			base.state.ItemCount = (this.Items = Mathf.Max(0, this.Items - 1));
 		}
 		else
@@ -260,7 +260,7 @@ public class rockThrowerItemHolder : EntityEventListener<IRockThrowerState>
 		{
 			base.state.ItemCount = (this.Items = Mathf.Min(this.Items + 1, this.ItemsRender.Length));
 			this.lastContentType = type;
-			this.entity.Freeze(false);
+			base.entity.Freeze(false);
 		}
 	}
 
@@ -328,7 +328,7 @@ public class rockThrowerItemHolder : EntityEventListener<IRockThrowerState>
 		if (BoltNetwork.isRunning)
 		{
 			RockThrowerActivated rockThrowerActivated = RockThrowerActivated.Create(GlobalTargets.Everyone);
-			rockThrowerActivated.Target = this.entity;
+			rockThrowerActivated.Target = base.entity;
 			rockThrowerActivated.Send();
 		}
 	}
@@ -339,7 +339,7 @@ public class rockThrowerItemHolder : EntityEventListener<IRockThrowerState>
 		if (BoltNetwork.isRunning)
 		{
 			RockThrowerDeActivated rockThrowerDeActivated = RockThrowerDeActivated.Create(GlobalTargets.Everyone);
-			rockThrowerDeActivated.Target = this.entity;
+			rockThrowerDeActivated.Target = base.entity;
 			rockThrowerDeActivated.Send();
 		}
 	}
@@ -355,7 +355,7 @@ public class rockThrowerItemHolder : EntityEventListener<IRockThrowerState>
 			{
 				rockThrowerRemoveItem.ContentType = component.ammoType;
 			}
-			rockThrowerRemoveItem.Target = this.entity;
+			rockThrowerRemoveItem.Target = base.entity;
 			rockThrowerRemoveItem.Player = LocalPlayer.Entity;
 			rockThrowerRemoveItem.Send();
 		}
@@ -380,7 +380,7 @@ public class rockThrowerItemHolder : EntityEventListener<IRockThrowerState>
 		if (BoltNetwork.isRunning)
 		{
 			RockThrowerResetAmmo rockThrowerResetAmmo = RockThrowerResetAmmo.Create(GlobalTargets.Everyone);
-			rockThrowerResetAmmo.Target = this.entity;
+			rockThrowerResetAmmo.Target = base.entity;
 			rockThrowerResetAmmo.Send();
 		}
 		else
@@ -400,7 +400,7 @@ public class rockThrowerItemHolder : EntityEventListener<IRockThrowerState>
 		RockThrowerAnimate rockThrowerAnimate = RockThrowerAnimate.Create(GlobalTargets.Everyone);
 		rockThrowerAnimate.animVar = var;
 		rockThrowerAnimate.onoff = onoff;
-		rockThrowerAnimate.Target = this.entity;
+		rockThrowerAnimate.Target = base.entity;
 		rockThrowerAnimate.Send();
 	}
 
@@ -409,7 +409,7 @@ public class rockThrowerItemHolder : EntityEventListener<IRockThrowerState>
 	{
 		RockThrowerLandTarget rockThrowerLandTarget = RockThrowerLandTarget.Create(GlobalTargets.OnlyServer);
 		rockThrowerLandTarget.landPos = this.am.throwPos.GetComponent<rockThrowerAimingReticle>()._currentLandTarget;
-		rockThrowerLandTarget.Target = this.entity;
+		rockThrowerLandTarget.Target = base.entity;
 		rockThrowerLandTarget.Send();
 	}
 

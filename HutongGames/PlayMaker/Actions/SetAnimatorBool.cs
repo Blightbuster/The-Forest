@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the value of a bool parameter")]
 	[ActionCategory("Animator")]
+	[Tooltip("Sets the value of a bool parameter")]
 	[HelpUrl("https:
 	public class SetAnimatorBool : FsmStateAction
 	{
@@ -93,9 +93,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
-		[CheckForComponent(typeof(Animator))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animator))]
+		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
 		public FsmOwnerDefault gameObject;
 
 		

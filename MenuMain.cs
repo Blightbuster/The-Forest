@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections;
+using System.Runtime.CompilerServices;
 using Pathfinding;
-using Rewired;
 using Steamworks;
 using TheForest.Commons.Enums;
-using TheForest.Items.Inventory;
 using TheForest.Utils;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 public class MenuMain : MonoBehaviour
@@ -20,8 +20,7 @@ public class MenuMain : MonoBehaviour
 		EventDelegate.Add(this.ExitButtonMainMenu.onClick, new EventDelegate.Callback(this.OnExitMenu));
 		EventDelegate.Add(this.LoadButton.onClick, new EventDelegate.Callback(this.OnLoad));
 		this.audio = this.MenuRoot.GetComponentInChildren<PauseMenuAudio>();
-		TheForest.Utils.Input.player.controllers.maps.SetMapsEnabled(true, ControllerType.Keyboard, "Menu");
-		TheForest.Utils.Input.player.controllers.maps.SetMapsEnabled(true, ControllerType.Joystick, "Menu");
+		TheForest.Utils.Input.UpdateControlMapping();
 	}
 
 	
@@ -32,11 +31,7 @@ public class MenuMain : MonoBehaviour
 		EventDelegate.Remove(this.ExitButton.onClick, new EventDelegate.Callback(this.OnExit));
 		EventDelegate.Remove(this.ExitButtonMainMenu.onClick, new EventDelegate.Callback(this.OnExitMenu));
 		EventDelegate.Remove(this.LoadButton.onClick, new EventDelegate.Callback(this.OnLoad));
-		if (TheForest.Utils.Input.player != null && (!LocalPlayer.Inventory || LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Pause))
-		{
-			TheForest.Utils.Input.player.controllers.maps.SetMapsEnabled(false, ControllerType.Keyboard, "Menu");
-			TheForest.Utils.Input.player.controllers.maps.SetMapsEnabled(false, ControllerType.Joystick, "Menu");
-		}
+		TheForest.Utils.Input.UpdateControlMapping();
 	}
 
 	
@@ -46,7 +41,7 @@ public class MenuMain : MonoBehaviour
 		{
 			return;
 		}
-		Scene.HudGui.TogglePauseMenu(false);
+		TheForest.Utils.Scene.HudGui.TogglePauseMenu(false);
 	}
 
 	
@@ -90,27 +85,30 @@ public class MenuMain : MonoBehaviour
 		RecastMeshObj.Clear();
 		if (BoltNetwork.isRunning)
 		{
-			base.StartCoroutine(this.WaitForBoltShutdown(delegate
+			if (MenuMain.<>f__mg$cache0 == null)
 			{
-				CoopSteamServer.Shutdown();
-				CoopSteamClient.Shutdown();
-				CoopTreeGrid.Clear();
-				GameSetup.SetInitType(InitTypes.New);
-				GameSetup.SetGameType(GameTypes.Standard);
-				GeoHash.ClearAll();
-				Application.LoadLevel("TitleSceneLoader");
-			}));
+				MenuMain.<>f__mg$cache0 = new Action(MenuMain.PostBoltShutdown);
+			}
+			base.StartCoroutine(this.WaitForBoltShutdown(MenuMain.<>f__mg$cache0));
+			return;
 		}
-		else
-		{
-			CoopTreeGrid.Clear();
-			GameSetup.SetInitType(InitTypes.New);
-			GameSetup.SetGameType(GameTypes.Standard);
-			GeoHash.ClearAll();
-			Resources.UnloadUnusedAssets();
-			GC.Collect();
-			Application.LoadLevel("TitleSceneLoader");
-		}
+		CoopTreeGrid.Clear();
+		GameSetup.SetInitType(InitTypes.New);
+		GameSetup.SetGameType(GameTypes.Standard);
+		GeoHash.ClearAll();
+		SceneManager.LoadScene("TitleSceneLoader", LoadSceneMode.Single);
+	}
+
+	
+	private static void PostBoltShutdown()
+	{
+		CoopSteamServer.Shutdown();
+		CoopSteamClient.Shutdown();
+		CoopTreeGrid.Clear();
+		GameSetup.SetInitType(InitTypes.New);
+		GameSetup.SetGameType(GameTypes.Standard);
+		GeoHash.ClearAll();
+		SceneManager.LoadScene("TitleSceneLoader", LoadSceneMode.Single);
 	}
 
 	
@@ -158,9 +156,16 @@ public class MenuMain : MonoBehaviour
 	private void DrawLoader()
 	{
 		this.DrawOverlay();
+		if (this.LoaderTexture == null)
+		{
+			return;
+		}
 		Matrix4x4 matrix = GUI.matrix;
 		GUIUtility.RotateAroundPivot(Time.time * 360f, new Vector2((float)(Screen.width / 2), (float)(Screen.height / 2)));
-		GUI.DrawTexture(new Rect((float)(Screen.width / 2 - 32), (float)(Screen.height / 2 - 32), 64f, 64f), Resources.Load("CoopLoaderTexture") as Texture2D);
+		if (this.LoaderTexture != null)
+		{
+			GUI.DrawTexture(new Rect((float)(Screen.width / 2 - 32), (float)(Screen.height / 2 - 32), 64f, 64f), this.LoaderTexture);
+		}
 		GUI.matrix = matrix;
 	}
 
@@ -187,7 +192,7 @@ public class MenuMain : MonoBehaviour
 	}
 
 	
-	private IEnumerator WaitForBoltShutdown(Action done)
+	private IEnumerator WaitForBoltShutdown(Action postBoltShutdownAction)
 	{
 		yield return null;
 		if (CoopLobby.IsInLobby)
@@ -198,18 +203,41 @@ public class MenuMain : MonoBehaviour
 			}
 			CoopLobby.LeaveActive();
 		}
-		if (BoltNetwork.isClient)
+		if (BoltNetwork.isRunning)
 		{
-			Debug.Log("DISCONNECT FROM SERVER");
-			if (SteamClientDSConfig.isDedicatedClient)
+			if (BoltNetwork.isClient)
 			{
-				SteamUser.TerminateGameConnection(SteamClientDSConfig.EndPoint.Address.Packed, SteamClientDSConfig.EndPoint.Port);
+				BoltNetwork.server.Disconnect();
+				Debug.Log("DISCONNECT FROM SERVER");
+				if (SteamClientDSConfig.isDedicatedClient)
+				{
+					SteamUser.TerminateGameConnection(SteamClientDSConfig.EndPoint.Address.Packed, SteamClientDSConfig.EndPoint.Port);
+				}
 			}
-			BoltNetwork.server.Disconnect();
+			else
+			{
+				BoltLauncher.Shutdown();
+			}
+			int loopCount = 0;
+			float timer = Time.realtimeSinceStartup;
+			while (BoltNetwork.isRunning)
+			{
+				loopCount++;
+				yield return null;
+			}
+			Debug.Log(string.Concat(new object[]
+			{
+				"BoltShutdown took (",
+				loopCount,
+				" frames) ",
+				Time.realtimeSinceStartup - timer,
+				"s"
+			}));
 		}
-		yield return new WaitForSeconds(0.5f);
-		BoltLauncher.Shutdown();
-		done();
+		if (postBoltShutdownAction != null)
+		{
+			postBoltShutdownAction();
+		}
 		yield break;
 	}
 
@@ -250,8 +278,15 @@ public class MenuMain : MonoBehaviour
 	public UIButton ExitButtonMainMenu;
 
 	
+	public Texture2D LoaderTexture;
+
+	
 	private PauseMenuAudio audio;
 
 	
 	private Texture2D texture_Overlay;
+
+	
+	[CompilerGenerated]
+	private static Action <>f__mg$cache0;
 }

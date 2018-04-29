@@ -43,7 +43,7 @@ namespace TheForest.Items.Special
 		private IEnumerator DelayedStop()
 		{
 			this.ToggleSpecial(false);
-			LocalPlayer.Sfx.PlayWhoosh();
+			LocalPlayer.Sfx.PlayItemCustomSfx(this._itemId, true);
 			LocalPlayer.Animator.SetBoolReflected("pedHeld", false);
 			yield return new WaitForSeconds(1f);
 			if (this.IsActive)

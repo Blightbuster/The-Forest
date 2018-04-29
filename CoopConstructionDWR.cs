@@ -10,6 +10,6 @@ public class CoopConstructionDWR : EntityBehaviour
 	{
 		WallDefensiveChunkReinforcement component = base.GetComponent<WallDefensiveChunkReinforcement>();
 		component._wasPlaced = true;
-		this.entity.SendMessage("OnDeserialized");
+		base.entity.SendMessage("OnDeserialized");
 	}
 }

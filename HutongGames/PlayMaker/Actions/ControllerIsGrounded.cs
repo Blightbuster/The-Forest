@@ -57,8 +57,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(CharacterController))]
 		[RequiredField]
+		[CheckForComponent(typeof(CharacterController))]
 		[Tooltip("The GameObject to check.")]
 		public FsmOwnerDefault gameObject;
 

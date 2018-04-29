@@ -123,42 +123,42 @@ namespace Ceto
 			try
 			{
 				Vector4 vector = new Vector4(this.absorptionR, this.absorptionG, this.absorptionB, 1f);
-				Vector4 vec = vector;
-				Vector4 vec2 = vector;
+				Vector4 value = vector;
+				Vector4 value2 = vector;
 				vector.w = Mathf.Max(0f, this.aboveAbsorptionModifier.scale);
-				vec.w = Mathf.Max(0f, this.subSurfaceScatterModifier.scale);
-				vec2.w = Mathf.Max(0f, this.belowAbsorptionModifier.scale);
-				Color color = this.aboveAbsorptionModifier.tint * Mathf.Max(0f, this.aboveAbsorptionModifier.intensity);
-				Color color2 = this.subSurfaceScatterModifier.tint * Mathf.Max(0f, this.subSurfaceScatterModifier.intensity);
-				Color color3 = this.belowAbsorptionModifier.tint * Mathf.Max(0f, this.belowAbsorptionModifier.intensity);
-				Vector4 vec3 = default(Vector4);
-				vec3.x = ((this.causticTexture.scale.x == 0f) ? 1f : (1f / this.causticTexture.scale.x));
-				vec3.y = ((this.causticTexture.scale.y == 0f) ? 1f : (1f / this.causticTexture.scale.y));
-				vec3.z = this.causticModifier.distortion;
-				vec3.w = Mathf.Clamp01(this.causticModifier.depthFade);
+				value.w = Mathf.Max(0f, this.subSurfaceScatterModifier.scale);
+				value2.w = Mathf.Max(0f, this.belowAbsorptionModifier.scale);
+				Color value3 = this.aboveAbsorptionModifier.tint * Mathf.Max(0f, this.aboveAbsorptionModifier.intensity);
+				Color value4 = this.subSurfaceScatterModifier.tint * Mathf.Max(0f, this.subSurfaceScatterModifier.intensity);
+				Color value5 = this.belowAbsorptionModifier.tint * Mathf.Max(0f, this.belowAbsorptionModifier.intensity);
+				Vector4 value6 = default(Vector4);
+				value6.x = ((this.causticTexture.scale.x == 0f) ? 1f : (1f / this.causticTexture.scale.x));
+				value6.y = ((this.causticTexture.scale.y == 0f) ? 1f : (1f / this.causticTexture.scale.y));
+				value6.z = this.causticModifier.distortion;
+				value6.w = Mathf.Clamp01(this.causticModifier.depthFade);
 				Shader.SetGlobalVector("Ceto_AbsCof", vector);
-				Shader.SetGlobalColor("Ceto_AbsTint", color);
-				Shader.SetGlobalVector("Ceto_SSSCof", vec);
-				Shader.SetGlobalColor("Ceto_SSSTint", color2);
-				Shader.SetGlobalVector("Ceto_BelowCof", vec2);
-				Shader.SetGlobalColor("Ceto_BelowTint", color3);
-				Color color4 = this.aboveInscatterModifier.color;
-				color4.a = Mathf.Clamp01(this.aboveInscatterModifier.intensity);
+				Shader.SetGlobalColor("Ceto_AbsTint", value3);
+				Shader.SetGlobalVector("Ceto_SSSCof", value);
+				Shader.SetGlobalColor("Ceto_SSSTint", value4);
+				Shader.SetGlobalVector("Ceto_BelowCof", value2);
+				Shader.SetGlobalColor("Ceto_BelowTint", value5);
+				Color color = this.aboveInscatterModifier.color;
+				color.a = Mathf.Clamp01(this.aboveInscatterModifier.intensity);
 				Shader.SetGlobalFloat("Ceto_AboveInscatterScale", Mathf.Max(0.1f, this.aboveInscatterModifier.scale));
 				Shader.SetGlobalVector("Ceto_AboveInscatterMode", this.InscatterModeToMask(this.aboveInscatterModifier.mode));
-				Shader.SetGlobalColor("Ceto_AboveInscatterColor", color4);
-				Color color5 = this.belowInscatterModifier.color;
-				color5.a = Mathf.Clamp01(this.belowInscatterModifier.intensity);
+				Shader.SetGlobalColor("Ceto_AboveInscatterColor", color);
+				Color color2 = this.belowInscatterModifier.color;
+				color2.a = Mathf.Clamp01(this.belowInscatterModifier.intensity);
 				Shader.SetGlobalFloat("Ceto_BelowInscatterScale", Mathf.Max(0.1f, this.belowInscatterModifier.scale));
 				Shader.SetGlobalVector("Ceto_BelowInscatterMode", this.InscatterModeToMask(this.belowInscatterModifier.mode));
-				Shader.SetGlobalColor("Ceto_BelowInscatterColor", color5);
+				Shader.SetGlobalColor("Ceto_BelowInscatterColor", color2);
 				Shader.SetGlobalFloat("Ceto_RefractionIntensity", Mathf.Max(0f, this.refractionIntensity));
 				Shader.SetGlobalFloat("Ceto_RefractionDistortion", this.refractionDistortion * 0.05f);
 				Shader.SetGlobalFloat("Ceto_MaxDepthDist", Mathf.Max(0f, this.MAX_DEPTH_DIST));
 				Shader.SetGlobalFloat("Ceto_DepthBlend", Mathf.Clamp01(this.depthBlend));
 				Shader.SetGlobalFloat("Ceto_EdgeFade", Mathf.Lerp(20f, 2f, Mathf.Clamp01(this.edgeFade)));
 				Shader.SetGlobalTexture("Ceto_CausticTexture", (!(this.causticTexture.tex != null)) ? Texture2D.blackTexture : this.causticTexture.tex);
-				Shader.SetGlobalVector("Ceto_CausticTextureScale", vec3);
+				Shader.SetGlobalVector("Ceto_CausticTextureScale", value6);
 				Shader.SetGlobalColor("Ceto_CausticTint", this.causticModifier.tint * this.causticModifier.intensity);
 				if (this.depthMode == DEPTH_MODE.USE_OCEAN_DEPTH_PASS)
 				{
@@ -349,6 +349,17 @@ namespace Ceto
 									Shader.SetGlobalTexture(Ocean.DEPTH_GRAB_TEXTURE_NAME, Texture2D.whiteTexture);
 									Shader.SetGlobalTexture(Ocean.NORMAL_FADE_TEXTURE_NAME, Texture2D.blackTexture);
 									Shader.SetGlobalMatrix("Ceto_Camera_IVP", (current.projectionMatrix * current.worldToCameraMatrix).inverse);
+									if (current.stereoEnabled)
+									{
+										Matrix4x4 inverse = current.GetStereoViewMatrix(Camera.StereoscopicEye.Left).inverse;
+										Matrix4x4 inverse2 = current.GetStereoViewMatrix(Camera.StereoscopicEye.Right).inverse;
+										Shader.SetGlobalMatrix("Ceto_Camera_IV_Left", inverse);
+										Shader.SetGlobalMatrix("Ceto_Camera_IV_Right", inverse2);
+										Matrix4x4 inverse3 = current.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left).inverse;
+										Matrix4x4 inverse4 = current.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right).inverse;
+										Shader.SetGlobalMatrix("Ceto_Camera_IP_Left", inverse3);
+										Shader.SetGlobalMatrix("Ceto_Camera_IP_Right", inverse4);
+									}
 									cameraData.depth.updated = true;
 								}
 								else if (this.depthMode == DEPTH_MODE.USE_DEPTH_BUFFER)
@@ -357,6 +368,17 @@ namespace Ceto
 									current.depthTextureMode |= DepthTextureMode.Depth;
 									current.depthTextureMode |= DepthTextureMode.DepthNormals;
 									Shader.SetGlobalMatrix("Ceto_Camera_IVP", (current.projectionMatrix * current.worldToCameraMatrix).inverse);
+									if (current.stereoEnabled)
+									{
+										Matrix4x4 inverse5 = current.GetStereoViewMatrix(Camera.StereoscopicEye.Left).inverse;
+										Matrix4x4 inverse6 = current.GetStereoViewMatrix(Camera.StereoscopicEye.Right).inverse;
+										Shader.SetGlobalMatrix("Ceto_Camera_IV_Left", inverse5);
+										Shader.SetGlobalMatrix("Ceto_Camera_IV_Right", inverse6);
+										Matrix4x4 inverse7 = current.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left).inverse;
+										Matrix4x4 inverse8 = current.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right).inverse;
+										Shader.SetGlobalMatrix("Ceto_Camera_IP_Left", inverse7);
+										Shader.SetGlobalMatrix("Ceto_Camera_IP_Right", inverse8);
+									}
 									this.CreateRefractionCommand(current, cameraData.depth);
 									cameraData.depth.updated = true;
 								}
@@ -574,7 +596,6 @@ namespace Ceto
 			mesh.name = "Ceto Bottom Mesh";
 			mesh.hideFlags = HideFlags.HideAndDontSave;
 			mesh.RecalculateNormals();
-			mesh.Optimize();
 			return mesh;
 		}
 

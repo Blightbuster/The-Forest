@@ -48,9 +48,9 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[ActionSection("Set up")]
-		[CheckForComponent(typeof(PlayMakerHashTableProxy))]
 		[RequiredField]
 		[Tooltip("The gameObject with the PlayMaker HashTable Proxy component")]
+		[CheckForComponent(typeof(PlayMakerHashTableProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -59,8 +59,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("The Key value to check for")]
 		[UIHint(UIHint.FsmString)]
+		[Tooltip("The Key value to check for")]
 		public FsmString key;
 
 		
@@ -69,14 +69,14 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmBool containsKey;
 
 		
-		[UIHint(UIHint.FsmEvent)]
 		[ActionSection("Result")]
+		[UIHint(UIHint.FsmEvent)]
 		[Tooltip("The event to trigger when key is found")]
 		public FsmEvent keyFoundEvent;
 
 		
-		[Tooltip("The event to trigger when key is not found")]
 		[UIHint(UIHint.FsmEvent)]
+		[Tooltip("The event to trigger when key is not found")]
 		public FsmEvent keyNotFoundEvent;
 	}
 }

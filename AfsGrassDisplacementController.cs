@@ -9,7 +9,7 @@ public class AfsGrassDisplacementController : MonoBehaviour
 	private void createDisplacementTexture()
 	{
 		this.DisplacementTexture = new RenderTexture((int)this.RenderTexSize, (int)this.RenderTexSize, 0, RenderTextureFormat.ARGBHalf);
-		this.DisplacementTexture.generateMips = false;
+		this.DisplacementTexture.autoGenerateMips = false;
 		this.DisplacementTexture.antiAliasing = 1;
 		this.DisplacementTexture.filterMode = FilterMode.Point;
 		this.OldRenderTexSize = this.RenderTexSize;

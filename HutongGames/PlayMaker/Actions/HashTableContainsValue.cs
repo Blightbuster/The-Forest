@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Check if a value exists in a PlayMaker HashTable Proxy component (PlayMakerHashTablePRoxy)")]
 	[ActionCategory("ArrayMaker/HashTable")]
+	[Tooltip("Check if a value exists in a PlayMaker HashTable Proxy component (PlayMakerHashTablePRoxy)")]
 	public class HashTableContainsValue : HashTableActions
 	{
 		
@@ -49,8 +49,8 @@ namespace HutongGames.PlayMaker.Actions
 		
 		[ActionSection("Set up")]
 		[RequiredField]
-		[CheckForComponent(typeof(PlayMakerHashTableProxy))]
 		[Tooltip("The gameObject with the PlayMaker HashTable Proxy component")]
+		[CheckForComponent(typeof(PlayMakerHashTableProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -73,8 +73,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmEvent valueFoundEvent;
 
 		
-		[Tooltip("The event to trigger when value is not found")]
 		[UIHint(UIHint.FsmEvent)]
+		[Tooltip("The event to trigger when value is not found")]
 		public FsmEvent valueNotFoundEvent;
 	}
 }

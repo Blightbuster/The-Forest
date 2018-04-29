@@ -14,7 +14,7 @@ namespace TheForest.Items.World
 		
 		private void Update()
 		{
-			if (!BoltNetwork.isRunning || (this.entity.isAttached && this.entity.isOwner))
+			if (!BoltNetwork.isRunning || (base.entity.isAttached && base.entity.isOwner))
 			{
 				Rigidbody component = base.GetComponent<Rigidbody>();
 				component.velocity += base.transform.forward * this._accelerationSpeed * Time.deltaTime;
@@ -86,7 +86,7 @@ namespace TheForest.Items.World
 		
 		private void OnCollisionEnter(Collision col)
 		{
-			if (base.isActiveAndEnabled && (!BoltNetwork.isRunning || (this.entity.isAttached && this.entity.isOwner)))
+			if (base.isActiveAndEnabled && (!BoltNetwork.isRunning || (base.entity.isAttached && base.entity.isOwner)))
 			{
 				if (!col.collider.CompareTag("Player"))
 				{

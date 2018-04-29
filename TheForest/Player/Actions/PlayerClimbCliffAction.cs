@@ -105,7 +105,6 @@ namespace TheForest.Player.Actions
 		
 		private void resetClimbCliff()
 		{
-			Debug.Log("reset cliff climb from action");
 			LocalPlayer.AnimControl.playerHeadCollider.enabled = true;
 			this.doingClimb = false;
 			LocalPlayer.CamRotator.rotationRange = new Vector2(LocalPlayer.FpCharacter.minCamRotationRange, 0f);

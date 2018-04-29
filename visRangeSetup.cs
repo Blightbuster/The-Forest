@@ -10,7 +10,7 @@ public class visRangeSetup : EntityBehaviour<IPlayerState>
 	
 	public override void Attached()
 	{
-		if (!this.entity.IsOwner())
+		if (!base.entity.IsOwner())
 		{
 			base.state.AddCallback("TreeDensity", new PropertyCallbackSimple(this.TreeDensityChanged));
 			base.state.AddCallback("isTargetting", new PropertyCallbackSimple(this.isTargettingChanged));
@@ -180,9 +180,9 @@ public class visRangeSetup : EntityBehaviour<IPlayerState>
 		}
 		if (BoltNetwork.isRunning)
 		{
-			if (this.entity != null && this.entity.isAttached)
+			if (base.entity != null && base.entity.isAttached)
 			{
-				if (this.entity.IsOwner())
+				if (base.entity.IsOwner())
 				{
 					this.treeDensity = this.modVisRange;
 					if (this.treeDensity != base.state.TreeDensity)

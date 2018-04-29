@@ -700,12 +700,6 @@ namespace Pathfinding.Serialization
 		}
 
 		
-		private const string binaryExt = ".binary";
-
-		
-		private const string jsonExt = ".json";
-
-		
 		private AstarData data;
 
 		
@@ -728,6 +722,12 @@ namespace Pathfinding.Serialization
 
 		
 		private int graphIndexOffset;
+
+		
+		private const string binaryExt = ".binary";
+
+		
+		private const string jsonExt = ".json";
 
 		
 		private uint checksum = uint.MaxValue;

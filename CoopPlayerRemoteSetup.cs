@@ -23,7 +23,7 @@ public class CoopPlayerRemoteSetup : EntityEventListener<IPlayerState>
 	{
 		PlayerHitByEnemey playerHitByEnemey = PlayerHitByEnemey.Create();
 		playerHitByEnemey.Damage = damage;
-		playerHitByEnemey.Target = this.entity;
+		playerHitByEnemey.Target = base.entity;
 		playerHitByEnemey.Send();
 	}
 
@@ -32,7 +32,7 @@ public class CoopPlayerRemoteSetup : EntityEventListener<IPlayerState>
 	{
 		PlayerHitByEnemey playerHitByEnemey = PlayerHitByEnemey.Create();
 		playerHitByEnemey.Damage = damage;
-		playerHitByEnemey.Target = this.entity;
+		playerHitByEnemey.Target = base.entity;
 		playerHitByEnemey.SharkHit = true;
 		playerHitByEnemey.Direction = this.hitDirection;
 		playerHitByEnemey.Send();
@@ -41,7 +41,7 @@ public class CoopPlayerRemoteSetup : EntityEventListener<IPlayerState>
 	
 	public void hitFromCreepy(int distance)
 	{
-		CreepHitPlayer creepHitPlayer = CreepHitPlayer.Create(this.entity.source);
+		CreepHitPlayer creepHitPlayer = CreepHitPlayer.Create(base.entity.source);
 		creepHitPlayer.damage = distance;
 		creepHitPlayer.Send();
 	}
@@ -60,6 +60,28 @@ public class CoopPlayerRemoteSetup : EntityEventListener<IPlayerState>
 		if (this.feet)
 		{
 			this.feet.Enable(base.state.itemAtFeet, null);
+		}
+	}
+
+	
+	private void Update()
+	{
+		this.UpdateHeldFire();
+	}
+
+	
+	private void UpdateHeldFire()
+	{
+		for (int i = 0; i < this.AltHeldFire.Length; i++)
+		{
+			if (base.state.altHeldFireIndex[i] > 0)
+			{
+				this.AltHeldFire[i].SetActive(true);
+			}
+			else
+			{
+				this.AltHeldFire[i].SetActive(false);
+			}
 		}
 	}
 
@@ -155,6 +177,9 @@ public class CoopPlayerRemoteSetup : EntityEventListener<IPlayerState>
 
 	
 	public CapsuleCollider blockerCollider;
+
+	
+	public GameObject[] AltHeldFire;
 
 	
 	private Vector3 hitDirection;

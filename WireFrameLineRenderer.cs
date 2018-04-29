@@ -109,6 +109,12 @@ public class WireFrameLineRenderer : MonoBehaviour
 		}
 
 		
+		public static bool operator ==(WireFrameLineRenderer.Line lA, WireFrameLineRenderer.Line lB)
+		{
+			return (lA.PointA == lB.PointA && lA.PointB == lB.PointB) || (lA.PointA == lB.PointB && lA.PointB == lB.PointA);
+		}
+
+		
 		public override bool Equals(object obj)
 		{
 			if (obj == null)
@@ -129,12 +135,6 @@ public class WireFrameLineRenderer : MonoBehaviour
 		public override int GetHashCode()
 		{
 			return 0;
-		}
-
-		
-		public static bool operator ==(WireFrameLineRenderer.Line lA, WireFrameLineRenderer.Line lB)
-		{
-			return (lA.PointA == lB.PointA && lA.PointB == lB.PointB) || (lA.PointA == lB.PointB && lA.PointB == lB.PointA);
 		}
 
 		

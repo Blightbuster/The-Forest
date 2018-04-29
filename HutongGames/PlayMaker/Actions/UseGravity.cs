@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets whether a Game Object's Rigidy Body is affected by Gravity.")]
 	[ActionCategory(ActionCategory.Physics)]
+	[Tooltip("Sets whether a Game Object's Rigidy Body is affected by Gravity.")]
 	public class UseGravity : ComponentAction<Rigidbody>
 	{
 		
@@ -33,8 +33,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Rigidbody))]
 		[RequiredField]
+		[CheckForComponent(typeof(Rigidbody))]
 		public FsmOwnerDefault gameObject;
 
 		

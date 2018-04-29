@@ -5,9 +5,9 @@ using UnityEngine;
 namespace Ceto
 {
 	
-	[RequireComponent(typeof(Ocean))]
-	[DisallowMultipleComponent]
 	[AddComponentMenu("Ceto/Components/PlanarReflection")]
+	[DisallowMultipleComponent]
+	[RequireComponent(typeof(Ocean))]
 	public class PlanarReflection : ReflectionBase
 	{
 		
@@ -141,6 +141,9 @@ namespace Ceto
 								{
 									this.CreateReflectionCameraFor(current, cameraData.reflection);
 									this.CreateRenderTarget(cameraData.reflection, current.name, current.pixelWidth, current.pixelHeight, current.hdr, cameraData.settings);
+									if (current.stereoEnabled)
+									{
+									}
 									NotifyOnEvent.Disable = true;
 									this.RenderReflectionFor(current, cameraData.reflection.cam, cameraData.settings);
 									NotifyOnEvent.Disable = false;
@@ -148,7 +151,11 @@ namespace Ceto
 								}
 								if (renderTexture != null)
 								{
-									Graphics.Blit(renderTexture, cameraData.reflection.tex);
+									if (this.blitmaterial == null)
+									{
+										this.blitmaterial = new Material(Shader.Find("Hidden/TheForestBlitCopyFullscreen"));
+									}
+									Graphics.Blit(renderTexture, cameraData.reflection.tex, this.blitmaterial);
 									this.m_imageBlur.BlurIterations = this.blurIterations;
 									this.m_imageBlur.BlurMode = this.blurMode;
 									this.m_imageBlur.BlurSpread = this.blurSpread;
@@ -318,6 +325,9 @@ namespace Ceto
 			}
 			bool invertCulling = GL.invertCulling;
 			GL.invertCulling = !invertCulling;
+			if (ForestVR.Enabled)
+			{
+			}
 			reflectCamera.Render();
 			QualitySettings.pixelLightCount = pixelLightCount;
 			GL.invertCulling = invertCulling;
@@ -424,6 +434,9 @@ namespace Ceto
 
 		
 		private ImageBlur m_imageBlur;
+
+		
+		private Material blitmaterial;
 
 		
 		[HideInInspector]

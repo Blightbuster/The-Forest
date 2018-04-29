@@ -11,11 +11,6 @@ namespace Rewired.UI.ControlMapper
 		
 		
 		
-		event UnityAction CancelEvent;
-
-		
-		
-		
 		Sprite disabledHighlightedSprite { get; set; }
 
 		
@@ -47,5 +42,10 @@ namespace Rewired.UI.ControlMapper
 		
 		
 		bool autoNavRight { get; set; }
+
+		
+		
+		
+		event UnityAction CancelEvent;
 	}
 }

@@ -21,7 +21,7 @@ public class snowDustController : MonoBehaviour
 	
 	private void Update()
 	{
-		if (Time.time > this.nextUpdateDelay && LocalPlayer.Stats.IsInNorthColdArea() && !LocalPlayer.IsInCaves)
+		if (Time.time > this.nextUpdateDelay && LocalPlayer.Stats.IsInNorthColdArea())
 		{
 			this.spawnParticleAroundPlayer();
 			this.nextUpdateDelay = Time.time + this.updateRate;

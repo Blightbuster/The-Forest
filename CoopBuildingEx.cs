@@ -11,9 +11,9 @@ public class CoopBuildingEx : EntityBehaviour
 	
 	public override void Attached()
 	{
-		if (!this.entity.isOwner)
+		if (!base.entity.isOwner)
 		{
-			CoopConstructionExToken coopConstructionExToken = (CoopConstructionExToken)this.entity.attachToken;
+			CoopConstructionExToken coopConstructionExToken = (CoopConstructionExToken)base.entity.attachToken;
 			for (int i = 0; i < coopConstructionExToken.Architects.Length; i++)
 			{
 				ICoopStructure coopStructure = (ICoopStructure)this.Architects[i];
@@ -41,7 +41,7 @@ public class CoopBuildingEx : EntityBehaviour
 					}
 				}
 			}
-			this.entity.SendMessage("OnDeserialized");
+			base.entity.SendMessage("OnDeserialized");
 		}
 	}
 

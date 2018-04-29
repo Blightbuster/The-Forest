@@ -7,12 +7,7 @@ namespace TheForest.Items.Core
 	public interface IItemStorage
 	{
 		
-		
-		Item.Types AcceptedTypes { get; }
-
-		
-		
-		Item.Types BlackListedTypes { get; }
+		bool IsValidItem(Item itemId);
 
 		
 		

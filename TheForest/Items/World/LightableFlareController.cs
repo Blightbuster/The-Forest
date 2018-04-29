@@ -34,34 +34,16 @@ namespace TheForest.Items.World
 		
 		private void Update()
 		{
-			if (!this.isLighting)
+			if (!this.isLighting && TheForest.Utils.Input.GetButtonAfterDelay("Lighter", 0.5f, false) && !this.isLighting)
 			{
-				if (TheForest.Utils.Input.GetButton("Lighter") && !this.isLighting)
-				{
-					Scene.HudGui.SetDelayedIconController(this);
-				}
-				else
-				{
-					Scene.HudGui.UnsetDelayedIconController(this);
-				}
-				if (TheForest.Utils.Input.GetButtonAfterDelay("Lighter", 0.5f, false) && !this.isLighting)
-				{
-					base.CancelInvoke("ResetIsLighting");
-					base.Invoke("ResetIsLighting", 1f);
-					this.isLighting = true;
-					this.lightFlare();
-					Scene.HudGui.UnsetDelayedIconController(this);
-				}
+				base.CancelInvoke("ResetIsLighting");
+				base.Invoke("ResetIsLighting", 1f);
+				this.isLighting = true;
+				this.lightFlare();
 			}
 			if (TheForest.Utils.Input.GetButtonUp("Lighter"))
 			{
 				TheForest.Utils.Input.ResetDelayedAction();
-				Scene.HudGui.UnsetDelayedIconController(this);
-			}
-			if (TheForest.Utils.Input.GetButtonUp("Lighter"))
-			{
-				TheForest.Utils.Input.ResetDelayedAction();
-				Scene.HudGui.UnsetDelayedIconController(this);
 			}
 		}
 

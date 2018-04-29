@@ -12,7 +12,7 @@ namespace TheForest.Items.World
 		protected override void Awake()
 		{
 			base.Awake();
-			if (this._fullness < 0.01f && this._hydration < 0.01f && (!BoltNetwork.isRunning || !this.entity.isAttached || this.entity.isOwner))
+			if (this._fullness < 0.01f && this._hydration < 0.01f && (!BoltNetwork.isRunning || !base.entity.isAttached || base.entity.isOwner))
 			{
 				UnityEngine.Object.Destroy(base.transform.parent.gameObject);
 			}
@@ -34,7 +34,6 @@ namespace TheForest.Items.World
 					LocalPlayer.Sfx.PlayWhoosh();
 					if (this._meats > 0)
 					{
-						LocalPlayer.SpecialActions.SendMessage("eatMeatRoutine", false, SendMessageOptions.DontRequireReceiver);
 					}
 					int calories = this._meats * 600 + this._mushrooms * 10 + this._herbs * 5;
 					StewCombo.SetIngredients(this._meats, this._mushrooms, this._herbs, this._hydration > 0.01f);
@@ -54,16 +53,16 @@ namespace TheForest.Items.World
 					LocalPlayer.Sfx.PlayDrink();
 					LocalPlayer.Stats.Thirst = Mathf.Clamp01(LocalPlayer.Stats.Thirst - this._hydration);
 				}
-				if (BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+				if (BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 				{
-					if (this.entity.isOwner)
+					if (base.entity.isOwner)
 					{
-						BoltNetwork.Destroy(this.entity);
+						BoltNetwork.Destroy(base.entity);
 					}
 					else
 					{
 						RequestDestroy requestDestroy = RequestDestroy.Create(GlobalTargets.Everyone);
-						requestDestroy.Entity = this.entity;
+						requestDestroy.Entity = base.entity;
 						requestDestroy.Send();
 					}
 				}

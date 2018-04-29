@@ -55,10 +55,10 @@ namespace TheForest.Buildings.World
 					{
 						for (int j = -1; j <= 1; j++)
 						{
-							InsideCheck.GridCell cell = InsideCheck.GetGridCell(position + new InsideCheck.GridPosition(i, j));
-							if (cell != null)
+							InsideCheck.GridCell gridCell = InsideCheck.GetGridCell(position + new InsideCheck.GridPosition(i, j));
+							if (gridCell != null)
 							{
-								this._currentGridCells.Add(cell);
+								this._currentGridCells.Add(gridCell);
 							}
 						}
 					}
@@ -482,12 +482,6 @@ namespace TheForest.Buildings.World
 		}
 
 		
-		private const float GRID_SIZE = 30f;
-
-		
-		private const int OCCLUSION_ENTRY_COUNT = 36;
-
-		
 		private bool _inside;
 
 		
@@ -519,6 +513,12 @@ namespace TheForest.Buildings.World
 
 		
 		private static int _nextGridToken;
+
+		
+		private const float GRID_SIZE = 30f;
+
+		
+		private const int OCCLUSION_ENTRY_COUNT = 36;
 
 		
 		private float OCCLUSION_THRESHOLD = 55f;

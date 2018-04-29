@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Flips the value of a Bool Variable.")]
 	[ActionCategory(ActionCategory.Math)]
+	[Tooltip("Flips the value of a Bool Variable.")]
 	public class BoolFlip : FsmStateAction
 	{
 		
@@ -21,8 +21,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		[Tooltip("Bool variable to flip.")]
 		public FsmBool boolVariable;
 	}

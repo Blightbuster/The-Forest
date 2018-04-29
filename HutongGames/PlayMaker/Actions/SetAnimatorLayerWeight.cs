@@ -4,9 +4,9 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[HelpUrl("https:
 	[ActionCategory("Animator")]
 	[Tooltip("Sets the layer's current weight")]
+	[HelpUrl("https:
 	public class SetAnimatorLayerWeight : FsmStateAction
 	{
 		
@@ -63,13 +63,13 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("The layer's index")]
 		[RequiredField]
+		[Tooltip("The layer's index")]
 		public FsmInt layerIndex;
 
 		
-		[Tooltip("Sets the layer's current weight")]
 		[RequiredField]
+		[Tooltip("Sets the layer's current weight")]
 		public FsmFloat layerWeight;
 
 		

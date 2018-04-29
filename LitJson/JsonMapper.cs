@@ -542,9 +542,22 @@ namespace LitJson
 			if (obj is Array)
 			{
 				writer.WriteArrayStart();
-				foreach (object obj2 in ((Array)obj))
+				IEnumerator enumerator = ((Array)obj).GetEnumerator();
+				try
 				{
-					JsonMapper.WriteValue(obj2, writer, writer_is_private, depth + 1);
+					while (enumerator.MoveNext())
+					{
+						object obj2 = enumerator.Current;
+						JsonMapper.WriteValue(obj2, writer, writer_is_private, depth + 1);
+					}
+				}
+				finally
+				{
+					IDisposable disposable;
+					if ((disposable = (enumerator as IDisposable)) != null)
+					{
+						disposable.Dispose();
+					}
 				}
 				writer.WriteArrayEnd();
 				return;
@@ -552,9 +565,22 @@ namespace LitJson
 			if (obj is IList)
 			{
 				writer.WriteArrayStart();
-				foreach (object obj3 in ((IList)obj))
+				IEnumerator enumerator2 = ((IList)obj).GetEnumerator();
+				try
 				{
-					JsonMapper.WriteValue(obj3, writer, writer_is_private, depth + 1);
+					while (enumerator2.MoveNext())
+					{
+						object obj3 = enumerator2.Current;
+						JsonMapper.WriteValue(obj3, writer, writer_is_private, depth + 1);
+					}
+				}
+				finally
+				{
+					IDisposable disposable2;
+					if ((disposable2 = (enumerator2 as IDisposable)) != null)
+					{
+						disposable2.Dispose();
+					}
 				}
 				writer.WriteArrayEnd();
 				return;
@@ -562,11 +588,24 @@ namespace LitJson
 			if (obj is IDictionary)
 			{
 				writer.WriteObjectStart();
-				foreach (object obj4 in ((IDictionary)obj))
+				IDictionaryEnumerator enumerator3 = ((IDictionary)obj).GetEnumerator();
+				try
 				{
-					DictionaryEntry dictionaryEntry = (DictionaryEntry)obj4;
-					writer.WritePropertyName((string)dictionaryEntry.Key);
-					JsonMapper.WriteValue(dictionaryEntry.Value, writer, writer_is_private, depth + 1);
+					while (enumerator3.MoveNext())
+					{
+						object obj4 = enumerator3.Current;
+						DictionaryEntry dictionaryEntry = (DictionaryEntry)obj4;
+						writer.WritePropertyName((string)dictionaryEntry.Key);
+						JsonMapper.WriteValue(dictionaryEntry.Value, writer, writer_is_private, depth + 1);
+					}
+				}
+				finally
+				{
+					IDisposable disposable3;
+					if ((disposable3 = (enumerator3 as IDisposable)) != null)
+					{
+						disposable3.Dispose();
+					}
 				}
 				writer.WriteObjectEnd();
 				return;

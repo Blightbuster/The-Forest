@@ -8,7 +8,7 @@ public class coopGirlTokenHandler : EntityBehaviour<IDynamicPickup>
 	
 	public override void Attached()
 	{
-		CoopSyncGirlPickupToken coopSyncGirlPickupToken = (CoopSyncGirlPickupToken)this.entity.attachToken;
+		CoopSyncGirlPickupToken coopSyncGirlPickupToken = (CoopSyncGirlPickupToken)base.entity.attachToken;
 		if (!CoopPeerStarter.DedicatedHost && BoltNetwork.isServer && coopSyncGirlPickupToken.playerTarget == LocalPlayer.Entity)
 		{
 			return;

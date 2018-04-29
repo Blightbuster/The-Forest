@@ -9,7 +9,7 @@ public class coopChoppedPartsReplicator : CoopBase<IDynamicPickup>
 	
 	public override void Attached()
 	{
-		if (!this.entity.isOwner)
+		if (!base.entity.isOwner)
 		{
 			base.StartCoroutine(this.syncPartsRoutine());
 		}
@@ -21,15 +21,15 @@ public class coopChoppedPartsReplicator : CoopBase<IDynamicPickup>
 		yield return new WaitForFixedUpdate();
 		float closestDist = float.PositiveInfinity;
 		GameObject closestStoredToken = null;
-		for (int z = 0; z < Scene.SceneTracker.storedRagDollPrefabs.Count; z++)
+		for (int i = 0; i < Scene.SceneTracker.storedRagDollPrefabs.Count; i++)
 		{
-			if (Scene.SceneTracker.storedRagDollPrefabs[z] != null)
+			if (Scene.SceneTracker.storedRagDollPrefabs[i] != null)
 			{
-				float dist = (base.transform.position - Scene.SceneTracker.storedRagDollPrefabs[z].transform.position).sqrMagnitude;
+				float dist = (base.transform.position - Scene.SceneTracker.storedRagDollPrefabs[i].transform.position).sqrMagnitude;
 				if (dist < closestDist)
 				{
 					closestDist = dist;
-					closestStoredToken = Scene.SceneTracker.storedRagDollPrefabs[z];
+					closestStoredToken = Scene.SceneTracker.storedRagDollPrefabs[i];
 				}
 			}
 		}
@@ -40,10 +40,10 @@ public class coopChoppedPartsReplicator : CoopBase<IDynamicPickup>
 			{
 				if (this.slmi.showHair)
 				{
-					enableGoReceiver egr = base.transform.GetComponentInChildren<enableGoReceiver>();
-					if (egr)
+					enableGoReceiver componentInChildren = base.transform.GetComponentInChildren<enableGoReceiver>();
+					if (componentInChildren)
 					{
-						egr.doEnableGo();
+						componentInChildren.doEnableGo();
 					}
 				}
 				if (this.slmi.showMask && this.faceMask)

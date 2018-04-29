@@ -82,8 +82,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject to Move")]
 		[RequiredField]
+		[Tooltip("The GameObject to Move")]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -104,8 +104,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat maxSpeed;
 
 		
-		[Tooltip("Distance at which the move is considered finished, and the Finish Event is sent.")]
 		[HasFloatSlider(0f, 5f)]
+		[Tooltip("Distance at which the move is considered finished, and the Finish Event is sent.")]
 		public FsmFloat finishDistance;
 
 		

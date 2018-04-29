@@ -18,18 +18,6 @@ public class CoopBodyPart : EntityBehaviour<IPartState>, IPriorityCalculator, IE
 	}
 
 	
-	float IPriorityCalculator.CalculateEventPriority(BoltConnection connection, Bolt.Event evnt)
-	{
-		return CoopUtils.CalculatePriorityFor(connection, this.entity, 1f, 1);
-	}
-
-	
-	float IPriorityCalculator.CalculateStatePriority(BoltConnection connection, int skipped)
-	{
-		return CoopUtils.CalculatePriorityFor(connection, this.entity, 1f, skipped + 1);
-	}
-
-	
 	public override void Attached()
 	{
 		if (BoltNetwork.isClient)
@@ -63,9 +51,21 @@ public class CoopBodyPart : EntityBehaviour<IPartState>, IPriorityCalculator, IE
 	}
 
 	
+	float IPriorityCalculator.CalculateEventPriority(BoltConnection connection, Bolt.Event evnt)
+	{
+		return CoopUtils.CalculatePriorityFor(connection, base.entity, 1f, 1);
+	}
+
+	
+	float IPriorityCalculator.CalculateStatePriority(BoltConnection connection, int skipped)
+	{
+		return CoopUtils.CalculatePriorityFor(connection, base.entity, 1f, skipped + 1);
+	}
+
+	
 	public bool AllowReplicationTo(BoltConnection connection)
 	{
-		if (this && this.entity && this.entity.isAttached && base.state != null && base.state.Effigy)
+		if (this && base.entity && base.entity.isAttached && base.state != null && base.state.Effigy)
 		{
 			if (base.state.Effigy.isFrozen)
 			{

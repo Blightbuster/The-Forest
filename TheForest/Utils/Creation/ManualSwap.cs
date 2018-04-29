@@ -18,8 +18,8 @@ namespace TheForest.Utils.Creation
 			for (int i = 0; i < this._ghosts.Length; i++)
 			{
 				GameObject go = this._ghosts[i]._go;
-				GameObject trigger = go.transform.GetChild(0).Find("Trigger").gameObject;
-				trigger.SetActive(false);
+				GameObject gameObject = go.transform.GetChild(0).Find("Trigger").gameObject;
+				gameObject.SetActive(false);
 				this._renderers[i] = go.transform.GetChild(0).GetComponent<Renderer>();
 				this._ghosts[i]._go.SetActive(this._currentGhost == i);
 			}

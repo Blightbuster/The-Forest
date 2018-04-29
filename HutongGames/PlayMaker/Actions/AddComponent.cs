@@ -44,7 +44,7 @@ namespace HutongGames.PlayMaker.Actions
 			this.storeComponent.Value = this.addedComponent;
 			if (this.addedComponent == null)
 			{
-				this.LogError("Can't add component: " + this.component.Value);
+				base.LogError("Can't add component: " + this.component.Value);
 			}
 		}
 
@@ -70,16 +70,16 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("The type of Component to add to the Game Object.")]
-		[Title("Component Type")]
-		[UIHint(UIHint.ScriptComponent)]
 		[RequiredField]
+		[UIHint(UIHint.ScriptComponent)]
+		[Title("Component Type")]
+		[Tooltip("The type of Component to add to the Game Object.")]
 		public FsmString component;
 
 		
+		[UIHint(UIHint.Variable)]
 		[ObjectType(typeof(Component))]
 		[Tooltip("Store the component in an Object variable. E.g., to use with Set Property.")]
-		[UIHint(UIHint.Variable)]
 		public FsmObject storeComponent;
 
 		

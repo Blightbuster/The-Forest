@@ -10,7 +10,7 @@ namespace TheForest.UI
 		
 		private void Update()
 		{
-			if (TheForest.Utils.Input.IsGamePad && UICamera.controller != null && UICamera.hoveredObject && TheForest.Utils.Input.GetButtonDown("Take"))
+			if (TheForest.Utils.Input.UsingDualshock && UICamera.controller != null && UICamera.hoveredObject && TheForest.Utils.Input.GetButtonDown("Take"))
 			{
 				if (UIPopupList.current)
 				{

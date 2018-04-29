@@ -17,7 +17,7 @@ public class rockThrowerAnimEvents : MonoBehaviour
 		for (int i = 0; i < this.ammoCount; i++)
 		{
 			Vector3 position = this.releasePos.position + this.releasePos.up * 2f + (this.releasePos.forward * UnityEngine.Random.Range(-0.6f, 0.6f) + this.releasePos.right * UnityEngine.Random.Range(-0.6f, 0.6f));
-			MultiThrowerProjectile multiThrowerProjectile = (MultiThrowerProjectile)UnityEngine.Object.Instantiate(this.projectilePrefab, position, Quaternion.identity);
+			MultiThrowerProjectile multiThrowerProjectile = UnityEngine.Object.Instantiate<MultiThrowerProjectile>(this.projectilePrefab, position, Quaternion.identity);
 			Rigidbody rigidbody = multiThrowerProjectile._rigidbody;
 			Vector2 vector = this.randomCircle2(2.2f);
 			Vector3 target = new Vector3(this.landTarget.x + vector.x, this.landTarget.y, this.landTarget.z + vector.y);

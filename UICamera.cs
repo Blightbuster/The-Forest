@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using TheForest.Utils;
 using UnityEngine;
 
 
-[RequireComponent(typeof(Camera))]
 [ExecuteInEditMode]
 [AddComponentMenu("NGUI/UI/NGUI Event System (UICamera)")]
+[RequireComponent(typeof(Camera))]
 public class UICamera : MonoBehaviour
 {
 	
@@ -1094,7 +1096,7 @@ public class UICamera : MonoBehaviour
 	{
 		UICamera.mWidth = Screen.width;
 		UICamera.mHeight = Screen.height;
-		UICamera.mMouse[0].pos = Input.mousePosition;
+		UICamera.mMouse[0].pos = UnityEngine.Input.mousePosition;
 		for (int i = 1; i < 3; i++)
 		{
 			UICamera.mMouse[i].pos = UICamera.mMouse[0].pos;
@@ -1146,7 +1148,12 @@ public class UICamera : MonoBehaviour
 	private void OnEnable()
 	{
 		UICamera.list.Add(this);
-		UICamera.list.Sort(new BetterList<UICamera>.CompareFunc(UICamera.CompareFunc));
+		BetterList<UICamera> betterList = UICamera.list;
+		if (UICamera.<>f__mg$cache0 == null)
+		{
+			UICamera.<>f__mg$cache0 = new BetterList<UICamera>.CompareFunc(UICamera.CompareFunc);
+		}
+		betterList.Sort(UICamera.<>f__mg$cache0);
 	}
 
 	
@@ -1280,13 +1287,13 @@ public class UICamera : MonoBehaviour
 		bool flag2 = false;
 		for (int i = 0; i < 3; i++)
 		{
-			if (Input.GetMouseButtonDown(i))
+			if (UnityEngine.Input.GetMouseButtonDown(i))
 			{
 				UICamera.currentKey = KeyCode.Mouse0 + i;
 				flag2 = true;
 				flag = true;
 			}
-			else if (Input.GetMouseButton(i))
+			else if (UnityEngine.Input.GetMouseButton(i))
 			{
 				UICamera.currentKey = KeyCode.Mouse0 + i;
 				flag = true;
@@ -1297,7 +1304,7 @@ public class UICamera : MonoBehaviour
 			return;
 		}
 		UICamera.currentTouch = UICamera.mMouse[0];
-		Vector2 vector = Input.mousePosition;
+		Vector2 vector = UnityEngine.Input.mousePosition;
 		if (UICamera.currentTouch.ignoreDelta == 0)
 		{
 			UICamera.currentTouch.delta = vector - UICamera.currentTouch.pos;
@@ -1372,8 +1379,8 @@ public class UICamera : MonoBehaviour
 		}
 		for (int l = 0; l < 3; l++)
 		{
-			bool mouseButtonDown = Input.GetMouseButtonDown(l);
-			bool mouseButtonUp = Input.GetMouseButtonUp(l);
+			bool mouseButtonDown = UnityEngine.Input.GetMouseButtonDown(l);
+			bool mouseButtonUp = UnityEngine.Input.GetMouseButtonUp(l);
 			if (mouseButtonDown || mouseButtonUp)
 			{
 				UICamera.currentKey = KeyCode.Mouse0 + l;
@@ -1411,7 +1418,7 @@ public class UICamera : MonoBehaviour
 	
 	public void ProcessTouches()
 	{
-		int num = (UICamera.GetInputTouchCount != null) ? UICamera.GetInputTouchCount() : Input.touchCount;
+		int num = (UICamera.GetInputTouchCount != null) ? UICamera.GetInputTouchCount() : UnityEngine.Input.touchCount;
 		for (int i = 0; i < num; i++)
 		{
 			TouchPhase phase;
@@ -1420,7 +1427,7 @@ public class UICamera : MonoBehaviour
 			int tapCount;
 			if (UICamera.GetInputTouch == null)
 			{
-				UnityEngine.Touch touch = Input.GetTouch(i);
+				UnityEngine.Touch touch = UnityEngine.Input.GetTouch(i);
 				phase = touch.phase;
 				fingerId = touch.fingerId;
 				position = touch.position;
@@ -1488,9 +1495,9 @@ public class UICamera : MonoBehaviour
 	
 	private void ProcessFakeTouches()
 	{
-		bool mouseButtonDown = Input.GetMouseButtonDown(0);
-		bool mouseButtonUp = Input.GetMouseButtonUp(0);
-		bool mouseButton = Input.GetMouseButton(0);
+		bool mouseButtonDown = UnityEngine.Input.GetMouseButtonDown(0);
+		bool mouseButtonUp = UnityEngine.Input.GetMouseButtonUp(0);
+		bool mouseButton = UnityEngine.Input.GetMouseButton(0);
 		if (mouseButtonDown || mouseButtonUp || mouseButton)
 		{
 			UICamera.currentTouchID = 1;
@@ -1501,7 +1508,7 @@ public class UICamera : MonoBehaviour
 				UICamera.currentTouch.pressTime = RealTime.time;
 				UICamera.activeTouches.Add(UICamera.currentTouch);
 			}
-			Vector2 vector = Input.mousePosition;
+			Vector2 vector = UnityEngine.Input.mousePosition;
 			UICamera.currentTouch.delta = vector - UICamera.currentTouch.pos;
 			UICamera.currentTouch.pos = vector;
 			UICamera.Raycast(UICamera.currentTouch);
@@ -1635,7 +1642,7 @@ public class UICamera : MonoBehaviour
 				}
 			}
 		}
-		if ((UICamera.GetAnyKeyDown == null) ? Input.anyKeyDown : UICamera.GetAnyKeyDown())
+		if ((UICamera.GetAnyKeyDown == null) ? UnityEngine.Input.anyKeyDown : UICamera.GetAnyKeyDown())
 		{
 			int i = 0;
 			int num3 = NGUITools.keys.Length;
@@ -1980,19 +1987,76 @@ public class UICamera : MonoBehaviour
 	}
 
 	
+	static UICamera()
+	{
+		
+		if (UICamera.<>f__mg$cache1 == null)
+		{
+			UICamera.<>f__mg$cache1 = new UICamera.GetKeyStateFunc(UnityEngine.Input.GetKeyDown);
+		}
+		UICamera.GetKeyDown = UICamera.<>f__mg$cache1;
+		if (UICamera.<>f__mg$cache2 == null)
+		{
+			UICamera.<>f__mg$cache2 = new UICamera.GetKeyStateFunc(UnityEngine.Input.GetKeyUp);
+		}
+		UICamera.GetKeyUp = UICamera.<>f__mg$cache2;
+		if (UICamera.<>f__mg$cache3 == null)
+		{
+			UICamera.<>f__mg$cache3 = new UICamera.GetKeyStateFunc(UnityEngine.Input.GetKey);
+		}
+		UICamera.GetKey = UICamera.<>f__mg$cache3;
+		if (UICamera.<>f__mg$cache4 == null)
+		{
+			UICamera.<>f__mg$cache4 = new UICamera.GetAxisFunc(TheForest.Utils.Input.GetAxis);
+		}
+		UICamera.GetAxis = UICamera.<>f__mg$cache4;
+		UICamera.showTooltips = true;
+		UICamera.mDisableController = false;
+		UICamera.mLastPos = Vector2.zero;
+		UICamera.lastWorldPosition = Vector3.zero;
+		UICamera.current = null;
+		UICamera.currentCamera = null;
+		UICamera.currentTouchID = -100;
+		UICamera.mCurrentKey = KeyCode.Alpha0;
+		UICamera.currentTouch = null;
+		UICamera.mInputFocus = false;
+		UICamera.mMouse = new UICamera.MouseOrTouch[]
+		{
+			new UICamera.MouseOrTouch(),
+			new UICamera.MouseOrTouch(),
+			new UICamera.MouseOrTouch()
+		};
+		UICamera.controller = new UICamera.MouseOrTouch();
+		UICamera.activeTouches = new List<UICamera.MouseOrTouch>();
+		UICamera.mTouchIDs = new List<int>();
+		UICamera.mWidth = 0;
+		UICamera.mHeight = 0;
+		UICamera.mTooltip = null;
+		UICamera.mTooltipTime = 0f;
+		UICamera.isDragging = false;
+		UICamera.mHit = default(UICamera.DepthEntry);
+		UICamera.mHits = new BetterList<UICamera.DepthEntry>();
+		UICamera.m2DPlane = new Plane(Vector3.back, 0f);
+		UICamera.mNextEvent = 0f;
+		UICamera.mNotifying = 0;
+		UICamera.disableControllerCheck = true;
+		UICamera.mUsingTouchEvents = true;
+	}
+
+	
 	public static BetterList<UICamera> list = new BetterList<UICamera>();
 
 	
-	public static UICamera.GetKeyStateFunc GetKeyDown = new UICamera.GetKeyStateFunc(Input.GetKeyDown);
+	public static UICamera.GetKeyStateFunc GetKeyDown;
 
 	
-	public static UICamera.GetKeyStateFunc GetKeyUp = new UICamera.GetKeyStateFunc(Input.GetKeyUp);
+	public static UICamera.GetKeyStateFunc GetKeyUp;
 
 	
-	public static UICamera.GetKeyStateFunc GetKey = new UICamera.GetKeyStateFunc(Input.GetKey);
+	public static UICamera.GetKeyStateFunc GetKey;
 
 	
-	public static UICamera.GetAxisFunc GetAxis = new UICamera.GetAxisFunc(Input.GetAxis);
+	public static UICamera.GetAxisFunc GetAxis;
 
 	
 	public static UICamera.GetAnyKeyFunc GetAnyKeyDown;
@@ -2085,40 +2149,40 @@ public class UICamera : MonoBehaviour
 	public static UICamera.OnCustomInput onCustomInput;
 
 	
-	public static bool showTooltips = true;
+	public static bool showTooltips;
 
 	
-	private static bool mDisableController = false;
+	private static bool mDisableController;
 
 	
-	private static Vector2 mLastPos = Vector2.zero;
+	private static Vector2 mLastPos;
 
 	
-	public static Vector3 lastWorldPosition = Vector3.zero;
+	public static Vector3 lastWorldPosition;
 
 	
 	public static RaycastHit lastHit;
 
 	
-	public static UICamera current = null;
+	public static UICamera current;
 
 	
-	public static Camera currentCamera = null;
+	public static Camera currentCamera;
 
 	
 	public static UICamera.OnSchemeChange onSchemeChange;
 
 	
-	public static int currentTouchID = -100;
+	public static int currentTouchID;
 
 	
-	private static KeyCode mCurrentKey = KeyCode.Alpha0;
+	private static KeyCode mCurrentKey;
 
 	
-	public static UICamera.MouseOrTouch currentTouch = null;
+	public static UICamera.MouseOrTouch currentTouch;
 
 	
-	private static bool mInputFocus = false;
+	private static bool mInputFocus;
 
 	
 	private static GameObject mGenericHandler;
@@ -2178,42 +2242,37 @@ public class UICamera : MonoBehaviour
 	public static UICamera.MoveDelegate onMouseMove;
 
 	
-	private static UICamera.MouseOrTouch[] mMouse = new UICamera.MouseOrTouch[]
-	{
-		new UICamera.MouseOrTouch(),
-		new UICamera.MouseOrTouch(),
-		new UICamera.MouseOrTouch()
-	};
+	private static UICamera.MouseOrTouch[] mMouse;
 
 	
-	public static UICamera.MouseOrTouch controller = new UICamera.MouseOrTouch();
+	public static UICamera.MouseOrTouch controller;
 
 	
-	public static List<UICamera.MouseOrTouch> activeTouches = new List<UICamera.MouseOrTouch>();
+	public static List<UICamera.MouseOrTouch> activeTouches;
 
 	
-	private static List<int> mTouchIDs = new List<int>();
+	private static List<int> mTouchIDs;
 
 	
-	private static int mWidth = 0;
+	private static int mWidth;
 
 	
-	private static int mHeight = 0;
+	private static int mHeight;
 
 	
-	private static GameObject mTooltip = null;
+	private static GameObject mTooltip;
 
 	
 	private Camera mCam;
 
 	
-	private static float mTooltipTime = 0f;
+	private static float mTooltipTime;
 
 	
 	private float mNextRaycast;
 
 	
-	public static bool isDragging = false;
+	public static bool isDragging;
 
 	
 	private static GameObject mRayHitObject;
@@ -2225,31 +2284,51 @@ public class UICamera : MonoBehaviour
 	private static GameObject mSelected;
 
 	
-	private static UICamera.DepthEntry mHit = default(UICamera.DepthEntry);
+	private static UICamera.DepthEntry mHit;
 
 	
-	private static BetterList<UICamera.DepthEntry> mHits = new BetterList<UICamera.DepthEntry>();
+	private static BetterList<UICamera.DepthEntry> mHits;
 
 	
-	private static Plane m2DPlane = new Plane(Vector3.back, 0f);
+	private static Plane m2DPlane;
 
 	
-	private static float mNextEvent = 0f;
+	private static float mNextEvent;
 
 	
-	private static int mNotifying = 0;
+	private static int mNotifying;
 
 	
-	private static bool disableControllerCheck = true;
+	private static bool disableControllerCheck;
 
 	
-	private static bool mUsingTouchEvents = true;
+	private static bool mUsingTouchEvents;
 
 	
 	public static UICamera.GetTouchCountCallback GetInputTouchCount;
 
 	
 	public static UICamera.GetTouchCallback GetInputTouch;
+
+	
+	[CompilerGenerated]
+	private static BetterList<UICamera>.CompareFunc <>f__mg$cache0;
+
+	
+	[CompilerGenerated]
+	private static UICamera.GetKeyStateFunc <>f__mg$cache1;
+
+	
+	[CompilerGenerated]
+	private static UICamera.GetKeyStateFunc <>f__mg$cache2;
+
+	
+	[CompilerGenerated]
+	private static UICamera.GetKeyStateFunc <>f__mg$cache3;
+
+	
+	[CompilerGenerated]
+	private static UICamera.GetAxisFunc <>f__mg$cache4;
 
 	
 	public enum ControlScheme
@@ -2362,38 +2441,6 @@ public class UICamera : MonoBehaviour
 	}
 
 	
-	private struct DepthEntry
-	{
-		
-		public int depth;
-
-		
-		public RaycastHit hit;
-
-		
-		public Vector3 point;
-
-		
-		public GameObject go;
-	}
-
-	
-	public class Touch
-	{
-		
-		public int fingerId;
-
-		
-		public TouchPhase phase;
-
-		
-		public Vector2 position;
-
-		
-		public int tapCount;
-	}
-
-	
 	
 	public delegate bool GetKeyStateFunc(KeyCode key);
 
@@ -2444,6 +2491,38 @@ public class UICamera : MonoBehaviour
 	
 	
 	public delegate void KeyCodeDelegate(GameObject go, KeyCode key);
+
+	
+	private struct DepthEntry
+	{
+		
+		public int depth;
+
+		
+		public RaycastHit hit;
+
+		
+		public Vector3 point;
+
+		
+		public GameObject go;
+	}
+
+	
+	public class Touch
+	{
+		
+		public int fingerId;
+
+		
+		public TouchPhase phase;
+
+		
+		public Vector2 position;
+
+		
+		public int tapCount;
+	}
 
 	
 	

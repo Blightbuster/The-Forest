@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Adds torque (rotational force) to a Game Object.")]
 	[ActionCategory(ActionCategory.Physics)]
+	[Tooltip("Adds torque (rotational force) to a Game Object.")]
 	public class AddTorque : ComponentAction<Rigidbody>
 	{
 		
@@ -84,8 +84,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("The GameObject to add torque to.")]
 		[CheckForComponent(typeof(Rigidbody))]
+		[Tooltip("The GameObject to add torque to.")]
 		public FsmOwnerDefault gameObject;
 
 		

@@ -48,8 +48,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("From Quaternion.")]
 		[RequiredField]
+		[Tooltip("From Quaternion.")]
 		public FsmQuaternion fromQuaternion;
 
 		
@@ -59,13 +59,13 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[HasFloatSlider(0f, 1f)]
 		[Tooltip("Interpolate between fromQuaternion and toQuaternion by this amount. Value is clamped to 0-1 range. 0 = fromQuaternion; 1 = toQuaternion; 0.5 = half way between.")]
+		[HasFloatSlider(0f, 1f)]
 		public FsmFloat amount;
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		[Tooltip("Store the result in this quaternion variable.")]
 		public FsmQuaternion storeResult;
 

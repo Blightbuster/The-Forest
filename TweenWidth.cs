@@ -2,8 +2,8 @@
 using UnityEngine;
 
 
-[AddComponentMenu("NGUI/Tween/Tween Width")]
 [RequireComponent(typeof(UIWidget))]
+[AddComponentMenu("NGUI/Tween/Tween Width")]
 public class TweenWidth : UITweener
 {
 	

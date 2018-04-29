@@ -1,4 +1,5 @@
 ﻿using System;
+using TheForest.Tools;
 using UnityEngine;
 
 
@@ -20,6 +21,12 @@ public class setupFishRagdoll : MonoBehaviour
 		{
 			this.skin.sharedMaterial = this.mat[n];
 			this.skin.sharedMesh = this.mesh[n];
+		}
+		if (n == 3)
+		{
+			AnimalType animalType = AnimalType.ButterFlyFish;
+			EventRegistry.Player.Publish(TfEvent.InspectedAnimal, animalType);
+			Debug.Log("publishing yellow tail fish");
 		}
 	}
 

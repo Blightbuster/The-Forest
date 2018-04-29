@@ -7,7 +7,7 @@ public class CoopTreeFall : CoopBase<ITreeFallState>
 	
 	public override void Attached()
 	{
-		if (!this.entity.isOwner)
+		if (!base.entity.isOwner)
 		{
 			foreach (Rigidbody rigidbody in base.GetComponentsInChildren<Rigidbody>())
 			{

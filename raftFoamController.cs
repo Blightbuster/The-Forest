@@ -47,7 +47,7 @@ public class raftFoamController : MonoBehaviour
 		{
 			this.particlesGo.SetActive(false);
 		}
-		else if (!this.particlesGo.activeSelf && this.bcy.InWater && this.bcy.IsOcean && this.currVel > this.maxVelocity / 2f)
+		else if (!this.particlesGo.activeSelf && this.bcy.InWater && this.bcy && this.currVel > this.maxVelocity / 2f)
 		{
 			this.particlesGo.SetActive(true);
 		}

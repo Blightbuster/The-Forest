@@ -938,12 +938,9 @@ namespace TheForest.Utils
 				MathEx.Edge edge = new MathEx.Edge(v1, v2);
 				if (this.faceCounts.ContainsKey(edge))
 				{
-					Dictionary<MathEx.Edge, int> dictionary2;
-					Dictionary<MathEx.Edge, int> dictionary = dictionary2 = this.faceCounts;
-					MathEx.Edge key2;
-					MathEx.Edge key = key2 = edge;
-					int num = dictionary2[key2];
-					dictionary[key] = num + 1;
+					Dictionary<MathEx.Edge, int> dictionary;
+					MathEx.Edge key;
+					(dictionary = this.faceCounts)[key = edge] = dictionary[key] + 1;
 				}
 				else
 				{

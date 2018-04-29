@@ -3,9 +3,9 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
+	[ActionCategory("Quaternion")]
 	[Tooltip("Get the vector3 from a quaternion multiplied by a vector.")]
 	[HelpUrl("https:
-	[ActionCategory("Quaternion")]
 	public class GetQuaternionMultipliedByVector : FsmStateAction
 	{
 		
@@ -45,14 +45,14 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmQuaternion quaternion;
 
 		
-		[Tooltip("The vector3 to multiply")]
 		[RequiredField]
+		[Tooltip("The vector3 to multiply")]
 		public FsmVector3 vector3;
 
 		
 		[RequiredField]
-		[Tooltip("The resulting vector3")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The resulting vector3")]
 		public FsmVector3 result;
 
 		

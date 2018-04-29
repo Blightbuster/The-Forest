@@ -34,13 +34,39 @@ public class flyingObjectFixer : MonoBehaviour
 	
 	private IEnumerator dampRigidBody()
 	{
-		this.rb.drag = 20f;
-		this.rb.angularDrag = 20f;
-		yield return YieldPresets.WaitTwoSeconds;
+		this.rb.drag = this._dragSetting;
+		this.rb.angularDrag = this._angularDrag;
+		if (this._lerpDownOverTime)
+		{
+			float startTime = Time.realtimeSinceStartup;
+			while (Time.realtimeSinceStartup - startTime < this._fixTime)
+			{
+				float timeElapsed = Time.realtimeSinceStartup - startTime;
+				this.rb.drag = Mathf.Lerp(this._dragSetting, this.initDrag, timeElapsed / this._fixTime);
+				this.rb.angularDrag = Mathf.Lerp(this._angularDrag, this.initDrag, timeElapsed / this._fixTime);
+				yield return null;
+			}
+		}
+		else
+		{
+			yield return new WaitForSeconds(this._fixTime);
+		}
 		this.rb.drag = this.initDrag;
 		this.rb.angularDrag = this.initAngularDrag;
 		yield break;
 	}
+
+	
+	public float _dragSetting = 20f;
+
+	
+	public float _angularDrag = 20f;
+
+	
+	public float _fixTime = 2f;
+
+	
+	public bool _lerpDownOverTime;
 
 	
 	private Rigidbody rb;

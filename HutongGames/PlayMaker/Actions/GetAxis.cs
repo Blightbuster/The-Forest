@@ -45,8 +45,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The name of the axis. Set in the Unity Input Manager.")]
 		[RequiredField]
+		[Tooltip("The name of the axis. Set in the Unity Input Manager.")]
 		public FsmString axisName;
 
 		
@@ -54,9 +54,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat multiplier;
 
 		
-		[Tooltip("Store the result in a float variable.")]
 		[RequiredField]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the result in a float variable.")]
 		public FsmFloat store;
 
 		

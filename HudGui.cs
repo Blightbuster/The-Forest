@@ -9,9 +9,11 @@ using TheForest.Items.Craft;
 using TheForest.Items.Inventory;
 using TheForest.Items.UI;
 using TheForest.Modding.Bridge.Interfaces;
+using TheForest.Player.Clothing;
 using TheForest.UI;
 using TheForest.UI.Anim;
 using TheForest.UI.Crafting;
+using TheForest.UI.Interfaces;
 using TheForest.UI.Multiplayer;
 using TheForest.Utils;
 using UniLinq;
@@ -77,6 +79,29 @@ public class HudGui : MonoBehaviour
 			this._nextBuildMissionDisplay = Time.realtimeSinceStartup + 0.15f;
 		}
 		this.CheckDelayedActionController();
+		this.CheckItemInfoViewCounter();
+		if (this._nextItemInfoIIV && this._nextItemInfoDisplay < Time.realtimeSinceStartup)
+		{
+			this.ShowItemInfoView(this._nextItemInfoIIV, this._nextItemInfoRenderer, this._nextItemInfoIsCraft, this._nextItemInfoViewCounter);
+			this._nextItemInfoIIV = null;
+			this._nextItemInfoDisplay = float.MaxValue;
+		}
+		if (this._nextOutfitInfoIIV && this._nextOutfitInfoDisplay < Time.realtimeSinceStartup)
+		{
+			this.ShowClothingOutitInfoView(this._nextOutfitInfoIIV, this._nextOutfitInfoRenderer);
+			this._nextOutfitInfoIIV = null;
+			this._nextOutfitInfoDisplay = float.MaxValue;
+		}
+		if (this._nextQuickInfoDisplay < Time.realtimeSinceStartup)
+		{
+			this._nextQuickInfoDisplay = float.MaxValue;
+			this.ShowQuickSelectInfo();
+		}
+		if (this._nextRecipeListDisplay < Time.realtimeSinceStartup)
+		{
+			this._nextRecipeListDisplay = float.MaxValue;
+			this.ShowRecipeList();
+		}
 	}
 
 	
@@ -89,6 +114,8 @@ public class HudGui : MonoBehaviour
 		this.InitPrefabPool(this._cantCarryItemView.transform);
 		this.InitPrefabPool(this._cantCarryItemWeightView.transform);
 		this.InitPrefabPool(this._gotItemView.transform);
+		this.InitPrefabPool(this._cantCarryClothingView.transform);
+		this.InitPrefabPool(this._gotClothingView.transform);
 		this.InitPrefabPool(this._foundPassengerView.transform);
 		this.InitPrefabPool(this._todoListMessageView.transform);
 		this.InitPrefabPoolLarge(this.BuildMissionWidget.transform);
@@ -233,9 +260,14 @@ public class HudGui : MonoBehaviour
 	
 	public void CheckHudState()
 	{
+		if (ForestVR.Prototype)
+		{
+			base.enabled = false;
+			return;
+		}
 		if (!SteamDSConfig.isDedicatedServer)
 		{
-			bool flag = !CoopPeerStarter.DedicatedHost && LocalPlayer.Inventory && LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Pause && !Scene.Atmosphere.Sleeping && this.hudCameraOffCounter <= 0;
+			bool flag = !CoopPeerStarter.DedicatedHost && LocalPlayer.Inventory && LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Pause && !Scene.Atmosphere.Sleeping && this._hudCameraOffCounter <= 0;
 			if (this.GuiCamC.enabled != flag)
 			{
 				this.GuiCamC.enabled = flag;
@@ -255,11 +287,11 @@ public class HudGui : MonoBehaviour
 	{
 		if (on)
 		{
-			this.hudCameraOffCounter = Mathf.Max(0, this.hudCameraOffCounter - 1);
+			this._hudCameraOffCounter = Mathf.Max(0, this._hudCameraOffCounter - 1);
 		}
 		else
 		{
-			this.hudCameraOffCounter++;
+			this._hudCameraOffCounter++;
 		}
 		this.CheckHudState();
 	}
@@ -298,14 +330,9 @@ public class HudGui : MonoBehaviour
 	}
 
 	
-	public void TogglePauseMenu()
-	{
-		this.TogglePauseMenu(!this.PauseMenu.activeSelf);
-	}
-
-	
 	public void TogglePauseMenu(bool on)
 	{
+		LocalPlayer.Inventory.CurrentView = ((!on) ? PlayerInventory.PlayerViews.World : PlayerInventory.PlayerViews.Pause);
 		if (on)
 		{
 			VirtualCursor.Instance.SetCursorType(VirtualCursor.CursorTypes.None);
@@ -386,17 +413,17 @@ public class HudGui : MonoBehaviour
 		HudGui.InventoryItemInfo inventoryItemInfo = this._inventoryItemsInfoCache[itemId];
 		if (plural)
 		{
-			text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._titlePluralTextTranslationKey, inventoryItemInfo._titlePluralText, caps);
+			text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._titlePluralTextTranslationKey, inventoryItemInfo._titlePluralText, true);
 		}
 		if (!plural || string.IsNullOrEmpty(text))
 		{
-			text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._titleTextTranslationKey, inventoryItemInfo._titleText, caps);
+			text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._titleTextTranslationKey, inventoryItemInfo._titleText, true);
 		}
 		return text;
 	}
 
 	
-	private string GetDecayingItemName(HudGui.InventoryItemInfo iii, InventoryItemView view, bool plural, bool caps)
+	private string GetMeatItemName(HudGui.InventoryItemInfo iii, InventoryItemView view, bool plural, bool caps)
 	{
 		string text = null;
 		if (view)
@@ -406,33 +433,11 @@ public class HudGui : MonoBehaviour
 			string format;
 			if (state < DecayingInventoryItemView.DecayStates.DriedFresh)
 			{
-				format = UiTranslationDatabase.TranslateKey("RAWMEAT_0_1", "Raw {0} {1}", caps);
+				format = UiTranslationDatabase.TranslateKey("RAWMEAT_0", "Raw {0}", caps);
 			}
 			else
 			{
-				format = "{0} {1}";
-			}
-			string arg;
-			switch (state)
-			{
-			case DecayingInventoryItemView.DecayStates.Edible:
-				arg = UiTranslationDatabase.TranslateKey("EDIBLE", "Edible", false);
-				break;
-			case DecayingInventoryItemView.DecayStates.Spoilt:
-				arg = UiTranslationDatabase.TranslateKey("SPOILT", "Spoilt", false);
-				break;
-			case DecayingInventoryItemView.DecayStates.DriedFresh:
-				arg = UiTranslationDatabase.TranslateKey("DRIED_FRESH", "Dried Fresh", false);
-				break;
-			case DecayingInventoryItemView.DecayStates.DriedEdible:
-				arg = UiTranslationDatabase.TranslateKey("DRIED_EDIBLE", "Dried Edible", false);
-				break;
-			case DecayingInventoryItemView.DecayStates.DriedSpoilt:
-				arg = UiTranslationDatabase.TranslateKey("DRIED_SPOILT", "Dried Spoilt", false);
-				break;
-			default:
-				arg = UiTranslationDatabase.TranslateKey("FRESH", "Fresh", caps);
-				break;
+				format = UiTranslationDatabase.TranslateKey("DRIEDMEAT_0", "Dried {0}", caps);
 			}
 			if (plural)
 			{
@@ -442,7 +447,10 @@ public class HudGui : MonoBehaviour
 			{
 				text2 = UiTranslationDatabase.TranslateKey(iii._titleTextTranslationKey, iii._titleText, caps);
 			}
-			text = string.Format(format, arg, text2);
+			text = StringEx.TryFormat(format, new object[]
+			{
+				text2
+			});
 		}
 		else
 		{
@@ -459,30 +467,55 @@ public class HudGui : MonoBehaviour
 	}
 
 	
+	private string GetMeatDecay(HudGui.InventoryItemInfo iii, InventoryItemView view, bool plural, bool caps)
+	{
+		string result = string.Empty;
+		if (view)
+		{
+			string text;
+			switch (((DecayingInventoryItemView)view).DecayProperties._state)
+			{
+			case DecayingInventoryItemView.DecayStates.Edible:
+			case DecayingInventoryItemView.DecayStates.DriedEdible:
+				text = UiTranslationDatabase.TranslateKey("EDIBLE", "Edible", caps);
+				goto IL_88;
+			case DecayingInventoryItemView.DecayStates.Spoilt:
+			case DecayingInventoryItemView.DecayStates.DriedSpoilt:
+				text = UiTranslationDatabase.TranslateKey("SPOILT", "Spoilt", caps);
+				goto IL_88;
+			}
+			text = UiTranslationDatabase.TranslateKey("FRESH", "Fresh", caps);
+			IL_88:
+			result = text;
+		}
+		return result;
+	}
+
+	
 	private string GetLeftClickActionName(HudGui.InventoryItemInfo iii)
 	{
 		switch (iii._leftClick)
 		{
 		case HudGui.InventoryItemInfo.LeftClickCommands.equip:
-			return UiTranslationDatabase.TranslateKey("EQUIP", "equip", false);
+			return UiTranslationDatabase.TranslateKey("EQUIP", "equip", true);
 		case HudGui.InventoryItemInfo.LeftClickCommands.play:
-			return UiTranslationDatabase.TranslateKey("PLAY", "play", false);
+			return UiTranslationDatabase.TranslateKey("PLAY", "play", true);
 		case HudGui.InventoryItemInfo.LeftClickCommands.drink:
-			return UiTranslationDatabase.TranslateKey("DRINK", "drink", false);
+			return UiTranslationDatabase.TranslateKey("DRINK", "drink", true);
 		case HudGui.InventoryItemInfo.LeftClickCommands.read:
-			return UiTranslationDatabase.TranslateKey("READ", "read", false);
+			return UiTranslationDatabase.TranslateKey("READ", "read", true);
 		case HudGui.InventoryItemInfo.LeftClickCommands.take:
-			return UiTranslationDatabase.TranslateKey("TAKE", "take", false);
+			return UiTranslationDatabase.TranslateKey("TAKE", "take", true);
 		case HudGui.InventoryItemInfo.LeftClickCommands.Charge_Flashlight:
-			return UiTranslationDatabase.TranslateKey("CHARGE", "charge", false);
+			return UiTranslationDatabase.TranslateKey("CHARGE", "charge", true);
 		case HudGui.InventoryItemInfo.LeftClickCommands.wear:
-			return UiTranslationDatabase.TranslateKey("WEAR", "wear", false);
+			return UiTranslationDatabase.TranslateKey("WEAR", "wear", true);
 		case HudGui.InventoryItemInfo.LeftClickCommands.eat:
-			return UiTranslationDatabase.TranslateKey("EAT", "eat", false);
+			return UiTranslationDatabase.TranslateKey("EAT", "eat", true);
 		case HudGui.InventoryItemInfo.LeftClickCommands.select:
-			return UiTranslationDatabase.TranslateKey("SELECT", "select", false);
+			return UiTranslationDatabase.TranslateKey("SELECT", "select", true);
 		case HudGui.InventoryItemInfo.LeftClickCommands.use:
-			return UiTranslationDatabase.TranslateKey("USE", "use", false);
+			return UiTranslationDatabase.TranslateKey("USE", "use", true);
 		default:
 			return "None";
 		}
@@ -491,21 +524,74 @@ public class HudGui : MonoBehaviour
 	
 	private string GetRightClickActionName(HudGui.InventoryItemInfo iii)
 	{
-		switch (iii._rightClick)
+		HudGui.InventoryItemInfo.RightClickCommands rightClick = iii._rightClick;
+		if (rightClick == HudGui.InventoryItemInfo.RightClickCommands.combine)
 		{
-		case HudGui.InventoryItemInfo.RightClickCommands.combine:
-			return UiTranslationDatabase.TranslateKey("COMBINE", "combine", false);
-		case HudGui.InventoryItemInfo.RightClickCommands.remove:
-			return UiTranslationDatabase.TranslateKey("REMOVE", "remove", false);
-		case HudGui.InventoryItemInfo.RightClickCommands.unequip:
-			return UiTranslationDatabase.TranslateKey("UNEQUIP", "unequip", false);
-		default:
+			return UiTranslationDatabase.TranslateKey("COMBINE", "combine", true);
+		}
+		if (rightClick == HudGui.InventoryItemInfo.RightClickCommands.remove)
+		{
+			return UiTranslationDatabase.TranslateKey("REMOVE", "remove", true);
+		}
+		if (rightClick != HudGui.InventoryItemInfo.RightClickCommands.unequip)
+		{
 			return "None";
 		}
+		return UiTranslationDatabase.TranslateKey("UNEQUIP", "unequip", true);
 	}
 
 	
-	public void ShowItemInfoView(InventoryItemView itemView, Vector3 viewportPos, bool isCraft)
+	public Vector3 GetInventoryScreenPos(Renderer renderer, HudGui.AllowPositions allowPos = HudGui.AllowPositions.Right | HudGui.AllowPositions.Top | HudGui.AllowPositions.Bottom)
+	{
+		bool flag = false;
+		bool flag2 = false;
+		bool flag3 = false;
+		bool flag4 = false;
+		Vector2 v = TheForest.Utils.Input.mousePosition;
+		float num = (float)(Screen.width / 8);
+		float num2 = (float)(Screen.height / 10);
+		if (renderer)
+		{
+			Rect screenRectOf = LocalPlayer.InventoryCam.GetScreenRectOf(renderer);
+			IScreenSizeRatio screenSizeRatio = renderer.GetComponent<IScreenSizeRatio>() ?? renderer.transform.parent.GetComponent<IScreenSizeRatio>();
+			float num3 = 1f;
+			if (screenSizeRatio != null)
+			{
+				num3 = screenSizeRatio.ScreenSizeRatio;
+			}
+			float num4 = screenRectOf.center.x / (float)Screen.width;
+			float num5 = screenRectOf.center.y / (float)Screen.height;
+			if ((allowPos & (HudGui.AllowPositions.Left | HudGui.AllowPositions.Right)) == (HudGui.AllowPositions)0 || ((allowPos & (HudGui.AllowPositions.Top | HudGui.AllowPositions.Bottom)) != (HudGui.AllowPositions)0 && Mathf.Abs(num4 - 0.5f) < Mathf.Abs(num5 - 0.5f) * (2.6f * (float)Screen.width / (float)Screen.height)))
+			{
+				if (num5 < 0.5f)
+				{
+					flag4 = true;
+				}
+				else
+				{
+					flag3 = true;
+				}
+			}
+			else if (num4 < 0.5f || (allowPos & HudGui.AllowPositions.Left) == (HudGui.AllowPositions)0)
+			{
+				flag2 = true;
+			}
+			else
+			{
+				flag = true;
+			}
+			v.x = ((!flag) ? ((!flag2) ? screenRectOf.center.x : (screenRectOf.xMax + num * num3 * 0.5f)) : (screenRectOf.xMin - num * num3));
+			v.y = ((!flag4) ? ((!flag3) ? screenRectOf.center.y : (screenRectOf.yMin - num2 * num3)) : (screenRectOf.yMax + num2 * num3));
+			v.x = Mathf.Clamp(v.x, num, (float)Screen.width - num * 1.5f);
+			v.y = Mathf.Clamp(v.y, num2 * 2f, (float)Screen.height - num2);
+		}
+		Vector3 position = LocalPlayer.InventoryCam.ScreenToViewportPoint(v);
+		position.z = 3f;
+		return this.ActionIconCams.ViewportToWorldPoint(position);
+	}
+
+	
+	public void ShowItemInfoViewDelayed(InventoryItemView itemView, Renderer renderer, bool isCraft)
 	{
 		if (LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Inventory)
 		{
@@ -514,47 +600,65 @@ public class HudGui : MonoBehaviour
 		if (this._inventoryItemInfoView._itemId == itemView._itemId && this._inventoryItemInfoView.IsCraft == isCraft)
 		{
 			this._inventoryItemInfoView.ViewCounter++;
+			if (isCraft)
+			{
+				if (!this.ClickToRemoveInfo.activeSelf)
+				{
+					this.ClickToRemoveInfo.SetActive(true);
+				}
+				if (this.ClickToEquipInfo.activeSelf != itemView._canEquipFromCraft)
+				{
+					this.ClickToEquipInfo.SetActive(itemView._canEquipFromCraft);
+				}
+			}
+			else if (!this._inventoryItemInfoView._root.activeSelf && !isCraft)
+			{
+				this._inventoryItemInfoView._root.SetActive(true);
+			}
 		}
-		else if (!isCraft)
+		else if (this._nextItemInfoIIV && this._nextItemInfoIIV._itemId == itemView._itemId && this._nextItemInfoIsCraft == isCraft)
+		{
+			this._nextItemInfoViewCounter++;
+		}
+		else
+		{
+			this._nextItemInfoViewCounter = 1;
+			this._nextItemInfoDisplay = Time.realtimeSinceStartup + 0.2f;
+			this._nextItemInfoIIV = itemView;
+			this._nextItemInfoRenderer = renderer;
+			this._nextItemInfoIsCraft = isCraft;
+		}
+	}
+
+	
+	private void ShowItemInfoView(InventoryItemView itemView, Renderer renderer, bool isCraft, int viewCounter)
+	{
+		if (LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Inventory)
+		{
+			return;
+		}
+		if (!isCraft)
 		{
 			if (this._inventoryItemsInfoCache.ContainsKey(itemView._itemId))
 			{
-				this._inventoryItemInfoView.ViewCounter = 1;
+				this._inventoryItemInfoView.ViewCounter = viewCounter;
 				this._inventoryItemInfoView._itemId = itemView._itemId;
 				this._inventoryItemInfoView.IsCraft = false;
-				if (viewportPos.y > 0.6f)
-				{
-					viewportPos.y -= 0.1f;
-				}
-				else
-				{
-					viewportPos.y += 0.1f;
-				}
-				if (viewportPos.x > 0.7f)
-				{
-					viewportPos.x -= 0.075f;
-				}
-				else if (viewportPos.x < 0.3f)
-				{
-					viewportPos.x += 0.075f;
-				}
-				viewportPos.x = Mathf.Clamp(viewportPos.x, 0.15f, 0.85f);
-				viewportPos.y = Mathf.Clamp(viewportPos.y, 0.15f, 0.85f);
-				viewportPos.z = 2f;
-				Vector3 position = this.ActionIconCams.ViewportToWorldPoint(viewportPos);
-				this._inventoryItemInfoView._root.transform.position = position;
+				this._inventoryItemInfoView._root.transform.position = this.GetInventoryScreenPos(renderer, HudGui.AllowPositions.Right | HudGui.AllowPositions.Top | HudGui.AllowPositions.Bottom);
 				HudGui.InventoryItemInfo inventoryItemInfo = this._inventoryItemsInfoCache[itemView._itemId];
-				this._inventoryItemInfoView._icon.spriteName = inventoryItemInfo._icon.name;
+				this._inventoryItemInfoView._icon.mainTexture = inventoryItemInfo._icon;
+				HudGui.InventoryItemInfo.BackgroundSize backgroundSize = HudGui.InventoryItemInfo.BackgroundSize.Small;
 				if (itemView is DecayingInventoryItemView)
 				{
-					this._inventoryItemInfoView._title.text = this.GetDecayingItemName(inventoryItemInfo, itemView, false, false);
+					this._inventoryItemInfoView._title.text = this.GetMeatItemName(inventoryItemInfo, itemView, false, true);
+					this._inventoryItemInfoView._description.text = this.GetMeatDecay(inventoryItemInfo, itemView, false, true);
 				}
 				else
 				{
-					this._inventoryItemInfoView._title.text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._titleTextTranslationKey, inventoryItemInfo._titleText, false);
+					this._inventoryItemInfoView._title.text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._titleTextTranslationKey, inventoryItemInfo._titleText, true);
+					this._inventoryItemInfoView._description.text = ((!inventoryItemInfo.ShowDescription()) ? string.Empty : UiTranslationDatabase.TranslateKey(inventoryItemInfo._descriptionTextTranslationKey, inventoryItemInfo._descriptionText, true));
 				}
-				this._inventoryItemInfoView._effect.text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._effectTextTranslationKey, inventoryItemInfo._effectText, false);
-				this._inventoryItemInfoView._description.text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._descriptionTextTranslationKey, inventoryItemInfo._descriptionText, false);
+				this._inventoryItemInfoView._effect.text = ((!inventoryItemInfo.ShowEffect()) ? string.Empty : UiTranslationDatabase.TranslateKey(inventoryItemInfo._effectTextTranslationKey, inventoryItemInfo._effectText, true));
 				this._inventoryItemInfoView._effect.gameObject.SetActive(true);
 				this._inventoryItemInfoView._description.gameObject.SetActive(true);
 				switch (inventoryItemInfo._amountDisplay)
@@ -568,19 +672,19 @@ public class HudGui : MonoBehaviour
 					break;
 				case HudGui.InventoryItemInfo.AmountDisplay.Pedometer:
 					this._inventoryItemInfoView._amountText._label.enabled = false;
-					this._inventoryItemInfoView._description.text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._descriptionTextTranslationKey, inventoryItemInfo._descriptionText, false).Replace("%", LocalPlayer.Stats.PedometerSteps.ToString());
+					this._inventoryItemInfoView._description.text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._descriptionTextTranslationKey, inventoryItemInfo._descriptionText, true).Replace("%", LocalPlayer.Stats.PedometerSteps.ToString());
 					break;
 				case HudGui.InventoryItemInfo.AmountDisplay.Battery:
 					this._inventoryItemInfoView._amountText._label.enabled = false;
-					this._inventoryItemInfoView._description.text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._descriptionTextTranslationKey, inventoryItemInfo._descriptionText, false).Replace("%", Mathf.FloorToInt(LocalPlayer.Stats.BatteryCharge) + "%");
+					this._inventoryItemInfoView._description.text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._descriptionTextTranslationKey, inventoryItemInfo._descriptionText, true).Replace("%", Mathf.FloorToInt(LocalPlayer.Stats.BatteryCharge) + "%");
 					break;
 				case HudGui.InventoryItemInfo.AmountDisplay.Air:
 					this._inventoryItemInfoView._amountText._label.enabled = false;
-					this._inventoryItemInfoView._description.text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._descriptionTextTranslationKey, inventoryItemInfo._descriptionText, false).Replace("%", Mathf.FloorToInt(LocalPlayer.Stats.AirBreathing.CurrentRebreatherAir) + "s");
+					this._inventoryItemInfoView._description.text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._descriptionTextTranslationKey, inventoryItemInfo._descriptionText, true).Replace("%", Mathf.FloorToInt(LocalPlayer.Stats.AirBreathing.CurrentRebreatherAir) + "s");
 					if (LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.Chest, inventoryItemInfo._itemId))
 					{
 						UILabel description = this._inventoryItemInfoView._description;
-						description.text += UiTranslationDatabase.TranslateKey("__EQUIPPED_", " (Equiped)", false);
+						description.text += UiTranslationDatabase.TranslateKey("__EQUIPPED_", " (Equiped)", true);
 					}
 					break;
 				case HudGui.InventoryItemInfo.AmountDisplay.WaterFill:
@@ -588,27 +692,36 @@ public class HudGui : MonoBehaviour
 					this._inventoryItemInfoView._amountText._label.enabled = false;
 					WeaponStatUpgrade.Types activeBonus = itemView.ActiveBonus;
 					string newValue;
-					if (activeBonus != WeaponStatUpgrade.Types.DirtyWater)
+					if (activeBonus != WeaponStatUpgrade.Types.CleanWater)
 					{
-						if (activeBonus != WeaponStatUpgrade.Types.CleanWater)
+						if (activeBonus != WeaponStatUpgrade.Types.DirtyWater)
 						{
-							newValue = "empty";
+							newValue = UiTranslationDatabase.TranslateKey("EMPTY", "empty", true);
 						}
 						else
 						{
-							newValue = UiTranslationDatabase.TranslateKey("CLEAN_WATER", "clean water", false) + " (" + string.Format("{0:P0}", itemView.Properties.ActiveBonusValue / 2f) + ")";
+							newValue = UiTranslationDatabase.TranslateKey("POLLUTED_WATER", "polluted water", true) + " (" + StringEx.TryFormat("{0:P0}", new object[]
+							{
+								itemView.Properties.ActiveBonusValue / 2f
+							}) + ")";
 						}
 					}
 					else
 					{
-						newValue = UiTranslationDatabase.TranslateKey("POLLUTED_WATER", "polluted water", false) + " (" + string.Format("{0:P0}", itemView.Properties.ActiveBonusValue / 2f) + ")";
+						newValue = UiTranslationDatabase.TranslateKey("CLEAN_WATER", "clean water", true) + " (" + StringEx.TryFormat("{0:P0}", new object[]
+						{
+							itemView.Properties.ActiveBonusValue / 2f
+						}) + ")";
 					}
-					this._inventoryItemInfoView._description.text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._descriptionTextTranslationKey, inventoryItemInfo._descriptionText, false).Replace("%", newValue);
+					this._inventoryItemInfoView._description.text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._descriptionTextTranslationKey, inventoryItemInfo._descriptionText, true).Replace("%", newValue);
 					break;
 				}
 				case HudGui.InventoryItemInfo.AmountDisplay.Fuel:
 					this._inventoryItemInfoView._amountText._label.enabled = false;
-					this._inventoryItemInfoView._description.text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._descriptionTextTranslationKey, inventoryItemInfo._descriptionText, false).Replace("%", string.Format("{0:P0}", LocalPlayer.Stats.Fuel.CurrentFuel / LocalPlayer.Stats.Fuel.MaxFuelCapacity));
+					this._inventoryItemInfoView._description.text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._descriptionTextTranslationKey, inventoryItemInfo._descriptionText, true).Replace("%", StringEx.TryFormat("{0:P0}", new object[]
+					{
+						LocalPlayer.Stats.Fuel.CurrentFuel / LocalPlayer.Stats.Fuel.MaxFuelCapacity
+					}));
 					break;
 				case HudGui.InventoryItemInfo.AmountDisplay.Ammo:
 					this._inventoryItemInfoView._amountText._label.enabled = true;
@@ -616,32 +729,6 @@ public class HudGui : MonoBehaviour
 					break;
 				}
 				this._inventoryItemInfoView._weight.enabled = false;
-				if (this._inventoryItemInfoView._upgradeCounterGrid)
-				{
-					if (itemView.ItemCache.MatchType(Item.Types.Equipment))
-					{
-						this._inventoryItemInfoView._upgradeCounterGrid.gameObject.SetActive(true);
-						for (int i = 0; i < this._inventoryItemInfoView._upgradeCounterViews.Count; i++)
-						{
-							HudGui.UpgradeCounterView upgradeCounterView = this._inventoryItemInfoView._upgradeCounterViews[i];
-							int amountOfUpgrades = LocalPlayer.Inventory.GetAmountOfUpgrades(itemView._itemId, upgradeCounterView._itemId);
-							if (amountOfUpgrades > 0)
-							{
-								upgradeCounterView._root.SetActive(true);
-								upgradeCounterView._label.text = amountOfUpgrades.ToString();
-							}
-							else
-							{
-								upgradeCounterView._root.SetActive(false);
-							}
-						}
-						this._inventoryItemInfoView._upgradeCounterGrid.Reposition();
-					}
-					else
-					{
-						this._inventoryItemInfoView._upgradeCounterGrid.gameObject.SetActive(false);
-					}
-				}
 				if (this._inventoryItemInfoView._upgradeBonusGrid)
 				{
 					if (!inventoryItemInfo._dontShowWeaponInfo && itemView.ItemCache.MatchType(Item.Types.Equipment) && itemView.ItemCache.MatchType(Item.Types.Weapon) && itemView._heldWeaponInfo)
@@ -659,93 +746,101 @@ public class HudGui : MonoBehaviour
 						float fillAmount3 = 1f - itemView._heldWeaponInfo.blockDamagePercent / 1f;
 						this._inventoryItemInfoView._blockView._amount.fillAmount = fillAmount3;
 						this._inventoryItemInfoView._upgradeBonusGrid.Reposition();
+						backgroundSize = HudGui.InventoryItemInfo.BackgroundSize.Large;
 					}
 					else
 					{
 						this._inventoryItemInfoView._upgradeBonusGrid.gameObject.SetActive(false);
 					}
 				}
-				for (int j = 0; j < this._inventoryItemInfoView._usableUpgradeViews.Count; j++)
-				{
-					HudGui.UsableUpgradeView usableUpgradeView = this._inventoryItemInfoView._usableUpgradeViews[j];
-					if (usableUpgradeView._stat == itemView.ActiveBonus != usableUpgradeView._root.activeSelf)
-					{
-						usableUpgradeView._root.SetActive(!usableUpgradeView._root.activeSelf);
-					}
-				}
 				bool canUseWithPrimary = itemView.CanUseWithPrimary;
 				if (inventoryItemInfo._leftClick == HudGui.InventoryItemInfo.LeftClickCommands.none || (!itemView.ItemCache.MatchType(Item.Types.Equipment) && itemView.ItemCache.MatchType(Item.Types.Edible) && !canUseWithPrimary))
 				{
-					this._inventoryItemInfoView._leftClickIcon.enabled = false;
-					this._inventoryItemInfoView._leftClickText.enabled = false;
+					this._inventoryItemInfoView._leftClickIcon.SetActive(false);
 				}
 				else
 				{
-					this._inventoryItemInfoView._leftClickIcon.enabled = true;
-					this._inventoryItemInfoView._leftClickText.enabled = true;
 					if (canUseWithPrimary && (itemView.ActiveBonus == WeaponStatUpgrade.Types.CleanWater || itemView.ActiveBonus == WeaponStatUpgrade.Types.DirtyWater))
 					{
-						this._inventoryItemInfoView._leftClickText.text = UiTranslationDatabase.TranslateKey("DRINK", "Drink", false);
+						this._inventoryItemInfoView._leftClickText.text = UiTranslationDatabase.TranslateKey("DRINK", "Drink", true);
 					}
 					else
 					{
 						this._inventoryItemInfoView._leftClickText.text = this.GetLeftClickActionName(inventoryItemInfo);
 					}
+					this._inventoryItemInfoView._leftClickIcon.SetActive(true);
 				}
 				if (LocalPlayer.Inventory.CurrentStorage == LocalPlayer.Inventory._craftingCog)
 				{
 					if (itemView._canDropFromInventory)
 					{
-						this._inventoryItemInfoView._rightClickIcon.enabled = true;
-						this._inventoryItemInfoView._rightClickText.enabled = true;
-						this._inventoryItemInfoView._rightClickText.text = UiTranslationDatabase.TranslateKey("DROP", "Drop", false);
+						this._inventoryItemInfoView._rightClickIcon.SetActive(true);
+						this._inventoryItemInfoView._rightClickText.text = UiTranslationDatabase.TranslateKey("DROP", "Drop", true);
 					}
 					else if (itemView.CanUseWithSecondary)
 					{
-						this._inventoryItemInfoView._rightClickIcon.enabled = true;
-						this._inventoryItemInfoView._rightClickText.enabled = true;
+						this._inventoryItemInfoView._rightClickIcon.SetActive(true);
 						if (itemView.ActiveBonus == WeaponStatUpgrade.Types.CleanWater || itemView.ActiveBonus == WeaponStatUpgrade.Types.DirtyWater)
 						{
-							this._inventoryItemInfoView._rightClickText.text = UiTranslationDatabase.TranslateKey("DRINK", "Drink", false);
+							this._inventoryItemInfoView._rightClickText.text = UiTranslationDatabase.TranslateKey("DRINK", "Drink", true);
 						}
 						else if (itemView.ActiveBonus == WeaponStatUpgrade.Types.DriedFood)
 						{
-							this._inventoryItemInfoView._rightClickText.text = UiTranslationDatabase.TranslateKey("EAT", "Eat", false);
+							this._inventoryItemInfoView._rightClickText.text = UiTranslationDatabase.TranslateKey("EAT", "Eat", true);
 						}
 						else
 						{
-							this._inventoryItemInfoView._rightClickText.text = UiTranslationDatabase.TranslateKey("USE", "Use", false);
+							this._inventoryItemInfoView._rightClickText.text = UiTranslationDatabase.TranslateKey("USE", "Use", true);
 						}
 					}
 					else if (itemView.CanBeHotkeyed)
 					{
-						this._inventoryItemInfoView._rightClickIcon.enabled = true;
-						this._inventoryItemInfoView._rightClickText.enabled = true;
-						this._inventoryItemInfoView._rightClickText.text = UiTranslationDatabase.TranslateKey("COMBINE", "combine", false);
+						this._inventoryItemInfoView._rightClickIcon.SetActive(true);
+						this._inventoryItemInfoView._rightClickText.text = UiTranslationDatabase.TranslateKey("COMBINE", "combine", true);
 					}
 					else if (inventoryItemInfo._rightClick == HudGui.InventoryItemInfo.RightClickCommands.none)
 					{
-						this._inventoryItemInfoView._rightClickIcon.enabled = false;
-						this._inventoryItemInfoView._rightClickText.enabled = false;
+						this._inventoryItemInfoView._rightClickIcon.SetActive(false);
 					}
 					else
 					{
-						this._inventoryItemInfoView._rightClickIcon.enabled = true;
-						this._inventoryItemInfoView._rightClickText.enabled = true;
+						this._inventoryItemInfoView._rightClickIcon.SetActive(true);
 						this._inventoryItemInfoView._rightClickText.text = this.GetRightClickActionName(inventoryItemInfo);
 					}
 				}
 				else if (itemView.CanBeStored)
 				{
-					this._inventoryItemInfoView._rightClickIcon.enabled = true;
-					this._inventoryItemInfoView._rightClickText.enabled = true;
-					this._inventoryItemInfoView._rightClickText.text = UiTranslationDatabase.TranslateKey("STORE", "Store", false);
+					this._inventoryItemInfoView._rightClickIcon.SetActive(true);
+					this._inventoryItemInfoView._rightClickText.text = UiTranslationDatabase.TranslateKey("STORE", "Store", true);
 				}
 				else
 				{
-					this._inventoryItemInfoView._rightClickIcon.enabled = false;
-					this._inventoryItemInfoView._rightClickText.enabled = false;
+					this._inventoryItemInfoView._rightClickIcon.SetActive(false);
 				}
+				bool flag = this._inventoryItemInfoView._leftClickIcon.activeSelf || this._inventoryItemInfoView._rightClickIcon.activeSelf;
+				bool flag2 = !string.IsNullOrEmpty(this._inventoryItemInfoView._description.text);
+				bool flag3 = !string.IsNullOrEmpty(this._inventoryItemInfoView._effect.text);
+				if (flag && (flag2 || flag3))
+				{
+					int num = (!flag2) ? 1 : Mathf.CeilToInt((float)this._inventoryItemInfoView._description.height / 18f);
+					if (flag3)
+					{
+						num += Mathf.CeilToInt((float)this._inventoryItemInfoView._effect.height / 18f);
+					}
+					if (num > 2)
+					{
+						backgroundSize = HudGui.InventoryItemInfo.BackgroundSize.Large;
+					}
+					else if (backgroundSize < HudGui.InventoryItemInfo.BackgroundSize.Medium)
+					{
+						backgroundSize = HudGui.InventoryItemInfo.BackgroundSize.Medium;
+					}
+				}
+				this._inventoryItemInfoView._background.height = this._inventoryItemInfoView._backgroundSizes[(int)backgroundSize];
+				this._inventoryItemInfoView._background.width = Mathf.Max(460, this._inventoryItemInfoView._title.width + 30 + 130);
+				Vector3 localPosition = this._inventoryItemInfoView._background.transform.localPosition;
+				localPosition.x = (float)(38 + Mathf.Max(this._inventoryItemInfoView._background.width - 460, 0) / 2);
+				this._inventoryItemInfoView._background.transform.localPosition = localPosition;
 				this._inventoryItemInfoView._root.SetActive(true);
 			}
 			else
@@ -775,16 +870,30 @@ public class HudGui : MonoBehaviour
 		if (this._inventoryItemInfoView._itemId == itemId && this._inventoryItemInfoView.IsCraft == isCraft)
 		{
 			this._inventoryItemInfoView.ViewCounter--;
-			if (this._inventoryItemInfoView.ViewCounter == 0)
+		}
+		else if (this._nextItemInfoIIV && this._nextItemInfoIIV._itemId == itemId && this._nextItemInfoIsCraft == isCraft)
+		{
+			this._nextItemInfoViewCounter--;
+		}
+	}
+
+	
+	private void CheckItemInfoViewCounter()
+	{
+		if (this._inventoryItemInfoView.ViewCounter <= 0 && this._inventoryItemInfoView._itemId != 0)
+		{
+			this.ClickToRemoveInfo.SetActive(false);
+			this.ClickToEquipInfo.SetActive(false);
+			if (this._inventoryItemInfoView._root.activeSelf)
 			{
-				this.ClickToRemoveInfo.SetActive(false);
-				this.ClickToEquipInfo.SetActive(false);
-				if (this._inventoryItemInfoView._root.activeSelf)
-				{
-					this._inventoryItemInfoView._root.SetActive(false);
-				}
-				this._inventoryItemInfoView._itemId = 0;
+				this._inventoryItemInfoView._root.SetActive(false);
 			}
+			this._inventoryItemInfoView.ViewCounter = 0;
+		}
+		if (this._nextItemInfoViewCounter <= 0 && this._nextItemInfoIIV)
+		{
+			this._nextItemInfoIIV = null;
+			this._nextItemInfoViewCounter = 0;
 		}
 	}
 
@@ -800,38 +909,38 @@ public class HudGui : MonoBehaviour
 	}
 
 	
-	public void ShowQuickSelectInfo(Vector3 viewportPos)
+	public void ShowQuickSelectInfoDelayed(Renderer renderer)
 	{
-		if (viewportPos.y > 0.75f)
+		this._quickSelectTooltipView._root.transform.position = this.GetInventoryScreenPos(renderer, HudGui.AllowPositions.Right | HudGui.AllowPositions.Top | HudGui.AllowPositions.Bottom);
+		this._nextQuickInfoDisplay = Time.realtimeSinceStartup + 0.2f;
+	}
+
+	
+	private void ShowQuickSelectInfo()
+	{
+		if (LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Inventory)
 		{
-			viewportPos.y -= 0.1f;
+			return;
 		}
-		else
-		{
-			viewportPos.y += 0.1f;
-		}
-		if (viewportPos.x > 0.8f)
-		{
-			viewportPos.x -= 0.075f;
-		}
-		else if (viewportPos.x < 0.2f)
-		{
-			viewportPos.x += 0.075f;
-		}
-		viewportPos.z = 2f;
-		Vector3 position = this.GuiCamC.ViewportToWorldPoint(viewportPos);
 		this._quickSelectTooltipView._root.SetActive(true);
-		this._quickSelectTooltipView._root.transform.position = position;
 		for (int i = 0; i < this._quickSelectTooltipView._slots.Length; i++)
 		{
 			int num = LocalPlayer.Inventory.QuickSelectItemIds[i];
-			if (num > 0 && this._inventoryItemsInfoCache.ContainsKey(num))
+			if (num > 0)
 			{
-				HudGui.InventoryItemInfo inventoryItemInfo = this._inventoryItemsInfoCache[num];
-				if (inventoryItemInfo != null)
+				if (this._inventoryItemsInfoCache.ContainsKey(num))
 				{
-					this._quickSelectTooltipView._slots[i].text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._titleTextTranslationKey, inventoryItemInfo._titleText, false);
+					HudGui.InventoryItemInfo inventoryItemInfo = this._inventoryItemsInfoCache[num];
+					if (inventoryItemInfo != null)
+					{
+						this._quickSelectTooltipView._slots[i].text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._titleTextTranslationKey, inventoryItemInfo._titleText, true);
+						this._quickSelectTooltipView._slots[i].enabled = true;
+					}
 				}
+			}
+			else
+			{
+				this._quickSelectTooltipView._slots[i].enabled = false;
 			}
 		}
 	}
@@ -840,6 +949,46 @@ public class HudGui : MonoBehaviour
 	public void HideQuickSelectInfo()
 	{
 		this._quickSelectTooltipView._root.SetActive(false);
+		this._nextQuickInfoDisplay = float.MaxValue;
+	}
+
+	
+	public void ShowQuickSelectCombineInfo()
+	{
+		if (LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Inventory)
+		{
+			return;
+		}
+		for (int i = 0; i < this._quickSelectInfoView._slots.Length; i++)
+		{
+			int num = LocalPlayer.Inventory.QuickSelectItemIds[i];
+			if (num > 0)
+			{
+				if (this._inventoryItemsInfoCache.ContainsKey(num))
+				{
+					HudGui.InventoryItemInfo inventoryItemInfo = this._inventoryItemsInfoCache[num];
+					if (inventoryItemInfo != null)
+					{
+						this._quickSelectInfoView._slots[i].text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._titleTextTranslationKey, inventoryItemInfo._titleText, true);
+						this._quickSelectInfoView._slots[i].enabled = true;
+					}
+				}
+			}
+			else
+			{
+				this._quickSelectInfoView._slots[i].enabled = false;
+			}
+		}
+		if (!this._quickSelectInfoView._root.activeSelf)
+		{
+			this._quickSelectInfoView._root.SetActive(true);
+		}
+	}
+
+	
+	public void HideQuickSelectCombineInfo()
+	{
+		this._quickSelectInfoView._root.SetActive(false);
 	}
 
 	
@@ -865,7 +1014,7 @@ public class HudGui : MonoBehaviour
 	
 	public void ToggleFullCapacityHud(int itemId)
 	{
-		if (!CoopPeerStarter.DedicatedHost && base.gameObject.activeSelf && this.Grid.gameObject.activeSelf && this.GuiCamC.enabled && this._inventoryItemsInfoCache.ContainsKey(itemId) && this._inventoryItemsInfoCache[itemId]._showCantCarryMoreItem && this.GuiCam.activeSelf && this._cantCarryItemViewGOs.Count < 10 && PoolManager.Pools.ContainsKey("misc") && PlayerPreferences.ShowHud)
+		if (!CoopPeerStarter.DedicatedHost && base.gameObject.activeSelf && this.Grid.gameObject.activeSelf && this.GuiCamC.enabled && this._inventoryItemsInfoCache.ContainsKey(itemId) && this._inventoryItemsInfoCache[itemId]._showCantCarryMoreItem && this.GuiCam.activeSelf && this._cantCarryItemViewGOs.Count < 5 && PoolManager.Pools.ContainsKey("misc") && PlayerPreferences.ShowHud)
 		{
 			if (!this._cantCarryItemViewGOs.ContainsKey(itemId))
 			{
@@ -878,7 +1027,7 @@ public class HudGui : MonoBehaviour
 				UILabel componentInChildren = gameObject.GetComponentInChildren<UILabel>();
 				if (componentInChildren)
 				{
-					componentInChildren.text = this.GetDecayingItemName(this._inventoryItemsInfoCache[itemId], null, true, true);
+					componentInChildren.text = this.GetMeatItemName(this._inventoryItemsInfoCache[itemId], null, true, true);
 				}
 				this.Grid.Reposition();
 				this._cantCarryItemViewGOs[itemId] = this.SpawnTimedGameObject(itemId, 0, Time.time + 5f, gameObject, null);
@@ -889,6 +1038,122 @@ public class HudGui : MonoBehaviour
 				this._cantCarryItemViewGOs[itemId]._GO.SetActive(false);
 				this.Grid.Reposition();
 				this._cantCarryItemViewGOs[itemId]._GO.SetActive(true);
+				this.Grid.Reposition();
+			}
+		}
+	}
+
+	
+	public void ShowClothingOutitInfoViewDelayed(ClothingInventoryView itemView, Renderer renderer)
+	{
+		if (LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Inventory)
+		{
+			return;
+		}
+		this._nextOutfitInfoIIV = itemView;
+		this._nextOutfitInfoRenderer = renderer;
+		this._nextOutfitInfoDisplay = Time.realtimeSinceStartup + 0.2f;
+	}
+
+	
+	private void ShowClothingOutitInfoView(ClothingInventoryView itemView, Renderer renderer)
+	{
+		if (LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Inventory)
+		{
+			return;
+		}
+		this._clothingItemInfoView._root.transform.position = this.GetInventoryScreenPos(renderer, HudGui.AllowPositions.Right | HudGui.AllowPositions.Top | HudGui.AllowPositions.Bottom);
+		this._clothingItemInfoView._outfitId = itemView._outfitId;
+		List<int> list = LocalPlayer.Clothing.AvailableClothingOutfits[itemView._outfitId];
+		string text = string.Empty;
+		for (int i = 0; i < list.Count; i++)
+		{
+			ClothingItem clothingItem = ClothingItemDatabase.ClothingItemById(list[i]);
+			text += UiTranslationDatabase.TranslateKey(clothingItem._translationKey, clothingItem._displayName.ToUpper(), true);
+			if (i + 2 < list.Count)
+			{
+				text += ", ";
+			}
+			else if (i + 1 < list.Count)
+			{
+				text += UiTranslationDatabase.TranslateKey("_AND_", " AND ", true);
+			}
+		}
+		this._clothingItemInfoView._content.text = text;
+		if (!this._clothingItemInfoView._root.activeSelf)
+		{
+			this._clothingItemInfoView._root.SetActive(true);
+		}
+	}
+
+	
+	public void HideClothingOutitInfoView(int itemId)
+	{
+		if (this._clothingItemInfoView._outfitId == itemId)
+		{
+			if (this._clothingItemInfoView._root.activeSelf)
+			{
+				this._clothingItemInfoView._root.SetActive(false);
+			}
+			this._clothingItemInfoView._outfitId = 0;
+		}
+		if (this._nextOutfitInfoIIV && this._nextOutfitInfoIIV._outfitId == itemId)
+		{
+			this._nextOutfitInfoIIV = null;
+		}
+	}
+
+	
+	public void ToggleGotClothingOutfitHud()
+	{
+		if (!CoopPeerStarter.DedicatedHost && base.gameObject.activeSelf && this.Grid.gameObject.activeSelf && this.GuiCamC.enabled && this.GuiCam.activeSelf && this._gotItemViewGOs.Count < 5 && PoolManager.Pools.ContainsKey("misc") && PlayerPreferences.ShowHud)
+		{
+			if (!this._gotItemViewGOs.ContainsKey(-1))
+			{
+				base.enabled = true;
+				GameObject gameObject = PoolManager.Pools["misc"].Spawn(this._gotClothingView.transform, this._gotClothingView.transform.position, this._gotClothingView.transform.rotation).gameObject;
+				gameObject.transform.parent = this.Grid.transform;
+				gameObject.transform.localScale = this._gotClothingView.transform.localScale;
+				gameObject.transform.localScale = this.BuildMissionWidget.transform.localScale;
+				gameObject.transform.SetSiblingIndex(this._gotClothingView.transform.GetSiblingIndex() + 1);
+				gameObject.SetActive(true);
+				this.Grid.Reposition();
+				this._gotItemViewGOs[-1] = this.SpawnTimedGameObject(-1, 1, Time.time + 2f, gameObject, gameObject.GetComponentInChildren<UILabel>());
+			}
+			else
+			{
+				this._gotItemViewGOs[-1]._amount++;
+				this._gotItemViewGOs[-1]._endTime = Time.time + 2f;
+				this._gotItemViewGOs[-1]._GO.SetActive(false);
+				this.Grid.Reposition();
+				this._gotItemViewGOs[-1]._GO.SetActive(true);
+				this.Grid.Reposition();
+			}
+		}
+	}
+
+	
+	public void ToggleFullClothingOutfitCapacityHud()
+	{
+		if (!CoopPeerStarter.DedicatedHost && base.gameObject.activeSelf && this.Grid.gameObject.activeSelf && this.GuiCamC.enabled && this.GuiCam.activeSelf && this._cantCarryItemViewGOs.Count < 5 && PoolManager.Pools.ContainsKey("misc") && PlayerPreferences.ShowHud)
+		{
+			if (!this._cantCarryItemViewGOs.ContainsKey(-1))
+			{
+				base.enabled = true;
+				GameObject gameObject = PoolManager.Pools["misc"].Spawn(this._cantCarryClothingView.transform, this._cantCarryClothingView.transform.position, this._cantCarryClothingView.transform.rotation).gameObject;
+				gameObject.transform.parent = this.Grid.transform;
+				gameObject.transform.localScale = this._cantCarryClothingView.transform.localScale;
+				gameObject.transform.SetSiblingIndex(this._gotItemView.transform.GetSiblingIndex() + 1);
+				gameObject.SetActive(true);
+				this.Grid.Reposition();
+				this._cantCarryItemViewGOs[-1] = this.SpawnTimedGameObject(-1, 0, Time.time + 5f, gameObject, null);
+			}
+			else
+			{
+				this._cantCarryItemViewGOs[-1]._endTime = Time.time + 5f;
+				this._cantCarryItemViewGOs[-1]._GO.SetActive(false);
+				this.Grid.Reposition();
+				this._cantCarryItemViewGOs[-1]._GO.SetActive(true);
 				this.Grid.Reposition();
 			}
 		}
@@ -928,7 +1193,7 @@ public class HudGui : MonoBehaviour
 	
 	public void ToggleGotItemHud(int itemId, int amount)
 	{
-		if (!CoopPeerStarter.DedicatedHost && base.gameObject.activeSelf && this.Grid.gameObject.activeSelf && this.GuiCamC.enabled && this._inventoryItemsInfoCache.ContainsKey(itemId) && this._inventoryItemsInfoCache[itemId]._showGotItem && this.GuiCam.activeSelf && this._gotItemViewGOs.Count < 10 && PoolManager.Pools.ContainsKey("misc") && PlayerPreferences.ShowHud)
+		if (!CoopPeerStarter.DedicatedHost && base.gameObject.activeSelf && this.Grid.gameObject.activeSelf && this.GuiCamC.enabled && this._inventoryItemsInfoCache.ContainsKey(itemId) && this._inventoryItemsInfoCache[itemId]._showGotItem && this.GuiCam.activeSelf && this._gotItemViewGOs.Count < 5 && PoolManager.Pools.ContainsKey("misc") && PlayerPreferences.ShowHud)
 		{
 			if (!this._gotItemViewGOs.ContainsKey(itemId))
 			{
@@ -944,10 +1209,10 @@ public class HudGui : MonoBehaviour
 				if (componentInChildren)
 				{
 					componentInChildren.text = this.GotItemText(inventoryItemInfo, amount);
-					UISprite componentInChildren2 = gameObject.GetComponentInChildren<UISprite>();
+					UITexture componentInChildren2 = gameObject.GetComponentInChildren<UITexture>();
 					if (componentInChildren2)
 					{
-						componentInChildren2.spriteName = inventoryItemInfo._icon.name;
+						componentInChildren2.mainTexture = inventoryItemInfo._icon;
 					}
 					this.Grid.Reposition();
 					this._gotItemViewGOs[itemId] = this.SpawnTimedGameObject(itemId, amount, Time.time + 2f, gameObject, componentInChildren);
@@ -976,7 +1241,7 @@ public class HudGui : MonoBehaviour
 	
 	public void ShowFoundPassenger(int passengerId, string displayName)
 	{
-		if (!CoopPeerStarter.DedicatedHost && base.gameObject.activeSelf && this.Grid.gameObject.activeSelf && this.GuiCamC.enabled && !this._foundPassengerViewGOs.ContainsKey(passengerId) && this._foundPassengerViewGOs.Count < 10 && PoolManager.Pools.ContainsKey("misc") && PlayerPreferences.ShowHud)
+		if (!CoopPeerStarter.DedicatedHost && base.gameObject.activeSelf && this.Grid.gameObject.activeSelf && this.GuiCamC.enabled && !this._foundPassengerViewGOs.ContainsKey(passengerId) && this._foundPassengerViewGOs.Count < 5 && PoolManager.Pools.ContainsKey("misc") && PlayerPreferences.ShowHud)
 		{
 			base.enabled = true;
 			GameObject gameObject = PoolManager.Pools["misc"].Spawn(this._foundPassengerView.transform, this._foundPassengerView.transform.position, this._foundPassengerView.transform.rotation).gameObject;
@@ -996,7 +1261,7 @@ public class HudGui : MonoBehaviour
 	
 	public void ShowTodoListMessage(string message)
 	{
-		if (!CoopPeerStarter.DedicatedHost && base.gameObject.activeSelf && this.Grid.gameObject.activeSelf && this.GuiCamC.enabled && !string.IsNullOrEmpty(message) && !this._todoListMessagesGOs.Any((KeyValuePair<int, HudGui.TimedGameObject> tlm) => tlm.Value._label.text.Equals(message)) && this._todoListMessagesGOs.Count < 10 && PoolManager.Pools.ContainsKey("misc") && PlayerPreferences.ShowHud)
+		if (!CoopPeerStarter.DedicatedHost && base.gameObject.activeSelf && this.Grid.gameObject.activeSelf && this.GuiCamC.enabled && !string.IsNullOrEmpty(message) && !this._todoListMessagesGOs.Any((KeyValuePair<int, HudGui.TimedGameObject> tlm) => tlm.Value._label.text.Equals(message)) && this._todoListMessagesGOs.Count < 5 && PoolManager.Pools.ContainsKey("misc") && PlayerPreferences.ShowHud)
 		{
 			base.enabled = true;
 			GameObject gameObject = PoolManager.Pools["misc"].Spawn(this._todoListMessageView.transform, this._todoListMessageView.transform.position, this._todoListMessageView.transform.rotation).gameObject;
@@ -1033,13 +1298,25 @@ public class HudGui : MonoBehaviour
 		}
 		if (iii._showCollectedItem)
 		{
-			text += UiTranslationDatabase.TranslateKey("_COLLECTED", " collected", true);
+			string text2 = UiTranslationDatabase.TranslateKey("_COLLECTED", " collected", true);
+			text += ((!text2.StartsWith(" ")) ? (' ' + text2) : text2);
 		}
 		else
 		{
 			text += UiTranslationDatabase.TranslateKey("ADDED_TO_BACKPACK", " added to backpack", true);
 		}
 		return text;
+	}
+
+	
+	public HudGui.InventoryItemInfo GetItemInfo(int itemId)
+	{
+		return (!this._inventoryItemsInfoCache.ContainsKey(itemId)) ? null : this._inventoryItemsInfoCache[itemId];
+	}
+
+	
+	public void HideCraftingRecipes()
+	{
 	}
 
 	
@@ -1050,16 +1327,8 @@ public class HudGui : MonoBehaviour
 		{
 			foreach (Receipe receipe in receipes)
 			{
-				HudGui.InventoryItemInfo iii;
-				if (receipe._type == Receipe.Types.Extension)
-				{
-					iii = ((!this._inventoryItemsInfoCache.ContainsKey(receipe._ingredients[0]._itemID)) ? null : this._inventoryItemsInfoCache[receipe._ingredients[0]._itemID]);
-				}
-				else
-				{
-					iii = ((!this._inventoryItemsInfoCache.ContainsKey(receipe._productItemID)) ? null : this._inventoryItemsInfoCache[receipe._productItemID]);
-				}
-				if (this._receipeProductViews[i].ShowReceipe(receipe, iii))
+				HudGui.InventoryItemInfo itemInfo = this.GetItemInfo((receipe._type != Receipe.Types.Extension) ? receipe._productItemID : receipe._ingredients[0]._itemID);
+				if (this._receipeProductViews[i].ShowReceipe(receipe, itemInfo))
 				{
 					if (!this._receipeProductViews[i].gameObject.activeSelf)
 					{
@@ -1081,6 +1350,67 @@ public class HudGui : MonoBehaviour
 			this._receipeProductViews[i].gameObject.SetActive(false);
 			i++;
 		}
+	}
+
+	
+	public void ShowRecipeListDelayed()
+	{
+		this._nextRecipeListDisplay = Time.realtimeSinceStartup + 0.2f;
+	}
+
+	
+	private void ShowRecipeList()
+	{
+		if (!this._receipeList.activeSelf)
+		{
+			this._receipeList.SetActive(true);
+		}
+		this._receipeList.GetComponent<UIGrid>().Reposition();
+		base.StartCoroutine(this.UpdateRecipeListSize());
+	}
+
+	
+	public void HideRecipeList()
+	{
+		if (this._receipeList.activeSelf)
+		{
+			this._receipeList.SetActive(false);
+		}
+		this._nextRecipeListDisplay = float.MaxValue;
+	}
+
+	
+	public IEnumerator UpdateRecipeListSize()
+	{
+		yield return null;
+		Bounds b = default(Bounds);
+		bool set = false;
+		for (int i = 0; i < this._receipeProductViews.Length; i++)
+		{
+			if (!this._receipeProductViews[i].gameObject.activeSelf)
+			{
+				break;
+			}
+			if (set)
+			{
+				b.Encapsulate(this._receipeProductViews[i]._title.CalculateBounds(this._receipeList.transform));
+			}
+			else
+			{
+				b = this._receipeProductViews[i]._title.CalculateBounds(this._receipeList.transform);
+				set = true;
+			}
+			for (int j = this._receipeProductViews[i]._ingredientTextures.Length - 1; j > 0; j--)
+			{
+				if (!this._receipeProductViews[i]._ingredientTextures[j - 1].gameObject.activeSelf)
+				{
+					b.Encapsulate(this._receipeProductViews[i]._ingredientTextures[j].CalculateBounds(this._receipeList.transform));
+					break;
+				}
+			}
+		}
+		this._receipeListSize.SetRect(b.min.x, b.min.y, b.max.x - b.min.x + 70f, b.max.y - b.min.y);
+		yield break;
 	}
 
 	
@@ -1119,20 +1449,23 @@ public class HudGui : MonoBehaviour
 				for (int j = 0; j < weaponStatUpgradeForIngredient.Length; j++)
 				{
 					WeaponStatUpgrade.Types type = weaponStatUpgradeForIngredient[j]._type;
-					switch (type)
+					if (type != WeaponStatUpgrade.Types.weaponSpeed)
 					{
-					case WeaponStatUpgrade.Types.weaponDamage:
-						num3 += LocalPlayer.Inventory._craftingCog.GetUpgradeBonusAmount(itemId, addingItemid, weaponStatUpgradeForIngredient[j], addingAmount);
-						break;
-					default:
-						if (type == WeaponStatUpgrade.Types.blockStaminaDrain)
+						if (type != WeaponStatUpgrade.Types.weaponDamage)
 						{
-							num5 += LocalPlayer.Inventory._craftingCog.GetUpgradeBonusAmount(itemId, addingItemid, weaponStatUpgradeForIngredient[j], addingAmount);
+							if (type == WeaponStatUpgrade.Types.blockStaminaDrain)
+							{
+								num5 += LocalPlayer.Inventory._craftingCog.GetUpgradeBonusAmount(itemId, addingItemid, weaponStatUpgradeForIngredient[j], addingAmount);
+							}
 						}
-						break;
-					case WeaponStatUpgrade.Types.weaponSpeed:
+						else
+						{
+							num3 += LocalPlayer.Inventory._craftingCog.GetUpgradeBonusAmount(itemId, addingItemid, weaponStatUpgradeForIngredient[j], addingAmount);
+						}
+					}
+					else
+					{
 						num2 += LocalPlayer.Inventory._craftingCog.GetUpgradeBonusAmount(itemId, addingItemid, weaponStatUpgradeForIngredient[j], addingAmount);
-						break;
 					}
 				}
 				this._inventoryItemInfoView._speedBonusView._root.SetActive(true);
@@ -1252,18 +1585,6 @@ public class HudGui : MonoBehaviour
 	}
 
 	
-	private const float MaxWeaponSpeed = 12f;
-
-	
-	private const float MaxWeaponDamage = 12f;
-
-	
-	private const float MaxWeaponBlockPercent = 1f;
-
-	
-	private const float MaxWeaponBlockStaminDrain = 26f;
-
-	
 	public GameObject PauseMenu;
 
 	
@@ -1298,12 +1619,6 @@ public class HudGui : MonoBehaviour
 	public UISprite TimmyStomach;
 
 	
-	public UISprite HealthBar;
-
-	
-	public UISprite HealthBarTarget;
-
-	
 	public UISprite ArmorBar;
 
 	
@@ -1311,6 +1626,12 @@ public class HudGui : MonoBehaviour
 
 	
 	public UISprite[] ArmorNibbles;
+
+	
+	public UISprite HealthBar;
+
+	
+	public UISprite HealthBarTarget;
 
 	
 	public UISprite StaminaBar;
@@ -1413,6 +1734,22 @@ public class HudGui : MonoBehaviour
 
 	
 	public GameObject RewindCamcorderIcon;
+
+	
+	public GameObject LoadingCavesInfo;
+
+	
+	public UISprite LoadingCavesFill;
+
+	
+	[Space(15f)]
+	public GameObject DropButton;
+
+	
+	public GameObject PlaceArtifactButton;
+
+	
+	public GameObject DelayedActionIcon;
 
 	
 	[Header("Construction")]
@@ -1541,11 +1878,15 @@ public class HudGui : MonoBehaviour
 	public ItemListWidget MultiSledAddWidget;
 
 	
-	[Header("Cameras")]
-	public GameObject bookUICam;
+	[Header("Traps")]
+	public UiFollowTarget TrapReArmIngredientsFollow;
 
 	
-	public GameObject bookTutorial;
+	public HudGui.BuildingIngredient TrapReArmIngredients;
+
+	
+	[Header("Cameras")]
+	public GameObject bookUICam;
 
 	
 	public GameObject GuiCam;
@@ -1586,9 +1927,6 @@ public class HudGui : MonoBehaviour
 
 	
 	public GameObject Tut_Shelter;
-
-	
-	public GameObject Tut_OpenBag;
 
 	
 	public GameObject Tut_OpenBook;
@@ -1642,9 +1980,6 @@ public class HudGui : MonoBehaviour
 	public GameObject Tut_Crafting;
 
 	
-	public GameObject Tut_AnchorAccessibleBuildings;
-
-	
 	public GameObject Tut_StoryClue;
 
 	
@@ -1654,17 +1989,13 @@ public class HudGui : MonoBehaviour
 	public GameObject Tut_MolotovTutorial;
 
 	
-	[Space(15f)]
-	public GameObject DropButton;
+	public GameObject Tut_NewBuildingsAvailable;
 
 	
-	public GameObject DelayedActionIcon;
+	public GameObject Tut_Sledding;
 
 	
 	[Header("Crafting")]
-	public GameObject CraftingMessage;
-
-	
 	public UISprite CraftingReceipeProgress;
 
 	
@@ -1772,6 +2103,21 @@ public class HudGui : MonoBehaviour
 	public GameObject _gotItemView;
 
 	
+	public GameObject _cantCarryClothingView;
+
+	
+	public GameObject _gotClothingView;
+
+	
+	public HudGui.ClothingItemTooltipView _clothingItemInfoView;
+
+	
+	public GameObject _receipeList;
+
+	
+	public UIWidget _receipeListSize;
+
+	
 	public ReceipeProductView[] _receipeProductViews;
 
 	
@@ -1814,19 +2160,89 @@ public class HudGui : MonoBehaviour
 	private float _nextBuildMissionDisplay;
 
 	
+	private int _hudCameraOffCounter;
+
+	
+	private float _nextItemInfoDisplay = float.MaxValue;
+
+	
+	private InventoryItemView _nextItemInfoIIV;
+
+	
+	private Renderer _nextItemInfoRenderer;
+
+	
+	private bool _nextItemInfoIsCraft;
+
+	
+	private int _nextItemInfoViewCounter;
+
+	
+	private float _nextOutfitInfoDisplay = float.MaxValue;
+
+	
+	private ClothingInventoryView _nextOutfitInfoIIV;
+
+	
+	private Renderer _nextOutfitInfoRenderer;
+
+	
+	private float _nextQuickInfoDisplay = float.MaxValue;
+
+	
+	private float _nextRecipeListDisplay = float.MaxValue;
+
+	
 	[Header("Controls")]
 	public bool _exportTranslationData;
 
 	
-	private int hudCameraOffCounter;
+	private const float MaxWeaponSpeed = 12f;
+
+	
+	private const float MaxWeaponDamage = 12f;
+
+	
+	private const float MaxWeaponBlockPercent = 1f;
+
+	
+	private const float MaxWeaponBlockStaminDrain = 26f;
 
 	
 	private int _screenResolutionHash;
 
 	
+	[Flags]
+	public enum AllowPositions
+	{
+		
+		Left = 1,
+		
+		Right = 2,
+		
+		Top = 4,
+		
+		Bottom = 8
+	}
+
+	
 	[Serializable]
 	public class InventoryItemInfo
 	{
+		
+		public bool ShowEffect()
+		{
+			HudGui.InventoryItemInfo.AllowedDifficulties allowedDifficulties = (HudGui.InventoryItemInfo.AllowedDifficulties)(1 << (int)GameSetup.Difficulty);
+			return (this._effectShowFor & allowedDifficulties) != HudGui.InventoryItemInfo.AllowedDifficulties.None;
+		}
+
+		
+		public bool ShowDescription()
+		{
+			HudGui.InventoryItemInfo.AllowedDifficulties allowedDifficulties = (HudGui.InventoryItemInfo.AllowedDifficulties)(1 << (int)GameSetup.Difficulty);
+			return (this._descriptionShowFor & allowedDifficulties) != HudGui.InventoryItemInfo.AllowedDifficulties.None;
+		}
+
 		
 		[ItemIdPicker]
 		public int _itemId;
@@ -1845,8 +2261,14 @@ public class HudGui : MonoBehaviour
 		public string _effectText;
 
 		
+		public HudGui.InventoryItemInfo.AllowedDifficulties _effectShowFor = HudGui.InventoryItemInfo.AllowedDifficulties.All;
+
+		
 		[Multiline(1)]
 		public string _descriptionText;
+
+		
+		public HudGui.InventoryItemInfo.AllowedDifficulties _descriptionShowFor = HudGui.InventoryItemInfo.AllowedDifficulties.All;
 
 		
 		public string _titleTextTranslationKey;
@@ -1859,6 +2281,9 @@ public class HudGui : MonoBehaviour
 
 		
 		public string _descriptionTextTranslationKey;
+
+		
+		public HudGui.InventoryItemInfo.BackgroundSize _backgroundSize = HudGui.InventoryItemInfo.BackgroundSize.Medium;
 
 		
 		public HudGui.InventoryItemInfo.LeftClickCommands _leftClick;
@@ -1941,6 +2366,35 @@ public class HudGui : MonoBehaviour
 			
 			Ammo
 		}
+
+		
+		public enum BackgroundSize
+		{
+			
+			Small,
+			
+			Medium,
+			
+			Large
+		}
+
+		
+		[Flags]
+		public enum AllowedDifficulties
+		{
+			
+			All = -1,
+			
+			None = 0,
+			
+			Peaceful = 1,
+			
+			Normal = 2,
+			
+			Hard = 4,
+			
+			HardSurvival = 8
+		}
 	}
 
 	
@@ -1965,7 +2419,14 @@ public class HudGui : MonoBehaviour
 		public GameObject _root;
 
 		
-		public UISprite _icon;
+		public UITexture _icon;
+
+		
+		public UISprite _background;
+
+		
+		[NameFromEnumIndex(typeof(HudGui.InventoryItemInfo.BackgroundSize))]
+		public int[] _backgroundSizes;
 
 		
 		public UILabel _title;
@@ -1983,10 +2444,10 @@ public class HudGui : MonoBehaviour
 		public ItemAmountLabel _amountText;
 
 		
-		public UISprite _leftClickIcon;
+		public GameObject _leftClickIcon;
 
 		
-		public UISprite _rightClickIcon;
+		public GameObject _rightClickIcon;
 
 		
 		public UILabel _leftClickText;
@@ -2014,14 +2475,6 @@ public class HudGui : MonoBehaviour
 
 		
 		public UIGrid _upgradeCounterGrid;
-
-		
-		[NameFromProperty("_root", 0)]
-		public List<HudGui.UpgradeCounterView> _upgradeCounterViews;
-
-		
-		[NameFromProperty("_stat", 0)]
-		public List<HudGui.UsableUpgradeView> _usableUpgradeViews;
 
 		
 		public UIGrid _upgradeBonusGrid;
@@ -2166,6 +2619,21 @@ public class HudGui : MonoBehaviour
 
 	
 	[Serializable]
+	public class ClothingItemTooltipView
+	{
+		
+		[HideInInspector]
+		public int _outfitId;
+
+		
+		public GameObject _root;
+
+		
+		public UILabel _content;
+	}
+
+	
+	[Serializable]
 	public class QuickSelectTooltipView
 	{
 		
@@ -2187,6 +2655,9 @@ public class HudGui : MonoBehaviour
 
 		
 		public GameObject _exitButton;
+
+		
+		public UILabel[] _slots;
 	}
 
 	
@@ -2283,6 +2754,20 @@ public class HudGui : MonoBehaviour
 		public int DisplayedNeeded { get; set; }
 
 		
+		public void SetMissingIngredientColor()
+		{
+			this._iconTexture.color = Scene.HudGui.BuildingIngredientMissing;
+			this._border.color = Scene.HudGui.BuildingIngredientMissing;
+		}
+
+		
+		public void SetAvailableIngredientColor()
+		{
+			this._iconTexture.color = Scene.HudGui.BuildingIngredientOwned;
+			this._border.color = Scene.HudGui.BuildingIngredientOwned;
+		}
+
+		
 		[ItemIdPicker]
 		public int _itemId;
 
@@ -2290,13 +2775,7 @@ public class HudGui : MonoBehaviour
 		public GameObject _iconGo;
 
 		
-		public UISprite _iconSprite;
-
-		
-		public GUITexture _icon;
-
-		
-		public GUIText _text;
+		public UITexture _iconTexture;
 
 		
 		public UILabel _label;

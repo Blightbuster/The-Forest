@@ -155,9 +155,6 @@ public class UnderfootSurfaceDetector : MonoBehaviour
 	}
 
 	
-	public const string TAG_WOOD = "UnderfootWood";
-
-	
 	private Collider collider;
 
 	
@@ -165,6 +162,9 @@ public class UnderfootSurfaceDetector : MonoBehaviour
 
 	
 	private List<Collider> goreColliders;
+
+	
+	public const string TAG_WOOD = "UnderfootWood";
 
 	
 	private static Dictionary<string, UnderfootSurfaceDetector.SurfaceType> SurfaceTags = new Dictionary<string, UnderfootSurfaceDetector.SurfaceType>

@@ -38,13 +38,13 @@ namespace HutongGames.PlayMaker.Actions
 			int value = this.hostIndex.Value;
 			if (value < 0 || value >= num)
 			{
-				this.LogError("MasterServer Host index out of range!");
+				base.LogError("MasterServer Host index out of range!");
 				return;
 			}
 			HostData hostData = MasterServer.PollHostList()[value];
 			if (hostData == null)
 			{
-				this.LogError("MasterServer HostData could not found at index " + value);
+				base.LogError("MasterServer HostData could not found at index " + value);
 				return;
 			}
 			this.useNat.Value = hostData.useNat;
@@ -85,13 +85,13 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmInt connectedPlayers;
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("Maximum players limit")]
+		[UIHint(UIHint.Variable)]
 		public FsmInt playerLimit;
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("Server IP address.")]
+		[UIHint(UIHint.Variable)]
 		public FsmString ipAddress;
 
 		
@@ -105,8 +105,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmBool passwordProtected;
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("A miscellaneous comment (can hold data)")]
+		[UIHint(UIHint.Variable)]
 		public FsmString comment;
 
 		

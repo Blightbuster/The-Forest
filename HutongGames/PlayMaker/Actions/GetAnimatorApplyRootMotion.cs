@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the value of ApplyRootMotion of an avatar. If true, root is controlled by animations")]
 	[ActionCategory("Animator")]
+	[Tooltip("Gets the value of ApplyRootMotion of an avatar. If true, root is controlled by animations")]
 	[HelpUrl("https:
 	public class GetAnimatorApplyRootMotion : FsmStateAction
 	{
@@ -56,15 +56,15 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The Target. An Animator component is required")]
 		[RequiredField]
 		[CheckForComponent(typeof(Animator))]
+		[Tooltip("The Target. An Animator component is required")]
 		public FsmOwnerDefault gameObject;
 
 		
-		[UIHint(UIHint.Variable)]
 		[ActionSection("Results")]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		[Tooltip("Is the rootMotionapplied. If true, root is controlled by animations")]
 		public FsmBool rootMotionApplied;
 

@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets a sub-string from a String Variable.")]
 	[ActionCategory(ActionCategory.String)]
+	[Tooltip("Gets a sub-string from a String Variable.")]
 	public class GetSubstring : FsmStateAction
 	{
 		
@@ -48,8 +48,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmString stringVariable;
 
 		
@@ -61,8 +61,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmInt length;
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmString storeResult;
 
 		

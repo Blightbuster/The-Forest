@@ -4,9 +4,9 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[HelpUrl("https:
 	[ActionCategory("Animator")]
 	[Tooltip("Gets the next State information on a specified layer")]
+	[HelpUrl("https:
 	public class GetAnimatorNextStateInfo : FsmStateAction
 	{
 		
@@ -103,9 +103,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
-		[CheckForComponent(typeof(Animator))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animator))]
+		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -124,8 +124,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString name;
 
 		
-		[Tooltip("The layer's name Hash")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The layer's name Hash")]
 		public FsmInt nameHash;
 
 		
@@ -134,8 +134,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmInt tagHash;
 
 		
-		[Tooltip("Is the state looping. All animations in the state must be looping")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Is the state looping. All animations in the state must be looping")]
 		public FsmBool isStateLooping;
 
 		
@@ -149,8 +149,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat normalizedTime;
 
 		
-		[Tooltip("The integer part is the number of time a state has been looped. This is extracted from the normalizedTime")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The integer part is the number of time a state has been looped. This is extracted from the normalizedTime")]
 		public FsmInt loopCount;
 
 		

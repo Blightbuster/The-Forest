@@ -771,9 +771,6 @@ public class LinearEmitter : MonoBehaviour, FMOD_Listener.ILinearEmitter
 	}
 
 	
-	private const float SOURCE_WIDTH = 90f;
-
-	
 	public string eventPath;
 
 	
@@ -836,6 +833,9 @@ public class LinearEmitter : MonoBehaviour, FMOD_Listener.ILinearEmitter
 
 	
 	private bool isActive;
+
+	
+	private const float SOURCE_WIDTH = 90f;
 
 	
 	private static Texture2D lineTexture = null;

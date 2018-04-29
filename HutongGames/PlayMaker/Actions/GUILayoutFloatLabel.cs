@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("GUILayout Label for a Float Variable.")]
 	[ActionCategory(ActionCategory.GUILayout)]
+	[Tooltip("GUILayout Label for a Float Variable.")]
 	public class GUILayoutFloatLabel : GUILayoutAction
 	{
 		
@@ -35,8 +35,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString prefix;
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		[Tooltip("Float variable to display.")]
 		public FsmFloat floatVariable;
 

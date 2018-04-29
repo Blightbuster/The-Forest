@@ -23,90 +23,90 @@ public class enemyType : MonoBehaviour
 		mutantTypeSetup typeSetup = base.GetComponent<mutantTypeSetup>();
 		if (typeSetup)
 		{
-			mutantAI ai = typeSetup.setup.ai;
-			if (ai.skinned)
+			mutantAI ai2 = typeSetup.setup.ai;
+			if (ai2.skinned)
 			{
 				this.Type = EnemyType.skinMaskMale;
 			}
-			else if (ai.maleSkinny)
+			else if (ai2.maleSkinny)
 			{
-				this.Type = ((!ai.pale) ? EnemyType.skinnyMale : EnemyType.skinnyMalePale);
+				this.Type = ((!ai2.pale) ? EnemyType.skinnyMale : EnemyType.skinnyMalePale);
 			}
-			else if (ai.femaleSkinny)
+			else if (ai2.femaleSkinny)
 			{
-				this.Type = ((!ai.pale) ? EnemyType.skinnyFemale : EnemyType.skinnyFemalePale);
+				this.Type = ((!ai2.pale) ? EnemyType.skinnyFemale : EnemyType.skinnyFemalePale);
 			}
-			else if (ai.male)
+			else if (ai2.male)
 			{
-				this.Type = ((!ai.pale) ? EnemyType.regularMale : EnemyType.paleMale);
+				this.Type = ((!ai2.pale) ? EnemyType.regularMale : EnemyType.paleMale);
 			}
-			else if (ai.female)
+			else if (ai2.female)
 			{
-				this.Type = ((!ai.pale) ? EnemyType.regularFemale : EnemyType.paleFemale);
+				this.Type = ((!ai2.pale) ? EnemyType.regularFemale : EnemyType.paleFemale);
 			}
-			else if (ai.creepy_male)
+			else if (ai2.creepy_male)
 			{
-				this.Type = ((!ai.pale) ? EnemyType.creepyArmsy : EnemyType.creepyArmsy);
+				this.Type = ((!ai2.pale) ? EnemyType.creepyArmsy : EnemyType.creepyArmsy);
 			}
-			else if (ai.creepy_fat)
+			else if (ai2.creepy_fat)
 			{
 				this.Type = EnemyType.creepyFat;
 			}
-			else if (ai.creepy_baby)
+			else if (ai2.creepy_baby)
 			{
 				this.Type = EnemyType.creepyBaby;
 			}
-			else if (ai.creepy)
+			else if (ai2.creepy)
 			{
-				this.Type = ((!ai.pale) ? EnemyType.creepySpiderLady : EnemyType.blueCreepySpiderLady);
+				this.Type = ((!ai2.pale) ? EnemyType.creepySpiderLady : EnemyType.blueCreepySpiderLady);
 			}
 		}
 		else
 		{
 			BoltEntity entity = base.GetComponent<BoltEntity>();
-			mutantAI_net ai2 = base.GetComponentInChildren<mutantAI_net>();
+			mutantAI_net ai = base.GetComponentInChildren<mutantAI_net>();
 			IMutantState state = entity.GetState<IMutantState>();
 			while (!entity.isAttached || state.ai_mask == 0)
 			{
 				yield return null;
 			}
-			if (ai2)
+			if (ai)
 			{
-				if (ai2.skinned)
+				if (ai.skinned)
 				{
 					this.Type = EnemyType.skinMaskMale;
 				}
-				else if (ai2.maleSkinny)
+				else if (ai.maleSkinny)
 				{
-					this.Type = ((!ai2.pale) ? EnemyType.skinnyMale : EnemyType.skinnyMalePale);
+					this.Type = ((!ai.pale) ? EnemyType.skinnyMale : EnemyType.skinnyMalePale);
 				}
-				else if (ai2.femaleSkinny)
+				else if (ai.femaleSkinny)
 				{
-					this.Type = ((!ai2.pale) ? EnemyType.skinnyFemale : EnemyType.skinnyFemalePale);
+					this.Type = ((!ai.pale) ? EnemyType.skinnyFemale : EnemyType.skinnyFemalePale);
 				}
-				else if (ai2.male)
+				else if (ai.male)
 				{
-					this.Type = ((!ai2.pale) ? EnemyType.regularMale : EnemyType.paleMale);
+					this.Type = ((!ai.pale) ? EnemyType.regularMale : EnemyType.paleMale);
 				}
-				else if (ai2.female)
+				else if (ai.female)
 				{
-					this.Type = ((!ai2.pale) ? EnemyType.regularFemale : EnemyType.paleFemale);
+					this.Type = ((!ai.pale) ? EnemyType.regularFemale : EnemyType.paleFemale);
 				}
-				else if (ai2.creepy_male)
+				else if (ai.creepy_male)
 				{
-					this.Type = ((!ai2.pale) ? EnemyType.creepyArmsy : EnemyType.creepyArmsy);
+					this.Type = ((!ai.pale) ? EnemyType.creepyArmsy : EnemyType.creepyArmsy);
 				}
-				else if (ai2.creepy_fat)
+				else if (ai.creepy_fat)
 				{
 					this.Type = EnemyType.creepyFat;
 				}
-				else if (ai2.creepy_baby)
+				else if (ai.creepy_baby)
 				{
 					this.Type = EnemyType.creepyBaby;
 				}
-				else if (ai2.creepy)
+				else if (ai.creepy)
 				{
-					this.Type = ((!ai2.pale) ? EnemyType.creepySpiderLady : EnemyType.blueCreepySpiderLady);
+					this.Type = ((!ai.pale) ? EnemyType.creepySpiderLady : EnemyType.blueCreepySpiderLady);
 				}
 			}
 		}

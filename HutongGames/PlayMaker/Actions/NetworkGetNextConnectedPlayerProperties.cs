@@ -68,8 +68,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[ActionSection("Result")]
-		[UIHint(UIHint.Variable)]
 		[Tooltip("The player connection index.")]
+		[UIHint(UIHint.Variable)]
 		public FsmInt index;
 
 		

@@ -1,8 +1,6 @@
 ﻿using System;
-using ModAPI;
 using TheForest.Items;
 using TheForest.Utils;
-using UltimateCheatmenu;
 using UnityEngine;
 
 
@@ -49,7 +47,7 @@ public class flintLockAnimSetup : MonoBehaviour
 	}
 
 	
-	private void __Update__Original()
+	private void Update()
 	{
 		if (!this._net && LocalPlayer.GameObject)
 		{
@@ -116,71 +114,6 @@ public class flintLockAnimSetup : MonoBehaviour
 		{
 			LocalPlayer.Animator.SetBool("forceReload", true);
 			LocalPlayer.Inventory.ForceReloadDelay();
-		}
-	}
-
-	
-	private void Update()
-	{
-		try
-		{
-			if (UCheatmenu.FastFlint)
-			{
-				if (LocalPlayer.Inventory.AmountOf(this._flintAmmoId, true) > 0)
-				{
-					LocalPlayer.Animator.SetBool("canReload", false);
-				}
-				else
-				{
-					LocalPlayer.Animator.SetBool("canReload", false);
-				}
-				if (!LocalPlayer.Animator)
-				{
-					return;
-				}
-				this.currState1 = LocalPlayer.Animator.GetCurrentAnimatorStateInfo(1);
-				this.nextState1 = LocalPlayer.Animator.GetNextAnimatorStateInfo(1);
-				this.currState2 = LocalPlayer.Animator.GetCurrentAnimatorStateInfo(2);
-				if (this.currState1.tagHash == this.knockBackHash || this.currState2.shortNameHash == this.sittingHash)
-				{
-					this.animator.CrossFade(this.idleHash, 0f, 0, 0f);
-				}
-				if (this.nextState1.shortNameHash == this.playerShootHash)
-				{
-					this.animator.SetBool("shoot", true);
-				}
-				else
-				{
-					this.animator.SetBool("shoot", false);
-				}
-				if (this.currState1.shortNameHash == this.playerReloadHash && !this.reloadSync && !LocalPlayer.Inventory.IsLeftHandEmpty())
-				{
-					this.leftHandFull = true;
-					LocalPlayer.Inventory.MemorizeItem(Item.EquipmentSlot.LeftHand);
-					LocalPlayer.Inventory.StashLeftHand();
-				}
-				if (this.nextState1.shortNameHash != this.playerIdleHash)
-				{
-					return;
-				}
-				LocalPlayer.Inventory.CancelReloadDelay();
-				if (!this.leftHandFull)
-				{
-					return;
-				}
-				LocalPlayer.Inventory.EquipPreviousUtility(false);
-				this.leftHandFull = false;
-				return;
-			}
-			else
-			{
-				this.__Update__Original();
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__Update__Original();
 		}
 	}
 

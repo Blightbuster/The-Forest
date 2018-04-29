@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Get connected player properties.")]
 	[ActionCategory(ActionCategory.Network)]
+	[Tooltip("Get connected player properties.")]
 	public class NetworkGetConnectedPlayerProperties : FsmStateAction
 	{
 		
@@ -32,7 +32,7 @@ namespace HutongGames.PlayMaker.Actions
 			int value = this.index.Value;
 			if (value < 0 || value >= Network.connections.Length)
 			{
-				this.LogError("Player index out of range");
+				base.LogError("Player index out of range");
 				return;
 			}
 			NetworkPlayer networkPlayer = Network.connections[value];
@@ -55,8 +55,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString IpAddress;
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("Get the port of this player.")]
+		[UIHint(UIHint.Variable)]
 		public FsmInt port;
 
 		
@@ -70,8 +70,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString externalIPAddress;
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("Get the external port of the network interface. This will only be populated after some external connection has been made.")]
+		[UIHint(UIHint.Variable)]
 		public FsmInt externalPort;
 	}
 }

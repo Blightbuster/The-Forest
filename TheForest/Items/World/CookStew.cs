@@ -24,7 +24,7 @@ namespace TheForest.Items.World
 			{
 				if (TheForest.Utils.Input.GetButtonDown("Craft") && LocalPlayer.Inventory.RemoveItem(this.CurrentFoodItemId, 1, true, true))
 				{
-					LocalPlayer.Sfx.PlayWhoosh();
+					LocalPlayer.Sfx.PlayItemCustomSfx(this.CurrentFoodItemId, true);
 					this.SpawnFoodPrefab(this.CurrentFoodprefab);
 				}
 				else
@@ -133,7 +133,7 @@ namespace TheForest.Items.World
 			Vector3 position = base.transform.position + new Vector3(UnityEngine.Random.Range(-0.2f, 0.2f), UnityEngine.Random.Range(-0.15f, 0f), UnityEngine.Random.Range(-0.2f, 0.2f));
 			if (!BoltNetwork.isRunning)
 			{
-				GameObject gameObject = (GameObject)UnityEngine.Object.Instantiate(prefab, position, Quaternion.identity);
+				GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(prefab, position, Quaternion.identity);
 				gameObject.transform.parent = base.transform.parent;
 				this.UpdateCookController();
 			}

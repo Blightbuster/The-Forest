@@ -375,9 +375,6 @@ public class SetupAdvancedFoliageShader : MonoBehaviour
 	}
 
 	
-	private const float TwoPI = 6.28318548f;
-
-	
 	public bool isLinear;
 
 	
@@ -477,6 +474,9 @@ public class SetupAdvancedFoliageShader : MonoBehaviour
 
 	
 	private float temp_WindJitterFrequency = 0.25f;
+
+	
+	private const float TwoPI = 6.28318548f;
 
 	
 	private float freqSpeed = 0.05f;

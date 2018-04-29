@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Smoothly Rotates a Game Object so its forward vector points in the specified Direction.")]
 	[ActionCategory(ActionCategory.Transform)]
+	[Tooltip("Smoothly Rotates a Game Object so its forward vector points in the specified Direction.")]
 	public class SmoothLookAtDirection : FsmStateAction
 	{
 		
@@ -87,8 +87,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("The direction to smoothly rotate towards.")]
 		[RequiredField]
+		[Tooltip("The direction to smoothly rotate towards.")]
 		public FsmVector3 targetDirection;
 
 		
@@ -106,8 +106,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("How quickly to rotate.")]
 		[HasFloatSlider(0.5f, 15f)]
+		[Tooltip("How quickly to rotate.")]
 		public FsmFloat speed;
 
 		

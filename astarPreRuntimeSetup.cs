@@ -116,12 +116,9 @@ public class astarPreRuntimeSetup : MonoBehaviour
 			{
 				if (dictionary.ContainsKey(list[l]))
 				{
-					Dictionary<uint, int> dictionary3;
-					Dictionary<uint, int> dictionary2 = dictionary3 = dictionary;
-					uint key2;
-					uint key = key2 = list[l];
-					int num2 = dictionary3[key2];
-					dictionary2[key] = num2 + 1;
+					Dictionary<uint, int> dictionary2;
+					uint key;
+					(dictionary2 = dictionary)[key = list[l]] = dictionary2[key] + 1;
 					if (dictionary[list[l]] > dictionary[this.mostCommonArea[j]])
 					{
 						this.mostCommonArea[j] = list[l];

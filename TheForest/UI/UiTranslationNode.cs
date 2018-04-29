@@ -52,11 +52,43 @@ namespace TheForest.UI
 			{
 				foreach (UiTranslationNode.TranslationData translationData2 in this._translationKeys)
 				{
-					if (translationData.ContainsKey(translationData2._key))
+					if (capsTranslationData.ContainsKey(translationData2._key))
 					{
-						translationData2.ApplyTranslation(translationData[translationData2._key], (!translationData2._caps || capsTranslationData == null) ? null : capsTranslationData[translationData2._key]);
+						translationData2.ApplyTranslation(translationData[translationData2._key], capsTranslationData[translationData2._key]);
 					}
 				}
+				for (int i = this._dynamicLabel.Count - 1; i >= 0; i--)
+				{
+					if (this._dynamicLabel[i])
+					{
+						if (translationData.ContainsKey(this._dynamicLabel[i]._key))
+						{
+							this._dynamicLabel[i].ApplyTranslation((capsTranslationData == null) ? translationData[this._dynamicLabel[i]._key] : capsTranslationData[this._dynamicLabel[i]._key]);
+						}
+					}
+					else
+					{
+						this._dynamicLabel.RemoveAt(i);
+					}
+				}
+			}
+		}
+
+		
+		public void RegisterDynamicLabel(UiTranslationLabel label)
+		{
+			if (!this._dynamicLabel.Contains(label))
+			{
+				this._dynamicLabel.Add(label);
+			}
+		}
+
+		
+		public void UnregisterDynamicLabel(UiTranslationLabel label)
+		{
+			if (this._dynamicLabel.Contains(label))
+			{
+				this._dynamicLabel.Remove(label);
 			}
 		}
 
@@ -71,6 +103,9 @@ namespace TheForest.UI
 		public List<UiTranslationNode.TranslationData> _translationKeys;
 
 		
+		private List<UiTranslationLabel> _dynamicLabel = new List<UiTranslationLabel>();
+
+		
 		[Serializable]
 		public class TranslationData
 		{
@@ -81,7 +116,7 @@ namespace TheForest.UI
 				{
 					if (uiTranslationLabel)
 					{
-						if (uiTranslationLabel._caps && !string.IsNullOrEmpty(capsText))
+						if (!string.IsNullOrEmpty(capsText))
 						{
 							uiTranslationLabel.ApplyTranslation(capsText);
 						}

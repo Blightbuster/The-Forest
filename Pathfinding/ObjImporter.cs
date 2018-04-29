@@ -79,21 +79,34 @@ namespace Pathfinding
 						text = text.Trim();
 						string[] array = text.Split(separator, 50);
 						string text2 = array[0];
-						switch (text2)
+						if (text2 != null)
 						{
-						case "v":
-							num2++;
-							break;
-						case "vt":
-							num3++;
-							break;
-						case "vn":
-							num4++;
-							break;
-						case "f":
-							num5 = num5 + array.Length - 1;
-							num += 3 * (array.Length - 2);
-							break;
+							if (!(text2 == "v"))
+							{
+								if (!(text2 == "vt"))
+								{
+									if (!(text2 == "vn"))
+									{
+										if (text2 == "f")
+										{
+											num5 = num5 + array.Length - 1;
+											num += 3 * (array.Length - 2);
+										}
+									}
+									else
+									{
+										num4++;
+									}
+								}
+								else
+								{
+									num3++;
+								}
+							}
+							else
+							{
+								num2++;
+							}
 						}
 						text = stringReader.ReadLine();
 						if (text != null)

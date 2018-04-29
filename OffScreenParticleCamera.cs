@@ -3,13 +3,17 @@ using TheForest.Utils;
 using UnityEngine;
 
 
-[RequireComponent(typeof(Camera))]
 [ExecuteInEditMode]
+[RequireComponent(typeof(Camera))]
 public class OffScreenParticleCamera : MonoBehaviour
 {
 	
 	private void Awake()
 	{
+		if (!base.enabled || ForestVR.Prototype)
+		{
+			return;
+		}
 		this.mCamera = base.GetComponent<Camera>();
 		this.mCamera.depthTextureMode |= DepthTextureMode.Depth;
 		if (Application.isPlaying)
@@ -72,6 +76,14 @@ public class OffScreenParticleCamera : MonoBehaviour
 		{
 			this.downsampleFastMaterial = new Material(this.downsampleDepthFastShader);
 		}
+		if (this.blitMaterial == null)
+		{
+			this.blitMaterial = new Material(Shader.Find("Hidden/Post FX/Blit"));
+		}
+		if (this.blitFullScreenMaterial == null)
+		{
+			this.blitFullScreenMaterial = new Material(Shader.Find("Hidden/TheForestBlitCopyFullscreen"));
+		}
 		if (this.shaderCamera == null)
 		{
 			this.shaderCamera = new GameObject("ParticleCam", new Type[]
@@ -83,16 +95,18 @@ public class OffScreenParticleCamera : MonoBehaviour
 		}
 		if (this.factor == OffScreenParticleCamera.Factor.Full)
 		{
-			Graphics.Blit(src, dest);
+			RenderTexture temporary = RenderTexture.GetTemporary(this.mCamera.pixelWidth, this.mCamera.pixelHeight, 24, src.format);
+			Graphics.Blit(src, temporary, this.blitMaterial);
 			this.shaderCamera.CopyFrom(this.mCamera);
 			this.shaderCamera.cullingMask = this.ParticleLayers;
 			this.shaderCamera.clearFlags = CameraClearFlags.Nothing;
 			this.shaderCamera.depthTextureMode = DepthTextureMode.None;
-			this.shaderCamera.targetTexture = dest;
+			this.shaderCamera.targetTexture = temporary;
 			this.shaderCamera.renderingPath = RenderingPath.Forward;
-			this.shaderCamera.hdr = this.mCamera.hdr;
+			this.shaderCamera.allowHDR = this.mCamera.allowHDR;
 			this.shaderCamera.useOcclusionCulling = false;
 			this.shaderCamera.Render();
+			Graphics.Blit(temporary, dest, this.blitFullScreenMaterial);
 			for (int j = 0; j < this.ShadowCastingLights.Length; j++)
 			{
 				if (this.ShadowCastingLights[j])
@@ -100,40 +114,41 @@ public class OffScreenParticleCamera : MonoBehaviour
 					this.ShadowCastingLights[j].shadows = LightShadows.Soft;
 				}
 			}
+			RenderTexture.ReleaseTemporary(temporary);
 			return;
 		}
 		RenderTexture renderTexture = this.DownsampleDepth(Screen.width, Screen.height, src, this.downsampleFastMaterial, (int)this.factor);
 		Shader.SetGlobalTexture("_CameraDepthLowRes", renderTexture);
-		RenderTexture temporary = RenderTexture.GetTemporary(Screen.width / (int)this.factor, Screen.height / (int)this.factor, 0);
+		RenderTexture temporary2 = RenderTexture.GetTemporary(Screen.width / (int)this.factor, Screen.height / (int)this.factor, 0);
 		this.shaderCamera.CopyFrom(this.mCamera);
 		this.shaderCamera.cullingMask = this.ParticleLayers;
 		this.clearColor.a = 0f;
 		this.shaderCamera.backgroundColor = this.clearColor;
 		this.shaderCamera.clearFlags = CameraClearFlags.Color;
 		this.shaderCamera.depthTextureMode = DepthTextureMode.None;
-		this.shaderCamera.targetTexture = temporary;
+		this.shaderCamera.targetTexture = temporary2;
 		this.shaderCamera.useOcclusionCulling = false;
 		this.shaderCamera.renderingPath = RenderingPath.Forward;
-		this.shaderCamera.hdr = this.mCamera.hdr;
+		this.shaderCamera.allowHDR = this.mCamera.allowHDR;
 		this.shaderCamera.Render();
 		Vector2 v = new Vector2(1f / (float)renderTexture.width, 1f / (float)renderTexture.height);
 		this.compositeMaterial.SetVector("_LowResPixelSize", v);
 		this.compositeMaterial.SetVector("_LowResTextureSize", new Vector2((float)renderTexture.width, (float)renderTexture.height));
 		this.compositeMaterial.SetFloat("_DepthMult", 32f);
 		this.compositeMaterial.SetFloat("_Threshold", this.depthThreshold);
-		this.compositeMaterial.SetTexture("_ParticleRT", temporary);
+		this.compositeMaterial.SetTexture("_ParticleRT", temporary2);
 		Graphics.Blit(src, dest);
-		Graphics.Blit(temporary, dest, this.compositeMaterial);
+		Graphics.Blit(temporary2, dest, this.compositeMaterial);
 		if (this.debugOptions.debugDrawBuffers)
 		{
 			GL.PushMatrix();
 			GL.LoadPixelMatrix(0f, (float)Screen.width, (float)Screen.height, 0f);
 			Graphics.DrawTexture(new Rect(0f, 0f, 128f, 128f), renderTexture);
 			Graphics.DrawTexture(new Rect(0f, 128f, 128f, 128f), src);
-			Graphics.DrawTexture(new Rect(128f, 128f, 128f, 128f), temporary);
+			Graphics.DrawTexture(new Rect(128f, 128f, 128f, 128f), temporary2);
 			GL.PopMatrix();
 		}
-		RenderTexture.ReleaseTemporary(temporary);
+		RenderTexture.ReleaseTemporary(temporary2);
 		RenderTexture.ReleaseTemporary(renderTexture);
 		for (int k = 0; k < this.ShadowCastingLights.Length; k++)
 		{
@@ -174,6 +189,12 @@ public class OffScreenParticleCamera : MonoBehaviour
 
 	
 	private Material downsampleFastMaterial;
+
+	
+	private Material blitMaterial;
+
+	
+	private Material blitFullScreenMaterial;
 
 	
 	public Camera shaderCamera;

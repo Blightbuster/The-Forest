@@ -35,20 +35,26 @@ namespace TheForest.Buildings.World
 		
 		private void LodChanged(int currentLod)
 		{
-			switch (currentLod)
+			if (currentLod != 0)
 			{
-			case 0:
+				if (currentLod != 1)
+				{
+					if (currentLod == 2)
+					{
+						this.SetLeavesCutHeight(0f);
+						this._renderer = null;
+					}
+				}
+				else
+				{
+					this.FetchLeavesRenderer();
+					this.SetLeavesCutHeight(2.75f);
+				}
+			}
+			else
+			{
 				this.FetchLeavesRenderer();
 				this.SetLeavesCutHeight(2.75f);
-				break;
-			case 1:
-				this.FetchLeavesRenderer();
-				this.SetLeavesCutHeight(2.75f);
-				break;
-			case 2:
-				this.SetLeavesCutHeight(0f);
-				this._renderer = null;
-				break;
 			}
 		}
 

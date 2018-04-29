@@ -8,7 +8,7 @@ public class CoopRigidbody : EntityBehaviour<IRigidbodyState>
 	
 	public override void Attached()
 	{
-		if (!this.entity.isOwner)
+		if (!base.entity.isOwner)
 		{
 			foreach (Collider collider in base.GetComponentsInChildren<Collider>())
 			{

@@ -45,8 +45,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The value of the sine")]
 		[RequiredField]
+		[Tooltip("The value of the sine")]
 		public FsmFloat Value;
 
 		

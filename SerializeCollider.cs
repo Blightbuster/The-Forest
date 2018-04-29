@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-[ComponentSerializerFor(typeof(TerrainCollider))]
-[ComponentSerializerFor(typeof(MeshCollider))]
 [ComponentSerializerFor(typeof(WheelCollider))]
+[ComponentSerializerFor(typeof(MeshCollider))]
+[ComponentSerializerFor(typeof(TerrainCollider))]
 public class SerializeCollider : ComponentSerializerExtensionBase<Collider>
 {
 	

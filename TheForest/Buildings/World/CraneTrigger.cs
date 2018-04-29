@@ -33,18 +33,18 @@ namespace TheForest.Buildings.World
 			yield return null;
 			if (!deserializing && !BoltNetwork.isClient && this._mainTrigger == this)
 			{
-				float lowest = this._platformTr.position.y - this._maxHeight;
-				Vector3 movement = new Vector3(0f, -this._maxHeight, 0f);
-				Vector3 ropePositionOffset = new Vector3(0f, -6.25f + this._platformTr.localPosition.y, 0f);
+				float num = this._platformTr.position.y - this._maxHeight;
+				Vector3 vector = new Vector3(0f, -this._maxHeight, 0f);
+				Vector3 b = new Vector3(0f, -6.25f + this._platformTr.localPosition.y, 0f);
 				for (int i = 0; i < this._ropes.Length; i++)
 				{
-					RaycastHit hit;
-					if (Physics.SphereCast(this._ropes[i].position + ropePositionOffset, 0.2f, movement.normalized, out hit, Mathf.Abs(movement.y) * 1.2f, Scene.ValidateFloorLayers(this._ropes[i].position, this._downwardsCollisionMask.value)) && hit.point.y > lowest)
+					RaycastHit raycastHit;
+					if (Physics.SphereCast(this._ropes[i].position + b, 0.2f, vector.normalized, out raycastHit, Mathf.Abs(vector.y) * 1.2f, Scene.ValidateFloorLayers(this._ropes[i].position, this._downwardsCollisionMask.value)) && raycastHit.point.y > num)
 					{
-						lowest = Mathf.Min(hit.point.y, this._platformTr.position.y);
+						num = Mathf.Min(raycastHit.point.y, this._platformTr.position.y);
 					}
 				}
-				this._mainTrigger._platformTr.position = new Vector3(this._platformTr.position.x, lowest + 7f, this._platformTr.position.z);
+				this._mainTrigger._platformTr.position = new Vector3(this._platformTr.position.x, num + 7f, this._platformTr.position.z);
 				this._mainTrigger.UpdateHeightMp();
 			}
 			this.ScaleRopes();
@@ -273,7 +273,7 @@ namespace TheForest.Buildings.World
 		
 		public override void Attached()
 		{
-			if (!this.entity.isOwner)
+			if (!base.entity.isOwner)
 			{
 				base.state.AddCallback("Height", new PropertyCallbackSimple(this.OnHeightUpdated));
 			}
@@ -292,7 +292,7 @@ namespace TheForest.Buildings.World
 				CraneCommand craneCommand = CraneCommand.Create(GlobalTargets.OnlyServer);
 				craneCommand.Direction = Mathf.RoundToInt(direction);
 				craneCommand.Sender = ((!unlocking) ? LocalPlayer.Entity : null);
-				craneCommand.Crane = this.entity;
+				craneCommand.Crane = base.entity;
 				craneCommand.Send();
 			}
 		}

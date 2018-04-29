@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Bridge for the Locomotion system.")]
 	[ActionCategory("Animator")]
+	[Tooltip("Bridge for the Locomotion system.")]
 	public class DoLocomotion : FsmStateAction
 	{
 		

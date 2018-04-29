@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -38,16 +39,29 @@ namespace Ceto.Common.Unity.Utility
 		
 		public static T GetInterfaceImmediateChildren<T>(GameObject obj) where T : class
 		{
-			foreach (object obj2 in obj.transform)
+			IEnumerator enumerator = obj.transform.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj2;
-				Component[] components = transform.GetComponents<Component>();
-				foreach (Component component in components)
+				while (enumerator.MoveNext())
 				{
-					if (component is T)
+					object obj2 = enumerator.Current;
+					Transform transform = (Transform)obj2;
+					Component[] components = transform.GetComponents<Component>();
+					foreach (Component component in components)
 					{
-						return component as T;
+						if (component is T)
+						{
+							return component as T;
+						}
 					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
 				}
 			}
 			return (T)((object)null);
@@ -87,16 +101,29 @@ namespace Ceto.Common.Unity.Utility
 		public static T[] GetInterfacesImmediateChildren<T>(GameObject obj) where T : class
 		{
 			List<T> list = new List<T>();
-			foreach (object obj2 in obj.transform)
+			IEnumerator enumerator = obj.transform.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj2;
-				Component[] components = transform.GetComponents<Component>();
-				foreach (Component component in components)
+				while (enumerator.MoveNext())
 				{
-					if (component is T)
+					object obj2 = enumerator.Current;
+					Transform transform = (Transform)obj2;
+					Component[] components = transform.GetComponents<Component>();
+					foreach (Component component in components)
 					{
-						list.Add(component as T);
+						if (component is T)
+						{
+							list.Add(component as T);
+						}
 					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
 				}
 			}
 			return list.ToArray();
@@ -125,13 +152,26 @@ namespace Ceto.Common.Unity.Utility
 		
 		public static T GetComponetInImmediateChildren<T>(GameObject obj) where T : Component
 		{
-			foreach (object obj2 in obj.transform)
+			IEnumerator enumerator = obj.transform.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj2;
-				T component = transform.GetComponent<T>();
-				if (component != null)
+				while (enumerator.MoveNext())
 				{
-					return component;
+					object obj2 = enumerator.Current;
+					Transform transform = (Transform)obj2;
+					T component = transform.GetComponent<T>();
+					if (component != null)
+					{
+						return component;
+					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
 				}
 			}
 			return (T)((object)null);
@@ -141,13 +181,26 @@ namespace Ceto.Common.Unity.Utility
 		public static T[] GetComponetsInImmediateChildren<T>(GameObject obj) where T : Component
 		{
 			List<T> list = new List<T>();
-			foreach (object obj2 in obj.transform)
+			IEnumerator enumerator = obj.transform.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj2;
-				T[] components = transform.GetComponents<T>();
-				foreach (T item in components)
+				while (enumerator.MoveNext())
 				{
-					list.Add(item);
+					object obj2 = enumerator.Current;
+					Transform transform = (Transform)obj2;
+					T[] components = transform.GetComponents<T>();
+					foreach (T item in components)
+					{
+						list.Add(item);
+					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
 				}
 			}
 			return list.ToArray();

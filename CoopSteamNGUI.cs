@@ -10,6 +10,7 @@ using TheForest.Utils;
 using UdpKit;
 using UniLinq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityStandardAssets.ImageEffects;
 
 
@@ -54,6 +55,7 @@ public class CoopSteamNGUI : MonoBehaviour
 			}
 		}
 		BoltLauncher.SetUdpPlatform(new SteamPlatform());
+		TheForest.Utils.Input.player.controllers.maps.SetMapsEnabled(false, ControllerType.Keyboard, "Default");
 		TheForest.Utils.Input.player.controllers.maps.SetMapsEnabled(true, ControllerType.Keyboard, "Menu");
 		TheForest.Utils.Input.player.controllers.maps.SetMapsEnabled(true, ControllerType.Joystick, "Menu");
 		if (!SteamManager.Initialized)
@@ -66,7 +68,7 @@ public class CoopSteamNGUI : MonoBehaviour
 			{
 				this.OpenScreen(CoopSteamNGUI.Screens.GameBrowser);
 			}
-			this.SetLoadingText(UiTranslationDatabase.TranslateKey("STEAM_NOT_INITIALIZED", "Steam not initialized", false));
+			this.SetLoadingText(UiTranslationDatabase.TranslateKey("STEAM_NOT_INITIALIZED", "Steam not initialized", this._allCapsTexts));
 			return;
 		}
 		this.RefreshUI();
@@ -82,7 +84,7 @@ public class CoopSteamNGUI : MonoBehaviour
 		}
 		else
 		{
-			CoopLobbyManager.QueryList();
+			CoopLobbyManager.QueryList(this._showFriendGames);
 			this.OpenScreen(CoopSteamNGUI.Screens.GameBrowser);
 		}
 		if (AutoJoinAfterMPInvite.LobbyID != null && (CoopLobby.Instance == null || CoopLobby.Instance.Info.LobbyId.ToString() != AutoJoinAfterMPInvite.LobbyID))
@@ -103,15 +105,32 @@ public class CoopSteamNGUI : MonoBehaviour
 	
 	private void LateUpdate()
 	{
-		switch ((this._currentScreen != CoopSteamNGUI.Screens.ModalScreen) ? this._currentScreen : this._prevScreen)
+		CoopSteamNGUI.Screens screens = (this._currentScreen != CoopSteamNGUI.Screens.ModalScreen) ? this._currentScreen : this._prevScreen;
+		if (screens != CoopSteamNGUI.Screens.LobbySetup)
 		{
-		case CoopSteamNGUI.Screens.Lobby:
-			this.UpdateLobby();
-			break;
-		case CoopSteamNGUI.Screens.GameBrowser:
-			this.UpdateGameBrowser();
-			break;
+			if (screens != CoopSteamNGUI.Screens.Lobby)
+			{
+				if (screens == CoopSteamNGUI.Screens.GameBrowser)
+				{
+					this.UpdateGameBrowser();
+				}
+			}
+			else
+			{
+				this.UpdateLobby();
+			}
 		}
+	}
+
+	
+	private void OnDestroy()
+	{
+		TheForest.Utils.Input.player.controllers.maps.SetMapsEnabled(true, ControllerType.Keyboard, "Default");
+	}
+
+	
+	public void OnHostChangeGameName()
+	{
 	}
 
 	
@@ -126,31 +145,34 @@ public class CoopSteamNGUI : MonoBehaviour
 		PlayerPrefs.Save();
 		bool flag = CoopSteamServer.Start(delegate
 		{
-			this.SetLoadingText(UiTranslationDatabase.TranslateKey("CREATING_LOBBY___", "Creating Lobby...", false));
+			this.SetLoadingText(UiTranslationDatabase.TranslateKey("CREATING_LOBBY___", "Creating Lobby...", this._allCapsTexts));
 			CoopLobbyManager.Create(this.GetHostGameName(), this.GetHostPlayersMax(), this._hostFriendsOnly, delegate
 			{
 				if (string.IsNullOrEmpty(CoopLobby.Instance.Info.Guid) && GameSetup.IsNewGame)
 				{
 					CoopLobby.Instance.SetGuid(Guid.NewGuid().ToString());
 				}
-				this._lobbyScreen._gameNameLabel.text = string.Format(UiTranslationDatabase.TranslateKey("LOBBY_GAME_NAME", "LOBBY: {0}", false), CoopLobby.Instance.Info.Name.ToUpperInvariant());
+				this._lobbyScreen._gameNameLabel.text = StringEx.TryFormat(UiTranslationDatabase.TranslateKey("LOBBY_GAME_NAME", "LOBBY: {0}", this._allCapsTexts), new object[]
+				{
+					CoopLobby.Instance.Info.Name.ToUpperInvariant()
+				});
 				this.OpenScreen(CoopSteamNGUI.Screens.Lobby);
 			}, delegate
 			{
 				this.ClearLoadingAndError();
-				this.SetErrorText(UiTranslationDatabase.TranslateKey("COULD_NOT_CREATE_STEAM_LOBBY", "Could not create Steam lobby.", false));
+				this.SetErrorText(UiTranslationDatabase.TranslateKey("COULD_NOT_CREATE_STEAM_LOBBY", "Could not create Steam lobby.", this._allCapsTexts));
 			});
 		}, delegate
 		{
-			this.SetErrorText(UiTranslationDatabase.TranslateKey("COULD_NOT_CONNECT_TO_STEAM_MASTER_SERVER", "Could not connect to Steam master server.", false));
+			this.SetErrorText(UiTranslationDatabase.TranslateKey("COULD_NOT_CONNECT_TO_STEAM_MASTER_SERVER", "Could not connect to Steam master server.", this._allCapsTexts));
 		});
 		if (flag)
 		{
-			this.SetLoadingText(UiTranslationDatabase.TranslateKey("TALKING_TO_STEAM___", "Talking To Steam...", false));
+			this.SetLoadingText(UiTranslationDatabase.TranslateKey("TALKING_TO_STEAM___", "Talking To Steam...", this._allCapsTexts));
 		}
 		else
 		{
-			this.SetErrorText(UiTranslationDatabase.TranslateKey("COULD_NOT_START_STEAM_GAME_SERVER", "Could not start Steam game server.", false));
+			this.SetErrorText(UiTranslationDatabase.TranslateKey("COULD_NOT_START_STEAM_GAME_SERVER", "Could not start Steam game server.", this._allCapsTexts));
 		}
 	}
 
@@ -163,12 +185,24 @@ public class CoopSteamNGUI : MonoBehaviour
 	
 	public void OnHostStartGame()
 	{
-		this.SetLoadingText(UiTranslationDatabase.TranslateKey("STARTING_SERVER___", "Starting Server...", false));
+		this.SetLoadingText(UiTranslationDatabase.TranslateKey("STARTING_SERVER___", "Starting Server...", this._allCapsTexts));
 		if (GameSetup.IsNewGame)
 		{
 			PlaneCrashAudioState.Spawn();
 		}
 		base.gameObject.AddComponent<CoopSteamServerStarter>().gui = this;
+	}
+
+	
+	public void OnGamepadSearch()
+	{
+	}
+
+	
+	public void OnShowFriendGames(bool onOff)
+	{
+		this._showFriendGames = onOff;
+		this.OnClientRefreshGameList();
 	}
 
 	
@@ -192,7 +226,7 @@ public class CoopSteamNGUI : MonoBehaviour
 				UnityEngine.Object.Destroy(mpGameRow.gameObject);
 			}
 			this._gameRows.Clear();
-			CoopLobbyManager.QueryList();
+			CoopLobbyManager.QueryList(this._showFriendGames);
 		}
 	}
 
@@ -211,9 +245,17 @@ public class CoopSteamNGUI : MonoBehaviour
 			this._currentScreen = this._prevScreen;
 			this.OpenScreen(CoopSteamNGUI.Screens.GameBrowser);
 		}
+		else if (this._currentScreen == CoopSteamNGUI.Screens.JoinP2P)
+		{
+			this._currentScreen = this._prevScreen;
+			this.OpenScreen(CoopSteamNGUI.Screens.GameBrowser);
+		}
 		try
 		{
-			this.SetLoadingText(string.Format(UiTranslationDatabase.TranslateKey("JOINING_LOBBY_0____", "Joining Lobby {0}...", false), lobby.Name));
+			this.SetLoadingText(StringEx.TryFormat(UiTranslationDatabase.TranslateKey("JOINING_LOBBY_0____", "Joining Lobby {0}...", this._allCapsTexts), new object[]
+			{
+				lobby.Name
+			}));
 		}
 		catch
 		{
@@ -241,9 +283,17 @@ public class CoopSteamNGUI : MonoBehaviour
 			this._currentScreen = this._prevScreen;
 			this.OpenScreen(CoopSteamNGUI.Screens.GameBrowser);
 		}
+		else if (this._currentScreen == CoopSteamNGUI.Screens.JoinP2P)
+		{
+			this._currentScreen = this._prevScreen;
+			this.OpenScreen(CoopSteamNGUI.Screens.GameBrowser);
+		}
 		try
 		{
-			this.SetLoadingText(string.Format(UiTranslationDatabase.TranslateKey("JOINING_LOBBY_0____", "Joining Lobby {0}...", false), lobby.Name));
+			this.SetLoadingText(StringEx.TryFormat(UiTranslationDatabase.TranslateKey("JOINING_LOBBY_0____", "Joining Lobby {0}...", this._allCapsTexts), new object[]
+			{
+				lobby.Name
+			}));
 		}
 		catch
 		{
@@ -260,14 +310,14 @@ public class CoopSteamNGUI : MonoBehaviour
 	private void OnFailedEnterLobby(string reason)
 	{
 		this.ClearLoadingAndError();
+		this.OnBack();
 		if (reason == "FULL")
 		{
-			this.OnBack();
 			this._lobbyFullMessage.SetActive(true);
 		}
 		else
 		{
-			this.SetErrorText(UiTranslationDatabase.TranslateKey("COULD_NOT_JOIN_STEAM_LOBBY", "Could not join Steam lobby.", false));
+			this.SetErrorText(UiTranslationDatabase.TranslateKey("COULD_NOT_JOIN_STEAM_LOBBY", "Could not join Steam lobby.", this._allCapsTexts));
 		}
 	}
 
@@ -295,7 +345,7 @@ public class CoopSteamNGUI : MonoBehaviour
 			if (this.PreviouslyPlayedServers.Contains(item))
 			{
 				this._joinDsScreen._continueButtonLabel.transform.parent.gameObject.SetActive(true);
-				this._joinDsScreen._continueButtonLabel.text = UiTranslationDatabase.TranslateKey("CONTINUE", "Continue", false);
+				this._joinDsScreen._continueButtonLabel.text = UiTranslationDatabase.TranslateKey("CONTINUE", "Continue", this._allCapsTexts);
 			}
 			else
 			{
@@ -309,8 +359,15 @@ public class CoopSteamNGUI : MonoBehaviour
 		this._joinDsScreen._serverName.text = server.GetServerName();
 		this.JoiningServer = server;
 		this._joinDsScreen._ip.text = server.m_NetAdr.GetConnectionAddressString();
-		this._joinDsScreen._ping.text = server.m_nPing + "ms";
-		this._joinDsScreen._playerLimit.text = string.Format("{0} / {1}", server.m_nPlayers, server.m_nMaxPlayers);
+		if (this._joinDsScreen._ping)
+		{
+			this._joinDsScreen._ping.text = server.m_nPing + "ms";
+		}
+		this._joinDsScreen._playerLimit.text = StringEx.TryFormat("{0} / {1}", new object[]
+		{
+			server.m_nPlayers,
+			server.m_nMaxPlayers
+		});
 		this._joinDsScreen._password.value = string.Empty;
 		this._joinDsScreen._adminPassword.value = string.Empty;
 		this.OpenScreen(CoopSteamNGUI.Screens.JoinDS);
@@ -352,7 +409,7 @@ public class CoopSteamNGUI : MonoBehaviour
 		SteamClientDSConfig.EndPoint = UdpEndPoint.Parse(SteamClientDSConfig.serverAddress);
 		GameSetup.SetInitType(InitTypes.New);
 		UnityEngine.Object.Destroy(base.gameObject);
-		Application.LoadLevel("SteamStartSceneDedicatedServer_Client");
+		SceneManager.LoadScene("SteamStartSceneDedicatedServer_Client");
 	}
 
 	
@@ -391,7 +448,7 @@ public class CoopSteamNGUI : MonoBehaviour
 		SteamClientDSConfig.EndPoint = UdpEndPoint.Parse(SteamClientDSConfig.serverAddress);
 		GameSetup.SetInitType(InitTypes.Continue);
 		UnityEngine.Object.Destroy(base.gameObject);
-		Application.LoadLevel("SteamStartSceneDedicatedServer_Client");
+		SceneManager.LoadScene("SteamStartSceneDedicatedServer_Client");
 	}
 
 	
@@ -428,7 +485,7 @@ public class CoopSteamNGUI : MonoBehaviour
 			this.ClearScenery();
 			CoopSteamClient.Shutdown();
 			UnityEngine.Object.Destroy(base.gameObject);
-			Application.LoadLevel("TitleScene");
+			SceneManager.LoadScene("TitleScene", LoadSceneMode.Single);
 			return;
 		case CoopSteamNGUI.Screens.Lobby:
 			if (GameSetup.IsMpClient)
@@ -447,7 +504,7 @@ public class CoopSteamNGUI : MonoBehaviour
 				{
 					this.ClearScenery();
 					UnityEngine.Object.Destroy(base.gameObject);
-					Application.LoadLevel("TitleScene");
+					SceneManager.LoadScene("TitleScene", LoadSceneMode.Single);
 				}
 			}
 			else
@@ -459,13 +516,14 @@ public class CoopSteamNGUI : MonoBehaviour
 			}
 			return;
 		case CoopSteamNGUI.Screens.JoinDS:
+		case CoopSteamNGUI.Screens.JoinP2P:
 			this.JoiningServer = null;
 			this.OpenScreen(this._prevScreen);
 			return;
 		}
 		this.ClearScenery();
 		UnityEngine.Object.Destroy(base.gameObject);
-		Application.LoadLevel("TitleScene");
+		SceneManager.LoadScene("TitleScene", LoadSceneMode.Single);
 	}
 
 	
@@ -493,11 +551,17 @@ public class CoopSteamNGUI : MonoBehaviour
 	{
 		foreach (GameObject gameObject in this._hostOnlyGOs)
 		{
-			gameObject.SetActive(GameSetup.IsMpServer);
+			if (gameObject)
+			{
+				gameObject.SetActive(GameSetup.IsMpServer);
+			}
 		}
 		foreach (GameObject gameObject2 in this._clientOnlyGOs)
 		{
-			gameObject2.SetActive(GameSetup.IsMpClient);
+			if (gameObject2)
+			{
+				gameObject2.SetActive(GameSetup.IsMpClient);
+			}
 		}
 	}
 
@@ -511,9 +575,19 @@ public class CoopSteamNGUI : MonoBehaviour
 		this._lobbySetupScreen._screen.SetActive(screen == CoopSteamNGUI.Screens.LobbySetup);
 		this._lobbyScreen._screen.SetActive(screen == CoopSteamNGUI.Screens.Lobby);
 		this._gameBrowserScreen._screen.SetActive(screen == CoopSteamNGUI.Screens.GameBrowser);
-		this._gameBrowserScreenDS._screen.SetActive(screen == CoopSteamNGUI.Screens.GameBrowserDS);
+		if (this._gameBrowserScreenDS._screen)
+		{
+			this._gameBrowserScreenDS._screen.SetActive(screen == CoopSteamNGUI.Screens.GameBrowserDS);
+		}
 		this._gameBrowserScreen._sources.SetActive(screen == CoopSteamNGUI.Screens.GameBrowser || screen == CoopSteamNGUI.Screens.GameBrowserDS);
-		this._joinDsScreen._screen.SetActive(screen == CoopSteamNGUI.Screens.JoinDS);
+		if (this._joinDsScreen._screen)
+		{
+			this._joinDsScreen._screen.SetActive(screen == CoopSteamNGUI.Screens.JoinDS);
+		}
+		if (this._joinP2PScreen._screen)
+		{
+			this._joinP2PScreen._screen.SetActive(screen == CoopSteamNGUI.Screens.JoinP2P);
+		}
 		this._currentScreen = screen;
 		if (screen == CoopSteamNGUI.Screens.GameBrowser || screen == CoopSteamNGUI.Screens.GameBrowserDS)
 		{
@@ -593,6 +667,11 @@ public class CoopSteamNGUI : MonoBehaviour
 	
 	public void SetErrorText(string text)
 	{
+		if (this._errorLabel == null)
+		{
+			return;
+		}
+		this._errorLabel.SetActiveSelfSafe(!text.NullOrEmpty());
 		this._errorLabel.text = text;
 	}
 
@@ -613,7 +692,7 @@ public class CoopSteamNGUI : MonoBehaviour
 		}
 		if (CoopLobby.Instance == null || CoopLobby.Instance.Info == null || CoopLobby.Instance.Info.Destroyed)
 		{
-			this.SetErrorText(UiTranslationDatabase.TranslateKey("LOBBY_DESTROYED", "Lobby Destroyed", false));
+			this.SetErrorText(UiTranslationDatabase.TranslateKey("LOBBY_DESTROYED", "Lobby Destroyed", this._allCapsTexts));
 			this.OnBack();
 			CoopLobby.LeaveActive();
 			return;
@@ -627,14 +706,18 @@ public class CoopSteamNGUI : MonoBehaviour
 				{
 					PlaneCrashAudioState.Spawn();
 				}
-				this.SetLoadingText(UiTranslationDatabase.TranslateKey("STARTING_CLIENT___", "Starting Client...", false));
+				this.SetLoadingText(UiTranslationDatabase.TranslateKey("STARTING_CLIENT___", "Starting Client...", this._allCapsTexts));
 			}
 		}
 		else
 		{
 			bool foundHost = false;
 			ulong ownerId = SteamMatchmaking.GetLobbyOwner(CoopLobby.Instance.Info.LobbyId).m_SteamID;
-			this._lobbyScreen._playerCountLabel.text = string.Format(UiTranslationDatabase.TranslateKey("PLAYER_CURRENT_OVER_MAX", "PLAYERS: {0} / {1}", false), CoopLobby.Instance.MemberCount, CoopLobby.Instance.Info.MemberLimit);
+			this._lobbyScreen._playerCountLabel.text = StringEx.TryFormat(UiTranslationDatabase.TranslateKey("PLAYER_CURRENT_OVER_MAX", "PLAYERS: {0} / {1}", this._allCapsTexts), new object[]
+			{
+				CoopLobby.Instance.MemberCount,
+				CoopLobby.Instance.Info.MemberLimit
+			});
 			this._lobbyScreen._playerListLabel.text = CoopLobby.Instance.AllMembers.Select(delegate(CSteamID x)
 			{
 				string text = SteamFriends.GetFriendPersonaName(x);
@@ -660,7 +743,10 @@ public class CoopSteamNGUI : MonoBehaviour
 		if (CoopLobby.IsInLobby)
 		{
 			this.OpenScreen(CoopSteamNGUI.Screens.Lobby);
-			this._lobbyScreen._gameNameLabel.text = string.Format(UiTranslationDatabase.TranslateKey("LOBBY_GAME_NAME", "LOBBY: {0}", false), CoopLobby.Instance.Info.Name.ToUpperInvariant());
+			this._lobbyScreen._gameNameLabel.text = StringEx.TryFormat(UiTranslationDatabase.TranslateKey("LOBBY_GAME_NAME", "LOBBY: {0}", this._allCapsTexts), new object[]
+			{
+				CoopLobby.Instance.Info.Name.ToUpperInvariant()
+			});
 			return;
 		}
 		this._lobbies = (from l in this._lobbies
@@ -679,7 +765,11 @@ public class CoopSteamNGUI : MonoBehaviour
 				mpGameRow.transform.localScale = localScale;
 				mpGameRow._gameName.text = coopLobbyInfo.Name;
 				mpGameRow._lobby = coopLobbyInfo;
-				mpGameRow._playerLimit.text = string.Format("{0} / {1}", coopLobbyInfo.CurrentMembers, coopLobbyInfo.MemberLimit);
+				mpGameRow._playerLimit.text = StringEx.TryFormat("{0} / {1}", new object[]
+				{
+					coopLobbyInfo.CurrentMembers,
+					coopLobbyInfo.MemberLimit
+				});
 				this._gameRows[coopLobbyInfo] = mpGameRow;
 				mpGameRow._previousPlayed = this._previouslyPlayedServers.Contains(mpGameRow._lobby.Guid);
 				if (mpGameRow._previousPlayed)
@@ -721,8 +811,14 @@ public class CoopSteamNGUI : MonoBehaviour
 		}
 		if (flag)
 		{
-			this._gameBrowserScreen._grid.repositionNow = true;
+			this._gameBrowserScreen._grid.Reposition();
 			this._gameBrowserScreen._scrollview.UpdateScrollbars();
+			this._gameBrowserScreen._scrollview.verticalScrollBar.value = 1f;
+			this._gameBrowserScreen._scrollview.verticalScrollBar.value = 0f;
+			if (this._gameBrowserScreen._firstSelectControl && this._gameBrowserScreen._grid.transform.childCount > 0)
+			{
+				this._gameBrowserScreen._firstSelectControl.ObjectToBeSelected = this._gameBrowserScreen._grid.GetChild(0).GetComponent<MpGameRow>()._continueButtonLabel.transform.parent.gameObject;
+			}
 		}
 	}
 
@@ -757,6 +853,9 @@ public class CoopSteamNGUI : MonoBehaviour
 	public CoopSteamNGUI.JoinServerScreen _joinDsScreen;
 
 	
+	public CoopSteamNGUI.JoinP2PScreen _joinP2PScreen;
+
+	
 	public GameObject[] _hostOnlyGOs;
 
 	
@@ -770,6 +869,9 @@ public class CoopSteamNGUI : MonoBehaviour
 
 	
 	public GameObject _lobbyFullMessage;
+
+	
+	public bool _allCapsTexts = true;
 
 	
 	private bool _hostFriendsOnly;
@@ -799,6 +901,9 @@ public class CoopSteamNGUI : MonoBehaviour
 	private HashSet<string> _previouslyPlayedServers;
 
 	
+	private bool _showFriendGames;
+
+	
 	public enum Screens
 	{
 		
@@ -814,7 +919,9 @@ public class CoopSteamNGUI : MonoBehaviour
 		
 		GameBrowserDS,
 		
-		JoinDS
+		JoinDS,
+		
+		JoinP2P
 	}
 
 	
@@ -853,7 +960,7 @@ public class CoopSteamNGUI : MonoBehaviour
 		public UIInput _gameNameInput;
 
 		
-		public UIInput _playerCountInput;
+		public UIPopupList _playerCountInput;
 
 		
 		public UIToggle _privateOnlyToggle;
@@ -897,6 +1004,9 @@ public class CoopSteamNGUI : MonoBehaviour
 
 		
 		public GameObject _sources;
+
+		
+		public FirstSelectControl _firstSelectControl;
 	}
 
 	
@@ -935,5 +1045,16 @@ public class CoopSteamNGUI : MonoBehaviour
 
 		
 		public UILabel _newButtonLabel;
+	}
+
+	
+	[Serializable]
+	public class JoinP2PScreen
+	{
+		
+		public GameObject _screen;
+
+		
+		public UILabel _gameNameLabel;
 	}
 }

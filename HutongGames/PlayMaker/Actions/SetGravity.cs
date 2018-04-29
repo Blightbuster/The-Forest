@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the gravity vector, or individual axis.")]
 	[ActionCategory(ActionCategory.Physics)]
+	[Tooltip("Sets the gravity vector, or individual axis.")]
 	public class SetGravity : FsmStateAction
 	{
 		

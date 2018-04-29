@@ -45,7 +45,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			if (base.renderer.material == null)
 			{
-				this.LogError("Missing Material!");
+				base.LogError("Missing Material!");
 				return;
 			}
 			if (this.materialIndex.Value == 0)

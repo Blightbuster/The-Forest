@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the avatar body mass center position and rotation.Optionally accept a GameObject to get the body transform. \nThe position and rotation are local to the gameobject")]
 	[ActionCategory("Animator")]
+	[Tooltip("Gets the avatar body mass center position and rotation.Optionally accept a GameObject to get the body transform. \nThe position and rotation are local to the gameobject")]
 	[HelpUrl("https:
 	public class GetAnimatorBody : FsmStateAction
 	{
@@ -95,8 +95,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Animator))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animator))]
 		[Tooltip("The target.")]
 		public FsmOwnerDefault gameObject;
 
@@ -105,14 +105,14 @@ namespace HutongGames.PlayMaker.Actions
 		public bool everyFrame;
 
 		
-		[Tooltip("The avatar body mass center")]
-		[UIHint(UIHint.Variable)]
 		[ActionSection("Results")]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("The avatar body mass center")]
 		public FsmVector3 bodyPosition;
 
 		
-		[Tooltip("The avatar body mass center")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The avatar body mass center")]
 		public FsmQuaternion bodyRotation;
 
 		

@@ -157,14 +157,16 @@ public class FirstPersonHeadBob : MonoBehaviour
 		{
 			return this.landWater;
 		}
-		switch (TerrainHelper.GetProminantTextureIndex(base.transform.position))
+		int prominantTextureIndex = TerrainHelper.GetProminantTextureIndex(base.transform.position);
+		if (prominantTextureIndex == 1)
 		{
-		case 1:
 			return this.landMud;
-		case 4:
-			return this.landSand;
 		}
-		return this.landDefault;
+		if (prominantTextureIndex != 4)
+		{
+			return this.landDefault;
+		}
+		return this.landSand;
 	}
 
 	
@@ -315,7 +317,7 @@ public class FirstPersonHeadBob : MonoBehaviour
 	
 	private bool IsOnSnow()
 	{
-		if (base.transform.position.z < -300f && base.transform.position.y > this.snowStartHeight)
+		if (!LocalPlayer.IsInCaves && base.transform.position.z < -300f && base.transform.position.y > this.snowStartHeight)
 		{
 			Terrain activeTerrain = Terrain.activeTerrain;
 			if (!activeTerrain || this.snowFadeLength <= 0f)
@@ -336,9 +338,6 @@ public class FirstPersonHeadBob : MonoBehaviour
 		}
 		return false;
 	}
-
-	
-	private const float SNOW_MAXIMUM_Z = -300f;
 
 	
 	[SerializeField]
@@ -521,6 +520,9 @@ public class FirstPersonHeadBob : MonoBehaviour
 
 	
 	private float snowFadeLength;
+
+	
+	private const float SNOW_MAXIMUM_Z = -300f;
 
 	
 	private static bool isQuitting;

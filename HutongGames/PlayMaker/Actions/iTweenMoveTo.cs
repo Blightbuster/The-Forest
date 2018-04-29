@@ -5,8 +5,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Changes a GameObject's position over time to a supplied destination.")]
 	[ActionCategory("iTween")]
+	[Tooltip("Changes a GameObject's position over time to a supplied destination.")]
 	public class iTweenMoveTo : iTweenFsmAction
 	{
 		
@@ -255,8 +255,8 @@ namespace HutongGames.PlayMaker.Actions
 		public iTweenFsmAction.AxisRestriction axis;
 
 		
-		[Tooltip("Whether to automatically generate a curve from the GameObject's current position to the beginning of the path. True by default.")]
 		[ActionSection("Path")]
+		[Tooltip("Whether to automatically generate a curve from the GameObject's current position to the beginning of the path. True by default.")]
 		public FsmBool moveToPath;
 
 		
@@ -264,8 +264,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat lookAhead;
 
 		
-		[Tooltip("A list of objects to draw a Catmull-Rom spline through for a curved animation path.")]
 		[CompoundArray("Path Nodes", "Transform", "Vector")]
+		[Tooltip("A list of objects to draw a Catmull-Rom spline through for a curved animation path.")]
 		public FsmGameObject[] transforms;
 
 		

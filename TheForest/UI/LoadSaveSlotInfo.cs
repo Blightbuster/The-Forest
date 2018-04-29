@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -58,87 +57,87 @@ namespace TheForest.UI
 							if (array != null && array.Length > 0)
 							{
 								int num = UnityEngine.Random.Range(0, array.Length);
-								string text = array[num].Name;
-								string text2;
-								switch (text)
+								string name = array[num].Name;
+								string text;
+								switch (name)
 								{
 								case "_treeCutDown":
-									text2 = "Trees Cut Down: ";
-									goto IL_4BE;
+									text = "Trees Cut Down: ";
+									goto IL_4BC;
 								case "_enemiesKilled":
-									text2 = "Enemies Killed: ";
-									goto IL_4BE;
+									text = "Enemies Killed: ";
+									goto IL_4BC;
 								case "_rabbitKilled":
-									text2 = "Rabbits Killed: ";
-									goto IL_4BE;
+									text = "Rabbits Killed: ";
+									goto IL_4BC;
 								case "_lizardKilled":
-									text2 = "Lizards Killed: ";
-									goto IL_4BE;
+									text = "Lizards Killed: ";
+									goto IL_4BC;
 								case "_raccoonKilled":
-									text2 = "Raccoons Killed: ";
-									goto IL_4BE;
+									text = "Raccoons Killed: ";
+									goto IL_4BC;
 								case "_deerKilled":
-									text2 = "Deer Killed: ";
-									goto IL_4BE;
+									text = "Deer Killed: ";
+									goto IL_4BC;
 								case "_turtleKilled":
-									text2 = "Turtles Killed: ";
-									goto IL_4BE;
+									text = "Turtles Killed: ";
+									goto IL_4BC;
 								case "_birdKilled":
-									text2 = "Birds Killed: ";
-									goto IL_4BE;
+									text = "Birds Killed: ";
+									goto IL_4BC;
 								case "_cookedFood":
-									text2 = "Cooked Food: ";
-									goto IL_4BE;
+									text = "Cooked Food: ";
+									goto IL_4BC;
 								case "_burntFood":
-									text2 = "Burnt Food: ";
-									goto IL_4BE;
+									text = "Burnt Food: ";
+									goto IL_4BC;
 								case "_cancelledStructures":
-									text2 = "Cancelled Structures: ";
-									goto IL_4BE;
+									text = "Cancelled Structures: ";
+									goto IL_4BC;
 								case "_builtStructures":
-									text2 = "Built Structures: ";
-									goto IL_4BE;
+									text = "Built Structures: ";
+									goto IL_4BC;
 								case "_destroyedStructures":
-									text2 = "Destroyed Structures: ";
-									goto IL_4BE;
+									text = "Destroyed Structures: ";
+									goto IL_4BC;
 								case "_repairedStructures":
-									text2 = "Repaired Structures: ";
-									goto IL_4BE;
+									text = "Repaired Structures: ";
+									goto IL_4BC;
 								case "_edibleItemsUsed":
-									text2 = "Edible Items Used: ";
-									goto IL_4BE;
+									text = "Edible Items Used: ";
+									goto IL_4BC;
 								case "_itemsCrafted":
-									text2 = "Items Crafted: ";
-									goto IL_4BE;
+									text = "Items Crafted: ";
+									goto IL_4BC;
 								case "_upgradesAdded":
-									text2 = "Upgrades Added: ";
-									goto IL_4BE;
+									text = "Upgrades Added: ";
+									goto IL_4BC;
 								case "_arrowsFired":
-									text2 = "Arrows Fired: ";
-									goto IL_4BE;
+									text = "Arrows Fired: ";
+									goto IL_4BC;
 								case "_litArrows":
-									text2 = "Lit Arrows: ";
-									goto IL_4BE;
+									text = "Lit Arrows: ";
+									goto IL_4BC;
 								case "_litWeapons":
-									text2 = "Lit Weapons: ";
-									goto IL_4BE;
+									text = "Lit Weapons: ";
+									goto IL_4BC;
 								case "_burntEnemies":
-									text2 = "Burnt Enemies: ";
-									goto IL_4BE;
+									text = "Burnt Enemies: ";
+									goto IL_4BC;
 								case "_explodedEnemies":
-									text2 = "Exploded Enemies: ";
-									goto IL_4BE;
+									text = "Exploded Enemies: ";
+									goto IL_4BC;
 								}
-								text2 = string.Empty;
-								IL_4BE:
-								if (string.IsNullOrEmpty(text2))
+								text = string.Empty;
+								IL_4BC:
+								if (string.IsNullOrEmpty(text))
 								{
 									this._labelStat.gameObject.SetActive(false);
 								}
 								else
 								{
 									this._labelStat.gameObject.SetActive(true);
-									this._labelStat.text = text2 + array[num].GetValue(gameStats);
+									this._labelStat.text = text + array[num].GetValue(gameStats);
 								}
 							}
 							else
@@ -163,45 +162,14 @@ namespace TheForest.UI
 					string path2 = localSlotPath + "difficulty";
 					if (File.Exists(path2))
 					{
-						string text3 = File.ReadAllText(path2);
-						string text = text3;
-						if (text != null)
+						string text2 = File.ReadAllText(path2);
+						if (text2 != null)
 						{
-							if (LoadSaveSlotInfo.<>f__switch$map1B == null)
+							if (text2 == "Peaceful" || text2 == "Hard" || text2 == "HardSurvival" || text2 == "Creative" || text2 == "Normal")
 							{
-								LoadSaveSlotInfo.<>f__switch$map1B = new Dictionary<string, int>(5)
-								{
-									{
-										"Peaceful",
-										0
-									},
-									{
-										"Hard",
-										0
-									},
-									{
-										"HardSurvival",
-										0
-									},
-									{
-										"Creative",
-										0
-									},
-									{
-										"Normal",
-										0
-									}
-								};
-							}
-							int num2;
-							if (LoadSaveSlotInfo.<>f__switch$map1B.TryGetValue(text, out num2))
-							{
-								if (num2 == 0)
-								{
-									string text4 = text3.ToUpper();
-									UILabel labelSlot2 = this._labelSlot;
-									labelSlot2.text += UiTranslationDatabase.TranslateKey(text4, text4, false);
-								}
+								string text3 = text2.ToUpper();
+								UILabel labelSlot2 = this._labelSlot;
+								labelSlot2.text += UiTranslationDatabase.TranslateKey(text3, text3, false);
 							}
 						}
 					}

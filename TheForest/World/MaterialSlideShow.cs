@@ -60,9 +60,6 @@ namespace TheForest.World
 		}
 
 		
-		private const string _swapEvent = "event:/endgame/sfx_endgame/projector_click";
-
-		
 		public Renderer _targetRenderer;
 
 		
@@ -85,5 +82,8 @@ namespace TheForest.World
 
 		
 		private float _lastSwapTime;
+
+		
+		private const string _swapEvent = "event:/endgame/sfx_endgame/projector_click";
 	}
 }

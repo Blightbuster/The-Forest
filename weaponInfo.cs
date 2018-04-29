@@ -317,7 +317,21 @@ public class weaponInfo : EntityEventListener
 		}
 		if (other.CompareTag("hanging") || other.CompareTag("corpseProp"))
 		{
-			this.spawnWeaponBlood(other);
+			if (this.animControl.smashBool)
+			{
+				if (LocalPlayer.Animator.GetFloat("tiredFloat") < 0.35f)
+				{
+					base.Invoke("spawnSmashWeaponBlood", 0.1f);
+				}
+				else
+				{
+					base.Invoke("spawnSmashWeaponBlood", 0.03f);
+				}
+			}
+			else
+			{
+				this.spawnWeaponBlood(other, false);
+			}
 			Mood.HitRumble();
 			other.gameObject.SendMessageUpwards("Hit", 0, SendMessageOptions.DontRequireReceiver);
 			this.FauxMpHit(0);
@@ -357,9 +371,20 @@ public class weaponInfo : EntityEventListener
 					{
 						flag = true;
 					}
-					if (!flag)
+					if (this.animControl.smashBool)
 					{
-						this.spawnWeaponBlood(other);
+						if (LocalPlayer.Animator.GetFloat("tiredFloat") < 0.35f)
+						{
+							base.Invoke("spawnSmashWeaponBlood", 0.1f);
+						}
+						else
+						{
+							base.Invoke("spawnSmashWeaponBlood", 0.03f);
+						}
+					}
+					else if (!flag)
+					{
+						this.spawnWeaponBlood(other, false);
 					}
 				}
 				if (other.gameObject.CompareTag("PlayerNet") && (this.mainTrigger || (!this.mainTrigger && (this.animControl.smashBool || this.chainSaw))))
@@ -418,9 +443,9 @@ public class weaponInfo : EntityEventListener
 					string tag = other.gameObject.tag;
 					if (tag != null)
 					{
-						if (weaponInfo.<>f__switch$map8 == null)
+						if (weaponInfo.<>f__switch$map3 == null)
 						{
-							weaponInfo.<>f__switch$map8 = new Dictionary<string, int>(7)
+							weaponInfo.<>f__switch$map3 = new Dictionary<string, int>(9)
 							{
 								{
 									"jumpObject",
@@ -449,11 +474,19 @@ public class weaponInfo : EntityEventListener
 								{
 									"Target",
 									0
+								},
+								{
+									"Untagged",
+									0
+								},
+								{
+									"Block",
+									0
 								}
 							};
 						}
 						int num2;
-						if (weaponInfo.<>f__switch$map8.TryGetValue(tag, out num2))
+						if (weaponInfo.<>f__switch$map3.TryGetValue(tag, out num2))
 						{
 							if (num2 == 0)
 							{
@@ -501,11 +534,14 @@ public class weaponInfo : EntityEventListener
 					}
 					if (this.spear && !this.mainTrigger && (other.gameObject.CompareTag("Water") || other.gameObject.CompareTag("Ocean")))
 					{
-						this.PlayGroundHit(this.waterHitEvent);
-						base.StartCoroutine(this.spawnSpearSplash(other));
+						if (!LocalPlayer.ScriptSetup.targetInfo.inYacht)
+						{
+							this.PlayGroundHit(this.waterHitEvent);
+							base.StartCoroutine(this.spawnSpearSplash(other));
+						}
 						this.setup.pmNoise.SendEvent("toWeaponNoise");
 					}
-					if (!this.spear && !this.mainTrigger && (other.gameObject.CompareTag("Water") || other.gameObject.CompareTag("Ocean")))
+					if (!this.spear && !this.mainTrigger && (other.gameObject.CompareTag("Water") || other.gameObject.CompareTag("Ocean")) && !LocalPlayer.ScriptSetup.targetInfo.inYacht)
 					{
 						this.PlayGroundHit(this.waterHitEvent);
 					}
@@ -835,7 +871,10 @@ public class weaponInfo : EntityEventListener
 						if (this.fsmJumpAttackBool.Value && LocalPlayer.FpCharacter.jumpingTimer > 1.2f && !this.chainSaw)
 						{
 							other.transform.SendMessageUpwards("Explosion", -1, SendMessageOptions.DontRequireReceiver);
-							playerHitEnemy.explosion = true;
+							if (BoltNetwork.isRunning)
+							{
+								playerHitEnemy.explosion = true;
+							}
 						}
 						else if (!other.gameObject.CompareTag("Fish"))
 						{
@@ -927,7 +966,7 @@ public class weaponInfo : EntityEventListener
 							this.setup.pmNoise.SendEvent("toWeaponNoise");
 							this.animator.SetFloatReflected("weaponHit", 1f);
 							this.PlayEvent(this.treeHitEvent, null);
-							if (BoltNetwork.isRunning && this.entity.isOwner)
+							if (BoltNetwork.isRunning && base.entity.isOwner)
 							{
 								FmodOneShot fmodOneShot2 = FmodOneShot.Create(GlobalTargets.Others, ReliabilityModes.Unreliable);
 								fmodOneShot2.Position = base.transform.position;
@@ -959,7 +998,7 @@ public class weaponInfo : EntityEventListener
 								Mood.HitRumble();
 							}
 							this.PlayEvent(this.treeHitEvent, null);
-							if (BoltNetwork.isRunning && this.entity.isOwner)
+							if (BoltNetwork.isRunning && base.entity.isOwner)
 							{
 								FmodOneShot fmodOneShot3 = FmodOneShot.Create(GlobalTargets.Others, ReliabilityModes.Unreliable);
 								fmodOneShot3.Position = base.transform.position;
@@ -1067,7 +1106,13 @@ public class weaponInfo : EntityEventListener
 	}
 
 	
-	private void spawnWeaponBlood(Collider other)
+	private void spawnSmashWeaponBlood()
+	{
+		this.spawnWeaponBlood(this.thisCollider, true);
+	}
+
+	
+	private void spawnWeaponBlood(Collider other, bool smashBlood = false)
 	{
 		if (this.remotePlayer)
 		{
@@ -1078,6 +1123,10 @@ public class weaponInfo : EntityEventListener
 			return;
 		}
 		this.bloodCoolDown = Time.time + 0.2f;
+		if (this.animControl.smashBool)
+		{
+			this.bloodCoolDown = Time.time + 0.65f;
+		}
 		int num = UnityEngine.Random.Range(1, Prefabs.Instance.BloodHitPSPrefabs.Length);
 		Vector3 vector = other.bounds.center + LocalPlayer.MainCamTr.forward * -1.3f;
 		netId component = other.GetComponent<netId>();
@@ -1085,7 +1134,7 @@ public class weaponInfo : EntityEventListener
 		{
 			vector = other.bounds.center;
 		}
-		if (other.gameObject.CompareTag("EnemyBodyPart") && this.animControl.smashBool)
+		if (other.gameObject.CompareTag("EnemyBodyPart") || this.animControl.smashBool)
 		{
 			vector = this.currentWeaponScript.transform.position;
 		}
@@ -1107,11 +1156,18 @@ public class weaponInfo : EntityEventListener
 			}
 		}
 		Quaternion quaternion = Quaternion.LookRotation(LocalPlayer.Transform.forward, Vector3.up);
-		quaternion *= Quaternion.AngleAxis(angle, Vector3.up);
-		Transform tr = PoolManager.Pools["Particles"].Spawn(Prefabs.Instance.BloodHitPSPrefabs[0].transform, vector, quaternion);
-		Transform tr2 = PoolManager.Pools["Particles"].Spawn(Prefabs.Instance.BloodHitPSPrefabs[1].transform, vector, quaternion);
 		if (!this.animControl.smashBool)
 		{
+			quaternion *= Quaternion.AngleAxis(angle, Vector3.up);
+		}
+		if (this.animControl.smashBool)
+		{
+			PoolManager.Pools["Particles"].Spawn(Prefabs.Instance.SmashBloodPrefab.transform, vector, quaternion);
+		}
+		else
+		{
+			Transform tr = PoolManager.Pools["Particles"].Spawn(Prefabs.Instance.BloodHitPSPrefabs[0].transform, vector, quaternion);
+			Transform tr2 = PoolManager.Pools["Particles"].Spawn(Prefabs.Instance.BloodHitPSPrefabs[1].transform, vector, quaternion);
 			base.StartCoroutine(this.fixBloodPosition(tr, other, vector));
 			base.StartCoroutine(this.fixBloodPosition(tr2, other, vector));
 		}
@@ -1142,12 +1198,12 @@ public class weaponInfo : EntityEventListener
 		yield return YieldPresets.WaitForEndOfFrame;
 		Quaternion spawnAngle = Quaternion.LookRotation(this.currentWeaponScript.transform.up, Vector3.up);
 		Prefabs.Instance.SpawnWoodChopPS(this.currentWeaponScript.transform.position, spawnAngle);
-		if (BoltNetwork.isRunning && this.entity.isOwner)
+		if (BoltNetwork.isRunning && base.entity.isOwner)
 		{
-			spawnTreeDust ev2 = spawnTreeDust.Create(GlobalTargets.Others, ReliabilityModes.Unreliable);
-			ev2.position = this.currentWeaponScript.transform.position;
-			ev2.rotation = spawnAngle;
-			ev2.Send();
+			spawnTreeDust spawnTreeDust = spawnTreeDust.Create(GlobalTargets.Others, ReliabilityModes.Unreliable);
+			spawnTreeDust.position = this.currentWeaponScript.transform.position;
+			spawnTreeDust.rotation = spawnAngle;
+			spawnTreeDust.Send();
 		}
 		yield break;
 	}
@@ -1170,10 +1226,9 @@ public class weaponInfo : EntityEventListener
 		}
 		UnderfootSurfaceDetector.SurfaceType surfaceType = UnderfootSurfaceDetector.GetSurfaceType(collider);
 		string empty = string.Empty;
-		UnderfootSurfaceDetector.SurfaceType surfaceType2 = surfaceType;
-		if (surfaceType2 != UnderfootSurfaceDetector.SurfaceType.Wood)
+		if (surfaceType != UnderfootSurfaceDetector.SurfaceType.Wood)
 		{
-			if (surfaceType2 != UnderfootSurfaceDetector.SurfaceType.Rock)
+			if (surfaceType != UnderfootSurfaceDetector.SurfaceType.Rock)
 			{
 				if (Sfx.TryPlay<WeaponHitSfxInfo>(collider, base.transform, true))
 				{
@@ -1322,7 +1377,7 @@ public class weaponInfo : EntityEventListener
 					this.mainTriggerScript.enableSpecialWeaponVars();
 				}
 			}
-			if (!this.thisCollider)
+			if (!this.thisCollider && base.transform.parent)
 			{
 				this.thisCollider = base.transform.parent.GetComponentsInChildren<Collider>(true)[0];
 			}
@@ -1697,10 +1752,10 @@ public class weaponInfo : EntityEventListener
 	private float soundDetectRangeInit;
 
 	
-	private float animSpeed;
+	public float animSpeed;
 
 	
-	private float animTiredSpeed;
+	public float animTiredSpeed;
 
 	
 	private bool Tired;

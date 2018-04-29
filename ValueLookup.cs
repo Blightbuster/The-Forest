@@ -9,7 +9,7 @@ public class ValueLookup<TK, TR> : Dictionary<TK, TR> where TR : struct
 	{
 		get
 		{
-			if (this.ContainsKey(index))
+			if (base.ContainsKey(index))
 			{
 				return base[index];
 			}

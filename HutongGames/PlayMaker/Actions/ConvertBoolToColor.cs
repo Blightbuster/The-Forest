@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Converts a Bool value to a Color.")]
 	[ActionCategory(ActionCategory.Convert)]
+	[Tooltip("Converts a Bool value to a Color.")]
 	public class ConvertBoolToColor : FsmStateAction
 	{
 		
@@ -41,14 +41,14 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
+		[RequiredField]
 		[UIHint(UIHint.Variable)]
 		[Tooltip("The Bool variable to test.")]
-		[RequiredField]
 		public FsmBool boolVariable;
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		[Tooltip("The Color variable to set based on the bool variable value.")]
 		public FsmColor colorVariable;
 

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using FMOD.Studio;
 using TheForest.Items.Core;
 using TheForest.Items.Craft.Interfaces;
 using TheForest.Items.Inventory;
@@ -15,8 +17,8 @@ using UnityEngine;
 namespace TheForest.Items.Craft
 {
 	
-	[AddComponentMenu("Items/Craft/Crafting Cog")]
 	[DoNotSerializePublic]
+	[AddComponentMenu("Items/Craft/Crafting Cog")]
 	public class CraftingCog : MonoBehaviour, IItemStorage
 	{
 		
@@ -27,16 +29,11 @@ namespace TheForest.Items.Craft
 				this._initialized = true;
 				this._validRecipeFill = 0f;
 				this._validRecipe = null;
-				base.gameObject.GetComponent<Collider>().enabled = false;
-				this._normalMaterial = base.gameObject.GetComponent<Renderer>().sharedMaterial;
+				this.ShowCogRenderer(false);
+				this._normalMaterial = this._targetCogRenderer.sharedMaterial;
 				this._upgradeCog = base.GetComponent<UpgradeCog>();
 				this._ingredients = new HashSet<ReceipeIngredient>();
-				this._itemViewsCache = (from iv in this._itemViews
-				where !ItemDatabase.ItemById(iv._itemId).MatchType(Item.Types.Extension)
-				select iv).ToDictionary((InventoryItemView iv) => iv._itemId, (InventoryItemView iv) => iv);
-				this._itemExtensionViewsCache = (from iv in this._itemViews
-				where ItemDatabase.ItemById(iv._itemId).MatchType(Item.Types.Extension)
-				select iv).ToDictionary((InventoryItemView iv) => iv._itemId, (InventoryItemView iv) => iv);
+				this.BuildViewCache();
 				if (this._inventory && Scene.HudGui)
 				{
 					this._clickToCombineButton = Scene.HudGui.ClickToCombineInfo;
@@ -57,6 +54,17 @@ namespace TheForest.Items.Craft
 		}
 
 		
+		private void BuildViewCache()
+		{
+			this._itemViewsCache = (from iv in this._itemViews
+			where !ItemDatabase.ItemById(iv._itemId).MatchType(Item.Types.Extension)
+			select iv).ToDictionary((InventoryItemView iv) => iv._itemId, (InventoryItemView iv) => iv);
+			this._itemExtensionViewsCache = (from iv in this._itemViews
+			where ItemDatabase.ItemById(iv._itemId).MatchType(Item.Types.Extension)
+			select iv).ToDictionary((InventoryItemView iv) => iv._itemId, (InventoryItemView iv) => iv);
+		}
+
+		
 		private void Start()
 		{
 			this._lambdaMultiView = new GameObject("LambdaMultiview").AddComponent<InventoryItemView>();
@@ -68,6 +76,14 @@ namespace TheForest.Items.Craft
 			{
 				this.IngredientCleanUp();
 			}
+			if (FMOD_StudioSystem.instance && !CoopPeerStarter.DedicatedHost)
+			{
+				this.CogRotateEventInstance = FMOD_StudioSystem.instance.GetEvent("event:/ui/ingame/ui_cog_spin");
+				if (this.CogRotateEventInstance != null)
+				{
+					UnityUtil.ERRCHECK(this.CogRotateEventInstance.getCue("KeyOff", out this.CogRotateEventKeyoff));
+				}
+			}
 		}
 
 		
@@ -77,12 +93,41 @@ namespace TheForest.Items.Craft
 		}
 
 		
+		private void OnEnable()
+		{
+			foreach (KeyValuePair<int, InventoryItemView> keyValuePair in this._itemViewsCache)
+			{
+				SpecialItemControlerBase component = keyValuePair.Value.GetComponent<SpecialItemControlerBase>();
+				if (!(component == null))
+				{
+					MetalTinTrayControler metalTinTrayControler = component as MetalTinTrayControler;
+					if (!(metalTinTrayControler == null))
+					{
+						if (!(metalTinTrayControler._storage == null) && !metalTinTrayControler._storage.IsEmpty)
+						{
+							metalTinTrayControler.EmptyToInventory();
+						}
+					}
+				}
+			}
+			InventoryItemView rightHand = this._inventory.RightHand;
+			ItemStorageProxy itemStorageProxy = (!(rightHand == null)) ? rightHand.GetComponent<ItemStorageProxy>() : null;
+			if (itemStorageProxy != null && itemStorageProxy._storage != null)
+			{
+				this.Storage = itemStorageProxy._storage;
+				this.Storage.Open();
+				int num = this._inventory.CurrentStorage.Add(rightHand._itemId, 1, rightHand.Properties);
+				this._inventory.RemoveItem(rightHand._itemId, 1 - num, true, true);
+			}
+		}
+
+		
 		private void OnDisable()
 		{
 			if (this._clickToCombineButton.activeSelf)
 			{
 				this._clickToCombineButton.SetActive(false);
-				base.gameObject.GetComponent<Renderer>().sharedMaterial = this._normalMaterial;
+				this._targetCogRenderer.sharedMaterial = this._normalMaterial;
 			}
 			if (Scene.HudGui && LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Inventory)
 			{
@@ -94,6 +139,10 @@ namespace TheForest.Items.Craft
 		
 		private void OnMouseExitCollider()
 		{
+			if (this.CogRotateEventKeyoff != null && this.CogRotateEventKeyoff.isValid())
+			{
+				UnityUtil.ERRCHECK(this.CogRotateEventKeyoff.trigger());
+			}
 			this._hovered = false;
 			this.OnDisable();
 		}
@@ -106,12 +155,14 @@ namespace TheForest.Items.Craft
 			if (!this._hovered && !this._upgradeCog.enabled && ((hasValideRecipe && (this._validRecipe._type != Receipe.Types.Upgrade || this._upgradeCount > 0)) || flag))
 			{
 				this._hovered = true;
-				base.gameObject.GetComponent<Renderer>().sharedMaterial = this._selectedMaterial;
+				this._targetCogRenderer.sharedMaterial = this._selectedMaterial;
 				if (this._clickToCombineButton.activeSelf != (hasValideRecipe || flag))
 				{
 					this._clickToCombineButton.SetActive(hasValideRecipe || flag);
 				}
 			}
+			UnityUtil.ERRCHECK(this.CogRotateEventInstance.set3DAttributes(UnityUtil.to3DAttributes(LocalPlayer.MainCamTr.gameObject, null)));
+			UnityUtil.ERRCHECK(this.CogRotateEventInstance.start());
 		}
 
 		
@@ -136,7 +187,10 @@ namespace TheForest.Items.Craft
 				}
 				else if (TheForest.Utils.Input.GetButtonDown("Drop"))
 				{
-					LocalPlayer.Sfx.PlayWhoosh();
+					if (this._ingredients != null && this._ingredients.Count > 0)
+					{
+						LocalPlayer.Sfx.PlayWhoosh();
+					}
 					this.Close();
 				}
 				bool flag = this._ingredients.Count > 0 && !this._upgradeCog.enabled;
@@ -145,26 +199,42 @@ namespace TheForest.Items.Craft
 					Scene.HudGui.DropToRemoveAllInfo.SetActive(flag);
 				}
 			}
+			this.UpdateCogRotation();
 		}
 
 		
-		
-		public Item.Types AcceptedTypes
+		private void UpdateCogRotation()
 		{
-			get
+			float b = 0f;
+			if (this._hovered)
 			{
-				return (!this.Storage) ? this._acceptedTypes : this.Storage.AcceptedTypes;
+				b = 2f;
 			}
+			if (this._targetCogRenderer.enabled)
+			{
+				this._targetCogRotate = Mathf.Lerp(this._targetCogRotate, b, Time.unscaledDeltaTime * 2.5f);
+			}
+			else
+			{
+				this._targetCogRotate = 0f;
+			}
+			this._targetCogRenderer.transform.localEulerAngles += new Vector3(0f, this._targetCogRotate, 0f);
 		}
 
 		
-		
-		public Item.Types BlackListedTypes
+		public bool IsValidItem(Item item)
 		{
-			get
+			if (this.Storage != null)
 			{
-				return (!this.Storage) ? ((Item.Types)0) : this.Storage.BlackListedTypes;
+				return this.Storage.IsValidItem(item);
 			}
+			return this.MatchType(this._acceptedTypes, item._type);
+		}
+
+		
+		private bool MatchType(Item.Types mask, Item.Types type)
+		{
+			return (mask & type) != (Item.Types)0;
 		}
 
 		
@@ -182,9 +252,13 @@ namespace TheForest.Items.Craft
 		{
 			if (amount > 0)
 			{
-				ReceipeIngredient receipeIngredient = this._ingredients.FirstOrDefault((ReceipeIngredient i) => i._itemID == itemId);
+				if (this.Storage != null)
+				{
+					this.RemoveExcessStorage(itemId);
+				}
+				ReceipeIngredient receipeIngredient = this.TryGetIngredient(itemId);
 				int num;
-				if (this.Storage || !this._itemViewsCache.ContainsKey(itemId))
+				if (this.Storage || !this.InItemViewsCache(itemId))
 				{
 					num = int.MaxValue;
 				}
@@ -206,11 +280,41 @@ namespace TheForest.Items.Craft
 				}
 				int result = Mathf.Max(receipeIngredient._amount + amount - num, 0);
 				receipeIngredient._amount = Mathf.Min(receipeIngredient._amount + amount, num);
-				this.CheckForValidRecipe();
 				this.ToggleItemInventoryView(itemId, properties);
+				this.CheckForValidRecipe();
 				return result;
 			}
 			return 0;
+		}
+
+		
+		private void RemoveExcessStorage(int incomingItemId)
+		{
+			List<ReceipeIngredient> list = new List<ReceipeIngredient>();
+			foreach (ReceipeIngredient receipeIngredient in this._ingredients)
+			{
+				int itemID = receipeIngredient._itemID;
+				Item item = ItemDatabase.ItemById(itemID);
+				if (item._maxAmount > 0 && (item._maxAmount <= 100 || itemID != incomingItemId))
+				{
+					bool flag = this.InItemViewsCache(itemID);
+					ItemStorageProxy itemStorageProxy = (!flag) ? null : this._itemViewsCache[itemID].GetComponent<ItemStorageProxy>();
+					if (!(itemStorageProxy != null) || !(itemStorageProxy._storage == this.Storage))
+					{
+						list.Add(receipeIngredient);
+					}
+				}
+			}
+			for (int i = 0; i < list.Count - (this.Storage._slotCount - 1); i++)
+			{
+				ItemProperties properties = ItemProperties.Any;
+				if (this.InItemViewsCache(list[i]._itemID))
+				{
+					properties = this._itemViewsCache[list[i]._itemID].Properties;
+				}
+				this._inventory.AddItem(list[i]._itemID, list[i]._amount, true, true, properties);
+				this.Remove(list[i]._itemID, list[i]._amount, properties);
+			}
 		}
 
 		
@@ -220,12 +324,14 @@ namespace TheForest.Items.Craft
 			{
 				this._upgradeCog.Shutdown();
 			}
-			ReceipeIngredient receipeIngredient = this._ingredients.FirstOrDefault((ReceipeIngredient i) => i._itemID == itemId);
+			ReceipeIngredient receipeIngredient = this.TryGetIngredient(itemId);
 			if (receipeIngredient != null)
 			{
-				if (this._itemViewsCache.ContainsKey(itemId) && (this._itemViewsCache[itemId].ItemCache._maxAmount == 0 || this._itemViewsCache[itemId].ItemCache._maxAmount > LocalPlayer.Inventory.InventoryItemViewsCache[itemId].Count || !this._itemViewsCache[itemId]._allowMultiView))
+				bool flag = this.InItemViewsCache(itemId);
+				InventoryItemView inventoryItemView = (!flag) ? null : this._itemViewsCache[itemId];
+				if (flag && (inventoryItemView.ItemCache._maxAmount == 0 || inventoryItemView.ItemCache._maxAmount > LocalPlayer.Inventory.InventoryItemViewsCache[itemId].Count || !inventoryItemView._allowMultiView))
 				{
-					if (properties == ItemProperties.Any || this._itemViewsCache[itemId].Properties.Match(properties))
+					if (properties == ItemProperties.Any || inventoryItemView.Properties.Match(properties))
 					{
 						int result = Mathf.Max(amount - receipeIngredient._amount, 0);
 						if ((receipeIngredient._amount -= amount) <= 0)
@@ -239,16 +345,16 @@ namespace TheForest.Items.Craft
 				}
 				else
 				{
-					if (this._itemViewsCache.ContainsKey(itemId))
+					if (flag)
 					{
-						int num = this._itemViewsCache[itemId].AmountOfMultiviewWithProperties(itemId, properties);
+						int num = inventoryItemView.AmountOfMultiviewWithProperties(itemId, properties);
 						int num2 = Mathf.Max(amount - num, 0);
 						if ((receipeIngredient._amount -= amount - num2) <= 0)
 						{
 							this._ingredients.Remove(receipeIngredient);
 						}
 						this.CheckForValidRecipe();
-						this._itemViewsCache[itemId].RemovedMultiViews(itemId, amount, properties, false);
+						inventoryItemView.RemovedMultiViews(itemId, amount, properties, false);
 						this.SelectItemViewProxyTarget();
 						return num2;
 					}
@@ -274,16 +380,17 @@ namespace TheForest.Items.Craft
 		
 		public ItemProperties GetPropertiesOf(int itemId)
 		{
-			ReceipeIngredient receipeIngredient = this._ingredients.FirstOrDefault((ReceipeIngredient i) => i._itemID == itemId);
+			ReceipeIngredient receipeIngredient = this.TryGetIngredient(itemId);
 			if (receipeIngredient != null)
 			{
-				if (this._itemViewsCache.ContainsKey(itemId) && (this._itemViewsCache[itemId].ItemCache._maxAmount == 0 || this._itemViewsCache[itemId].ItemCache._maxAmount > LocalPlayer.Inventory.InventoryItemViewsCache[itemId].Count || !this._itemViewsCache[itemId]._allowMultiView))
+				InventoryItemView inventoryItemView = null;
+				if (this._itemViewsCache.TryGetValue(itemId, out inventoryItemView) && (inventoryItemView.ItemCache._maxAmount == 0 || inventoryItemView.ItemCache._maxAmount > LocalPlayer.Inventory.InventoryItemViewsCache[itemId].Count || !inventoryItemView._allowMultiView))
 				{
-					return this._itemViewsCache[itemId].Properties;
+					return inventoryItemView.Properties;
 				}
-				if (this._itemViewsCache.ContainsKey(itemId))
+				if (inventoryItemView != null)
 				{
-					return this._itemViewsCache[itemId].GetFirstViewProperties();
+					return inventoryItemView.GetFirstViewProperties();
 				}
 				if (LocalPlayer.Inventory.InventoryItemViewsCache.ContainsKey(itemId))
 				{
@@ -305,26 +412,31 @@ namespace TheForest.Items.Craft
 			{
 				this._upgradeCog.Shutdown();
 			}
+			if (this.Storage != null)
+			{
+				this.EmptyStorageToInventory();
+			}
 			foreach (ReceipeIngredient receipeIngredient in this._ingredients)
 			{
 				if (LocalPlayer.Inventory.InventoryItemViewsCache[receipeIngredient._itemID][0].ItemCache.MatchType(Item.Types.Special))
 				{
 					LocalPlayer.Inventory.SpecialItemsControlers[receipeIngredient._itemID].ToggleSpecialCraft(false);
 				}
-				if (this._itemViewsCache.ContainsKey(receipeIngredient._itemID))
+				if (this.InItemViewsCache(receipeIngredient._itemID))
 				{
-					if (!this._itemViewsCache[receipeIngredient._itemID]._allowMultiView)
+					InventoryItemView inventoryItemView = this._itemViewsCache[receipeIngredient._itemID];
+					if (!inventoryItemView._allowMultiView)
 					{
-						this._inventory.AddItem(receipeIngredient._itemID, receipeIngredient._amount, true, true, this._itemViewsCache[receipeIngredient._itemID].Properties);
+						this._inventory.AddItem(receipeIngredient._itemID, receipeIngredient._amount, true, true, inventoryItemView.Properties);
 					}
 					else
 					{
 						int i = receipeIngredient._amount;
 						while (i > 0)
 						{
-							ItemProperties firstViewProperties = this._itemViewsCache[receipeIngredient._itemID].GetFirstViewProperties();
-							int num = this._itemViewsCache[receipeIngredient._itemID].AmountOfMultiviewWithProperties(receipeIngredient._itemID, firstViewProperties);
-							this._itemViewsCache[receipeIngredient._itemID].RemovedMultiViews(receipeIngredient._itemID, num, firstViewProperties, false);
+							ItemProperties firstViewProperties = inventoryItemView.GetFirstViewProperties();
+							int num = inventoryItemView.AmountOfMultiviewWithProperties(receipeIngredient._itemID, firstViewProperties);
+							inventoryItemView.RemovedMultiViews(receipeIngredient._itemID, num, firstViewProperties, false);
 							this._inventory.AddItem(receipeIngredient._itemID, num, true, true, firstViewProperties);
 							if (num > 0)
 							{
@@ -358,6 +470,18 @@ namespace TheForest.Items.Craft
 		}
 
 		
+		private void EmptyStorageToInventory()
+		{
+			for (int i = 0; i < this.Storage.UsedSlots.Count; i++)
+			{
+				LocalPlayer.Inventory.AddItem(this.Storage.UsedSlots[i]._itemId, this.Storage.UsedSlots[i]._amount, true, true, this.Storage.UsedSlots[i]._properties);
+			}
+			this.Storage.Close();
+			this.Storage.UsedSlots.Clear();
+			this.Storage.UpdateContentVersion();
+		}
+
+		
 		private bool CanCarryProduct(Receipe recipe)
 		{
 			int maxAmountOf = LocalPlayer.Inventory.GetMaxAmountOf(recipe._productItemID);
@@ -365,8 +489,18 @@ namespace TheForest.Items.Craft
 		}
 
 		
+		private bool ShouldList(Receipe recipe)
+		{
+			return !recipe._hidden;
+		}
+
+		
 		private bool CanCarryUpgradeProduct(Receipe recipe)
 		{
+			if (recipe._forceUnique && this.HasExistingUpgradeBonus(recipe))
+			{
+				return false;
+			}
 			if (recipe._productItemID == recipe._ingredients[0]._itemID)
 			{
 				return true;
@@ -374,6 +508,37 @@ namespace TheForest.Items.Craft
 			int maxAmountOf = LocalPlayer.Inventory.GetMaxAmountOf(recipe._productItemID);
 			int num = this._inventory.AmountOf(recipe._productItemID, false);
 			return num < maxAmountOf || this._ingredients.Any((ReceipeIngredient i) => i._itemID == recipe._productItemID);
+		}
+
+		
+		private bool HasExistingUpgradeBonus(Receipe recipe)
+		{
+			if (recipe._type != Receipe.Types.Upgrade)
+			{
+				return false;
+			}
+			if (this._inventory.AmountOf(recipe._productItemID, false) == 0 && this.Ingredients.All((ReceipeIngredient ingredient) => ingredient._itemID != recipe._productItemID))
+			{
+				return false;
+			}
+			if (recipe._weaponStatUpgrades == null || recipe._weaponStatUpgrades.Length == 0)
+			{
+				return false;
+			}
+			int productItemID = recipe._productItemID;
+			WeaponStatUpgrade.Types activeBonus = this._itemViewsCache[productItemID].ActiveBonus;
+			if (activeBonus == (WeaponStatUpgrade.Types)(-1))
+			{
+				return false;
+			}
+			foreach (WeaponStatUpgrade weaponStatUpgrade in recipe._weaponStatUpgrades)
+			{
+				if (activeBonus == weaponStatUpgrade._type)
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 
 		
@@ -385,16 +550,21 @@ namespace TheForest.Items.Craft
 				Scene.HudGui.CraftingReceipeBacking.gameObject.SetActive(false);
 				Scene.HudGui.ShowValidCraftingRecipes(null);
 				Scene.HudGui.HideUpgradesDistribution();
-				base.gameObject.GetComponent<Renderer>().enabled = (this._ingredients.Count > 1);
-				base.gameObject.GetComponent<Collider>().enabled = (this._ingredients.Count > 1);
+				this.ShowCogRenderer(this._ingredients.Count > 1);
 				return true;
 			}
 			if (this._validRecipe == null)
 			{
-				base.gameObject.GetComponent<Renderer>().enabled = false;
-				base.gameObject.GetComponent<Collider>().enabled = false;
+				this.ShowCogRenderer(false);
 			}
 			return false;
+		}
+
+		
+		private void ShowCogRenderer(bool enabledValue)
+		{
+			this._targetCogRenderer.enabled = enabledValue;
+			base.gameObject.GetComponent<Collider>().enabled = enabledValue;
 		}
 
 		
@@ -405,7 +575,9 @@ namespace TheForest.Items.Craft
 			this._craftSfxEmitter.Play();
 			foreach (ReceipeIngredient receipeIngredient in this._ingredients)
 			{
-				if (!this._itemViewsCache.ContainsKey(receipeIngredient._itemID))
+				bool flag = this.InItemViewsCache(receipeIngredient._itemID);
+				ItemStorageProxy itemStorageProxy = (!flag) ? null : this._itemViewsCache[receipeIngredient._itemID].GetComponent<ItemStorageProxy>();
+				if (!flag)
 				{
 					while (this._lambdaMultiView.ContainsMultiView(receipeIngredient._itemID))
 					{
@@ -427,7 +599,7 @@ namespace TheForest.Items.Craft
 						}
 					}
 				}
-				else if (!this._itemViewsCache[receipeIngredient._itemID].ItemCache.MatchType(Item.Types.Special))
+				else if (itemStorageProxy == null)
 				{
 					int num3 = 0;
 					if (!this._itemViewsCache[receipeIngredient._itemID]._allowMultiView)
@@ -469,13 +641,9 @@ namespace TheForest.Items.Craft
 						receipeIngredient._amount = num3;
 					}
 				}
-				else
+				else if (itemStorageProxy._storage == this.Storage)
 				{
-					ItemStorageProxy component = this._itemViewsCache[receipeIngredient._itemID].GetComponent<ItemStorageProxy>();
-					if (component && component._storage == this.Storage)
-					{
-						targetView = this._itemViewsCache[receipeIngredient._itemID];
-					}
+					targetView = this._itemViewsCache[receipeIngredient._itemID];
 				}
 			}
 			foreach (ReceipeIngredient receipeIngredient2 in list)
@@ -489,33 +657,61 @@ namespace TheForest.Items.Craft
 		}
 
 		
+		private bool InItemViewsCache(int itemId)
+		{
+			return this._itemViewsCache.ContainsKey(itemId);
+		}
+
+		
 		private void DoCraft()
 		{
 			Receipe validRecipe = this._validRecipe;
 			this._craftSfxEmitter.Play();
-			LocalPlayer.Tuts.CloseRecipeTut();
-			this._upgradeCount = 1;
+			UnityEngine.Object.Instantiate<GameObject>(this._craftParticle1, this._craftParticleSpawnPos.position, this._craftParticleSpawnPos.rotation);
+			if (!validRecipe._type.Equals(Receipe.Types.Upgrade))
+			{
+				this._upgradeCount = 1;
+			}
 			ItemProperties itemProperties = ItemProperties.Any;
 			for (int i = 0; i < validRecipe._ingredients.Length; i++)
 			{
-				ReceipeIngredient recipeIngredient = validRecipe._ingredients[i];
-				ReceipeIngredient receipeIngredient = this._ingredients.FirstOrDefault((ReceipeIngredient ig) => ig._itemID == recipeIngredient._itemID);
-				int num = recipeIngredient._amount * ((i != 0 || !validRecipe._type.Equals(Receipe.Types.Upgrade)) ? this._upgradeCount : 1);
-				receipeIngredient._amount -= num;
+				ReceipeIngredient receipeIngredient = validRecipe._ingredients[i];
+				ReceipeIngredient receipeIngredient2 = this.TryGetIngredient(receipeIngredient._itemID);
+				int num;
+				if (i == 0)
+				{
+					if (validRecipe._type.Equals(Receipe.Types.Upgrade))
+					{
+						num = receipeIngredient._amount;
+					}
+					else if (validRecipe._type.Equals(Receipe.Types.Extension))
+					{
+						num = 0;
+					}
+					else
+					{
+						num = receipeIngredient._amount * this._upgradeCount;
+					}
+				}
+				else
+				{
+					num = receipeIngredient._amount * this._upgradeCount;
+				}
+				receipeIngredient2._amount -= num;
 				if (i == 1)
 				{
-					itemProperties = ((!this._itemViewsCache[receipeIngredient._itemID]._allowMultiView) ? this._itemViewsCache[receipeIngredient._itemID].Properties : this._itemViewsCache[receipeIngredient._itemID].GetFirstViewProperties());
+					itemProperties = ((!this._itemViewsCache[receipeIngredient2._itemID]._allowMultiView) ? this._itemViewsCache[receipeIngredient2._itemID].Properties : this._itemViewsCache[receipeIngredient2._itemID].GetFirstViewProperties());
 				}
-				if (receipeIngredient._amount <= 0)
+				if (receipeIngredient2._amount <= 0)
 				{
-					this._ingredients.Remove(receipeIngredient);
+					this._ingredients.Remove(receipeIngredient2);
 				}
-				else if (recipeIngredient._amount == 0)
+				else if (receipeIngredient._amount == 0)
 				{
-					this._inventory.AddItem(recipeIngredient._itemID, receipeIngredient._amount, true, true, itemProperties);
-					this.Remove(recipeIngredient._itemID, receipeIngredient._amount, null);
+					this._inventory.AddItem(receipeIngredient._itemID, receipeIngredient2._amount, true, true, itemProperties);
+					this.Remove(receipeIngredient._itemID, receipeIngredient2._amount, null);
 				}
-				this.ToggleItemInventoryView(recipeIngredient._itemID, ItemProperties.Any);
+				this.ToggleItemInventoryView(receipeIngredient._itemID, ItemProperties.Any);
 			}
 			int upgradeCount = this._upgradeCount;
 			if (!validRecipe._type.Equals(Receipe.Types.Extension))
@@ -537,76 +733,216 @@ namespace TheForest.Items.Craft
 			}
 			InventoryItemView itemView = this.GetItemView(validRecipe._productItemID);
 			this._completedItemViewProxy._targetView = itemView;
+			if (!this._upgradeCog.enabled)
+			{
+				base.StartCoroutine(this.animateCraftedItemRoutine(itemView.transform));
+			}
+		}
+
+		
+		private void CheckCraftOverride()
+		{
+			Scene.HudGui.HideUpgradesDistribution();
+			bool flag = this.CraftOverride.CanCombine();
+			if (flag)
+			{
+				this._craftSfx2Emitter.Play();
+			}
+			this.ShowCogRenderer(flag);
 		}
 
 		
 		public void CheckForValidRecipe()
 		{
+			if (this._legacyCraftingSystem)
+			{
+				this.CheckForValidRecipeLegacy();
+				return;
+			}
 			if (this.CheckStorage())
 			{
 				return;
 			}
+			this._validRecipeFill = 0f;
+			this._validRecipe = null;
+			this._upgradeCount = 0;
+			this._validRecipeFill = 0f;
+			this._validRecipeFull = false;
+			if (this.CraftOverride != null)
+			{
+				this.HideRecipeDisplay();
+				this.CheckCraftOverride();
+				return;
+			}
+			if (this._ingredients.Count == 0)
+			{
+				this.HideRecipeDisplay();
+				return;
+			}
+			int i;
+			List<Receipe> list = (from ar in this._receipeBook.AvailableReceipesCache
+			where this._ingredients.All((ReceipeIngredient i) => ar._ingredients.Any((ReceipeIngredient i2) => i._itemID == i2._itemID))
+			select ar).ToList<Receipe>();
+			list.AddRange(from ar in this._receipeBook.AvailableUpgradeCache
+			where this._ingredients.All((ReceipeIngredient i) => ar._ingredients.Any((ReceipeIngredient i2) => i._itemID == i2._itemID))
+			select ar);
+			if (list.Count == 0)
+			{
+				this.HideRecipeDisplay();
+				return;
+			}
+			Scene.HudGui.CraftingReceipeBacking.gameObject.SetActive(true);
+			list.ForEach(delegate(Receipe ar)
+			{
+				ar.CanCarryProduct = this.CanCarryUpgradeProduct(ar);
+			});
+			bool flag = false;
+			bool flag2 = false;
+			list = (from eachRecipe in list
+			orderby eachRecipe.CanCarryProduct descending, eachRecipe._ingredients.Length
+			select eachRecipe).ThenBy((Receipe r) => r._type).ToList<Receipe>();
+			for (i = 0; i < list.Count; i++)
+			{
+				Receipe receipe = list[i];
+				if (receipe.CanCarryProduct)
+				{
+					flag2 |= (receipe._type == Receipe.Types.Craft);
+					int num = receipe._ingredients.Sum((ReceipeIngredient ingredient) => Mathf.Max(ingredient._amount, 1));
+					int matchedIngredientSum = CraftingCog.GetMatchedIngredientSum(receipe, this._ingredients);
+					float num2 = (float)matchedIngredientSum / (float)num;
+					if (receipe._hidden)
+					{
+						num2 = 0f;
+					}
+					if (!flag && num2 > this._validRecipeFill)
+					{
+						this._validRecipe = receipe;
+						this._validRecipeFill = Mathf.Max(num2, this._validRecipeFill);
+						flag = (num == matchedIngredientSum);
+					}
+				}
+			}
+			if (flag && flag2)
+			{
+				if (this._validRecipe._type == Receipe.Types.Upgrade)
+				{
+					this._upgradeCount = ItemDatabase.ItemById(this._validRecipe._productItemID)._maxUpgradesAmount;
+				}
+				Scene.HudGui.CraftingReceipeBacking.gameObject.SetActive(false);
+				Scene.HudGui.HideUpgradesDistribution();
+				this._craftSfx2Emitter.Play();
+				this.ShowCogRenderer(true);
+				return;
+			}
+			CraftingCog.ShowFilteredRecipes(list);
+			this.ShowCogRenderer(false);
+			float validRecipeFill = this._validRecipeFill;
+			this._validRecipe = null;
+			this.CheckForValidUpgrade(false);
+			if (this._validRecipe == null)
+			{
+				this._validRecipeFill = validRecipeFill;
+				Scene.HudGui.CraftingReceipeBacking.gameObject.SetActive(true);
+				this.ShowCogRenderer(false);
+			}
+			Scene.HudGui.CraftingReceipeProgress.fillAmount = this._validRecipeFill;
+		}
+
+		
+		private void HideRecipeDisplay()
+		{
+			this.ShowCogRenderer(false);
+			Scene.HudGui.ShowValidCraftingRecipes(null);
+			Scene.HudGui.CraftingReceipeBacking.gameObject.SetActive(false);
+		}
+
+		
+		private static void ShowFilteredRecipes(List<Receipe> foundRecipes)
+		{
+			IEnumerable<Receipe> receipes = from eachRecipe in foundRecipes.Distinct(new CraftingCog.CompareRecipeProduct())
+			where !eachRecipe._hidden
+			select eachRecipe;
+			Scene.HudGui.ShowValidCraftingRecipes(receipes);
+		}
+
+		
+		[Obsolete("Use CheckForValidRecipe")]
+		public void CheckForValidRecipeLegacy()
+		{
+			if (this.CheckStorage())
+			{
+				return;
+			}
+			Receipe receipe = null;
 			IOrderedEnumerable<Receipe> orderedEnumerable = null;
 			IOrderedEnumerable<Receipe> orderedEnumerable2 = null;
-			Receipe receipe;
+			int num = 0;
+			int num2 = 0;
 			int i;
 			if (this._ingredients.Count > 0 && this.CraftOverride == null)
 			{
 				orderedEnumerable = from ar in this._receipeBook.AvailableReceipesCache
-				where this.CanCarryProduct(ar)
+				where !ar._hidden
 				where this._ingredients.All((ReceipeIngredient i) => ar._ingredients.Any((ReceipeIngredient i2) => i._itemID == i2._itemID))
-				orderby ar._ingredients.Sum((ReceipeIngredient ari) => ari._amount)
-				orderby ar._ingredients.Length
+				orderby ar._ingredients.Sum((ReceipeIngredient ari) => ari._amount), ar._ingredients.Length
 				select ar;
+				num = orderedEnumerable.Count<Receipe>();
+				orderedEnumerable.ForEach(delegate(Receipe ar)
+				{
+					ar.CanCarryProduct = this.CanCarryUpgradeProduct(ar);
+				});
 				orderedEnumerable2 = from ar in this._receipeBook.AvailableUpgradeCache
-				where this.CanCarryUpgradeProduct(ar)
+				where !ar._hidden
 				where this._ingredients.All((ReceipeIngredient i) => ar._ingredients.Any((ReceipeIngredient i2) => i._itemID == i2._itemID))
 				orderby ar._ingredients.Length
 				select ar;
-				receipe = orderedEnumerable.FirstOrDefault<Receipe>();
-				Receipe receipe2 = orderedEnumerable2.FirstOrDefault<Receipe>();
+				num2 = orderedEnumerable2.Count<Receipe>();
+				orderedEnumerable2.ForEach(delegate(Receipe ar)
+				{
+					ar.CanCarryProduct = this.CanCarryUpgradeProduct(ar);
+				});
+				receipe = orderedEnumerable.FirstOrDefault((Receipe ar) => ar.CanCarryProduct);
+				Receipe receipe2 = orderedEnumerable2.FirstOrDefault((Receipe ar) => ar.CanCarryProduct);
 				if (receipe2 != null && receipe != null && receipe._ingredients.Length > receipe2._ingredients.Length)
 				{
 					receipe = null;
 				}
 			}
-			else
-			{
-				receipe = null;
-			}
 			bool flag = receipe != null;
-			bool skipUpgrade2dFillingCog = flag;
+			bool skipUpgrade2DFillingCog = flag;
 			this._validRecipeFill = 0f;
 			if (flag)
 			{
 				this._validRecipe = null;
 				flag = false;
 				Receipe receipe3 = null;
-				float num = 0f;
+				float num3 = 0f;
 				List<Receipe> list = new List<Receipe>();
 				foreach (Receipe receipe4 in orderedEnumerable)
 				{
-					int num2 = 0;
-					int num3 = receipe4._ingredients.Sum((ReceipeIngredient i) => i._amount);
-					ReceipeIngredient cogIngredients;
-					foreach (ReceipeIngredient cogIngredients2 in this._ingredients)
+					int num4 = 0;
+					int num5 = receipe4._ingredients.Sum((ReceipeIngredient i) => i._amount);
+					using (HashSet<ReceipeIngredient>.Enumerator enumerator2 = this._ingredients.GetEnumerator())
 					{
-						cogIngredients = cogIngredients2;
-						ReceipeIngredient receipeIngredient = receipe4._ingredients.First((ReceipeIngredient i) => i._itemID == cogIngredients._itemID);
-						num2 += ((cogIngredients._amount <= receipeIngredient._amount) ? cogIngredients._amount : receipeIngredient._amount);
-						if (receipeIngredient._amount == 0 && cogIngredients._amount > 0)
+						while (enumerator2.MoveNext())
 						{
-							num2++;
-							num3++;
+							ReceipeIngredient cogIngredients = enumerator2.Current;
+							ReceipeIngredient receipeIngredient = receipe4._ingredients.First((ReceipeIngredient i) => i._itemID == cogIngredients._itemID);
+							num4 += ((cogIngredients._amount <= receipeIngredient._amount) ? cogIngredients._amount : receipeIngredient._amount);
+							if (receipeIngredient._amount == 0 && cogIngredients._amount > 0)
+							{
+								num4++;
+								num5++;
+							}
 						}
 					}
 					this._validRecipeFull = false;
-					this._validRecipeFill = (float)num2 / (float)num3;
-					if (num2 != num3)
+					this._validRecipeFill = (float)num4 / (float)num5;
+					if (num4 != num5)
 					{
-						if (this._validRecipeFill > num)
+						if (this._validRecipeFill > num3)
 						{
-							num = this._validRecipeFill;
+							num3 = this._validRecipeFill;
 							receipe3 = receipe4;
 							list.Insert(0, receipe4);
 						}
@@ -634,59 +970,38 @@ namespace TheForest.Items.Craft
 						this._validRecipe = receipe4;
 						flag = true;
 						receipe3 = null;
-						num = 1f;
+						num3 = 1f;
 					}
 				}
-				skipUpgrade2dFillingCog = flag;
-				this._validRecipeFill = num;
+				skipUpgrade2DFillingCog = flag;
+				this._validRecipeFill = num3;
 				if (receipe3 != null && !flag)
 				{
 					Scene.HudGui.CraftingReceipeBacking.gameObject.SetActive(true);
-					Scene.HudGui.CraftingReceipeProgress.fillAmount = num;
+					Scene.HudGui.CraftingReceipeProgress.fillAmount = num3;
 				}
 				else
 				{
 					Scene.HudGui.CraftingReceipeBacking.gameObject.SetActive(false);
 				}
 				Scene.HudGui.ShowValidCraftingRecipes(from r in list.Concat(orderedEnumerable2).Distinct(new CraftingCog.CompareRecipeProduct())
-				orderby r._type
+				orderby r.CanCarryProduct descending, r._type
 				select r);
 			}
 			else
 			{
-				if (orderedEnumerable2 != null)
+				List<Receipe> list2 = new List<Receipe>();
+				if (orderedEnumerable != null && num > 0)
 				{
-					if (orderedEnumerable != null)
-					{
-						Scene.HudGui.ShowValidCraftingRecipes(from r in orderedEnumerable.Concat(orderedEnumerable2).Distinct(new CraftingCog.CompareRecipeProduct())
-						orderby r._type
-						orderby r._ingredients.Length
-						select r);
-					}
-					else
-					{
-						Scene.HudGui.ShowValidCraftingRecipes(from r in orderedEnumerable2.Distinct(new CraftingCog.CompareRecipeProduct())
-						orderby r._ingredients.Length
-						select r);
-					}
+					list2.AddRange(orderedEnumerable);
 				}
-				else
+				if (orderedEnumerable2 != null && num2 > 0)
 				{
-					HudGui hudGui = Scene.HudGui;
-					IEnumerable<Receipe> receipes;
-					if (orderedEnumerable != null)
-					{
-						IOrderedEnumerable<Receipe> orderedEnumerable3 = from r in orderedEnumerable.Distinct(new CraftingCog.CompareRecipeProduct())
-						orderby r._ingredients.Length
-						select r;
-						receipes = orderedEnumerable3;
-					}
-					else
-					{
-						receipes = null;
-					}
-					hudGui.ShowValidCraftingRecipes(receipes);
+					list2.AddRange(orderedEnumerable2);
 				}
+				Scene.HudGui.ShowValidCraftingRecipes(from r in list2.Distinct(new CraftingCog.CompareRecipeProduct())
+				orderby r.CanCarryProduct descending, r._ingredients.Length
+				select r);
 				Scene.HudGui.CraftingReceipeBacking.gameObject.SetActive(false);
 			}
 			if (this.CraftOverride == null)
@@ -695,12 +1010,12 @@ namespace TheForest.Items.Craft
 				{
 					Scene.HudGui.HideUpgradesDistribution();
 					this._craftSfx2Emitter.Play();
-					base.gameObject.GetComponent<Renderer>().enabled = true;
+					this._targetCogRenderer.enabled = true;
 					base.gameObject.GetComponent<Collider>().enabled = true;
 				}
 				if (!flag || !this.CanCraft)
 				{
-					this.CheckForValidUpgrade(skipUpgrade2dFillingCog);
+					this.CheckForValidUpgrade(skipUpgrade2DFillingCog);
 				}
 			}
 			else
@@ -709,26 +1024,48 @@ namespace TheForest.Items.Craft
 				if (this.CraftOverride.CanCombine())
 				{
 					this._craftSfx2Emitter.Play();
-					base.gameObject.GetComponent<Renderer>().enabled = true;
+					this._targetCogRenderer.enabled = true;
 					base.gameObject.GetComponent<Collider>().enabled = true;
 				}
 				else
 				{
-					base.gameObject.GetComponent<Renderer>().enabled = false;
+					this._targetCogRenderer.enabled = false;
 					base.gameObject.GetComponent<Collider>().enabled = false;
 				}
 			}
 		}
 
 		
-		private void CheckForValidUpgrade(bool skipUpgrade2dFillingCog)
+		private static int GetMatchedIngredientSum(Receipe validRecipe, HashSet<ReceipeIngredient> suppliedIngredients)
+		{
+			int num = 0;
+			if (validRecipe == null || suppliedIngredients == null)
+			{
+				return num;
+			}
+			foreach (ReceipeIngredient receipeIngredient in validRecipe._ingredients)
+			{
+				foreach (ReceipeIngredient receipeIngredient2 in suppliedIngredients)
+				{
+					if (receipeIngredient2._itemID == receipeIngredient._itemID)
+					{
+						int a = Mathf.Max(receipeIngredient._amount, 1);
+						num += Mathf.Min(a, receipeIngredient2._amount);
+					}
+				}
+			}
+			return num;
+		}
+
+		
+		private void CheckForValidUpgrade(bool skipUpgrade2DFillingCog = false)
 		{
 			Receipe receipe = null;
-			int i;
 			if (this._ingredients.Count > 0)
 			{
 				IOrderedEnumerable<Receipe> source = from ar in this._receipeBook.AvailableUpgradeCache
-				where this._ingredients.Any((ReceipeIngredient i) => i._itemID == ar._ingredients[0]._itemID) && this._ingredients.All((ReceipeIngredient i) => ar._ingredients.Any((ReceipeIngredient i2) => i._itemID == i2._itemID))
+				where this._ingredients.All(new Func<ReceipeIngredient, bool>(ar.HasIngredient))
+				where this.CanCarryUpgradeProduct(ar)
 				orderby ar._ingredients.Length
 				select ar;
 				receipe = source.FirstOrDefault<Receipe>();
@@ -746,21 +1083,21 @@ namespace TheForest.Items.Craft
 					join i in this._ingredients on vri._itemID equals i._itemID
 					select i;
 					ReceipeIngredient[] array = source2.ToArray<ReceipeIngredient>();
-					if (array.Length > 1)
+					if (array.Length > 0)
 					{
 						this._upgradeCount = ItemDatabase.ItemById(receipe._productItemID)._maxUpgradesAmount;
-						int itemID = array[1]._itemID;
+						int itemID = receipe._ingredients[1]._itemID;
 						if (this._upgradeCog.SupportedItemsCache.ContainsKey(itemID) && this._upgradeCog.SupportedItemsCache[itemID]._pattern != UpgradeCog.Patterns.NoView)
 						{
 							this._upgradeCount -= LocalPlayer.Inventory.GetAmountOfUpgrades(receipe._productItemID);
 						}
 						bool flag = false;
 						bool flag2 = this._upgradeCount == 0;
-						int num = receipe._ingredients[0]._amount;
-						int num2 = receipe._ingredients.Sum((ReceipeIngredient i) => i._amount);
-						for (i = 1; i < receipe._ingredients.Length; i++)
+						int num = 0;
+						int num2 = receipe._ingredients.Sum((ReceipeIngredient i) => (i._amount != 0) ? i._amount : 1);
+						for (int j = 0; j < receipe._ingredients.Length; j++)
 						{
-							ReceipeIngredient receipeIngredient = receipe._ingredients[i];
+							ReceipeIngredient receipeIngredient = receipe._ingredients[j];
 							int num3 = 0;
 							while (num3 < array.Length && array[num3]._itemID != receipeIngredient._itemID)
 							{
@@ -773,7 +1110,7 @@ namespace TheForest.Items.Craft
 							else if (receipeIngredient._amount > 0)
 							{
 								int num4 = array[num3]._amount / receipeIngredient._amount;
-								if (num4 < this._upgradeCount)
+								if (j > 0 && num4 < this._upgradeCount)
 								{
 									this._upgradeCount = num4;
 								}
@@ -782,12 +1119,13 @@ namespace TheForest.Items.Craft
 							else
 							{
 								this._upgradeCount = 1;
+								num++;
 								flag2 = true;
 							}
 						}
-						if (!skipUpgrade2dFillingCog)
+						if (!skipUpgrade2DFillingCog)
 						{
-							float num5 = (float)num / (float)num2;
+							float num5 = (!receipe.CanCarryProduct) ? 0f : ((float)num / (float)num2);
 							if (num5 > this._validRecipeFill)
 							{
 								this._validRecipeFill = num5;
@@ -821,7 +1159,7 @@ namespace TheForest.Items.Craft
 			}
 			else
 			{
-				if (!skipUpgrade2dFillingCog)
+				if (!skipUpgrade2DFillingCog)
 				{
 					Scene.HudGui.CraftingReceipeBacking.gameObject.SetActive(this._validRecipeFill > 0f);
 					Scene.HudGui.CraftingReceipeProgress.fillAmount = this._validRecipeFill;
@@ -829,14 +1167,13 @@ namespace TheForest.Items.Craft
 				Scene.HudGui.HideUpgradesDistribution();
 				this._upgradeCount = 0;
 			}
-			if (base.gameObject.GetComponent<Renderer>().enabled != this._upgradeCount > 0)
+			if (this._targetCogRenderer.enabled != this._upgradeCount > 0)
 			{
-				if (!base.gameObject.GetComponent<Renderer>().enabled)
+				if (!this._targetCogRenderer.enabled)
 				{
 					this._craftSfx2Emitter.Play();
 				}
-				base.gameObject.GetComponent<Renderer>().enabled = (this._upgradeCount > 0);
-				base.gameObject.GetComponent<Collider>().enabled = (this._upgradeCount > 0);
+				this.ShowCogRenderer(this._upgradeCount > 0);
 			}
 		}
 
@@ -880,6 +1217,7 @@ namespace TheForest.Items.Craft
 		
 		public bool ApplyWeaponStatsUpgrades(int productItemId, int ingredientItemId, WeaponStatUpgrade[] bonuses, bool batched, int upgradeCount, ItemProperties lastIngredientProperties = null)
 		{
+			InventoryItemView inventoryItemView = this._itemViewsCache[productItemId];
 			bool flag = false;
 			int i = 0;
 			while (i < bonuses.Length)
@@ -888,23 +1226,23 @@ namespace TheForest.Items.Craft
 				{
 				case WeaponStatUpgrade.Types.BurningWeapon:
 				{
-					BurnableCloth componentInChildren = this._itemViewsCache[productItemId]._held.GetComponentInChildren<BurnableCloth>();
+					BurnableCloth componentInChildren = inventoryItemView._held.GetComponentInChildren<BurnableCloth>();
 					if (componentInChildren)
 					{
-						this._itemViewsCache[productItemId].ActiveBonus = WeaponStatUpgrade.Types.BurningWeapon;
+						inventoryItemView.ActiveBonus = WeaponStatUpgrade.Types.BurningWeapon;
 						componentInChildren.EnableBurnableCloth();
 					}
 					flag = true;
 					break;
 				}
 				case WeaponStatUpgrade.Types.StickyProjectile:
-					if (batched && this._itemViewsCache[productItemId]._allowMultiView)
+					if (batched && inventoryItemView._allowMultiView)
 					{
-						this._itemViewsCache[productItemId].SetMultiviewsBonus(WeaponStatUpgrade.Types.StickyProjectile);
+						inventoryItemView.SetMultiviewsBonus(WeaponStatUpgrade.Types.StickyProjectile);
 					}
 					else
 					{
-						this._itemViewsCache[productItemId].ActiveBonus = WeaponStatUpgrade.Types.StickyProjectile;
+						inventoryItemView.ActiveBonus = WeaponStatUpgrade.Types.StickyProjectile;
 					}
 					flag = true;
 					break;
@@ -913,19 +1251,19 @@ namespace TheForest.Items.Craft
 					flag = true;
 					break;
 				case WeaponStatUpgrade.Types.BurningAmmo:
-					if (batched && this._itemViewsCache[productItemId]._allowMultiView)
+					if (batched && inventoryItemView._allowMultiView)
 					{
-						this._itemViewsCache[productItemId].SetMultiviewsBonus(WeaponStatUpgrade.Types.BurningAmmo);
+						inventoryItemView.SetMultiviewsBonus(WeaponStatUpgrade.Types.BurningAmmo);
 					}
 					else
 					{
-						this._itemViewsCache[productItemId].ActiveBonus = WeaponStatUpgrade.Types.BurningAmmo;
+						inventoryItemView.ActiveBonus = WeaponStatUpgrade.Types.BurningAmmo;
 					}
 					flag = true;
 					break;
 				case WeaponStatUpgrade.Types.Paint_Green:
 				{
-					EquipmentPainting componentInChildren2 = this._itemViewsCache[productItemId]._held.GetComponentInChildren<EquipmentPainting>();
+					EquipmentPainting componentInChildren2 = inventoryItemView._held.GetComponentInChildren<EquipmentPainting>();
 					if (componentInChildren2)
 					{
 						componentInChildren2.PaintInGreen();
@@ -935,7 +1273,7 @@ namespace TheForest.Items.Craft
 				}
 				case WeaponStatUpgrade.Types.Paint_Orange:
 				{
-					EquipmentPainting componentInChildren3 = this._itemViewsCache[productItemId]._held.GetComponentInChildren<EquipmentPainting>();
+					EquipmentPainting componentInChildren3 = inventoryItemView._held.GetComponentInChildren<EquipmentPainting>();
 					if (componentInChildren3)
 					{
 						componentInChildren3.PaintInOrange();
@@ -949,10 +1287,10 @@ namespace TheForest.Items.Craft
 				case WeaponStatUpgrade.Types.blockStaminaDrain:
 				case WeaponStatUpgrade.Types.RawFood:
 				case WeaponStatUpgrade.Types.DriedFood:
-					goto IL_50B;
+					goto IL_3C7;
 				case WeaponStatUpgrade.Types.ItemPart:
 				{
-					IItemPartInventoryView itemPartInventoryView = (IItemPartInventoryView)this._itemViewsCache[productItemId];
+					IItemPartInventoryView itemPartInventoryView = (IItemPartInventoryView)inventoryItemView;
 					itemPartInventoryView.AddPiece(Mathf.RoundToInt(bonuses[i]._amount), true);
 					flag = true;
 					break;
@@ -966,44 +1304,44 @@ namespace TheForest.Items.Craft
 					flag = true;
 					break;
 				case WeaponStatUpgrade.Types.SetWeaponAmmoBonus:
-					this._itemViewsCache[productItemId].Properties.Copy((lastIngredientProperties != ItemProperties.Any) ? lastIngredientProperties : this._itemViewsCache[ingredientItemId].Properties);
-					LocalPlayer.Inventory.SortInventoryViewsByBonus(LocalPlayer.Inventory.InventoryItemViewsCache[ingredientItemId][0], this._itemViewsCache[productItemId].ActiveBonus, false);
+					inventoryItemView.Properties.Copy((lastIngredientProperties != ItemProperties.Any) ? lastIngredientProperties : this._itemViewsCache[ingredientItemId].Properties);
+					LocalPlayer.Inventory.SortInventoryViewsByBonus(LocalPlayer.Inventory.InventoryItemViewsCache[ingredientItemId][0], inventoryItemView.ActiveBonus, false);
 					flag = true;
 					break;
 				case WeaponStatUpgrade.Types.PoisonnedAmmo:
-					if (batched && this._itemViewsCache[productItemId]._allowMultiView)
+					if (batched && inventoryItemView._allowMultiView)
 					{
-						this._itemViewsCache[productItemId].SetMultiviewsBonus(WeaponStatUpgrade.Types.PoisonnedAmmo);
+						inventoryItemView.SetMultiviewsBonus(WeaponStatUpgrade.Types.PoisonnedAmmo);
 					}
 					else
 					{
-						this._itemViewsCache[productItemId].ActiveBonus = WeaponStatUpgrade.Types.PoisonnedAmmo;
+						inventoryItemView.ActiveBonus = WeaponStatUpgrade.Types.PoisonnedAmmo;
 					}
 					flag = true;
 					break;
 				case WeaponStatUpgrade.Types.BurningWeaponExtra:
 				{
-					BurnableCloth componentInChildren4 = this._itemViewsCache[productItemId]._held.GetComponentInChildren<BurnableCloth>();
-					if (componentInChildren4 && this._itemViewsCache[productItemId].ActiveBonus == WeaponStatUpgrade.Types.BurningWeapon)
+					BurnableCloth componentInChildren4 = inventoryItemView._held.GetComponentInChildren<BurnableCloth>();
+					if (componentInChildren4 && inventoryItemView.ActiveBonus == WeaponStatUpgrade.Types.BurningWeapon)
 					{
-						this._itemViewsCache[productItemId].ActiveBonus = WeaponStatUpgrade.Types.BurningWeaponExtra;
+						inventoryItemView.ActiveBonus = WeaponStatUpgrade.Types.BurningWeaponExtra;
 						componentInChildren4.EnableBurnableClothExtra();
 					}
 					flag = true;
 					break;
 				}
 				case WeaponStatUpgrade.Types.Incendiary:
-					this._itemViewsCache[productItemId].ActiveBonus = WeaponStatUpgrade.Types.Incendiary;
+					inventoryItemView.ActiveBonus = WeaponStatUpgrade.Types.Incendiary;
 					flag = true;
 					break;
 				case WeaponStatUpgrade.Types.BoneAmmo:
-					if (batched && this._itemViewsCache[productItemId]._allowMultiView)
+					if (batched && inventoryItemView._allowMultiView)
 					{
-						this._itemViewsCache[productItemId].SetMultiviewsBonus(WeaponStatUpgrade.Types.BoneAmmo);
+						inventoryItemView.SetMultiviewsBonus(WeaponStatUpgrade.Types.BoneAmmo);
 					}
 					else
 					{
-						this._itemViewsCache[productItemId].ActiveBonus = WeaponStatUpgrade.Types.BoneAmmo;
+						inventoryItemView.ActiveBonus = WeaponStatUpgrade.Types.BoneAmmo;
 					}
 					flag = true;
 					break;
@@ -1012,12 +1350,12 @@ namespace TheForest.Items.Craft
 					flag = true;
 					break;
 				case WeaponStatUpgrade.Types.PoisonnedWeapon:
-					if (this._itemViewsCache[productItemId]._heldWeaponInfo.bonus)
+					if (inventoryItemView._heldWeaponInfo.bonus)
 					{
-						this._itemViewsCache[productItemId].ActiveBonus = WeaponStatUpgrade.Types.PoisonnedWeapon;
-						this._itemViewsCache[productItemId]._heldWeaponInfo.bonus._bonusType = WeaponBonus.BonusTypes.Poison;
-						this._itemViewsCache[productItemId]._heldWeaponInfo.bonus.enabled = true;
-						RandomWeaponUpgradeVisual component = this._itemViewsCache[productItemId]._heldWeaponInfo.bonus.GetComponent<RandomWeaponUpgradeVisual>();
+						inventoryItemView.ActiveBonus = WeaponStatUpgrade.Types.PoisonnedWeapon;
+						inventoryItemView._heldWeaponInfo.bonus._bonusType = WeaponBonus.BonusTypes.Poison;
+						inventoryItemView._heldWeaponInfo.bonus.enabled = true;
+						RandomWeaponUpgradeVisual component = inventoryItemView._heldWeaponInfo.bonus.GetComponent<RandomWeaponUpgradeVisual>();
 						if (component)
 						{
 							component.OnEnable();
@@ -1026,13 +1364,13 @@ namespace TheForest.Items.Craft
 					flag = true;
 					break;
 				case WeaponStatUpgrade.Types.ModernAmmo:
-					if (batched && this._itemViewsCache[productItemId]._allowMultiView)
+					if (batched && inventoryItemView._allowMultiView)
 					{
-						this._itemViewsCache[productItemId].SetMultiviewsBonus(WeaponStatUpgrade.Types.ModernAmmo);
+						inventoryItemView.SetMultiviewsBonus(WeaponStatUpgrade.Types.ModernAmmo);
 					}
 					else
 					{
-						this._itemViewsCache[productItemId].ActiveBonus = WeaponStatUpgrade.Types.ModernAmmo;
+						inventoryItemView.ActiveBonus = WeaponStatUpgrade.Types.ModernAmmo;
 					}
 					flag = true;
 					break;
@@ -1041,12 +1379,12 @@ namespace TheForest.Items.Craft
 					flag = true;
 					break;
 				default:
-					goto IL_50B;
+					goto IL_3C7;
 				}
-				IL_55F:
+				IL_410:
 				i++;
 				continue;
-				IL_50B:
+				IL_3C7:
 				flag = this.ApplyWeaponBonus(bonuses[i], productItemId, ingredientItemId, upgradeCount);
 				if (flag)
 				{
@@ -1054,9 +1392,9 @@ namespace TheForest.Items.Craft
 				}
 				else
 				{
-					Debug.LogError("Attempting to upgrade " + this._itemViewsCache[productItemId].ItemCache._name + " which doesn't reference its weaponInfo component.");
+					Debug.LogError("Attempting to upgrade " + inventoryItemView.ItemCache._name + " which doesn't reference its weaponInfo component.");
 				}
-				goto IL_55F;
+				goto IL_410;
 			}
 			return flag;
 		}
@@ -1104,12 +1442,25 @@ namespace TheForest.Items.Craft
 		}
 
 		
+		private ReceipeIngredient TryGetIngredient(int itemId)
+		{
+			foreach (ReceipeIngredient receipeIngredient in this._ingredients)
+			{
+				if (receipeIngredient._itemID == itemId)
+				{
+					return receipeIngredient;
+				}
+			}
+			return null;
+		}
+
+		
 		private void ToggleItemInventoryView(int itemId, ItemProperties properties = null)
 		{
-			ReceipeIngredient receipeIngredient = this._ingredients.FirstOrDefault((ReceipeIngredient i) => i._itemID == itemId);
+			ReceipeIngredient receipeIngredient = this.TryGetIngredient(itemId);
 			int num = (receipeIngredient == null) ? 0 : receipeIngredient._amount;
 			bool flag = num > 0;
-			if (this._itemViewsCache.ContainsKey(itemId))
+			if (this.InItemViewsCache(itemId))
 			{
 				if (this._itemViewsCache[itemId]._allowMultiView)
 				{
@@ -1158,7 +1509,7 @@ namespace TheForest.Items.Craft
 		
 		private InventoryItemView GetItemView(int itemId)
 		{
-			if (this._itemViewsCache.ContainsKey(itemId))
+			if (this.InItemViewsCache(itemId))
 			{
 				if (this._itemViewsCache[itemId]._allowMultiView)
 				{
@@ -1180,12 +1531,51 @@ namespace TheForest.Items.Craft
 		private void IngredientCleanUp()
 		{
 			this._ingredients.Clear();
-			IEnumerable<Item> enumerable = ItemDatabase.ItemsByType(Item.Types.CraftingMaterial | Item.Types.Craftable);
+			IEnumerable<Item> enumerable = ItemDatabase.ItemsByType(Item.Types.CraftingMaterial | Item.Types.Craftable | Item.Types.Edible);
 			foreach (Item item in enumerable)
 			{
 				this.ToggleItemInventoryView(item._id, ItemProperties.Any);
 			}
 			this._lambdaMultiView.ClearMultiViews();
+		}
+
+		
+		private void EnableInventorySnapshot()
+		{
+			if (FMOD_StudioSystem.instance && this.InventorySnapShotInstance == null)
+			{
+				this.InventorySnapShotInstance = FMOD_StudioSystem.instance.GetEvent("snapshot:/inventory");
+				if (this.InventorySnapShotInstance != null)
+				{
+					UnityUtil.ERRCHECK(this.InventorySnapShotInstance.start());
+				}
+			}
+		}
+
+		
+		private void DisableInventorySnapshot()
+		{
+			if (this.InventorySnapShotInstance != null && this.InventorySnapShotInstance.isValid())
+			{
+				UnityUtil.ERRCHECK(this.InventorySnapShotInstance.stop(STOP_MODE.IMMEDIATE));
+				UnityUtil.ERRCHECK(this.InventorySnapShotInstance.release());
+				this.InventorySnapShotInstance = null;
+			}
+		}
+
+		
+		private IEnumerator animateCraftedItemRoutine(Transform tr)
+		{
+			Transform currentParent = tr.parent;
+			Vector3 currentPos = tr.localPosition;
+			Quaternion currentRot = tr.localRotation;
+			tr.parent = this._craftAnimateParent;
+			this._craftAnim.SetTrigger("craftTrigger");
+			yield return YieldPresets.WaitOnePointThreeSeconds;
+			tr.parent = currentParent;
+			tr.localPosition = currentPos;
+			tr.localRotation = currentRot;
+			yield break;
 		}
 
 		
@@ -1279,6 +1669,9 @@ namespace TheForest.Items.Craft
 		}
 
 		
+		public bool _legacyCraftingSystem;
+
+		
 		[EnumFlags]
 		public Item.Types _acceptedTypes;
 
@@ -1292,10 +1685,25 @@ namespace TheForest.Items.Craft
 		public Material _selectedMaterial;
 
 		
+		public MeshRenderer _targetCogRenderer;
+
+		
 		public GameObject _craftSfx;
 
 		
 		public GameObject _craftSfx2;
+
+		
+		public GameObject _craftParticle1;
+
+		
+		public Transform _craftParticleSpawnPos;
+
+		
+		public Animator _craftAnim;
+
+		
+		public Transform _craftAnimateParent;
 
 		
 		public InventoryItemView[] _itemViews;
@@ -1349,6 +1757,18 @@ namespace TheForest.Items.Craft
 		private InventoryItemView _lambdaMultiView;
 
 		
+		private float _targetCogRotate;
+
+		
+		private EventInstance InventorySnapShotInstance;
+
+		
+		private EventInstance CogRotateEventInstance;
+
+		
+		private CueInstance CogRotateEventKeyoff;
+
+		
 		private class CompareRecipeProduct : IEqualityComparer<Receipe>
 		{
 			
@@ -1368,15 +1788,18 @@ namespace TheForest.Items.Craft
 					}
 					else
 					{
-						if (x._productItemID != y._productItemID || x._productItemAmount._min != y._productItemAmount._min || x._productItemAmount._max != y._productItemAmount._max || x._weaponStatUpgrades.Length != y._weaponStatUpgrades.Length || x._weaponStatUpgrades.Length <= 0)
+						if (x._productItemAmount._min != y._productItemAmount._min || x._productItemAmount._max != y._productItemAmount._max || x._weaponStatUpgrades.Length != y._weaponStatUpgrades.Length)
 						{
 							return false;
 						}
-						for (int j = 0; j < x._weaponStatUpgrades.Length; j++)
+						if (x._weaponStatUpgrades.Length > 0)
 						{
-							if (x._weaponStatUpgrades[j]._type != y._weaponStatUpgrades[j]._type)
+							for (int j = 0; j < x._weaponStatUpgrades.Length; j++)
 							{
-								return false;
+								if (x._weaponStatUpgrades[j]._type != y._weaponStatUpgrades[j]._type)
+								{
+									return false;
+								}
 							}
 						}
 					}
@@ -1387,6 +1810,21 @@ namespace TheForest.Items.Craft
 			
 			public int GetHashCode(Receipe obj)
 			{
+				if (obj._type == Receipe.Types.Upgrade)
+				{
+					if (obj._weaponStatUpgrades.Length > 0)
+					{
+						return (int)(obj._weaponStatUpgrades[0]._type + (int)(obj._type * (Receipe.Types)10000));
+					}
+					if (obj._ingredients.Length == 3)
+					{
+						return (int)(obj._ingredients[1]._itemID * 1000 + obj._ingredients[2]._itemID * 500000 + obj._type * (Receipe.Types)10000000);
+					}
+					if (obj._ingredients.Length == 2)
+					{
+						return (int)(obj._ingredients[1]._itemID * 1000 + obj._type * (Receipe.Types)10000000);
+					}
+				}
 				return (int)(obj._productItemID + obj._type * (Receipe.Types)100000);
 			}
 		}

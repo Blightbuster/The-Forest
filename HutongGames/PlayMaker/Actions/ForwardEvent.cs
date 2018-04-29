@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Forward an event recieved by this FSM to another target.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Forward an event recieved by this FSM to another target.")]
 	public class ForwardEvent : FsmStateAction
 	{
 		

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections;
-using ModAPI;
 using TheForest.Items.Inventory;
 using TheForest.Utils;
-using UltimateCheatmenu;
 using UnityEngine;
 
 namespace TheForest.World
@@ -24,9 +22,12 @@ namespace TheForest.World
 		}
 
 		
-		private void __Update__Original()
+		private void Update()
 		{
-			this.CheckInCave();
+			if (LocalPlayer.AnimControl && !LocalPlayer.AnimControl.endGameCutScene)
+			{
+				this.CheckInCave();
+			}
 			if (this.State == WeatherSystem.States.GrowingClouds || (BoltNetwork.isClient && this.CloudOvercastCurrentValue < this.CloudOvercastTargetValue))
 			{
 				this.GrowClouds();
@@ -35,7 +36,7 @@ namespace TheForest.World
 			{
 				this.ReduceClouds();
 			}
-			else if (!CoopPeerStarter.DedicatedHost)
+			else if (!CoopPeerStarter.DedicatedHost && LocalPlayer.AnimControl && !LocalPlayer.AnimControl.endGameCutScene)
 			{
 				this.CheckSnowArea();
 			}
@@ -88,7 +89,7 @@ namespace TheForest.World
 		}
 
 		
-		private void __TryRain__Original()
+		private void TryRain()
 		{
 			if (!this.Raining)
 			{
@@ -162,17 +163,24 @@ namespace TheForest.World
 				{
 					this.Lightning();
 				}
-				switch (this.RainDice)
+				int rainDice = this.RainDice;
+				if (rainDice != 2)
 				{
-				case 2:
+					if (rainDice != 3)
+					{
+						if (rainDice == 4)
+						{
+							this.TurnOn(WeatherSystem.RainTypes.Heavy);
+						}
+					}
+					else
+					{
+						this.TurnOn(WeatherSystem.RainTypes.Medium);
+					}
+				}
+				else
+				{
 					this.TurnOn(WeatherSystem.RainTypes.Light);
-					break;
-				case 3:
-					this.TurnOn(WeatherSystem.RainTypes.Medium);
-					break;
-				case 4:
-					this.TurnOn(WeatherSystem.RainTypes.Heavy);
-					break;
 				}
 			}
 			else
@@ -487,94 +495,6 @@ namespace TheForest.World
 		public bool ShouldDoLighting { get; private set; }
 
 		
-		private void TryRain()
-		{
-			try
-			{
-				if (UCheatmenu.FreezeWeather)
-				{
-					return;
-				}
-				this.__TryRain__Original();
-			}
-			catch (Exception ex)
-			{
-				Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-				this.__TryRain__Original();
-			}
-		}
-
-		
-		private void Update()
-		{
-			try
-			{
-				if (this.ResetCloudTime > 0f)
-				{
-					this.ResetCloudTime -= Time.deltaTime;
-					if (this.ResetCloudTime <= 0f)
-					{
-						this.CloudSmoothTime = 20f;
-					}
-				}
-				if (UCheatmenu.ForceWeather >= 0)
-				{
-					this.AllOff();
-					Scene.RainFollowGO.SetActive(true);
-					Scene.RainTypes.SnowConstant.SetActive(false);
-					if (UCheatmenu.ForceWeather == 1)
-					{
-						this.TurnOn(WeatherSystem.RainTypes.Light);
-						this.CloudSmoothTime = 1f;
-					}
-					if (UCheatmenu.ForceWeather == 2)
-					{
-						this.TurnOn(WeatherSystem.RainTypes.Medium);
-						this.CloudSmoothTime = 1f;
-					}
-					if (UCheatmenu.ForceWeather == 3)
-					{
-						this.TurnOn(WeatherSystem.RainTypes.Heavy);
-						this.CloudSmoothTime = 1f;
-					}
-					if (UCheatmenu.ForceWeather == 4)
-					{
-						this.RainDiceStop = 1;
-						this.GrowClouds();
-						this.ReduceClouds();
-						this.CloudOvercastTargetValue = UnityEngine.Random.Range(0.55f, 1f);
-						this.CloudOpacityScaleTargetValue = UnityEngine.Random.Range(1f, 1.2f);
-					}
-					if (UCheatmenu.ForceWeather == 5)
-					{
-						this.State = WeatherSystem.States.Raining;
-						Scene.RainTypes.SnowLight.SetActive(true);
-						this.CloudSmoothTime = 1f;
-					}
-					if (UCheatmenu.ForceWeather == 6)
-					{
-						this.State = WeatherSystem.States.Raining;
-						Scene.RainTypes.SnowMedium.SetActive(true);
-						this.CloudSmoothTime = 1f;
-					}
-					if (UCheatmenu.ForceWeather == 7)
-					{
-						this.State = WeatherSystem.States.Raining;
-						Scene.RainTypes.SnowHeavy.SetActive(true);
-						this.CloudSmoothTime = 1f;
-					}
-					UCheatmenu.ForceWeather = -1;
-				}
-				this.__Update__Original();
-			}
-			catch (Exception ex)
-			{
-				Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-				this.__Update__Original();
-			}
-		}
-
-		
 		public Material CloudOvercastMat;
 
 		
@@ -628,9 +548,6 @@ namespace TheForest.World
 
 		
 		private WeatherSystem.RainTypes CurrentType;
-
-		
-		protected float ResetCloudTime;
 
 		
 		public enum States

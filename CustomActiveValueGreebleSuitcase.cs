@@ -38,13 +38,13 @@ public class CustomActiveValueGreebleSuitcase : CustomActiveValueGreeble
 		yield return null;
 		if (base.Data != null)
 		{
-			ISuitcaseState iss = null;
+			ISuitcaseState suitcaseState = null;
 			if (BoltNetwork.isRunning)
 			{
-				BoltEntity be = base.GetComponent<BoltEntity>();
-				if (be.isAttached)
+				BoltEntity component = base.GetComponent<BoltEntity>();
+				if (component.isAttached)
 				{
-					iss = be.GetState<ISuitcaseState>();
+					suitcaseState = component.GetState<ISuitcaseState>();
 				}
 			}
 			byte b = base.Data._instancesState[base.Index];
@@ -66,12 +66,12 @@ public class CustomActiveValueGreebleSuitcase : CustomActiveValueGreeble
 				{
 					this._trigger.SetActive(false);
 				}
-				if (iss != null)
+				if (suitcaseState != null)
 				{
-					iss.Open = true;
-					iss.ClothPickedUp = false;
+					suitcaseState.Open = true;
+					suitcaseState.ClothPickedUp = false;
 				}
-				goto IL_2D1;
+				goto IL_293;
 			case 2:
 				this._lid.Play();
 				if (this._interior.activeSelf)
@@ -82,16 +82,16 @@ public class CustomActiveValueGreebleSuitcase : CustomActiveValueGreeble
 				{
 					this._trigger.SetActive(false);
 				}
-				if (iss != null)
+				if (suitcaseState != null)
 				{
-					iss.Open = true;
-					iss.ClothPickedUp = true;
+					suitcaseState.Open = true;
+					suitcaseState.ClothPickedUp = true;
 				}
-				goto IL_2D1;
+				goto IL_293;
 			default:
 				if (b != 252)
 				{
-					goto IL_2D1;
+					goto IL_293;
 				}
 				break;
 			}
@@ -109,12 +109,12 @@ public class CustomActiveValueGreebleSuitcase : CustomActiveValueGreeble
 			{
 				this._trigger.SetActive(true);
 			}
-			if (iss != null)
+			if (suitcaseState != null)
 			{
-				iss.Open = false;
-				iss.ClothPickedUp = false;
+				suitcaseState.Open = false;
+				suitcaseState.ClothPickedUp = false;
 			}
-			IL_2D1:;
+			IL_293:;
 		}
 		else
 		{

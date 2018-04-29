@@ -10,12 +10,12 @@ public class Bomb : EntityBehaviour<IRigidbodyState>
 	public override void Attached()
 	{
 		Rigidbody component = base.GetComponent<Rigidbody>();
-		if (component && !this.entity.isOwner)
+		if (component && !base.entity.isOwner)
 		{
 			component.isKinematic = true;
 			component.useGravity = false;
 		}
-		if (this.entity.StateIs<IRigidbodyState>() && component)
+		if (base.entity.StateIs<IRigidbodyState>() && component)
 		{
 			base.state.Transform.SetTransforms(base.transform);
 		}
@@ -24,7 +24,7 @@ public class Bomb : EntityBehaviour<IRigidbodyState>
 	
 	private void Start()
 	{
-		if (!this.SkipAttach && BoltNetwork.isRunning && this.entity && !this.entity.isAttached)
+		if (!this.SkipAttach && BoltNetwork.isRunning && base.entity && !base.entity.isAttached)
 		{
 			BoltNetwork.Attach(base.gameObject);
 		}
@@ -56,7 +56,7 @@ public class Bomb : EntityBehaviour<IRigidbodyState>
 		}
 		else
 		{
-			flag = (!BoltNetwork.isRunning || this.SkipAttach || this.entity.IsOwner());
+			flag = (!BoltNetwork.isRunning || this.SkipAttach || base.entity.IsOwner());
 		}
 		if (flag)
 		{

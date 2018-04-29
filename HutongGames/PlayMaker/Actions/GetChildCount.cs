@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the number of children that a GameObject has.")]
 	[ActionCategory(ActionCategory.GameObject)]
+	[Tooltip("Gets the number of children that a GameObject has.")]
 	public class GetChildCount : FsmStateAction
 	{
 		
@@ -40,8 +40,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("Store the number of children in an int variable.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the number of children in an int variable.")]
 		public FsmInt storeResult;
 	}
 }

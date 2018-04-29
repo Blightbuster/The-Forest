@@ -46,7 +46,7 @@ public class CoopMutantTransformDelayer : EntityBehaviour<IMutantState>
 	
 	public override void Attached()
 	{
-		if (this.entity.isOwner)
+		if (base.entity.isOwner)
 		{
 			if (this.Creepy)
 			{
@@ -65,29 +65,32 @@ public class CoopMutantTransformDelayer : EntityBehaviour<IMutantState>
 			this.MecanimReplicator.TargetAnimator.applyRootMotion = false;
 			if (this.Creepy)
 			{
-				this.realRotation = new GameObject(this.entity.networkId + "_REAL_ROTATION");
+				this.realRotation = new GameObject(base.entity.networkId + "_REAL_ROTATION");
 				this.realRotation.transform.localPosition = base.transform.localPosition;
 				this.realRotation.transform.localRotation = base.transform.localRotation;
 				base.state.RotationTransform.SetTransforms(this.realRotation.transform);
 			}
 			else
 			{
-				this.realPosition = new GameObject(this.entity.networkId + "_REAL_POSITION");
+				this.realPosition = new GameObject(base.entity.networkId + "_REAL_POSITION");
 				this.realPosition.transform.position = base.transform.position;
 				base.state.Transform.SetTransforms(this.realPosition.transform);
-				this.realRotation = new GameObject(this.entity.networkId + "_REAL_ROTATION");
+				this.realRotation = new GameObject(base.entity.networkId + "_REAL_ROTATION");
 				this.realRotation.transform.localPosition = this.RotationTransform.localPosition;
 				this.realRotation.transform.localRotation = this.RotationTransform.localRotation;
 				base.state.RotationTransform.SetTransforms(this.realRotation.transform);
 			}
-			this.pos = this.realPosition.transform.position;
+			if (this.realPosition != null)
+			{
+				this.pos = this.realPosition.transform.position;
+			}
 		}
 	}
 
 	
 	private void Update()
 	{
-		if (this.entity.IsAttached() && !this.entity.IsOwner())
+		if (base.entity.IsAttached() && !base.entity.IsOwner())
 		{
 			if (this.timer > 0f)
 			{
@@ -179,9 +182,9 @@ public class CoopMutantTransformDelayer : EntityBehaviour<IMutantState>
 	public bool ignoreDelay;
 
 	
+	[Range(0f, 1f)]
 	[Header("Interpolation Delay (Ignored On Host)")]
 	[SerializeField]
-	[Range(0f, 1f)]
 	public float InterpolationDelay = 0.08f;
 
 	

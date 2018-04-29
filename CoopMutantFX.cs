@@ -28,10 +28,7 @@ public class CoopMutantFX : EntityBehaviour<IMutantState>
 		{
 			int fx_mask = base.state.fx_mask;
 			this.FX_Fire1.SetActive((fx_mask & 1) == 1);
-			this.FX_Fire1.SetActive((fx_mask & 2) == 2);
-			this.FX_Fire1.SetActive((fx_mask & 4) == 4);
-			this.FX_Fire1.SetActive((fx_mask & 8) == 8);
-			if (!this.entity.isOwner)
+			if (!base.entity.isOwner)
 			{
 				bool flag = this.isBurning;
 				this.isBurning = (fx_mask != 0);
@@ -92,31 +89,92 @@ public class CoopMutantFX : EntityBehaviour<IMutantState>
 	
 	public void Update()
 	{
-		if (BoltNetwork.isRunning && this.entity && this.entity.isAttached && this.entity.isOwner)
+		if (BoltNetwork.isRunning && base.entity && base.entity.isAttached && base.entity.isOwner)
 		{
 			int num = 0;
-			if (this.FX_Fire1 && this.FX_Fire1.activeInHierarchy)
+			if (this.FX_Fire1 && this.FX_Fire1.activeSelf)
 			{
 				num |= 1;
-			}
-			if (this.FX_Fire2 && this.FX_Fire2.activeInHierarchy)
-			{
-				num |= 2;
-			}
-			if (this.FX_Fire3 && this.FX_Fire3.activeInHierarchy)
-			{
-				num |= 4;
-			}
-			if (this.FX_Fire4 && this.FX_Fire4.activeInHierarchy)
-			{
-				num |= 8;
 			}
 			if (base.state.fx_mask != num)
 			{
 				base.state.fx_mask = num;
 			}
 		}
+		if (BoltNetwork.isRunning && base.entity && base.entity.isAttached && !base.entity.isOwner)
+		{
+			if (this.FX_Fire1 && this.FX_Fire1.activeSelf && !this.particlesActive)
+			{
+				if (this.FX_Fire2)
+				{
+					this.FX_Fire2.SetActive(true);
+				}
+				if (this.FX_Fire3)
+				{
+					this.FX_Fire3.SetActive(true);
+				}
+				if (this.FX_Fire4)
+				{
+					this.FX_Fire4.SetActive(true);
+				}
+				this.particlesActive = true;
+			}
+			else if (this.FX_Fire1 && !this.FX_Fire1.activeSelf && this.particlesActive)
+			{
+				this.resetFireDurations();
+				if (this.FX_Fire2)
+				{
+					this.FX_Fire2.SetActive(false);
+				}
+				if (this.FX_Fire3)
+				{
+					this.FX_Fire3.SetActive(false);
+				}
+				if (this.FX_Fire4)
+				{
+					this.FX_Fire4.SetActive(false);
+				}
+				this.particlesActive = false;
+			}
+		}
 		this.UpdateOnFireEvent();
+	}
+
+	
+	private void resetFireDurations()
+	{
+		if (this.FX_Fire1)
+		{
+			spawnParticleController component = this.FX_Fire1.GetComponent<spawnParticleController>();
+			if (component)
+			{
+				component.resetParticleDuration();
+			}
+		}
+		if (this.FX_Fire2)
+		{
+			spawnParticleController component2 = this.FX_Fire2.GetComponent<spawnParticleController>();
+			if (component2)
+			{
+				component2.resetParticleDuration();
+			}
+		}
+		if (this.FX_Fire3)
+		{
+			spawnParticleController component3 = this.FX_Fire3.GetComponent<spawnParticleController>();
+			if (component3)
+			{
+				component3.resetParticleDuration();
+			}
+		}
+		if (this.FX_Fire4)
+		{
+			spawnParticleController component4 = this.FX_Fire4.GetComponent<spawnParticleController>();
+			if (component4)
+			{
+				component4.resetParticleDuration();
+			}
+		}
 	}
 
 	
@@ -137,6 +195,9 @@ public class CoopMutantFX : EntityBehaviour<IMutantState>
 
 	
 	private bool isBurning;
+
+	
+	private bool particlesActive;
 
 	
 	private EventInstance onFireEventInstance;

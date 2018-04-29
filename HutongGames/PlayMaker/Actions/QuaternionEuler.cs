@@ -4,9 +4,9 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
+	[ActionCategory("Quaternion")]
 	[Tooltip("Returns a rotation that rotates z degrees around the z axis, x degrees around the x axis, and y degrees around the y axis (in that order).")]
 	[HelpUrl("https:
-	[ActionCategory("Quaternion")]
 	public class QuaternionEuler : FsmStateAction
 	{
 		
@@ -46,8 +46,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("Store the euler angles of this quaternion variable.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the euler angles of this quaternion variable.")]
 		public FsmQuaternion result;
 
 		

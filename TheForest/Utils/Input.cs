@@ -1,6 +1,7 @@
 ﻿using System;
 using Rewired;
 using Rewired.ControllerExtensions;
+using TheForest.Items.Inventory;
 using TheForest.UI;
 using UnityEngine;
 
@@ -9,6 +10,11 @@ namespace TheForest.Utils
 	
 	public class Input : MonoBehaviour
 	{
+		
+		
+		
+		public static bool UsingDualshock { get; private set; }
+
 		
 		private void Awake()
 		{
@@ -41,7 +47,8 @@ namespace TheForest.Utils
 				}
 				if (lastActiveController != this.prevController)
 				{
-					Input.DS4 = lastActiveController.GetExtension<DualShock4Extension>();
+					Input.DS4 = ((!Input.IsGamePad || lastActiveController == null) ? null : lastActiveController.GetExtension<DualShock4Extension>());
+					Input.UsingDualshock = (Input.IsGamePad && lastActiveController != null && lastActiveController.name.Contains("DualShock"));
 					this.prevController = lastActiveController;
 				}
 			}
@@ -204,6 +211,61 @@ namespace TheForest.Utils
 		}
 
 		
+		public static void UpdateControlMapping()
+		{
+			if (Input.player == null)
+			{
+				return;
+			}
+			if (LocalPlayer.Inventory == null)
+			{
+				return;
+			}
+			PlayerInventory.PlayerViews currentView = LocalPlayer.Inventory.CurrentView;
+			if (currentView != PlayerInventory.PlayerViews.Pause)
+			{
+				Input.SetMenuMapping(false);
+			}
+			else
+			{
+				Input.SetMenuMapping(true);
+			}
+		}
+
+		
+		public static void SetDefaultMapping(bool enabled)
+		{
+			Input.player.controllers.maps.SetMapsEnabled(enabled, ControllerType.Keyboard, "Default");
+			Input.player.controllers.maps.SetMapsEnabled(enabled, ControllerType.Mouse, "Default");
+			Input.player.controllers.maps.SetMapsEnabled(enabled, ControllerType.Joystick, "Default");
+		}
+
+		
+		public static void SetMenuMapping(bool enabled)
+		{
+			Input.player.controllers.maps.SetMapsEnabled(enabled, ControllerType.Keyboard, "Menu");
+			Input.player.controllers.maps.SetMapsEnabled(enabled, ControllerType.Joystick, "Menu");
+		}
+
+		
+		public static void LogDebugInfo()
+		{
+			Debug.Log(string.Concat(new object[]
+			{
+				"DelayedActionStartTime = ",
+				Input.DelayedActionStartTime,
+				"DelayedActionAlpha = ",
+				Input.DelayedActionAlpha,
+				"DelayedActionIsDown = ",
+				Input.DelayedActionIsDown,
+				"DelayedActionWasUpdated = ",
+				Input.DelayedActionWasUpdated,
+				"DelayedActionName = ",
+				Input.DelayedActionName
+			}));
+		}
+
+		
 		public static float GetAxis(string axis)
 		{
 			return Input.player.GetAxis(axis);
@@ -221,6 +283,14 @@ namespace TheForest.Utils
 		{
 			get
 			{
+				if (ForestVR.Enabled && LocalPlayer.IsInInventory)
+				{
+					return LocalPlayer.InventoryCam.WorldToScreenPoint(LocalPlayer.RightHandTrVR.position);
+				}
+				if (ForestVR.Enabled && LocalPlayer.IsInBook)
+				{
+					return LocalPlayer.MainCam.WorldToScreenPoint(LocalPlayer.RightHandTrVR.position);
+				}
 				if (VirtualCursor.Instance && VirtualCursor.Instance.UseVirtualPosition)
 				{
 					return VirtualCursor.Instance.Position;
@@ -263,6 +333,12 @@ namespace TheForest.Utils
 		{
 			return Input.GetTouch(index);
 		}
+
+		
+		private const string MenuInputMap = "Menu";
+
+		
+		private const string DefaultInputMap = "Default";
 
 		
 		public bool isGamePad;

@@ -80,9 +80,9 @@ public class squirrelAnimatorControl : MonoBehaviour
 					}
 					this.animSpeed = this.animator.GetFloat("Speed") * 5f;
 					this.animSpeed = Mathf.Clamp(this.animSpeed, 0.5f, 6f);
-					Vector3 to = this.Tr.position + a * d;
+					Vector3 b = this.Tr.position + a * d;
 					Debug.DrawRay(this.Tr.position, a * d * 5f, Color.red);
-					this.Tr.position = Vector3.Slerp(this.Tr.position, to, this.animSpeed * Time.deltaTime);
+					this.Tr.position = Vector3.Slerp(this.Tr.position, b, this.animSpeed * Time.deltaTime);
 				}
 			}
 			else

@@ -39,13 +39,13 @@ public class mutantRagdollSetup : MonoBehaviour
 		{
 			yield break;
 		}
-		GameObject store = UnityEngine.Object.Instantiate(this.storePrefab, base.transform.position, base.transform.rotation) as GameObject;
+		GameObject store = UnityEngine.Object.Instantiate<GameObject>(this.storePrefab, base.transform.position, base.transform.rotation);
 		storeLocalMutantInfo2 slmi = store.GetComponent<storeLocalMutantInfo2>();
 		slmi.identifier = this.cms.storedRagDollName;
 		slmi.jointAngles.Clear();
-		for (int x = 0; x < this.jointsToSync.Length; x++)
+		for (int i = 0; i < this.jointsToSync.Length; i++)
 		{
-			slmi.jointAngles.Add(this.jointsToSync[x].localRotation);
+			slmi.jointAngles.Add(this.jointsToSync[i].localRotation);
 		}
 		CoopMutantMaterialSync cmms = base.transform.parent.GetComponent<CoopMutantMaterialSync>();
 		if (cmms)
@@ -54,13 +54,29 @@ public class mutantRagdollSetup : MonoBehaviour
 		}
 		if (this.ast)
 		{
-			foreach (KeyValuePair<Transform, int> attachStat in this.ast.stuckArrows)
+			foreach (KeyValuePair<Transform, int> keyValuePair in this.ast.stuckArrows)
 			{
-				if (attachStat.Key)
+				if (keyValuePair.Key)
 				{
-					slmi.stuckArrowsIndex.Add(attachStat.Key, attachStat.Value);
-					slmi.stuckArrowPos.Add(attachStat.Key.localPosition);
-					slmi.stuckArrowRot.Add(attachStat.Key.localRotation);
+					slmi.stuckArrowsIndex.Add(keyValuePair.Key, keyValuePair.Value);
+					slmi.stuckArrowPos.Add(keyValuePair.Key.localPosition);
+					slmi.stuckArrowRot.Add(keyValuePair.Key.localRotation);
+				}
+			}
+		}
+		mutantTransferFire mtf = base.transform.parent.GetComponent<mutantTransferFire>();
+		if (mtf)
+		{
+			for (int j = 0; j < mtf.clientFireGo.Count; j++)
+			{
+				spawnParticleController component = mtf.clientFireGo[j].GetComponent<spawnParticleController>();
+				if (component && component.spawnedPrefab)
+				{
+					int value = mtf.allBones.IndexOf(mtf.clientFireGo[j].transform.parent);
+					slmi.fireIndex.Add(component.spawnedPrefab.transform, value);
+					slmi.firePos.Add(mtf.clientFireGo[j].transform.localPosition);
+					slmi.fireRot.Add(mtf.clientFireGo[j].transform.localRotation);
+					component.spawnedPrefab.SendMessage("disableFollowTarget");
 				}
 			}
 		}

@@ -37,9 +37,9 @@ public class TripWireTrigger : EntityBehaviour<ITripWireState>
 			this.BombScript.transform.parent = null;
 			if (BoltNetwork.isRunning)
 			{
-				if (this.entity && this.entity.isOwner)
+				if (base.entity && base.entity.isOwner)
 				{
-					UnityEngine.Object.Destroy(this.entity.gameObject, 0.1f);
+					UnityEngine.Object.Destroy(base.entity.gameObject, 0.1f);
 				}
 			}
 			else
@@ -56,14 +56,14 @@ public class TripWireTrigger : EntityBehaviour<ITripWireState>
 		{
 			if (BoltNetwork.isRunning)
 			{
-				if (this.entity && this.entity.isOwner)
+				if (base.entity && base.entity.isOwner)
 				{
 					base.state.Tripped = true;
 				}
 				else
 				{
 					TripWire tripWire = TripWire.Create(GlobalTargets.OnlyServer);
-					tripWire.WireEntity = this.entity;
+					tripWire.WireEntity = base.entity;
 					tripWire.Send();
 				}
 			}

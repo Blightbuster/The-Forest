@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Print the value of an FSM Variable in the PlayMaker Log Window.")]
 	[ActionCategory(ActionCategory.Debug)]
+	[Tooltip("Print the value of an FSM Variable in the PlayMaker Log Window.")]
 	public class DebugFsmVariable : FsmStateAction
 	{
 		

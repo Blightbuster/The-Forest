@@ -58,10 +58,10 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString reference;
 
 		
-		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component that will store the keys")]
 		[ActionSection("Result")]
-		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		[RequiredField]
+		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component that will store the keys")]
+		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault arrayListGameObject;
 
 		

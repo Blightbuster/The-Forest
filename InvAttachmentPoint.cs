@@ -18,7 +18,7 @@ public class InvAttachmentPoint : MonoBehaviour
 			if (this.mPrefab != null)
 			{
 				Transform transform = base.transform;
-				this.mChild = (UnityEngine.Object.Instantiate(this.mPrefab, transform.position, transform.rotation) as GameObject);
+				this.mChild = UnityEngine.Object.Instantiate<GameObject>(this.mPrefab, transform.position, transform.rotation);
 				Transform transform2 = this.mChild.transform;
 				transform2.parent = transform;
 				transform2.localPosition = Vector3.zero;

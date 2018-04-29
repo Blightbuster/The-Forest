@@ -58,8 +58,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("Fade out time in seconds.")]
 		[HasFloatSlider(0f, 10f)]
+		[Tooltip("Fade out time in seconds.")]
 		public FsmFloat time;
 
 		

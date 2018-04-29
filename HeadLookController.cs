@@ -48,12 +48,21 @@ public class HeadLookController : MonoBehaviour
 		Vector3[] array = new Vector3[this.nonAffectedJoints.Length];
 		for (int i = 0; i < this.nonAffectedJoints.Length; i++)
 		{
-			using (IEnumerator enumerator = this.nonAffectedJoints[i].joint.GetEnumerator())
+			IEnumerator enumerator = this.nonAffectedJoints[i].joint.GetEnumerator();
+			try
 			{
 				if (enumerator.MoveNext())
 				{
 					Transform transform = (Transform)enumerator.Current;
 					array[i] = transform.position - this.nonAffectedJoints[i].joint.position;
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
 				}
 			}
 		}
@@ -91,8 +100,8 @@ public class HeadLookController : MonoBehaviour
 			Vector3 forward = vector;
 			bendingSegment.dirUp = Vector3.Slerp(bendingSegment.dirUp, referenceUpDir, Time.deltaTime * 5f);
 			Vector3.OrthoNormalize(ref forward, ref bendingSegment.dirUp);
-			Quaternion to = rotation * Quaternion.LookRotation(forward, bendingSegment.dirUp) * Quaternion.Inverse(rotation * Quaternion.LookRotation(bendingSegment.referenceLookDir, bendingSegment.referenceUpDir));
-			Quaternion lhs = Quaternion.Slerp(Quaternion.identity, to, this.effect / (float)bendingSegment.chainLength);
+			Quaternion b = rotation * Quaternion.LookRotation(forward, bendingSegment.dirUp) * Quaternion.Inverse(rotation * Quaternion.LookRotation(bendingSegment.referenceLookDir, bendingSegment.referenceUpDir));
+			Quaternion lhs = Quaternion.Slerp(Quaternion.identity, b, this.effect / (float)bendingSegment.chainLength);
 			transform2 = bendingSegment.lastTransform;
 			for (int l = 0; l < bendingSegment.chainLength; l++)
 			{
@@ -103,12 +112,21 @@ public class HeadLookController : MonoBehaviour
 		for (int m = 0; m < this.nonAffectedJoints.Length; m++)
 		{
 			Vector3 vector2 = Vector3.zero;
-			using (IEnumerator enumerator2 = this.nonAffectedJoints[m].joint.GetEnumerator())
+			IEnumerator enumerator2 = this.nonAffectedJoints[m].joint.GetEnumerator();
+			try
 			{
 				if (enumerator2.MoveNext())
 				{
 					Transform transform3 = (Transform)enumerator2.Current;
 					vector2 = transform3.position - this.nonAffectedJoints[m].joint.position;
+				}
+			}
+			finally
+			{
+				IDisposable disposable2;
+				if ((disposable2 = (enumerator2 as IDisposable)) != null)
+				{
+					disposable2.Dispose();
 				}
 			}
 			Vector3 toDirection = Vector3.Slerp(array[m], vector2, this.nonAffectedJoints[m].effect);

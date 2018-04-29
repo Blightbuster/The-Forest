@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Get the value of a Texture Variable from another FSM.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Get the value of a Texture Variable from another FSM.")]
 	public class GetFsmTexture : FsmStateAction
 	{
 		
@@ -64,8 +64,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("Optional name of FSM on Game Object")]
 		[UIHint(UIHint.FsmName)]
+		[Tooltip("Optional name of FSM on Game Object")]
 		public FsmString fsmName;
 
 		

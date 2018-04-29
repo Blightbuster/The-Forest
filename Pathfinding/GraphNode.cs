@@ -95,7 +95,7 @@ namespace Pathfinding
 			}
 			set
 			{
-				this.flags = ((this.flags & 4294967294u) | ((!value) ? 0u : 1u));
+				this.flags = ((this.flags & 4294967294u) | ((!value) ? 0u : 1u) << 0);
 			}
 		}
 
@@ -253,6 +253,15 @@ namespace Pathfinding
 		}
 
 		
+		private int nodeIndex;
+
+		
+		protected uint flags;
+
+		
+		public Int3 position;
+
+		
 		private const int FlagsWalkableOffset = 0;
 
 		
@@ -281,14 +290,5 @@ namespace Pathfinding
 
 		
 		private const uint FlagsTagMask = 16252928u;
-
-		
-		private int nodeIndex;
-
-		
-		protected uint flags;
-
-		
-		public Int3 position;
 	}
 }

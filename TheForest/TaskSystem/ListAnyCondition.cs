@@ -49,8 +49,8 @@ namespace TheForest.TaskSystem
 		}
 
 		
-		[SerializeThis]
 		[HideInInspector]
+		[SerializeThis]
 		public ACondition[] _conditions;
 	}
 }

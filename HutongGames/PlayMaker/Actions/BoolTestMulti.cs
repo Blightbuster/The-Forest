@@ -66,9 +66,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("This must be the same number used for Bool States.")]
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("This must be the same number used for Bool States.")]
 		public FsmBool[] boolVariables;
 
 		

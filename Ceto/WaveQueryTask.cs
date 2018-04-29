@@ -59,7 +59,7 @@ namespace Ceto
 			IEnumerator<WaveQuery> enumerator = this.m_querys.GetEnumerator();
 			while (enumerator.MoveNext())
 			{
-				if (this.Cancelled)
+				if (base.Cancelled)
 				{
 					return;
 				}

@@ -109,7 +109,7 @@ namespace HutongGames.PlayMaker.Actions
 				this.cachedGameObject = go;
 				if (this.component == null)
 				{
-					this.LogWarning("Missing component: " + typeof(T).FullName + " on: " + go.name);
+					base.LogWarning("Missing component: " + typeof(T).FullName + " on: " + go.name);
 				}
 			}
 			return this.component != null;

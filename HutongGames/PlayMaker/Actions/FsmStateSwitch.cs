@@ -63,8 +63,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject that owns the FSM.")]
 		[RequiredField]
+		[Tooltip("The GameObject that owns the FSM.")]
 		public FsmGameObject gameObject;
 
 		

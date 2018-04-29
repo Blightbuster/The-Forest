@@ -7,7 +7,7 @@ namespace Rewired.UI.ControlMapper
 {
 	
 	[AddComponentMenu("")]
-	public abstract class UIElementInfo : MonoBehaviour, IEventSystemHandler, ISelectHandler
+	public abstract class UIElementInfo : MonoBehaviour, ISelectHandler, IEventSystemHandler
 	{
 		
 		

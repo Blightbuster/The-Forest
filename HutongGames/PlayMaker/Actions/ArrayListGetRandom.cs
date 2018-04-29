@@ -56,10 +56,10 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
-		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
-		[RequiredField]
 		[ActionSection("Set up")]
+		[RequiredField]
+		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
+		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -67,19 +67,19 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString reference;
 
 		
+		[ActionSection("Result")]
 		[Tooltip("The random item data picked from the array")]
 		[UIHint(UIHint.Variable)]
-		[ActionSection("Result")]
 		public FsmVar randomItem;
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("The random item index picked from the array")]
+		[UIHint(UIHint.Variable)]
 		public FsmInt randomIndex;
 
 		
-		[Tooltip("The event to trigger if the action fails ( likely and index is out of range exception)")]
 		[UIHint(UIHint.FsmEvent)]
+		[Tooltip("The event to trigger if the action fails ( likely and index is out of range exception)")]
 		public FsmEvent failureEvent;
 	}
 }

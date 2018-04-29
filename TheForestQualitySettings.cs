@@ -59,17 +59,20 @@ public class TheForestQualitySettings : ScriptableObject
 	{
 		get
 		{
-			switch (this.MaterialQuality)
+			TheForestQualitySettings.MaterialQualities materialQuality = this.MaterialQuality;
+			if (materialQuality == TheForestQualitySettings.MaterialQualities.High)
 			{
-			case TheForestQualitySettings.MaterialQualities.High:
 				return 600;
-			case TheForestQualitySettings.MaterialQualities.Medium:
+			}
+			if (materialQuality == TheForestQualitySettings.MaterialQualities.Medium)
+			{
 				return 300;
-			case TheForestQualitySettings.MaterialQualities.Low:
-				return 300;
-			default:
+			}
+			if (materialQuality != TheForestQualitySettings.MaterialQualities.Low)
+			{
 				return 1000;
 			}
+			return 300;
 		}
 	}
 
@@ -79,17 +82,20 @@ public class TheForestQualitySettings : ScriptableObject
 	{
 		get
 		{
-			switch (this.TerrainQuality)
+			TheForestQualitySettings.TerrainQualities terrainQuality = this.TerrainQuality;
+			if (terrainQuality == TheForestQualitySettings.TerrainQualities.POM)
 			{
-			case TheForestQualitySettings.TerrainQualities.POM:
 				return 16.1999989f;
-			case TheForestQualitySettings.TerrainQualities.PM:
+			}
+			if (terrainQuality == TheForestQualitySettings.TerrainQualities.PM)
+			{
 				return 27f;
-			case TheForestQualitySettings.TerrainQualities.SIMPLE:
-				return 37.8f;
-			default:
+			}
+			if (terrainQuality != TheForestQualitySettings.TerrainQualities.SIMPLE)
+			{
 				return 0f;
 			}
+			return 37.8f;
 		}
 	}
 
@@ -133,7 +139,6 @@ public class TheForestQualitySettings : ScriptableObject
 	{
 		PlayerPrefs.SetInt("Quality_v016_Preset", (int)TheForestQualitySettings.UserSettings.Preset);
 		PlayerPrefs.SetInt("Quality_v016_MotionBlur", (int)TheForestQualitySettings.UserSettings.MotionBlur);
-		PlayerPrefs.SetInt("Quality_v016_MyRenderType", (int)TheForestQualitySettings.UserSettings.MyRenderType);
 		PlayerPrefs.SetInt("Quality_v016_DrawDistance", (int)TheForestQualitySettings.UserSettings.DrawDistance);
 		PlayerPrefs.SetFloat("Quality_v016_GrassDistance", TheForestQualitySettings.UserSettings.GrassDistance);
 		PlayerPrefs.SetFloat("Quality_v016_GrassDensity", TheForestQualitySettings.UserSettings.GrassDensity);
@@ -143,6 +148,7 @@ public class TheForestQualitySettings : ScriptableObject
 		PlayerPrefs.SetInt("Quality_v016_CA", (int)TheForestQualitySettings.UserSettings.CA);
 		PlayerPrefs.SetInt("Quality_v016_Fg", (int)TheForestQualitySettings.UserSettings.Fg);
 		PlayerPrefs.SetInt("Quality_v016_DofTech", (int)TheForestQualitySettings.UserSettings.DofTech);
+		PlayerPrefs.SetInt("Quality_v016_ScreenSpaceReflection", (int)TheForestQualitySettings.UserSettings.screenSpaceReflection);
 		PlayerPrefs.SetInt("Quality_v016_SunshineOcclusion", (int)TheForestQualitySettings.UserSettings.SunshineOcclusion);
 		PlayerPrefs.SetInt("Quality_v016_VolumetricsType", (int)TheForestQualitySettings.UserSettings.VolumetricsType);
 		PlayerPrefs.SetInt("Quality_v016_Caustics", (int)TheForestQualitySettings.UserSettings.Caustics);
@@ -184,8 +190,7 @@ public class TheForestQualitySettings : ScriptableObject
 			TheForestQualitySettings.UserSettings.ShadowLevel = (TheForestQualitySettings.ShadowLevels)shadowLevel;
 			TheForestQualitySettings.UserSettings.FarShadowMode = (TheForestQualitySettings.FarShadowModes)PlayerPrefs.GetInt("Quality_v016_FarShadowMode", (int)TheForestQualitySettings.UserSettings.FarShadowMode);
 			TheForestQualitySettings.UserSettings.MotionBlur = (TheForestQualitySettings.MotionBlurQuality)PlayerPrefs.GetInt("Quality_v016_MotionBlur", (int)TheForestQualitySettings.UserSettings.MotionBlur);
-			TheForestQualitySettings.UserSettings.MyRenderType = (TheForestQualitySettings.RendererType)PlayerPrefs.GetInt("Quality_v016_MyRenderType", (int)TheForestQualitySettings.UserSettings.MyRenderType);
-			TheForestQualitySettings.UserSettings.DrawDistance = (TheForestQualitySettings.DrawDistances)PlayerPrefs.GetInt("Quality_v016_DrawDistance", (int)TheForestQualitySettings.UserSettings.DrawDistance);
+			TheForestQualitySettings.UserSettings.DrawDistance = (TheForestQualitySettings.DrawDistances)Mathf.Clamp(PlayerPrefs.GetInt("Quality_v016_DrawDistance", (int)TheForestQualitySettings.UserSettings.DrawDistance), 2, 5);
 			TheForestQualitySettings.UserSettings.GrassDistance = PlayerPrefs.GetFloat("Quality_v016_GrassDistance", TheForestQualitySettings.UserSettings.GrassDistance);
 			TheForestQualitySettings.UserSettings.GrassDensity = PlayerPrefs.GetFloat("Quality_v016_GrassDensity", TheForestQualitySettings.UserSettings.GrassDensity);
 			TheForestQualitySettings.UserSettings.SSAOType = (TheForestQualitySettings.SSAOTypes)PlayerPrefs.GetInt("Quality_v016_SSAOType", (int)TheForestQualitySettings.UserSettings.SSAOType);
@@ -194,6 +199,7 @@ public class TheForestQualitySettings : ScriptableObject
 			TheForestQualitySettings.UserSettings.CA = (TheForestQualitySettings.ChromaticAberration)PlayerPrefs.GetInt("Quality_v016_CA", (int)TheForestQualitySettings.UserSettings.CA);
 			TheForestQualitySettings.UserSettings.Fg = (TheForestQualitySettings.FilmGrain)PlayerPrefs.GetInt("Quality_v016_Fg", (int)TheForestQualitySettings.UserSettings.Fg);
 			TheForestQualitySettings.UserSettings.DofTech = (TheForestQualitySettings.Dof)PlayerPrefs.GetInt("Quality_v016_DofTech", (int)TheForestQualitySettings.UserSettings.DofTech);
+			TheForestQualitySettings.UserSettings.screenSpaceReflection = (TheForestQualitySettings.ScreenSpaceReflection)PlayerPrefs.GetInt("Quality_v016_ScreenSpaceReflection", (int)TheForestQualitySettings.UserSettings.screenSpaceReflection);
 			TheForestQualitySettings.UserSettings.SunshineOcclusion = (TheForestQualitySettings.SunshineOcclusionOn)PlayerPrefs.GetInt("Quality_v016_SunshineOcclusion", (int)TheForestQualitySettings.UserSettings.SunshineOcclusion);
 			TheForestQualitySettings.UserSettings.VolumetricsType = (TheForestQualitySettings.VolumetricsTypes)PlayerPrefs.GetInt("Quality_v016_VolumetricsType", (int)TheForestQualitySettings.UserSettings.VolumetricsType);
 			TheForestQualitySettings.UserSettings.Caustics = (TheForestQualitySettings.CausticsOn)PlayerPrefs.GetInt("Quality_v016_Caustics", (int)TheForestQualitySettings.UserSettings.Caustics);
@@ -287,7 +293,6 @@ public class TheForestQualitySettings : ScriptableObject
 		to.LightmapResolution = from.LightmapResolution;
 		to.LightmapUpdateIntervalFrames = from.LightmapUpdateIntervalFrames;
 		to.MotionBlur = from.MotionBlur;
-		to.MyRenderType = from.MyRenderType;
 		to.ScatterResolution = from.ScatterResolution;
 		to.ScatterSamplingQuality = from.ScatterSamplingQuality;
 		to.SSAOType = from.SSAOType;
@@ -296,6 +301,7 @@ public class TheForestQualitySettings : ScriptableObject
 		to.Fg = from.Fg;
 		to.CA = from.CA;
 		to.DofTech = from.DofTech;
+		to.screenSpaceReflection = from.screenSpaceReflection;
 		to.SunshineOcclusion = from.SunshineOcclusion;
 		to.VolumetricsType = from.VolumetricsType;
 		to.Caustics = from.Caustics;
@@ -363,7 +369,7 @@ public class TheForestQualitySettings : ScriptableObject
 		{
 			TheForestQualitySettings theForestQualitySettings = TheForestQualitySettings.UserSettings;
 			TheForestQualitySettings preset = TheForestQualitySettings.GetPreset((int)theForestQualitySettings.Preset);
-			return theForestQualitySettings.AntiAliasing != preset.AntiAliasing || theForestQualitySettings.CascadeCount != preset.CascadeCount || theForestQualitySettings.FarShadowMode != preset.FarShadowMode || !Mathf.Approximately(theForestQualitySettings.GrassDistance, preset.GrassDistance) || !Mathf.Approximately(theForestQualitySettings.GrassDensity, preset.GrassDensity) || !Mathf.Approximately(theForestQualitySettings.LightDistance, preset.LightDistance) || theForestQualitySettings.LightmapResolution != preset.LightmapResolution || theForestQualitySettings.LightmapUpdateIntervalFrames != preset.LightmapUpdateIntervalFrames || theForestQualitySettings.MotionBlur != preset.MotionBlur || theForestQualitySettings.MyRenderType != preset.MyRenderType || theForestQualitySettings.ScatterResolution != preset.ScatterResolution || theForestQualitySettings.ScatterSamplingQuality != preset.ScatterSamplingQuality || theForestQualitySettings.SSAOType != preset.SSAOType || theForestQualitySettings.SSAO != preset.SSAO || theForestQualitySettings.SEBloom != preset.SEBloom || theForestQualitySettings.Fg != preset.Fg || theForestQualitySettings.CA != preset.CA || theForestQualitySettings.DofTech != preset.DofTech || theForestQualitySettings.SunshineOcclusion != preset.SunshineOcclusion || theForestQualitySettings.VolumetricsType != preset.VolumetricsType || theForestQualitySettings.Caustics != preset.Caustics || theForestQualitySettings.SkyLighting != preset.SkyLighting || theForestQualitySettings.TerrainQuality != preset.TerrainQuality || theForestQualitySettings.DrawDistance != preset.DrawDistance || theForestQualitySettings.ReflexionMode != preset.ReflexionMode || theForestQualitySettings.OceanQuality != preset.OceanQuality || theForestQualitySettings.TextureQuality != preset.TextureQuality || theForestQualitySettings.MaterialQuality != preset.MaterialQuality;
+			return theForestQualitySettings.AntiAliasing != preset.AntiAliasing || theForestQualitySettings.CascadeCount != preset.CascadeCount || theForestQualitySettings.FarShadowMode != preset.FarShadowMode || !Mathf.Approximately(theForestQualitySettings.GrassDistance, preset.GrassDistance) || !Mathf.Approximately(theForestQualitySettings.GrassDensity, preset.GrassDensity) || !Mathf.Approximately(theForestQualitySettings.LightDistance, preset.LightDistance) || theForestQualitySettings.LightmapResolution != preset.LightmapResolution || theForestQualitySettings.LightmapUpdateIntervalFrames != preset.LightmapUpdateIntervalFrames || theForestQualitySettings.MotionBlur != preset.MotionBlur || theForestQualitySettings.ScatterResolution != preset.ScatterResolution || theForestQualitySettings.ScatterSamplingQuality != preset.ScatterSamplingQuality || theForestQualitySettings.SSAOType != preset.SSAOType || theForestQualitySettings.SSAO != preset.SSAO || theForestQualitySettings.SEBloom != preset.SEBloom || theForestQualitySettings.Fg != preset.Fg || theForestQualitySettings.CA != preset.CA || theForestQualitySettings.DofTech != preset.DofTech || theForestQualitySettings.screenSpaceReflection != preset.screenSpaceReflection || theForestQualitySettings.SunshineOcclusion != preset.SunshineOcclusion || theForestQualitySettings.VolumetricsType != preset.VolumetricsType || theForestQualitySettings.Caustics != preset.Caustics || theForestQualitySettings.SkyLighting != preset.SkyLighting || theForestQualitySettings.TerrainQuality != preset.TerrainQuality || theForestQualitySettings.DrawDistance != preset.DrawDistance || theForestQualitySettings.ReflexionMode != preset.ReflexionMode || theForestQualitySettings.OceanQuality != preset.OceanQuality || theForestQualitySettings.TextureQuality != preset.TextureQuality || theForestQualitySettings.MaterialQuality != preset.MaterialQuality;
 		}
 	}
 
@@ -438,9 +444,6 @@ public class TheForestQualitySettings : ScriptableObject
 	}
 
 	
-	private const string Prefix = "Quality_v016_";
-
-	
 	public TheForestQualitySettings.DrawDistances DrawDistance = TheForestQualitySettings.DrawDistances.Medium;
 
 	
@@ -448,9 +451,6 @@ public class TheForestQualitySettings : ScriptableObject
 
 	
 	public TheForestQualitySettings.MotionBlurQuality MotionBlur = TheForestQualitySettings.MotionBlurQuality.High;
-
-	
-	public TheForestQualitySettings.RendererType MyRenderType;
 
 	
 	public float GrassDistance = 50f;
@@ -477,6 +477,9 @@ public class TheForestQualitySettings : ScriptableObject
 	public TheForestQualitySettings.Dof DofTech = TheForestQualitySettings.Dof.None;
 
 	
+	public TheForestQualitySettings.ScreenSpaceReflection screenSpaceReflection;
+
+	
 	public TheForestQualitySettings.SunshineOcclusionOn SunshineOcclusion;
 
 	
@@ -489,7 +492,7 @@ public class TheForestQualitySettings : ScriptableObject
 	public TheForestQualitySettings.CausticsOn Caustics;
 
 	
-	public TheForestQualitySettings.AntiAliasingTechnique AntiAliasing = TheForestQualitySettings.AntiAliasingTechnique.SMAA;
+	public TheForestQualitySettings.AntiAliasingTechnique AntiAliasing = TheForestQualitySettings.AntiAliasingTechnique.TAA;
 
 	
 	public int LightmapResolution = 4096;
@@ -530,6 +533,9 @@ public class TheForestQualitySettings : ScriptableObject
 
 	
 	public TheForestQualitySettings.MaterialQualities MaterialQuality;
+
+	
+	private const string Prefix = "Quality_v016_";
 
 	
 	private static TheForestQualitySettings[] Presets;
@@ -580,9 +586,7 @@ public class TheForestQualitySettings : ScriptableObject
 	public enum SSAOTypes
 	{
 		
-		SESSAO,
-		
-		HBAO,
+		AMPLIFY,
 		
 		UNITY
 	}
@@ -625,6 +629,15 @@ public class TheForestQualitySettings : ScriptableObject
 		Normal,
 		
 		None
+	}
+
+	
+	public enum ScreenSpaceReflection
+	{
+		
+		On,
+		
+		Off
 	}
 
 	
@@ -671,7 +684,7 @@ public class TheForestQualitySettings : ScriptableObject
 		
 		FXAA,
 		
-		SMAA
+		TAA
 	}
 
 	
@@ -687,17 +700,6 @@ public class TheForestQualitySettings : ScriptableObject
 		High,
 		
 		Ultra
-	}
-
-	
-	public enum RendererType
-	{
-		
-		Deferred,
-		
-		LegacyDeferred,
-		
-		Forward
 	}
 
 	

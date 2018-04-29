@@ -245,47 +245,47 @@ namespace Ceto
 				Shader.SetGlobalColor("Ceto_FoamTint", this.foamTint * this.foamIntensity);
 				Shader.SetGlobalVector("Ceto_SunDir", this.SunDir());
 				Shader.SetGlobalVector("Ceto_SunColor", this.SunColor());
-				Vector4 vec = default(Vector4);
-				vec.x = ((this.foamTexture0.scale.x == 0f) ? 1f : (1f / this.foamTexture0.scale.x));
-				vec.y = ((this.foamTexture0.scale.y == 0f) ? 1f : (1f / this.foamTexture0.scale.y));
-				vec.z = this.foamTexture0.scrollSpeed * this.OceanTime.Now;
-				vec.w = 0f;
-				Vector4 vec2 = default(Vector4);
-				vec2.x = ((this.foamTexture1.scale.x == 0f) ? 1f : (1f / this.foamTexture1.scale.x));
-				vec2.y = ((this.foamTexture1.scale.y == 0f) ? 1f : (1f / this.foamTexture1.scale.y));
-				vec2.z = this.foamTexture1.scrollSpeed * this.OceanTime.Now;
-				vec2.w = 0f;
+				Vector4 value2 = default(Vector4);
+				value2.x = ((this.foamTexture0.scale.x == 0f) ? 1f : (1f / this.foamTexture0.scale.x));
+				value2.y = ((this.foamTexture0.scale.y == 0f) ? 1f : (1f / this.foamTexture0.scale.y));
+				value2.z = this.foamTexture0.scrollSpeed * this.OceanTime.Now;
+				value2.w = 0f;
+				Vector4 value3 = default(Vector4);
+				value3.x = ((this.foamTexture1.scale.x == 0f) ? 1f : (1f / this.foamTexture1.scale.x));
+				value3.y = ((this.foamTexture1.scale.y == 0f) ? 1f : (1f / this.foamTexture1.scale.y));
+				value3.z = this.foamTexture1.scrollSpeed * this.OceanTime.Now;
+				value3.w = 0f;
 				Shader.SetGlobalTexture("Ceto_FoamTexture0", (!(this.foamTexture0.tex != null)) ? Texture2D.whiteTexture : this.foamTexture0.tex);
-				Shader.SetGlobalVector("Ceto_FoamTextureScale0", vec);
+				Shader.SetGlobalVector("Ceto_FoamTextureScale0", value2);
 				Shader.SetGlobalTexture("Ceto_FoamTexture1", (!(this.foamTexture1.tex != null)) ? Texture2D.whiteTexture : this.foamTexture1.tex);
-				Shader.SetGlobalVector("Ceto_FoamTextureScale1", vec2);
+				Shader.SetGlobalVector("Ceto_FoamTextureScale1", value3);
 				foreach (KeyValuePair<Camera, CameraData> keyValuePair in this.m_cameraData)
 				{
-					CameraData value2 = keyValuePair.Value;
-					if (value2.mask != null && !value2.mask.updated)
+					CameraData value4 = keyValuePair.Value;
+					if (value4.mask != null && !value4.mask.updated)
 					{
-						value2.mask.updatedLastFrame = false;
+						value4.mask.updatedLastFrame = false;
 					}
-					if (value2.mask != null)
+					if (value4.mask != null)
 					{
-						value2.mask.updated = false;
+						value4.mask.updated = false;
 					}
-					if (value2.depth != null)
+					if (value4.depth != null)
 					{
-						value2.depth.updated = false;
+						value4.depth.updated = false;
 					}
-					if (value2.overlay != null)
+					if (value4.overlay != null)
 					{
-						value2.overlay.updated = false;
+						value4.overlay.updated = false;
 					}
-					if (value2.reflection != null)
+					if (value4.reflection != null)
 					{
-						value2.reflection.updated = false;
+						value4.reflection.updated = false;
 					}
-					if (value2.projection != null)
+					if (value4.projection != null)
 					{
-						value2.projection.updated = false;
-						value2.projection.checkedForFlipping = false;
+						value4.projection.updated = false;
+						value4.projection.checkedForFlipping = false;
 					}
 				}
 			}
@@ -832,12 +832,6 @@ namespace Ceto
 		}
 
 		
-		public const float MAX_SPECTRUM_WAVE_HEIGHT = 40f;
-
-		
-		public const float MAX_OVERLAY_WAVE_HEIGHT = 20f;
-
-		
 		public static readonly bool DISABLE_FOURIER_MULTITHREADING;
 
 		
@@ -872,6 +866,12 @@ namespace Ceto
 
 		
 		public static readonly string NORMAL_FADE_TEXTURE_NAME = "Ceto_NormalFade";
+
+		
+		public const float MAX_SPECTRUM_WAVE_HEIGHT = 40f;
+
+		
+		public const float MAX_OVERLAY_WAVE_HEIGHT = 20f;
 
 		
 		public bool disableWarnings;

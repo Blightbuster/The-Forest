@@ -27,7 +27,7 @@ public class playerStealthMeter : MonoBehaviour
 		{
 			return;
 		}
-		if (LocalPlayer.Animator.GetFloat("crouch") > 5f && !this.vis.currentlyTargetted && PlayerPreferences.ShowStealthMeter)
+		if (LocalPlayer.Animator.GetFloat("crouch") > 5f && !this.vis.currentlyTargetted && PlayerPreferences.ShowStealthMeter && !LocalPlayer.AnimControl.useRootMotion)
 		{
 			Scene.HudGui.EyeIcon.SetActive(true);
 		}

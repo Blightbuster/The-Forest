@@ -83,7 +83,7 @@ namespace Ceto
 			{
 				num = this.m_fourier.PeformFFT_SinglePacked(0, this.m_data, this);
 			}
-			if (this.Cancelled)
+			if (base.Cancelled)
 			{
 				return;
 			}

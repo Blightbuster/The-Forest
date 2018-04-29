@@ -21,7 +21,6 @@ public class BoltPlayerOnPlaneSetup : MonoBehaviour
 		if (this.ReceivedAllVariations)
 		{
 			CoopPlayerVariations component = base.GetComponent<CoopPlayerVariations>();
-			component.SetVariation(this.playerVariation, this.playerVariationTShirtType, this.playerVariationTShirtMat, this.playerVariationPantsType, this.playerVariationPantsMat, this.playerVariationHair, this.playerClothing, this.playerClothingVariation);
 			component.UpdateSkinVariation(false, false, false, false);
 		}
 	}
@@ -33,7 +32,6 @@ public class BoltPlayerOnPlaneSetup : MonoBehaviour
 		if (this.ReceivedAllVariations)
 		{
 			CoopPlayerVariations component = base.GetComponent<CoopPlayerVariations>();
-			component.SetVariation(this.playerVariation, this.playerVariationTShirtType, this.playerVariationTShirtMat, this.playerVariationPantsType, this.playerVariationPantsMat, this.playerVariationHair, this.playerClothing, this.playerClothingVariation);
 			component.UpdateSkinVariation(false, false, false, false);
 		}
 	}
@@ -45,7 +43,6 @@ public class BoltPlayerOnPlaneSetup : MonoBehaviour
 		if (this.ReceivedAllVariations)
 		{
 			CoopPlayerVariations component = base.GetComponent<CoopPlayerVariations>();
-			component.SetVariation(this.playerVariation, this.playerVariationTShirtType, this.playerVariationTShirtMat, this.playerVariationPantsType, this.playerVariationPantsMat, this.playerVariationHair, this.playerClothing, this.playerClothingVariation);
 			component.UpdateSkinVariation(false, false, false, false);
 		}
 	}
@@ -57,7 +54,6 @@ public class BoltPlayerOnPlaneSetup : MonoBehaviour
 		if (this.ReceivedAllVariations)
 		{
 			CoopPlayerVariations component = base.GetComponent<CoopPlayerVariations>();
-			component.SetVariation(this.playerVariation, this.playerVariationTShirtType, this.playerVariationTShirtMat, this.playerVariationPantsType, this.playerVariationPantsMat, this.playerVariationHair, this.playerClothing, this.playerClothingVariation);
 			component.UpdateSkinVariation(false, false, false, false);
 		}
 	}
@@ -69,7 +65,6 @@ public class BoltPlayerOnPlaneSetup : MonoBehaviour
 		if (this.ReceivedAllVariations)
 		{
 			CoopPlayerVariations component = base.GetComponent<CoopPlayerVariations>();
-			component.SetVariation(this.playerVariation, this.playerVariationTShirtType, this.playerVariationTShirtMat, this.playerVariationPantsType, this.playerVariationPantsMat, this.playerVariationHair, this.playerClothing, this.playerClothingVariation);
 			component.UpdateSkinVariation(false, false, false, false);
 		}
 	}
@@ -81,7 +76,6 @@ public class BoltPlayerOnPlaneSetup : MonoBehaviour
 		if (this.ReceivedAllVariations)
 		{
 			CoopPlayerVariations component = base.GetComponent<CoopPlayerVariations>();
-			component.SetVariation(this.playerVariation, this.playerVariationTShirtType, this.playerVariationTShirtMat, this.playerVariationPantsType, this.playerVariationPantsMat, this.playerVariationHair, this.playerClothing, this.playerClothingVariation);
 			component.UpdateSkinVariation(false, false, false, false);
 		}
 	}
@@ -93,7 +87,6 @@ public class BoltPlayerOnPlaneSetup : MonoBehaviour
 		if (this.ReceivedAllVariations)
 		{
 			CoopPlayerVariations component = base.GetComponent<CoopPlayerVariations>();
-			component.SetVariation(this.playerVariation, this.playerVariationTShirtType, this.playerVariationTShirtMat, this.playerVariationPantsType, this.playerVariationPantsMat, this.playerVariationHair, this.playerClothing, this.playerClothingVariation);
 			component.UpdateSkinVariation(false, false, false, false);
 		}
 	}

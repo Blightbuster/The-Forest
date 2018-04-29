@@ -30,9 +30,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject with an Audio Source component.")]
-		[CheckForComponent(typeof(AudioSource))]
 		[RequiredField]
+		[CheckForComponent(typeof(AudioSource))]
+		[Tooltip("The GameObject with an Audio Source component.")]
 		public FsmOwnerDefault gameObject;
 	}
 }

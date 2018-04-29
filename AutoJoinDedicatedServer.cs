@@ -2,6 +2,7 @@
 using System.Collections;
 using Steamworks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 public class AutoJoinDedicatedServer : MonoBehaviour
@@ -32,7 +33,7 @@ public class AutoJoinDedicatedServer : MonoBehaviour
 		if (AutoJoinDedicatedServer.AutoStartAfterDelay)
 		{
 			yield return new WaitForSeconds(1f);
-			Application.LoadLevel("SteamStartSceneDedicatedServer_Client");
+			SceneManager.LoadScene("SteamStartSceneDedicatedServer_Client", LoadSceneMode.Single);
 		}
 		yield break;
 	}
@@ -42,7 +43,7 @@ public class AutoJoinDedicatedServer : MonoBehaviour
 	{
 		SteamClientDSConfig.serverAddress = param.m_rgchServer;
 		SteamClientDSConfig.password = param.m_rgchPassword;
-		Application.LoadLevel("SteamStartSceneDedicatedServer_Client");
+		SceneManager.LoadScene("SteamStartSceneDedicatedServer_Client", LoadSceneMode.Single);
 	}
 
 	

@@ -33,6 +33,93 @@ namespace Pathfinding
 		}
 
 		
+		public static bool operator ==(Int3 lhs, Int3 rhs)
+		{
+			return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
+		}
+
+		
+		public static bool operator !=(Int3 lhs, Int3 rhs)
+		{
+			return lhs.x != rhs.x || lhs.y != rhs.y || lhs.z != rhs.z;
+		}
+
+		
+		public static explicit operator Int3(Vector3 ob)
+		{
+			return new Int3((int)Math.Round((double)(ob.x * 1000f)), (int)Math.Round((double)(ob.y * 1000f)), (int)Math.Round((double)(ob.z * 1000f)));
+		}
+
+		
+		public static explicit operator Vector3(Int3 ob)
+		{
+			return new Vector3((float)ob.x * 0.001f, (float)ob.y * 0.001f, (float)ob.z * 0.001f);
+		}
+
+		
+		public static Int3 operator -(Int3 lhs, Int3 rhs)
+		{
+			lhs.x -= rhs.x;
+			lhs.y -= rhs.y;
+			lhs.z -= rhs.z;
+			return lhs;
+		}
+
+		
+		public static Int3 operator -(Int3 lhs)
+		{
+			lhs.x = -lhs.x;
+			lhs.y = -lhs.y;
+			lhs.z = -lhs.z;
+			return lhs;
+		}
+
+		
+		public static Int3 operator +(Int3 lhs, Int3 rhs)
+		{
+			lhs.x += rhs.x;
+			lhs.y += rhs.y;
+			lhs.z += rhs.z;
+			return lhs;
+		}
+
+		
+		public static Int3 operator *(Int3 lhs, int rhs)
+		{
+			lhs.x *= rhs;
+			lhs.y *= rhs;
+			lhs.z *= rhs;
+			return lhs;
+		}
+
+		
+		public static Int3 operator *(Int3 lhs, float rhs)
+		{
+			lhs.x = (int)Math.Round((double)((float)lhs.x * rhs));
+			lhs.y = (int)Math.Round((double)((float)lhs.y * rhs));
+			lhs.z = (int)Math.Round((double)((float)lhs.z * rhs));
+			return lhs;
+		}
+
+		
+		public static Int3 operator *(Int3 lhs, double rhs)
+		{
+			lhs.x = (int)Math.Round((double)lhs.x * rhs);
+			lhs.y = (int)Math.Round((double)lhs.y * rhs);
+			lhs.z = (int)Math.Round((double)lhs.z * rhs);
+			return lhs;
+		}
+
+		
+		public static Int3 operator /(Int3 lhs, float rhs)
+		{
+			lhs.x = (int)Math.Round((double)((float)lhs.x / rhs));
+			lhs.y = (int)Math.Round((double)((float)lhs.y / rhs));
+			lhs.z = (int)Math.Round((double)((float)lhs.z / rhs));
+			return lhs;
+		}
+
+		
 		public int this[int i]
 		{
 			get
@@ -146,6 +233,12 @@ namespace Pathfinding
 		}
 
 		
+		public static implicit operator string(Int3 ob)
+		{
+			return ob.ToString();
+		}
+
+		
 		public override string ToString()
 		{
 			return string.Concat(new object[]
@@ -178,97 +271,13 @@ namespace Pathfinding
 		}
 
 		
-		public static bool operator ==(Int3 lhs, Int3 rhs)
-		{
-			return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
-		}
+		public int x;
 
 		
-		public static bool operator !=(Int3 lhs, Int3 rhs)
-		{
-			return lhs.x != rhs.x || lhs.y != rhs.y || lhs.z != rhs.z;
-		}
+		public int y;
 
 		
-		public static explicit operator Int3(Vector3 ob)
-		{
-			return new Int3((int)Math.Round((double)(ob.x * 1000f)), (int)Math.Round((double)(ob.y * 1000f)), (int)Math.Round((double)(ob.z * 1000f)));
-		}
-
-		
-		public static explicit operator Vector3(Int3 ob)
-		{
-			return new Vector3((float)ob.x * 0.001f, (float)ob.y * 0.001f, (float)ob.z * 0.001f);
-		}
-
-		
-		public static Int3 operator -(Int3 lhs, Int3 rhs)
-		{
-			lhs.x -= rhs.x;
-			lhs.y -= rhs.y;
-			lhs.z -= rhs.z;
-			return lhs;
-		}
-
-		
-		public static Int3 operator -(Int3 lhs)
-		{
-			lhs.x = -lhs.x;
-			lhs.y = -lhs.y;
-			lhs.z = -lhs.z;
-			return lhs;
-		}
-
-		
-		public static Int3 operator +(Int3 lhs, Int3 rhs)
-		{
-			lhs.x += rhs.x;
-			lhs.y += rhs.y;
-			lhs.z += rhs.z;
-			return lhs;
-		}
-
-		
-		public static Int3 operator *(Int3 lhs, int rhs)
-		{
-			lhs.x *= rhs;
-			lhs.y *= rhs;
-			lhs.z *= rhs;
-			return lhs;
-		}
-
-		
-		public static Int3 operator *(Int3 lhs, float rhs)
-		{
-			lhs.x = (int)Math.Round((double)((float)lhs.x * rhs));
-			lhs.y = (int)Math.Round((double)((float)lhs.y * rhs));
-			lhs.z = (int)Math.Round((double)((float)lhs.z * rhs));
-			return lhs;
-		}
-
-		
-		public static Int3 operator *(Int3 lhs, double rhs)
-		{
-			lhs.x = (int)Math.Round((double)lhs.x * rhs);
-			lhs.y = (int)Math.Round((double)lhs.y * rhs);
-			lhs.z = (int)Math.Round((double)lhs.z * rhs);
-			return lhs;
-		}
-
-		
-		public static Int3 operator /(Int3 lhs, float rhs)
-		{
-			lhs.x = (int)Math.Round((double)((float)lhs.x / rhs));
-			lhs.y = (int)Math.Round((double)((float)lhs.y / rhs));
-			lhs.z = (int)Math.Round((double)((float)lhs.z / rhs));
-			return lhs;
-		}
-
-		
-		public static implicit operator string(Int3 ob)
-		{
-			return ob.ToString();
-		}
+		public int z;
 
 		
 		public const int Precision = 1000;
@@ -278,14 +287,5 @@ namespace Pathfinding
 
 		
 		public const float PrecisionFactor = 0.001f;
-
-		
-		public int x;
-
-		
-		public int y;
-
-		
-		public int z;
 	}
 }

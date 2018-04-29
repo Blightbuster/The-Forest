@@ -12,7 +12,7 @@ public class resetArtifactProperties : MonoBehaviour
 		sharedMaterial.EnableKeyword("_EMISSION");
 		float value = 0f;
 		Color white = Color.white;
-		Color color = white * Mathf.LinearToGammaSpace(value);
-		sharedMaterial.SetColor("_EmissionColor", color);
+		Color value2 = white * Mathf.LinearToGammaSpace(value);
+		sharedMaterial.SetColor("_EmissionColor", value2);
 	}
 }

@@ -8,10 +8,10 @@ namespace TheForest.Utils
 	public static class GeoHashHelper<T> where T : Component
 	{
 		
-		public static T GetFromHash(long hash)
+		public static T GetFromHash(long hash, Lookup lookupMode = Lookup.Auto)
 		{
-			T result = (T)((object)null);
-			if (GeoHashHelper<T>.hashes == null || !GeoHashHelper<T>.hashes.TryGetValue(hash, out result))
+			T t = (T)((object)null);
+			if ((GeoHashHelper<T>.hashes == null || !GeoHashHelper<T>.hashes.TryGetValue(hash, out t) || !t) && lookupMode == Lookup.Auto)
 			{
 				T[] array = UnityEngine.Object.FindObjectsOfType<T>();
 				if (GeoHashHelper<T>.hashes == null)
@@ -23,9 +23,32 @@ namespace TheForest.Utils
 				{
 					GeoHashHelper<T>.hashes[value.transform.ToGeoHash()] = value;
 				}
-				GeoHashHelper<T>.hashes.TryGetValue(hash, out result);
+				GeoHashHelper<T>.hashes.TryGetValue(hash, out t);
 			}
-			return result;
+			return t;
+		}
+
+		
+		public static void Register(T component)
+		{
+			if (GeoHashHelper<T>.hashes == null)
+			{
+				GeoHashHelper<T>.hashes = new Dictionary<long, T>(5);
+			}
+			GeoHashHelper<T>.hashes[component.transform.ToGeoHash()] = component;
+		}
+
+		
+		public static void Unregister(T component)
+		{
+			if (GeoHashHelper<T>.hashes != null)
+			{
+				long key = component.transform.ToGeoHash();
+				if (GeoHashHelper<T>.hashes.ContainsKey(key))
+				{
+					GeoHashHelper<T>.hashes.Remove(key);
+				}
+			}
 		}
 
 		

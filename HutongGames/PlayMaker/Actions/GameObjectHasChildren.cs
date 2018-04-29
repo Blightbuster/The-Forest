@@ -61,8 +61,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmEvent falseEvent;
 
 		
-		[Tooltip("Store the result in a bool variable.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the result in a bool variable.")]
 		public FsmBool storeResult;
 
 		

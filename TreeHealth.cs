@@ -1,10 +1,9 @@
 ﻿using System;
+using System.Collections;
 using Bolt;
 using FMOD.Studio;
-using ModAPI;
 using TheForest.Tools;
 using TheForest.Utils;
-using UltimateCheatmenu;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -57,7 +56,7 @@ public class TreeHealth : MonoBehaviour
 	}
 
 	
-	private void __Hit__Original()
+	private void Hit()
 	{
 		if (BoltNetwork.isRunning)
 		{
@@ -162,7 +161,7 @@ public class TreeHealth : MonoBehaviour
 		{
 			return;
 		}
-		this.Trunk = (GameObject)UnityEngine.Object.Instantiate(this.Trunk, base.transform.position, base.transform.rotation);
+		this.Trunk = UnityEngine.Object.Instantiate<GameObject>(this.Trunk, base.transform.position, base.transform.rotation);
 		if (!this.dontScaleTrunk)
 		{
 			this.Trunk.transform.localScale = base.transform.localScale;
@@ -196,7 +195,7 @@ public class TreeHealth : MonoBehaviour
 	{
 		if (this.TrunkUpperSpawn)
 		{
-			this.TrunkUpperSpawn = (GameObject)UnityEngine.Object.Instantiate(this.TrunkUpperSpawn, base.transform.position, base.transform.rotation);
+			this.TrunkUpperSpawn = UnityEngine.Object.Instantiate<GameObject>(this.TrunkUpperSpawn, base.transform.position, base.transform.rotation);
 			if (!this.dontScaleTrunk)
 			{
 				this.TrunkUpperSpawn.transform.localScale = base.transform.localScale;
@@ -215,7 +214,7 @@ public class TreeHealth : MonoBehaviour
 	{
 		if (this.TrunkUpperSpawn)
 		{
-			this.TrunkUpperSpawn = (GameObject)UnityEngine.Object.Instantiate(this.TrunkUpperSpawn, base.transform.position, base.transform.rotation);
+			this.TrunkUpperSpawn = UnityEngine.Object.Instantiate<GameObject>(this.TrunkUpperSpawn, base.transform.position, base.transform.rotation);
 			if (!this.dontScaleTrunk)
 			{
 				this.TrunkUpperSpawn.transform.localScale = base.transform.localScale;
@@ -242,16 +241,29 @@ public class TreeHealth : MonoBehaviour
 		if (this.LodTree != null)
 		{
 			this.LodTree.SendMessageToTargets("OnTreeCutDown", this.TrunkUpperSpawn);
-			foreach (object obj in base.transform)
+			IEnumerator enumerator = base.transform.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				ExplodeTreeStump component = transform.GetComponent<ExplodeTreeStump>();
-				if (component)
+				while (enumerator.MoveNext())
 				{
-					transform.parent = this.LodTree.transform;
-					component.CoolDown();
-					UnityEngine.Object.Destroy(base.gameObject, 0.01f);
-					break;
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					ExplodeTreeStump component = transform.GetComponent<ExplodeTreeStump>();
+					if (component)
+					{
+						transform.parent = this.LodTree.transform;
+						component.CoolDown();
+						UnityEngine.Object.Destroy(base.gameObject, 0.01f);
+						break;
+					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
 				}
 			}
 		}
@@ -265,7 +277,7 @@ public class TreeHealth : MonoBehaviour
 			return;
 		}
 		EventInstance windEvent = TreeWindSfx.BeginTransfer(base.transform);
-		this.Trunk = (GameObject)UnityEngine.Object.Instantiate(this.Trunk, base.transform.position, base.transform.rotation);
+		this.Trunk = UnityEngine.Object.Instantiate<GameObject>(this.Trunk, base.transform.position, base.transform.rotation);
 		if (!this.dontScaleTrunk)
 		{
 			this.Trunk.transform.localScale = base.transform.localScale;
@@ -304,25 +316,6 @@ public class TreeHealth : MonoBehaviour
 		for (int i = 0; i < componentsInChildren.Length; i++)
 		{
 			UnityEngine.Object.Destroy(componentsInChildren[i].transform.parent.gameObject);
-		}
-	}
-
-	
-	private void Hit()
-	{
-		try
-		{
-			if (UCheatmenu.InstantTree)
-			{
-				this.Explosion(100f);
-				return;
-			}
-			this.__Hit__Original();
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__Hit__Original();
 		}
 	}
 

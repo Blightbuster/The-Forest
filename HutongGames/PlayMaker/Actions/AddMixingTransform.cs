@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Play an animation on a subset of the hierarchy. E.g., A waving animation on the upper body.")]
 	[ActionCategory(ActionCategory.Animation)]
+	[Tooltip("Play an animation on a subset of the hierarchy. E.g., A waving animation on the upper body.")]
 	public class AddMixingTransform : FsmStateAction
 	{
 		
@@ -47,8 +47,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Animation))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animation))]
 		[Tooltip("The GameObject playing the animation.")]
 		public FsmOwnerDefault gameObject;
 
@@ -58,8 +58,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString animationName;
 
 		
-		[Tooltip("The mixing transform. E.g., root/upper_body/left_shoulder")]
 		[RequiredField]
+		[Tooltip("The mixing transform. E.g., root/upper_body/left_shoulder")]
 		public FsmString transform;
 
 		

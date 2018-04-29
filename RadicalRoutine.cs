@@ -9,20 +9,6 @@ public class RadicalRoutine : IDeserialized
 	
 	
 	
-	public event Action Cancelled = delegate
-	{
-	};
-
-	
-	
-	
-	public event Action Finished = delegate
-	{
-	};
-
-	
-	
-	
 	public MonoBehaviour trackedObject
 	{
 		get
@@ -35,6 +21,20 @@ public class RadicalRoutine : IDeserialized
 			this.isTracking = (this._trackedObject != null);
 		}
 	}
+
+	
+	
+	
+	public event Action Cancelled = delegate
+	{
+	};
+
+	
+	
+	
+	public event Action Finished = delegate
+	{
+	};
 
 	
 	public void Cancel()

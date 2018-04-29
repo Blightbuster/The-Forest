@@ -8,12 +8,23 @@ public class CoopArmorReplicator : EntityBehaviour<IPlayerState>
 	
 	public override void Attached()
 	{
-		if (!this.entity.isOwner)
+		if (!base.entity.isOwner)
 		{
 			base.state.AddCallback("Armors[]", new PropertyCallbackSimple(this.ArmorsChanged));
-			base.state.AddCallback("Leaves[]", new PropertyCallbackSimple(this.LeavesChanged));
-			base.state.AddCallback("Bones[]", new PropertyCallbackSimple(this.BonesChanged));
+			base.state.AddCallback("Leaves[]", delegate
+			{
+				this.AnyArmorChanged(this.Leaves, base.state.Leaves);
+			});
+			base.state.AddCallback("Bones[]", delegate
+			{
+				this.AnyArmorChanged(this.Bones, base.state.Bones);
+			});
+			base.state.AddCallback("Creepy[]", delegate
+			{
+				this.AnyArmorChanged(this.Creepy, base.state.Creepy);
+			});
 			base.state.AddCallback("Rebreater", new PropertyCallbackSimple(this.ReBreatherChanged));
+			base.state.AddCallback("Warmsuit", new PropertyCallbackSimple(this.WarmsuitChanged));
 		}
 	}
 
@@ -24,25 +35,19 @@ public class CoopArmorReplicator : EntityBehaviour<IPlayerState>
 	}
 
 	
-	private void LeavesChanged()
+	private void WarmsuitChanged()
 	{
-		for (int i = 0; i < Mathf.Min(base.state.Leaves.Length, this.Leaves.Length); i++)
-		{
-			if (this.Leaves[i])
-			{
-				this.Leaves[i].SetActive(base.state.Leaves[i] == 1);
-			}
-		}
+		this.Warmsuit.SetActive(base.state.Warmsuit);
 	}
 
 	
-	private void BonesChanged()
+	private void AnyArmorChanged(GameObject[] armorType, NetworkArray_Integer stateArray)
 	{
-		for (int i = 0; i < Mathf.Min(base.state.Bones.Length, this.Bones.Length); i++)
+		for (int i = 0; i < Mathf.Min(stateArray.Length, armorType.Length); i++)
 		{
-			if (this.Bones[i])
+			if (armorType[i])
 			{
-				this.Bones[i].SetActive(base.state.Bones[i] == 1);
+				armorType[i].SetActive(stateArray[i] == 1);
 			}
 		}
 	}
@@ -70,9 +75,16 @@ public class CoopArmorReplicator : EntityBehaviour<IPlayerState>
 	
 	private void Update()
 	{
-		if (BoltNetwork.isRunning && this.entity && this.entity.isAttached && this.entity.isOwner)
+		if (BoltNetwork.isRunning && base.entity && base.entity.isAttached && base.entity.isOwner)
 		{
-			base.state.Rebreater = this.ReBreather.activeInHierarchy;
+			if (base.state.Rebreater != this.ReBreather.activeInHierarchy)
+			{
+				base.state.Rebreater = this.ReBreather.activeInHierarchy;
+			}
+			if (base.state.Warmsuit != this.Warmsuit.activeInHierarchy)
+			{
+				base.state.Warmsuit = this.Warmsuit.activeInHierarchy;
+			}
 			for (int i = 0; i < Mathf.Min(base.state.Leaves.Length, this.Leaves.Length); i++)
 			{
 				if (this.Leaves[i])
@@ -95,25 +107,36 @@ public class CoopArmorReplicator : EntityBehaviour<IPlayerState>
 					}
 				}
 			}
-			for (int k = 0; k < Mathf.Min(base.state.Armors.Length, this.Armors.Length); k++)
+			for (int k = 0; k < Mathf.Min(base.state.Creepy.Length, this.Creepy.Length); k++)
 			{
-				if (this.Armors[k])
+				if (this.Creepy[k])
 				{
-					int num3 = 0;
-					if (this.Armors[k].activeInHierarchy)
+					int num3 = (!this.Creepy[k].activeInHierarchy) ? 0 : 1;
+					if (num3 != base.state.Creepy[k])
 					{
-						for (int l = 0; l < this.ArmorMaterials.Length; l++)
+						base.state.Creepy[k] = num3;
+					}
+				}
+			}
+			for (int l = 0; l < Mathf.Min(base.state.Armors.Length, this.Armors.Length); l++)
+			{
+				if (this.Armors[l])
+				{
+					int num4 = 0;
+					if (this.Armors[l].activeInHierarchy)
+					{
+						for (int m = 0; m < this.ArmorMaterials.Length; m++)
 						{
-							if (object.ReferenceEquals(this.ArmorMaterials[l], this.Armors[k].GetComponent<Renderer>().sharedMaterial))
+							if (object.ReferenceEquals(this.ArmorMaterials[m], this.Armors[l].GetComponent<Renderer>().sharedMaterial))
 							{
-								num3 = l + 1;
+								num4 = m + 1;
 								break;
 							}
 						}
 					}
-					if (num3 != base.state.Armors[k])
+					if (num4 != base.state.Armors[l])
 					{
-						base.state.Armors[k] = num3;
+						base.state.Armors[l] = num4;
 					}
 				}
 			}
@@ -133,5 +156,11 @@ public class CoopArmorReplicator : EntityBehaviour<IPlayerState>
 	public GameObject[] Bones;
 
 	
+	public GameObject[] Creepy;
+
+	
 	public GameObject ReBreather;
+
+	
+	public GameObject Warmsuit;
 }

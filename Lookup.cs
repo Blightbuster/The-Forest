@@ -9,7 +9,7 @@ public class Lookup<TK, TR> : Dictionary<TK, TR> where TR : class
 	{
 		get
 		{
-			if (this.ContainsKey(index))
+			if (base.ContainsKey(index))
 			{
 				return base[index];
 			}

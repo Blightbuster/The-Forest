@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Logs the value of a Float Variable in the PlayMaker Log Window.")]
 	[ActionCategory(ActionCategory.Debug)]
+	[Tooltip("Logs the value of a Float Variable in the PlayMaker Log Window.")]
 	public class DebugFloat : FsmStateAction
 	{
 		
@@ -31,8 +31,8 @@ namespace HutongGames.PlayMaker.Actions
 		public LogLevel logLevel;
 
 		
-		[Tooltip("Prints the value of a Float variable in the PlayMaker log window.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Prints the value of a Float variable in the PlayMaker log window.")]
 		public FsmFloat floatVariable;
 	}
 }

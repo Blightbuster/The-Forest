@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Converts a Bool value to a Float value.")]
 	[ActionCategory(ActionCategory.Convert)]
+	[Tooltip("Converts a Bool value to a Float value.")]
 	public class ConvertBoolToFloat : FsmStateAction
 	{
 		
@@ -46,9 +46,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmBool boolVariable;
 
 		
-		[Tooltip("The Float variable to set based on the Bool variable value.")]
 		[RequiredField]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The Float variable to set based on the Bool variable value.")]
 		public FsmFloat floatVariable;
 
 		

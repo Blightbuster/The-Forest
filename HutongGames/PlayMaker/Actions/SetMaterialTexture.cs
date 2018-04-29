@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets a named texture in a game object's material.")]
 	[ActionCategory(ActionCategory.Material)]
+	[Tooltip("Sets a named texture in a game object's material.")]
 	public class SetMaterialTexture : ComponentAction<Renderer>
 	{
 		
@@ -45,7 +45,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			if (base.renderer.material == null)
 			{
-				this.LogError("Missing Material!");
+				base.LogError("Missing Material!");
 				return;
 			}
 			if (this.materialIndex.Value == 0)
@@ -74,8 +74,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmMaterial material;
 
 		
-		[Tooltip("A named parameter in the shader.")]
 		[UIHint(UIHint.NamedTexture)]
+		[Tooltip("A named parameter in the shader.")]
 		public FsmString namedTexture;
 
 		

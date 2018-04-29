@@ -68,6 +68,18 @@ namespace RadicalLibrary
 		}
 
 		
+		public static implicit operator Quaternion(SmoothQuaternion obj)
+		{
+			return obj.Value;
+		}
+
+		
+		public static implicit operator SmoothQuaternion(Quaternion q)
+		{
+			return new SmoothQuaternion(q);
+		}
+
+		
 		
 		
 		public float x
@@ -135,18 +147,6 @@ namespace RadicalLibrary
 			{
 				return (Time.time - this._startTime) / this.Duration >= 1f;
 			}
-		}
-
-		
-		public static implicit operator Quaternion(SmoothQuaternion obj)
-		{
-			return obj.Value;
-		}
-
-		
-		public static implicit operator SmoothQuaternion(Quaternion q)
-		{
-			return new SmoothQuaternion(q);
 		}
 
 		

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 
@@ -15,28 +14,14 @@ public static class CompressionHelper
 			string text = CompressionHelper.technique;
 			if (text != null)
 			{
-				if (CompressionHelper.<>f__switch$map24 == null)
+				if (text == "ZipStream")
 				{
-					CompressionHelper.<>f__switch$map24 = new Dictionary<string, int>(1)
-					{
-						{
-							"ZipStream",
-							0
-						}
-					};
-				}
-				int num;
-				if (CompressionHelper.<>f__switch$map24.TryGetValue(text, out num))
-				{
-					if (num == 0)
-					{
-						BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
-						DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(memoryStream);
-						binaryWriter.Write(data.Length);
-						deflaterOutputStream.Write(data, 0, data.Length);
-						deflaterOutputStream.Flush();
-						deflaterOutputStream.Close();
-					}
+					BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
+					DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(memoryStream);
+					binaryWriter.Write(data.Length);
+					deflaterOutputStream.Write(data, 0, data.Length);
+					deflaterOutputStream.Flush();
+					deflaterOutputStream.Close();
 				}
 			}
 			result = CompressionHelper.technique + ":" + Convert.ToBase64String(memoryStream.GetBuffer());

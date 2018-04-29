@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Makes an on/off Toggle Button and stores the button state in a Bool Variable.")]
 	[ActionCategory(ActionCategory.GUILayout)]
+	[Tooltip("Makes an on/off Toggle Button and stores the button state in a Bool Variable.")]
 	public class GUILayoutToggle : GUILayoutAction
 	{
 		

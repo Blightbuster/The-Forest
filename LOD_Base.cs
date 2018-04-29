@@ -147,20 +147,26 @@ public abstract class LOD_Base : MonoBehaviour, IThreadSafeTask
 			return;
 		}
 		Transform transform = null;
-		switch (lod)
+		if (lod != 0)
 		{
-		case 0:
-			transform = this.High;
-			break;
-		case 1:
-			transform = this.Mid;
-			break;
-		case 2:
-			if (this.UseLow)
+			if (lod != 1)
 			{
-				transform = this.Low;
+				if (lod == 2)
+				{
+					if (this.UseLow)
+					{
+						transform = this.Low;
+					}
+				}
 			}
-			break;
+			else
+			{
+				transform = this.Mid;
+			}
+		}
+		else
+		{
+			transform = this.High;
 		}
 		if (transform != null)
 		{
@@ -171,7 +177,7 @@ public abstract class LOD_Base : MonoBehaviour, IThreadSafeTask
 			}
 			else
 			{
-				this.CurrentLodTransform = (UnityEngine.Object.Instantiate(transform, this._position, base.transform.rotation) as Transform);
+				this.CurrentLodTransform = UnityEngine.Object.Instantiate<Transform>(transform, this._position, base.transform.rotation);
 			}
 			LOD_Stats.Current = null;
 			if (this.CurrentLodTransform)

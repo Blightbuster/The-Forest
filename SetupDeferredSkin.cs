@@ -38,16 +38,13 @@ public class SetupDeferredSkin : MonoBehaviour
 	}
 
 	
-	private const int k_TextureCount = 64;
-
-	
-	[Space(2f)]
 	[Header("Area Lights")]
+	[Space(2f)]
 	public bool enableAreaLights;
 
 	
-	[Space(2f)]
 	[Header("Skin Lighting")]
+	[Space(2f)]
 	public Texture BRDFTexture;
 
 	
@@ -69,4 +66,7 @@ public class SetupDeferredSkin : MonoBehaviour
 
 	
 	private int textureIndex;
+
+	
+	private const int k_TextureCount = 64;
 }

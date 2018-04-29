@@ -204,10 +204,8 @@ namespace Pathfinding
 			vector /= (float)previousPoints.Count;
 			for (int j = 0; j < previousPoints.Count; j++)
 			{
-				int index2;
-				int index = index2 = j;
-				Vector3 a = previousPoints[index2];
-				previousPoints[index] = a - vector;
+				int index;
+				previousPoints[index = j] = previousPoints[index] - vector;
 			}
 			PathUtilities.GetPointsAroundPoint(p, g, previousPoints, radius, clearanceRadius);
 		}

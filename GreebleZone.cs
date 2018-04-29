@@ -21,24 +21,28 @@ public class GreebleZone : MonoBehaviour, IThreadSafeTask
 	
 	private void Start()
 	{
-		switch (this.RandomSelection)
+		GreebleSelection randomSelection = this.RandomSelection;
+		if (randomSelection != GreebleSelection.Normal)
 		{
-		case GreebleSelection.RandomizeChances:
-			foreach (GreebleDefinition greebleDefinition in this.GreebleDefinitions)
+			if (randomSelection != GreebleSelection.RandomizeChances)
 			{
-				greebleDefinition.Chance = GreebleUtility.ProceduralValue(1, 100);
+				if (randomSelection == GreebleSelection.SelectOne)
+				{
+					UnityEngine.Random.seed = this.GetRandomSeed();
+					int num = GreebleUtility.ProceduralValue(0, this.GreebleDefinitions.Length);
+					for (int i = 0; i < this.GreebleDefinitions.Length; i++)
+					{
+						this.GreebleDefinitions[i].Chance = ((i != num) ? 0 : 1);
+					}
+				}
 			}
-			break;
-		case GreebleSelection.SelectOne:
-		{
-			UnityEngine.Random.seed = this.GetRandomSeed();
-			int num = GreebleUtility.ProceduralValue(0, this.GreebleDefinitions.Length);
-			for (int j = 0; j < this.GreebleDefinitions.Length; j++)
+			else
 			{
-				this.GreebleDefinitions[j].Chance = ((j != num) ? 0 : 1);
+				foreach (GreebleDefinition greebleDefinition in this.GreebleDefinitions)
+				{
+					greebleDefinition.Chance = GreebleUtility.ProceduralValue(1, 100);
+				}
 			}
-			break;
-		}
 		}
 	}
 

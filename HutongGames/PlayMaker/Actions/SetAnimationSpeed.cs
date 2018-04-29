@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the Speed of an Animation. Check Every Frame to update the animation time continuosly, e.g., if you're manipulating a variable that controls animation speed.")]
 	[ActionCategory(ActionCategory.Animation)]
+	[Tooltip("Sets the Speed of an Animation. Check Every Frame to update the animation time continuosly, e.g., if you're manipulating a variable that controls animation speed.")]
 	public class SetAnimationSpeed : ComponentAction<Animation>
 	{
 		
@@ -43,15 +43,15 @@ namespace HutongGames.PlayMaker.Actions
 			AnimationState animationState = base.animation[this.animName.Value];
 			if (animationState == null)
 			{
-				this.LogWarning("Missing animation: " + this.animName.Value);
+				base.LogWarning("Missing animation: " + this.animName.Value);
 				return;
 			}
 			animationState.speed = this.speed.Value;
 		}
 
 		
-		[CheckForComponent(typeof(Animation))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animation))]
 		public FsmOwnerDefault gameObject;
 
 		

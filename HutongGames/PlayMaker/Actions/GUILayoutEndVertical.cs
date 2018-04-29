@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Close a group started with BeginVertical.")]
 	[ActionCategory(ActionCategory.GUILayout)]
+	[Tooltip("Close a group started with BeginVertical.")]
 	public class GUILayoutEndVertical : FsmStateAction
 	{
 		

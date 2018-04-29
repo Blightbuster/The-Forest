@@ -319,7 +319,7 @@ namespace Pathfinding.Util
 									{
 										if (!flag)
 										{
-											goto IL_9AA;
+											goto IL_9A0;
 										}
 										this.CutDual(list7, list3, list4, flag, intermediateResult, polyTree);
 									}
@@ -408,7 +408,7 @@ namespace Pathfinding.Util
 										}
 									}
 								}
-								IL_9AA:;
+								IL_9A0:;
 							}
 						}
 					}

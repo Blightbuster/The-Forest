@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets a Float Variable to a random value between Min/Max.")]
 	[ActionCategory(ActionCategory.Math)]
+	[Tooltip("Sets a Float Variable to a random value between Min/Max.")]
 	public class RandomFloat : FsmStateAction
 	{
 		

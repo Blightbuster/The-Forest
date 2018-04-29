@@ -79,8 +79,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat fromFloat;
 
 		
-		[Tooltip("Interpolate to this value.")]
 		[RequiredField]
+		[Tooltip("Interpolate to this value.")]
 		public FsmFloat toFloat;
 
 		
@@ -89,8 +89,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat time;
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		[Tooltip("Store the current value in a float variable.")]
 		public FsmFloat storeResult;
 

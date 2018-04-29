@@ -14,7 +14,7 @@ public class ArrowDamage : MonoBehaviour
 	{
 		if (this.parent)
 		{
-			this.bodyCollider = this.parent.GetComponent<CapsuleCollider>();
+			this.bodyCollider = this.parent.GetComponent<Collider>();
 			this.at = this.parent.GetComponent<arrowTrajectory>();
 		}
 		if (this.at)
@@ -69,7 +69,7 @@ public class ArrowDamage : MonoBehaviour
 	{
 		if (BoltNetwork.isRunning)
 		{
-			if (this.at._boltEntity && this.at._boltEntity.isAttached && this.at._boltEntity.isOwner)
+			if (this.at && this.at._boltEntity && this.at._boltEntity.isAttached && this.at._boltEntity.isOwner)
 			{
 				this.Live = false;
 			}
@@ -86,6 +86,14 @@ public class ArrowDamage : MonoBehaviour
 		if (this.ignoreCollisionEvents(targetCollider))
 		{
 			return;
+		}
+		if (!isTrigger)
+		{
+			Molotov componentInParent = base.transform.GetComponentInParent<Molotov>();
+			if (componentInParent)
+			{
+				componentInParent.IncendiaryBreak();
+			}
 		}
 		bool headDamage = false;
 		if (target.gameObject.layer == LayerMask.NameToLayer("Water"))
@@ -140,7 +148,7 @@ public class ArrowDamage : MonoBehaviour
 			}
 			if (!this.spearType && !this.flintLockAmmoType && !flag2)
 			{
-				if (arrowStickToTarget)
+				if (arrowStickToTarget && arrowStickToTarget.enabled)
 				{
 					if (flag)
 					{
@@ -151,19 +159,15 @@ public class ArrowDamage : MonoBehaviour
 					{
 						if (this.at && this.at._boltEntity && this.at._boltEntity.isAttached && this.at._boltEntity.isOwner)
 						{
-							arrowStickToTarget.stickArrowToNearestBone(base.transform);
+							headDamage = arrowStickToTarget.stickArrowToNearestBone(base.transform);
 						}
 					}
 					else
 					{
-						arrowStickToTarget.stickArrowToNearestBone(base.transform);
+						headDamage = arrowStickToTarget.stickArrowToNearestBone(base.transform);
 					}
 				}
 				base.Invoke("destroyMe", 0.1f);
-			}
-			if (arrowStickToTarget && arrowStickToTarget.isHeadTransform(base.transform))
-			{
-				headDamage = true;
 			}
 			base.StartCoroutine(this.HitAi(target, flag || flag3, headDamage));
 			if (flag2)
@@ -188,7 +192,7 @@ public class ArrowDamage : MonoBehaviour
 				}
 			}
 		}
-		else if (target.CompareTag("TerrainMain"))
+		else if (target.CompareTag("TerrainMain") && !LocalPlayer.IsInCaves)
 		{
 			if (this.ignoreTerrain)
 			{
@@ -375,78 +379,78 @@ public class ArrowDamage : MonoBehaviour
 		}
 		if (target)
 		{
-			Vector3 localTarget = target.transform.root.GetChild(0).InverseTransformPoint(base.transform.position);
-			float targetAngle = Mathf.Atan2(localTarget.x, localTarget.z) * 57.29578f;
+			Vector3 vector = target.transform.root.GetChild(0).InverseTransformPoint(base.transform.position);
+			float targetAngle = Mathf.Atan2(vector.x, vector.z) * 57.29578f;
 			int animalHitDirection = animalHealth.GetAnimalHitDirection(targetAngle);
-			BoltEntity targetEntity = target.GetComponentInParent<BoltEntity>();
-			if (!targetEntity)
+			BoltEntity componentInParent = target.GetComponentInParent<BoltEntity>();
+			if (!componentInParent)
 			{
 				target.GetComponent<BoltEntity>();
 			}
-			if (BoltNetwork.isClient && targetEntity)
+			if (BoltNetwork.isClient && componentInParent)
 			{
 				if (hitDelay)
 				{
 					target.transform.SendMessageUpwards("getClientHitDirection", 6, SendMessageOptions.DontRequireReceiver);
 					target.transform.SendMessageUpwards("StartPrediction", SendMessageOptions.DontRequireReceiver);
-					BoltEntity arrowEntity = this.parent.GetComponent<BoltEntity>();
-					PlayerHitEnemy ev = PlayerHitEnemy.Raise(GlobalTargets.OnlyServer);
-					ev.Target = targetEntity;
-					ev.Weapon = arrowEntity;
-					ev.getAttacker = 10;
+					BoltEntity component = this.parent.GetComponent<BoltEntity>();
+					PlayerHitEnemy playerHitEnemy = PlayerHitEnemy.Raise(GlobalTargets.OnlyServer);
+					playerHitEnemy.Target = componentInParent;
+					playerHitEnemy.Weapon = component;
+					playerHitEnemy.getAttacker = 10;
 					if (target.gameObject.CompareTag("animalRoot"))
 					{
-						ev.getAttackDirection = animalHitDirection;
+						playerHitEnemy.getAttackDirection = animalHitDirection;
 					}
 					else
 					{
-						ev.getAttackDirection = 3;
+						playerHitEnemy.getAttackDirection = 3;
 					}
-					ev.getAttackerType = 4;
-					ev.Hit = sendDamage;
-					ev.Send();
+					playerHitEnemy.getAttackerType = 4;
+					playerHitEnemy.Hit = sendDamage;
+					playerHitEnemy.Send();
 				}
 				else
 				{
 					target.transform.SendMessageUpwards("getClientHitDirection", 6, SendMessageOptions.DontRequireReceiver);
 					target.transform.SendMessageUpwards("StartPrediction", SendMessageOptions.DontRequireReceiver);
-					PlayerHitEnemy ev2 = PlayerHitEnemy.Raise(GlobalTargets.OnlyServer);
-					ev2.Target = targetEntity;
+					PlayerHitEnemy playerHitEnemy2 = PlayerHitEnemy.Raise(GlobalTargets.OnlyServer);
+					playerHitEnemy2.Target = componentInParent;
 					if (target.gameObject.CompareTag("animalRoot"))
 					{
-						ev2.getAttackDirection = animalHitDirection;
+						playerHitEnemy2.getAttackDirection = animalHitDirection;
 					}
 					else
 					{
-						ev2.getAttackDirection = 3;
+						playerHitEnemy2.getAttackDirection = 3;
 					}
-					ev2.getAttackerType = 4;
-					ev2.Hit = sendDamage;
-					ev2.Send();
+					playerHitEnemy2.getAttackerType = 4;
+					playerHitEnemy2.Hit = sendDamage;
+					playerHitEnemy2.Send();
 				}
 			}
 			else
 			{
 				target.gameObject.SendMessageUpwards("getAttackDirection", 3, SendMessageOptions.DontRequireReceiver);
 				target.gameObject.SendMessageUpwards("getAttackerType", 4, SendMessageOptions.DontRequireReceiver);
-				GameObject attacker = Scene.SceneTracker.GetClosestPlayerFromPos(base.transform.position);
-				target.gameObject.SendMessageUpwards("getAttacker", attacker, SendMessageOptions.DontRequireReceiver);
+				GameObject closestPlayerFromPos = Scene.SceneTracker.GetClosestPlayerFromPos(base.transform.position);
+				target.gameObject.SendMessageUpwards("getAttacker", closestPlayerFromPos, SendMessageOptions.DontRequireReceiver);
 				if (target.gameObject.CompareTag("lb_bird") || target.gameObject.CompareTag("animalRoot") || target.gameObject.CompareTag("enemyRoot") || target.gameObject.CompareTag("PlayerNet"))
 				{
 					if (target.gameObject.CompareTag("enemyRoot"))
 					{
-						EnemyHealth eh = target.GetComponentInChildren<EnemyHealth>();
-						if (eh)
+						EnemyHealth componentInChildren = target.GetComponentInChildren<EnemyHealth>();
+						if (componentInChildren)
 						{
-							eh.getAttackDirection(3);
-							eh.setSkinDamage(2);
-							mutantTargetSwitching mts = target.GetComponentInChildren<mutantTargetSwitching>();
-							if (mts)
+							componentInChildren.getAttackDirection(3);
+							componentInChildren.setSkinDamage(2);
+							mutantTargetSwitching componentInChildren2 = target.GetComponentInChildren<mutantTargetSwitching>();
+							if (componentInChildren2)
 							{
-								mts.getAttackerType(4);
-								mts.getAttacker(attacker);
+								componentInChildren2.getAttackerType(4);
+								componentInChildren2.getAttacker(closestPlayerFromPos);
 							}
-							eh.Hit(sendDamage);
+							componentInChildren.Hit(sendDamage);
 						}
 					}
 					else
@@ -646,7 +650,7 @@ public class ArrowDamage : MonoBehaviour
 	public string hitMetalEvent;
 
 	
-	private CapsuleCollider bodyCollider;
+	private Collider bodyCollider;
 
 	
 	private RaycastHit hit;

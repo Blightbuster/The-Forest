@@ -5,9 +5,9 @@ using UnityEngine.Rendering;
 namespace uSky
 {
 	
+	[ExecuteInEditMode]
 	[AddComponentMenu("uSky/uSky Light")]
 	[RequireComponent(typeof(uSkyManager))]
-	[ExecuteInEditMode]
 	public class uSkyLight : MonoBehaviour
 	{
 		
@@ -266,20 +266,20 @@ namespace uSky
 		private Color colorOffset(Color currentColor, float offsetRange, float rayleighOffsetRange, bool IsGround)
 		{
 			Vector3 vector = (!(this.uSM != null)) ? new Vector3(5.81f, 13.57f, 33.13f) : (this.uSM.BetaR * 1000f);
-			Vector3 to = new Vector3(0.5f, 0.5f, 0.5f);
+			Vector3 b = new Vector3(0.5f, 0.5f, 0.5f);
 			if (IsGround)
 			{
-				to = new Vector3(this.groundColorTint.r / 0.369f * 0.5f, this.groundColorTint.g / 0.349f * 0.5f, this.groundColorTint.b / 0.341f * 0.5f);
+				b = new Vector3(this.groundColorTint.r / 0.369f * 0.5f, this.groundColorTint.g / 0.349f * 0.5f, this.groundColorTint.b / 0.341f * 0.5f);
 			}
 			else
 			{
-				to = new Vector3(vector.x / 5.81f * 0.5f, vector.y / 13.57f * 0.5f, vector.z / 33.13f * 0.5f);
+				b = new Vector3(vector.x / 5.81f * 0.5f, vector.y / 13.57f * 0.5f, vector.z / 33.13f * 0.5f);
 			}
-			to = Vector3.Lerp(new Vector3(Mathf.Abs(1f - to.x), Mathf.Abs(1f - to.y), Mathf.Abs(1f - to.z)), to, this.sunsetTime);
-			to = Vector3.Lerp(new Vector3(0.5f, 0.5f, 0.5f), to, this.dayTime);
-			Vector3 vector2 = new Vector3(Mathf.Lerp(currentColor.r - offsetRange, currentColor.r + offsetRange, to.x), Mathf.Lerp(currentColor.g - offsetRange, currentColor.g + offsetRange, to.y), Mathf.Lerp(currentColor.b - offsetRange, currentColor.b + offsetRange, to.z));
-			Vector3 to2 = new Vector3(vector2.x / vector.x, vector2.y / vector.y, vector2.z / vector.z) * 4f;
-			vector2 = ((this.rayleighSlider >= 1f) ? Vector3.Lerp(vector2, to2, Mathf.Max(0f, this.rayleighSlider - 1f) / 4f * rayleighOffsetRange) : Vector3.Lerp(Vector3.zero, vector2, this.rayleighSlider));
+			b = Vector3.Lerp(new Vector3(Mathf.Abs(1f - b.x), Mathf.Abs(1f - b.y), Mathf.Abs(1f - b.z)), b, this.sunsetTime);
+			b = Vector3.Lerp(new Vector3(0.5f, 0.5f, 0.5f), b, this.dayTime);
+			Vector3 vector2 = new Vector3(Mathf.Lerp(currentColor.r - offsetRange, currentColor.r + offsetRange, b.x), Mathf.Lerp(currentColor.g - offsetRange, currentColor.g + offsetRange, b.y), Mathf.Lerp(currentColor.b - offsetRange, currentColor.b + offsetRange, b.z));
+			Vector3 b2 = new Vector3(vector2.x / vector.x, vector2.y / vector.y, vector2.z / vector.z) * 4f;
+			vector2 = ((this.rayleighSlider >= 1f) ? Vector3.Lerp(vector2, b2, Mathf.Max(0f, this.rayleighSlider - 1f) / 4f * rayleighOffsetRange) : Vector3.Lerp(Vector3.zero, vector2, this.rayleighSlider));
 			return new Color(vector2.x, vector2.y, vector2.z, 1f) * this.exposure;
 		}
 

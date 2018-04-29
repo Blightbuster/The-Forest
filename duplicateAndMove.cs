@@ -9,7 +9,7 @@ public class duplicateAndMove : MonoBehaviour
 	{
 		for (int i = 0; i < this.amount; i++)
 		{
-			GameObject gameObject = UnityEngine.Object.Instantiate(this.tempCube, base.transform.position, base.transform.rotation) as GameObject;
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.tempCube, base.transform.position, base.transform.rotation);
 		}
 	}
 

@@ -14,7 +14,7 @@ public class CoopSharableStorageListener : EntityBehaviour<IPlayerState>
 	
 	private void Update()
 	{
-		if (this.entity && this.entity.isAttached)
+		if (base.entity && base.entity.isAttached)
 		{
 			this.CheckContentVersion();
 		}

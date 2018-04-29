@@ -100,7 +100,7 @@ public class LOD_Settings
 		{
 			num = -1f;
 		}
-		return Mathf.Min(num, 400f);
+		return Mathf.Min(num, 375f);
 	}
 
 	

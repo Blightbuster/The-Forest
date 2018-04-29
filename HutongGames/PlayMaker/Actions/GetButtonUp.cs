@@ -4,8 +4,8 @@ using TheForest.Utils;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sends an Event when a Button is released.")]
 	[ActionCategory(ActionCategory.Input)]
+	[Tooltip("Sends an Event when a Button is released.")]
 	public class GetButtonUp : FsmStateAction
 	{
 		
@@ -28,8 +28,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The name of the button. Set in the Unity Input Manager.")]
 		[RequiredField]
+		[Tooltip("The name of the button. Set in the Unity Input Manager.")]
 		public FsmString buttonName;
 
 		

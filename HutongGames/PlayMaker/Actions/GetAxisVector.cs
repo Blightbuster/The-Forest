@@ -27,40 +27,49 @@ namespace HutongGames.PlayMaker.Actions
 			Vector3 a2 = default(Vector3);
 			if (this.relativeTo.Value == null)
 			{
-				switch (this.mapToPlane)
+				GetAxisVector.AxisPlane axisPlane = this.mapToPlane;
+				if (axisPlane != GetAxisVector.AxisPlane.XZ)
 				{
-				case GetAxisVector.AxisPlane.XZ:
+					if (axisPlane != GetAxisVector.AxisPlane.XY)
+					{
+						if (axisPlane == GetAxisVector.AxisPlane.YZ)
+						{
+							a = Vector3.up;
+							a2 = Vector3.forward;
+						}
+					}
+					else
+					{
+						a = Vector3.up;
+						a2 = Vector3.right;
+					}
+				}
+				else
+				{
 					a = Vector3.forward;
 					a2 = Vector3.right;
-					break;
-				case GetAxisVector.AxisPlane.XY:
-					a = Vector3.up;
-					a2 = Vector3.right;
-					break;
-				case GetAxisVector.AxisPlane.YZ:
-					a = Vector3.up;
-					a2 = Vector3.forward;
-					break;
 				}
 			}
 			else
 			{
 				Transform transform = this.relativeTo.Value.transform;
-				switch (this.mapToPlane)
+				GetAxisVector.AxisPlane axisPlane2 = this.mapToPlane;
+				if (axisPlane2 != GetAxisVector.AxisPlane.XZ)
 				{
-				case GetAxisVector.AxisPlane.XZ:
+					if (axisPlane2 == GetAxisVector.AxisPlane.XY || axisPlane2 == GetAxisVector.AxisPlane.YZ)
+					{
+						a = Vector3.up;
+						a.z = 0f;
+						a = a.normalized;
+						a2 = transform.TransformDirection(Vector3.right);
+					}
+				}
+				else
+				{
 					a = transform.TransformDirection(Vector3.forward);
 					a.y = 0f;
 					a = a.normalized;
 					a2 = new Vector3(a.z, 0f, -a.x);
-					break;
-				case GetAxisVector.AxisPlane.XY:
-				case GetAxisVector.AxisPlane.YZ:
-					a = Vector3.up;
-					a.z = 0f;
-					a = a.normalized;
-					a2 = transform.TransformDirection(Vector3.right);
-					break;
 				}
 			}
 			float d = (!this.horizontalAxis.IsNone && !string.IsNullOrEmpty(this.horizontalAxis.Value)) ? TheForest.Utils.Input.GetAxis(this.horizontalAxis.Value) : 0f;
@@ -87,8 +96,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat multiplier;
 
 		
-		[Tooltip("The world plane to map the 2d input onto.")]
 		[RequiredField]
+		[Tooltip("The world plane to map the 2d input onto.")]
 		public GetAxisVector.AxisPlane mapToPlane;
 
 		
@@ -97,13 +106,13 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("Store the direction vector.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the direction vector.")]
 		public FsmVector3 storeVector;
 
 		
-		[Tooltip("Store the length of the direction vector.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the length of the direction vector.")]
 		public FsmFloat storeMagnitude;
 
 		

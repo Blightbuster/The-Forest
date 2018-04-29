@@ -62,9 +62,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The Index of the player in the network connections list.")]
-		[RequiredField]
 		[ActionSection("Setup")]
+		[RequiredField]
+		[Tooltip("The Index of the player in the network connections list.")]
 		[UIHint(UIHint.Variable)]
 		public FsmInt playerIndex;
 
@@ -76,10 +76,10 @@ namespace HutongGames.PlayMaker.Actions
 		public bool everyFrame;
 
 		
-		[RequiredField]
 		[ActionSection("Result")]
-		[UIHint(UIHint.Variable)]
+		[RequiredField]
 		[Tooltip("Get the last average ping time to the given player in milliseconds.")]
+		[UIHint(UIHint.Variable)]
 		public FsmInt averagePing;
 
 		

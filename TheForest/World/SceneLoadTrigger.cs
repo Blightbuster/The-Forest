@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections;
 using Bolt;
+using TheForest.Items.Inventory;
+using TheForest.Utils;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
 
 namespace TheForest.World
 {
@@ -79,17 +82,24 @@ namespace TheForest.World
 			{
 				this._runningAction = this._pendingAction;
 				this._pendingAction = SceneLoadTrigger.Actions.None;
-				switch (this._runningAction)
+				SceneLoadTrigger.Actions runningAction = this._runningAction;
+				if (runningAction != SceneLoadTrigger.Actions.Load)
 				{
-				case SceneLoadTrigger.Actions.Load:
+					if (runningAction != SceneLoadTrigger.Actions.Unload)
+					{
+						if (runningAction == SceneLoadTrigger.Actions.CrossingEventOnly)
+						{
+							this.OnActionFinished();
+						}
+					}
+					else
+					{
+						TheForest.Utils.Scene.ActiveMB.StartCoroutine(this.UnloadScene());
+					}
+				}
+				else
+				{
 					base.StartCoroutine(this.StreamSceneRoutine());
-					break;
-				case SceneLoadTrigger.Actions.Unload:
-					base.StartCoroutine(this.UnloadScene());
-					break;
-				case SceneLoadTrigger.Actions.CrossingEventOnly:
-					this.OnActionFinished();
-					break;
 				}
 			}
 		}
@@ -104,14 +114,6 @@ namespace TheForest.World
 		
 		private GameObject GetLoadedSceneRoot()
 		{
-			if (!this._loadedSceneRoot)
-			{
-				GameObject gameObject = string.IsNullOrEmpty(this._sceneObjectName) ? GameObject.FindWithTag(this._sceneObjectTag) : GameObject.Find(this._sceneObjectName);
-				if (gameObject)
-				{
-					this._loadedSceneRoot = gameObject.transform.root.gameObject;
-				}
-			}
 			return this._loadedSceneRoot;
 		}
 
@@ -123,27 +125,28 @@ namespace TheForest.World
 				this._onBeforeLoad.Invoke();
 				if (this._loadDelay > 0f)
 				{
+					if (LocalPlayer.Inventory && LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Loading && !TheForest.Utils.Scene.HudGui.LoadingCavesInfo.activeSelf)
+					{
+						TheForest.Utils.Scene.HudGui.LoadingCavesInfo.SetActive(true);
+						TheForest.Utils.Scene.HudGui.LoadingCavesFill.fillAmount = 0.1f;
+					}
 					yield return new WaitForSeconds(this._loadDelay);
 				}
-				AsyncOperation async = Application.LoadLevelAdditiveAsync(this._sceneName);
-				yield return async;
-				if (this.GetLoadedSceneRoot())
+				SceneManager.sceneLoaded += this.SceneManager_sceneLoaded;
+				SceneManager.LoadScene(this._sceneName, LoadSceneMode.Additive);
+				if (LocalPlayer.Inventory && LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Loading && TheForest.Utils.Scene.HudGui.LoadingCavesInfo.activeSelf)
 				{
-					if (this._loadAnimPrefabs)
-					{
-						if (!CoopPeerStarter.DedicatedHost)
-						{
-						}
-						base.StartCoroutine(this.loadEndBossScene());
-					}
-					this._onFinishedLoading.Invoke();
-					this.OnActionFinished();
+					TheForest.Utils.Scene.HudGui.LoadingCavesFill.fillAmount = Mathf.Max(0.1f, 0.5f);
+				}
+				yield return null;
+				if (this._loadAnimPrefabs)
+				{
+					base.StartCoroutine(this.loadEndBossScene());
 				}
 				else
 				{
-					this._runningAction = SceneLoadTrigger.Actions.None;
-					this._pendingAction = SceneLoadTrigger.Actions.Load;
-					this.DoPendingAction();
+					TheForest.Utils.Scene.HudGui.LoadingCavesInfo.SetActive(false);
+					TheForest.Utils.Scene.HudGui.Grid.repositionNow = true;
 				}
 			}
 			else
@@ -151,6 +154,26 @@ namespace TheForest.World
 				this.OnActionFinished();
 			}
 			yield break;
+		}
+
+		
+		private void SceneManager_sceneLoaded(UnityEngine.SceneManagement.Scene arg0, LoadSceneMode arg1)
+		{
+			if (arg0.name == this._sceneName)
+			{
+				SceneManager.sceneLoaded -= this.SceneManager_sceneLoaded;
+				if (arg0.rootCount == 1)
+				{
+					this._loadedSceneRoot = arg0.GetRootGameObjects()[0];
+				}
+				else
+				{
+					Debug.Log("More than one root object in cave scene: " + this._sceneName);
+					this._loadedSceneRoot = (string.IsNullOrEmpty(this._sceneObjectName) ? GameObject.FindWithTag(this._sceneObjectTag) : GameObject.Find(this._sceneObjectName));
+				}
+				this._onFinishedLoading.Invoke();
+				this.OnActionFinished();
+			}
 		}
 
 		
@@ -164,23 +187,34 @@ namespace TheForest.World
 					yield return YieldPresets.WaitTwoSeconds;
 					if (GameObject.FindWithTag("endGameBossPrefab") == null)
 					{
-						AsyncOperation async = Application.LoadLevelAdditiveAsync(this._animationPrefabsSceneName);
-						yield return async;
+						AsyncOperation async = SceneManager.LoadSceneAsync(this._animationPrefabsSceneName, LoadSceneMode.Additive);
+						while (!async.isDone)
+						{
+							TheForest.Utils.Scene.HudGui.LoadingCavesFill.fillAmount = Mathf.Max(0.1f, 0.5f + async.progress / 2f);
+							yield return null;
+						}
 					}
 					Debug.Log("client loaded end boss prefab");
 					if (SteamClientDSConfig.isDedicatedClient)
 					{
-						loadEndGamePrefabs ev = loadEndGamePrefabs.Create(GlobalTargets.OnlyServer);
-						ev.sceneName = this._animationPrefabsSceneName;
-						ev.Send();
+						loadEndGamePrefabs loadEndGamePrefabs = loadEndGamePrefabs.Create(GlobalTargets.OnlyServer);
+						loadEndGamePrefabs.sceneName = this._animationPrefabsSceneName;
+						loadEndGamePrefabs.Send();
 					}
 				}
 				else if (GameObject.FindWithTag("endGameBossPrefab") == null)
 				{
-					Application.LoadLevelAdditiveAsync(this._animationPrefabsSceneName);
+					AsyncOperation async2 = SceneManager.LoadSceneAsync(this._animationPrefabsSceneName, LoadSceneMode.Additive);
 					Debug.Log("loading animation prefabs on server");
+					while (!async2.isDone)
+					{
+						TheForest.Utils.Scene.HudGui.LoadingCavesFill.fillAmount = Mathf.Max(0.1f, 0.5f + async2.progress / 2f);
+						yield return null;
+					}
 				}
 			}
+			TheForest.Utils.Scene.HudGui.LoadingCavesInfo.SetActive(false);
+			TheForest.Utils.Scene.HudGui.Grid.repositionNow = true;
 			yield return null;
 			yield break;
 		}
@@ -195,8 +229,8 @@ namespace TheForest.World
 				{
 					yield return new WaitForSeconds(this._unloadDelay);
 				}
-				UnityEngine.Object.Destroy(this._loadedSceneRoot);
-				this._loadedSceneRoot = null;
+				SceneManager.sceneUnloaded += this.SceneManager_sceneUnloaded;
+				yield return SceneManager.UnloadSceneAsync(this._sceneName);
 				yield return null;
 				yield return null;
 				Resources.UnloadUnusedAssets();
@@ -207,6 +241,16 @@ namespace TheForest.World
 			this._onFinishedUnloading.Invoke();
 			this.OnActionFinished();
 			yield break;
+		}
+
+		
+		private void SceneManager_sceneUnloaded(UnityEngine.SceneManagement.Scene arg0)
+		{
+			if (arg0.name == this._sceneName)
+			{
+				SceneManager.sceneUnloaded -= this.SceneManager_sceneUnloaded;
+				this._loadedSceneRoot = null;
+			}
 		}
 
 		

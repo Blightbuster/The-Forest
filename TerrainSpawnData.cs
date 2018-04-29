@@ -26,7 +26,7 @@ public struct TerrainSpawnData
 	{
 		for (int i = 0; i < this.positions.Count; i++)
 		{
-			GameObject gameObject = (GameObject)UnityEngine.Object.Instantiate(this.prefab, this.positions[i], Quaternion.Euler(this.eulerRotations[i]));
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.prefab, this.positions[i], Quaternion.Euler(this.eulerRotations[i]));
 			gameObject.transform.parent = parent;
 			if (hideInEditor)
 			{

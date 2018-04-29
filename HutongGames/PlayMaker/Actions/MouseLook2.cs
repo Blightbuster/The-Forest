@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Rotates a GameObject based on mouse movement. Minimum and Maximum values can be used to constrain the rotation.")]
 	[ActionCategory(ActionCategory.Input)]
+	[Tooltip("Rotates a GameObject based on mouse movement. Minimum and Maximum values can be used to constrain the rotation.")]
 	public class MouseLook2 : ComponentAction<Rigidbody>
 	{
 		
@@ -57,17 +57,24 @@ namespace HutongGames.PlayMaker.Actions
 				return;
 			}
 			Transform transform = ownerDefaultTarget.transform;
-			switch (this.axes)
+			MouseLook2.RotationAxes rotationAxes = this.axes;
+			if (rotationAxes != MouseLook2.RotationAxes.MouseXAndY)
 			{
-			case MouseLook2.RotationAxes.MouseXAndY:
+				if (rotationAxes != MouseLook2.RotationAxes.MouseX)
+				{
+					if (rotationAxes == MouseLook2.RotationAxes.MouseY)
+					{
+						transform.localEulerAngles = new Vector3(-this.GetYRotation(), transform.localEulerAngles.y, 0f);
+					}
+				}
+				else
+				{
+					transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, this.GetXRotation(), 0f);
+				}
+			}
+			else
+			{
 				transform.localEulerAngles = new Vector3(this.GetYRotation(), this.GetXRotation(), 0f);
-				break;
-			case MouseLook2.RotationAxes.MouseX:
-				transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, this.GetXRotation(), 0f);
-				break;
-			case MouseLook2.RotationAxes.MouseY:
-				transform.localEulerAngles = new Vector3(-this.GetYRotation(), transform.localEulerAngles.y, 0f);
-				break;
 			}
 		}
 
@@ -124,13 +131,13 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat minimumX;
 
 		
-		[HasFloatSlider(-360f, 360f)]
 		[RequiredField]
+		[HasFloatSlider(-360f, 360f)]
 		public FsmFloat maximumX;
 
 		
-		[HasFloatSlider(-360f, 360f)]
 		[RequiredField]
+		[HasFloatSlider(-360f, 360f)]
 		public FsmFloat minimumY;
 
 		

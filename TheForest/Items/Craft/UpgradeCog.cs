@@ -45,8 +45,9 @@ namespace TheForest.Items.Craft
 				if (Mathf.Approximately(num, 1f))
 				{
 					this._stateStartTime = Time.realtimeSinceStartup;
-					this._state = UpgradeCog.States.Aiming;
 					Scene.HudGui.ManualUpgradingInfo.SetActive(true);
+					this._failCount = 0;
+					this._state = ((!this._autoPlace) ? UpgradeCog.States.Aiming : UpgradeCog.States.Applying);
 				}
 				break;
 			case UpgradeCog.States.Aiming:
@@ -95,14 +96,30 @@ namespace TheForest.Items.Craft
 					if (this.ThrowUpgradePart(false))
 					{
 						this._failCount = 0;
+						if (this._autoPlace)
+						{
+							bool flag = Vector3.Dot(this._currentReceiver._centerAndRotationAxisUpDirection.right, this._currentUpgradePartTr.position - this._currentReceiver._centerAndRotationAxisUpDirection.position) < 0f;
+							if (this._rotateAngle > 60f)
+							{
+								this._currentUpgradePartTr.gameObject.SetActive(false);
+								if (!flag)
+								{
+									this._rotateAngle = -this._rotateAngle;
+								}
+								this._rotateAxis = this._currentReceiver._centerAndRotationAxisUpDirection.up;
+								this._stateStartTime = 0f;
+								this._state = UpgradeCog.States.Rotating;
+								break;
+							}
+						}
 						this._stateStartTime = Time.realtimeSinceStartup;
 						this._state = UpgradeCog.States.Implanting;
 					}
-					else if (this._failCount++ > 10)
+					else if (++this._failCount + this._implantsDone > this._totalIngredientImplants)
 					{
 						this.NextIngredient();
 					}
-					else
+					else if (!this._autoPlace)
 					{
 						this._state = UpgradeCog.States.Aiming;
 					}
@@ -116,12 +133,17 @@ namespace TheForest.Items.Craft
 			{
 				float num4 = (!this._fastForward) ? (Time.unscaledDeltaTime / this._rotationDuration) : 1f;
 				this._craftView.transform.RotateAround(this._currentReceiver._centerAndRotationAxisUpDirection.position, this._rotateAxis, this._rotateAngle * num4);
+				this._circlePatternRotation *= Quaternion.AngleAxis(this._rotateAngle * num4, this._rotateAxis);
 				this._stateStartTime += Time.unscaledDeltaTime;
 				if (this._stateStartTime >= this._rotationDuration || this._fastForward)
 				{
+					if (this._autoPlace)
+					{
+						this._currentUpgradePartTr.gameObject.SetActive(true);
+					}
 					this._failCount = 0;
 					this._stateStartTime = Time.realtimeSinceStartup;
-					this._state = UpgradeCog.States.Aiming;
+					this._state = ((!this._autoPlace) ? UpgradeCog.States.Aiming : UpgradeCog.States.Implanting);
 				}
 				break;
 			}
@@ -138,7 +160,7 @@ namespace TheForest.Items.Craft
 						this.ApplyBonus();
 						Scene.HudGui.ShowUpgradesDistribution(this._recipe._productItemID, this._recipe._ingredients[1]._itemID, 1);
 					}
-					this._state = UpgradeCog.States.Aiming;
+					this._state = ((!this._autoPlace) ? UpgradeCog.States.Aiming : UpgradeCog.States.Applying);
 					LocalPlayer.Sfx.PlayUpgradeSuccess(this._currentUpgradePartTr.gameObject);
 				}
 				break;
@@ -199,12 +221,24 @@ namespace TheForest.Items.Craft
 			this._recipe = receipe;
 			this._craftView = craftView;
 			this._currentReceiver = null;
-			this._upPositionV = craftView.transform.position + this._upPosition.parent.TransformDirection(new Vector3(0.5f, -1.05f, 0f));
-			this._upRotation = craftView.transform.rotation * Quaternion.Euler(30f, 0f, 0f);
 			this._receivers = this._craftView.GetAllComponentsInChildren<UpgradeViewReceiver>();
+			Transform parent = craftView.transform.parent;
+			Transform child = craftView.transform.GetChild(0);
 			this._downPosition = this._craftView.transform.position;
 			this._downRotation = this._craftView.transform.rotation;
+			child.parent = this._upPosition;
+			craftView.transform.parent = child;
+			child.localPosition = Vector3.zero;
+			child.localRotation = Quaternion.identity;
+			this._upRotation = this._craftView.transform.rotation;
+			this._upPositionV = craftView.transform.position;
+			craftView.transform.parent = parent;
+			child.parent = craftView.transform;
+			child.SetAsFirstSibling();
+			craftView.transform.position = this._downPosition;
+			craftView.transform.rotation = this._downRotation;
 			this._state = UpgradeCog.States.MoveUp;
+			this._stateStartTime = Time.realtimeSinceStartup;
 			this._totalUpgrades = amount;
 			this._implantsDone = 0;
 			this._totalIngredientImplants = 0;
@@ -340,16 +374,47 @@ namespace TheForest.Items.Craft
 		
 		private void SpawnDebug(Vector3 outterPos, Vector3 dir, Color col)
 		{
-			GameObject gameObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+			if (!this._spawnDebug)
+			{
+				return;
+			}
+			if (GameObject.Find("DebugUpgrades"))
+			{
+				UnityEngine.Object.Destroy(GameObject.Find("DebugUpgrades"));
+			}
+			GameObject gameObject = new GameObject("DebugUpgrades");
 			gameObject.transform.position = outterPos;
-			gameObject.name = "outter";
-			gameObject.GetComponent<Renderer>().material.color = col;
-			gameObject.transform.localScale *= 0.1f;
+			gameObject.layer = 23;
 			GameObject gameObject2 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-			gameObject2.transform.position = outterPos + dir;
-			gameObject2.name = "outter + dir";
-			gameObject2.GetComponent<Renderer>().material.color = col / 2f;
-			gameObject2.transform.localScale *= 0.1f;
+			gameObject2.transform.position = outterPos;
+			gameObject2.transform.localScale *= 0.16f;
+			gameObject2.transform.parent = gameObject.transform;
+			gameObject2.name = "outter";
+			gameObject2.GetComponent<Renderer>().material.color = col;
+			gameObject2.layer = 23;
+			UnityEngine.Object.Destroy(gameObject2.GetComponent<Collider>());
+			GameObject gameObject3 = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+			gameObject3.transform.position = outterPos + dir;
+			gameObject3.transform.localScale *= 0.1f;
+			gameObject3.transform.parent = gameObject.transform;
+			gameObject3.name = "outter + dir";
+			gameObject3.GetComponent<Renderer>().material.color = col / 2f;
+			gameObject3.layer = 23;
+			UnityEngine.Object.Destroy(gameObject3.GetComponent<Collider>());
+			GameObject gameObject4 = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+			gameObject4.transform.position = outterPos + dir / 2f;
+			gameObject4.transform.LookAt(outterPos + dir);
+			gameObject4.transform.LookAt(gameObject4.transform.position + gameObject4.transform.up);
+			gameObject4.transform.localScale = new Vector3(0.1f, 0.5f, 0.1f);
+			gameObject4.transform.parent = gameObject.transform;
+			gameObject4.name = "outter to dir";
+			gameObject4.GetComponent<Renderer>().material.color = col;
+			gameObject4.layer = 23;
+			UnityEngine.Object.Destroy(gameObject4.GetComponent<Collider>());
+			if (this._breakAfterSpawnDebug)
+			{
+				Debug.Break();
+			}
 		}
 
 		
@@ -360,8 +425,38 @@ namespace TheForest.Items.Craft
 				Scene.HudGui.UpgradePlacementGizmo.gameObject.SetActive(false);
 				return false;
 			}
+			Ray ray;
+			if (this._autoPlace)
+			{
+				Vector3 vector2;
+				Vector3 vector;
+				if (this._currentReceiver._filterCollider is CapsuleCollider)
+				{
+					vector = this.OuterPositionFromCapsule(out vector2);
+					Debug.Log(string.Concat(new object[]
+					{
+						"Capsule outterPosition=",
+						vector,
+						" direction=",
+						vector2
+					}));
+					Debug.DrawRay(vector, vector2, Color.blue, 10f, true);
+					this.SpawnDebug(vector, vector2, Color.blue);
+				}
+				else
+				{
+					vector = this.OuterPositionFromSphere(out vector2);
+					Debug.DrawRay(vector, vector2, Color.red, 10f, true);
+					this.SpawnDebug(vector, vector2, Color.red);
+				}
+				ray = new Ray(vector, vector2.normalized);
+			}
+			else
+			{
+				ray = LocalPlayer.InventoryCam.ScreenPointToRay(TheForest.Utils.Input.mousePosition);
+			}
 			RaycastHit raycastHit;
-			if (this._currentReceiver._mainCollider.Raycast(LocalPlayer.InventoryCam.ScreenPointToRay(TheForest.Utils.Input.mousePosition), out raycastHit, 100f))
+			if (Physics.SphereCast(ray, 0.1f, out raycastHit, 100f, 1 << this._currentReceiver._mainCollider.gameObject.layer, QueryTriggerInteraction.Ignore) && raycastHit.collider == this._currentReceiver._mainCollider)
 			{
 				if (preview)
 				{
@@ -371,16 +466,20 @@ namespace TheForest.Items.Craft
 				}
 				else
 				{
-					Vector3 position = raycastHit.point + raycastHit.normal * 2f;
+					Vector3 vector = raycastHit.point + raycastHit.normal * 2f;
 					Scene.HudGui.UpgradePlacementGizmo.gameObject.SetActive(false);
-					this._currentUpgradePartTr = (Transform)UnityEngine.Object.Instantiate(this._supportedItemsCache[this._currentIngredientItemId]._prefab, position, Quaternion.LookRotation(raycastHit.normal));
+					this._currentUpgradePartTr = UnityEngine.Object.Instantiate<Transform>(this._supportedItemsCache[this._currentIngredientItemId]._prefab, vector, Quaternion.LookRotation(raycastHit.normal));
 					if (this._supportedItemsCache[this._currentIngredientItemId]._pointDownwards)
 					{
 						this._currentUpgradePartTr.forward = -this._currentReceiver._centerAndRotationAxisUpDirection.up;
 					}
 					this._currentUpgradePartTr.parent = this._currentReceiver.transform;
-					this._upgradePartStartPosition = this._currentReceiver.transform.InverseTransformPoint(position);
+					this._upgradePartStartPosition = this._currentReceiver.transform.InverseTransformPoint(vector);
 					this._upgradePartTargetPosition = this._currentReceiver.transform.InverseTransformPoint(raycastHit.point);
+					if (this._autoPlace)
+					{
+						this._rotateAngle = Vector3.Angle(Vector3.up, vector - raycastHit.point);
+					}
 				}
 				return true;
 			}
@@ -409,15 +508,15 @@ namespace TheForest.Items.Craft
 				float f;
 				if (this._supportedItemsCache[this._currentIngredientItemId]._pattern == UpgradeCog.Patterns.Circle)
 				{
-					f = (float)this._implantsDone / (float)this._totalIngredientImplants * 2f * 3.14159274f;
+					f = (float)(this._implantsDone + this._failCount) / (float)this._totalIngredientImplants * 2f * 3.14159274f;
 				}
 				else
 				{
-					f = (float)this._implantsDone * this._supportedItemsCache[this._currentIngredientItemId]._alignedPatternExtents * 2f * 3.14159274f;
+					f = (float)(this._implantsDone + this._failCount) * this._supportedItemsCache[this._currentIngredientItemId]._alignedPatternExtents * 2f * 3.14159274f;
 				}
 				a = this._circlePatternRotation * new Vector3(Mathf.Cos(f) * magnitude, Mathf.Sin(f) * magnitude, 0f);
 			}
-			direction = Vector3.Scale(-a.normalized, new Vector3(UnityEngine.Random.Range(0.9f, 1.1f), UnityEngine.Random.Range(0.9f, 1.1f), UnityEngine.Random.Range(0.9f, 1.1f)));
+			direction = Vector3.Scale(-a.normalized, new Vector3(UnityEngine.Random.Range(0.98f, 1.02f), UnityEngine.Random.Range(0.98f, 1.02f), UnityEngine.Random.Range(0.98f, 1.02f)));
 			return a + center;
 		}
 
@@ -492,6 +591,9 @@ namespace TheForest.Items.Craft
 
 		
 		public GameObject _disableWhenActive;
+
+		
+		public bool _autoPlace = true;
 
 		
 		private Dictionary<int, UpgradeCogItems> _supportedItemsCache;
@@ -579,6 +681,12 @@ namespace TheForest.Items.Craft
 
 		
 		private bool _fastForward;
+
+		
+		public bool _spawnDebug;
+
+		
+		public bool _breakAfterSpawnDebug;
 
 		
 		public enum States

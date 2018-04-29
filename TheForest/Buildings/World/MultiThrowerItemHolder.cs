@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Bolt;
 using TheForest.Items;
 using TheForest.Items.Inventory;
@@ -53,27 +54,9 @@ namespace TheForest.Buildings.World
 			if (this._nextItemIndex > 0)
 			{
 				Scene.HudGui.MultiThrowerTakeWidget.ShowSingle(this._items[this._nextItemIndex - 1], this._takeIcon.transform, SideIcons.Take);
-				if (TheForest.Utils.Input.GetButtonDown("Take") && LocalPlayer.Inventory.AddItem(this._items[this._nextItemIndex - 1], 1, false, false, null))
+				if (TheForest.Utils.Input.GetButtonDown("Take"))
 				{
-					if (BoltNetwork.isRunning)
-					{
-						ItemHolderTakeItem itemHolderTakeItem = ItemHolderTakeItem.Create(GlobalTargets.OnlyServer);
-						itemHolderTakeItem.Target = this.entity;
-						itemHolderTakeItem.ContentType = this._items[this._nextItemIndex - 1];
-						itemHolderTakeItem.Player = LocalPlayer.Entity;
-						itemHolderTakeItem.Send();
-					}
-					else
-					{
-						this._nextItemIndex--;
-						UnityEngine.Object.Destroy(this._renderSlots[this._nextItemIndex].GetChild(0).gameObject);
-						this._renderSlots[this._nextItemIndex].gameObject.SetActive(false);
-						this._items[this._nextItemIndex] = -1;
-					}
-					if (DecayingInventoryItemView.LastUsed)
-					{
-						DecayingInventoryItemView.LastUsed.SetDecayState(DecayingInventoryItemView.DecayStates.Spoilt);
-					}
+					this.TakeItem();
 				}
 			}
 			else
@@ -109,7 +92,7 @@ namespace TheForest.Buildings.World
 							{
 								ItemHolderAddItem itemHolderAddItem = ItemHolderAddItem.Create(GlobalTargets.OnlyServer);
 								itemHolderAddItem.ContentType = id;
-								itemHolderAddItem.Target = this.entity;
+								itemHolderAddItem.Target = base.entity;
 								itemHolderAddItem.Send();
 							}
 							else
@@ -131,6 +114,40 @@ namespace TheForest.Buildings.World
 			else
 			{
 				Scene.HudGui.MultiThrowerAddWidget.Shutdown();
+			}
+		}
+
+		
+		private void TakeItem()
+		{
+			int num = this._items[this._nextItemIndex - 1];
+			bool flag = LocalPlayer.Inventory.AddItem(num, 1, false, false, null);
+			if (!flag)
+			{
+				flag = LocalPlayer.Inventory.FakeDrop(num, null);
+			}
+			if (!flag)
+			{
+				return;
+			}
+			if (BoltNetwork.isRunning)
+			{
+				ItemHolderTakeItem itemHolderTakeItem = ItemHolderTakeItem.Create(GlobalTargets.OnlyServer);
+				itemHolderTakeItem.Target = base.entity;
+				itemHolderTakeItem.ContentType = num;
+				itemHolderTakeItem.Player = LocalPlayer.Entity;
+				itemHolderTakeItem.Send();
+			}
+			else
+			{
+				this._nextItemIndex--;
+				UnityEngine.Object.Destroy(this._renderSlots[this._nextItemIndex].GetChild(0).gameObject);
+				this._renderSlots[this._nextItemIndex].gameObject.SetActive(false);
+				this._items[this._nextItemIndex] = -1;
+			}
+			if (DecayingInventoryItemView.LastUsed)
+			{
+				DecayingInventoryItemView.LastUsed.SetDecayState(DecayingInventoryItemView.DecayStates.Spoilt);
 			}
 		}
 
@@ -174,7 +191,7 @@ namespace TheForest.Buildings.World
 		
 		private void GrabEnter()
 		{
-			if (!BoltNetwork.isRunning || this.entity.isAttached)
+			if (!BoltNetwork.isRunning || base.entity.isAttached)
 			{
 				if (!LocalPlayer.Inventory.IsRightHandEmpty() && this.IsValidItem(LocalPlayer.Inventory.RightHandOrNext.ItemCache))
 				{
@@ -207,11 +224,11 @@ namespace TheForest.Buildings.World
 		}
 
 		
-		private bool IsBlackListed(int itemId)
+		private bool IsWhiteListed(int itemId)
 		{
-			for (int i = 0; i < this._blackListedItemIds.Length; i++)
+			for (int i = 0; i < this._whiteListedItemIds.Length; i++)
 			{
-				if (this._blackListedItemIds[i] == itemId)
+				if (this._whiteListedItemIds[i] == itemId)
 				{
 					return true;
 				}
@@ -222,7 +239,7 @@ namespace TheForest.Buildings.World
 		
 		private bool IsValidItem(Item item)
 		{
-			return !item.MatchType(Item.Types.Story | Item.Types.Weapon) && item.MatchType(Item.Types.Equipment) && item._equipmentSlot == Item.EquipmentSlot.RightHand && !this.IsBlackListed(item._id);
+			return !item.MatchType(Item.Types.Story | Item.Types.Weapon) && item.MatchType(Item.Types.Equipment) && item._equipmentSlot == Item.EquipmentSlot.RightHand && this.IsWhiteListed(item._id);
 		}
 
 		
@@ -292,12 +309,25 @@ namespace TheForest.Buildings.World
 				gameObject.SetActive(true);
 				if (!inventoryItemView.ItemCache._throwerProjectilePrefab)
 				{
-					foreach (object obj in gameObject.transform)
+					IEnumerator enumerator = gameObject.transform.GetEnumerator();
+					try
 					{
-						Transform transform = (Transform)obj;
-						if (transform.name.Contains("collide") || transform.GetComponent<weaponInfo>())
+						while (enumerator.MoveNext())
 						{
-							UnityEngine.Object.Destroy(transform.gameObject);
+							object obj = enumerator.Current;
+							Transform transform = (Transform)obj;
+							if (transform.name.Contains("collide") || transform.GetComponent<weaponInfo>())
+							{
+								UnityEngine.Object.Destroy(transform.gameObject);
+							}
+						}
+					}
+					finally
+					{
+						IDisposable disposable;
+						if ((disposable = (enumerator as IDisposable)) != null)
+						{
+							disposable.Dispose();
 						}
 					}
 					foreach (MonoBehaviour obj2 in gameObject.GetComponents<MonoBehaviour>())
@@ -369,7 +399,7 @@ namespace TheForest.Buildings.World
 				}
 				if (BoltNetwork.isRunning)
 				{
-					this.entity.Freeze(false);
+					base.entity.Freeze(false);
 					base.state.Items[this._nextItemIndex] = -1;
 					base.state.Ammo[this._anim.ammoCount] = num;
 				}
@@ -401,7 +431,7 @@ namespace TheForest.Buildings.World
 		{
 			if (this._nextItemIndex > 0)
 			{
-				this.entity.Freeze(false);
+				base.entity.Freeze(false);
 				base.state.Items[--this._nextItemIndex] = (this._items[this._nextItemIndex] = -1);
 			}
 			else
@@ -429,7 +459,7 @@ namespace TheForest.Buildings.World
 				int nextItemIndex = this._nextItemIndex;
 				this._items[this._nextItemIndex] = itemId;
 				items[nextItemIndex] = itemId;
-				this.entity.Freeze(false);
+				base.entity.Freeze(false);
 				this._nextItemIndex++;
 			}
 		}
@@ -505,7 +535,7 @@ namespace TheForest.Buildings.World
 			if (BoltNetwork.isRunning)
 			{
 				RockThrowerActivated rockThrowerActivated = RockThrowerActivated.Create(GlobalTargets.Everyone);
-				rockThrowerActivated.Target = this.entity;
+				rockThrowerActivated.Target = base.entity;
 				rockThrowerActivated.Send();
 			}
 		}
@@ -516,7 +546,7 @@ namespace TheForest.Buildings.World
 			if (BoltNetwork.isRunning)
 			{
 				RockThrowerDeActivated rockThrowerDeActivated = RockThrowerDeActivated.Create(GlobalTargets.Everyone);
-				rockThrowerDeActivated.Target = this.entity;
+				rockThrowerDeActivated.Target = base.entity;
 				rockThrowerDeActivated.Send();
 			}
 		}
@@ -530,7 +560,7 @@ namespace TheForest.Buildings.World
 				{
 					RockThrowerRemoveItem rockThrowerRemoveItem = RockThrowerRemoveItem.Create(GlobalTargets.OnlyServer);
 					rockThrowerRemoveItem.ContentType = this._items[this._nextItemIndex - 1];
-					rockThrowerRemoveItem.Target = this.entity;
+					rockThrowerRemoveItem.Target = base.entity;
 					rockThrowerRemoveItem.Player = LocalPlayer.Entity;
 					rockThrowerRemoveItem.Send();
 				}
@@ -547,7 +577,7 @@ namespace TheForest.Buildings.World
 			if (BoltNetwork.isRunning)
 			{
 				RockThrowerResetAmmo rockThrowerResetAmmo = RockThrowerResetAmmo.Create(GlobalTargets.Everyone);
-				rockThrowerResetAmmo.Target = this.entity;
+				rockThrowerResetAmmo.Target = base.entity;
 				rockThrowerResetAmmo.Send();
 			}
 			else
@@ -562,7 +592,7 @@ namespace TheForest.Buildings.World
 			RockThrowerAnimate rockThrowerAnimate = RockThrowerAnimate.Create(GlobalTargets.Everyone);
 			rockThrowerAnimate.animVar = var;
 			rockThrowerAnimate.onoff = onoff;
-			rockThrowerAnimate.Target = this.entity;
+			rockThrowerAnimate.Target = base.entity;
 			rockThrowerAnimate.Send();
 		}
 
@@ -571,7 +601,7 @@ namespace TheForest.Buildings.World
 		{
 			RockThrowerLandTarget rockThrowerLandTarget = RockThrowerLandTarget.Create(GlobalTargets.OnlyServer);
 			rockThrowerLandTarget.landPos = this._anim.throwPos.GetComponent<rockThrowerAimingReticle>()._currentLandTarget;
-			rockThrowerLandTarget.Target = this.entity;
+			rockThrowerLandTarget.Target = base.entity;
 			rockThrowerLandTarget.Send();
 		}
 
@@ -602,7 +632,7 @@ namespace TheForest.Buildings.World
 
 		
 		[ItemIdPicker(Item.Types.Equipment)]
-		public int[] _blackListedItemIds;
+		public int[] _whiteListedItemIds;
 
 		
 		[Header("FMOD")]

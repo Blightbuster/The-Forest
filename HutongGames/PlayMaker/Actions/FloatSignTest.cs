@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sends Events based on the sign of a Float.")]
 	[ActionCategory(ActionCategory.Logic)]
+	[Tooltip("Sends Events based on the sign of a Float.")]
 	public class FloatSignTest : FsmStateAction
 	{
 		
@@ -54,8 +54,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("The float variable to test.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The float variable to test.")]
 		public FsmFloat floatValue;
 
 		

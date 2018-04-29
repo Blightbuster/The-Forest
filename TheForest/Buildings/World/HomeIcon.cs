@@ -42,7 +42,12 @@ namespace TheForest.Buildings.World
 		
 		private void OnDeserialized()
 		{
-			if (!BoltNetwork.isRunning || (this.entity.isAttached && this.entity.isOwner))
+			if (base.GetComponent<EmptyObjectIdentifier>())
+			{
+				UnityEngine.Object.Destroy(base.gameObject);
+				return;
+			}
+			if (!BoltNetwork.isRunning || (base.entity.isAttached && base.entity.isOwner))
 			{
 				this.SetupIcon();
 			}
@@ -75,7 +80,7 @@ namespace TheForest.Buildings.World
 		public void SetColorIndex(int index)
 		{
 			this._color = index % Scene.HudGui.OverlayIconWidgets[(int)this._type]._rotationItems.Length;
-			if (BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+			if (BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 			{
 				this.SetMpStateFlagAny();
 			}
@@ -104,7 +109,7 @@ namespace TheForest.Buildings.World
 		
 		public override void Attached()
 		{
-			if (this.entity.isOwner)
+			if (base.entity.isOwner)
 			{
 				this.SetMpStateFlagAny();
 			}
@@ -127,15 +132,15 @@ namespace TheForest.Buildings.World
 		
 		private void SetMpStateFlagAny()
 		{
-			if (this.entity.isOwner)
+			if (base.entity.isOwner)
 			{
 				this.SetMpStateFlagHost(this._color);
 			}
 			else
 			{
-				SetBuildingFlag setBuildingFlag = SetBuildingFlag.Create(this.entity.source);
+				SetBuildingFlag setBuildingFlag = SetBuildingFlag.Create(base.entity.source);
 				setBuildingFlag.Flag = this._color;
-				setBuildingFlag.BuildingEntity = this.entity;
+				setBuildingFlag.BuildingEntity = base.entity;
 				setBuildingFlag.Send();
 			}
 		}

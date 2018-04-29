@@ -29,7 +29,7 @@ namespace TheForest.Items.Inventory
 		
 		public override void Init()
 		{
-			if (!this._initDone)
+			if (!this._initDone && this._held)
 			{
 				base.Init();
 				this._initDone = true;

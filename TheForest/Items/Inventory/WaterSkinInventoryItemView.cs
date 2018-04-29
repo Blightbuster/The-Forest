@@ -38,11 +38,11 @@ namespace TheForest.Items.Inventory
 					this._inventory.SendMessage("PlayInventorySound", base.ItemCache._usedSFX);
 				}
 				Scene.HudGui.HideItemInfoView(this._itemId, this._isCraft);
-				Scene.HudGui.ShowItemInfoView(this, LocalPlayer.InventoryCam.ScreenToViewportPoint(TheForest.Utils.Input.mousePosition), this._isCraft);
+				Scene.HudGui.ShowItemInfoViewDelayed(this, (this._renderers.Length <= 0) ? null : this._renderers[0]._renderer, this._isCraft);
 			}
 			else
 			{
-				LocalPlayer.Sfx.PlayWhoosh();
+				LocalPlayer.Sfx.PlayItemCustomSfx(base.ItemCache, true);
 			}
 		}
 	}

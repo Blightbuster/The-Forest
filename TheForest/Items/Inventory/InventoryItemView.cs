@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using TheForest.Items.Craft;
 using TheForest.Items.Utils;
@@ -12,13 +13,17 @@ using UnityEngine;
 namespace TheForest.Items.Inventory
 {
 	
-	[DoNotSerializePublic]
 	[AddComponentMenu("Items/Inventory/Item Inventory View")]
-	public class InventoryItemView : MonoBehaviour, IVirtualCursorSnapNodeGroupTester
+	[DoNotSerializePublic]
+	public class InventoryItemView : MonoBehaviour, IVirtualCursorSnapNodeGroupTester, IScreenSizeRatio
 	{
 		
 		private void Start()
 		{
+			if (base.transform.parent)
+			{
+				this._itemSpread = base.transform.parent.GetComponent<inventoryItemSpreadSetup>();
+			}
 			if (this._isCraft && this._allowMultiView)
 			{
 				this._multiViews = new List<InventoryItemView>();
@@ -52,6 +57,10 @@ namespace TheForest.Items.Inventory
 				base.enabled = false;
 				VirtualCursor.Instance.SetCursorType(VirtualCursor.CursorTypes.Inventory);
 			}
+			if (this._itemSpread && this._itemSpread.savingCompatibilityMode && !this._ignoreItemSpread)
+			{
+				this.disableItemSpread();
+			}
 		}
 
 		
@@ -64,7 +73,11 @@ namespace TheForest.Items.Inventory
 				base.enabled = true;
 				VirtualCursor.Instance.SetCursorType(VirtualCursor.CursorTypes.InventoryHover);
 				this.Highlight(true);
-				Scene.HudGui.ShowItemInfoView(this, LocalPlayer.InventoryCam.ScreenToViewportPoint(TheForest.Utils.Input.mousePosition), this._isCraft);
+				Scene.HudGui.ShowItemInfoViewDelayed(this, (this._renderers.Length <= 0) ? null : this._renderers[0]._renderer, this._isCraft);
+			}
+			if (this._itemSpread && this._itemSpread.savingCompatibilityMode && !this._ignoreItemSpread)
+			{
+				this.enableItemSpread();
 			}
 		}
 
@@ -207,7 +220,7 @@ namespace TheForest.Items.Inventory
 							GameObject worldGo;
 							if (!BoltNetwork.isRunning || !this.ItemCache._pickupPrefabMP)
 							{
-								worldGo = (GameObject)UnityEngine.Object.Instantiate((!this.ItemCache._pickupPrefab) ? this._worldPrefab : this.ItemCache._pickupPrefab.gameObject, (!component) ? this._held.transform.position : component.RealPosition, (!component) ? this._held.transform.rotation : component.RealRotation);
+								worldGo = UnityEngine.Object.Instantiate<GameObject>((!this.ItemCache._pickupPrefab) ? this._worldPrefab : this.ItemCache._pickupPrefab.gameObject, (!component) ? this._held.transform.position : component.RealPosition, (!component) ? this._held.transform.rotation : component.RealRotation);
 							}
 							else
 							{
@@ -217,7 +230,7 @@ namespace TheForest.Items.Inventory
 							this._inventory.BubbleUpInventoryView(this);
 							this._inventory.RemoveItem(this._itemId, 1, false, true);
 						}
-						else if ((this._item._equipmentSlot == Item.EquipmentSlot.Chest || this._item._equipmentSlot == Item.EquipmentSlot.Feet) && LocalPlayer.Inventory.EquipmentSlots[(int)this._item._equipmentSlot] == this)
+						else if (this._item._equipmentSlot >= Item.EquipmentSlot.Chest && LocalPlayer.Inventory.EquipmentSlots[(int)this._item._equipmentSlot] == this)
 						{
 							LocalPlayer.Inventory.UnequipItemAtSlot(this._item._equipmentSlot, false, true, false);
 						}
@@ -326,7 +339,19 @@ namespace TheForest.Items.Inventory
 			{
 				foreach (InventoryItemView.RendererDefinition rendererDefinition in this._renderers)
 				{
-					rendererDefinition.Highlight(onoff);
+					rendererDefinition.Highlight(onoff, this._itemId);
+				}
+			}
+		}
+
+		
+		public void Sheen(bool onoff)
+		{
+			if (this._renderers != null)
+			{
+				foreach (InventoryItemView.RendererDefinition rendererDefinition in this._renderers)
+				{
+					rendererDefinition.Sheen(onoff);
 				}
 			}
 		}
@@ -403,7 +428,18 @@ namespace TheForest.Items.Inventory
 			}
 			this.ActiveBonus = (WeaponStatUpgrade.Types)(-1);
 			this._inventory.BubbleUpInventoryView(this);
-			if (!this._item.MatchType(Item.Types.Equipment))
+			if (this._item.MatchType(Item.Types.Armor))
+			{
+				this._inventory.RemoveItem(this._itemId, 1, false, true);
+				if (!ItemUtils.ApplyEffectsToStats(this._item._usedStatEffect, true, 1))
+				{
+					this._inventory.AddItemNF(this._itemId, 1, false, false, null);
+					LocalPlayer.Sfx.PlayItemCustomSfx(this.ItemCache, true);
+					return;
+				}
+				EventRegistry.Player.Publish(TfEvent.UsedItem, this._itemId);
+			}
+			else if (!this._item.MatchType(Item.Types.Equipment))
 			{
 				if (!ItemUtils.ApplyEffectsToStats(this._item._usedStatEffect, true, 1))
 				{
@@ -419,7 +455,7 @@ namespace TheForest.Items.Inventory
 			}
 			if (this._item._usedSFX != Item.SFXCommands.None)
 			{
-				this._inventory.SendMessage("PlayInventorySound", this._item._usedSFX);
+				LocalPlayer.Sfx.PlayInventorySound(this._item._usedSFX);
 			}
 		}
 
@@ -635,7 +671,7 @@ namespace TheForest.Items.Inventory
 				}
 			}
 			vector.y = 0f;
-			InventoryItemView inventoryItemView = (InventoryItemView)UnityEngine.Object.Instantiate(source, base.transform.position + vector, (!randomRotation) ? source.transform.rotation : (source.transform.rotation * Quaternion.Euler(euler)));
+			InventoryItemView inventoryItemView = UnityEngine.Object.Instantiate<InventoryItemView>(source, base.transform.position + vector, (!randomRotation) ? source.transform.rotation : (source.transform.rotation * Quaternion.Euler(euler)));
 			inventoryItemView.transform.parent = parent;
 			inventoryItemView.transform.localScale = source.transform.localScale;
 			inventoryItemView._isCraft = true;
@@ -643,6 +679,7 @@ namespace TheForest.Items.Inventory
 			inventoryItemView.enabled = true;
 			inventoryItemView.gameObject.SetActive(true);
 			inventoryItemView.Init();
+			inventoryItemView.Highlight(false);
 			inventoryItemView.OnMultiviewSpawned();
 			if (properties != ItemProperties.Any)
 			{
@@ -665,6 +702,21 @@ namespace TheForest.Items.Inventory
 					this._multiViews[i].ActiveBonus = bonus;
 				}
 			}
+		}
+
+		
+		public List<WeaponStatUpgrade.Types> GetMultiviewsBonus()
+		{
+			if (this._multiViews == null)
+			{
+				return null;
+			}
+			List<WeaponStatUpgrade.Types> list = new List<WeaponStatUpgrade.Types>();
+			foreach (InventoryItemView inventoryItemView in this._multiViews)
+			{
+				list.Add(inventoryItemView.ActiveBonus);
+			}
+			return list;
 		}
 
 		
@@ -748,6 +800,137 @@ namespace TheForest.Items.Inventory
 		}
 
 		
+		private bool isNeighbourActive()
+		{
+			return (!this._itemSpread.singleItemMode && !this._itemSpread.spreadHoveredItemOnlyMode) || true;
+		}
+
+		
+		private void enableItemSpread()
+		{
+			int num = 0;
+			if (this._itemSpread.minSpreadTargetAmount > 0)
+			{
+				for (int i = 0; i < this._itemSpread.sourceObjects.Count; i++)
+				{
+					if (this._itemSpread.sourceObjects[i].activeSelf)
+					{
+						num++;
+					}
+				}
+				if (num < this._itemSpread.minSpreadTargetAmount)
+				{
+					return;
+				}
+			}
+			if (this._itemSpread.spreadHoveredItemOnlyMode)
+			{
+				LocalPlayer.Sfx.PlayItemCustomSfx(this.ItemCache, PlayerInventory.SfxListenerSpacePosition(base.transform.position), false);
+				base.StartCoroutine("enableSingleItemSpreadRoutine");
+				return;
+			}
+			this._itemSpread.spreadActive = true;
+			if (!this._itemSpread.doingItemSpread && this.isNeighbourActive())
+			{
+				LocalPlayer.Sfx.PlayItemCustomSfx(this.ItemCache, PlayerInventory.SfxListenerSpacePosition(base.transform.position), false);
+				this._itemSpread.StartCoroutine("enableItemSpreadRoutine");
+			}
+		}
+
+		
+		private void disableItemSpread()
+		{
+			if (this._itemSpread.spreadHoveredItemOnlyMode)
+			{
+				base.StartCoroutine("disableSingleItemSpreadRoutine");
+				return;
+			}
+			this._itemSpread.spreadActive = false;
+			if (this._itemSpread.singleItemMode || this._itemSpread.spreadHoveredItemOnlyMode)
+			{
+				base.StartCoroutine(this.resetSpread(0.1f));
+			}
+			else
+			{
+				base.StartCoroutine(this.resetSpread(0.25f));
+			}
+		}
+
+		
+		private IEnumerator resetSpread(float delay)
+		{
+			float t = 0f;
+			while (t < delay)
+			{
+				t += Time.unscaledDeltaTime;
+				yield return null;
+			}
+			if (this._itemSpread.doingItemSpread && !this._itemSpread.spreadActive && base.gameObject.activeInHierarchy)
+			{
+				this._itemSpread.StartCoroutine("disableItemSpreadRoutine");
+			}
+			yield break;
+		}
+
+		
+		private IEnumerator enableSingleItemSpreadRoutine()
+		{
+			float t = 0f;
+			base.StopCoroutine("disableSingleItemSpreadRoutine");
+			while (t < 1f)
+			{
+				if (this._itemSpread.offsetRenderersMode)
+				{
+					this._itemSpread.offsetSourceObjects[this._itemSpreadIndex].transform.localPosition = Vector3.Lerp(this._itemSpread.offsetSourceObjects[this._itemSpreadIndex].transform.localPosition, this._itemSpread.targetPositions[this._itemSpreadIndex], t);
+					this._itemSpread.offsetSourceObjects[this._itemSpreadIndex].transform.localRotation = Quaternion.Lerp(this._itemSpread.offsetSourceObjects[this._itemSpreadIndex].transform.localRotation, this._itemSpread.targetRotations[this._itemSpreadIndex], t);
+				}
+				else
+				{
+					base.transform.localPosition = Vector3.Lerp(base.transform.localPosition, this._itemSpread.targetPositions[this._itemSpreadIndex], t);
+					base.transform.localRotation = Quaternion.Lerp(base.transform.localRotation, this._itemSpread.targetRotations[this._itemSpreadIndex], t);
+				}
+				t += Time.unscaledDeltaTime * 2f;
+				yield return null;
+			}
+			yield break;
+		}
+
+		
+		private IEnumerator disableSingleItemSpreadRoutine()
+		{
+			float t = 0f;
+			while (t < 0.15f)
+			{
+				t += Time.unscaledDeltaTime;
+				yield return null;
+			}
+			base.StopCoroutine("enableSingleItemSpreadRoutine");
+			t = 0f;
+			while (t < 1f)
+			{
+				if (this._itemSpread.offsetRenderersMode)
+				{
+					this._itemSpread.offsetSourceObjects[this._itemSpreadIndex].transform.localPosition = Vector3.Lerp(this._itemSpread.offsetSourceObjects[this._itemSpreadIndex].transform.localPosition, this._itemSpread.startPositions[this._itemSpreadIndex], t);
+					this._itemSpread.offsetSourceObjects[this._itemSpreadIndex].transform.localRotation = Quaternion.Lerp(this._itemSpread.offsetSourceObjects[this._itemSpreadIndex].transform.localRotation, this._itemSpread.startRotations[this._itemSpreadIndex], t);
+				}
+				else
+				{
+					base.transform.localPosition = Vector3.Lerp(base.transform.localPosition, this._itemSpread.startPositions[this._itemSpreadIndex], t);
+					base.transform.localRotation = Quaternion.Lerp(base.transform.localRotation, this._itemSpread.startRotations[this._itemSpreadIndex], t);
+				}
+				t += Time.unscaledDeltaTime * 2f;
+				yield return null;
+			}
+			yield break;
+		}
+
+		
+		public void PlayCustomSFX()
+		{
+			LocalPlayer.Sfx.PlayItemCustomSfx(this.ItemCache, PlayerInventory.SfxListenerSpacePosition(base.transform.position), false);
+		}
+
+		
 		
 		public Item ItemCache
 		{
@@ -773,7 +956,7 @@ namespace TheForest.Items.Inventory
 		{
 			get
 			{
-				return (this._item.MatchType(LocalPlayer.Inventory.CurrentStorage.AcceptedTypes) && !this._item.MatchType(LocalPlayer.Inventory.CurrentStorage.BlackListedTypes)) || this.CanBeHotkeyed;
+				return LocalPlayer.Inventory.CurrentStorage.IsValidItem(this._item) || this.CanBeHotkeyed;
 			}
 		}
 
@@ -864,6 +1047,16 @@ namespace TheForest.Items.Inventory
 		}
 
 		
+		
+		public float ScreenSizeRatio
+		{
+			get
+			{
+				return this._onScreenSizeRatio;
+			}
+		}
+
+		
 		public bool BelongWith(IVirtualCursorSnapNodeGroupTester group)
 		{
 			InventoryItemView inventoryItemView = group as InventoryItemView;
@@ -921,6 +1114,15 @@ namespace TheForest.Items.Inventory
 		public Material _materialWhenAttachedToPack;
 
 		
+		public int _itemSpreadIndex;
+
+		
+		public bool _ignoreItemSpread;
+
+		
+		public float _onScreenSizeRatio = 1f;
+
+		
 		protected bool _hovered;
 
 		
@@ -936,6 +1138,9 @@ namespace TheForest.Items.Inventory
 		protected ItemProperties _properties;
 
 		
+		private inventoryItemSpreadSetup _itemSpread;
+
+		
 		protected static int CombiningItemId;
 
 		
@@ -949,13 +1154,37 @@ namespace TheForest.Items.Inventory
 		public class RendererDefinition
 		{
 			
-			public void Highlight(bool onoff)
+			public void Highlight(bool onoff, int itemId)
 			{
-				if (onoff && this._defaultMaterial != this._renderer.sharedMaterial && this._renderer.sharedMaterial != this._selectedMaterial)
+				if (onoff)
 				{
-					this._defaultMaterial = this._renderer.sharedMaterial;
+					if (this._defaultMaterial != this._renderer.sharedMaterial && this._renderer.sharedMaterial != this._selectedMaterial && this._renderer.sharedMaterial != this._sheenMaterial)
+					{
+						this._defaultMaterial = this._renderer.sharedMaterial;
+					}
+					if (this._renderer.sharedMaterial == this._sheenMaterial)
+					{
+						LocalPlayer.Inventory.SheenItem(itemId, ItemProperties.Any, false);
+					}
 				}
 				this._renderer.sharedMaterial = ((!onoff) ? this._defaultMaterial : this._selectedMaterial);
+			}
+
+			
+			public void Sheen(bool onoff)
+			{
+				if (this._sheenMaterial && onoff)
+				{
+					if (this._defaultMaterial != this._renderer.sharedMaterial && this._renderer.sharedMaterial != this._selectedMaterial && this._renderer.sharedMaterial != this._sheenMaterial)
+					{
+						this._defaultMaterial = this._renderer.sharedMaterial;
+					}
+					this._renderer.sharedMaterial = this._sheenMaterial;
+				}
+				if (this._defaultMaterial && !onoff)
+				{
+					this._renderer.sharedMaterial = this._defaultMaterial;
+				}
 			}
 
 			
@@ -974,6 +1203,9 @@ namespace TheForest.Items.Inventory
 
 			
 			public Material _selectedMaterial;
+
+			
+			public Material _sheenMaterial;
 		}
 	}
 }

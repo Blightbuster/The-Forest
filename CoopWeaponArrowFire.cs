@@ -24,10 +24,10 @@ public class CoopWeaponArrowFire : EntityBehaviour<IDynamicPickup>
 	{
 		if (this.onArrowSync)
 		{
-			if (BoltNetwork.isRunning && this.entity && this.entity.isAttached && this.entity.isOwner && this.ad.Live && base.transform.GetComponentInChildren<WeaponBonus>())
+			if (BoltNetwork.isRunning && base.entity && base.entity.isAttached && base.entity.isOwner && this.ad.Live && base.transform.GetComponentInChildren<WeaponBonus>())
 			{
 				arrowFireSync arrowFireSync = arrowFireSync.Create(GlobalTargets.Everyone);
-				arrowFireSync.Target = this.entity;
+				arrowFireSync.Target = base.entity;
 				arrowFireSync.Send();
 				base.enabled = false;
 			}

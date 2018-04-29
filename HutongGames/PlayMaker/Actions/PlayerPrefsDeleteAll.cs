@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Removes all keys and values from the preferences. Use with caution.")]
 	[ActionCategory("PlayerPrefs")]
+	[Tooltip("Removes all keys and values from the preferences. Use with caution.")]
 	public class PlayerPrefsDeleteAll : FsmStateAction
 	{
 		

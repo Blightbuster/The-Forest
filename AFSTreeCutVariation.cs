@@ -18,10 +18,36 @@ public class AFSTreeCutVariation : MonoBehaviour
 	}
 
 	
+	private void OnEnable()
+	{
+		this.lastPos = this.m_rb.transform.position;
+		this.lastRot = this.m_rb.transform.rotation;
+		this.velocity = new Vector3(0.001f, 0.001f, 0.001f);
+		this.updateBending();
+	}
+
+	
 	private void FixedUpdate()
 	{
-		this.velocity = Vector3.SmoothDamp(this.velocity, this.m_rb.velocity, ref this.smoothVelocity, this.smoothTime);
-		this.angularVelocity = Vector3.SmoothDamp(this.angularVelocity, this.m_rb.angularVelocity, ref this.smoothAngularVelocity, this.smoothTime);
+		this.updateBending();
+	}
+
+	
+	private void updateBending()
+	{
+		Vector3 target = this.m_rb.velocity;
+		Vector3 target2 = this.m_rb.angularVelocity;
+		if (BoltNetwork.isClient)
+		{
+			Quaternion quaternion = this.m_rb.transform.rotation * Quaternion.Inverse(this.lastRot);
+			Vector3 a = new Vector3(Mathf.DeltaAngle(0f, quaternion.eulerAngles.x), Mathf.DeltaAngle(0f, quaternion.eulerAngles.y), Mathf.DeltaAngle(0f, quaternion.eulerAngles.z));
+			target2 = a / Time.fixedDeltaTime * 0.0174532924f;
+			this.lastRot = this.m_rb.transform.rotation;
+			target = (this.m_rb.worldCenterOfMass - this.lastPos) / Time.fixedDeltaTime;
+			this.lastPos = this.m_rb.worldCenterOfMass;
+		}
+		this.velocity = Vector3.SmoothDamp(this.velocity, target, ref this.smoothVelocity, this.smoothTime);
+		this.angularVelocity = Vector3.SmoothDamp(this.angularVelocity, target2, ref this.smoothAngularVelocity, this.smoothTime);
 		this.finalBendingStrength = Mathf.Clamp(this.angularVelocity.magnitude * this.BendingMultiplier, 0f, this.maxBendingStrength);
 		this.finalTumblingStrength = Mathf.Clamp(this.angularVelocity.magnitude * this.TumblingMultiplier, 0f, this.maxTumblingStrength);
 		this.t_TumbleFrequency = Mathf.Lerp(1f, this.FrequencyMultiplier, this.finalBendingStrength / this.maxBendingStrength);
@@ -112,6 +138,12 @@ public class AFSTreeCutVariation : MonoBehaviour
 
 	
 	private Vector3 angularVelocity;
+
+	
+	private Vector3 lastPos;
+
+	
+	private Quaternion lastRot;
 
 	
 	private Vector3 n_velocity;

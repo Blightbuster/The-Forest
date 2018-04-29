@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets a Random Child of a Game Object.")]
 	[ActionCategory(ActionCategory.GameObject)]
+	[Tooltip("Gets a Random Child of a Game Object.")]
 	public class GetRandomChild : FsmStateAction
 	{
 		

@@ -53,6 +53,13 @@ namespace TheForest.UI
 		{
 			get
 			{
+				foreach (UiTranslationDatabase.Language language in this._builtInLanguages)
+				{
+					if (language._name.Equals(this._language))
+					{
+						return UiTranslationDatabase.TranslationsPath + language._data.name + ".json";
+					}
+				}
 				return UiTranslationDatabase.TranslationsPath + this._language + ".json";
 			}
 		}
@@ -84,13 +91,14 @@ namespace TheForest.UI
 			{
 				if (UiTranslationDatabase.Instance._availableTranslations.Length != 0)
 				{
-					goto IL_24F;
+					goto IL_327;
 				}
 			}
 			try
 			{
 				int num = -1;
 				bool flag = false;
+				List<string> list = new List<string>();
 				if (!Directory.Exists(UiTranslationDatabase.TranslationsPath))
 				{
 					Directory.CreateDirectory(UiTranslationDatabase.TranslationsPath);
@@ -99,18 +107,34 @@ namespace TheForest.UI
 				{
 					flag = true;
 				}
-				List<string> list = (from f in Directory.GetFiles(UiTranslationDatabase.TranslationsPath, "*.json", SearchOption.TopDirectoryOnly)
+				List<string> list2 = (from f in Directory.GetFiles(UiTranslationDatabase.TranslationsPath, "*.json", SearchOption.TopDirectoryOnly)
 				select f.Substring(f.LastIndexOf('/') + 1).Replace(".json", string.Empty)).ToList<string>();
 				foreach (UiTranslationDatabase.Language language in UiTranslationDatabase.Instance._builtInLanguages)
 				{
-					string item = language._data.name.Replace(".json", string.Empty);
-					if (flag || !list.Contains(item))
+					string text = language._data.name.Replace(".json", string.Empty);
+					string text2 = language._name;
+					if (string.IsNullOrEmpty(text2))
+					{
+						text2 = text;
+					}
+					if (flag || !list2.Contains(text))
 					{
 						File.WriteAllText(UiTranslationDatabase.TranslationsPath + language._data.name + ".json", language._data.text);
-						if (!list.Contains(item))
-						{
-							list.Add(item);
-						}
+					}
+					if (list2.Contains(text))
+					{
+						list2.Remove(text);
+					}
+					if (!list.Contains(text2))
+					{
+						list.Add(text2);
+					}
+				}
+				foreach (string item in list2)
+				{
+					if (!list.Contains(item))
+					{
+						list.Add(item);
 					}
 				}
 				GUIText guitext = new GameObject("TestFont").AddComponent<GUIText>();
@@ -118,25 +142,35 @@ namespace TheForest.UI
 				for (int j = list.Count - 1; j >= 0; j--)
 				{
 					int num2 = list[j].IndexOf(' ');
+					if (num2 <= 0)
+					{
+						num2 = list[j].Length;
+					}
 					if (num2 > 0)
 					{
 						guitext.text = list[j].Substring(0, num2);
 						if (guitext.GetScreenRect().width < 10f)
 						{
-							Debug.Log("Missing font, removing " + list[j]);
+							Debug.LogWarning("[Translation] Missing font, removing " + list2[j]);
 							list.RemoveAt(j);
 						}
+					}
+					else
+					{
+						Debug.LogWarning("[Translation] Invalid translation name, removing " + list2[j]);
+						list.RemoveAt(j);
 					}
 				}
 				UnityEngine.Object.DestroyImmediate(guitext.gameObject);
 				UiTranslationDatabase.Instance._availableTranslations = list.ToArray();
+				UiTranslationDatabase.Instance._language = UiTranslationDatabase.Instance._language;
 				File.WriteAllText(UiTranslationDatabase.TranslationsPath + "version.txt", UiTranslationDatabase.Instance._version.ToString());
 			}
 			catch (Exception exception)
 			{
 				Debug.LogException(exception);
 			}
-			IL_24F:
+			IL_327:
 			return UiTranslationDatabase.Instance._availableTranslations;
 		}
 
@@ -171,25 +205,26 @@ namespace TheForest.UI
 			UiTranslationDatabase.Instance._language = "English";
 			try
 			{
+				string filename = UiTranslationDatabase.Instance.Filename;
 				Dictionary<string, string> source;
-				if (Path.IsPathRooted(UiTranslationDatabase.Instance.Filename))
+				if (Path.IsPathRooted(filename))
 				{
-					if (!File.Exists(UiTranslationDatabase.Instance.Filename))
+					if (!File.Exists(filename))
 					{
-						Debug.LogError("Missing lang file: " + UiTranslationDatabase.Instance.Filename);
+						Debug.LogError("Missing lang file: " + filename);
 						return;
 					}
-					source = JsonMapper.ToObject<Dictionary<string, string>>(File.ReadAllText(UiTranslationDatabase.Instance.Filename));
+					source = JsonMapper.ToObject<Dictionary<string, string>>(File.ReadAllText(filename));
 				}
 				else
 				{
 					string path = Application.dataPath + "/../" + UiTranslationDatabase.TranslationsPath;
 					if (!Directory.Exists(path))
 					{
-						Debug.LogError("Missing lang file: " + UiTranslationDatabase.Instance.Filename);
+						Debug.LogError("Missing lang file: " + filename);
 						return;
 					}
-					source = JsonMapper.ToObject<Dictionary<string, string>>(File.ReadAllText(Application.dataPath + "/../" + UiTranslationDatabase.Instance.Filename));
+					source = JsonMapper.ToObject<Dictionary<string, string>>(File.ReadAllText(Application.dataPath + "/../" + filename));
 				}
 				UiTranslationDatabase.Instance.DataEnglish = (from d in source
 				where !string.IsNullOrEmpty(d.Value)
@@ -209,66 +244,75 @@ namespace TheForest.UI
 		public static void SetLanguage(string lang)
 		{
 			UiTranslationDatabase.GetAvailableTranslations();
-			if (UiTranslationDatabase.Instance._availableTranslations.Contains(lang))
+			if (string.Compare(lang, "TRANSLATIONDEBUG") == 0)
 			{
-				if (lang != UiTranslationDatabase.Instance._language || UiTranslationDatabase.Instance.Data == null)
-				{
-					string language = UiTranslationDatabase.Instance._language;
-					UiTranslationDatabase.Instance._language = lang;
-					try
-					{
-						bool flag = UiTranslationDatabase.Instance._builtInLanguages.Any((UiTranslationDatabase.Language bil) => bil._roman && bil._data.name.Contains(lang));
-						Dictionary<string, string> source;
-						if (Path.IsPathRooted(UiTranslationDatabase.Instance.Filename))
-						{
-							if (!File.Exists(UiTranslationDatabase.Instance.Filename))
-							{
-								Debug.LogError("Missing lang file: " + UiTranslationDatabase.Instance.Filename);
-								return;
-							}
-							source = JsonMapper.ToObject<Dictionary<string, string>>(File.ReadAllText(UiTranslationDatabase.Instance.Filename));
-						}
-						else
-						{
-							string path = Application.dataPath + "/../" + UiTranslationDatabase.TranslationsPath;
-							if (!Directory.Exists(path))
-							{
-								Debug.LogError("Missing lang file: " + UiTranslationDatabase.Instance.Filename);
-								return;
-							}
-							source = JsonMapper.ToObject<Dictionary<string, string>>(File.ReadAllText(Application.dataPath + "/../" + UiTranslationDatabase.Instance.Filename));
-						}
-						UiTranslationDatabase.Instance.Data = (from d in source
-						where !string.IsNullOrEmpty(d.Value)
-						select d).ToDictionary((KeyValuePair<string, string> i) => i.Key, (KeyValuePair<string, string> i) => i.Value);
-						UiTranslationDatabase.Instance.DataCaps = new Dictionary<string, string>();
-						foreach (KeyValuePair<string, string> keyValuePair in UiTranslationDatabase.Instance.DataEnglish)
-						{
-							if (!UiTranslationDatabase.Instance.Data.ContainsKey(keyValuePair.Key))
-							{
-								UiTranslationDatabase.Instance.Data.Add(keyValuePair.Key, keyValuePair.Value);
-							}
-							if (!UiTranslationDatabase.Instance.DataCaps.ContainsKey(keyValuePair.Key))
-							{
-								UiTranslationDatabase.Instance.DataCaps.Add(keyValuePair.Key, UiTranslationDatabase.Instance.Data[keyValuePair.Key].ToUpper());
-							}
-						}
-						PlayerPreferences.Language = lang;
-						PlayerPreferences.Save();
-					}
-					catch (Exception exception)
-					{
-						Debug.LogException(exception);
-						UiTranslationDatabase.Instance._language = language;
-						return;
-					}
-					UiTranslationDatabase.OriginalVersion = (UiTranslationDatabase.Instance._language == "English");
-					EventRegistry.Game.Publish(TfEvent.LanguageSet, null);
-				}
+				UiTranslationDatabase.Instance.Data = (from d in UiTranslationDatabase.Instance.DataEnglish
+				where !string.IsNullOrEmpty(d.Value)
+				select d).ToDictionary((KeyValuePair<string, string> i) => i.Key, (KeyValuePair<string, string> i) => "{" + i.Key + "}");
+				UiTranslationDatabase.Instance.DataCaps = (from d in UiTranslationDatabase.Instance.DataEnglish
+				where !string.IsNullOrEmpty(d.Value)
+				select d).ToDictionary((KeyValuePair<string, string> i) => i.Key, (KeyValuePair<string, string> i) => "{{" + i.Key + "}}");
+				EventRegistry.Game.Publish(TfEvent.LanguageSet, null);
+				return;
 			}
-			else
+			if (!UiTranslationDatabase.Instance._availableTranslations.Contains(lang))
 			{
-				Debug.LogError("Unknown lang: " + lang);
+				Debug.LogError("Unknown lang: " + lang + " fallback to English");
+				lang = "English";
+			}
+			if (lang != UiTranslationDatabase.Instance._language || UiTranslationDatabase.Instance.Data == null)
+			{
+				string language = UiTranslationDatabase.Instance._language;
+				UiTranslationDatabase.Instance._language = lang;
+				try
+				{
+					string filename = UiTranslationDatabase.Instance.Filename;
+					Dictionary<string, string> source;
+					if (Path.IsPathRooted(filename))
+					{
+						if (!File.Exists(filename))
+						{
+							Debug.LogError("Missing lang file: " + filename);
+							return;
+						}
+						source = JsonMapper.ToObject<Dictionary<string, string>>(File.ReadAllText(filename));
+					}
+					else
+					{
+						string path = Application.dataPath + "/../" + UiTranslationDatabase.TranslationsPath;
+						if (!Directory.Exists(path))
+						{
+							Debug.LogError("Missing lang file: " + filename);
+							return;
+						}
+						source = JsonMapper.ToObject<Dictionary<string, string>>(File.ReadAllText(Application.dataPath + "/../" + filename));
+					}
+					UiTranslationDatabase.Instance.Data = (from d in source
+					where !string.IsNullOrEmpty(d.Value)
+					select d).ToDictionary((KeyValuePair<string, string> i) => i.Key, (KeyValuePair<string, string> i) => i.Value);
+					UiTranslationDatabase.Instance.DataCaps = new Dictionary<string, string>();
+					foreach (KeyValuePair<string, string> keyValuePair in UiTranslationDatabase.Instance.DataEnglish)
+					{
+						if (!UiTranslationDatabase.Instance.Data.ContainsKey(keyValuePair.Key))
+						{
+							UiTranslationDatabase.Instance.Data.Add(keyValuePair.Key, keyValuePair.Value);
+						}
+						if (!UiTranslationDatabase.Instance.DataCaps.ContainsKey(keyValuePair.Key))
+						{
+							UiTranslationDatabase.Instance.DataCaps.Add(keyValuePair.Key, UiTranslationDatabase.Instance.Data[keyValuePair.Key].ToUpper());
+						}
+					}
+					PlayerPreferences.Language = lang;
+					PlayerPreferences.Save();
+				}
+				catch (Exception exception)
+				{
+					Debug.LogException(exception);
+					UiTranslationDatabase.Instance._language = language;
+					return;
+				}
+				UiTranslationDatabase.OriginalVersion = (UiTranslationDatabase.Instance._language == "English");
+				EventRegistry.Game.Publish(TfEvent.LanguageSet, null);
 			}
 		}
 
@@ -281,16 +325,25 @@ namespace TheForest.UI
 		
 		public static string TranslateKey(string key, string defaultValue, bool caps = false)
 		{
-			string text;
-			if (caps && UiTranslationDatabase.Instance && UiTranslationDatabase.Instance.DataCaps != null && UiTranslationDatabase.Instance.DataCaps.TryGetValue(key, out text) && !string.IsNullOrEmpty(text))
+			caps = true;
+			if (caps)
 			{
-				return text;
+				string text;
+				if (UiTranslationDatabase.Instance && UiTranslationDatabase.Instance.DataCaps != null && UiTranslationDatabase.Instance.DataCaps.TryGetValue(key, out text) && !string.IsNullOrEmpty(text))
+				{
+					return text;
+				}
+				return defaultValue;
 			}
-			if (UiTranslationDatabase.Instance && UiTranslationDatabase.Instance.Data != null && UiTranslationDatabase.Instance.Data.TryGetValue(key, out text) && !string.IsNullOrEmpty(text))
+			else
 			{
-				return text;
+				string text;
+				if (UiTranslationDatabase.Instance && UiTranslationDatabase.Instance.Data != null && UiTranslationDatabase.Instance.Data.TryGetValue(key, out text) && !string.IsNullOrEmpty(text))
+				{
+					return text;
+				}
+				return defaultValue;
 			}
-			return defaultValue;
 		}
 
 		
@@ -308,6 +361,9 @@ namespace TheForest.UI
 		public const string DatabasePath = "Translation/UiTranslationDatabase";
 
 		
+		private const string DefaultLanguage = "English";
+
+		
 		public int _version;
 
 		
@@ -317,9 +373,11 @@ namespace TheForest.UI
 		public List<UiTranslationDatabase.Node> _nodes;
 
 		
+		[SerializeField]
 		private string[] _availableTranslations;
 
 		
+		[SerializeField]
 		private string _language = "English";
 
 		
@@ -331,6 +389,9 @@ namespace TheForest.UI
 		{
 			
 			public TextAsset _data;
+
+			
+			public string _name;
 
 			
 			public string _customFont;

@@ -4,9 +4,9 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[HelpUrl("https:
-	[Tooltip("Follow a target")]
 	[ActionCategory("Animator")]
+	[Tooltip("Follow a target")]
+	[HelpUrl("https:
 	public class AnimatorFollow : FsmStateAction
 	{
 		

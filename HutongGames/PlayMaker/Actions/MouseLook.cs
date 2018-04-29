@@ -66,17 +66,24 @@ namespace HutongGames.PlayMaker.Actions
 				return;
 			}
 			Transform transform = ownerDefaultTarget.transform;
-			switch (this.axes)
+			MouseLook.RotationAxes rotationAxes = this.axes;
+			if (rotationAxes != MouseLook.RotationAxes.MouseXAndY)
 			{
-			case MouseLook.RotationAxes.MouseXAndY:
+				if (rotationAxes != MouseLook.RotationAxes.MouseX)
+				{
+					if (rotationAxes == MouseLook.RotationAxes.MouseY)
+					{
+						transform.localEulerAngles = new Vector3(-this.GetYRotation(), transform.localEulerAngles.y, 0f);
+					}
+				}
+				else
+				{
+					transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, this.GetXRotation(), 0f);
+				}
+			}
+			else
+			{
 				transform.localEulerAngles = new Vector3(this.GetYRotation(), this.GetXRotation(), 0f);
-				break;
-			case MouseLook.RotationAxes.MouseX:
-				transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, this.GetXRotation(), 0f);
-				break;
-			case MouseLook.RotationAxes.MouseY:
-				transform.localEulerAngles = new Vector3(-this.GetYRotation(), transform.localEulerAngles.y, 0f);
-				break;
 			}
 		}
 
@@ -128,8 +135,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat sensitivityY;
 
 		
-		[Tooltip("Clamp rotation around X axis. Set to None for no clamping.")]
 		[HasFloatSlider(-360f, 360f)]
+		[Tooltip("Clamp rotation around X axis. Set to None for no clamping.")]
 		public FsmFloat minimumX;
 
 		

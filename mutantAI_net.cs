@@ -15,7 +15,7 @@ public class mutantAI_net : EntityBehaviour<IMutantState>
 	
 	public override void Attached()
 	{
-		if (!this.entity.IsOwner())
+		if (!base.entity.IsOwner())
 		{
 			base.state.AddCallback("ai_mask", delegate
 			{
@@ -51,6 +51,11 @@ public class mutantAI_net : EntityBehaviour<IMutantState>
 			Scene.SceneTracker.EndgameBoss = base.gameObject;
 			Scene.mecanimEvents.GetComponent<MecanimEventSetupHelper>().dataSources[19] = this._mecanimEventPrefab;
 			Scene.mecanimEvents.SendMessage("refreshDataSources");
+			this.ast = base.transform.GetComponentInChildren<arrowStickToTarget>();
+			if (this.ast)
+			{
+				this.ast.enabled = false;
+			}
 		}
 	}
 
@@ -65,6 +70,10 @@ public class mutantAI_net : EntityBehaviour<IMutantState>
 		{
 			this.checkCloseTargets();
 			this.targetUpdateTimer = Time.time + 1.5f;
+		}
+		if (this.creepy_boss && this.animControl.animator.GetCurrentAnimatorStateInfo(0).tagHash != this.notActiveHash && this.ast && !this.ast.enabled)
+		{
+			this.ast.enabled = true;
 		}
 	}
 
@@ -98,7 +107,7 @@ public class mutantAI_net : EntityBehaviour<IMutantState>
 	
 	public void TriggerSync(mutantAI ai)
 	{
-		if (BoltNetwork.isRunning && this.entity.IsOwner())
+		if (BoltNetwork.isRunning && base.entity.IsOwner())
 		{
 			int num = 0;
 			if (this.creepy = ai.creepy)
@@ -161,49 +170,13 @@ public class mutantAI_net : EntityBehaviour<IMutantState>
 	}
 
 	
-	private const int leader_bit = 1;
-
-	
-	private const int maleSkinny_bit = 2;
-
-	
-	private const int femaleSkinny_bit = 4;
-
-	
-	private const int male_bit = 8;
-
-	
-	private const int female_bit = 16;
-
-	
-	private const int creepy_bit = 32;
-
-	
-	private const int creepy_male_bit = 64;
-
-	
-	private const int creepy_baby_bit = 128;
-
-	
-	private const int fireman_bit = 256;
-
-	
-	private const int pale_bit = 512;
-
-	
-	private const int creepy_fat_bit = 1024;
-
-	
-	private const int painted_bit = 2048;
-
-	
-	private const int skinned_bit = 4096;
-
-	
 	public MecanimEventData _mecanimEventPrefab;
 
 	
 	private mutantNetAnimatorControl animControl;
+
+	
+	private arrowStickToTarget ast;
 
 	
 	private float targetUpdateTimer = 1.5f;
@@ -215,41 +188,83 @@ public class mutantAI_net : EntityBehaviour<IMutantState>
 	public bool leader;
 
 	
+	private const int leader_bit = 1;
+
+	
 	public bool maleSkinny;
+
+	
+	private const int maleSkinny_bit = 2;
 
 	
 	public bool femaleSkinny;
 
 	
+	private const int femaleSkinny_bit = 4;
+
+	
 	public bool male;
+
+	
+	private const int male_bit = 8;
 
 	
 	public bool female;
 
 	
+	private const int female_bit = 16;
+
+	
 	public bool creepy;
+
+	
+	private const int creepy_bit = 32;
 
 	
 	public bool creepy_male;
 
 	
+	private const int creepy_male_bit = 64;
+
+	
 	public bool creepy_baby;
+
+	
+	private const int creepy_baby_bit = 128;
 
 	
 	public bool fireman;
 
 	
+	private const int fireman_bit = 256;
+
+	
 	public bool pale;
+
+	
+	private const int pale_bit = 512;
 
 	
 	public bool creepy_fat;
 
 	
+	private const int creepy_fat_bit = 1024;
+
+	
 	public bool painted;
+
+	
+	private const int painted_bit = 2048;
 
 	
 	public bool skinned;
 
 	
+	private const int skinned_bit = 4096;
+
+	
 	public bool creepy_boss;
+
+	
+	private int notActiveHash = Animator.StringToHash("notActive");
 }

@@ -50,11 +50,10 @@ namespace TheForest.Items.World
 			if (Scene.HudGui)
 			{
 				this._attacking = false;
-				Scene.HudGui.UnsetDelayedIconController(this);
 				LocalPlayer.Inventory.Attacked.RemoveListener(new UnityAction(this.OnAttacking));
 				LocalPlayer.Inventory.AttackEnded.RemoveListener(new UnityAction(this.OnAttackEnded));
 				LighterControler.HasLightableItem = false;
-				this.GotClean();
+				this.GotCleanDisable();
 				if (this._state > BurnableCloth.States.Idle)
 				{
 					this.Burnt();
@@ -99,10 +98,14 @@ namespace TheForest.Items.World
 		
 		public void OnDeserialized()
 		{
-			WeaponStatUpgrade.Types activeBonus = this._inventoryMirror.transform.parent.GetComponent<InventoryItemView>().ActiveBonus;
-			if (activeBonus == WeaponStatUpgrade.Types.BurningWeapon || activeBonus == WeaponStatUpgrade.Types.BurningWeaponExtra)
+			InventoryItemView inventoryItemView = this._inventoryMirror.transform.parent.parent.GetComponent<InventoryItemView>() ?? this._inventoryMirror.transform.parent.GetComponent<InventoryItemView>();
+			if (inventoryItemView)
 			{
-				this.EnableBurnableCloth();
+				WeaponStatUpgrade.Types activeBonus = inventoryItemView.ActiveBonus;
+				if (activeBonus == WeaponStatUpgrade.Types.BurningWeapon || activeBonus == WeaponStatUpgrade.Types.BurningWeaponExtra)
+				{
+					this.EnableBurnableCloth();
+				}
 			}
 		}
 
@@ -129,6 +132,11 @@ namespace TheForest.Items.World
 
 		
 		public void GotClean()
+		{
+		}
+
+		
+		private void GotCleanDisable()
 		{
 			if (this._state == BurnableCloth.States.Burning)
 			{
@@ -157,14 +165,6 @@ namespace TheForest.Items.World
 		
 		private void Idle()
 		{
-			if (TheForest.Utils.Input.GetButton("Lighter"))
-			{
-				Scene.HudGui.SetDelayedIconController(this);
-			}
-			else
-			{
-				Scene.HudGui.UnsetDelayedIconController(this);
-			}
 			if (TheForest.Utils.Input.GetButtonAfterDelay("Lighter", 0.5f, false))
 			{
 				if (!LocalPlayer.Inventory.DefaultLight.IsReallyActive)
@@ -172,7 +172,6 @@ namespace TheForest.Items.World
 					LocalPlayer.Inventory.LastLight = LocalPlayer.Inventory.DefaultLight;
 					LocalPlayer.Inventory.TurnOnLastLight();
 				}
-				Scene.HudGui.UnsetDelayedIconController(this);
 				LocalPlayer.Inventory.SpecialItems.SendMessage("LightHeldFire");
 				this._fuel = Time.time + this._lightingDuration;
 				this._state = ((this._state != BurnableCloth.States.PutOutIdle) ? BurnableCloth.States.Lighting : BurnableCloth.States.PutOutLighting);
@@ -187,9 +186,9 @@ namespace TheForest.Items.World
 			{
 				GameStats.LitWeapon.Invoke();
 				LocalPlayer.Inventory.DefaultLight.StashLighter();
-				InventoryItemView component = this._inventoryMirror.transform.parent.GetComponent<InventoryItemView>();
+				InventoryItemView inventoryItemView = this._inventoryMirror.transform.parent.parent.GetComponent<InventoryItemView>() ?? this._inventoryMirror.transform.parent.GetComponent<InventoryItemView>();
 				Transform transform = (!this._weaponFireSpawn) ? base.transform : this._weaponFireSpawn.transform;
-				this._weaponFire = (GameObject)UnityEngine.Object.Instantiate(this._weaponFirePrefab, transform.position, transform.rotation);
+				this._weaponFire = UnityEngine.Object.Instantiate<GameObject>(this._weaponFirePrefab, transform.position, transform.rotation);
 				this._weaponFire.transform.parent = transform;
 				if (!this._weaponFire.activeSelf)
 				{
@@ -198,10 +197,10 @@ namespace TheForest.Items.World
 				if (this._customFireEffect)
 				{
 					this._customFireEffect.SetActive(true);
-					ParticleSystem componentInChildren = this._weaponFire.GetComponentInChildren<ParticleSystem>();
+					weaponFireParticleController componentInChildren = this._weaponFire.GetComponentInChildren<weaponFireParticleController>();
 					if (componentInChildren)
 					{
-						UnityEngine.Object.Destroy(componentInChildren);
+						UnityEngine.Object.Destroy(componentInChildren.gameObject);
 					}
 				}
 				this._fireParticleScale = this._weaponFire.GetComponentInChildren<ParticleScaler>();
@@ -209,7 +208,7 @@ namespace TheForest.Items.World
 				this._fireAudioEmitter = this._weaponFire.GetComponent<FMOD_StudioEventEmitter>();
 				base.GetComponent<Renderer>().sharedMaterial = this._burningMat;
 				this._fuel = ((this._state != BurnableCloth.States.PutOutLighting) ? this._burnDuration : this._putOutFuel);
-				if (component.ActiveBonus == WeaponStatUpgrade.Types.BurningWeaponExtra)
+				if (inventoryItemView.ActiveBonus == WeaponStatUpgrade.Types.BurningWeaponExtra)
 				{
 					this._extraBurn = true;
 					this._fuel *= 3f;
@@ -221,7 +220,7 @@ namespace TheForest.Items.World
 				this._state = BurnableCloth.States.Burning;
 				this._player.IsWeaponBurning = true;
 				this._attacking = false;
-				component.ActiveBonus = (WeaponStatUpgrade.Types)(-1);
+				inventoryItemView.ActiveBonus = (WeaponStatUpgrade.Types)(-1);
 				FMODCommon.PlayOneshot("event:/fire/fire_built_start", transform);
 			}
 		}
@@ -229,6 +228,10 @@ namespace TheForest.Items.World
 		
 		private void Burning()
 		{
+			if (this._fuel < 1.5f && this._weaponFire)
+			{
+				this._weaponFire.SendMessage("setFireTimeout", SendMessageOptions.DontRequireReceiver);
+			}
 			if (this._fuel >= 0f)
 			{
 				if (Scene.WeatherSystem.Raining)
@@ -250,7 +253,7 @@ namespace TheForest.Items.World
 				}
 				if (this._firelight)
 				{
-					this._firelight.intensity = num * 0.428571433f * ((!this._attacking) ? 1f : 0.8f);
+					this._firelight.intensity = num * 0.428571433f * this._firelightIntensityRatio * ((!this._attacking) ? 1f : 0.8f);
 				}
 				if (this._fireAudioEmitter)
 				{
@@ -355,6 +358,9 @@ namespace TheForest.Items.World
 
 		
 		public float _fireParticleSize = 1.2f;
+
+		
+		public float _firelightIntensityRatio = 1f;
 
 		
 		public GameObject _customFireEffect;

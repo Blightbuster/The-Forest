@@ -27,15 +27,7 @@ namespace TheForest.Utils
 		
 		private void Awake()
 		{
-			this.Proxy = AnimationSequence.GetProxyFor(base.transform.position);
-			if (this.Proxy)
-			{
-				this.Proxy.SetSequence(this);
-			}
-			if (GameSetup.IsSavedGame && !BoltNetwork.isClient)
-			{
-				base.StartCoroutine(this.DelayedAwake());
-			}
+			base.StartCoroutine(this.DelayedAwake());
 		}
 
 		
@@ -117,6 +109,20 @@ namespace TheForest.Utils
 		}
 
 		
+		public void RunStageCompletedMp(int stage)
+		{
+			if (this.Proxy)
+			{
+				this.Proxy.BeginStage(stage, 0f, null);
+				this.Proxy.CompleteStage(stage);
+			}
+			else
+			{
+				this.RunStageCompleted(stage);
+			}
+		}
+
+		
 		public void RunStageCompleted(int stage)
 		{
 			GlobalDataSaver.SetInt(string.Concat(new object[]
@@ -149,7 +155,7 @@ namespace TheForest.Utils
 			AnimationSequenceProxy animationSequenceProxy;
 			if (BoltNetwork.isRunning)
 			{
-				animationSequenceProxy = GeoHashHelper<AnimationSequenceProxy>.GetFromHash(GeoHash.ToGeoHash(position));
+				animationSequenceProxy = GeoHashHelper<AnimationSequenceProxy>.GetFromHash(GeoHash.ToGeoHash(position), Lookup.Auto);
 				if (!animationSequenceProxy)
 				{
 					if (BoltNetwork.isClient)
@@ -160,7 +166,7 @@ namespace TheForest.Utils
 					}
 					else
 					{
-						animationSequenceProxy = (AnimationSequenceProxy)UnityEngine.Object.Instantiate(Prefabs.Instance.AnimationSequenceProxy, position, Quaternion.identity);
+						animationSequenceProxy = UnityEngine.Object.Instantiate<AnimationSequenceProxy>(Prefabs.Instance.AnimationSequenceProxy, position, Quaternion.identity);
 					}
 				}
 				else
@@ -178,30 +184,41 @@ namespace TheForest.Utils
 		
 		private IEnumerator DelayedAwake()
 		{
-			while (LevelSerializer.IsDeserializing || (BoltNetwork.isRunning && !this.Proxy))
+			while (!Prefabs.Instance)
 			{
 				yield return null;
 			}
-			yield return null;
-			for (int i = 0; i <= this._stages.Length; i++)
+			try
 			{
-				bool completed = GlobalDataSaver.GetInt(string.Concat(new object[]
+				this.Proxy = AnimationSequence.GetProxyFor(base.transform.position);
+				if (this.Proxy)
 				{
-					base.transform.ToGeoHash(),
-					"_",
-					i,
-					"_completed"
-				}), 0) == 1;
-				if (completed)
+					this.Proxy.SetSequence(this);
+				}
+			}
+			catch (Exception exception)
+			{
+				Debug.LogException(exception);
+			}
+			if (GameSetup.IsSavedGame && !BoltNetwork.isClient)
+			{
+				while (LevelSerializer.IsDeserializing || (BoltNetwork.isRunning && !this.Proxy))
 				{
-					if (this.Proxy)
+					yield return null;
+				}
+				yield return null;
+				for (int i = 0; i <= this._stages.Length; i++)
+				{
+					bool flag = GlobalDataSaver.GetInt(string.Concat(new object[]
 					{
-						this.Proxy.BeginStage(i, 0f, null);
-						this.Proxy.CompleteStage(i);
-					}
-					else
+						base.transform.ToGeoHash(),
+						"_",
+						i,
+						"_completed"
+					}), 0) == 1;
+					if (flag)
 					{
-						this.RunStageCompleted(i);
+						this.RunStageCompletedMp(i);
 					}
 				}
 			}

@@ -95,9 +95,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject to apply the force to.")]
 		[RequiredField]
 		[CheckForComponent(typeof(Rigidbody))]
+		[Tooltip("The GameObject to apply the force to.")]
 		public FsmOwnerDefault gameObject;
 
 		

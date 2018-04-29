@@ -230,7 +230,7 @@ public class SteamSocket : UdpPlatformSocket
 		{
 			get
 			{
-				Queue<SteamSocket.Packet> obj = this.queue;
+				object obj = this.queue;
 				int count;
 				lock (obj)
 				{
@@ -243,7 +243,7 @@ public class SteamSocket : UdpPlatformSocket
 		
 		public bool TryDequeue(out SteamSocket.Packet packet)
 		{
-			Queue<SteamSocket.Packet> obj = this.queue;
+			object obj = this.queue;
 			lock (obj)
 			{
 				if (this.queue.Count > 0)
@@ -259,7 +259,7 @@ public class SteamSocket : UdpPlatformSocket
 		
 		public void Enqueue(SteamSocket.Packet packet)
 		{
-			Queue<SteamSocket.Packet> obj = this.queue;
+			object obj = this.queue;
 			lock (obj)
 			{
 				this.queue.Enqueue(packet);
@@ -288,7 +288,7 @@ public class SteamSocket : UdpPlatformSocket
 		public byte[] Allocate(int size)
 		{
 			byte[] result = null;
-			Dictionary<int, Queue<byte[]>> obj = this.bufferQueues;
+			object obj = this.bufferQueues;
 			lock (obj)
 			{
 				Queue<byte[]> queue = this.GetQueue(size);
@@ -316,7 +316,7 @@ public class SteamSocket : UdpPlatformSocket
 		public void Free(byte[] buffer)
 		{
 			Array.Clear(buffer, 0, buffer.Length);
-			Dictionary<int, Queue<byte[]>> obj = this.bufferQueues;
+			object obj = this.bufferQueues;
 			lock (obj)
 			{
 				this.GetQueue(buffer.Length).Enqueue(buffer);

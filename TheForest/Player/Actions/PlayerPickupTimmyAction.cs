@@ -70,8 +70,8 @@ namespace TheForest.Player.Actions
 				{
 					if (this.currentSequence.Proxy.state.Actor)
 					{
-						Animator animator = this.currentSequence.Proxy.state.Actor.GetComponentInChildren<Animator>();
-						this.ActorAnimator = animator;
+						Animator componentInChildren = this.currentSequence.Proxy.state.Actor.GetComponentInChildren<Animator>();
+						this.ActorAnimator = componentInChildren;
 					}
 					yield return null;
 				}
@@ -393,10 +393,23 @@ namespace TheForest.Player.Actions
 			{
 				this.currentSequence.TickProgressStage();
 			}
-			foreach (object obj in this.screensGo.transform)
+			IEnumerator enumerator = this.screensGo.transform.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				transform.SendMessage("CheckNextImage", SendMessageOptions.DontRequireReceiver);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					transform.SendMessage("CheckNextImage", SendMessageOptions.DontRequireReceiver);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 

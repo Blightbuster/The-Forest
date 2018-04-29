@@ -31,32 +31,32 @@ namespace TheForest.UI
 		{
 			if (this._action != InputMappingIcons.Actions.None && (!this._gamepadOnly || TheForest.Utils.Input.IsGamePad) && (!this._mouseOnly || !TheForest.Utils.Input.IsGamePad))
 			{
-				this.FillSprite = ActionIconSystem.RegisterIcon(base.transform, this._action, this._sideIcon, this._currentViewOption);
-				if (this._overrideDepth || this._overrideHeight || this._currentViewOption == ActionIconSystem.CurrentViewOptions.AllowInBook || this._currentViewOption == ActionIconSystem.CurrentViewOptions.AllowInInventory)
+				ActionIcon actionIcon = ActionIconSystem.RegisterIcon(base.transform, this._action, this._sideIcon, this._currentViewOption, false, false);
+				if (actionIcon)
 				{
-					ActionIcon actionIcon = ActionIconSystem.GetActionIcon(base.transform);
-					if (actionIcon)
+					this.FillSprite = actionIcon._fillSprite;
+				}
+				if ((this._overrideDepth || this._overrideHeight || this._currentViewOption == ActionIconSystem.CurrentViewOptions.AllowInBook || this._currentViewOption == ActionIconSystem.CurrentViewOptions.AllowInInventory) && actionIcon)
+				{
+					if (this._overrideDepth)
 					{
-						if (this._overrideDepth)
+						if (this._currentViewOption != ActionIconSystem.CurrentViewOptions.AllowInBook)
 						{
-							if (this._currentViewOption != ActionIconSystem.CurrentViewOptions.AllowInBook)
-							{
-								this._oldDepth = actionIcon._follow._minDepth;
-								actionIcon._follow._minDepth = this._depth;
-							}
+							this._oldDepth = actionIcon._follow._minDepth;
+							actionIcon._follow._minDepth = this._depth;
 						}
-						if (this._overrideHeight)
+					}
+					if (this._overrideHeight)
+					{
+						if (this._currentViewOption != ActionIconSystem.CurrentViewOptions.AllowInBook)
 						{
-							if (this._currentViewOption != ActionIconSystem.CurrentViewOptions.AllowInBook)
-							{
-								this._oldHeight = actionIcon._follow._worldOffset.y;
-								actionIcon._follow._worldOffset.y = this._height;
-							}
+							this._oldHeight = actionIcon._follow._worldOffset.y;
+							actionIcon._follow._worldOffset.y = this._height;
 						}
-						if (this._currentViewOption == ActionIconSystem.CurrentViewOptions.AllowInBook || this._currentViewOption == ActionIconSystem.CurrentViewOptions.AllowInInventory)
-						{
-							actionIcon._follow._viewportOffsetBook = this._viewportOffset;
-						}
+					}
+					if (this._currentViewOption == ActionIconSystem.CurrentViewOptions.AllowInBook || this._currentViewOption == ActionIconSystem.CurrentViewOptions.AllowInInventory)
+					{
+						actionIcon._follow._viewportOffsetBook = this._viewportOffset;
 					}
 				}
 			}
@@ -67,7 +67,7 @@ namespace TheForest.UI
 		{
 			if (this._action != InputMappingIcons.Actions.None)
 			{
-				ActionIcon actionIcon = ActionIconSystem.UnregisterIcon(base.transform);
+				ActionIcon actionIcon = ActionIconSystem.UnregisterIcon(base.transform, false, false);
 				if (actionIcon)
 				{
 					if (this._overrideDepth)

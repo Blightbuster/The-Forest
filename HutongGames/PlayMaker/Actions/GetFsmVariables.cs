@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Get the values of multiple variables in another FSM and store in variables of the same name in this FSM.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Get the values of multiple variables in another FSM and store in variables of the same name in this FSM.")]
 	public class GetFsmVariables : FsmStateAction
 	{
 		
@@ -37,7 +37,7 @@ namespace HutongGames.PlayMaker.Actions
 					this.getVariables[i].Type = FsmUtility.GetVariableType(this.targetVariables[i]);
 					if (!string.IsNullOrEmpty(variableName) && this.sourceVariables[i] == null)
 					{
-						this.LogWarning("Missing Variable: " + variableName);
+						base.LogWarning("Missing Variable: " + variableName);
 					}
 					this.cachedGO = ownerDefaultTarget;
 				}
@@ -73,19 +73,19 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject that owns the FSM")]
 		[RequiredField]
+		[Tooltip("The GameObject that owns the FSM")]
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("Optional name of FSM on Game Object")]
 		[UIHint(UIHint.FsmName)]
+		[Tooltip("Optional name of FSM on Game Object")]
 		public FsmString fsmName;
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
 		[HideTypeFilter]
+		[UIHint(UIHint.Variable)]
 		public FsmVar[] getVariables;
 
 		

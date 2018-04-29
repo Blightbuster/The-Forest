@@ -26,6 +26,7 @@ public class playerOpenKeypadDoorAction : MonoBehaviour
 		bool flashLightHeld = LocalPlayer.Animator.GetBool("flashLightHeld");
 		bool lighterHeld = LocalPlayer.Animator.GetBool("lighterHeld");
 		bool pedHeld = LocalPlayer.Animator.GetBool("pedHeld");
+		LocalPlayer.Inventory.LockEquipmentSlot(Item.EquipmentSlot.LeftHand);
 		LocalPlayer.Stats.cancelCheckItem();
 		LocalPlayer.ScriptSetup.pmControl.enabled = false;
 		LocalPlayer.Animator.SetBoolReflected("stickBlock", false);
@@ -79,6 +80,7 @@ public class playerOpenKeypadDoorAction : MonoBehaviour
 		}
 		while (this.layer0.tagHash == this.enterDoorHash || LocalPlayer.AnimControl.loadingAnimation)
 		{
+			LocalPlayer.Inventory.LockEquipmentSlot(Item.EquipmentSlot.LeftHand);
 			yield return null;
 			LocalPlayer.Animator.SetLayerWeightReflected(2, 0f);
 			LocalPlayer.Animator.SetLayerWeightReflected(4, 0f);
@@ -106,8 +108,10 @@ public class playerOpenKeypadDoorAction : MonoBehaviour
 			this.doorAnimator.CrossFade("Base Layer.openStatic", 0f, 0, 0f);
 		}
 		this.unlockPlayerParams();
+		LocalPlayer.Inventory.UnlockEquipmentSlot(Item.EquipmentSlot.LeftHand);
 		LocalPlayer.ScriptSetup.pmControl.enabled = true;
 		LocalPlayer.ScriptSetup.pmControl.SendEvent("toReset2");
+		LocalPlayer.Transform.parent = Scene.SceneTracker.transform;
 		LocalPlayer.Transform.parent = null;
 		LocalPlayer.Transform.localScale = new Vector3(1f, 1f, 1f);
 		LocalPlayer.Transform.localEulerAngles = new Vector3(0f, LocalPlayer.Transform.localEulerAngles.y, 0f);
@@ -126,15 +130,15 @@ public class playerOpenKeypadDoorAction : MonoBehaviour
 			keycardHeld.SetActive(false);
 			LocalPlayer.Inventory.EquipPreviousWeapon(false);
 		}
-		if (flashLightHeld)
+		if (flashLightHeld && LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.LeftHand, LocalPlayer.AnimControl._torchId))
 		{
 			LocalPlayer.Animator.SetBool("flashLightHeld", true);
 		}
-		if (lighterHeld)
+		if (lighterHeld && LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.LeftHand, LocalPlayer.AnimControl._lighterId))
 		{
 			LocalPlayer.Animator.SetBool("lighterHeld", true);
 		}
-		if (pedHeld)
+		if (pedHeld && LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.LeftHand, LocalPlayer.AnimControl._pedometerId))
 		{
 			LocalPlayer.Animator.SetBool("pedHeld", true);
 		}
@@ -193,6 +197,7 @@ public class playerOpenKeypadDoorAction : MonoBehaviour
 	{
 		LocalPlayer.ScriptSetup.forceLocalPos.enabled = true;
 		LocalPlayer.Inventory.UnlockEquipmentSlot(Item.EquipmentSlot.RightHand);
+		LocalPlayer.Inventory.UnlockEquipmentSlot(Item.EquipmentSlot.LeftHand);
 		LocalPlayer.FpCharacter.allowFallDamage = true;
 		LocalPlayer.FpCharacter.Locked = false;
 		LocalPlayer.FpCharacter.CanJump = true;

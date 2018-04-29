@@ -5,8 +5,8 @@ namespace HutongGames.PlayMaker.Actions
 {
 	
 	[Obsolete("This action is obsolete; use Send Event with Event Target instead.")]
-	[Tooltip("Sends an Event to another Fsm after an optional delay. Specify an Fsm Name or use the first Fsm on the object.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Sends an Event to another Fsm after an optional delay. Specify an Fsm Name or use the first Fsm on the object.")]
 	public class SendEventToFsm : FsmStateAction
 	{
 		
@@ -33,7 +33,7 @@ namespace HutongGames.PlayMaker.Actions
 			{
 				if (this.requireReceiver)
 				{
-					this.LogError("GameObject doesn't have FsmComponent: " + this.go.name + " " + this.fsmName.Value);
+					base.LogError("GameObject doesn't have FsmComponent: " + this.go.name + " " + this.fsmName.Value);
 				}
 				return;
 			}
@@ -62,8 +62,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("Optional name of Fsm on Game Object")]
 		[UIHint(UIHint.FsmName)]
+		[Tooltip("Optional name of Fsm on Game Object")]
 		public FsmString fsmName;
 
 		

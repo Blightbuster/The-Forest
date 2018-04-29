@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Invokes a Method in a Behaviour attached to a Game Object. See Unity InvokeMethod docs.")]
 	[ActionCategory(ActionCategory.ScriptControl)]
+	[Tooltip("Invokes a Method in a Behaviour attached to a Game Object. See Unity InvokeMethod docs.")]
 	public class InvokeMethod : FsmStateAction
 	{
 		
@@ -37,7 +37,7 @@ namespace HutongGames.PlayMaker.Actions
 			this.component = (go.GetComponent(this.behaviour.Value) as MonoBehaviour);
 			if (this.component == null)
 			{
-				this.LogWarning("InvokeMethod: " + go.name + " missing behaviour: " + this.behaviour.Value);
+				base.LogWarning("InvokeMethod: " + go.name + " missing behaviour: " + this.behaviour.Value);
 				return;
 			}
 			if (this.repeating.Value)
@@ -68,8 +68,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmOwnerDefault gameObject;
 
 		
-		[UIHint(UIHint.Script)]
 		[RequiredField]
+		[UIHint(UIHint.Script)]
 		public FsmString behaviour;
 
 		

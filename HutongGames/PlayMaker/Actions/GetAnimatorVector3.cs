@@ -97,8 +97,8 @@ namespace HutongGames.PlayMaker.Actions
 		public bool everyFrame;
 
 		
-		[RequiredField]
 		[ActionSection("Results")]
+		[RequiredField]
 		[UIHint(UIHint.Variable)]
 		[Tooltip("The Vector3 value of the animator parameter")]
 		public FsmVector3 result;

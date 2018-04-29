@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections;
 using Bolt;
-using ModAPI;
 using PathologicalGames;
 using TheForest.Items.World;
 using TheForest.Utils;
-using UltimateCheatmenu;
 using UnityEngine;
 
 namespace TheForest.Buildings.World
@@ -14,20 +12,6 @@ namespace TheForest.Buildings.World
 	[DoNotSerializePublic]
 	public class GardenDirtPile : EntityBehaviour<IGardenDirtPileState>, IEntityReplicationFilter
 	{
-		
-		bool IEntityReplicationFilter.AllowReplicationTo(BoltConnection connection)
-		{
-			if (this && this.entity && this.entity.isAttached && base.state != null && base.state.Garden)
-			{
-				if (base.state.Garden.isFrozen)
-				{
-					base.state.Garden.Freeze(false);
-				}
-				return connection.ExistsOnRemote(base.state.Garden) == ExistsResult.Yes;
-			}
-			return false;
-		}
-
 		
 		private void Awake()
 		{
@@ -79,7 +63,7 @@ namespace TheForest.Buildings.World
 		}
 
 		
-		public void __Growth__Original()
+		public void Growth()
 		{
 			if (this._growType == GardenDirtPile.GrowTypes.Plant)
 			{
@@ -110,7 +94,7 @@ namespace TheForest.Buildings.World
 						{
 							pickUp.Used = true;
 							this._usedPickups[i] = true;
-							if (BoltNetwork.isRunning && this.entity.isAttached && this.entity.isOwner && base.state.UsedPickups[i] == 0)
+							if (BoltNetwork.isRunning && base.entity.isAttached && base.entity.isOwner && base.state.UsedPickups[i] == 0)
 							{
 								base.state.UsedPickups[i] = 1;
 							}
@@ -188,18 +172,25 @@ namespace TheForest.Buildings.World
 		
 		private void Clear()
 		{
-			if (PoolManager.Pools["misc"].IsSpawned(base.transform))
+			if (!BoltNetwork.isClient)
 			{
-				base.transform.parent = null;
-				PoolManager.Pools["misc"].Despawn(base.transform);
-				for (int i = 0; i < this._pickups.Length; i++)
+				if (PoolManager.Pools["misc"].IsSpawned(base.transform))
 				{
-					this._pickups[i].transform.parent.gameObject.SetActive(true);
+					if (BoltNetwork.isRunning && base.entity && base.entity.isAttached && base.entity.isOwner)
+					{
+						BoltNetwork.Detach(base.entity);
+					}
+					base.transform.parent = null;
+					PoolManager.Pools["misc"].Despawn(base.transform);
+					for (int i = 0; i < this._pickups.Length; i++)
+					{
+						this._pickups[i].transform.parent.gameObject.SetActive(true);
+					}
 				}
-			}
-			else
-			{
-				UnityEngine.Object.Destroy(base.gameObject);
+				else
+				{
+					UnityEngine.Object.Destroy(base.gameObject);
+				}
 			}
 		}
 
@@ -215,9 +206,9 @@ namespace TheForest.Buildings.World
 					{
 						pickUp.Used = true;
 						this._usedPickups[i] = true;
-						if (BoltNetwork.isRunning && this.entity.isAttached && this.entity.isOwner && base.state.UsedPickups[i] == 0)
+						if (BoltNetwork.isRunning && base.entity.isAttached && base.entity.isOwner && base.state.UsedPickups[i] == 0)
 						{
-							this.entity.Freeze(false);
+							base.entity.Freeze(false);
 							base.state.UsedPickups[i] = 1;
 						}
 						if (pickUp._destroyTarget.gameObject.activeSelf)
@@ -332,6 +323,20 @@ namespace TheForest.Buildings.World
 		}
 
 		
+		bool IEntityReplicationFilter.AllowReplicationTo(BoltConnection connection)
+		{
+			if (this && base.entity && base.entity.isAttached && base.state != null && base.state.Garden)
+			{
+				if (base.state.Garden.isFrozen)
+				{
+					base.state.Garden.Freeze(false);
+				}
+				return connection.ExistsOnRemote(base.state.Garden) == ExistsResult.Yes;
+			}
+			return false;
+		}
+
+		
 		
 		
 		public int SlotNum
@@ -343,25 +348,6 @@ namespace TheForest.Buildings.World
 			set
 			{
 				this._slotNum = value;
-			}
-		}
-
-		
-		public void Growth()
-		{
-			try
-			{
-				if (UCheatmenu.instgrow)
-				{
-					this._plantedTime = Scene.Clock.ElapsedGameTime - UCheatmenu.instgrowspeed;
-				}
-				this.__Growth__Original();
-				UCheatmenu.instgrow = false;
-			}
-			catch (Exception ex)
-			{
-				Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-				this.__Growth__Original();
 			}
 		}
 

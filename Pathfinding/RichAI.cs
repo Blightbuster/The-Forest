@@ -7,9 +7,9 @@ using UnityEngine;
 namespace Pathfinding
 {
 	
-	[HelpURL("http:
-	[AddComponentMenu("Pathfinding/AI/RichAI (3D, for navmesh)")]
 	[RequireComponent(typeof(Seeker))]
+	[AddComponentMenu("Pathfinding/AI/RichAI (3D, for navmesh)")]
+	[HelpURL("http:
 	public class RichAI : MonoBehaviour
 	{
 		

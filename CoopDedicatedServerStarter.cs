@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Steamworks;
 using TheForest.Utils;
@@ -41,7 +42,11 @@ public class CoopDedicatedServerStarter : MonoBehaviour
 		if (flag)
 		{
 			Debug.Log("GameServer init success. Port: " + SteamDSConfig.ServerGamePort);
-			SteamGameServerUtils.SetWarningMessageHook(new SteamAPIWarningMessageHook_t(CoopDedicatedServerStarter.SteamAPIDebugTextHook));
+			if (CoopDedicatedServerStarter.<>f__mg$cache0 == null)
+			{
+				CoopDedicatedServerStarter.<>f__mg$cache0 = new SteamAPIWarningMessageHook_t(CoopDedicatedServerStarter.SteamAPIDebugTextHook);
+			}
+			SteamGameServerUtils.SetWarningMessageHook(CoopDedicatedServerStarter.<>f__mg$cache0);
 			SteamGameServer.SetModDir("theforestDS");
 			SteamGameServer.SetProduct(SteamDSConfig.ProductName);
 			SteamGameServer.SetGameDescription(SteamDSConfig.ProductDescription);
@@ -242,4 +247,8 @@ public class CoopDedicatedServerStarter : MonoBehaviour
 
 	
 	private static CoopSteamServerStarter serverStarter;
+
+	
+	[CompilerGenerated]
+	private static SteamAPIWarningMessageHook_t <>f__mg$cache0;
 }

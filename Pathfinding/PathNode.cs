@@ -91,6 +91,18 @@ namespace Pathfinding
 		}
 
 		
+		public GraphNode node;
+
+		
+		public PathNode parent;
+
+		
+		public ushort pathID;
+
+		
+		private uint flags;
+
+		
 		private const uint CostMask = 268435455u;
 
 		
@@ -104,18 +116,6 @@ namespace Pathfinding
 
 		
 		private const uint Flag2Mask = 536870912u;
-
-		
-		public GraphNode node;
-
-		
-		public PathNode parent;
-
-		
-		public ushort pathID;
-
-		
-		private uint flags;
 
 		
 		private uint g;

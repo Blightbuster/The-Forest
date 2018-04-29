@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using Bolt;
 using FMOD.Studio;
 using PathologicalGames;
 using TheForest.Items.World;
+using TheForest.Utils;
 using UnityEngine;
 
 
@@ -23,7 +25,7 @@ public class FireDamage : EntityBehaviour
 	{
 		if (this.isBurning && this.MyBurnt)
 		{
-			UnityEngine.Object.Instantiate(this.MyBurnt, base.transform.position, base.transform.rotation);
+			UnityEngine.Object.Instantiate<GameObject>(this.MyBurnt, base.transform.position, base.transform.rotation);
 		}
 	}
 
@@ -146,8 +148,19 @@ public class FireDamage : EntityBehaviour
 	}
 
 	
-	private void Burn()
+	public void SetLodBase(LOD_Base lb)
 	{
+		this.LodBase = lb;
+	}
+
+	
+	protected virtual void Burn()
+	{
+		if (this.LodBase)
+		{
+			this.LodBase.CurrentLodTransform = null;
+			this.LodBase = null;
+		}
 		if (this.MyFuel == 0f)
 		{
 			this.MyFuel = 15f;
@@ -188,13 +201,38 @@ public class FireDamage : EntityBehaviour
 				this.AdditionalBurnMaterials[i].renderer.sharedMaterial = this.AdditionalBurnMaterials[i].material;
 			}
 		}
-		foreach (object obj in base.transform)
+		if (this.DestroyWhenComplete)
 		{
-			Transform transform = (Transform)obj;
-			PickUp component2 = transform.GetComponent<PickUp>();
-			if (component2)
+			IEnumerator enumerator = base.transform.GetEnumerator();
+			try
 			{
-				component2.ClearOut(false);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					PickUp component2 = transform.GetComponent<PickUp>();
+					if (component2)
+					{
+						component2._destroyTarget = component2.gameObject;
+						if (component2._myPickUp)
+						{
+							UnityEngine.Object.Destroy(component2._myPickUp);
+						}
+						if (component2._sheen)
+						{
+							UnityEngine.Object.Destroy(component2._sheen);
+						}
+						UnityEngine.Object.Destroy(component2.gameObject);
+					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 	}
@@ -350,6 +388,11 @@ public class FireDamage : EntityBehaviour
 		{
 			float num = Mathf.Clamp01(this.usedFuelSeconds / this.FuelSeconds);
 			this.usedFuelSeconds += Time.deltaTime;
+			if (num >= 0.85f && !this.SmokeShown)
+			{
+				this.SmokeShown = true;
+				Prefabs.Instance.SpawnBurntDustAndSmokePS(base.transform.position, base.transform.rotation);
+			}
 			if (num >= 0.99f)
 			{
 				this.StopBurningEvent();
@@ -409,16 +452,46 @@ public class FireDamage : EntityBehaviour
 	
 	protected virtual void FinishedBurning()
 	{
-		if (this.MyBurnt && !BoltNetwork.isClient)
+		if (this.MyBurnt && (!BoltNetwork.isClient || !this.MyBurnt.GetComponent<BoltEntity>()))
 		{
-			GameObject value = (GameObject)UnityEngine.Object.Instantiate(this.MyBurnt, base.transform.position, base.transform.rotation);
-			base.SendMessage("Burnt", value, SendMessageOptions.DontRequireReceiver);
+			FMODCommon.PlayOneshot("event:/combat/weapons/axe/axe_plane_hits_plant", base.transform.position, new object[0]);
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.MyBurnt, base.transform.position, base.transform.rotation);
+			base.SendMessage("Burnt", gameObject, SendMessageOptions.DontRequireReceiver);
+			IEnumerator enumerator = gameObject.transform.GetEnumerator();
+			try
+			{
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					if (!transform.GetComponent<UnParent>())
+					{
+						Renderer component = transform.GetComponent<Renderer>();
+						if (component)
+						{
+							if (this.BurnMaterial)
+							{
+								component.sharedMaterial = this.BurnMaterial;
+							}
+							component.SetPropertyBlock(this.propertyBlock);
+						}
+					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
+			}
 		}
 		if (this.DestroyWhenComplete)
 		{
-			if (BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+			if (BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 			{
-				if (this.entity.isOwner)
+				if (base.entity.isOwner)
 				{
 					BoltNetwork.Destroy((!this.DestroyTarget) ? base.gameObject : this.DestroyTarget);
 				}
@@ -436,13 +509,13 @@ public class FireDamage : EntityBehaviour
 	}
 
 	
-	public const int MaxBurnGenerations = 10;
-
-	
 	public bool DestroyWhenComplete;
 
 	
 	public GameObject DestroyTarget;
+
+	
+	public const int MaxBurnGenerations = 10;
 
 	
 	public Material BurnMaterial;
@@ -479,6 +552,9 @@ public class FireDamage : EntityBehaviour
 	private int burnGeneration;
 
 	
+	private bool SmokeShown;
+
+	
 	public float MyFuel;
 
 	
@@ -499,6 +575,9 @@ public class FireDamage : EntityBehaviour
 
 	
 	private MaterialPropertyBlock propertyBlock;
+
+	
+	private LOD_Base LodBase;
 
 	
 	private float spreadTimer;

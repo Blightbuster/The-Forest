@@ -37,7 +37,7 @@ public class CoopVoice : MonoBehaviour
 	{
 		if (this.IsLocal)
 		{
-			if (base.GetComponentInParent<BoltEntity>().IsOwner() && this.WalkieTalkie.gameObject.activeInHierarchy && LocalPlayer.Stats.BatteryCharge > 0f)
+			if (base.GetComponentInParent<BoltEntity>().IsOwner() && this.WalkieTalkie.gameObject.activeInHierarchy)
 			{
 				if (this.recording)
 				{
@@ -114,13 +114,17 @@ public class CoopVoice : MonoBehaviour
 	
 	private void ReceiveVoiceData_Unpacked(byte[] voice, int size)
 	{
-		if (LocalPlayer.Stats.BatteryCharge > 0f)
-		{
-			base.GetComponent<CoopSteamVoicePlayer>().DataReceived(voice, size);
-		}
 		if (BoltNetwork.isServer)
 		{
 			this.ForwardVoiceData(voice, size);
+			if (!CoopPeerStarter.DedicatedHost)
+			{
+				base.GetComponent<CoopSteamVoicePlayer>().DataReceived(voice, size);
+			}
+		}
+		else if (LocalPlayer.Stats != null)
+		{
+			base.GetComponent<CoopSteamVoicePlayer>().DataReceived(voice, size);
 		}
 	}
 
@@ -132,10 +136,14 @@ public class CoopVoice : MonoBehaviour
 		{
 			foreach (GameObject gameObject in this.SceneTracker.allPlayers)
 			{
-				BoltEntity componentInParent2 = gameObject.GetComponentInParent<BoltEntity>();
-				if (!object.ReferenceEquals(componentInParent2, componentInParent) && componentInParent2.source != null)
+				BoltEntity boltEntity = gameObject.GetComponentInParent<BoltEntity>();
+				if (boltEntity == null)
 				{
-					this.SendVoiceData(data, size, componentInParent2.source);
+					boltEntity = gameObject.GetComponent<BoltEntity>();
+				}
+				if (!object.ReferenceEquals(boltEntity, componentInParent) && boltEntity.source != null)
+				{
+					this.SendVoiceData(data, size, boltEntity.source);
 				}
 			}
 		}
@@ -154,8 +162,9 @@ public class CoopVoice : MonoBehaviour
 			Blit.PackBytes(array, ref num, voice, 0, size);
 			sendTo.StreamBytes(CoopVoice.VoiceChannel, array);
 		}
-		catch (Exception ex)
+		catch (Exception exception)
 		{
+			BoltLog.Exception(exception);
 		}
 	}
 

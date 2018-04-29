@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the value of a Rect Variable.")]
 	[ActionCategory(ActionCategory.Rect)]
+	[Tooltip("Sets the value of a Rect Variable.")]
 	public class SetRectValue : FsmStateAction
 	{
 		
@@ -32,8 +32,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmRect rectVariable;
 
 		

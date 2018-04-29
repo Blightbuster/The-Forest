@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Get Vector3 Length.")]
 	[ActionCategory(ActionCategory.Vector3)]
+	[Tooltip("Get Vector3 Length.")]
 	public class GetVectorLength : FsmStateAction
 	{
 		

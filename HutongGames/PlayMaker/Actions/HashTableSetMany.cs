@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Set key/value pairs to a PlayMaker HashTable Proxy component (PlayMakerHashTableProxy)")]
 	[ActionCategory("ArrayMaker/HashTable")]
+	[Tooltip("Set key/value pairs to a PlayMaker HashTable Proxy component (PlayMakerHashTableProxy)")]
 	public class HashTableSetMany : HashTableActions
 	{
 		
@@ -40,10 +40,10 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[RequiredField]
 		[ActionSection("Set up")]
-		[CheckForComponent(typeof(PlayMakerHashTableProxy))]
+		[RequiredField]
 		[Tooltip("The gameObject with the PlayMaker HashTable Proxy component")]
+		[CheckForComponent(typeof(PlayMakerHashTableProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -51,11 +51,11 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString reference;
 
 		
-		[Tooltip("The Key values for that hash set")]
 		[ActionSection("Data")]
 		[CompoundArray("Count", "Key", "Value")]
 		[RequiredField]
 		[UIHint(UIHint.FsmString)]
+		[Tooltip("The Key values for that hash set")]
 		public FsmString[] keys;
 
 		

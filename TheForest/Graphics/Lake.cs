@@ -5,8 +5,8 @@ using UnityEngine;
 namespace TheForest.Graphics
 {
 	
-	[AddComponentMenu("The Forest/Graphics/Lake")]
 	[ExecuteInEditMode]
+	[AddComponentMenu("The Forest/Graphics/Lake")]
 	public class Lake : Water
 	{
 		
@@ -67,12 +67,13 @@ namespace TheForest.Graphics
 			{
 				return false;
 			}
-			if (Vector3.Distance(position, this.newRenderer.bounds.center) > this.newRenderer.bounds.size.magnitude / 2f)
+			Bounds bounds = this.newRenderer.bounds;
+			if (Vector3.Distance(position, bounds.center) > bounds.size.magnitude / 2f)
 			{
 				return false;
 			}
-			position.y = this.newRenderer.bounds.center.y;
-			return this.newRenderer.bounds.Contains(position);
+			position.y = bounds.center.y;
+			return bounds.Contains(position);
 		}
 
 		

@@ -8,13 +8,19 @@ public abstract class CoopBase<T> : EntityEventListener<T>, IPriorityCalculator
 	
 	float IPriorityCalculator.CalculateEventPriority(BoltConnection connection, Bolt.Event evnt)
 	{
-		return CoopUtils.CalculatePriorityFor(connection, this.entity, this.MultiplayerPriority, 1);
+		return CoopUtils.CalculatePriorityFor(connection, base.entity, this.MultiplayerPriority, 1);
 	}
 
 	
 	float IPriorityCalculator.CalculateStatePriority(BoltConnection connection, int skipped)
 	{
-		return CoopUtils.CalculatePriorityFor(connection, this.entity, this.MultiplayerPriority, skipped);
+		return CoopUtils.CalculatePriorityFor(connection, base.entity, this.MultiplayerPriority, skipped);
+	}
+
+	
+	public override void OnEvent(SendMessageEvent evnt)
+	{
+		base.entity.SendMessage(evnt.Message, SendMessageOptions.DontRequireReceiver);
 	}
 
 	
@@ -25,12 +31,6 @@ public abstract class CoopBase<T> : EntityEventListener<T>, IPriorityCalculator
 		{
 			return false;
 		}
-	}
-
-	
-	public override void OnEvent(SendMessageEvent evnt)
-	{
-		this.entity.SendMessage(evnt.Message, SendMessageOptions.DontRequireReceiver);
 	}
 
 	

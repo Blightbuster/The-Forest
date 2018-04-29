@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Tests if a point is inside a rectangle.")]
 	[ActionCategory(ActionCategory.Rect)]
+	[Tooltip("Tests if a point is inside a rectangle.")]
 	public class RectContains : FsmStateAction
 	{
 		
@@ -71,8 +71,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("Rectangle to test.")]
 		[RequiredField]
+		[Tooltip("Rectangle to test.")]
 		public FsmRect rectangle;
 
 		

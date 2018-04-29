@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets a Float variable to its absolute value.")]
 	[ActionCategory(ActionCategory.Math)]
+	[Tooltip("Sets a Float variable to its absolute value.")]
 	public class FloatAbs : FsmStateAction
 	{
 		
@@ -38,8 +38,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		[Tooltip("The Float variable.")]
 		public FsmFloat floatVariable;
 

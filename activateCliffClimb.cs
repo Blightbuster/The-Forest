@@ -42,8 +42,8 @@ public class activateCliffClimb : MonoBehaviour
 		{
 			if (Physics.Raycast(LocalPlayer.MainCamTr.position, LocalPlayer.MainCamTr.forward, out this.hit, 5f, this.layerMask) && !LocalPlayer.FpCharacter.Sitting)
 			{
-				notClimbable nc = this.hit.transform.GetComponent<notClimbable>();
-				if (!nc)
+				notClimbable component = this.hit.transform.GetComponent<notClimbable>();
+				if (!component)
 				{
 					if (!this.hit.collider.gameObject.CompareTag("climbWall") && LocalPlayer.IsInCaves)
 					{
@@ -62,10 +62,10 @@ public class activateCliffClimb : MonoBehaviour
 						{
 							this.MyPickUp.SetActive(true);
 						}
-						Vector3 iconPos = this.hit.point;
-						iconPos += LocalPlayer.MainCamTr.forward * -1.5f;
-						iconPos.y -= 1f;
-						this.MyPickUp.transform.position = Vector3.Lerp(this.MyPickUp.transform.position, iconPos, Time.deltaTime * 20f);
+						Vector3 vector = this.hit.point;
+						vector += LocalPlayer.MainCamTr.forward * -1.5f;
+						vector.y -= 1f;
+						this.MyPickUp.transform.position = Vector3.Lerp(this.MyPickUp.transform.position, vector, Time.deltaTime * 20f);
 						this.allowClimb = true;
 					}
 				}
@@ -78,7 +78,7 @@ public class activateCliffClimb : MonoBehaviour
 			}
 			if (!this.activateCoolDown)
 			{
-				if (TheForest.Utils.Input.GetButtonDown("Take") && this.allowClimb && !LocalPlayer.Animator.GetBool("deathBool") && Physics.Raycast(LocalPlayer.Transform.position, LocalPlayer.Transform.forward, out this.hit, 5f, this.layerMask) && !LocalPlayer.AnimControl.cliffClimb)
+				if (TheForest.Utils.Input.GetButtonDown("Take") && this.allowClimb && !LocalPlayer.Animator.GetBool("deathBool") && !LocalPlayer.AnimControl.cliffClimb)
 				{
 					if (!this.cliffAction.doingClimb && LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.RightHand, this._itemId))
 					{

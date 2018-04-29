@@ -48,10 +48,10 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
-		[RequiredField]
-		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		[ActionSection("Set up")]
+		[RequiredField]
+		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
+		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -60,14 +60,14 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString reference;
 
 		
-		[UIHint(UIHint.FsmEvent)]
 		[ActionSection("Result")]
+		[UIHint(UIHint.FsmEvent)]
 		[Tooltip("The event to trigger if the ArrayList proxy component is destroyed")]
 		public FsmEvent successEvent;
 
 		
-		[Tooltip("The event to trigger if the ArrayList proxy component was not found")]
 		[UIHint(UIHint.FsmEvent)]
+		[Tooltip("The event to trigger if the ArrayList proxy component was not found")]
 		public FsmEvent notFoundEvent;
 	}
 }

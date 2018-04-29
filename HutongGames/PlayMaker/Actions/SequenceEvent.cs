@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sends the next event on the state each time the state is entered.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Sends the next event on the state each time the state is entered.")]
 	public class SequenceEvent : FsmStateAction
 	{
 		

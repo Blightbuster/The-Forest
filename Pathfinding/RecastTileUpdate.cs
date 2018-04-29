@@ -4,8 +4,8 @@ using UnityEngine;
 namespace Pathfinding
 {
 	
-	[HelpURL("http:
 	[AddComponentMenu("Pathfinding/Navmesh/RecastTileUpdate")]
+	[HelpURL("http:
 	public class RecastTileUpdate : MonoBehaviour
 	{
 		

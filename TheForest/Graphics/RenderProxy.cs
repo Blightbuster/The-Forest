@@ -4,8 +4,8 @@ using UnityEngine;
 namespace TheForest.Graphics
 {
 	
-	[AddComponentMenu("The Forest/Graphics/RenderProxy")]
 	[ExecuteInEditMode]
+	[AddComponentMenu("The Forest/Graphics/RenderProxy")]
 	public class RenderProxy : MonoBehaviour
 	{
 		

@@ -2,8 +2,8 @@
 using UnityEngine;
 
 
-[ExecuteInEditMode]
 [AddComponentMenu("Relief Terrain/Helpers/Use baked gloss texture")]
+[ExecuteInEditMode]
 public class GlossBakedTextureReplacement : MonoBehaviour
 {
 	
@@ -85,20 +85,20 @@ public class GlossBakedTextureReplacement : MonoBehaviour
 		}
 		else
 		{
-			string propertyName = "RTP_gloss_mult0";
-			string propertyName2 = "RTP_gloss_shaping0";
+			string text = "RTP_gloss_mult0";
+			string text2 = "RTP_gloss_shaping0";
 			if (this.layerNumber == 2)
 			{
-				propertyName = "RTP_gloss_mult1";
-				propertyName2 = "RTP_gloss_shaping1";
+				text = "RTP_gloss_mult1";
+				text2 = "RTP_gloss_shaping1";
 			}
-			if (material.HasProperty(propertyName))
+			if (material.HasProperty(text))
 			{
-				material.SetFloat(propertyName, 1f);
+				material.SetFloat(text, 1f);
 			}
-			if (material.HasProperty(propertyName2))
+			if (material.HasProperty(text2))
 			{
-				material.SetFloat(propertyName2, 0.5f);
+				material.SetFloat(text2, 0.5f);
 			}
 		}
 	}
@@ -110,26 +110,26 @@ public class GlossBakedTextureReplacement : MonoBehaviour
 		{
 			return;
 		}
-		string propertyName = "_MainTex";
+		string text = "_MainTex";
 		if (this.RTPStandAloneShader)
 		{
-			propertyName = "_SplatA0";
+			text = "_SplatA0";
 			if (this.layerNumber == 2)
 			{
-				propertyName = "_SplatA1";
+				text = "_SplatA1";
 			}
 			else if (this.layerNumber == 3)
 			{
-				propertyName = "_SplatA2";
+				text = "_SplatA2";
 			}
 			else if (this.layerNumber == 4)
 			{
-				propertyName = "_SplatA3";
+				text = "_SplatA3";
 			}
 		}
 		else if (this.layerNumber == 2)
 		{
-			propertyName = "_MainTex2";
+			text = "_MainTex2";
 		}
 		Material material;
 		if (this.CustomMaterial != null)
@@ -152,24 +152,24 @@ public class GlossBakedTextureReplacement : MonoBehaviour
 		{
 			return;
 		}
-		if (material.HasProperty(propertyName))
+		if (material.HasProperty(text))
 		{
 			if (this.bakedTexture)
 			{
-				material.SetTexture(propertyName, this.bakedTexture);
+				material.SetTexture(text, this.bakedTexture);
 			}
 			else
 			{
 				if (this.originalTexture == null)
 				{
-					this.originalTexture = (Texture2D)material.GetTexture(propertyName);
+					this.originalTexture = (Texture2D)material.GetTexture(text);
 				}
 				if (this.originalTexture != null && this.glossBakedData != null && !this.glossBakedData.used_in_atlas && this.glossBakedData.CheckSize(this.originalTexture))
 				{
 					this.bakedTexture = this.glossBakedData.MakeTexture(this.originalTexture);
 					if (this.bakedTexture)
 					{
-						material.SetTexture(propertyName, this.bakedTexture);
+						material.SetTexture(text, this.bakedTexture);
 					}
 				}
 			}

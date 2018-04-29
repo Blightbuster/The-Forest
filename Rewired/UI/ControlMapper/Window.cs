@@ -9,8 +9,8 @@ using UnityEngine.UI;
 namespace Rewired.UI.ControlMapper
 {
 	
-	[RequireComponent(typeof(CanvasGroup))]
 	[AddComponentMenu("")]
+	[RequireComponent(typeof(CanvasGroup))]
 	public class Window : MonoBehaviour
 	{
 		
@@ -168,6 +168,7 @@ namespace Rewired.UI.ControlMapper
 			{
 				return;
 			}
+			this.CheckUISelection();
 			if (this._updateCallback != null)
 			{
 				this._updateCallback(this._id);
@@ -439,6 +440,49 @@ namespace Rewired.UI.ControlMapper
 		}
 
 		
+		private void CheckUISelection()
+		{
+			if (!this.hasFocus)
+			{
+				return;
+			}
+			if (EventSystem.current == null)
+			{
+				return;
+			}
+			if (EventSystem.current.currentSelectedGameObject == null)
+			{
+				this.RestoreDefaultOrLastUISelection();
+			}
+			this.lastUISelection = EventSystem.current.currentSelectedGameObject;
+		}
+
+		
+		private void RestoreDefaultOrLastUISelection()
+		{
+			if (!this.hasFocus)
+			{
+				return;
+			}
+			if (this.lastUISelection == null || !this.lastUISelection.activeInHierarchy)
+			{
+				this.SetUISelection(this._defaultUIElement);
+				return;
+			}
+			this.SetUISelection(this.lastUISelection);
+		}
+
+		
+		private void SetUISelection(GameObject selection)
+		{
+			if (EventSystem.current == null)
+			{
+				return;
+			}
+			EventSystem.current.SetSelectedGameObject(selection);
+		}
+
+		
 		public Image backgroundImage;
 
 		
@@ -476,6 +520,9 @@ namespace Rewired.UI.ControlMapper
 
 		
 		public UnityAction cancelCallback;
+
+		
+		private GameObject lastUISelection;
 
 		
 		public class Timer

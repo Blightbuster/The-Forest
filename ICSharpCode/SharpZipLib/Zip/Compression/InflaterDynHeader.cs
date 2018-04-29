@@ -16,20 +16,20 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 					switch (this.mode)
 					{
 					case 0:
-						goto IL_31;
+						goto IL_2F;
 					case 1:
-						goto IL_71;
+						goto IL_6F;
 					case 2:
-						goto IL_D1;
+						goto IL_CF;
 					case 3:
-						goto IL_121;
+						goto IL_11F;
 					case 4:
-						goto IL_19D;
+						goto IL_19B;
 					case 5:
-						goto IL_236;
+						goto IL_232;
 					}
 				}
-				IL_236:
+				IL_232:
 				int bitCount = InflaterDynHeader.repBits[this.repSymbol];
 				int num = input.PeekBits(bitCount);
 				if (num < 0)
@@ -52,7 +52,7 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 				}
 				this.mode = 4;
 				continue;
-				IL_19D:
+				IL_19B:
 				int symbol;
 				while (((symbol = this.blTree.GetSymbol(input)) & -16) == 0)
 				{
@@ -76,8 +76,8 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 				}
 				this.repSymbol = symbol - 16;
 				this.mode = 5;
-				goto IL_236;
-				IL_121:
+				goto IL_232;
+				IL_11F:
 				while (this.ptr < this.blnum)
 				{
 					int num2 = input.PeekBits(3);
@@ -93,8 +93,8 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 				this.blLens = null;
 				this.ptr = 0;
 				this.mode = 4;
-				goto IL_19D;
-				IL_D1:
+				goto IL_19B;
+				IL_CF:
 				this.blnum = input.PeekBits(4);
 				if (this.blnum < 0)
 				{
@@ -105,8 +105,8 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 				this.blLens = new byte[19];
 				this.ptr = 0;
 				this.mode = 3;
-				goto IL_121;
-				IL_71:
+				goto IL_11F;
+				IL_6F:
 				this.dnum = input.PeekBits(5);
 				if (this.dnum < 0)
 				{
@@ -117,8 +117,8 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 				this.num = this.lnum + this.dnum;
 				this.litdistLens = new byte[this.num];
 				this.mode = 2;
-				goto IL_D1;
-				IL_31:
+				goto IL_CF;
+				IL_2F:
 				this.lnum = input.PeekBits(5);
 				if (this.lnum < 0)
 				{
@@ -127,7 +127,7 @@ namespace ICSharpCode.SharpZipLib.Zip.Compression
 				this.lnum += 257;
 				input.DropBits(5);
 				this.mode = 1;
-				goto IL_71;
+				goto IL_6F;
 			}
 			return false;
 			Block_10:

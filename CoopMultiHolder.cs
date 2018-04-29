@@ -11,19 +11,6 @@ public class CoopMultiHolder : EntityBehaviour<IMultiHolderState>
 	
 	private void Awake()
 	{
-		if (CoopPeerStarter.DedicatedHost)
-		{
-			AmplifyMotionObject[] componentsInChildren = base.transform.GetComponentsInChildren<AmplifyMotionObject>(true);
-			AmplifyMotionObjectBase[] componentsInChildren2 = base.transform.GetComponentsInChildren<AmplifyMotionObjectBase>(true);
-			foreach (AmplifyMotionObject obj in componentsInChildren)
-			{
-				UnityEngine.Object.Destroy(obj);
-			}
-			foreach (AmplifyMotionObjectBase obj2 in componentsInChildren2)
-			{
-				UnityEngine.Object.Destroy(obj2);
-			}
-		}
 		if (!BoltNetwork.isRunning)
 		{
 			UnityEngine.Object.Destroy(this);
@@ -47,7 +34,7 @@ public class CoopMultiHolder : EntityBehaviour<IMultiHolderState>
 	public override void Attached()
 	{
 		this.rb = base.GetComponentInChildren<Rigidbody>();
-		if (this.entity.isOwner)
+		if (base.entity.isOwner)
 		{
 			base.StartCoroutine(this.ClampVelocityRoutine());
 		}
@@ -93,21 +80,24 @@ public class CoopMultiHolder : EntityBehaviour<IMultiHolderState>
 	{
 		return delegate
 		{
-			switch (index)
+			if (index != 0)
 			{
-			case 0:
-				if (this.state.Body0)
+				if (index != 1)
 				{
-					this.body0 = this.state.Body0;
-					this.SetPickupTrigger(this.body0, false);
+					if (index == 2)
+					{
+						if (this.state.Body2)
+						{
+							this.body2 = this.state.Body2;
+							this.SetPickupTrigger(this.body2, false);
+						}
+						else if (this.body2)
+						{
+							this.SetPickupTrigger(this.body2, true);
+						}
+					}
 				}
-				else if (this.body0)
-				{
-					this.SetPickupTrigger(this.body0, true);
-				}
-				break;
-			case 1:
-				if (this.state.Body1)
+				else if (this.state.Body1)
 				{
 					this.body1 = this.state.Body1;
 					this.SetPickupTrigger(this.body1, false);
@@ -116,18 +106,15 @@ public class CoopMultiHolder : EntityBehaviour<IMultiHolderState>
 				{
 					this.SetPickupTrigger(this.body1, true);
 				}
-				break;
-			case 2:
-				if (this.state.Body2)
-				{
-					this.body2 = this.state.Body2;
-					this.SetPickupTrigger(this.body2, false);
-				}
-				else if (this.body2)
-				{
-					this.SetPickupTrigger(this.body2, true);
-				}
-				break;
+			}
+			else if (this.state.Body0)
+			{
+				this.body0 = this.state.Body0;
+				this.SetPickupTrigger(this.body0, false);
+			}
+			else if (this.body0)
+			{
+				this.SetPickupTrigger(this.body0, true);
 			}
 		};
 	}
@@ -135,7 +122,7 @@ public class CoopMultiHolder : EntityBehaviour<IMultiHolderState>
 	
 	private void ContentTypeChanged()
 	{
-		if (!this.entity.isOwner)
+		if (!base.entity.isOwner)
 		{
 			this.multiholder._contentTypeActual = (MultiHolder.ContentTypes)base.state.ContentType;
 			this.multiholder.ItemCountChangedMP();
@@ -218,14 +205,14 @@ public class CoopMultiHolder : EntityBehaviour<IMultiHolderState>
 		{
 			if (base.state.Replaces.isOwner)
 			{
-				base.state.Replaces.GetState<IMultiHolderState>().ReplacedBy = this.entity;
+				base.state.Replaces.GetState<IMultiHolderState>().ReplacedBy = base.entity;
 			}
 			base.state.Replaces.GetComponent<CoopMultiHolder>().sledPush.Interraction(false);
 			base.state.Replaces.GetComponent<CoopMultiHolder>().multiholder.gameObject.SetActive(false);
-			this.sledPush.Interraction(this.entity.isOwner);
-			this.multiholder.gameObject.SetActive(!this.entity.isOwner);
+			this.sledPush.Interraction(base.entity.isOwner);
+			this.multiholder.gameObject.SetActive(!base.entity.isOwner);
 			base.state.Replaces.GetComponent<CoopMultiHolder>().Hide(true, true);
-			if (this.entity.isOwner)
+			if (base.entity.isOwner)
 			{
 				base.GetComponentInChildren<activateSledPush>().enableSled();
 			}
@@ -247,7 +234,7 @@ public class CoopMultiHolder : EntityBehaviour<IMultiHolderState>
 					componentsInChildren[0]._contentActual = base.state.LogCount;
 					componentsInChildren[0]._contentTypeActual = (MultiHolder.ContentTypes)base.state.ContentType;
 					componentsInChildren[0].ItemCountChangedMP();
-					state.Replaces = this.entity;
+					state.Replaces = base.entity;
 					state.LogCount = base.state.LogCount;
 					state.Body0 = base.state.Body0;
 					state.Body1 = base.state.Body1;
@@ -303,13 +290,13 @@ public class CoopMultiHolder : EntityBehaviour<IMultiHolderState>
 	{
 		if (hide)
 		{
-			if (this.entity.isOwner)
+			if (base.entity.isOwner)
 			{
 				this.rb.isKinematic = true;
 				this.rb.useGravity = false;
 			}
 		}
-		else if (this.entity.isOwner)
+		else if (base.entity.isOwner)
 		{
 			this.rb.isKinematic = false;
 			this.rb.useGravity = true;

@@ -45,14 +45,14 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The value of the cosine")]
 		[RequiredField]
+		[Tooltip("The value of the cosine")]
 		public FsmFloat Value;
 
 		
-		[Tooltip("The resulting angle. Note:If you want degrees, simply check RadToDeg")]
 		[RequiredField]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The resulting angle. Note:If you want degrees, simply check RadToDeg")]
 		public FsmFloat angle;
 
 		

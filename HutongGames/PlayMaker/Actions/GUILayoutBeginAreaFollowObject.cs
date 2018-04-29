@@ -36,9 +36,9 @@ namespace HutongGames.PlayMaker.Actions
 				return;
 			}
 			Vector2 vector = Camera.main.WorldToScreenPoint(position);
-			float left = vector.x + ((!this.normalized.Value) ? this.offsetLeft.Value : (this.offsetLeft.Value * (float)Screen.width));
-			float top = vector.y + ((!this.normalized.Value) ? this.offsetTop.Value : (this.offsetTop.Value * (float)Screen.width));
-			Rect screenRect = new Rect(left, top, this.width.Value, this.height.Value);
+			float x = vector.x + ((!this.normalized.Value) ? this.offsetLeft.Value : (this.offsetLeft.Value * (float)Screen.width));
+			float y = vector.y + ((!this.normalized.Value) ? this.offsetTop.Value : (this.offsetTop.Value * (float)Screen.width));
+			Rect screenRect = new Rect(x, y, this.width.Value, this.height.Value);
 			if (this.normalized.Value)
 			{
 				screenRect.width *= (float)Screen.width;

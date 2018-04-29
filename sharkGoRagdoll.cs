@@ -33,7 +33,7 @@ public class sharkGoRagdoll : MonoBehaviour
 	public void enableRagDoll()
 	{
 		this.doneRagdoll = true;
-		UnityEngine.Object.Instantiate(this.ragDoll, base.transform.position, base.transform.rotation);
+		UnityEngine.Object.Instantiate<GameObject>(this.ragDoll, base.transform.position, base.transform.rotation);
 		if (!BoltNetwork.isClient)
 		{
 			SkinnedMeshRenderer[] componentsInChildren = base.transform.GetComponentsInChildren<SkinnedMeshRenderer>();

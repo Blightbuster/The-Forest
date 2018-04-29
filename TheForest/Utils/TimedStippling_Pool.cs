@@ -98,7 +98,7 @@ namespace TheForest.Utils
 		
 		private void SetStipplingAlpha(float alpha)
 		{
-			if (this._renderer)
+			if (this._renderer != null && this._block != null)
 			{
 				this._renderer.GetPropertyBlock(this._block);
 				this._block.SetVector("_StippleAlpha", new Vector4(alpha, Mathf.Ceil(alpha * 16f) * 0.0625f, 0f, 0f));

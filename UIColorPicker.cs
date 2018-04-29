@@ -197,19 +197,19 @@ public class UIColorPicker : MonoBehaviour
 				new Keyframe(1f, 0.5f)
 			});
 		}
-		Vector3 from = new Vector3(UIColorPicker.mRed.Evaluate(x), UIColorPicker.mGreen.Evaluate(x), UIColorPicker.mBlue.Evaluate(x));
+		Vector3 a = new Vector3(UIColorPicker.mRed.Evaluate(x), UIColorPicker.mGreen.Evaluate(x), UIColorPicker.mBlue.Evaluate(x));
 		if (y < 0.5f)
 		{
 			y *= 2f;
-			from.x *= y;
-			from.y *= y;
-			from.z *= y;
+			a.x *= y;
+			a.y *= y;
+			a.z *= y;
 		}
 		else
 		{
-			from = Vector3.Lerp(from, Vector3.one, y * 2f - 1f);
+			a = Vector3.Lerp(a, Vector3.one, y * 2f - 1f);
 		}
-		return new Color(from.x, from.y, from.z, 1f);
+		return new Color(a.x, a.y, a.z, 1f);
 	}
 
 	

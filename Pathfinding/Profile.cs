@@ -110,9 +110,6 @@ namespace Pathfinding
 		private const bool PROFILE_MEM = false;
 
 		
-		private const bool dontCountFirst = false;
-
-		
 		public readonly string name;
 
 		
@@ -129,5 +126,8 @@ namespace Pathfinding
 
 		
 		private int control = 1073741824;
+
+		
+		private const bool dontCountFirst = false;
 	}
 }

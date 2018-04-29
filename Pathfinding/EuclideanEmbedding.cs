@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Pathfinding.Util;
 using UnityEngine;
@@ -65,15 +66,28 @@ namespace Pathfinding
 		
 		private void GetClosestWalkableNodesToChildrenRecursively(Transform tr, List<GraphNode> nodes)
 		{
-			foreach (object obj in tr)
+			IEnumerator enumerator = tr.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				NNInfo nearest = AstarPath.active.GetNearest(transform.position, NNConstraint.Default);
-				if (nearest.node != null && nearest.node.Walkable)
+				while (enumerator.MoveNext())
 				{
-					nodes.Add(nearest.node);
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					NNInfo nearest = AstarPath.active.GetNearest(transform.position, NNConstraint.Default);
+					if (nearest.node != null && nearest.node.Walkable)
+					{
+						nodes.Add(nearest.node);
+					}
+					this.GetClosestWalkableNodesToChildrenRecursively(transform, nodes);
 				}
-				this.GetClosestWalkableNodesToChildrenRecursively(transform, nodes);
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 
@@ -389,12 +403,6 @@ namespace Pathfinding
 		}
 
 		
-		private const uint ra = 12820163u;
-
-		
-		private const uint rc = 1140671485u;
-
-		
 		public HeuristicOptimizationMode mode;
 
 		
@@ -421,6 +429,12 @@ namespace Pathfinding
 
 		
 		private GraphNode[] pivots;
+
+		
+		private const uint ra = 12820163u;
+
+		
+		private const uint rc = 1140671485u;
 
 		
 		private uint rval;

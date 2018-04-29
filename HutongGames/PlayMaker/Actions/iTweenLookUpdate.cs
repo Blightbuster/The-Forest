@@ -5,8 +5,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Rotates a GameObject to look at a supplied Transform or Vector3 over time.")]
 	[ActionCategory("iTween")]
+	[Tooltip("Rotates a GameObject to look at a supplied Transform or Vector3 over time.")]
 	public class iTweenLookUpdate : FsmStateAction
 	{
 		

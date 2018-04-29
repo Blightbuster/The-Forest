@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Steamworks;
 using UnityEngine;
 
@@ -95,10 +96,26 @@ internal static class CoopSteamServer
 		if (CoopSteamServer.runInit)
 		{
 			CoopSteamServer.runInit = false;
-			CoopSteamServer.P2PSessionRequest_Callback = Callback<P2PSessionRequest_t>.CreateGameServer(new Callback<P2PSessionRequest_t>.DispatchDelegate(CoopSteamServer.P2PSessionRequest));
-			CoopSteamServer.SteamServersConnected_Callback = Callback<SteamServersConnected_t>.CreateGameServer(new Callback<SteamServersConnected_t>.DispatchDelegate(CoopSteamServer.SteamServersConnected));
-			CoopSteamServer.SteamServersDisconnected_Callback = Callback<SteamServersDisconnected_t>.CreateGameServer(new Callback<SteamServersDisconnected_t>.DispatchDelegate(CoopSteamServer.SteamServersDisconnected));
-			CoopSteamServer.SteamServerConnectFailure_Callback = Callback<SteamServerConnectFailure_t>.CreateGameServer(new Callback<SteamServerConnectFailure_t>.DispatchDelegate(CoopSteamServer.SteamServerConnectFailure));
+			if (CoopSteamServer.<>f__mg$cache0 == null)
+			{
+				CoopSteamServer.<>f__mg$cache0 = new Callback<P2PSessionRequest_t>.DispatchDelegate(CoopSteamServer.P2PSessionRequest);
+			}
+			CoopSteamServer.P2PSessionRequest_Callback = Callback<P2PSessionRequest_t>.CreateGameServer(CoopSteamServer.<>f__mg$cache0);
+			if (CoopSteamServer.<>f__mg$cache1 == null)
+			{
+				CoopSteamServer.<>f__mg$cache1 = new Callback<SteamServersConnected_t>.DispatchDelegate(CoopSteamServer.SteamServersConnected);
+			}
+			CoopSteamServer.SteamServersConnected_Callback = Callback<SteamServersConnected_t>.CreateGameServer(CoopSteamServer.<>f__mg$cache1);
+			if (CoopSteamServer.<>f__mg$cache2 == null)
+			{
+				CoopSteamServer.<>f__mg$cache2 = new Callback<SteamServersDisconnected_t>.DispatchDelegate(CoopSteamServer.SteamServersDisconnected);
+			}
+			CoopSteamServer.SteamServersDisconnected_Callback = Callback<SteamServersDisconnected_t>.CreateGameServer(CoopSteamServer.<>f__mg$cache2);
+			if (CoopSteamServer.<>f__mg$cache3 == null)
+			{
+				CoopSteamServer.<>f__mg$cache3 = new Callback<SteamServerConnectFailure_t>.DispatchDelegate(CoopSteamServer.SteamServerConnectFailure);
+			}
+			CoopSteamServer.SteamServerConnectFailure_Callback = Callback<SteamServerConnectFailure_t>.CreateGameServer(CoopSteamServer.<>f__mg$cache3);
 		}
 	}
 
@@ -185,4 +202,20 @@ internal static class CoopSteamServer
 
 	
 	private static Callback<SteamServerConnectFailure_t> SteamServerConnectFailure_Callback;
+
+	
+	[CompilerGenerated]
+	private static Callback<P2PSessionRequest_t>.DispatchDelegate <>f__mg$cache0;
+
+	
+	[CompilerGenerated]
+	private static Callback<SteamServersConnected_t>.DispatchDelegate <>f__mg$cache1;
+
+	
+	[CompilerGenerated]
+	private static Callback<SteamServersDisconnected_t>.DispatchDelegate <>f__mg$cache2;
+
+	
+	[CompilerGenerated]
+	private static Callback<SteamServerConnectFailure_t>.DispatchDelegate <>f__mg$cache3;
 }

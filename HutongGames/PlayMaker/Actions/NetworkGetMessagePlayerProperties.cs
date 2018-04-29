@@ -39,8 +39,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("Get the IP address of this connected player.")]
+		[UIHint(UIHint.Variable)]
 		public FsmString IpAddress;
 
 		

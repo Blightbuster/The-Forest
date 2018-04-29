@@ -21,7 +21,7 @@ public class effectSpawnVolume : MonoBehaviour
 	{
 		if (this.armed && Input.GetKeyDown(KeyCode.Space))
 		{
-			UnityEngine.Object.Instantiate(this.effectToSpawn, base.transform.position + this.spawnPosition, Quaternion.Euler(this.spawnRotation));
+			UnityEngine.Object.Instantiate<Transform>(this.effectToSpawn, base.transform.position + this.spawnPosition, Quaternion.Euler(this.spawnRotation));
 		}
 	}
 

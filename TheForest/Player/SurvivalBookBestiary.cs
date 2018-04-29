@@ -14,7 +14,7 @@ namespace TheForest.Player
 		
 		private void Awake()
 		{
-			if (GameSetup.IsNewGame)
+			if (GameSetup.IsNewGame && !ForestVR.Prototype)
 			{
 				Scene.ActiveMB.StartCoroutine(this.DelayedAwake());
 			}
@@ -66,12 +66,12 @@ namespace TheForest.Player
 			yield return null;
 			if (this._doneConditions != null)
 			{
-				HashSet<int> doneConditionCache = new HashSet<int>(this._doneConditions);
+				HashSet<int> hashSet = new HashSet<int>(this._doneConditions);
 				for (int i = 0; i < this._foundEnemyInfos.Length; i++)
 				{
-					this._foundEnemyInfos[i].LoadDone(doneConditionCache);
+					this._foundEnemyInfos[i].LoadDone(hashSet);
 				}
-				doneConditionCache.Clear();
+				hashSet.Clear();
 			}
 			base.StartCoroutine(this.DelayedAwake());
 			yield break;

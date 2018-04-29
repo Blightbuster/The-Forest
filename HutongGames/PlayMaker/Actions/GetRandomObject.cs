@@ -57,8 +57,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString withTag;
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmGameObject storeResult;
 
 		

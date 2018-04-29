@@ -34,7 +34,7 @@ public class Index<TK, TR> : Lookup<TK, TR>, IChanged where TR : class, new()
 	{
 		get
 		{
-			if (this.ContainsKey(index))
+			if (base.ContainsKey(index))
 			{
 				return base[index];
 			}

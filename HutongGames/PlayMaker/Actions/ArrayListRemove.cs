@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Remove an element of a PlayMaker Array List Proxy component")]
 	[ActionCategory("ArrayMaker/ArrayList")]
+	[Tooltip("Remove an element of a PlayMaker Array List Proxy component")]
 	public class ArrayListRemove : ArrayListActions
 	{
 		
@@ -40,10 +40,10 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
-		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
-		[RequiredField]
 		[ActionSection("Set up")]
+		[RequiredField]
+		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
+		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -57,9 +57,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmVar variable;
 
 		
-		[UIHint(UIHint.FsmEvent)]
-		[Tooltip("Event sent if this arraList does not contains that element ( described below)")]
 		[ActionSection("Result")]
+		[Tooltip("Event sent if this arraList does not contains that element ( described below)")]
+		[UIHint(UIHint.FsmEvent)]
 		public FsmEvent notFoundEvent;
 	}
 }

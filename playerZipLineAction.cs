@@ -81,7 +81,7 @@ public class playerZipLineAction : MonoBehaviour
 			}
 			if (LocalPlayer.Animator.GetCurrentAnimatorStateInfo(0).shortNameHash != this._idleToZipHash && LocalPlayer.Animator.GetCurrentAnimatorStateInfo(0).shortNameHash != this._zipIdleHash)
 			{
-				goto IL_422;
+				goto IL_40A;
 			}
 			if (!this._fixPlayerPosition)
 			{
@@ -100,16 +100,16 @@ public class playerZipLineAction : MonoBehaviour
 			{
 				goto Block_7;
 			}
-			Vector3 fixPos = trn.InverseTransformPoint(LocalPlayer.Transform.position);
-			fixPos.x = 0f;
-			fixPos.y = -2.5f;
-			LocalPlayer.Transform.position = trn.TransformPoint(fixPos);
+			Vector3 position = trn.InverseTransformPoint(LocalPlayer.Transform.position);
+			position.x = 0f;
+			position.y = -2.5f;
+			LocalPlayer.Transform.position = trn.TransformPoint(position);
 			LocalPlayer.PlayerBase.transform.localPosition = fixLocalPos;
 			if (LocalPlayer.Rigidbody.velocity.magnitude > 50f)
 			{
-				Vector3 newVelocity = LocalPlayer.Rigidbody.velocity.normalized;
-				newVelocity *= 50f;
-				LocalPlayer.Rigidbody.velocity = newVelocity;
+				Vector3 vector = LocalPlayer.Rigidbody.velocity.normalized;
+				vector *= 50f;
+				LocalPlayer.Rigidbody.velocity = vector;
 			}
 			LocalPlayer.Sfx.SetZiplineLoop(true);
 			if (this.CheckCloseToGround())
@@ -118,7 +118,7 @@ public class playerZipLineAction : MonoBehaviour
 			}
 			if (TheForest.Utils.Input.GetButtonDown("Take") || TheForest.Utils.Input.GetButtonDown("Jump"))
 			{
-				goto IL_450;
+				goto IL_438;
 			}
 			yield return new WaitForFixedUpdate();
 		}
@@ -130,10 +130,10 @@ public class playerZipLineAction : MonoBehaviour
 		Block_9:
 		this.ExitZipLine();
 		yield break;
-		IL_422:
+		IL_40A:
 		this.ExitZipLine();
 		yield break;
-		IL_450:
+		IL_438:
 		this.ExitZipLine();
 		yield break;
 		yield break;

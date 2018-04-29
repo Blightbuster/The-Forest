@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Converts an String value to an Int value.")]
 	[ActionCategory(ActionCategory.Convert)]
+	[Tooltip("Converts an String value to an Int value.")]
 	public class ConvertStringToInt : FsmStateAction
 	{
 		
@@ -38,9 +38,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The String variable to convert to an integer.")]
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("The String variable to convert to an integer.")]
 		public FsmString stringVariable;
 
 		

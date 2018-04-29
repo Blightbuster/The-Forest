@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Store all resolutions")]
 	[ActionCategory("ArrayMaker/ArrayList")]
+	[Tooltip("Store all resolutions")]
 	public class ArrayListGetScreenResolutions : ArrayListActions
 	{
 		
@@ -41,9 +41,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
+		[ActionSection("Set up")]
 		[RequiredField]
 		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
-		[ActionSection("Set up")]
 		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;
 

@@ -10,13 +10,22 @@ public class activateClimb : MonoBehaviour
 	
 	private void Start()
 	{
+		if (base.transform.parent)
+		{
+			this._topClimb = base.transform.parent.GetComponentInChildren<activateClimbTop>(true);
+		}
+		if (this.CheckShortRope())
+		{
+			this.Sheen.SetActive(false);
+			this.MyPickUp.SetActive(false);
+		}
 		base.enabled = false;
 	}
 
 	
 	private void GrabEnter(GameObject grabber)
 	{
-		if (!LocalPlayer.FpCharacter.Sitting)
+		if (!LocalPlayer.FpCharacter.Sitting && !this.CheckShortRope())
 		{
 			base.enabled = true;
 			this.Sheen.SetActive(false);
@@ -45,7 +54,7 @@ public class activateClimb : MonoBehaviour
 			this.MyPickUp.SetActive(false);
 			return;
 		}
-		if (this.checkForCloseWall())
+		if (this.checkForCloseWall() || this.CheckShortRope())
 		{
 			this.Sheen.SetActive(false);
 			this.MyPickUp.SetActive(false);
@@ -82,25 +91,6 @@ public class activateClimb : MonoBehaviour
 	
 	private bool validateTriggerForCoop()
 	{
-		for (int i = 0; i < Scene.SceneTracker.allPlayers.Count; i++)
-		{
-			targetStats component = Scene.SceneTracker.allPlayers[i].GetComponent<targetStats>();
-			if (Scene.SceneTracker.allPlayers[i] && Scene.SceneTracker.allPlayers[i].CompareTag("PlayerNet") && component)
-			{
-				float sqrMagnitude = (Scene.SceneTracker.allPlayers[i].transform.position - base.transform.position).sqrMagnitude;
-				if (component.onRope)
-				{
-					if (sqrMagnitude < 6.25f)
-					{
-						return false;
-					}
-				}
-				else if (sqrMagnitude < 2.25f)
-				{
-					return false;
-				}
-			}
-		}
 		return true;
 	}
 
@@ -109,23 +99,26 @@ public class activateClimb : MonoBehaviour
 	{
 		Vector3 direction = LocalPlayer.MainCamTr.position - base.transform.position;
 		RaycastHit raycastHit;
-		return Physics.Raycast(base.transform.position, direction, out raycastHit, direction.magnitude, this.wallMask);
+		return Physics.Raycast(base.transform.position, direction, out raycastHit, direction.magnitude, this.wallMask, QueryTriggerInteraction.Ignore);
+	}
+
+	
+	private bool CheckShortRope()
+	{
+		if (this._topClimb)
+		{
+			float num = Vector3.Distance(base.transform.position, this._topClimb.transform.position);
+			if (num < this.closeTriggerThreshhold)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	
 	private IEnumerator validatePlayerActivate()
 	{
-		float t = 0f;
-		while (t < 1f)
-		{
-			if (!this.validateTriggerForCoop())
-			{
-				LocalPlayer.SpecialActions.SendMessage("fixClimbingPosition");
-				yield break;
-			}
-			t += Time.deltaTime;
-			yield return null;
-		}
 		yield break;
 	}
 
@@ -134,6 +127,12 @@ public class activateClimb : MonoBehaviour
 
 	
 	public GameObject MyPickUp;
+
+	
+	private activateClimbTop _topClimb;
+
+	
+	public float closeTriggerThreshhold = 3f;
 
 	
 	public activateClimb.Types climbType;

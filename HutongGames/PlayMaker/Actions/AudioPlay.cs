@@ -69,19 +69,19 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject with an AudioSource component.")]
 		[RequiredField]
 		[CheckForComponent(typeof(AudioSource))]
+		[Tooltip("The GameObject with an AudioSource component.")]
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("Set the volume.")]
 		[HasFloatSlider(0f, 1f)]
+		[Tooltip("Set the volume.")]
 		public FsmFloat volume;
 
 		
-		[Tooltip("Optionally play a 'one shot' AudioClip. NOTE: Volume cannot be adjusted while playing a 'one shot' AudioClip.")]
 		[ObjectType(typeof(AudioClip))]
+		[Tooltip("Optionally play a 'one shot' AudioClip. NOTE: Volume cannot be adjusted while playing a 'one shot' AudioClip.")]
 		public FsmObject oneShotClip;
 
 		

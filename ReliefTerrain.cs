@@ -245,7 +245,7 @@ public class ReliefTerrain : MonoBehaviour
 			{
 				if (this.ColorGlobal)
 				{
-					splatPrototypes[0 + num].texture = this.ColorGlobal;
+					splatPrototypes[num].texture = this.ColorGlobal;
 				}
 				bool flag = false;
 				RTP_LODmanager rtp_LODmanagerScript = this.globalSettingsHolder.Get_RTP_LODmanagerScript();

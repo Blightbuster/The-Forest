@@ -17,7 +17,7 @@ public class CoopMutantBlendWeightSync : EntityBehaviour<IMutantState>
 	
 	public override void Attached()
 	{
-		if (!this.entity.IsOwner())
+		if (!base.entity.IsOwner())
 		{
 			base.state.AddCallback("BlendShapeWeight0", new PropertyCallbackSimple(this.BlendShapeWeight0Changed));
 			base.state.AddCallback("BlendShapeWeight1", new PropertyCallbackSimple(this.BlendShapeWeight1Changed));
@@ -45,7 +45,7 @@ public class CoopMutantBlendWeightSync : EntityBehaviour<IMutantState>
 	
 	private void Update()
 	{
-		if (this.entity.IsOwner() && this.Renderers.Length > 0)
+		if (base.entity.IsOwner() && this.Renderers.Length > 0)
 		{
 			if (this.Layer0Index != -1)
 			{

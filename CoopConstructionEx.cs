@@ -10,7 +10,7 @@ public class CoopConstructionEx : CoopConstruction
 	
 	public override void Attached()
 	{
-		CoopConstructionExToken coopConstructionExToken = (CoopConstructionExToken)this.entity.attachToken;
+		CoopConstructionExToken coopConstructionExToken = (CoopConstructionExToken)base.entity.attachToken;
 		for (int i = 0; i < coopConstructionExToken.Architects.Length; i++)
 		{
 			ICoopStructure coopStructure = (ICoopStructure)this.Architects[i];
@@ -38,7 +38,7 @@ public class CoopConstructionEx : CoopConstruction
 				}
 			}
 		}
-		this.entity.SendMessage("OnDeserialized");
+		base.entity.SendMessage("OnDeserialized");
 		base.Attached();
 	}
 

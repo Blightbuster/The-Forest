@@ -240,7 +240,7 @@ public class rockSound : MonoBehaviour
 	
 	private void enableSound()
 	{
-		this.spawnedSound = (UnityEngine.Object.Instantiate(this.soundDetect.transform, base.transform.position, base.transform.rotation) as Transform);
+		this.spawnedSound = UnityEngine.Object.Instantiate<Transform>(this.soundDetect.transform, base.transform.position, base.transform.rotation);
 		this.spawnedSound.SendMessage("setRange", this.soundRange, SendMessageOptions.DontRequireReceiver);
 		base.Invoke("disableSound", 0.5f);
 	}

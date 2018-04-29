@@ -10,7 +10,7 @@ public class rbSolve : MonoBehaviour
 		Rigidbody[] allComponentsInChildren = base.transform.GetAllComponentsInChildren<Rigidbody>();
 		foreach (Rigidbody rigidbody in allComponentsInChildren)
 		{
-			rigidbody.solverIterationCount = 128;
+			rigidbody.solverIterations = 128;
 			Debug.Log("doing count set");
 		}
 	}

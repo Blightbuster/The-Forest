@@ -26,7 +26,10 @@ namespace TheForest.Items.Inventory
 		
 		private void OnDestroy()
 		{
-			this._itemView.Properties.ActiveBonusChanged -= this.OnActiveBonusChanged;
+			if (this._itemView != null && this._itemView.Properties != null)
+			{
+				this._itemView.Properties.ActiveBonusChanged -= this.OnActiveBonusChanged;
+			}
 		}
 
 		

@@ -8,7 +8,7 @@ public class FlareWeapon : EntityBehaviour
 	
 	private void Awake()
 	{
-		if (BoltNetwork.isRunning && this.entity.isAttached && !this.entity.isOwner)
+		if (BoltNetwork.isRunning && base.entity.isAttached && !base.entity.isOwner)
 		{
 			base.enabled = false;
 		}
@@ -30,7 +30,7 @@ public class FlareWeapon : EntityBehaviour
 	
 	private void TurnOff()
 	{
-		if (!BoltNetwork.isRunning || (this.entity && this.entity.isAttached && this.entity.isOwner))
+		if (!BoltNetwork.isRunning || (base.entity && base.entity.isAttached && base.entity.isOwner))
 		{
 			UnityEngine.Object.Destroy(base.gameObject);
 		}

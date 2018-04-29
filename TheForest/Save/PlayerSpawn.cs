@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using Serialization;
 using TheForest.Utils;
+using UniLinq;
 using UnityEngine;
 
 namespace TheForest.Save
@@ -19,13 +20,16 @@ namespace TheForest.Save
 			}
 			if (!CoopPeerStarter.DedicatedHost)
 			{
-				if ((!BoltNetwork.isRunning || !BoltNetwork.isClient || !PlayerSpawn.LoadSavedCharacter || !PlayerSpawn.LoadMpCharacter()) && !LevelSerializer.IsDeserializing)
+				if ((!BoltNetwork.isRunning || !BoltNetwork.isClient || !PlayerSpawn.LoadSavedCharacter || !this.LoadMpCharacter()) && !LevelSerializer.IsDeserializing)
 				{
-					this._player = (GameObject)UnityEngine.Object.Instantiate(this._playerPrefab, base.transform.position, base.transform.rotation);
+					this._player = UnityEngine.Object.Instantiate<GameObject>(this._playerPrefab, base.transform.position, base.transform.rotation);
 					this._player.name = "player";
 					this._player.GetComponent<playerAiInfo>().enabled = false;
 					base.Invoke("InitPlayer", 0.1f);
-					base.StartCoroutine(Scene.PlaneCrash.InitPlaneCrashSequence());
+					if (this._planeCrash)
+					{
+						base.StartCoroutine(Scene.PlaneCrash.InitPlaneCrashSequence());
+					}
 				}
 			}
 			else
@@ -75,12 +79,12 @@ namespace TheForest.Save
 		}
 
 		
-		private static bool LoadMpCharacter()
+		private bool LoadMpCharacter()
 		{
 			bool flag = PlayerSpawn.HasMPCharacterSave();
 			if (flag)
 			{
-				Scene.ActiveMB.StartCoroutine(PlayerSpawn.LoadMpCharacterDelayed());
+				Scene.ActiveMB.StartCoroutine(this.LoadMpCharacterDelayed());
 				Scene.PlaneCrash.SetupCrashedPlane_MP();
 				return true;
 			}
@@ -94,9 +98,17 @@ namespace TheForest.Save
 		}
 
 		
-		private static IEnumerator LoadMpCharacterDelayed()
+		private IEnumerator LoadMpCharacterDelayed()
 		{
 			yield return null;
+			if (!SaveGameManager.Instance.requiredObjects.Contains(this._playerPrefab))
+			{
+				SaveGameManager.Instance.requiredObjects = new UnityEngine.Object[]
+				{
+					this._playerPrefab
+				};
+				LevelSerializer.InitPrefabList();
+			}
 			File.ReadAllBytes(SaveSlotUtils.GetMpClientLocalPath() + PlayerSpawn.GetClientSaveFileName()).LoadObjectTree(null);
 			Debug.Log("Client player loaded from local file");
 			LocalPlayer.Rigidbody.useGravity = false;
@@ -109,6 +121,9 @@ namespace TheForest.Save
 
 		
 		public GameObject _playerPrefab;
+
+		
+		public bool _planeCrash = true;
 
 		
 		private GameObject _player;

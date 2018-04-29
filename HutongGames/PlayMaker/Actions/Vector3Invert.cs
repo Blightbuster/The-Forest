@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Reverses the direction of a Vector3 Variable. Same as multiplying by -1.")]
 	[ActionCategory(ActionCategory.Vector3)]
+	[Tooltip("Reverses the direction of a Vector3 Variable. Same as multiplying by -1.")]
 	public class Vector3Invert : FsmStateAction
 	{
 		

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Get the sine. You can use degrees, simply check on the DegToRad conversion")]
 	[ActionCategory("Trigonometry")]
+	[Tooltip("Get the sine. You can use degrees, simply check on the DegToRad conversion")]
 	public class GetSine : FsmStateAction
 	{
 		
@@ -45,8 +45,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The angle. Note: You can use degrees, simply check DegtoRad if the angle is expressed in degrees.")]
 		[RequiredField]
+		[Tooltip("The angle. Note: You can use degrees, simply check DegtoRad if the angle is expressed in degrees.")]
 		public FsmFloat angle;
 
 		
@@ -54,9 +54,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmBool DegToRad;
 
 		
+		[RequiredField]
 		[UIHint(UIHint.Variable)]
 		[Tooltip("The angle tan")]
-		[RequiredField]
 		public FsmFloat result;
 
 		

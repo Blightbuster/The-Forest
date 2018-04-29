@@ -22,7 +22,7 @@ namespace TheForest.Buildings.World
 			this.FinalizeDoorStatus();
 			if (BoltNetwork.isRunning)
 			{
-				while (!this.entity.isAttached)
+				while (!base.entity.isAttached)
 				{
 					yield return null;
 				}
@@ -52,14 +52,6 @@ namespace TheForest.Buildings.World
 					else
 					{
 						WallDoor.Actions currentAction = this.ToggleDoorStatusAction(true);
-					}
-					if (this._currentAction == WallDoor.Actions.Closing)
-					{
-						LocalPlayer.Sfx.PlayStructureBreak(base.gameObject, 0.008f);
-					}
-					else
-					{
-						LocalPlayer.Sfx.PlayBreakWood(base.gameObject);
 					}
 				}
 				this.RefreshIcons();
@@ -103,7 +95,7 @@ namespace TheForest.Buildings.World
 		
 		private void OnDestroy()
 		{
-			if (BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+			if (BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 			{
 				base.state.RemoveCallback("Addition", new PropertyCallbackSimple(this.OnAdditionChange));
 			}
@@ -121,6 +113,22 @@ namespace TheForest.Buildings.World
 		{
 			base.enabled = (this._currentAction != WallDoor.Actions.Idle);
 			this.RefreshIcons();
+		}
+
+		
+		protected virtual void PlaySfx(WallDoor.Actions action)
+		{
+			if (LocalPlayer.Sfx)
+			{
+				if (action == WallDoor.Actions.Closing)
+				{
+					LocalPlayer.Sfx.PlayStructureBreak(base.gameObject, 0.008f);
+				}
+				else
+				{
+					LocalPlayer.Sfx.PlayBreakWood(base.gameObject);
+				}
+			}
 		}
 
 		
@@ -158,10 +166,10 @@ namespace TheForest.Buildings.World
 		public WallDoor.Actions ToggleDoorStatusAction(bool mp)
 		{
 			WallChunkArchitect componentInParent = base.GetComponentInParent<WallChunkArchitect>();
-			if (mp && BoltNetwork.isRunning && this.entity.isAttached)
+			if (mp && BoltNetwork.isRunning && base.entity.isAttached)
 			{
 				ToggleWallDoor toggleWallDoor = ToggleWallDoor.Create(GlobalTargets.OnlyServer);
-				toggleWallDoor.Entity = this.entity;
+				toggleWallDoor.Entity = base.entity;
 				toggleWallDoor.Send();
 			}
 			else
@@ -177,11 +185,12 @@ namespace TheForest.Buildings.World
 				if (BoltNetwork.isServer)
 				{
 					base.state.Addition = (int)componentInParent.Addition;
-					if (this.entity.isOwner)
+					if (base.entity.isOwner)
 					{
-						((CoopWallChunkToken)this.entity.attachToken).Additions = componentInParent.Addition;
+						((CoopWallChunkToken)base.entity.attachToken).Additions = componentInParent.Addition;
 					}
 				}
+				this.PlaySfx((componentInParent.Addition < WallChunkArchitect.Additions.LockedDoor1) ? WallDoor.Actions.Openning : WallDoor.Actions.Closing);
 			}
 			return (componentInParent.Addition < WallChunkArchitect.Additions.LockedDoor1) ? WallDoor.Actions.Openning : WallDoor.Actions.Closing;
 		}
@@ -205,7 +214,7 @@ namespace TheForest.Buildings.World
 		protected void FakeAttach()
 		{
 			base.state.AddCallback("Addition", new PropertyCallbackSimple(this.OnAdditionChange));
-			if (this.entity.isOwner)
+			if (base.entity.isOwner)
 			{
 				base.state.Addition = (int)base.GetComponentInParent<WallChunkArchitect>().Addition;
 			}
@@ -233,6 +242,7 @@ namespace TheForest.Buildings.World
 				{
 					this._targetRb.transform.localRotation = Quaternion.identity;
 				}
+				this.PlaySfx(activeDoorStatusAction);
 			}
 		}
 

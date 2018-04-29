@@ -18,10 +18,10 @@ public class AeroplaneGUI : MonoBehaviour
 	}
 
 	
-	private const float MpsToKph = 3.6f;
+	public AeroplaneController plane;
 
 	
-	public AeroplaneController plane;
+	private const float MpsToKph = 3.6f;
 
 	
 	private string displayText = "\n\n\nThrottle: {0:0%}\nSpeed: {1:0000}KM/H\nAltitude: {2:0000}M";

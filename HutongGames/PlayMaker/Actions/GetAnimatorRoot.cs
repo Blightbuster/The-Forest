@@ -95,9 +95,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The target.")]
-		[CheckForComponent(typeof(Animator))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animator))]
+		[Tooltip("The target.")]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -105,9 +105,9 @@ namespace HutongGames.PlayMaker.Actions
 		public bool everyFrame;
 
 		
-		[Tooltip("The avatar body mass center")]
-		[UIHint(UIHint.Variable)]
 		[ActionSection("Results")]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("The avatar body mass center")]
 		public FsmVector3 rootPosition;
 
 		

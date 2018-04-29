@@ -7,8 +7,8 @@ using UnityEngine;
 namespace TheForest.Buildings.World
 {
 	
-	[AddComponentMenu("Buildings/World/Item Cupboard")]
 	[DoNotSerializePublic]
+	[AddComponentMenu("Buildings/World/Item Cupboard")]
 	public class ItemCupboard : EntityEventListener<IItemHolderState>
 	{
 		
@@ -31,7 +31,7 @@ namespace TheForest.Buildings.World
 						if (BoltNetwork.isRunning)
 						{
 							ItemHolderTakeItem itemHolderTakeItem = ItemHolderTakeItem.Raise(GlobalTargets.OnlyServer);
-							itemHolderTakeItem.Target = this.entity;
+							itemHolderTakeItem.Target = base.entity;
 							itemHolderTakeItem.Send();
 						}
 						else
@@ -64,7 +64,7 @@ namespace TheForest.Buildings.World
 						if (BoltNetwork.isRunning)
 						{
 							ItemHolderAddItem itemHolderAddItem = ItemHolderAddItem.Raise(GlobalTargets.OnlyServer);
-							itemHolderAddItem.Target = this.entity;
+							itemHolderAddItem.Target = base.entity;
 							itemHolderAddItem.Send();
 						}
 						else

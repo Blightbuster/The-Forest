@@ -6,8 +6,8 @@ using UnityEngine;
 namespace Pathfinding.Examples
 {
 	
-	[HelpURL("http:
 	[RequireComponent(typeof(MeshFilter))]
+	[HelpURL("http:
 	public class LightweightRVO : MonoBehaviour
 	{
 		

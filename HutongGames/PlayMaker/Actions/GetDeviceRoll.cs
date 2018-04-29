@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the rotation of the device around its z axis (into the screen). For example when you steer with the iPhone in a driving game.")]
 	[ActionCategory(ActionCategory.Device)]
+	[Tooltip("Gets the rotation of the device around its z axis (into the screen). For example when you steer with the iPhone in a driving game.")]
 	public class GetDeviceRoll : FsmStateAction
 	{
 		
@@ -43,17 +43,24 @@ namespace HutongGames.PlayMaker.Actions
 			float x = Input.acceleration.x;
 			float y = Input.acceleration.y;
 			float num = 0f;
-			switch (this.baseOrientation)
+			GetDeviceRoll.BaseOrientation baseOrientation = this.baseOrientation;
+			if (baseOrientation != GetDeviceRoll.BaseOrientation.Portrait)
 			{
-			case GetDeviceRoll.BaseOrientation.Portrait:
+				if (baseOrientation != GetDeviceRoll.BaseOrientation.LandscapeLeft)
+				{
+					if (baseOrientation == GetDeviceRoll.BaseOrientation.LandscapeRight)
+					{
+						num = -Mathf.Atan2(y, x);
+					}
+				}
+				else
+				{
+					num = Mathf.Atan2(y, -x);
+				}
+			}
+			else
+			{
 				num = -Mathf.Atan2(x, -y);
-				break;
-			case GetDeviceRoll.BaseOrientation.LandscapeLeft:
-				num = Mathf.Atan2(y, -x);
-				break;
-			case GetDeviceRoll.BaseOrientation.LandscapeRight:
-				num = -Mathf.Atan2(y, x);
-				break;
 			}
 			if (!this.limitAngle.IsNone)
 			{

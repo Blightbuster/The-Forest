@@ -57,14 +57,14 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The parent GameObject. Note, if GameObject changes, this action will reset and start again at the first child.")]
 		[RequiredField]
+		[Tooltip("The parent GameObject. Note, if GameObject changes, this action will reset and start again at the first child.")]
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("Store the next child in a GameObject variable.")]
 		[RequiredField]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the next child in a GameObject variable.")]
 		public FsmGameObject storeNextChild;
 
 		

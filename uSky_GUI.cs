@@ -2,8 +2,8 @@
 using UnityEngine;
 
 
-[AddComponentMenu("uSky/uSky Demo GUI (Legacy)")]
 [ExecuteInEditMode]
+[AddComponentMenu("uSky/uSky Demo GUI (Legacy)")]
 public class uSky_GUI : MonoBehaviour
 {
 	
@@ -226,9 +226,6 @@ public class uSky_GUI : MonoBehaviour
 	}
 
 	
-	private const int labelWidth = 115;
-
-	
 	public uSkyManager m_uSky;
 
 	
@@ -236,4 +233,7 @@ public class uSky_GUI : MonoBehaviour
 
 	
 	private Rect rect = new Rect(2f, 2f, 240f, 490f);
+
+	
+	private const int labelWidth = 115;
 }

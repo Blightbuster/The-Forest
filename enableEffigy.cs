@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections;
 using Bolt;
-using ModAPI;
 using TheForest.Items;
 using TheForest.UI;
 using TheForest.Utils;
-using UltimateCheatmenu;
 using UnityEngine;
 
 
@@ -20,7 +18,7 @@ public class enableEffigy : MonoBehaviour
 	}
 
 	
-	private void __Update__Original()
+	private void Update()
 	{
 		if (TheForest.Utils.Input.GetButtonAfterDelay("Take", 0.5f, false) && !this.lightBool)
 		{
@@ -79,6 +77,7 @@ public class enableEffigy : MonoBehaviour
 				}
 			}
 			this.lightEffigy();
+			base.Invoke("ShutdownFire", this.duration - this.timer._doneTime - 3f);
 			base.Invoke("die", this.duration - this.timer._doneTime);
 			if (Scene.HudGui)
 			{
@@ -98,6 +97,7 @@ public class enableEffigy : MonoBehaviour
 			{
 				Scene.HudGui.FireWidget.Shutdown();
 			}
+			base.Invoke("ShutdownFire", this.duration - 3f);
 			base.Invoke("die", this.duration);
 			base.enabled = false;
 			this.lightBool = true;
@@ -149,33 +149,67 @@ public class enableEffigy : MonoBehaviour
 		Transform transform = BoltNetwork.isRunning ? ItemDatabase.ItemById(this._boneItemId)._pickupPrefabMP : ItemDatabase.ItemById(this._boneItemId)._pickupPrefab;
 		Transform transform2 = BoltNetwork.isRunning ? ItemDatabase.ItemById(this._skullItemId)._pickupPrefabMP : ItemDatabase.ItemById(this._skullItemId)._pickupPrefab;
 		Transform transform3 = BoltNetwork.isRunning ? ItemDatabase.ItemById(this._rockItemId)._pickupPrefabMP : ItemDatabase.ItemById(this._rockItemId)._pickupPrefab;
-		foreach (object obj in this.Renderers.transform)
+		IEnumerator enumerator = this.Renderers.transform.GetEnumerator();
+		try
 		{
-			Transform transform4 = (Transform)obj;
-			if (transform && (transform4.name.StartsWith("Arm") || transform4.name.StartsWith("Leg")))
+			while (enumerator.MoveNext())
 			{
-				Transform transform5 = BoltNetwork.isRunning ? BoltNetwork.Instantiate(transform.gameObject).transform : UnityEngine.Object.Instantiate<Transform>(transform);
-				transform5.position = transform4.position;
-				transform5.rotation = transform4.rotation;
+				object obj = enumerator.Current;
+				Transform transform4 = (Transform)obj;
+				if (transform && (transform4.name.StartsWith("Arm") || transform4.name.StartsWith("Leg")))
+				{
+					Transform transform5 = BoltNetwork.isRunning ? BoltNetwork.Instantiate(transform.gameObject).transform : UnityEngine.Object.Instantiate<Transform>(transform);
+					transform5.position = transform4.position;
+					transform5.rotation = transform4.rotation;
+				}
+				else if (transform2 && transform4.name.StartsWith("Head"))
+				{
+					Transform transform6 = BoltNetwork.isRunning ? BoltNetwork.Instantiate(transform2.gameObject).transform : UnityEngine.Object.Instantiate<Transform>(transform2);
+					transform6.position = transform4.position;
+					transform6.rotation = transform4.rotation;
+				}
+				else if (transform3 && transform4.name.StartsWith("Rock"))
+				{
+					Transform transform7 = BoltNetwork.isRunning ? BoltNetwork.Instantiate(transform3.gameObject).transform : UnityEngine.Object.Instantiate<Transform>(transform3);
+					transform7.position = transform4.position;
+					transform7.rotation = transform4.rotation;
+				}
+				if (BoltNetwork.isRunning && transform4.GetComponent<BoltEntity>())
+				{
+					BoltNetwork.Destroy(transform4.gameObject);
+				}
 			}
-			else if (transform2 && transform4.name.StartsWith("Head"))
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = (enumerator as IDisposable)) != null)
 			{
-				Transform transform6 = BoltNetwork.isRunning ? BoltNetwork.Instantiate(transform2.gameObject).transform : UnityEngine.Object.Instantiate<Transform>(transform2);
-				transform6.position = transform4.position;
-				transform6.rotation = transform4.rotation;
-			}
-			else if (transform3 && transform4.name.StartsWith("Rock"))
-			{
-				Transform transform7 = BoltNetwork.isRunning ? BoltNetwork.Instantiate(transform3.gameObject).transform : UnityEngine.Object.Instantiate<Transform>(transform3);
-				transform7.position = transform4.position;
-				transform7.rotation = transform4.rotation;
-			}
-			if (BoltNetwork.isRunning && transform4.GetComponent<BoltEntity>())
-			{
-				BoltNetwork.Destroy(transform4.gameObject);
+				disposable.Dispose();
 			}
 		}
 		UnityEngine.Object.Destroy(base.GetComponentInParent<PrefabIdentifier>().gameObject);
+	}
+
+	
+	private void ShutdownFire()
+	{
+		foreach (GameObject gameObject in this.fires)
+		{
+			if (gameObject)
+			{
+				ParticleSystem component = gameObject.GetComponent<ParticleSystem>();
+				if (component)
+				{
+					component.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+				}
+				FMOD_StudioEventEmitter component2 = gameObject.GetComponent<FMOD_StudioEventEmitter>();
+				if (component2)
+				{
+					component2.Stop();
+				}
+			}
+		}
 	}
 
 	
@@ -191,24 +225,6 @@ public class enableEffigy : MonoBehaviour
 		else
 		{
 			this.dieReal();
-		}
-	}
-
-	
-	private void Update()
-	{
-		try
-		{
-			this.__Update__Original();
-			if (UCheatmenu.InfFire)
-			{
-				this.duration = 1200f;
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__Update__Original();
 		}
 	}
 

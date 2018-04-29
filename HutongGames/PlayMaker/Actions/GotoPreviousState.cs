@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Immediately return to the previously active state.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Immediately return to the previously active state.")]
 	public class GotoPreviousState : FsmStateAction
 	{
 		
@@ -17,7 +17,7 @@ namespace HutongGames.PlayMaker.Actions
 		{
 			if (base.Fsm.PreviousActiveState != null)
 			{
-				this.Log("Goto Previous State: " + base.Fsm.PreviousActiveState.Name);
+				base.Log("Goto Previous State: " + base.Fsm.PreviousActiveState.Name);
 				base.Fsm.GotoPreviousState();
 			}
 			base.Finish();

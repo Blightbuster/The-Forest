@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Get the maximum amount of connections/players allowed.")]
 	[ActionCategory(ActionCategory.Network)]
+	[Tooltip("Get the maximum amount of connections/players allowed.")]
 	public class NetworkGetMaximumConnections : FsmStateAction
 	{
 		
@@ -22,8 +22,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[UIHint(UIHint.Variable)]
 		[Tooltip("Get the maximum amount of connections/players allowed.")]
+		[UIHint(UIHint.Variable)]
 		public FsmInt result;
 	}
 }

@@ -25,7 +25,7 @@ public class CoopUnderfootSurface : EntityBehaviour<IPlayerState>
 	
 	public override void Attached()
 	{
-		if (!this.entity.isOwner)
+		if (!base.entity.isOwner)
 		{
 			base.state.AddCallback("UnderfootSurface", new PropertyCallbackSimple(this.OnUnderfootSurface));
 			base.state.AddCallback("UnderfootGore", new PropertyCallbackSimple(this.OnUnderfootGore));
@@ -47,7 +47,7 @@ public class CoopUnderfootSurface : EntityBehaviour<IPlayerState>
 	
 	private void Update()
 	{
-		if (BoltNetwork.isRunning && this.entity && this.entity.isAttached && this.entity.isOwner && this.surfaceDetector)
+		if (BoltNetwork.isRunning && base.entity && base.entity.isAttached && base.entity.isOwner && this.surfaceDetector)
 		{
 			base.state.UnderfootSurface = (int)this.surfaceDetector.Surface;
 			base.state.UnderfootGore = this.surfaceDetector.IsOnGore;

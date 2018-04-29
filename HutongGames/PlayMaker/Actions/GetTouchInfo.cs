@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets info on a touch event.")]
 	[ActionCategory(ActionCategory.Device)]
+	[Tooltip("Gets info on a touch event.")]
 	public class GetTouchInfo : FsmStateAction
 	{
 		

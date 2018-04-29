@@ -30,8 +30,9 @@ public class TreeCutChunk : EntityBehaviour
 				damageTree.Damage = amount;
 				damageTree.Send();
 			}
-			catch (Exception ex)
+			catch (Exception exception)
 			{
+				BoltLog.Exception(exception);
 			}
 		}
 		else

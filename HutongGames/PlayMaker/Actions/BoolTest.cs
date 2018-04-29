@@ -33,9 +33,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
+		[RequiredField]
 		[UIHint(UIHint.Variable)]
 		[Tooltip("The Bool variable to test.")]
-		[RequiredField]
 		public FsmBool boolVariable;
 
 		

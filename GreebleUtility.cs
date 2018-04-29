@@ -159,7 +159,7 @@ public static class GreebleUtility
 		}
 		else
 		{
-			result = (GameObject)UnityEngine.Object.Instantiate(greebleDefinition.Prefab, vector, rotation);
+			result = UnityEngine.Object.Instantiate<GameObject>(greebleDefinition.Prefab, vector, rotation);
 		}
 		return result;
 	}

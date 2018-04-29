@@ -37,8 +37,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The Game Object to parent.")]
 		[RequiredField]
+		[Tooltip("The Game Object to parent.")]
 		public FsmOwnerDefault gameObject;
 
 		

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using TheForest.Items.Inventory;
 using TheForest.Utils;
@@ -74,15 +75,41 @@ namespace TheForest.Items.Craft
 							boxCollider.center = Vector3.forward * 0.02f;
 							child.parent = gameObject.transform;
 						}
-						foreach (object obj in upgradeViewReceiver._mirrorHeld)
+						IEnumerator enumerator2 = upgradeViewReceiver._mirrorHeld.GetEnumerator();
+						try
 						{
-							Transform transform = (Transform)obj;
-							UnityEngine.Object.Destroy(transform.gameObject);
+							while (enumerator2.MoveNext())
+							{
+								object obj = enumerator2.Current;
+								Transform transform = (Transform)obj;
+								UnityEngine.Object.Destroy(transform.gameObject);
+							}
 						}
-						foreach (object obj2 in upgradeViewReceiver._mirrorInventory)
+						finally
 						{
-							Transform transform2 = (Transform)obj2;
-							UnityEngine.Object.Destroy(transform2.gameObject);
+							IDisposable disposable;
+							if ((disposable = (enumerator2 as IDisposable)) != null)
+							{
+								disposable.Dispose();
+							}
+						}
+						IEnumerator enumerator3 = upgradeViewReceiver._mirrorInventory.GetEnumerator();
+						try
+						{
+							while (enumerator3.MoveNext())
+							{
+								object obj2 = enumerator3.Current;
+								Transform transform2 = (Transform)obj2;
+								UnityEngine.Object.Destroy(transform2.gameObject);
+							}
+						}
+						finally
+						{
+							IDisposable disposable2;
+							if ((disposable2 = (enumerator3 as IDisposable)) != null)
+							{
+								disposable2.Dispose();
+							}
 						}
 						upgradeViewReceiver.Version = 0;
 					}

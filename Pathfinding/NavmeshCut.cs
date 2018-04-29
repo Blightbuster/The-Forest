@@ -289,9 +289,76 @@ namespace Pathfinding
 				matrix = this.tr.localToWorldMatrix;
 				flag = VectorMath.ReversesFaceOrientationsXZ(matrix);
 			}
-			switch (this.type)
+			NavmeshCut.MeshType meshType = this.type;
+			if (meshType != NavmeshCut.MeshType.Rectangle)
 			{
-			case NavmeshCut.MeshType.Rectangle:
+				if (meshType != NavmeshCut.MeshType.Circle)
+				{
+					if (meshType == NavmeshCut.MeshType.CustomMesh)
+					{
+						if (this.mesh != this.lastMesh || this.contours == null)
+						{
+							this.CalculateMeshContour();
+							this.lastMesh = this.mesh;
+						}
+						if (this.contours != null)
+						{
+							a += this.center;
+							flag ^= (this.meshScale < 0f);
+							for (int i = 0; i < this.contours.Length; i++)
+							{
+								Vector3[] array = this.contours[i];
+								List<IntPoint> list = ListPool<IntPoint>.Claim(array.Length);
+								if (this.useRotation)
+								{
+									for (int j = 0; j < array.Length; j++)
+									{
+										list.Add(NavmeshCut.V3ToIntPoint(matrix.MultiplyPoint3x4(this.center + array[j] * this.meshScale)));
+									}
+								}
+								else
+								{
+									for (int k = 0; k < array.Length; k++)
+									{
+										list.Add(NavmeshCut.V3ToIntPoint(a + array[k] * this.meshScale));
+									}
+								}
+								if (flag)
+								{
+									list.Reverse();
+								}
+								buffer.Add(list);
+							}
+						}
+					}
+				}
+				else
+				{
+					List<IntPoint> list = ListPool<IntPoint>.Claim(this.circleResolution);
+					flag ^= (this.circleRadius < 0f);
+					if (this.useRotation)
+					{
+						for (int l = 0; l < this.circleResolution; l++)
+						{
+							list.Add(NavmeshCut.V3ToIntPoint(matrix.MultiplyPoint3x4(this.center + new Vector3(Mathf.Cos((float)(l * 2) * 3.14159274f / (float)this.circleResolution), 0f, Mathf.Sin((float)(l * 2) * 3.14159274f / (float)this.circleResolution)) * this.circleRadius)));
+						}
+					}
+					else
+					{
+						a += this.center;
+						for (int m = 0; m < this.circleResolution; m++)
+						{
+							list.Add(NavmeshCut.V3ToIntPoint(a + new Vector3(Mathf.Cos((float)(m * 2) * 3.14159274f / (float)this.circleResolution), 0f, Mathf.Sin((float)(m * 2) * 3.14159274f / (float)this.circleResolution)) * this.circleRadius));
+						}
+					}
+					if (flag)
+					{
+						list.Reverse();
+					}
+					buffer.Add(list);
+				}
+			}
+			else
 			{
 				List<IntPoint> list = ListPool<IntPoint>.Claim();
 				flag ^= (this.rectangleSize.x < 0f ^ this.rectangleSize.y < 0f);
@@ -315,70 +382,6 @@ namespace Pathfinding
 					list.Reverse();
 				}
 				buffer.Add(list);
-				break;
-			}
-			case NavmeshCut.MeshType.Circle:
-			{
-				List<IntPoint> list = ListPool<IntPoint>.Claim(this.circleResolution);
-				flag ^= (this.circleRadius < 0f);
-				if (this.useRotation)
-				{
-					for (int i = 0; i < this.circleResolution; i++)
-					{
-						list.Add(NavmeshCut.V3ToIntPoint(matrix.MultiplyPoint3x4(this.center + new Vector3(Mathf.Cos((float)(i * 2) * 3.14159274f / (float)this.circleResolution), 0f, Mathf.Sin((float)(i * 2) * 3.14159274f / (float)this.circleResolution)) * this.circleRadius)));
-					}
-				}
-				else
-				{
-					a += this.center;
-					for (int j = 0; j < this.circleResolution; j++)
-					{
-						list.Add(NavmeshCut.V3ToIntPoint(a + new Vector3(Mathf.Cos((float)(j * 2) * 3.14159274f / (float)this.circleResolution), 0f, Mathf.Sin((float)(j * 2) * 3.14159274f / (float)this.circleResolution)) * this.circleRadius));
-					}
-				}
-				if (flag)
-				{
-					list.Reverse();
-				}
-				buffer.Add(list);
-				break;
-			}
-			case NavmeshCut.MeshType.CustomMesh:
-				if (this.mesh != this.lastMesh || this.contours == null)
-				{
-					this.CalculateMeshContour();
-					this.lastMesh = this.mesh;
-				}
-				if (this.contours != null)
-				{
-					a += this.center;
-					flag ^= (this.meshScale < 0f);
-					for (int k = 0; k < this.contours.Length; k++)
-					{
-						Vector3[] array = this.contours[k];
-						List<IntPoint> list = ListPool<IntPoint>.Claim(array.Length);
-						if (this.useRotation)
-						{
-							for (int l = 0; l < array.Length; l++)
-							{
-								list.Add(NavmeshCut.V3ToIntPoint(matrix.MultiplyPoint3x4(this.center + array[l] * this.meshScale)));
-							}
-						}
-						else
-						{
-							for (int m = 0; m < array.Length; m++)
-							{
-								list.Add(NavmeshCut.V3ToIntPoint(a + array[m] * this.meshScale));
-							}
-						}
-						if (flag)
-						{
-							list.Reverse();
-						}
-						buffer.Add(list);
-					}
-				}
-				break;
 			}
 		}
 

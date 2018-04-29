@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sends an Event when a Key is released.")]
 	[ActionCategory(ActionCategory.Input)]
+	[Tooltip("Sends an Event when a Key is released.")]
 	public class GetKeyUp : FsmStateAction
 	{
 		

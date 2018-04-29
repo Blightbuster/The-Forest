@@ -454,7 +454,7 @@ namespace Pathfinding.RVO.Sampled
 		private void GenerateNeighbourAgentVOs(Agent.VOBuffer vos)
 		{
 			float num = 1f / this.agentTimeHorizon;
-			Vector2 from = this.currentVelocity;
+			Vector2 a = this.currentVelocity;
 			for (int i = 0; i < this.neighbours.Count; i++)
 			{
 				Agent agent = this.neighbours[i];
@@ -464,7 +464,7 @@ namespace Pathfinding.RVO.Sampled
 					float num3 = Math.Max(this.elevationCoordinate, agent.elevationCoordinate);
 					if (num2 - num3 >= 0f)
 					{
-						Vector2 to = agent.currentVelocity;
+						Vector2 b = agent.currentVelocity;
 						float num4 = this.radius + agent.radius;
 						Vector2 vector = agent.position - this.position;
 						float t;
@@ -480,7 +480,7 @@ namespace Pathfinding.RVO.Sampled
 						{
 							t = 0.5f;
 						}
-						Vector2 vector2 = Vector2.Lerp(from, to, t);
+						Vector2 vector2 = Vector2.Lerp(a, b, t);
 						vos.Add(new Agent.VO(vector, vector2, num4, num, 1f / this.simulator.DeltaTime));
 						if (this.DebugDraw)
 						{
@@ -600,12 +600,6 @@ namespace Pathfinding.RVO.Sampled
 		}
 
 		
-		private const float DesiredVelocityWeight = 0.1f;
-
-		
-		private const float WallWeight = 5f;
-
-		
 		internal float radius;
 
 		
@@ -697,6 +691,12 @@ namespace Pathfinding.RVO.Sampled
 
 		
 		private List<float> obstacleDists = new List<float>();
+
+		
+		private const float DesiredVelocityWeight = 0.1f;
+
+		
+		private const float WallWeight = 5f;
 
 		
 		internal struct VO

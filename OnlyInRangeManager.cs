@@ -120,8 +120,8 @@ public class OnlyInRangeManager : MonoBehaviour
 		LevelSerializer.DontCollect();
 		LevelSerializer.LoadNow(d, true, false, delegate(LevelLoader usedLevelLoader)
 		{
-			this.<complete>__2 = true;
-			this.<loader>__3 = usedLevelLoader;
+			complete = true;
+			loader = usedLevelLoader;
 			LevelSerializer.Collect();
 		});
 		while (!complete)

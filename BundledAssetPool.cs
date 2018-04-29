@@ -32,7 +32,7 @@ public class BundledAssetPool
 		}
 		else
 		{
-			gameObject = (GameObject)UnityEngine.Object.Instantiate(this.prefab, pos, rot);
+			gameObject = UnityEngine.Object.Instantiate<GameObject>(this.prefab, pos, rot);
 		}
 		gameObject.transform.parent = parent;
 		this.spawned++;

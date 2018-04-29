@@ -4,9 +4,9 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[HelpUrl("https:
-	[Tooltip("Set Apply Root Motion: If true, Root is controlled by animations")]
 	[ActionCategory("Animator")]
+	[Tooltip("Set Apply Root Motion: If true, Root is controlled by animations")]
+	[HelpUrl("https:
 	public class SetAnimatorApplyRootMotion : FsmStateAction
 	{
 		
@@ -46,9 +46,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
+		[RequiredField]
 		[CheckForComponent(typeof(Animator))]
 		[Tooltip("The Target. An Animator component is required")]
-		[RequiredField]
 		public FsmOwnerDefault gameObject;
 
 		

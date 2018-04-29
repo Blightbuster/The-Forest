@@ -4,12 +4,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Serialization;
 using TheForest.Commons.Enums;
 using TheForest.Utils;
 using UniLinq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 public static class LevelSerializer
@@ -32,11 +34,22 @@ public static class LevelSerializer
 		LevelSerializer.StoreComponent = delegate
 		{
 		};
+		LevelSerializer._collectionCount = 0;
 		LevelSerializer.Progress = delegate
 		{
 		};
-		LevelSerializer.webClient.UploadDataCompleted += LevelSerializer.HandleWebClientUploadDataCompleted;
-		LevelSerializer.webClient.UploadStringCompleted += LevelSerializer.HandleWebClientUploadStringCompleted;
+		WebClient webClient = LevelSerializer.webClient;
+		if (LevelSerializer.<>f__mg$cache0 == null)
+		{
+			LevelSerializer.<>f__mg$cache0 = new UploadDataCompletedEventHandler(LevelSerializer.HandleWebClientUploadDataCompleted);
+		}
+		webClient.UploadDataCompleted += LevelSerializer.<>f__mg$cache0;
+		WebClient webClient2 = LevelSerializer.webClient;
+		if (LevelSerializer.<>f__mg$cache1 == null)
+		{
+			LevelSerializer.<>f__mg$cache1 = new UploadStringCompletedEventHandler(LevelSerializer.HandleWebClientUploadStringCompleted);
+		}
+		webClient2.UploadStringCompleted += LevelSerializer.<>f__mg$cache1;
 		LevelSerializer._stopCases.Add(typeof(PrefabIdentifier));
 		UnitySerializer.AddPrivateType(typeof(AnimationClip));
 		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
@@ -50,67 +63,8 @@ public static class LevelSerializer
 				LevelSerializer.CustomSerializers[((ComponentSerializerFor)attr).SerializesType] = (Activator.CreateInstance(tp) as IComponentSerializer);
 			}, assembly, typeof(ComponentSerializerFor));
 		}
-		LevelSerializer.InitPrefabList();
-		try
-		{
-			string @string = PlayerPrefsFile.GetString("_Save_Game_Data_", string.Empty, true);
-			if (!string.IsNullOrEmpty(@string))
-			{
-				try
-				{
-					LevelSerializer.SavedGames = UnitySerializer.Deserialize<global::Lookup<string, List<LevelSerializer.SaveEntry>>>(Convert.FromBase64String(@string));
-				}
-				catch
-				{
-					LevelSerializer.SavedGames = null;
-				}
-			}
-			if (LevelSerializer.SavedGames == null)
-			{
-				LevelSerializer.SavedGames = new Index<string, List<LevelSerializer.SaveEntry>>();
-				LevelSerializer.SaveDataToPlayerPrefs();
-			}
-		}
-		catch
-		{
-			LevelSerializer.SavedGames = new Index<string, List<LevelSerializer.SaveEntry>>();
-		}
+		LevelSerializer.SavedGames = new Index<string, List<LevelSerializer.SaveEntry>>();
 	}
-
-	
-	
-	
-	public static event Action Deserialized;
-
-	
-	
-	
-	public static event Action GameSaved;
-
-	
-	
-	
-	public static event Action SuspendingSerialization;
-
-	
-	
-	
-	public static event Action ResumingSerialization;
-
-	
-	
-	
-	public static event LevelSerializer.StoreQuery Store;
-
-	
-	
-	
-	public static event LevelSerializer.StoreComponentQuery StoreComponent;
-
-	
-	
-	
-	public static event Action<string, float> Progress;
 
 	
 	private static void HandleWebClientUploadStringCompleted(object sender, UploadStringCompletedEventArgs e)
@@ -175,29 +129,29 @@ public static class LevelSerializer
 	
 	public static void SaveObjectTreeToServer(string uri, GameObject rootOfTree, string userName = "", string password = "", Action<Exception> onComplete = null)
 	{
-		LevelSerializer.<SaveObjectTreeToServer>c__AnonStorey3EF <SaveObjectTreeToServer>c__AnonStorey3EF = new LevelSerializer.<SaveObjectTreeToServer>c__AnonStorey3EF();
-		<SaveObjectTreeToServer>c__AnonStorey3EF.rootOfTree = rootOfTree;
-		<SaveObjectTreeToServer>c__AnonStorey3EF.userName = userName;
-		<SaveObjectTreeToServer>c__AnonStorey3EF.password = password;
-		<SaveObjectTreeToServer>c__AnonStorey3EF.uri = uri;
-		<SaveObjectTreeToServer>c__AnonStorey3EF.onComplete = onComplete;
-		LevelSerializer.<SaveObjectTreeToServer>c__AnonStorey3EF <SaveObjectTreeToServer>c__AnonStorey3EF2 = <SaveObjectTreeToServer>c__AnonStorey3EF;
+		LevelSerializer.<SaveObjectTreeToServer>c__AnonStorey5 <SaveObjectTreeToServer>c__AnonStorey = new LevelSerializer.<SaveObjectTreeToServer>c__AnonStorey5();
+		<SaveObjectTreeToServer>c__AnonStorey.rootOfTree = rootOfTree;
+		<SaveObjectTreeToServer>c__AnonStorey.userName = userName;
+		<SaveObjectTreeToServer>c__AnonStorey.password = password;
+		<SaveObjectTreeToServer>c__AnonStorey.uri = uri;
+		<SaveObjectTreeToServer>c__AnonStorey.onComplete = onComplete;
+		LevelSerializer.<SaveObjectTreeToServer>c__AnonStorey5 <SaveObjectTreeToServer>c__AnonStorey2 = <SaveObjectTreeToServer>c__AnonStorey;
 		Action<Exception> onComplete2;
-		if ((onComplete2 = <SaveObjectTreeToServer>c__AnonStorey3EF.onComplete) == null)
+		if ((onComplete2 = <SaveObjectTreeToServer>c__AnonStorey.onComplete) == null)
 		{
 			onComplete2 = delegate
 			{
 			};
 		}
-		<SaveObjectTreeToServer>c__AnonStorey3EF2.onComplete = onComplete2;
+		<SaveObjectTreeToServer>c__AnonStorey2.onComplete = onComplete2;
 		Action action = delegate
 		{
-			byte[] data = <SaveObjectTreeToServer>c__AnonStorey3EF.rootOfTree.SaveObjectTree();
+			byte[] data = <SaveObjectTreeToServer>c__AnonStorey.rootOfTree.SaveObjectTree();
 			Action upload = delegate
 			{
 				LevelSerializer.uploadCount++;
-				LevelSerializer.webClient.Credentials = new NetworkCredential(<SaveObjectTreeToServer>c__AnonStorey3EF.userName, <SaveObjectTreeToServer>c__AnonStorey3EF.password);
-				LevelSerializer.webClient.UploadDataAsync(new Uri(<SaveObjectTreeToServer>c__AnonStorey3EF.uri), null, data, <SaveObjectTreeToServer>c__AnonStorey3EF.onComplete);
+				LevelSerializer.webClient.Credentials = new NetworkCredential(<SaveObjectTreeToServer>c__AnonStorey.userName, <SaveObjectTreeToServer>c__AnonStorey.password);
+				LevelSerializer.webClient.UploadDataAsync(new Uri(<SaveObjectTreeToServer>c__AnonStorey.uri), null, data, <SaveObjectTreeToServer>c__AnonStorey.onComplete);
 			};
 			LevelSerializer.DoWhenReady(upload);
 		};
@@ -241,11 +195,11 @@ public static class LevelSerializer
 	
 	public static void SerializeLevelToServer(string uri, string userName = "", string password = "", Action<Exception> onComplete = null)
 	{
-		LevelSerializer.<SerializeLevelToServer>c__AnonStorey3F2 <SerializeLevelToServer>c__AnonStorey3F = new LevelSerializer.<SerializeLevelToServer>c__AnonStorey3F2();
-		<SerializeLevelToServer>c__AnonStorey3F.uri = uri;
-		<SerializeLevelToServer>c__AnonStorey3F.userName = userName;
-		<SerializeLevelToServer>c__AnonStorey3F.password = password;
-		<SerializeLevelToServer>c__AnonStorey3F.onComplete = onComplete;
+		LevelSerializer.<SerializeLevelToServer>c__AnonStorey8 <SerializeLevelToServer>c__AnonStorey = new LevelSerializer.<SerializeLevelToServer>c__AnonStorey8();
+		<SerializeLevelToServer>c__AnonStorey.uri = uri;
+		<SerializeLevelToServer>c__AnonStorey.userName = userName;
+		<SerializeLevelToServer>c__AnonStorey.password = password;
+		<SerializeLevelToServer>c__AnonStorey.onComplete = onComplete;
 		object guard = LevelSerializer.Guard;
 		lock (guard)
 		{
@@ -253,24 +207,24 @@ public static class LevelSerializer
 			{
 				Loom.QueueOnMainThread(delegate
 				{
-					LevelSerializer.SerializeLevelToServer(<SerializeLevelToServer>c__AnonStorey3F.uri, <SerializeLevelToServer>c__AnonStorey3F.userName, <SerializeLevelToServer>c__AnonStorey3F.password, <SerializeLevelToServer>c__AnonStorey3F.onComplete);
+					LevelSerializer.SerializeLevelToServer(<SerializeLevelToServer>c__AnonStorey.uri, <SerializeLevelToServer>c__AnonStorey.userName, <SerializeLevelToServer>c__AnonStorey.password, <SerializeLevelToServer>c__AnonStorey.onComplete);
 				}, 0.5f);
 			}
 			else
 			{
 				LevelSerializer.uploadCount++;
-				LevelSerializer.<SerializeLevelToServer>c__AnonStorey3F2 <SerializeLevelToServer>c__AnonStorey3F2 = <SerializeLevelToServer>c__AnonStorey3F;
+				LevelSerializer.<SerializeLevelToServer>c__AnonStorey8 <SerializeLevelToServer>c__AnonStorey2 = <SerializeLevelToServer>c__AnonStorey;
 				Action<Exception> onComplete2;
-				if ((onComplete2 = <SerializeLevelToServer>c__AnonStorey3F.onComplete) == null)
+				if ((onComplete2 = <SerializeLevelToServer>c__AnonStorey.onComplete) == null)
 				{
 					onComplete2 = delegate
 					{
 					};
 				}
-				<SerializeLevelToServer>c__AnonStorey3F2.onComplete = onComplete2;
+				<SerializeLevelToServer>c__AnonStorey2.onComplete = onComplete2;
 				string data = LevelSerializer.SerializeLevel();
-				LevelSerializer.webClient.Credentials = new NetworkCredential(<SerializeLevelToServer>c__AnonStorey3F.userName, <SerializeLevelToServer>c__AnonStorey3F.password);
-				LevelSerializer.webClient.UploadStringAsync(new Uri(<SerializeLevelToServer>c__AnonStorey3F.uri), null, data, <SerializeLevelToServer>c__AnonStorey3F.onComplete);
+				LevelSerializer.webClient.Credentials = new NetworkCredential(<SerializeLevelToServer>c__AnonStorey.userName, <SerializeLevelToServer>c__AnonStorey.password);
+				LevelSerializer.webClient.UploadStringAsync(new Uri(<SerializeLevelToServer>c__AnonStorey.uri), null, data, <SerializeLevelToServer>c__AnonStorey.onComplete);
 			}
 		}
 	}
@@ -296,11 +250,23 @@ public static class LevelSerializer
 	
 	public static void InitPrefabList()
 	{
-		LevelSerializer.AllPrefabs = Resources.FindObjectsOfTypeAll(typeof(GameObject)).Cast<GameObject>().Where(delegate(GameObject go)
+		if (LevelSerializer.AllPrefabs == null || LevelSerializer.allPrefabs.Count == 0 || (SaveGameManager.Instance && SaveGameManager.Instance != null && SaveGameManager.Instance.requiredObjects.Length > LevelSerializer.allPrefabs.Count))
 		{
-			PrefabIdentifier component = go.GetComponent<PrefabIdentifier>();
-			return component != null && !component.IsInScene();
-		}).Distinct(LevelSerializer.CompareGameObjects.Instance).ToDictionary((GameObject go) => go.GetComponent<PrefabIdentifier>().ClassId, (GameObject go) => go);
+			if (SaveGameManager.Instance && SaveGameManager.Instance.requiredObjects != null)
+			{
+				LevelSerializer.AllPrefabs = (from ro in SaveGameManager.Instance.requiredObjects
+				where ro is GameObject
+				select ro).ToDictionary((UnityEngine.Object go) => ((GameObject)go).GetComponent<PrefabIdentifier>().ClassId, (UnityEngine.Object go) => (GameObject)go);
+			}
+			else
+			{
+				LevelSerializer.AllPrefabs = Resources.FindObjectsOfTypeAll(typeof(GameObject)).Cast<GameObject>().Where(delegate(GameObject go)
+				{
+					PrefabIdentifier component = go.GetComponent<PrefabIdentifier>();
+					return component != null && !component.IsInScene();
+				}).Distinct(LevelSerializer.CompareGameObjects.Instance).ToDictionary((GameObject go) => go.GetComponent<PrefabIdentifier>().ClassId, (GameObject go) => go);
+			}
+		}
 	}
 
 	
@@ -356,6 +322,26 @@ public static class LevelSerializer
 	}
 
 	
+	
+	
+	public static event Action Deserialized;
+
+	
+	
+	
+	public static event Action GameSaved;
+
+	
+	
+	
+	public static event Action SuspendingSerialization;
+
+	
+	
+	
+	public static event Action ResumingSerialization;
+
+	
 	internal static void InvokeDeserialized()
 	{
 		LevelSerializer._suspensionCount = 0;
@@ -370,6 +356,16 @@ public static class LevelSerializer
 	}
 
 	
+	
+	
+	public static event LevelSerializer.StoreQuery Store;
+
+	
+	
+	
+	public static event LevelSerializer.StoreComponentQuery StoreComponent;
+
+	
 	public static void Resume()
 	{
 		string @string = PlayerPrefsFile.GetString(LevelSerializer.PlayerName + "__RESUME__", string.Empty, true);
@@ -380,24 +376,32 @@ public static class LevelSerializer
 			GC.Collect();
 			LevelSerializer.SaveEntry saveEntry = UnitySerializer.Deserialize<LevelSerializer.SaveEntry>(array);
 			string name = saveEntry.Name;
-			switch (name)
+			if (name != null)
 			{
-			case "Peaceful":
-				GameSetup.SetDifficulty(DifficultyModes.Peaceful);
-				goto IL_105;
-			case "Hard":
-				GameSetup.SetDifficulty(DifficultyModes.Hard);
-				goto IL_105;
-			case "HardSurvival":
-				GameSetup.SetDifficulty(DifficultyModes.HardSurvival);
-				goto IL_105;
-			case "Creative":
-				GameSetup.SetDifficulty(DifficultyModes.Peaceful);
-				GameSetup.SetGameType(GameTypes.Creative);
-				goto IL_105;
+				if (name == "Peaceful")
+				{
+					GameSetup.SetDifficulty(DifficultyModes.Peaceful);
+					goto IL_CF;
+				}
+				if (name == "Hard")
+				{
+					GameSetup.SetDifficulty(DifficultyModes.Hard);
+					goto IL_CF;
+				}
+				if (name == "HardSurvival")
+				{
+					GameSetup.SetDifficulty(DifficultyModes.HardSurvival);
+					goto IL_CF;
+				}
+				if (name == "Creative")
+				{
+					GameSetup.SetDifficulty(DifficultyModes.Peaceful);
+					GameSetup.SetGameType(GameTypes.Creative);
+					goto IL_CF;
+				}
 			}
 			GameSetup.SetDifficulty(DifficultyModes.Normal);
-			IL_105:
+			IL_CF:
 			saveEntry.Load();
 		}
 	}
@@ -405,7 +409,13 @@ public static class LevelSerializer
 	
 	public static void Checkpoint()
 	{
-		LevelSerializer.SaveGame((!GameSetup.IsCreativeGame) ? GameSetup.Difficulty.ToString() : "Creative", false, new Action<string, bool>(LevelSerializer.PerformSaveCheckPoint));
+		string name = (!GameSetup.IsCreativeGame) ? GameSetup.Difficulty.ToString() : "Creative";
+		bool urgent = false;
+		if (LevelSerializer.<>f__mg$cache2 == null)
+		{
+			LevelSerializer.<>f__mg$cache2 = new Action<string, bool>(LevelSerializer.PerformSaveCheckPoint);
+		}
+		LevelSerializer.SaveGame(name, urgent, LevelSerializer.<>f__mg$cache2);
 	}
 
 	
@@ -499,7 +509,16 @@ public static class LevelSerializer
 	
 	public static void SaveGame(string name, bool urgent, Action<string, bool> perform)
 	{
-		perform = (perform ?? new Action<string, bool>(LevelSerializer.PerformSave));
+		Action<string, bool> action;
+		if ((action = perform) == null)
+		{
+			if (LevelSerializer.<>f__mg$cache3 == null)
+			{
+				LevelSerializer.<>f__mg$cache3 = new Action<string, bool>(LevelSerializer.PerformSave);
+			}
+			action = LevelSerializer.<>f__mg$cache3;
+		}
+		perform = action;
 		if (urgent || !LevelSerializer.IsSuspended || LevelSerializer.SerializationMode != LevelSerializer.SerializationModes.SerializeWhenFree)
 		{
 			perform(name, urgent);
@@ -668,6 +687,11 @@ public static class LevelSerializer
 		LevelSerializer.GetComponentsInChildrenWithClause(go.transform, list);
 		return list;
 	}
+
+	
+	
+	
+	public static event Action<string, float> Progress;
 
 	
 	public static byte[] SaveObjectTree(this GameObject rootOfTree)
@@ -933,7 +957,7 @@ public static class LevelSerializer
 		UnityEngine.Object.DontDestroyOnLoad(gameObject);
 		LevelLoader levelLoader = gameObject.AddComponent<LevelLoader>();
 		levelLoader.Data = levelData;
-		LevelSerializer.LevelLoadingOperation = Application.LoadLevelAsync(levelData.Name);
+		LevelSerializer.LevelLoadingOperation = SceneManager.LoadSceneAsync(levelData.Name);
 		return levelLoader;
 	}
 
@@ -992,10 +1016,37 @@ public static class LevelSerializer
 	private static int uploadCount;
 
 	
-	private static int _collectionCount = 0;
+	public static bool Prewarmed;
+
+	
+	private static int _collectionCount;
 
 	
 	public static AsyncOperation LevelLoadingOperation;
+
+	
+	[CompilerGenerated]
+	private static UploadDataCompletedEventHandler <>f__mg$cache0;
+
+	
+	[CompilerGenerated]
+	private static UploadStringCompletedEventHandler <>f__mg$cache1;
+
+	
+	[CompilerGenerated]
+	private static Action<string, bool> <>f__mg$cache2;
+
+	
+	[CompilerGenerated]
+	private static Action<string, bool> <>f__mg$cache3;
+
+	
+	
+	public delegate void StoreQuery(GameObject go, ref bool store);
+
+	
+	
+	public delegate void StoreComponentQuery(Component component, ref bool store);
 
 	
 	public enum SerializationModes
@@ -1208,12 +1259,4 @@ public static class LevelSerializer
 		
 		public bool createEmptyObject;
 	}
-
-	
-	
-	public delegate void StoreQuery(GameObject go, ref bool store);
-
-	
-	
-	public delegate void StoreComponentQuery(Component component, ref bool store);
 }

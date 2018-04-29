@@ -10,17 +10,24 @@ public static class AnimatorExtensions
 		AnimatorControllerData.ControllerData data = AnimatorControllerData.Instance.GetData(from.runtimeAnimatorController.name.GetHashCode());
 		foreach (AnimatorControllerData.Parameter parameter in data.Parameters)
 		{
-			switch (parameter.ParamType)
+			AnimatorControllerData.ParamType paramType = parameter.ParamType;
+			if (paramType != AnimatorControllerData.ParamType.Bool)
 			{
-			case AnimatorControllerData.ParamType.Bool:
+				if (paramType != AnimatorControllerData.ParamType.Int)
+				{
+					if (paramType == AnimatorControllerData.ParamType.Float)
+					{
+						self.SetFloatReflected(parameter.Name, from.GetFloat(parameter.Name));
+					}
+				}
+				else
+				{
+					self.SetIntegerReflected(parameter.Name, from.GetInteger(parameter.Name));
+				}
+			}
+			else
+			{
 				self.SetBoolReflected(parameter.Name, from.GetBool(parameter.Name));
-				break;
-			case AnimatorControllerData.ParamType.Int:
-				self.SetIntegerReflected(parameter.Name, from.GetInteger(parameter.Name));
-				break;
-			case AnimatorControllerData.ParamType.Float:
-				self.SetFloatReflected(parameter.Name, from.GetFloat(parameter.Name));
-				break;
 			}
 		}
 	}

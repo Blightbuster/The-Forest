@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("A Vertical Slider linked to a Float Variable.")]
 	[ActionCategory(ActionCategory.GUILayout)]
+	[Tooltip("A Vertical Slider linked to a Float Variable.")]
 	public class GUILayoutVerticalSlider : GUILayoutAction
 	{
 		

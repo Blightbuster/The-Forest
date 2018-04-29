@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets a Game Object's Tag.")]
 	[ActionCategory(ActionCategory.GameObject)]
+	[Tooltip("Sets a Game Object's Tag.")]
 	public class SetTag : FsmStateAction
 	{
 		

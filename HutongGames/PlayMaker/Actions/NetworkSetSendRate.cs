@@ -28,8 +28,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The send rate for all networkViews")]
 		[RequiredField]
+		[Tooltip("The send rate for all networkViews")]
 		public FsmFloat sendRate;
 	}
 }

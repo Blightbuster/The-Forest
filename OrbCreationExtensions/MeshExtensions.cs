@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using UnityEngine;
 
@@ -156,17 +157,17 @@ namespace OrbCreationExtensions
 			int[] subMeshOffsets = new int[mesh.subMeshCount];
 			if (mesh.subMeshCount > 1)
 			{
-				for (int s = 0; s < mesh.subMeshCount; s++)
+				for (int i = 0; i < mesh.subMeshCount; i++)
 				{
-					int[] subTs = mesh.GetTriangles(s);
-					int t;
-					for (t = 0; t < subTs.Length; t++)
+					int[] triangles = mesh.GetTriangles(i);
+					int j;
+					for (j = 0; j < triangles.Length; j++)
 					{
-						ts[subMeshOffsets[s] + t] = subTs[t];
+						ts[subMeshOffsets[i] + j] = triangles[j];
 					}
-					if (s + 1 < mesh.subMeshCount)
+					if (i + 1 < mesh.subMeshCount)
 					{
-						subMeshOffsets[s + 1] = subMeshOffsets[s] + t;
+						subMeshOffsets[i + 1] = subMeshOffsets[i] + j;
 					}
 				}
 			}
@@ -183,7 +184,11 @@ namespace OrbCreationExtensions
 			lodInfo["boneWeights"] = bws;
 			lodInfo["subMeshOffsets"] = subMeshOffsets;
 			lodInfo["meshBounds"] = meshBounds;
-			Thread thread = new Thread(new ParameterizedThreadStart(LODMaker.MakeLODMeshInBackground));
+			if (MeshExtensions.<>f__mg$cache0 == null)
+			{
+				MeshExtensions.<>f__mg$cache0 = new ParameterizedThreadStart(LODMaker.MakeLODMeshInBackground);
+			}
+			Thread thread = new Thread(MeshExtensions.<>f__mg$cache0);
 			thread.Start(lodInfo);
 			while (!lodInfo.ContainsKey("ready"))
 			{
@@ -680,5 +685,9 @@ namespace OrbCreationExtensions
 		{
 			return Vector3.Cross(v1 - v0, v2 - v0).normalized;
 		}
+
+		
+		[CompilerGenerated]
+		private static ParameterizedThreadStart <>f__mg$cache0;
 	}
 }

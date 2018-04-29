@@ -1,9 +1,10 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.AI;
 
 
-[RequireComponent(typeof(ThirdPersonCharacter))]
 [RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(ThirdPersonCharacter))]
 public class AICharacterControl : MonoBehaviour
 {
 	

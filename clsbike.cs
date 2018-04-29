@@ -102,15 +102,6 @@ public class clsbike : MonoBehaviour
 	}
 
 	
-	private const float cnsspring = 2500f;
-
-	
-	private const float cnsdamper = 200f;
-
-	
-	private const float cnssuspension = 0.5f;
-
-	
 	public float vargammotormax = 500f;
 
 	
@@ -127,6 +118,15 @@ public class clsbike : MonoBehaviour
 
 	
 	private WheelCollider[] varwheels;
+
+	
+	private const float cnsspring = 2500f;
+
+	
+	private const float cnsdamper = 200f;
+
+	
+	private const float cnssuspension = 0.5f;
 
 	
 	private float varpower;

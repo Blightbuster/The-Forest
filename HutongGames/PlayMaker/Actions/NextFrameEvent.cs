@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sends an Event in the next frame. Useful if you want to loop states every frame.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Sends an Event in the next frame. Useful if you want to loop states every frame.")]
 	public class NextFrameEvent : FsmStateAction
 	{
 		

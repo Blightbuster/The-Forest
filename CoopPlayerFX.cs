@@ -50,7 +50,7 @@ public class CoopPlayerFX : EntityBehaviour<IPlayerState>
 	
 	public void Update()
 	{
-		if (BoltNetwork.isRunning && this.entity && this.entity.isAttached && this.entity.isOwner)
+		if (BoltNetwork.isRunning && base.entity && base.entity.isAttached && base.entity.isOwner)
 		{
 			base.state.FX_Fire = this.FX_Fire.activeInHierarchy;
 			base.state.MolotovFire = this.FX_MolotovFire.activeInHierarchy;

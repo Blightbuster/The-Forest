@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using Bolt;
 using TheForest.Buildings.Interfaces;
 using TheForest.Buildings.World;
@@ -16,6 +17,12 @@ namespace TheForest.Buildings.Creation
 	public class Create : MonoBehaviour
 	{
 		
+		private void Awake()
+		{
+			this.CraftStructures = new List<Craft_Structure>();
+		}
+
+		
 		private void Update()
 		{
 			if ((LocalPlayer.AnimControl.onRope || LocalPlayer.AnimControl.useRootMotion || LocalPlayer.AnimControl.onRockThrower || LocalPlayer.FpCharacter.drinking || LocalPlayer.AnimControl.holdingGirl) && this.Inventory.CurrentView == PlayerInventory.PlayerViews.Book)
@@ -26,11 +33,17 @@ namespace TheForest.Buildings.Creation
 			}
 			if (this.IsClosing)
 			{
-				LocalPlayer.MainCam.fieldOfView = Mathf.SmoothDamp(LocalPlayer.MainCam.fieldOfView, PlayerPreferences.Fov, ref this._fovChangeSpeed, 0.15f);
-				if (Mathf.Approximately(LocalPlayer.MainCam.fieldOfView, PlayerPreferences.Fov))
+				if (!PlayerPreferences.CanUpdateFov)
 				{
-					this.IsClosing = false;
-					PlayerPreferences.CanUpdateFov = true;
+					if (!ForestVR.Enabled)
+					{
+						LocalPlayer.MainCam.fieldOfView = Mathf.SmoothDamp(LocalPlayer.MainCam.fieldOfView, PlayerPreferences.Fov, ref this._fovChangeSpeed, 0.15f);
+					}
+					if (Mathf.Approximately(LocalPlayer.MainCam.fieldOfView, PlayerPreferences.Fov))
+					{
+						this.IsClosing = false;
+						PlayerPreferences.CanUpdateFov = true;
+					}
 				}
 			}
 			else if (this.Inventory.CurrentView == PlayerInventory.PlayerViews.Book)
@@ -39,7 +52,7 @@ namespace TheForest.Buildings.Creation
 				{
 					this.CloseTheBook(false);
 				}
-				if (!PlayerPreferences.CanUpdateFov && !Mathf.Approximately(LocalPlayer.MainCam.fieldOfView, 65f))
+				if (!PlayerPreferences.CanUpdateFov && !Mathf.Approximately(LocalPlayer.MainCam.fieldOfView, 65f) && !ForestVR.Enabled)
 				{
 					LocalPlayer.MainCam.fieldOfView = Mathf.SmoothDamp(LocalPlayer.MainCam.fieldOfView, 70f, ref this._fovChangeSpeed, 0.15f);
 				}
@@ -117,7 +130,6 @@ namespace TheForest.Buildings.Creation
 				TreeStructure ts = this._currentGhost.GetComponentInChildren<TreeStructure>();
 				if (ts && this.TargetTree)
 				{
-					LocalPlayer.Tuts.ShowTreeStructureTut();
 					if (this.TargetTree.CompareTag("conTree"))
 					{
 						ts.TreeId = this.TargetTree.parent.GetComponent<TreeHealth>().LodTree.GetComponentInChildren<CoopTreeId>().Id;
@@ -135,48 +147,48 @@ namespace TheForest.Buildings.Creation
 				CoopConstructionEx coopEx = this._currentGhost.GetComponent<CoopConstructionEx>();
 				WallArchitect wallArch = this.CurrentGhost.GetComponent<WallArchitect>();
 				ICoopTokenConstruction tokenConstruction = this._currentGhost.GetComponent<ICoopTokenConstruction>();
-				BoltEntity parentEntity = this.GetParentEntity(this._currentGhost);
+				this.ParentEntity = this.GetParentEntity(this._currentGhost);
 				if (BoltNetwork.isRunning && !wallArch)
 				{
-					BoltEntity ghostEntity = this._currentGhost.GetComponent<BoltEntity>();
+					BoltEntity component = this._currentGhost.GetComponent<BoltEntity>();
 					if (tokenConstruction != null)
 					{
-						PlaceFoundationEx ev = PlaceFoundationEx.Create(GlobalTargets.OnlyServer);
-						ev.Position = this._currentGhost.transform.position;
-						ev.Rotation = this._currentGhost.transform.rotation;
-						ev.Prefab = ghostEntity.prefabId;
-						ev.Token = tokenConstruction.CustomToken;
-						ev.Parent = parentEntity;
-						ev.Send();
+						PlaceFoundationEx placeFoundationEx = PlaceFoundationEx.Create(GlobalTargets.OnlyServer);
+						placeFoundationEx.Position = this._currentGhost.transform.position;
+						placeFoundationEx.Rotation = this._currentGhost.transform.rotation;
+						placeFoundationEx.Prefab = component.prefabId;
+						placeFoundationEx.Token = tokenConstruction.CustomToken;
+						placeFoundationEx.Parent = this.ParentEntity;
+						placeFoundationEx.Send();
 						UnityEngine.Object.Destroy(this._currentGhost);
 					}
 					else if (coopEx)
 					{
 						coopEx.SendMessage("OnSerializing");
-						CoopConstructionExToken to = this.GetCoopConstructionExToken(coopEx, parentEntity);
-						PlaceFoundationEx ev2 = PlaceFoundationEx.Create(GlobalTargets.OnlyServer);
-						ev2.Parent = parentEntity;
-						ev2.Position = this._currentGhost.transform.position;
-						ev2.Rotation = this._currentGhost.transform.rotation;
-						ev2.Prefab = ghostEntity.prefabId;
-						ev2.Token = to;
-						ev2.Send();
+						CoopConstructionExToken coopConstructionExToken = this.GetCoopConstructionExToken(coopEx, this.ParentEntity);
+						PlaceFoundationEx placeFoundationEx2 = PlaceFoundationEx.Create(GlobalTargets.OnlyServer);
+						placeFoundationEx2.Parent = this.ParentEntity;
+						placeFoundationEx2.Position = this._currentGhost.transform.position;
+						placeFoundationEx2.Rotation = this._currentGhost.transform.rotation;
+						placeFoundationEx2.Prefab = component.prefabId;
+						placeFoundationEx2.Token = coopConstructionExToken;
+						placeFoundationEx2.Send();
 						UnityEngine.Object.Destroy(this._currentGhost);
 					}
-					else if (!this._currentGhost.GetComponent(typeof(IAnchorableStructure)) && ghostEntity)
+					else if (!this._currentGhost.GetComponent(typeof(IAnchorableStructure)) && component)
 					{
 						this._currentGhost.AddComponent<CoopDestroyPredictedGhost>();
 						this._currentGhost.AddComponent<destroyAfter>().destroyTime = 2f;
-						PlaceConstruction ev3 = PlaceConstruction.Create(GlobalTargets.OnlyServer);
-						ev3.Parent = parentEntity;
-						ev3.PrefabId = ghostEntity.prefabId;
-						ev3.Position = this._currentGhost.transform.position;
-						ev3.Rotation = this._currentGhost.transform.rotation;
+						PlaceConstruction placeConstruction = PlaceConstruction.Create(GlobalTargets.OnlyServer);
+						placeConstruction.Parent = this.ParentEntity;
+						placeConstruction.PrefabId = component.prefabId;
+						placeConstruction.Position = this._currentGhost.transform.position;
+						placeConstruction.Rotation = this._currentGhost.transform.rotation;
 						if (ts)
 						{
-							ev3.TreeIndex = ts.TreeId;
+							placeConstruction.TreeIndex = ts.TreeId;
 						}
-						ev3.Send();
+						placeConstruction.Send();
 						this._currentGhost.SendMessage("OnPlacingRemotely", SendMessageOptions.DontRequireReceiver);
 					}
 					else
@@ -188,15 +200,15 @@ namespace TheForest.Buildings.Creation
 				{
 					this._currentGhost.SendMessage("OnPlaced", false, SendMessageOptions.DontRequireReceiver);
 					this._currentGhost.transform.Find("Trigger").gameObject.SetActive(true);
-					Transform yellowHammer = this._currentGhost.transform.Find("LastBuiltLocation");
-					if (yellowHammer)
+					Transform transform = this._currentGhost.transform.Find("LastBuiltLocation");
+					if (transform)
 					{
-						yellowHammer.gameObject.SetActive(true);
+						transform.gameObject.SetActive(true);
 					}
-					if (parentEntity)
+					if (this.ParentEntity)
 					{
-						DynamicBuilding db = parentEntity.GetComponent<DynamicBuilding>();
-						this._currentGhost.transform.parent = ((!db || !db._parentOverride) ? parentEntity.transform : db._parentOverride);
+						DynamicBuilding component2 = this.ParentEntity.GetComponent<DynamicBuilding>();
+						this._currentGhost.transform.parent = ((!component2 || !component2._parentOverride) ? this.ParentEntity.transform : component2._parentOverride);
 					}
 				}
 				this.ClearReferences(!chain);
@@ -314,6 +326,7 @@ namespace TheForest.Buildings.Creation
 				this._currentGhost = null;
 			}
 			this._currentBlueprint = null;
+			this.CraftStructures.Clear();
 			if (this._buildingPlacer)
 			{
 				this._buildingPlacer.ValidateAnchor = null;
@@ -387,6 +400,7 @@ namespace TheForest.Buildings.Creation
 			{
 				yield break;
 			}
+			LocalPlayer.Tuts.CloseCraftingTut();
 			LocalPlayer.Inventory.BlockTogglingInventory = true;
 			if (LocalPlayer.AnimControl.USE_NEW_BOOK && (!LocalPlayer.AnimControl.bookHeldGo.GetComponent<survivalBookController>().realBookOpen || (LocalPlayer.AnimControl.currLayerState1.shortNameHash == LocalPlayer.AnimControl.bookIdleToIdleHash && LocalPlayer.AnimControl.currLayerState1.normalizedTime > 0.5f)))
 			{
@@ -571,17 +585,23 @@ namespace TheForest.Buildings.Creation
 				}
 				this._currentGhost.transform.parent = this._buildingPlacer.transform;
 				this._currentGhost.transform.localRotation = Quaternion.identity;
-				this._currentGhost.transform.Find("Trigger").gameObject.SetActive(false);
-				Renderer component = this._currentGhost.GetComponent<Renderer>();
+				Transform transform = this._currentGhost.transform.Find("Trigger");
+				Craft_Structure component = transform.GetComponent<Craft_Structure>();
 				if (component)
 				{
-					component.enabled = false;
-					base.StartCoroutine(this.EnableRendererAfterDelay(component));
+					this.CraftStructures.Add(component);
 				}
-				Transform transform = this._currentGhost.transform.Find("LastBuiltLocation");
-				if (transform)
+				transform.gameObject.SetActive(false);
+				Renderer component2 = this._currentGhost.GetComponent<Renderer>();
+				if (component2)
 				{
-					transform.gameObject.SetActive(false);
+					component2.enabled = false;
+					base.StartCoroutine(this.EnableRendererAfterDelay(component2));
+				}
+				Transform transform2 = this._currentGhost.transform.Find("LastBuiltLocation");
+				if (transform2)
+				{
+					transform2.gameObject.SetActive(false);
 				}
 				this._currentGhost.transform.localPosition = this.GetGhostOffsetWithPlacer(this._currentGhost);
 				this._buildingPlacer.TreeStructure = this._currentBlueprint._allowInTree;
@@ -589,10 +609,10 @@ namespace TheForest.Buildings.Creation
 				this._buildingPlacer.IgnoreBlock = this._currentBlueprint._ignoreBlock;
 				this._buildingPlacer.AllowFoundation = this._currentBlueprint._allowFoundation;
 				this._buildingPlacer.Airborne = this._currentBlueprint._airBorne;
-				IAnchorValidation component2 = this._currentGhost.GetComponent<IAnchorValidation>();
-				if (component2 != null)
+				IAnchorValidation component3 = this._currentGhost.GetComponent<IAnchorValidation>();
+				if (component3 != null)
 				{
-					this._buildingPlacer.ValidateAnchor = new Func<Transform, bool>(component2.ValidateAnchor);
+					this._buildingPlacer.ValidateAnchor = new Func<Transform, bool>(component3.ValidateAnchor);
 				}
 				this._buildingPlacer.ShowAnchorArea.SetActive(this._currentBlueprint._showAnchors);
 				this._buildingPlacer.ShowSupportAnchorArea.SetActive(this._currentBlueprint._showSupportAnchor);
@@ -659,6 +679,31 @@ namespace TheForest.Buildings.Creation
 			get
 			{
 				return this._buildingPlacer;
+			}
+		}
+
+		
+		
+		
+		public List<Craft_Structure> CraftStructures { get; private set; }
+
+		
+		
+		
+		public BoltEntity ParentEntity { get; private set; }
+
+		
+		
+		
+		public static bool CanLock { get; set; }
+
+		
+		
+		public static Material CurrentGhostMat
+		{
+			get
+			{
+				return (!Create.CanLock) ? Prefabs.Instance.GhostBlocked : Prefabs.Instance.GhostClear;
 			}
 		}
 

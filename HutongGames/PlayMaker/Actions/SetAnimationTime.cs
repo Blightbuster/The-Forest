@@ -45,7 +45,7 @@ namespace HutongGames.PlayMaker.Actions
 			AnimationState animationState = base.animation[this.animName.Value];
 			if (animationState == null)
 			{
-				this.LogWarning("Missing animation: " + this.animName.Value);
+				base.LogWarning("Missing animation: " + this.animName.Value);
 				return;
 			}
 			if (this.normalized)

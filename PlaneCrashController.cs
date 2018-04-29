@@ -131,7 +131,7 @@ public class PlaneCrashController : MonoBehaviour, IPlaneCrashController
 	
 	private void loadCrashPlane()
 	{
-		this.spawnedHullPrefab = (GameObject)UnityEngine.Object.Instantiate(this.savedHullPrefab, this.savePos.position, this.savePos.rotation);
+		this.spawnedHullPrefab = UnityEngine.Object.Instantiate<GameObject>(this.savedHullPrefab, this.savePos.position, this.savePos.rotation);
 		if (!CoopPeerStarter.DedicatedHost && LocalPlayer.Inventory.CurrentView == PlayerInventory.PlayerViews.PlaneCrash)
 		{
 			LocalPlayer.Inventory.CurrentView = PlayerInventory.PlayerViews.Loading;

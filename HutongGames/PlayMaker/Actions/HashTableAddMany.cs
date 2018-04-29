@@ -54,10 +54,10 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[RequiredField]
-		[CheckForComponent(typeof(PlayMakerHashTableProxy))]
-		[Tooltip("The gameObject with the PlayMaker HashTable Proxy component")]
 		[ActionSection("Set up")]
+		[RequiredField]
+		[Tooltip("The gameObject with the PlayMaker HashTable Proxy component")]
+		[CheckForComponent(typeof(PlayMakerHashTableProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -65,10 +65,10 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString reference;
 
 		
+		[ActionSection("Data")]
+		[CompoundArray("Count", "Key", "Value")]
 		[RequiredField]
 		[UIHint(UIHint.FsmString)]
-		[CompoundArray("Count", "Key", "Value")]
-		[ActionSection("Data")]
 		[Tooltip("The Key")]
 		public FsmString[] keys;
 
@@ -78,14 +78,14 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmVar[] variables;
 
 		
-		[Tooltip("The event to trigger when elements are added")]
 		[ActionSection("Result")]
 		[UIHint(UIHint.FsmEvent)]
+		[Tooltip("The event to trigger when elements are added")]
 		public FsmEvent successEvent;
 
 		
-		[Tooltip("The event to trigger when elements exists already")]
 		[UIHint(UIHint.FsmEvent)]
+		[Tooltip("The event to trigger when elements exists already")]
 		public FsmEvent keyExistsAlreadyEvent;
 	}
 }

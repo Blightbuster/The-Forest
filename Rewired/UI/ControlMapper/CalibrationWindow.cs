@@ -437,6 +437,7 @@ namespace Rewired.UI.ControlMapper
 				return;
 			}
 			this.axisButtons[index].interactable = false;
+			this.axisButtons[index].Select();
 			for (int i = 0; i < this.axisButtons.Count; i++)
 			{
 				if (i != index)

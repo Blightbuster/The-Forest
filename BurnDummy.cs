@@ -13,15 +13,15 @@ public class BurnDummy : EntityBehaviour
 		if (!BoltNetwork.isClient && !this._isBurning)
 		{
 			base.StartCoroutine(this.BurnRoutine(false));
-			if (BoltNetwork.isServer && this.entity.isAttached)
+			if (BoltNetwork.isServer && base.entity.isAttached)
 			{
-				if (this.entity.StateIs<IMutantMaleDummyState>())
+				if (base.entity.StateIs<IMutantMaleDummyState>())
 				{
-					this.entity.GetState<IMutantMaleDummyState>().IsBurning = true;
+					base.entity.GetState<IMutantMaleDummyState>().IsBurning = true;
 				}
-				else if (this.entity.StateIs<IMutantFemaleDummyState>())
+				else if (base.entity.StateIs<IMutantFemaleDummyState>())
 				{
-					this.entity.GetState<IMutantFemaleDummyState>().IsBurning = true;
+					base.entity.GetState<IMutantFemaleDummyState>().IsBurning = true;
 				}
 			}
 		}
@@ -79,7 +79,7 @@ public class BurnDummy : EntityBehaviour
 		{
 			lsb.mh.PickUpBody();
 		}
-		if (BoltNetwork.isRunning && this.entity.isAttached)
+		if (BoltNetwork.isRunning && base.entity.isAttached)
 		{
 			BoltNetwork.Destroy(base.transform.parent.gameObject);
 		}
@@ -112,13 +112,13 @@ public class BurnDummy : EntityBehaviour
 	
 	public override void Attached()
 	{
-		if (this.entity.StateIs<IMutantMaleDummyState>())
+		if (base.entity.StateIs<IMutantMaleDummyState>())
 		{
-			this.entity.GetState<IMutantMaleDummyState>().AddCallback("IsBurning", new PropertyCallbackSimple(this.BurnSFX));
+			base.entity.GetState<IMutantMaleDummyState>().AddCallback("IsBurning", new PropertyCallbackSimple(this.BurnSFX));
 		}
-		else if (this.entity.StateIs<IMutantFemaleDummyState>())
+		else if (base.entity.StateIs<IMutantFemaleDummyState>())
 		{
-			this.entity.GetState<IMutantFemaleDummyState>().AddCallback("IsBurning", new PropertyCallbackSimple(this.BurnSFX));
+			base.entity.GetState<IMutantFemaleDummyState>().AddCallback("IsBurning", new PropertyCallbackSimple(this.BurnSFX));
 		}
 	}
 

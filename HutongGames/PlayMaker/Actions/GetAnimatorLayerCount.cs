@@ -4,9 +4,9 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[HelpUrl("https:
 	[ActionCategory("Animator")]
 	[Tooltip("Returns the Animator controller layer count")]
+	[HelpUrl("https:
 	public class GetAnimatorLayerCount : FsmStateAction
 	{
 		
@@ -52,10 +52,10 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("The Animator controller layer count")]
+		[ActionSection("Results")]
 		[RequiredField]
 		[UIHint(UIHint.Variable)]
-		[ActionSection("Results")]
+		[Tooltip("The Animator controller layer count")]
 		public FsmInt layerCount;
 
 		

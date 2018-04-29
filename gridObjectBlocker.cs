@@ -145,6 +145,10 @@ public class gridObjectBlocker : MonoBehaviour
 		if (component)
 		{
 		}
+		if (base.gameObject.name.Contains("StairsBuilt"))
+		{
+			this.isStructure = true;
+		}
 		if (!base.transform.GetComponent<setupNavRemoveRoot>() && !this.planeCollision)
 		{
 			base.transform.gameObject.AddComponent<setupNavRemoveRoot>();
@@ -191,10 +195,6 @@ public class gridObjectBlocker : MonoBehaviour
 				return;
 			}
 		}
-		if (base.gameObject.name.Contains("StairsBuilt"))
-		{
-			this.isStructure = true;
-		}
 		if (this.isStructure && base.transform.root)
 		{
 			if (this.doingOnGameStartCheck)
@@ -210,7 +210,7 @@ public class gridObjectBlocker : MonoBehaviour
 		}
 		if (!this.planeCollision && !this.cutGo && !this.disableColliderForUpdate)
 		{
-			this.cutGo = (GameObject)UnityEngine.Object.Instantiate((GameObject)Resources.Load("navCubeCutter"), base.transform.position, base.transform.rotation);
+			this.cutGo = UnityEngine.Object.Instantiate<GameObject>((GameObject)Resources.Load("navCubeCutter"), base.transform.position, base.transform.rotation);
 			if (this.col.GetType() == typeof(BoxCollider))
 			{
 				BoxCollider component3 = this.col.transform.GetComponent<BoxCollider>();
@@ -336,17 +336,17 @@ public class gridObjectBlocker : MonoBehaviour
 		if (AstarPath.active && !this.delayedCoolDown)
 		{
 			this.go = base.gameObject;
-			Collider col = this.go.GetComponent<Collider>();
-			if (!col)
+			Collider component = this.go.GetComponent<Collider>();
+			if (!component)
 			{
 				yield break;
 			}
-			Bounds b = col.bounds;
-			this.diff = b.center.y - b.extents.y;
-			float height = Terrain.activeTerrain.SampleHeight(b.center) + Terrain.activeTerrain.transform.position.y;
-			this.diff -= height;
-			GraphUpdateObject guo = new GraphUpdateObject(b);
-			AstarPath.active.UpdateGraphs(guo);
+			Bounds bounds = component.bounds;
+			this.diff = bounds.center.y - bounds.extents.y;
+			float num = Terrain.activeTerrain.SampleHeight(bounds.center) + Terrain.activeTerrain.transform.position.y;
+			this.diff -= num;
+			GraphUpdateObject ob = new GraphUpdateObject(bounds);
+			AstarPath.active.UpdateGraphs(ob);
 			this.delayedCoolDown = true;
 			base.Invoke("resetDelayedCoolDown", 1f);
 		}
@@ -405,7 +405,7 @@ public class gridObjectBlocker : MonoBehaviour
 				{
 					return;
 				}
-				GameObject gameObject = UnityEngine.Object.Instantiate(this.go, this.go.transform.position, this.go.transform.rotation) as GameObject;
+				GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this.go, this.go.transform.position, this.go.transform.rotation);
 				Collider component2 = gameObject.GetComponent<Collider>();
 				if (!component2)
 				{
@@ -456,7 +456,7 @@ public class gridObjectBlocker : MonoBehaviour
 				extents.y *= 20f;
 				this.storeBounds.extents = extents;
 			}
-			GameObject gameObject = (GameObject)UnityEngine.Object.Instantiate((GameObject)Resources.Load("dummyNavRemove"), base.transform.position, base.transform.rotation);
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>((GameObject)Resources.Load("dummyNavRemove"), base.transform.position, base.transform.rotation);
 			gameObject.SendMessage("doDummyNavRemove", this.storeBounds);
 			this.blockNav = true;
 		}
@@ -486,7 +486,7 @@ public class gridObjectBlocker : MonoBehaviour
 		BoxCollider component = this.col.transform.GetComponent<BoxCollider>();
 		if (component)
 		{
-			GameObject gameObject = (GameObject)UnityEngine.Object.Instantiate((GameObject)Resources.Load("navCubeCutter"), base.transform.position, base.transform.rotation);
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>((GameObject)Resources.Load("navCubeCutter"), base.transform.position, base.transform.rotation);
 			Vector3 size = component.size;
 			if (isFloor)
 			{

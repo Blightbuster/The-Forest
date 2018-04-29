@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Plays an Animation on a Game Object. You can add named animation clips to the object in the Unity editor, or with the Add Animation Clip action.")]
 	[ActionCategory(ActionCategory.Animation)]
+	[Tooltip("Plays an Animation on a Game Object. You can add named animation clips to the object in the Unity editor, or with the Add Animation Clip action.")]
 	public class PlayAnimation : ComponentAction<Animation>
 	{
 		
@@ -37,14 +37,14 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			if (string.IsNullOrEmpty(this.animName.Value))
 			{
-				this.LogWarning("Missing animName!");
+				base.LogWarning("Missing animName!");
 				base.Finish();
 				return;
 			}
 			this.anim = base.animation[this.animName.Value];
 			if (this.anim == null)
 			{
-				this.LogWarning("Missing animation: " + this.animName.Value);
+				base.LogWarning("Missing animation: " + this.animName.Value);
 				base.Finish();
 				return;
 			}
@@ -98,14 +98,14 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Animation))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animation))]
 		[Tooltip("Game Object to play the animation on.")]
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("The name of the animation to play.")]
 		[UIHint(UIHint.Animation)]
+		[Tooltip("The name of the animation to play.")]
 		public FsmString animName;
 
 		
@@ -113,8 +113,8 @@ namespace HutongGames.PlayMaker.Actions
 		public PlayMode playMode;
 
 		
-		[Tooltip("Time taken to blend to this animation.")]
 		[HasFloatSlider(0f, 5f)]
+		[Tooltip("Time taken to blend to this animation.")]
 		public FsmFloat blendTime;
 
 		

@@ -13,7 +13,7 @@ namespace TheForest.Buildings.Creation
 	
 	[AddComponentMenu("Buildings/Creation/Dock Architect")]
 	[DoNotSerializePublic]
-	public class DockArchitect : MonoBehaviour, IProceduralStructure, ICoopStructure, TriggerTagSensor.ITarget
+	public class DockArchitect : MonoBehaviour, ICoopStructure, IProceduralStructure, TriggerTagSensor.ITarget
 	{
 		
 		private void Awake()
@@ -27,7 +27,6 @@ namespace TheForest.Buildings.Creation
 		{
 			this._logPool = new Stack<Transform>();
 			this._newPool = new Stack<Transform>();
-			this._logMat = ((!this._wasPlaced && !this._wasBuilt) ? new Material(this._logRenderer.sharedMaterial) : this._logRenderer.sharedMaterial);
 			if (this._multiPointsPositions == null)
 			{
 				this._multiPointsPositions = new List<Vector3>(5);
@@ -72,10 +71,6 @@ namespace TheForest.Buildings.Creation
 			{
 				base.enabled = true;
 				LocalPlayer.Create.BuildingPlacer.Clear = false;
-				if (base.GetComponent<Renderer>())
-				{
-					base.GetComponent<Renderer>().sharedMaterial = this._logMat;
-				}
 			}
 			yield break;
 		}
@@ -88,17 +83,12 @@ namespace TheForest.Buildings.Creation
 			if (LocalPlayer.Create.BuildingPlacer.Clear != flag)
 			{
 				LocalPlayer.Create.BuildingPlacer.Clear = flag;
-				if (base.GetComponent<Renderer>().enabled)
-				{
-					base.GetComponent<Renderer>().sharedMaterial = this._logMat;
-				}
 			}
-			this._logMat.SetColor("_TintColor", (this._waterLevel != float.MaxValue) ? LocalPlayer.Create.BuildingPlacer.ClearMat.GetColor("_TintColor") : LocalPlayer.Create.BuildingPlacer.RedMat.GetColor("_TintColor"));
 			if (this._waterLevel == 3.40282347E+38f)
 			{
+				Create.CanLock = false;
 				Scene.HudGui.RotateIcon.SetActive(this._multiPointsPositions.Count == 0);
 				Scene.HudGui.RoofConstructionIcons.Shutdown();
-				return;
 			}
 			if (this._multiPointsPositions.Count > 0)
 			{
@@ -133,23 +123,29 @@ namespace TheForest.Buildings.Creation
 			}
 			else
 			{
-				if (this._dockRoot)
-				{
-					base.GetComponent<Renderer>().enabled = true;
-					UnityEngine.Object.Destroy(this._dockRoot.gameObject);
-					this._dockRoot = null;
-					this._logPool.Clear();
-				}
 				if (base.transform.parent.position.y < this._waterLevel + 2f)
 				{
 					Vector3 position = base.transform.parent.position;
-					position.y = this._waterLevel + 2f;
+					position.y = ((this._waterLevel >= float.MaxValue) ? (position.y + 1f) : (this._waterLevel + 2f));
 					base.transform.position = position;
 					base.transform.rotation = Quaternion.Euler(0f, base.transform.eulerAngles.y, 0f);
 				}
+				this._multiPointsPositions.Add(base.transform.position);
+				this._multiPointsPositions.Add(base.transform.position + base.transform.forward * (this._logWidth * 0.8f));
+				Transform dockRoot2 = this.SpawnStructure();
+				this._multiPointsPositions.RemoveAt(0);
+				this._multiPointsPositions.RemoveAt(0);
+				if (this._dockRoot)
+				{
+					UnityEngine.Object.Destroy(this._dockRoot.gameObject);
+				}
+				this._dockRoot = dockRoot2;
 			}
-			this.CheckLockPoint();
-			this.CheckUnlockPoint();
+			if (this._waterLevel < 3.40282347E+38f)
+			{
+				this.CheckLockPoint();
+				this.CheckUnlockPoint();
+			}
 		}
 
 		
@@ -205,7 +201,6 @@ namespace TheForest.Buildings.Creation
 			{
 				UnityEngine.Object.Destroy(base.GetComponent<Rigidbody>());
 				UnityEngine.Object.Destroy(base.GetComponent<Collider>());
-				UnityEngine.Object.Destroy(base.GetComponent<Renderer>());
 				Transform newDock = this.SpawnStructure();
 				if (this._dockRoot)
 				{
@@ -215,31 +210,75 @@ namespace TheForest.Buildings.Creation
 				Transform ghostRoot = this._dockRoot;
 				Transform transform = ghostRoot;
 				transform.name += "Ghost";
-				this._logPool.Clear();
-				Transform logGhostPrefab = this._logPrefabs[0];
-				Transform StiltGhostPrefab = this._stiltPrefab;
-				this._logPrefabs[0] = Prefabs.Instance.LogStairsBuiltPrefab;
-				this._stiltPrefab = Prefabs.Instance.LogStiltStairsGhostBuiltPrefab;
-				this._dockRoot = this.SpawnStructure();
-				this._dockRoot.name = "DockRootBuilt";
 				this._logPool = null;
 				this._newPool = null;
-				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.<>f__this._logItemId);
-				List<GameObject> logStacks = new List<GameObject>();
-				foreach (object obj in this._dockRoot)
+				Craft_Structure.BuildIngredients ri = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this.$this._logItemId);
+				List<GameObject> stairsLogs = new List<GameObject>();
+				List<GameObject> stiltsLogs = new List<GameObject>();
+				Material stiltMat = Prefabs.Instance.LogStiltStairsGhostBuiltPrefab.GetComponentInChildren<Renderer>().sharedMaterial;
+				IEnumerator enumerator = this._dockRoot.GetEnumerator();
+				try
 				{
-					Transform edge = (Transform)obj;
-					foreach (object obj2 in edge)
+					while (enumerator.MoveNext())
 					{
-						Transform logStack = (Transform)obj2;
-						logStack.gameObject.SetActive(false);
-						logStacks.Add(logStack.gameObject);
+						object obj = enumerator.Current;
+						Transform transform2 = (Transform)obj;
+						IEnumerator enumerator2 = transform2.GetEnumerator();
+						try
+						{
+							while (enumerator2.MoveNext())
+							{
+								object obj2 = enumerator2.Current;
+								Transform transform3 = (Transform)obj2;
+								IEnumerator enumerator3 = transform3.GetEnumerator();
+								try
+								{
+									while (enumerator3.MoveNext())
+									{
+										object obj3 = enumerator3.Current;
+										Transform transform4 = (Transform)obj3;
+										Renderer componentInChildren = transform4.GetComponentInChildren<Renderer>();
+										if (componentInChildren.sharedMaterial == stiltMat)
+										{
+											stiltsLogs.Add(componentInChildren.gameObject);
+										}
+										else
+										{
+											stairsLogs.Add(componentInChildren.gameObject);
+										}
+									}
+								}
+								finally
+								{
+									IDisposable disposable;
+									if ((disposable = (enumerator3 as IDisposable)) != null)
+									{
+										disposable.Dispose();
+									}
+								}
+							}
+						}
+						finally
+						{
+							IDisposable disposable2;
+							if ((disposable2 = (enumerator2 as IDisposable)) != null)
+							{
+								disposable2.Dispose();
+							}
+						}
 					}
 				}
-				ri._renderers = logStacks.ToArray();
-				ri._amount += logStacks.Count;
-				this._logPrefabs[0] = logGhostPrefab;
-				this._stiltPrefab = StiltGhostPrefab;
+				finally
+				{
+					IDisposable disposable3;
+					if ((disposable3 = (enumerator as IDisposable)) != null)
+					{
+						disposable3.Dispose();
+					}
+				}
+				ri._amount = stiltsLogs.Count<GameObject>() + stairsLogs.Count<GameObject>() / 2;
+				ri.AddRuntimeObjects(stairsLogs.AsEnumerable<GameObject>().Reverse<GameObject>(), Prefabs.Instance.LogStairsBuiltPrefab.GetComponentInChildren<Renderer>().sharedMaterial);
+				ri.AddRuntimeObjects(stiltsLogs.AsEnumerable<GameObject>().Reverse<GameObject>(), Prefabs.Instance.LogStiltStairsGhostBuiltPrefab.GetComponentInChildren<Renderer>().sharedMaterial);
 				ghostRoot.transform.parent = null;
 				base.transform.position = this._multiPointsPositions.First<Vector3>();
 				base.transform.LookAt(this._multiPointsPositions.Last<Vector3>());
@@ -258,11 +297,11 @@ namespace TheForest.Buildings.Creation
 				Bounds b = default(Bounds);
 				for (int j = 1; j < this._multiPointsPositions.Count; j++)
 				{
-					Vector3 p = this._multiPointsPositions[j];
-					Vector3 axis = (p - this._multiPointsPositions[j - 1]).normalized;
-					Vector3 pAxis = Vector3.Cross(Vector3.up, axis) * 3.5f;
-					b.Encapsulate(base.transform.InverseTransformPoint(p + pAxis));
-					b.Encapsulate(base.transform.InverseTransformPoint(p - pAxis));
+					Vector3 a = this._multiPointsPositions[j];
+					Vector3 normalized = (a - this._multiPointsPositions[j - 1]).normalized;
+					Vector3 b2 = Vector3.Cross(Vector3.up, normalized) * 3.5f;
+					b.Encapsulate(base.transform.InverseTransformPoint(a + b2));
+					b.Encapsulate(base.transform.InverseTransformPoint(a - b2));
 				}
 				bc.size = new Vector3(b.size.x, 6f, b.size.z);
 				bc.center = b.center;
@@ -375,9 +414,9 @@ namespace TheForest.Buildings.Creation
 						num = y;
 					}
 				}
-				if (num2 + this.groundToWaterMaxDistance > num)
+				if (num2 + this.groundToWaterMaxDistance > num - 1f)
 				{
-					this._waterLevel = Mathf.Max(num2, num);
+					this._waterLevel = Mathf.Max(num2, num - 1f);
 				}
 				else
 				{
@@ -389,49 +428,45 @@ namespace TheForest.Buildings.Creation
 		
 		private void CheckLockPoint()
 		{
-			bool flag = this._multiPointsPositions.Count == 0;
-			bool flag2 = false;
-			if (!flag && this._multiPointsPositions.Count < this._maxPoints)
+			Create.CanLock = (this._multiPointsPositions.Count == 0);
+			bool flag = false;
+			if (!Create.CanLock && this._multiPointsPositions.Count < this._maxPoints)
 			{
 				Vector3 vector = base.transform.position - this._multiPointsPositions.Last<Vector3>();
 				Vector3 vector2 = vector;
 				vector2.y = 0f;
 				float magnitude = vector.magnitude;
 				vector2.y = 0f;
-				flag = (magnitude > this._logLength);
-				if (flag && this._multiPointsPositions.Count > 1)
+				Create.CanLock = (magnitude > this._logLength);
+				if (Create.CanLock && this._multiPointsPositions.Count > 1)
 				{
 					Vector3 from = this._multiPointsPositions.Last<Vector3>() - this._multiPointsPositions[this._multiPointsPositions.Count - 2];
 					float num = Vector3.Angle(from, vector);
-					flag = (num < this._maxAngleBetweenEdges);
+					Create.CanLock = (num < this._maxAngleBetweenEdges);
 				}
-				flag2 = (magnitude >= this._maxEdgeLength);
+				flag = (magnitude >= this._maxEdgeLength);
 			}
-			if ((flag && TheForest.Utils.Input.GetButtonDown("Fire1")) || (this._multiPointsPositions.Count >= 1 && TheForest.Utils.Input.GetButtonDown("Build")))
+			if (LocalPlayer.Create.BuildingPlacer.OnDynamicClear && ((Create.CanLock && TheForest.Utils.Input.GetButtonDown("Fire1")) || (this._multiPointsPositions.Count >= 1 && TheForest.Utils.Input.GetButtonDown("Build"))))
 			{
-				Vector3 vector3 = base.transform.position;
+				Vector3 vector3 = base.transform.parent.position;
 				vector3.y = this._waterLevel + 2f;
 				Vector3 vector4 = (this._multiPointsPositions.Count <= 0) ? vector3 : this._multiPointsPositions.Last<Vector3>();
-				if (flag2)
+				if (flag)
 				{
 					vector3 = vector4 + (vector3 - vector4).normalized * this._maxEdgeLength;
 				}
-				if (base.GetComponent<Renderer>().enabled)
-				{
-					base.GetComponent<Renderer>().enabled = false;
-				}
 				this._multiPointsPositions.Add(vector3);
 			}
-			if (this._multiPointsPositions.Count == 1 && !flag)
+			if (this._multiPointsPositions.Count == 1 && !Create.CanLock)
 			{
 				LocalPlayer.Create.BuildingPlacer.Clear = false;
 			}
-			bool flag3 = this._multiPointsPositions.Count == 0;
-			bool canLock = flag && this._multiPointsPositions.Count > 0;
-			bool canUnlock = !flag3;
-			bool showManualPlace = this._multiPointsPositions.Count > 0 && (flag || this._multiPointsPositions.Count > 1);
+			bool flag2 = this._multiPointsPositions.Count == 0;
+			bool canLock = Create.CanLock && this._multiPointsPositions.Count > 0;
+			bool canUnlock = !flag2;
+			bool showManualPlace = this._multiPointsPositions.Count > 0 && (Create.CanLock || this._multiPointsPositions.Count > 1);
 			Scene.HudGui.RotateIcon.SetActive(this._multiPointsPositions.Count == 0);
-			Scene.HudGui.RoofConstructionIcons.Show(flag3, false, false, showManualPlace, canLock, canUnlock, false);
+			Scene.HudGui.RoofConstructionIcons.Show(flag2, false, false, showManualPlace, canLock, canUnlock, false);
 		}
 
 		
@@ -440,10 +475,6 @@ namespace TheForest.Buildings.Creation
 			if (TheForest.Utils.Input.GetButtonDown("AltFire") && this._multiPointsPositions.Count > 0)
 			{
 				this._multiPointsPositions.RemoveAt(this._multiPointsPositions.Count - 1);
-				if (this._multiPointsPositions.Count == 0)
-				{
-					base.GetComponent<Renderer>().enabled = true;
-				}
 			}
 		}
 
@@ -510,12 +541,12 @@ namespace TheForest.Buildings.Creation
 								flag3 = true;
 							}
 							Vector3 normalized = ((this._multiPointsPositions[i - 1] - this._multiPointsPositions[i]).normalized + (this._multiPointsPositions[i + 1] - this._multiPointsPositions[i]).normalized).normalized;
-							Transform transform4 = (Transform)UnityEngine.Object.Instantiate(this._stiltPrefab, vector2 + normalized * (this._logLength / 2f + this._logWidth * 0.3f) + Vector3.up, Quaternion.identity);
+							Transform transform4 = UnityEngine.Object.Instantiate<Transform>(this._stiltPrefab, vector2 + normalized * (this._logLength / 2f + this._logWidth * 0.3f) + Vector3.up, Quaternion.identity);
 							transform4.parent = transform2;
 							transform4.localScale = new Vector3(1f, (Mathf.Abs(vector2.y - this.GetPointFloorPosition(vector2).y) + 1f) / 4.5f, 1f);
 							if (!this._wasBuilt && !this._wasPlaced)
 							{
-								transform4.GetComponentInChildren<Renderer>().sharedMaterial = this._logMat;
+								transform4.GetComponentInChildren<Renderer>().sharedMaterial = Create.CurrentGhostMat;
 							}
 						}
 						if (i > 1 && j == 0)
@@ -531,22 +562,22 @@ namespace TheForest.Buildings.Creation
 						}
 						if (!flag3)
 						{
-							Transform transform4 = (Transform)UnityEngine.Object.Instantiate(this._stiltPrefab, vector2 + b2 + Vector3.up, Quaternion.identity);
+							Transform transform4 = UnityEngine.Object.Instantiate<Transform>(this._stiltPrefab, vector2 + b2 + Vector3.up, Quaternion.identity);
 							transform4.parent = transform2;
 							transform4.localScale = new Vector3(1f, (Mathf.Abs(vector2.y - this.GetPointFloorPosition(vector2).y) + 1f) / 4.5f, 1f);
 							if (!this._wasBuilt && !this._wasPlaced)
 							{
-								transform4.GetComponentInChildren<Renderer>().sharedMaterial = this._logMat;
+								transform4.GetComponentInChildren<Renderer>().sharedMaterial = Create.CurrentGhostMat;
 							}
 						}
 						if (!flag2)
 						{
-							Transform transform4 = (Transform)UnityEngine.Object.Instantiate(this._stiltPrefab, vector2 - b2 + Vector3.up, Quaternion.identity);
+							Transform transform4 = UnityEngine.Object.Instantiate<Transform>(this._stiltPrefab, vector2 - b2 + Vector3.up, Quaternion.identity);
 							transform4.parent = transform2;
 							transform4.localScale = new Vector3(1f, (Mathf.Abs(vector2.y - this.GetPointFloorPosition(vector2).y) + 1f) / 4.5f, 1f);
 							if (!this._wasBuilt && !this._wasPlaced)
 							{
-								transform4.GetComponentInChildren<Renderer>().sharedMaterial = this._logMat;
+								transform4.GetComponentInChildren<Renderer>().sharedMaterial = Create.CurrentGhostMat;
 							}
 						}
 					}
@@ -578,12 +609,16 @@ namespace TheForest.Buildings.Creation
 				Transform transform = this._logPool.Pop();
 				transform.position = position;
 				transform.rotation = rotation;
+				if (!this._wasBuilt && !this._wasPlaced)
+				{
+					transform.GetComponentInChildren<Renderer>().sharedMaterial = Create.CurrentGhostMat;
+				}
 				return transform;
 			}
-			Transform transform2 = (Transform)UnityEngine.Object.Instantiate(this._logPrefabs[UnityEngine.Random.Range(0, this._logPrefabs.Length)], position, rotation);
+			Transform transform2 = UnityEngine.Object.Instantiate<Transform>(this._logPrefabs[UnityEngine.Random.Range(0, this._logPrefabs.Length)], position, rotation);
 			if (!this._wasBuilt && !this._wasPlaced)
 			{
-				transform2.GetComponentInChildren<Renderer>().sharedMaterial = this._logMat;
+				transform2.GetComponentInChildren<Renderer>().sharedMaterial = Create.CurrentGhostMat;
 			}
 			else if (this._wasBuilt)
 			{
@@ -602,14 +637,12 @@ namespace TheForest.Buildings.Creation
 		public void OnTargetTagTrigerEnter(Collider other)
 		{
 			this._waterLevel = other.bounds.max.y;
-			this._logMat.SetColor("_TintColor", LocalPlayer.Create.BuildingPlacer.ClearMat.GetColor("_TintColor"));
 		}
 
 		
 		public void OnTargetTagTrigerExit(Collider other)
 		{
 			this._waterLevel = float.MaxValue;
-			this._logMat.SetColor("_TintColor", LocalPlayer.Create.BuildingPlacer.RedMat.GetColor("_TintColor"));
 			Scene.HudGui.RoofConstructionIcons.Shutdown();
 			base.transform.localPosition = Vector3.zero;
 			base.transform.localRotation = Quaternion.identity;
@@ -777,8 +810,5 @@ namespace TheForest.Buildings.Creation
 
 		
 		private Stack<Transform> _newPool;
-
-		
-		private Material _logMat;
 	}
 }

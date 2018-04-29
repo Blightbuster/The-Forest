@@ -76,7 +76,7 @@ namespace TheForest.Utils.AssetBundle
 				{
 					Vector3 position = base.transform.position;
 					Quaternion rotation = base.transform.rotation;
-					GameObject gameObject = (GameObject)UnityEngine.Object.Instantiate(prefab, position, rotation);
+					GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(prefab, position, rotation);
 					this._instance = gameObject;
 					if (BoltNetwork.isServer && !this._doLocalOnlyCheck && gameObject.GetComponent<BoltEntity>())
 					{

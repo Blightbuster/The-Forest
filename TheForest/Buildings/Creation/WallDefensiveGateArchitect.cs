@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using TheForest.Buildings.World;
 using TheForest.Utils;
+using UniLinq;
 using UnityEngine;
 
 namespace TheForest.Buildings.Creation
@@ -87,6 +89,18 @@ namespace TheForest.Buildings.Creation
 				wallDefensiveGate.transform.localRotation = Quaternion.identity;
 				wallDefensiveGate._target1 = gameObject.transform;
 				wallDefensiveGate._target2 = ((!gameObject2) ? null : gameObject2.transform);
+				BuildingHealth component = base.GetComponent<BuildingHealth>();
+				if (component)
+				{
+					component._renderersRoot = this._wallRoot.gameObject;
+					if (BoltNetwork.isRunning)
+					{
+						component.SetMpRandomDistortColliders(new Collider[]
+						{
+							boxCollider
+						});
+					}
+				}
 			}
 		}
 
@@ -123,7 +137,7 @@ namespace TheForest.Buildings.Creation
 				vector2.y *= -1f;
 			}
 			Vector3 one = Vector3.one;
-			float from = (!flag) ? 1.2f : 1.45f;
+			float a2 = (!flag) ? 1.2f : 1.45f;
 			Vector3 vector3 = p1;
 			transform.position = vector3;
 			transform.LookAt(new Vector3(p2.x, vector3.y, p2.z));
@@ -150,11 +164,11 @@ namespace TheForest.Buildings.Creation
 				}
 				else if (flag)
 				{
-					one.y = Mathf.Lerp(from, 1f, (float)Mathf.Abs(num3 - i) / (float)num3);
+					one.y = Mathf.Lerp(a2, 1f, (float)Mathf.Abs(num3 - i) / (float)num3);
 				}
 				else
 				{
-					one.y = Mathf.Lerp(from, 1f, Mathf.Abs(num4 - (float)i) / num4);
+					one.y = Mathf.Lerp(a2, 1f, Mathf.Abs(num4 - (float)i) / num4);
 				}
 			}
 			if (flag)
@@ -171,14 +185,56 @@ namespace TheForest.Buildings.Creation
 		public override void ShowToggleAdditionIcon()
 		{
 			WallChunkArchitect.Additions additions = this.SegmentNextAddition(this._addition);
-			switch (additions + 1)
+			if (additions != WallChunkArchitect.Additions.Wall)
 			{
-			case WallChunkArchitect.Additions.Window:
-				Scene.HudGui.ToggleDefensiveWallIcon.SetActive(true);
-				break;
-			case WallChunkArchitect.Additions.LockedDoor1:
-				Scene.HudGui.ToggleGate2Icon.SetActive(true);
-				break;
+				if (additions != WallChunkArchitect.Additions.Door1)
+				{
+					if (additions == WallChunkArchitect.Additions.Door2)
+					{
+						if (Scene.HudGui.ToggleDefensiveWallIcon.activeSelf)
+						{
+							Scene.HudGui.ToggleDefensiveWallIcon.SetActive(false);
+						}
+						if (Scene.HudGui.ToggleGate1Icon.activeSelf)
+						{
+							Scene.HudGui.ToggleGate1Icon.SetActive(false);
+						}
+						if (!Scene.HudGui.ToggleGate2Icon.activeSelf)
+						{
+							Scene.HudGui.ToggleGate2Icon.SetActive(true);
+						}
+					}
+				}
+				else
+				{
+					if (Scene.HudGui.ToggleDefensiveWallIcon.activeSelf)
+					{
+						Scene.HudGui.ToggleDefensiveWallIcon.SetActive(false);
+					}
+					if (!Scene.HudGui.ToggleGate1Icon.activeSelf)
+					{
+						Scene.HudGui.ToggleGate1Icon.SetActive(true);
+					}
+					if (Scene.HudGui.ToggleGate2Icon.activeSelf)
+					{
+						Scene.HudGui.ToggleGate2Icon.SetActive(false);
+					}
+				}
+			}
+			else
+			{
+				if (!Scene.HudGui.ToggleDefensiveWallIcon.activeSelf)
+				{
+					Scene.HudGui.ToggleDefensiveWallIcon.SetActive(true);
+				}
+				if (Scene.HudGui.ToggleGate1Icon.activeSelf)
+				{
+					Scene.HudGui.ToggleGate1Icon.SetActive(false);
+				}
+				if (Scene.HudGui.ToggleGate2Icon.activeSelf)
+				{
+					Scene.HudGui.ToggleGate2Icon.SetActive(false);
+				}
 			}
 		}
 
@@ -190,6 +246,10 @@ namespace TheForest.Buildings.Creation
 				if (Scene.HudGui.ToggleDefensiveWallIcon.activeSelf)
 				{
 					Scene.HudGui.ToggleDefensiveWallIcon.SetActive(false);
+				}
+				if (Scene.HudGui.ToggleGate1Icon.activeSelf)
+				{
+					Scene.HudGui.ToggleGate1Icon.SetActive(false);
 				}
 				if (Scene.HudGui.ToggleGate2Icon.activeSelf)
 				{
@@ -229,6 +289,22 @@ namespace TheForest.Buildings.Creation
 					UnityEngine.Object.Destroy(this._wallRoot.gameObject);
 					this._wallRoot = this.SpawnStructure();
 					this._wallRoot.parent = base.transform;
+					Craft_Structure.BuildIngredients buildIngredients = this._craftStructure._requiredIngredients.FirstOrDefault((Craft_Structure.BuildIngredients i) => i._itemID == this._logItemId);
+					if (buildIngredients == null)
+					{
+						buildIngredients = new Craft_Structure.BuildIngredients();
+						buildIngredients._itemID = this._logItemId;
+						buildIngredients._amount = 0;
+						buildIngredients._renderers = new GameObject[0];
+						this._craftStructure._requiredIngredients.Insert(0, buildIngredients);
+					}
+					else
+					{
+						buildIngredients._subIngredients.Clear();
+					}
+					buildIngredients._amount = this.GetLogCost();
+					List<GameObject> builtRenderers = this.GetBuiltRenderers(this._wallRoot);
+					buildIngredients.AddRuntimeObjects(builtRenderers, this.BuiltLogPrefab.GetComponentInChildren<Renderer>().sharedMaterial);
 				}
 			}
 		}
@@ -237,14 +313,39 @@ namespace TheForest.Buildings.Creation
 		protected override List<GameObject> GetBuiltRenderers(Transform wallRoot)
 		{
 			List<GameObject> list = new List<GameObject>(12);
-			foreach (object obj in wallRoot)
+			IEnumerator enumerator = wallRoot.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				foreach (object obj2 in transform)
+				while (enumerator.MoveNext())
 				{
-					Transform transform2 = (Transform)obj2;
-					list.Add(transform2.gameObject);
-					transform2.gameObject.SetActive(false);
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					IEnumerator enumerator2 = transform.GetEnumerator();
+					try
+					{
+						while (enumerator2.MoveNext())
+						{
+							object obj2 = enumerator2.Current;
+							Transform transform2 = (Transform)obj2;
+							list.Add(transform2.GetComponentInChildren<Renderer>().gameObject);
+						}
+					}
+					finally
+					{
+						IDisposable disposable;
+						if ((disposable = (enumerator2 as IDisposable)) != null)
+						{
+							disposable.Dispose();
+						}
+					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable2;
+				if ((disposable2 = (enumerator as IDisposable)) != null)
+				{
+					disposable2.Dispose();
 				}
 			}
 			return list;

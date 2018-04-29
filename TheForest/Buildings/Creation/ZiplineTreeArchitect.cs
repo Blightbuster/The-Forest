@@ -57,7 +57,7 @@ namespace TheForest.Buildings.Creation
 					transform.position = new Vector3(transform.position.x, num - 1f, transform.position.z);
 				}
 			}
-			else if (transform.transform.parent)
+			else if (transform.transform.parent && !flag2)
 			{
 				transform.localPosition = Vector3.zero;
 			}
@@ -79,20 +79,38 @@ namespace TheForest.Buildings.Creation
 			{
 				if (flag)
 				{
-					float num = Vector3.Distance(this._gate1.transform.position, this._gate2.transform.position);
+					float num = Vector3.Distance(this.Gate1RopePosition, this.Gate2RopePosition);
 					if (num < 20f || num > 470f)
 					{
 						return false;
 					}
 					float num2 = 1.5f;
-					Vector3 normalized = (this._gate2.transform.position - this._gate1.transform.position).normalized;
+					Vector3 normalized = (this.Gate2RopePosition - this.Gate1RopePosition).normalized;
 					RaycastHit raycastHit;
-					if (Physics.SphereCast(this._gate1.transform.position + Vector3.down + normalized * (num2 * 2f), num2, normalized, out raycastHit, num - num2 * 4f, LocalPlayer.Create.BuildingPlacer.FloorLayers | 1 << LayerMask.NameToLayer("treeMid")) && ((LocalPlayer.Create.TargetTree && raycastHit.collider.gameObject != LocalPlayer.Create.TargetTree) || (Vector3.Distance(raycastHit.point, base.transform.position) > (float)((!LocalPlayer.Create.TargetTree) ? 20 : 7) && (LocalPlayer.Create.TargetTree || raycastHit.collider.gameObject != Terrain.activeTerrain.gameObject))))
+					if (Physics.SphereCast(this.Gate1RopePosition + Vector3.down + normalized * (num2 * 2f), num2, normalized, out raycastHit, num - num2 * 4f, LocalPlayer.Create.BuildingPlacer.FloorLayers | LayerMask.GetMask(new string[]
+					{
+						"treeMid",
+						"Blocker",
+						"PickUp"
+					}), QueryTriggerInteraction.Collide))
+					{
+						float num3 = Vector3.Distance(raycastHit.point, base.transform.position);
+						if ((raycastHit.collider.gameObject != LocalPlayer.Create.TargetTree && raycastHit.collider.CompareTag("Tree")) || (num3 > (float)((!LocalPlayer.Create.TargetTree) ? 20 : 7) && raycastHit.collider.gameObject != Terrain.activeTerrain.gameObject) || (num3 > 100f && raycastHit.collider.gameObject == Terrain.activeTerrain.gameObject))
+						{
+							return false;
+						}
+					}
+					if (Physics.SphereCast(this.Gate1RopePosition + normalized * (num2 * 2f), 0.35f, normalized, out raycastHit, num - num2 * 4f, LocalPlayer.Create.BuildingPlacer.FloorLayers | LayerMask.GetMask(new string[]
+					{
+						"treeMid",
+						"Blocker",
+						"PickUp"
+					}), QueryTriggerInteraction.Collide))
 					{
 						return false;
 					}
 				}
-				int num3 = -1;
+				int num4 = -1;
 				if (LocalPlayer.Create.TargetTree)
 				{
 					TreeHealth component;
@@ -104,8 +122,8 @@ namespace TheForest.Buildings.Creation
 					{
 						component = LocalPlayer.Create.TargetTree.GetComponent<TreeHealth>();
 					}
-					num3 = component.LodTree.GetComponentInChildren<CoopTreeId>().Id;
-					if (num3 == this._treeStructure.TreeId)
+					num4 = component.LodTree.GetComponentInChildren<CoopTreeId>().Id;
+					if (num4 == this._treeStructure.TreeId)
 					{
 						return false;
 					}
@@ -114,12 +132,12 @@ namespace TheForest.Buildings.Creation
 				{
 					if (!flag)
 					{
-						this._treeStructure.TreeId = num3;
+						this._treeStructure.TreeId = num4;
 						this._gate1.transform.parent = null;
 					}
 					else
 					{
-						this._treeStructure.TreeId2 = num3;
+						this._treeStructure.TreeId2 = num4;
 						this._gate2.transform.parent = null;
 						if (this._ziplineRoot)
 						{

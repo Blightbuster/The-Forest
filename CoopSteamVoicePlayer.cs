@@ -126,6 +126,12 @@ internal class CoopSteamVoicePlayer : MonoBehaviour
 	}
 
 	
+	private static Dictionary<int, float[]> buffers = new Dictionary<int, float[]>();
+
+	
+	public static float GLOBAL_VOLUME = 1f;
+
+	
 	public const int FREQUENCY = 11025;
 
 	
@@ -133,12 +139,6 @@ internal class CoopSteamVoicePlayer : MonoBehaviour
 
 	
 	public const int BYTE_BUFFER_SIZE = 65536;
-
-	
-	private static Dictionary<int, float[]> buffers = new Dictionary<int, float[]>();
-
-	
-	public static float GLOBAL_VOLUME = 1f;
 
 	
 	private byte[] vc_decomp = new byte[65536];

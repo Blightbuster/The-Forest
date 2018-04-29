@@ -9,7 +9,7 @@ public class MasterFireSpread : EntityBehaviour
 	
 	public override void Attached()
 	{
-		if (!this.entity.isOwner)
+		if (!base.entity.isOwner)
 		{
 			base.enabled = true;
 		}
@@ -35,11 +35,11 @@ public class MasterFireSpread : EntityBehaviour
 		}
 		else if (this.destroyWhenOutOfFuel)
 		{
-			if (!BoltNetwork.isRunning || !this.entity || !this.entity.isAttached)
+			if (!BoltNetwork.isRunning || !base.entity || !base.entity.isAttached)
 			{
 				UnityEngine.Object.Destroy((!this.DestroyTarget) ? base.gameObject : this.DestroyTarget);
 			}
-			else if (this.entity.isOwner)
+			else if (base.entity.isOwner)
 			{
 				base.transform.parent = null;
 				BoltNetwork.Destroy((!this.DestroyTarget) ? base.gameObject : this.DestroyTarget);
@@ -74,11 +74,11 @@ public class MasterFireSpread : EntityBehaviour
 			{
 				if (this.parentFireParticle)
 				{
-					this.burnP = PoolManager.Pools["Particles"].Spawn(this.FireParticle, base.transform.position, Quaternion.identity, base.transform).transform;
+					this.burnP = PoolManager.Pools["Particles"].Spawn((!this.useShortFire) ? this.FireParticle : this.FireParticleShort, base.transform.position, Quaternion.identity, base.transform).transform;
 				}
 				else
 				{
-					this.burnP = PoolManager.Pools["Particles"].Spawn(this.FireParticle, base.transform.position, Quaternion.identity).transform;
+					this.burnP = PoolManager.Pools["Particles"].Spawn((!this.useShortFire) ? this.FireParticle : this.FireParticleShort, base.transform.position, Quaternion.identity).transform;
 				}
 			}
 		}
@@ -117,6 +117,9 @@ public class MasterFireSpread : EntityBehaviour
 	public Transform FireParticle;
 
 	
+	public Transform FireParticleShort;
+
+	
 	public bool parentFireParticle;
 
 	
@@ -136,4 +139,7 @@ public class MasterFireSpread : EntityBehaviour
 
 	
 	private Transform burnP;
+
+	
+	public bool useShortFire;
 }

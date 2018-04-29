@@ -33,8 +33,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Light))]
 		[RequiredField]
+		[CheckForComponent(typeof(Light))]
 		public FsmOwnerDefault gameObject;
 
 		

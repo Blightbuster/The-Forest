@@ -73,15 +73,15 @@ public class getAnimatorParams : MonoBehaviour
 		bool useBodyPosition = false;
 		if (this.setup && this.setup.ai && this.setup.ai.pale && !p.IsDummyLoad && this.health.trapGo)
 		{
-			trapTrigger trigger = this.health.trapGo.GetComponentInChildren<trapTrigger>();
-			if (trigger)
+			trapTrigger componentInChildren = this.health.trapGo.GetComponentInChildren<trapTrigger>();
+			if (componentInChildren)
 			{
-				trigger.FixPalePosition(this.setup, false);
+				componentInChildren.FixPalePosition(this.setup, false);
 				bodyPosition += -0.15f * Vector3.up;
 				useBodyPosition = true;
 			}
 		}
-		GameObject dummy = UnityEngine.Object.Instantiate(this.dummyMutant, bodyPosition, base.transform.rotation) as GameObject;
+		GameObject dummy = UnityEngine.Object.Instantiate<GameObject>(this.dummyMutant, bodyPosition, base.transform.rotation);
 		dummy.transform.rotation = angle;
 		if (p.IsDummyLoad || (this.animator.GetBool("trapBool") && this.animator.GetInteger("trapTypeInt1") == 2))
 		{
@@ -90,9 +90,9 @@ public class getAnimatorParams : MonoBehaviour
 		dummy.transform.localScale = this.mutantBase.localScale;
 		dummy.SendMessage("setCalledFromDeath", SendMessageOptions.DontRequireReceiver);
 		SkinnedMeshRenderer[] sk = dummy.GetComponentsInChildren<SkinnedMeshRenderer>();
-		foreach (SkinnedMeshRenderer s in sk)
+		foreach (SkinnedMeshRenderer skinnedMeshRenderer in sk)
 		{
-			s.enabled = false;
+			skinnedMeshRenderer.enabled = false;
 		}
 		Animator dummyAnim = dummy.GetComponent<Animator>();
 		AnimatorStateInfo state = this.animator.GetCurrentAnimatorStateInfo(0);
@@ -118,9 +118,16 @@ public class getAnimatorParams : MonoBehaviour
 		this.dummyHips.position = bodyPosition;
 		dummy.transform.position = bodyPosition;
 		dummy.transform.localScale = this.mutantBase.localScale;
-		if (this.setup.health.onFire)
+		if (this.setup.health.Fire.Length > 0)
 		{
-			dummy.SendMessage("startDummyFire", SendMessageOptions.DontRequireReceiver);
+			mutantTransferFire component = base.transform.GetComponent<mutantTransferFire>();
+			foreach (GameObject gameObject in this.setup.health.Fire)
+			{
+				if (gameObject.activeSelf)
+				{
+					component.transferFireToTarget(gameObject, dummy);
+				}
+			}
 		}
 		if (p.IsDummyLoad || this.animator.GetBool("trapBool"))
 		{
@@ -128,10 +135,10 @@ public class getAnimatorParams : MonoBehaviour
 			{
 				dummy.transform.parent = this.health.trapParent.transform;
 				dummy.SendMessageUpwards("setTrapDummy", dummy);
-				CoopMutantDummy mutantDummySetup = dummy.GetComponentInChildren<CoopMutantDummy>();
-				if (mutantDummySetup && this.health.trapGo)
+				CoopMutantDummy componentInChildren2 = dummy.GetComponentInChildren<CoopMutantDummy>();
+				if (componentInChildren2 && this.health.trapGo)
 				{
-					this.health.trapGo.SendMessage("SetNooseRope", mutantDummySetup, SendMessageOptions.DontRequireReceiver);
+					this.health.trapGo.SendMessage("SetNooseRope", componentInChildren2, SendMessageOptions.DontRequireReceiver);
 				}
 			}
 			if ((p.IsDummyLoad || this.animator.GetInteger("trapTypeInt1") == 0) && this.health.trapGo)
@@ -239,12 +246,12 @@ public class getAnimatorParams : MonoBehaviour
 		dummy.SendMessage("setPoisoned", this.health.poisoned, SendMessageOptions.DontRequireReceiver);
 		if (this.setup.arrowSticker)
 		{
-			arrowStickToTarget dummySticker = dummy.GetComponentInChildren<arrowStickToTarget>();
-			foreach (KeyValuePair<Transform, int> attachStat in this.setup.arrowSticker.stuckArrows)
+			arrowStickToTarget componentInChildren3 = dummy.GetComponentInChildren<arrowStickToTarget>();
+			foreach (KeyValuePair<Transform, int> keyValuePair in this.setup.arrowSticker.stuckArrows)
 			{
-				if (attachStat.Key)
+				if (keyValuePair.Key)
 				{
-					dummySticker.applyStuckArrowToDummy(attachStat.Key, attachStat.Key.localPosition, attachStat.Key.localRotation, attachStat.Value);
+					componentInChildren3.applyStuckArrowToDummy(keyValuePair.Key, keyValuePair.Key.localPosition, keyValuePair.Key.localRotation, keyValuePair.Value);
 				}
 			}
 		}
@@ -253,69 +260,69 @@ public class getAnimatorParams : MonoBehaviour
 		dummy.SendMessage("setSkinMaterialProperties", this.health.MySkin.material, SendMessageOptions.DontRequireReceiver);
 		if (BoltNetwork.isServer)
 		{
-			CoopMutantDummyToken token = new CoopMutantDummyToken();
-			token.Skinny = skinny;
-			token.HipPosition = bodyPosition;
-			token.HipRotation = this.hips.rotation;
-			token.OriginalMutant = base.GetComponent<BoltEntity>();
-			token.Scale = this.mutantBase.localScale;
-			token.skinDamage1 = this.bloodPropertyBlock.GetFloat("_Damage1");
-			token.skinDamage2 = this.bloodPropertyBlock.GetFloat("_Damage2");
-			token.skinDamage3 = this.bloodPropertyBlock.GetFloat("_Damage3");
-			token.skinDamage4 = this.bloodPropertyBlock.GetFloat("_Damage4");
+			CoopMutantDummyToken coopMutantDummyToken = new CoopMutantDummyToken();
+			coopMutantDummyToken.Skinny = skinny;
+			coopMutantDummyToken.HipPosition = bodyPosition;
+			coopMutantDummyToken.HipRotation = this.hips.rotation;
+			coopMutantDummyToken.OriginalMutant = base.GetComponent<BoltEntity>();
+			coopMutantDummyToken.Scale = this.mutantBase.localScale;
+			coopMutantDummyToken.skinDamage1 = this.bloodPropertyBlock.GetFloat("_Damage1");
+			coopMutantDummyToken.skinDamage2 = this.bloodPropertyBlock.GetFloat("_Damage2");
+			coopMutantDummyToken.skinDamage3 = this.bloodPropertyBlock.GetFloat("_Damage3");
+			coopMutantDummyToken.skinDamage4 = this.bloodPropertyBlock.GetFloat("_Damage4");
 			if (p.IsDummyLoad)
 			{
-				foreach (SkinnedMeshRenderer s2 in sk)
+				foreach (SkinnedMeshRenderer skinnedMeshRenderer2 in sk)
 				{
-					s2.enabled = true;
+					skinnedMeshRenderer2.enabled = true;
 				}
-				CoopMutantMaterialSync CoopMaterial = dummy.GetComponent<CoopMutantMaterialSync>();
-				CoopMaterial.ForceStart();
-				token.MaterialIndex = CoopMaterial.GetMaterialIndex();
-				CoopMutantPropSync CoopProps = dummy.GetComponent<CoopMutantPropSync>();
-				token.Props = CoopProps.GetPropMask();
+				CoopMutantMaterialSync component2 = dummy.GetComponent<CoopMutantMaterialSync>();
+				component2.ForceStart();
+				coopMutantDummyToken.MaterialIndex = component2.GetMaterialIndex();
+				CoopMutantPropSync component3 = dummy.GetComponent<CoopMutantPropSync>();
+				coopMutantDummyToken.Props = component3.GetPropMask();
 			}
 			else
 			{
-				IMutantState s3 = base.GetComponent<BoltEntity>().GetState<IMutantState>();
-				token.MaterialIndex = s3.MainMaterialIndex;
-				token.Props = s3.prop_mask;
+				IMutantState state2 = base.GetComponent<BoltEntity>().GetState<IMutantState>();
+				coopMutantDummyToken.MaterialIndex = state2.MainMaterialIndex;
+				coopMutantDummyToken.Props = state2.prop_mask;
 			}
 			if (this.health.poisoned)
 			{
-				token.skinColor = new Color(0.670588255f, 0.796078444f, 0.5529412f, 1f);
+				coopMutantDummyToken.skinColor = new Color(0.670588255f, 0.796078444f, 0.5529412f, 1f);
 			}
 			else if (this.setup.ai.pale && !this.setup.ai.skinned)
 			{
-				token.skinColor = new Color(0.8039216f, 0.870588243f, 0.9137255f, 1f);
+				coopMutantDummyToken.skinColor = new Color(0.8039216f, 0.870588243f, 0.9137255f, 1f);
 			}
 			else
 			{
-				token.skinColor = new Color(0.698039234f, 0.698039234f, 0.698039234f, 1f);
+				coopMutantDummyToken.skinColor = new Color(0.698039234f, 0.698039234f, 0.698039234f, 1f);
 			}
-			BoltNetwork.Attach(dummy, token);
+			BoltNetwork.Attach(dummy, coopMutantDummyToken);
 		}
 		if (BoltNetwork.isServer)
 		{
-			IMutantFemaleDummyState female;
-			if (dummy.GetComponent<BoltEntity>().TryFindState<IMutantFemaleDummyState>(out female))
+			IMutantFemaleDummyState mutantFemaleDummyState;
+			if (dummy.GetComponent<BoltEntity>().TryFindState<IMutantFemaleDummyState>(out mutantFemaleDummyState))
 			{
-				female.Type = TYPE;
-				female.CrossFadeHash = state.nameHash;
-				female.CrossFadeTime = state.normalizedTime;
+				mutantFemaleDummyState.Type = TYPE;
+				mutantFemaleDummyState.CrossFadeHash = state.nameHash;
+				mutantFemaleDummyState.CrossFadeTime = state.normalizedTime;
 			}
-			IMutantMaleDummyState male;
-			if (dummy.GetComponent<BoltEntity>().TryFindState<IMutantMaleDummyState>(out male))
+			IMutantMaleDummyState mutantMaleDummyState;
+			if (dummy.GetComponent<BoltEntity>().TryFindState<IMutantMaleDummyState>(out mutantMaleDummyState))
 			{
-				male.Type = TYPE;
-				male.CrossFadeHash = state.nameHash;
-				male.CrossFadeTime = state.normalizedTime;
+				mutantMaleDummyState.Type = TYPE;
+				mutantMaleDummyState.CrossFadeHash = state.nameHash;
+				mutantMaleDummyState.CrossFadeTime = state.normalizedTime;
 			}
 		}
 		List<Quaternion> jointRotations = new List<Quaternion>();
-		for (int i = 0; i < this.mrs.jointsToSync.Length; i++)
+		for (int l = 0; l < this.mrs.jointsToSync.Length; l++)
 		{
-			jointRotations.Add(this.mrs.jointsToSync[i].localRotation);
+			jointRotations.Add(this.mrs.jointsToSync[l].localRotation);
 		}
 		if (!p.IsDummyLoad && !this.animator.GetBool("trapBool"))
 		{
@@ -332,9 +339,9 @@ public class getAnimatorParams : MonoBehaviour
 		{
 			this.setup.rootTr.parent = null;
 		}
-		foreach (SkinnedMeshRenderer s4 in sk)
+		foreach (SkinnedMeshRenderer skinnedMeshRenderer3 in sk)
 		{
-			s4.enabled = true;
+			skinnedMeshRenderer3.enabled = true;
 		}
 		if (PoolManager.Pools["enemies"].IsSpawned(base.transform))
 		{

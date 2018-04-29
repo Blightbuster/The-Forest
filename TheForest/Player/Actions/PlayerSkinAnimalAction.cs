@@ -18,6 +18,10 @@ namespace TheForest.Player.Actions
 			this.rabbitSkinGo.SetActive(false);
 			this.lizardSkinGo.SetActive(false);
 			this.turtleMeatGo.SetActive(false);
+			this.creepySkinGo.SetActive(false);
+			this.boarSkinGo.SetActive(false);
+			this.raccoonSkinGo.SetActive(false);
+			this.clothingGo.SetActive(false);
 		}
 
 		
@@ -86,7 +90,12 @@ namespace TheForest.Player.Actions
 			LocalPlayer.CamFollowHead.lockYCam = true;
 			LocalPlayer.AnimControl.animEvents.StartCoroutine("smoothDisableSpine");
 			Vector3 moveDir = (LocalPlayer.PlayerBase.transform.position - animalPos).normalized;
-			Vector3 movePos = animalPos + moveDir * 1.3f;
+			float posOffset = 1.3f;
+			if (this.animalType == 5)
+			{
+				posOffset = 3f;
+			}
+			Vector3 movePos = animalPos + moveDir * posOffset;
 			movePos.y += 2.3f;
 			LocalPlayer.Animator.SetBool("skinAnimal", true);
 			if (LocalPlayer.Inventory.Logs.HasLogs)
@@ -128,6 +137,7 @@ namespace TheForest.Player.Actions
 			}
 			Vector3 backPos = LocalPlayer.Transform.position + backVector;
 			LocalPlayer.Transform.position = movePos;
+			bool setBloody = false;
 			while (this.currState2.shortNameHash == this.skinAnimalHash)
 			{
 				this.planeAxeHeldGo.SetActive(true);
@@ -138,6 +148,11 @@ namespace TheForest.Player.Actions
 				{
 					LocalPlayer.Transform.position = movePos;
 					LocalPlayer.Rigidbody.velocity = Vector3.zero;
+				}
+				if (this.currState2.normalizedTime > 0.4f && !setBloody && this.animalTr && this.animalType == 5)
+				{
+					this.animalTr.SendMessage("setRagdollBloody", SendMessageOptions.DontRequireReceiver);
+					setBloody = true;
 				}
 				if (this.currState2.normalizedTime > 0.46f)
 				{
@@ -247,6 +262,22 @@ namespace TheForest.Player.Actions
 				{
 					this.turtleMeatGo.SetActive(true);
 				}
+				else if (this.animalType == 5)
+				{
+					this.creepySkinGo.SetActive(true);
+				}
+				else if (this.animalType == 6)
+				{
+					this.boarSkinGo.SetActive(true);
+				}
+				else if (this.animalType == 7)
+				{
+					this.raccoonSkinGo.SetActive(true);
+				}
+				else if (this.animalType == 8)
+				{
+					this.clothingGo.SetActive(true);
+				}
 			}
 			else
 			{
@@ -255,13 +286,16 @@ namespace TheForest.Player.Actions
 				this.rabbitSkinGo.SetActive(false);
 				this.deerSkinGo.SetActive(false);
 				this.turtleMeatGo.SetActive(false);
+				this.creepySkinGo.SetActive(false);
+				this.boarSkinGo.SetActive(false);
+				this.raccoonSkinGo.SetActive(false);
+				this.clothingGo.SetActive(false);
 			}
 		}
 
 		
 		private IEnumerator forceSkinningReset()
 		{
-			Debug.Log("doing force reset");
 			base.StopCoroutine("skinAnimalRoutine");
 			if (LocalPlayer.AnimControl.skinningAnimal)
 			{
@@ -340,6 +374,18 @@ namespace TheForest.Player.Actions
 
 		
 		public GameObject turtleMeatGo;
+
+		
+		public GameObject creepySkinGo;
+
+		
+		public GameObject boarSkinGo;
+
+		
+		public GameObject raccoonSkinGo;
+
+		
+		public GameObject clothingGo;
 
 		
 		private int animalType;

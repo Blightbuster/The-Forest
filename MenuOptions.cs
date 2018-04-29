@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Rewired;
-using TheForest.Items.Inventory;
 using TheForest.UI;
 using TheForest.Utils;
 using UnityEngine;
@@ -48,21 +46,14 @@ public class MenuOptions : MonoBehaviour
 				blur.enabled = false;
 			}
 		}
-		if (TheForest.Utils.Input.player != null && LocalPlayer.Inventory && LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Pause)
-		{
-			TheForest.Utils.Input.player.controllers.maps.SetMapsEnabled(false, ControllerType.Keyboard, "Menu");
-			TheForest.Utils.Input.player.controllers.maps.SetMapsEnabled(false, ControllerType.Joystick, "Menu");
-		}
+		TheForest.Utils.Input.UpdateControlMapping();
 	}
 
 	
 	private void OnEnable()
 	{
 		this.shouldSave = true;
-		if (this.AllowEnemies && this.AllowEnemies.gameObject.activeSelf != GameSetup.IsCreativeGame)
-		{
-			this.AllowEnemies.transform.parent.gameObject.SetActive(GameSetup.IsCreativeGame);
-		}
+		this.ShowMenuButton(GameSetup.IsCreativeGame, this.AllowEnemies, true);
 		if (LoadAsync.Scenery)
 		{
 			Blur blur = (!LoadAsync.Scenery) ? null : LoadAsync.Scenery.GetComponentInChildren<Blur>();
@@ -71,10 +62,65 @@ public class MenuOptions : MonoBehaviour
 				blur.enabled = true;
 			}
 		}
-		if (TheForest.Utils.Input.player != null)
+		TheForest.Utils.Input.UpdateControlMapping();
+	}
+
+	
+	private void ShowMenuButton(bool showValue, UIWidgetContainer buttonTarget, bool reconnectUiKeyNav)
+	{
+		if (buttonTarget == null)
 		{
-			TheForest.Utils.Input.player.controllers.maps.SetMapsEnabled(true, ControllerType.Keyboard, "Menu");
-			TheForest.Utils.Input.player.controllers.maps.SetMapsEnabled(true, ControllerType.Joystick, "Menu");
+			return;
+		}
+		if (buttonTarget.transform.parent.gameObject.activeSelf == showValue)
+		{
+			return;
+		}
+		buttonTarget.transform.parent.gameObject.SetActive(showValue);
+		if (!reconnectUiKeyNav)
+		{
+			return;
+		}
+		MenuOptions.ReconnectMenuButton(buttonTarget, !showValue);
+	}
+
+	
+	private static void ReconnectMenuButton(UIWidgetContainer buttonTarget, bool breakConnection)
+	{
+		UIKeyNavigation component = buttonTarget.GetComponent<UIKeyNavigation>();
+		if (component == null)
+		{
+			return;
+		}
+		GameObject onUp = component.onUp;
+		GameObject onDown = component.onDown;
+		UIKeyNavigation uikeyNavigation = null;
+		UIKeyNavigation uikeyNavigation2 = null;
+		if (onUp != null)
+		{
+			uikeyNavigation = onUp.GetComponent<UIKeyNavigation>();
+		}
+		if (onDown != null)
+		{
+			uikeyNavigation2 = onDown.GetComponent<UIKeyNavigation>();
+		}
+		if (uikeyNavigation == null || uikeyNavigation2 == null)
+		{
+			return;
+		}
+		if (breakConnection)
+		{
+			if (uikeyNavigation.onDown != buttonTarget.gameObject || uikeyNavigation2.onUp != buttonTarget.gameObject)
+			{
+				return;
+			}
+			uikeyNavigation.onDown = onDown;
+			uikeyNavigation2.onUp = onUp;
+		}
+		else
+		{
+			uikeyNavigation.onDown = buttonTarget.gameObject;
+			uikeyNavigation2.onUp = buttonTarget.gameObject;
 		}
 	}
 
@@ -103,15 +149,20 @@ public class MenuOptions : MonoBehaviour
 			this.Resolution.items = new List<string>();
 			foreach (Resolution resolution in resolutions)
 			{
-				this.Resolution.items.Add(string.Format("{0}x{1}", resolution.width, resolution.height));
+				string item = string.Format("{0}x{1}", resolution.width, resolution.height);
+				if (!this.Resolution.items.Contains(item))
+				{
+					this.Resolution.items.Add(item);
+				}
 			}
+			Debug.Log(string.Format("[Options] Found resolutions:\n{0}", this.Resolution.items.Join("\n")));
 		}
 		if (this.Language)
 		{
 			this.Language.items = new List<string>();
-			foreach (string item in UiTranslationDatabase.GetAvailableTranslations())
+			foreach (string item2 in UiTranslationDatabase.GetAvailableTranslations())
 			{
-				this.Language.items.Add(item);
+				this.Language.items.Add(item2);
 			}
 		}
 		if (this.Preset)
@@ -142,10 +193,6 @@ public class MenuOptions : MonoBehaviour
 		{
 			EventDelegate.Add(this.SSAO.onChange, new EventDelegate.Callback(this.OnChange));
 		}
-		if (this.RenderType)
-		{
-			EventDelegate.Add(this.RenderType.onChange, new EventDelegate.Callback(this.OnChange));
-		}
 		if (this.Bloom)
 		{
 			EventDelegate.Add(this.Bloom.onChange, new EventDelegate.Callback(this.OnChange));
@@ -161,6 +208,10 @@ public class MenuOptions : MonoBehaviour
 		if (this.Dof)
 		{
 			EventDelegate.Add(this.Dof.onChange, new EventDelegate.Callback(this.OnChange));
+		}
+		if (this.ScreenSpaceReflection)
+		{
+			EventDelegate.Add(this.ScreenSpaceReflection.onChange, new EventDelegate.Callback(this.OnChange));
 		}
 		if (this.SunshineOcclusion)
 		{
@@ -353,17 +404,17 @@ public class MenuOptions : MonoBehaviour
 	private IEnumerator Start()
 	{
 		yield return YieldPresets.WaitForEndOfFrame;
-		this.Language.value = ((!this.Language.items.Contains(PlayerPreferences.Language)) ? "English" : PlayerPreferences.Language);
+		this.Language.value = ((!this.Language.items.Contains(PlayerPreferences.Language)) ? "ENGLISH" : PlayerPreferences.Language);
 		this.EndIgnoreEvents();
 		if (this.Preset)
 		{
 			if (TheForestQualitySettings.IsCustomized)
 			{
-				this.Preset.value = this.GetPopupItem(this.Preset, this.Preset.items.Count - 1);
+				this.Preset.value = this.GetPopupItem(this.Preset, 0);
 			}
 			else
 			{
-				this.Preset.value = this.GetPopupItem(this.Preset, PlayerPreferences.Preset);
+				this.Preset.value = this.GetPopupItem(this.Preset, this.PresetToUiIndex(PlayerPreferences.Preset));
 			}
 		}
 		else
@@ -404,10 +455,6 @@ public class MenuOptions : MonoBehaviour
 		{
 			EventDelegate.Remove(this.Scatter.onChange, new EventDelegate.Callback(this.OnChange));
 		}
-		if (this.RenderType)
-		{
-			EventDelegate.Remove(this.RenderType.onChange, new EventDelegate.Callback(this.OnChange));
-		}
 		if (this.Bloom)
 		{
 			EventDelegate.Remove(this.Bloom.onChange, new EventDelegate.Callback(this.OnChange));
@@ -423,6 +470,10 @@ public class MenuOptions : MonoBehaviour
 		if (this.Dof)
 		{
 			EventDelegate.Remove(this.Dof.onChange, new EventDelegate.Callback(this.OnChange));
+		}
+		if (this.ScreenSpaceReflection)
+		{
+			EventDelegate.Remove(this.ScreenSpaceReflection.onChange, new EventDelegate.Callback(this.OnChange));
 		}
 		if (this.SunshineOcclusion)
 		{
@@ -629,6 +680,18 @@ public class MenuOptions : MonoBehaviour
 	}
 
 	
+	private int PresetToUiIndex(int preset)
+	{
+		return (preset != 5) ? (preset + 1) : 0;
+	}
+
+	
+	private int UiIndexToPreset(int uiIndex)
+	{
+		return (uiIndex != 0) ? (uiIndex - 1) : 5;
+	}
+
+	
 	private void OnChangePreset()
 	{
 		if (this.IgnoreEvents)
@@ -640,7 +703,7 @@ public class MenuOptions : MonoBehaviour
 		bool flag = false;
 		if (this.Preset)
 		{
-			num = (PlayerPreferences.Preset = this.PopupIndex(this.Preset));
+			num = (PlayerPreferences.Preset = this.UiIndexToPreset(this.PopupIndex(this.Preset)));
 			if (num < 0)
 			{
 				return;
@@ -758,13 +821,6 @@ public class MenuOptions : MonoBehaviour
 		}
 		try
 		{
-			this.RenderType.value = this.GetPopupItem(this.RenderType, (int)TheForestQualitySettings.UserSettings.MyRenderType);
-		}
-		catch
-		{
-		}
-		try
-		{
 			this.Bloom.value = this.GetPopupItem(this.Bloom, (int)TheForestQualitySettings.UserSettings.SEBloom);
 		}
 		catch
@@ -787,6 +843,13 @@ public class MenuOptions : MonoBehaviour
 		try
 		{
 			this.Dof.value = this.GetPopupItem(this.Dof, (int)TheForestQualitySettings.UserSettings.DofTech);
+		}
+		catch
+		{
+		}
+		try
+		{
+			this.ScreenSpaceReflection.value = this.GetPopupItem(this.ScreenSpaceReflection, (int)TheForestQualitySettings.UserSettings.screenSpaceReflection);
 		}
 		catch
 		{
@@ -842,7 +905,7 @@ public class MenuOptions : MonoBehaviour
 		}
 		try
 		{
-			this.DrawDistance.value = this.GetPopupItem(this.DrawDistance, (int)TheForestQualitySettings.UserSettings.DrawDistance);
+			this.DrawDistance.value = this.GetPopupItem(this.DrawDistance, TheForestQualitySettings.UserSettings.DrawDistance - TheForestQualitySettings.DrawDistances.VeryHigh);
 		}
 		catch
 		{
@@ -870,7 +933,7 @@ public class MenuOptions : MonoBehaviour
 		}
 		try
 		{
-			this.GhostTintOpacity.value = PlayerPreferences.GhostTintOpacity;
+			this.GhostTintOpacity.value = Mathf.InverseLerp(0.0784f, 0.75f, PlayerPreferences.GhostTintOpacity);
 		}
 		catch
 		{
@@ -1055,14 +1118,14 @@ public class MenuOptions : MonoBehaviour
 		}
 		try
 		{
-			this.GammaWorldAndDay.value = Mathf.InverseLerp(2f, 3f, PlayerPreferences.GammaWorldAndDay);
+			this.GammaWorldAndDay.value = Mathf.InverseLerp(2f, 2.2f, PlayerPreferences.GammaWorldAndDay);
 		}
 		catch
 		{
 		}
 		try
 		{
-			this.GammaCavesAndNight.value = Mathf.InverseLerp(2f, 3f, PlayerPreferences.GammaCavesAndNight);
+			this.GammaCavesAndNight.value = Mathf.InverseLerp(2f, 2.2f, PlayerPreferences.GammaCavesAndNight);
 		}
 		catch
 		{
@@ -1135,7 +1198,7 @@ public class MenuOptions : MonoBehaviour
 		}
 		if (this.Preset)
 		{
-			PlayerPreferences.Preset = this.PopupIndex(this.Preset);
+			PlayerPreferences.Preset = this.UiIndexToPreset(this.PopupIndex(this.Preset));
 			TheForestQualitySettings.UserSettings.Preset = (TheForestQualitySettings.PresetLevels)PlayerPreferences.Preset;
 		}
 		if (this.Antialias)
@@ -1156,10 +1219,6 @@ public class MenuOptions : MonoBehaviour
 		{
 			TheForestQualitySettings.UserSettings.SSAO = (TheForestQualitySettings.SSAOTechnique)this.PopupIndex(this.SSAO);
 		}
-		if (this.RenderType)
-		{
-			TheForestQualitySettings.UserSettings.MyRenderType = (TheForestQualitySettings.RendererType)this.PopupIndex(this.RenderType);
-		}
 		if (this.Bloom)
 		{
 			TheForestQualitySettings.UserSettings.SEBloom = (TheForestQualitySettings.SEBloomTechnique)this.PopupIndex(this.Bloom);
@@ -1175,6 +1234,10 @@ public class MenuOptions : MonoBehaviour
 		if (this.Dof)
 		{
 			TheForestQualitySettings.UserSettings.DofTech = (TheForestQualitySettings.Dof)this.PopupIndex(this.Dof);
+		}
+		if (this.ScreenSpaceReflection)
+		{
+			TheForestQualitySettings.UserSettings.screenSpaceReflection = (TheForestQualitySettings.ScreenSpaceReflection)this.PopupIndex(this.ScreenSpaceReflection);
 		}
 		if (this.SunshineOcclusion)
 		{
@@ -1210,7 +1273,7 @@ public class MenuOptions : MonoBehaviour
 		}
 		if (this.DrawDistance)
 		{
-			TheForestQualitySettings.UserSettings.DrawDistance = (TheForestQualitySettings.DrawDistances)this.PopupIndex(this.DrawDistance);
+			TheForestQualitySettings.UserSettings.DrawDistance = this.PopupIndex(this.DrawDistance) + TheForestQualitySettings.DrawDistances.VeryHigh;
 		}
 		if (this.Grass)
 		{
@@ -1222,11 +1285,7 @@ public class MenuOptions : MonoBehaviour
 		}
 		if (this.GhostTint)
 		{
-			PlayerPreferences.SetGhostTint(this.PopupIndex(this.GhostTint), this.GhostTintOpacity.value);
-		}
-		if (this.GhostTintOpacity && this.GhostTintOpacity.value < PlayerPreferences.GhostTintOpacity)
-		{
-			this.GhostTintOpacity.value = PlayerPreferences.GhostTintOpacity;
+			PlayerPreferences.SetGhostTint(this.PopupIndex(this.GhostTint), Mathf.Lerp(0.0784f, 0.75f, this.GhostTintOpacity.value));
 		}
 		if (this.ColorGrading)
 		{
@@ -1323,24 +1382,27 @@ public class MenuOptions : MonoBehaviour
 		if (this.Fullscreen && this.Resolution)
 		{
 			bool flag2 = this.OnOff(this.Fullscreen);
-			int width = Screen.width;
-			int height = Screen.height;
-			string[] array = this.Resolution.value.Split(new char[]
+			if (!string.IsNullOrEmpty(this.Resolution.value))
 			{
-				'x'
-			});
-			if (array.Length == 2)
-			{
-				int.TryParse(array[0], out width);
-				int.TryParse(array[1], out height);
-			}
-			if (width != Screen.width || height != Screen.height || flag2 != Screen.fullScreen)
-			{
-				Screen.SetResolution(width, height, flag2);
-				TweenTransform componentInParent = base.GetComponentInParent<TweenTransform>();
-				if (componentInParent)
+				int width = Screen.width;
+				int height = Screen.height;
+				string[] array = this.Resolution.value.Split(new char[]
 				{
-					componentInParent.enabled = true;
+					'x'
+				});
+				if (array.Length == 2)
+				{
+					int.TryParse(array[0], out width);
+					int.TryParse(array[1], out height);
+				}
+				if (width != Screen.width || height != Screen.height || flag2 != Screen.fullScreen)
+				{
+					Screen.SetResolution(width, height, flag2);
+					TweenTransform componentInParent = base.GetComponentInParent<TweenTransform>();
+					if (componentInParent)
+					{
+						componentInParent.enabled = true;
+					}
 				}
 			}
 		}
@@ -1355,11 +1417,11 @@ public class MenuOptions : MonoBehaviour
 		}
 		if (this.GammaCavesAndNight)
 		{
-			PlayerPreferences.GammaCavesAndNight = Mathf.Lerp(2f, 3f, this.GammaCavesAndNight.value);
+			PlayerPreferences.GammaCavesAndNight = Mathf.Lerp(2f, 2.2f, this.GammaCavesAndNight.value);
 		}
 		if (this.GammaWorldAndDay)
 		{
-			PlayerPreferences.GammaWorldAndDay = Mathf.Lerp(2f, 3f, this.GammaWorldAndDay.value);
+			PlayerPreferences.GammaWorldAndDay = Mathf.Lerp(2f, 2.2f, this.GammaWorldAndDay.value);
 		}
 		if (this.Volume)
 		{
@@ -1383,11 +1445,11 @@ public class MenuOptions : MonoBehaviour
 		{
 			if (TheForestQualitySettings.IsCustomized)
 			{
-				this.Preset.value = this.GetPopupItem(this.Preset, this.Preset.items.Count - 1);
+				this.Preset.value = this.GetPopupItem(this.Preset, 0);
 			}
 			else
 			{
-				this.Preset.value = this.GetPopupItem(this.Preset, PlayerPreferences.Preset);
+				this.Preset.value = this.GetPopupItem(this.Preset, this.PresetToUiIndex(PlayerPreferences.Preset));
 			}
 		}
 		this.EndIgnoreEvents();
@@ -1441,13 +1503,13 @@ public class MenuOptions : MonoBehaviour
 	public UIPopupList Dof;
 
 	
+	public UIPopupList ScreenSpaceReflection;
+
+	
 	public UIPopupList SunshineOcclusion;
 
 	
 	public UIPopupList VolumetricsType;
-
-	
-	public UIPopupList RenderType;
 
 	
 	public UIPopupList Shadows;

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Connect to a server.")]
 	[ActionCategory(ActionCategory.Network)]
+	[Tooltip("Connect to a server.")]
 	public class NetworkConnect : FsmStateAction
 	{
 		
@@ -25,7 +25,7 @@ namespace HutongGames.PlayMaker.Actions
 			if (networkConnectionError != NetworkConnectionError.NoError)
 			{
 				this.errorString.Value = networkConnectionError.ToString();
-				this.LogError(this.errorString.Value);
+				base.LogError(this.errorString.Value);
 				base.Fsm.Event(this.errorEvent);
 			}
 			base.Finish();
@@ -37,8 +37,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString remoteIP;
 
 		
-		[Tooltip("The port on the remote machine to connect to.")]
 		[RequiredField]
+		[Tooltip("The port on the remote machine to connect to.")]
 		public FsmInt remotePort;
 
 		
@@ -51,8 +51,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmEvent errorEvent;
 
 		
-		[Tooltip("Store the error string in a variable.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the error string in a variable.")]
 		public FsmString errorString;
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using PathologicalGames;
 using TheForest.Buildings.Creation;
 using TheForest.Buildings.World;
@@ -85,6 +86,15 @@ namespace TheForest.Utils
 		}
 
 		
+		public void SpawnBurntDustAndSmokePS(Vector3 pos, Quaternion rot)
+		{
+			if (this._psSpawnPool && this.BurntSmokeAndDustPrefab)
+			{
+				this._psSpawnPool.Spawn(this.BurntSmokeAndDustPrefab, pos, rot);
+			}
+		}
+
+		
 		public void SpawnNextFrame(Transform prefab, Vector3 pos, Quaternion rot, Transform parent = null)
 		{
 			base.StartCoroutine(this.DelayedSpawn(prefab, pos, rot, parent));
@@ -134,10 +144,56 @@ namespace TheForest.Utils
 		}
 
 		
+		public Material GetGhostClearColorMenu()
+		{
+			return this.GhostClearColorMenu;
+		}
+
+		
+		public Material GetGhostClearAlphaMenu()
+		{
+			return this.GhostClearAlphaMenu;
+		}
+
+		
+		public Material GetGhostClear()
+		{
+			return this.GhostClear;
+		}
+
+		
+		public Material GetGhostClearGround()
+		{
+			return this.GhostClearGround;
+		}
+
+		
+		public Material GetWallChunkBillboardMat()
+		{
+			return this.WallChunkBillboardMat;
+		}
+
+		
+		public Material GetMaterialInstance(Material sourceMaterial)
+		{
+			if (this._materialInstances == null)
+			{
+				this._materialInstances = new Dictionary<Material, Material>();
+			}
+			Material material = null;
+			if (!this._materialInstances.TryGetValue(sourceMaterial, out material))
+			{
+				material = new Material(sourceMaterial);
+				this._materialInstances.Add(sourceMaterial, material);
+			}
+			return material;
+		}
+
+		
 		private IEnumerator DelayedSpawn(Transform prefab, Vector3 pos, Quaternion rot, Transform parent)
 		{
 			yield return null;
-			Transform t = (Transform)UnityEngine.Object.Instantiate(prefab, pos, rot);
+			Transform t = UnityEngine.Object.Instantiate<Transform>(prefab, pos, rot);
 			if (parent)
 			{
 				t.parent = parent;
@@ -190,6 +246,9 @@ namespace TheForest.Utils
 		public Transform LogBridgeBuiltPrefab;
 
 		
+		public Renderer LogBridgeBuiltPrefabLOD1;
+
+		
 		public Transform LogStairsBuiltPrefab;
 
 		
@@ -217,6 +276,12 @@ namespace TheForest.Utils
 		public Transform LogWallDefensiveExBuiltPrefab;
 
 		
+		public Renderer[] LogWallDefensiveExBuiltPrefabLOD1;
+
+		
+		public Renderer[] DefensiveWallReinforcementBuiltPrefabLOD1;
+
+		
 		public Transform[] RockFenceChunksGhostPrefabs;
 
 		
@@ -224,6 +289,9 @@ namespace TheForest.Utils
 
 		
 		public Transform[] RockFenceChunksBuiltPrefabs;
+
+		
+		public Renderer[] RockFenceChunksBuiltPrefabsLOD1;
 
 		
 		public Transform[] RockFenceChunkDestroyPrefabs;
@@ -293,10 +361,16 @@ namespace TheForest.Utils
 
 		
 		[Header("Buildings Mats")]
-		public Material GhostClearColor;
+		public Material GhostClearColorMenu;
+
+		
+		public Material GhostClearAlphaMenu;
 
 		
 		public Material GhostClear;
+
+		
+		public Material GhostBlocked;
 
 		
 		public Material GhostClearGround;
@@ -367,6 +441,12 @@ namespace TheForest.Utils
 		public ParticleSystem woodChopPrefab;
 
 		
+		public ParticleSystem BurntSmokeAndDustPrefab;
+
+		
+		public Transform SmashBloodPrefab;
+
+		
 		[Header("Mp")]
 		public GameObject HashPositionToNamePrefab;
 
@@ -401,7 +481,14 @@ namespace TheForest.Utils
 		public GameObject[] GameModePrefabs;
 
 		
+		[Header("Debug/Diag")]
+		public GameObject DeviceDebugInformation;
+
+		
 		private SpawnPool _psSpawnPool;
+
+		
+		private Dictionary<Material, Material> _materialInstances;
 
 		
 		public static Prefabs Instance;

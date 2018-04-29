@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the Collision Flags from a Character Controller on a Game Object. Collision flags give you a broad overview of where the character collided with any other object.")]
 	[ActionCategory(ActionCategory.Character)]
+	[Tooltip("Gets the Collision Flags from a Character Controller on a Game Object. Collision flags give you a broad overview of where the character collided with any other object.")]
 	public class GetControllerCollisionFlags : FsmStateAction
 	{
 		
@@ -45,14 +45,14 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(CharacterController))]
 		[RequiredField]
+		[CheckForComponent(typeof(CharacterController))]
 		[Tooltip("The GameObject with a Character Controller component.")]
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("True if the Character Controller capsule is on the ground")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("True if the Character Controller capsule is on the ground")]
 		public FsmBool isGrounded;
 
 		
@@ -61,13 +61,13 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmBool none;
 
 		
-		[Tooltip("True if the Character Controller capsule was hit on the sides.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("True if the Character Controller capsule was hit on the sides.")]
 		public FsmBool sides;
 
 		
-		[Tooltip("True if the Character Controller capsule was hit from above.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("True if the Character Controller capsule was hit from above.")]
 		public FsmBool above;
 
 		

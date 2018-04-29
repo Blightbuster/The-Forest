@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("GUILayout Text Field to edit a Float Variable. Optionally send an event if the text has been edited.")]
 	[ActionCategory(ActionCategory.GUILayout)]
+	[Tooltip("GUILayout Text Field to edit a Float Variable. Optionally send an event if the text has been edited.")]
 	public class GUILayoutFloatField : GUILayoutAction
 	{
 		
@@ -42,8 +42,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("Float Variable to show in the edit field.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Float Variable to show in the edit field.")]
 		public FsmFloat floatVariable;
 
 		

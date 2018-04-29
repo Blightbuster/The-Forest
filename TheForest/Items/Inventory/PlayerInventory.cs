@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Bolt;
 using FMOD.Studio;
-using ModAPI;
 using TheForest.Items.Core;
 using TheForest.Items.Craft;
 using TheForest.Items.Special;
@@ -12,7 +12,6 @@ using TheForest.Items.World;
 using TheForest.Tools;
 using TheForest.UI;
 using TheForest.Utils;
-using UltimateCheatmenu;
 using UniLinq;
 using UnityEngine;
 using UnityEngine.Events;
@@ -60,6 +59,11 @@ namespace TheForest.Items.Inventory
 		
 		public void Start()
 		{
+			if (ForestVR.Prototype)
+			{
+				base.enabled = false;
+				return;
+			}
 			this._craftingCog._inventory = this;
 			for (int i = 0; i < this._itemViews.Length; i++)
 			{
@@ -97,43 +101,41 @@ namespace TheForest.Items.Inventory
 			{
 				try
 				{
-					foreach (KeyValuePair<int, List<InventoryItemView>> iivList in this._inventoryItemViewsCache)
+					foreach (KeyValuePair<int, List<InventoryItemView>> keyValuePair in this._inventoryItemViewsCache)
 					{
-						for (int i3 = iivList.Value.Count<InventoryItemView>() - 1; i3 >= 0; i3--)
+						for (int i2 = keyValuePair.Value.Count<InventoryItemView>() - 1; i2 >= 0; i2--)
 						{
-							if (!iivList.Value[i3])
+							if (!keyValuePair.Value[i2])
 							{
-								iivList.Value.RemoveAt(i3);
+								keyValuePair.Value.RemoveAt(i2);
 							}
 						}
 					}
 				}
-				catch (Exception ex11)
+				catch (Exception exception)
 				{
-					Exception ex = ex11;
-					Debug.LogException(ex);
+					Debug.LogException(exception);
 				}
 				try
 				{
 					if (!this.SpecialItemsControlers.ContainsKey(ItemDatabase.ItemByName("Compass")._id))
 					{
 						Debug.LogError("Adding compass controller");
-						CompassControler cc = this._specialItems.AddComponent<CompassControler>();
-						cc._itemId = ItemDatabase.ItemByName("Compass")._id;
-						cc._button = SpecialItemControlerBase.Buttons.Utility;
+						CompassControler compassControler = this._specialItems.AddComponent<CompassControler>();
+						compassControler._itemId = ItemDatabase.ItemByName("Compass")._id;
+						compassControler._button = SpecialItemControlerBase.Buttons.Utility;
 					}
 					if (!this.SpecialItemsControlers.ContainsKey(ItemDatabase.ItemByName("MetalTinTray")._id))
 					{
 						Debug.LogError("Adding metal tin tray controller");
-						MetalTinTrayControler cc2 = this._specialItems.AddComponent<MetalTinTrayControler>();
-						cc2._itemId = ItemDatabase.ItemByName("MetalTinTray")._id;
-						cc2._storage = this._specialItems.transform.Find("MetalTinTrayStorage").GetComponent<ItemStorage>();
+						MetalTinTrayControler metalTinTrayControler = this._specialItems.AddComponent<MetalTinTrayControler>();
+						metalTinTrayControler._itemId = ItemDatabase.ItemByName("MetalTinTray")._id;
+						metalTinTrayControler._storage = this._specialItems.transform.Find("MetalTinTrayStorage").GetComponent<ItemStorage>();
 					}
 				}
-				catch (Exception ex12)
+				catch (Exception exception2)
 				{
-					Exception ex2 = ex12;
-					Debug.LogException(ex2);
+					Debug.LogException(exception2);
 				}
 				this.FixMaxAmountBonuses();
 				try
@@ -143,10 +145,9 @@ namespace TheForest.Items.Inventory
 						this.AddItem(this.DefaultLight._itemId, 1, true, false, null);
 					}
 				}
-				catch (Exception ex13)
+				catch (Exception exception3)
 				{
-					Exception ex3 = ex13;
-					Debug.LogException(ex3);
+					Debug.LogException(exception3);
 				}
 				try
 				{
@@ -155,20 +156,34 @@ namespace TheForest.Items.Inventory
 						this.AddItem(this._defaultWeaponItemId, 1, true, false, null);
 					}
 				}
-				catch (Exception ex14)
+				catch (Exception exception4)
 				{
-					Exception ex4 = ex14;
-					Debug.LogException(ex4);
+					Debug.LogException(exception4);
+				}
+				try
+				{
+					if (!LocalPlayer.SavedData.ExitedEndgame)
+					{
+						int timmyPhotoItemId = ItemDatabase.ItemByName("PhotoTimmy")._id;
+						if (!this._possessedItems.Any((InventoryItem pi) => pi._itemId == timmyPhotoItemId) && !this._equipmentSlotsIds.Contains(timmyPhotoItemId))
+						{
+							Debug.LogError("Adding timmy photo failsafe");
+							this.AddItem(timmyPhotoItemId, 1, true, true, null);
+						}
+					}
+				}
+				catch (Exception exception5)
+				{
+					Debug.LogException(exception5);
 				}
 				try
 				{
 					this._craftingCog.OnDeserialized();
 					this._craftingCog.GetComponent<UpgradeCog>().Awake();
 				}
-				catch (Exception ex15)
+				catch (Exception exception6)
 				{
-					Exception ex5 = ex15;
-					Debug.LogException(ex5);
+					Debug.LogException(exception6);
 				}
 				try
 				{
@@ -178,23 +193,23 @@ namespace TheForest.Items.Inventory
 						try
 						{
 							this.ToggleInventoryItemView(item._id, true, ItemProperties.Any);
-							bool owned = this._possessedItemCache.ContainsKey(item._id);
-							if (item.MatchType(Item.Types.Special) && (owned || this._equipmentSlotsIds.Contains(item._id)))
+							bool flag = this._possessedItemCache.ContainsKey(item._id);
+							if (item.MatchType(Item.Types.Special) && (flag || this._equipmentSlotsIds.Contains(item._id)))
 							{
 								this._specialItems.SendMessage("PickedUpSpecialItem", item._id);
 							}
-							if (owned)
+							if (flag)
 							{
 								this._possessedItemCache[item._id]._maxAmount = ((item._maxAmount != 0) ? item._maxAmount : int.MaxValue);
 								if (this._possessedItemCache[item._id]._amount > this._possessedItemCache[item._id].MaxAmount)
 								{
 									this._possessedItemCache[item._id]._amount = this._possessedItemCache[item._id].MaxAmount;
 								}
-								for (int v = 0; v < this._inventoryItemViewsCache[item._id].Count; v++)
+								for (int k = 0; k < this._inventoryItemViewsCache[item._id].Count; k++)
 								{
-									if (this._inventoryItemViewsCache[item._id][v].gameObject.activeSelf)
+									if (this._inventoryItemViewsCache[item._id][k].gameObject.activeSelf)
 									{
-										this._inventoryItemViewsCache[item._id][v].OnDeserialized();
+										this._inventoryItemViewsCache[item._id][k].OnDeserialized();
 									}
 								}
 							}
@@ -204,10 +219,9 @@ namespace TheForest.Items.Inventory
 						}
 					}
 				}
-				catch (Exception ex16)
+				catch (Exception exception7)
 				{
-					Exception ex6 = ex16;
-					Debug.LogException(ex6);
+					Debug.LogException(exception7);
 				}
 				yield return null;
 				try
@@ -215,83 +229,79 @@ namespace TheForest.Items.Inventory
 					if (this._equipmentSlotsIds != null)
 					{
 						this.HideAllEquiped(false, false);
-						for (int k = 0; k < this._equipmentSlotsIds.Length; k++)
-						{
-							if (this._equipmentSlotsIds[k] > 0)
-							{
-								this.LockEquipmentSlot((Item.EquipmentSlot)k);
-							}
-						}
 						for (int l = 0; l < this._equipmentSlotsIds.Length; l++)
 						{
 							if (this._equipmentSlotsIds[l] > 0)
 							{
-								int itemId = this._equipmentSlotsIds[l];
-								ItemUtils.ApplyEffectsToStats(this._inventoryItemViewsCache[itemId][0].ItemCache._equipedStatEffect, false, 1);
-								this._equipmentSlots[l] = null;
-								this.UnlockEquipmentSlot((Item.EquipmentSlot)l);
-								if (!this.Equip(itemId, true))
+								this.LockEquipmentSlot((Item.EquipmentSlot)l);
+							}
+						}
+						for (int m = 0; m < this._equipmentSlotsIds.Length; m++)
+						{
+							if (this._equipmentSlotsIds[m] > 0)
+							{
+								int num = this._equipmentSlotsIds[m];
+								ItemUtils.ApplyEffectsToStats(this._inventoryItemViewsCache[num][0].ItemCache._equipedStatEffect, false, 1);
+								this._equipmentSlots[m] = null;
+								this.UnlockEquipmentSlot((Item.EquipmentSlot)m);
+								if (!this.Equip(num, true))
 								{
-									this.AddItem(itemId, 1, true, true, null);
+									this.AddItem(num, 1, true, true, null);
 								}
 							}
 						}
 					}
 				}
-				catch (Exception ex17)
+				catch (Exception exception8)
 				{
-					Exception ex7 = ex17;
-					Debug.LogException(ex7);
+					Debug.LogException(exception8);
 				}
 				try
 				{
 					if (this._upgradeCounters != null)
 					{
-						for (int m = 0; m < this._upgradeCountersCount; m++)
+						for (int n = 0; n < this._upgradeCountersCount; n++)
 						{
-							PlayerInventory.SerializableItemUpgradeCounters itemUpgradeCounters = this._upgradeCounters[m];
-							if (!this.ItemsUpgradeCounters.ContainsKey(itemUpgradeCounters._itemId))
+							PlayerInventory.SerializableItemUpgradeCounters serializableItemUpgradeCounters = this._upgradeCounters[n];
+							if (!this.ItemsUpgradeCounters.ContainsKey(serializableItemUpgradeCounters._itemId))
 							{
-								this.ItemsUpgradeCounters[itemUpgradeCounters._itemId] = new PlayerInventory.UpgradeCounterDict();
+								this.ItemsUpgradeCounters[serializableItemUpgradeCounters._itemId] = new PlayerInventory.UpgradeCounterDict();
 							}
-							for (int n = 0; n < itemUpgradeCounters._count; n++)
+							for (int num2 = 0; num2 < serializableItemUpgradeCounters._count; num2++)
 							{
-								PlayerInventory.SerializableUpgradeCounter upgradeCounter = itemUpgradeCounters._counters[n];
-								this._craftingCog.ApplyWeaponStatsUpgrades(itemUpgradeCounters._itemId, upgradeCounter._upgradeItemId, this._craftingCog._upgradeCog.SupportedItemsCache[upgradeCounter._upgradeItemId]._weaponStatUpgrades, false, upgradeCounter._amount, null);
-								this.ItemsUpgradeCounters[itemUpgradeCounters._itemId][upgradeCounter._upgradeItemId] = upgradeCounter._amount;
+								PlayerInventory.SerializableUpgradeCounter serializableUpgradeCounter = serializableItemUpgradeCounters._counters[num2];
+								this._craftingCog.ApplyWeaponStatsUpgrades(serializableItemUpgradeCounters._itemId, serializableUpgradeCounter._upgradeItemId, this._craftingCog._upgradeCog.SupportedItemsCache[serializableUpgradeCounter._upgradeItemId]._weaponStatUpgrades, false, serializableUpgradeCounter._amount, null);
+								this.ItemsUpgradeCounters[serializableItemUpgradeCounters._itemId][serializableUpgradeCounter._upgradeItemId] = serializableUpgradeCounter._amount;
 							}
 						}
 					}
 				}
-				catch (Exception ex18)
+				catch (Exception exception9)
 				{
-					Exception ex8 = ex18;
-					Debug.LogException(ex8);
+					Debug.LogException(exception9);
 				}
 				try
 				{
-					for (int i2 = 0; i2 < this._upgradeViewReceivers.Count; i2++)
+					for (int num3 = 0; num3 < this._upgradeViewReceivers.Count; num3++)
 					{
-						this._upgradeViewReceivers[i2].OnDeserialized();
+						this._upgradeViewReceivers[num3].OnDeserialized();
 					}
 				}
-				catch (Exception ex19)
+				catch (Exception exception10)
 				{
-					Exception ex9 = ex19;
-					Debug.LogException(ex9);
+					Debug.LogException(exception10);
 				}
 				try
 				{
-					foreach (QuickSelectViews view in LocalPlayer.QuickSelectViews)
+					foreach (QuickSelectViews quickSelectViews2 in LocalPlayer.QuickSelectViews)
 					{
-						view.Awake();
-						view.ShowLocalPlayerViews();
+						quickSelectViews2.Awake();
+						quickSelectViews2.ShowLocalPlayerViews();
 					}
 				}
-				catch (Exception ex20)
+				catch (Exception exception11)
 				{
-					Exception ex10 = ex20;
-					Debug.LogException(ex10);
+					Debug.LogException(exception11);
 				}
 			}
 			finally
@@ -309,12 +319,12 @@ namespace TheForest.Items.Inventory
 			{
 				return;
 			}
-			if ((this.CurrentView != PlayerInventory.PlayerViews.Pause && !this.BlockTogglingInventory && !LocalPlayer.AnimControl.useRootMotion && !LocalPlayer.FpCharacter.jumping && !LocalPlayer.FpCharacter.drinking && TheForest.Utils.Input.GetButtonDown("Inventory")) || (this.CurrentView == PlayerInventory.PlayerViews.Inventory && TheForest.Utils.Input.GetButtonDown("Esc")))
+			if ((this.CurrentView != PlayerInventory.PlayerViews.Pause && !this.BlockTogglingInventory && !LocalPlayer.AnimControl.useRootMotion && !LocalPlayer.FpCharacter.jumping && !LocalPlayer.FpCharacter.drinking && !LocalPlayer.AnimControl.endGameCutScene && !LocalPlayer.AnimControl.blockInventoryOpen && TheForest.Utils.Input.GetButtonDown("Inventory")) || (this.CurrentView == PlayerInventory.PlayerViews.Inventory && TheForest.Utils.Input.GetButtonDown("Esc")))
 			{
 				Scene.HudGui.ClearMpPlayerList();
 				this.ToggleInventory();
 			}
-			else if ((TheForest.Utils.Input.GetButtonDown("Esc") && this.CurrentView != PlayerInventory.PlayerViews.Book && !LocalPlayer.Create.CreateMode && !this.QuickSelectGamepadSwitch) || (this.CurrentView == PlayerInventory.PlayerViews.Pause && !Scene.HudGui.PauseMenu.activeSelf))
+			else if ((TheForest.Utils.Input.GetButtonDown("Esc") && this.CurrentView != PlayerInventory.PlayerViews.Book && !LocalPlayer.Create.CreateMode && !this.QuickSelectGamepadSwitch) || (this.CurrentView == PlayerInventory.PlayerViews.Pause && !Scene.HudGui.IsNull() && !Scene.HudGui.PauseMenu.IsNull() && !Scene.HudGui.PauseMenu.activeSelf))
 			{
 				Scene.HudGui.ClearMpPlayerList();
 				this.TogglePauseMenu();
@@ -378,6 +388,12 @@ namespace TheForest.Items.Inventory
 		}
 
 		
+		public static Vector3 SfxListenerSpacePosition(Vector3 worldPosition)
+		{
+			return LocalPlayer.MainCamTr.TransformPoint(LocalPlayer.InventoryCam.transform.InverseTransformPoint(worldPosition));
+		}
+
+		
 		public void ToggleInventory()
 		{
 			if (this.CurrentView == PlayerInventory.PlayerViews.Inventory || LocalPlayer.Stats.Dead)
@@ -408,14 +424,22 @@ namespace TheForest.Items.Inventory
 				this.CurrentStorage = storage;
 				this.CurrentStorage.Open();
 				this.CurrentView = PlayerInventory.PlayerViews.Inventory;
-				LocalPlayer.Tuts.CloseCraftingTut();
 				LocalPlayer.FpCharacter.LockView(true);
-				LocalPlayer.MainCam.enabled = false;
+				if (!ForestVR.Enabled)
+				{
+					LocalPlayer.MainCam.enabled = false;
+				}
 				VirtualCursor.Instance.SetCursorType(VirtualCursor.CursorTypes.Inventory);
 				Scene.HudGui.CheckHudState();
 				Scene.HudGui.Grid.gameObject.SetActive(false);
 				this._inventoryGO.tag = "open";
 				this._inventoryGO.SetActive(true);
+				if (ForestVR.Enabled)
+				{
+					this._inventoryGO.transform.position = LocalPlayer.InventoryPositionVR.transform.position;
+					this._inventoryGO.transform.rotation = LocalPlayer.InventoryPositionVR.transform.rotation;
+					LocalPlayer.InventoryMouseEventsVR.enabled = true;
+				}
 				LocalPlayer.Sfx.PlayOpenInventory();
 				this.IsOpenningInventory = true;
 				base.Invoke("PauseTimeInInventory", (!flag) ? 0.05f : 0.25f);
@@ -428,11 +452,14 @@ namespace TheForest.Items.Inventory
 			if (this.CurrentView == PlayerInventory.PlayerViews.Inventory)
 			{
 				this.IsOpenningInventory = false;
-				if (!BoltNetwork.isRunning && !GameSetup.IsHardMode && !GameSetup.IsHardSurvivalMode)
+				if (!BoltNetwork.isRunning && !GameSetup.IsHardMode && !GameSetup.IsHardSurvivalMode && !ForestVR.Enabled)
 				{
 					Time.timeScale = 0f;
 				}
-				Application.targetFrameRate = 60;
+				if (!ForestVR.Enabled)
+				{
+					Application.targetFrameRate = 60;
+				}
 				this._pauseSnapshot = FMODCommon.PlayOneshot("snapshot:/Inventory Pause", Vector3.zero, new object[0]);
 			}
 		}
@@ -449,9 +476,9 @@ namespace TheForest.Items.Inventory
 				this._inventoryGO.SetActive(false);
 				Scene.HudGui.CheckHudState();
 				Scene.HudGui.Grid.gameObject.SetActive(true);
-				LocalPlayer.Tuts.CloseRecipeTut();
 				LocalPlayer.FpCharacter.UnLockView();
 				LocalPlayer.MainCam.enabled = true;
+				LocalPlayer.InventoryMouseEventsVR.enabled = false;
 				PlayerPreferences.ApplyMaxFrameRate();
 				VirtualCursor.Instance.SetCursorType(VirtualCursor.CursorTypes.Hand);
 				if (!string.IsNullOrEmpty(this.PendingSendMessage))
@@ -473,8 +500,8 @@ namespace TheForest.Items.Inventory
 		public void TogglePauseMenu()
 		{
 			this.BlockTogglingInventory = false;
-			this.CurrentView = ((this.CurrentView != PlayerInventory.PlayerViews.Pause) ? PlayerInventory.PlayerViews.Pause : PlayerInventory.PlayerViews.World);
-			Scene.HudGui.TogglePauseMenu(this.CurrentView == PlayerInventory.PlayerViews.Pause);
+			bool flag = this.CurrentView == PlayerInventory.PlayerViews.Pause;
+			Scene.HudGui.TogglePauseMenu(!flag);
 		}
 
 		
@@ -509,7 +536,7 @@ namespace TheForest.Items.Inventory
 		
 		private void CheckQuickSelect()
 		{
-			if (this.CurrentView == PlayerInventory.PlayerViews.World && !LocalPlayer.AnimControl.swimming && !LocalPlayer.AnimControl.onRope && !LocalPlayer.AnimControl.onRaft && !LocalPlayer.AnimControl.sitting && !LocalPlayer.AnimControl.upsideDown && !LocalPlayer.AnimControl.skinningAnimal && !LocalPlayer.AnimControl.endGameCutScene && !LocalPlayer.AnimControl.useRootMotion && !LocalPlayer.Create.CreateMode)
+			if (this.CurrentView == PlayerInventory.PlayerViews.World && !LocalPlayer.AnimControl.swimming && !LocalPlayer.AnimControl.onRope && !LocalPlayer.AnimControl.onRaft && !LocalPlayer.AnimControl.sitting && !LocalPlayer.AnimControl.upsideDown && !LocalPlayer.AnimControl.skinningAnimal && !LocalPlayer.AnimControl.endGameCutScene && !LocalPlayer.AnimControl.useRootMotion && !LocalPlayer.Create.CreateMode && !LocalPlayer.AnimControl.PlayerIsAttacking())
 			{
 				bool flag = !TheForest.Utils.Input.IsGamePad || this.QuickSelectGamepadSwitch;
 				for (int i = 0; i < this._quickSelectItemIds.Length; i++)
@@ -709,14 +736,14 @@ namespace TheForest.Items.Inventory
 			{
 				if (itemView._held)
 				{
+					this._equipmentSlots[(int)slot] = itemView;
 					itemView.OnItemEquipped();
 					itemView._held.SetActive(true);
 					itemView.ApplyEquipmentEffect(true);
-					this._equipmentSlots[(int)slot] = itemView;
 					this._itemAnimHash.ApplyAnimVars(itemView.ItemCache, true);
 					if (itemView.ItemCache._equipedSFX != Item.SFXCommands.None)
 					{
-						LocalPlayer.Sfx.SendMessage(itemView.ItemCache._equipedSFX.ToString());
+						LocalPlayer.Sfx.SendMessage(itemView.ItemCache._equipedSFX.ToString(), SendMessageOptions.DontRequireReceiver);
 					}
 					if (itemView.ItemCache._maxAmount >= 0)
 					{
@@ -724,12 +751,12 @@ namespace TheForest.Items.Inventory
 						this.ToggleInventoryItemView(itemView._itemId, false, null);
 					}
 					yield return (!itemView.ItemCache.MatchType(Item.Types.Projectile)) ? null : YieldPresets.WaitPointSevenSeconds;
-					this.UnlockEquipmentSlot(slot);
 				}
 				else
 				{
 					Debug.LogError("Trying to equip item '" + itemView.ItemCache._name + "' which doesn't have a held reference in " + itemView.name);
 				}
+				this.UnlockEquipmentSlot(slot);
 			}
 			this._pendingEquip = false;
 			yield break;
@@ -921,7 +948,7 @@ namespace TheForest.Items.Inventory
 		}
 
 		
-		public void __Attack__Original()
+		public void Attack()
 		{
 			if (!this.IsRightHandEmpty() && !this._isThrowing && !this.IsReloading && !this.blockRangedAttack && !this.IsSlotLocked(Item.EquipmentSlot.RightHand) && !LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.RightHand, LocalPlayer.AnimControl._slingShotId))
 			{
@@ -939,7 +966,7 @@ namespace TheForest.Items.Inventory
 				}
 				if (itemCache._attackSFX != Item.SFXCommands.None)
 				{
-					LocalPlayer.Sfx.SendMessage(itemCache._attackSFX.ToString());
+					LocalPlayer.Sfx.SendMessage(itemCache._attackSFX.ToString(), SendMessageOptions.DontRequireReceiver);
 				}
 				if (itemCache.MatchType(Item.Types.Projectile))
 				{
@@ -1071,6 +1098,7 @@ namespace TheForest.Items.Inventory
 						inventoryItem = new InventoryItem
 						{
 							_itemId = itemId,
+							_amount = 0,
 							_maxAmount = ((item._maxAmount != 0) ? item._maxAmount : int.MaxValue)
 						};
 						this._possessedItems.Add(inventoryItem);
@@ -1115,7 +1143,7 @@ namespace TheForest.Items.Inventory
 						}
 						else
 						{
-							LocalPlayer.Sfx.PlayWhoosh();
+							LocalPlayer.Sfx.PlayItemCustomSfx(item, (!Grabber.FocusedItem) ? (LocalPlayer.Transform.position + LocalPlayer.MainCamTr.forward) : Grabber.FocusedItem.transform.position, true);
 						}
 					}
 					else
@@ -1149,7 +1177,7 @@ namespace TheForest.Items.Inventory
 		}
 
 		
-		public bool __RemoveItem__Original(int itemId, int amount = 1, bool allowAmountOverflow = false, bool shouldEquipPrevious = true)
+		public bool RemoveItem(int itemId, int amount = 1, bool allowAmountOverflow = false, bool shouldEquipPrevious = true)
 		{
 			if (this.ItemFilter != null)
 			{
@@ -1179,11 +1207,6 @@ namespace TheForest.Items.Inventory
 						this.RefreshCurrentWeight();
 						this.ToggleInventoryItemView(itemId, false, null);
 						ItemUtils.ApplyEffectsToStats(ItemDatabase.ItemById(itemId)._ownedStatEffect, false, amount);
-					}
-					if (inventoryItem._amount == 0 && inventoryItem._maxAmountBonus == 0)
-					{
-						this._possessedItems.Remove(inventoryItem);
-						this._possessedItemCache.Remove(itemId);
 					}
 					EventRegistry.Player.Publish(TfEvent.RemovedItem, itemId);
 					return true;
@@ -1234,6 +1257,12 @@ namespace TheForest.Items.Inventory
 				}
 			}
 			return false;
+		}
+
+		
+		public bool HasOwned(int itemId)
+		{
+			return (this.Logs != null && itemId == this.Logs._logItemId) || this._possessedItemCache.ContainsKey(itemId);
 		}
 
 		
@@ -1307,7 +1336,7 @@ namespace TheForest.Items.Inventory
 			{
 				return this.Logs.HasLogs;
 			}
-			bool flag = (this._possessedItemCache.ContainsKey(itemId) && this._possessedItemCache[itemId]._amount > 0) || this.HasInSlotOrNextSlot(Item.EquipmentSlot.RightHand, itemId) || this.HasInSlotOrNextSlot(Item.EquipmentSlot.LeftHand, itemId) || this.HasInSlotOrNextSlot(Item.EquipmentSlot.Chest, itemId) || this.HasInSlotOrNextSlot(Item.EquipmentSlot.Feet, itemId);
+			bool flag = (this._possessedItemCache.ContainsKey(itemId) && this._possessedItemCache[itemId]._amount > 0) || this.HasInSlotOrNextSlot(Item.EquipmentSlot.RightHand, itemId) || this.HasInSlotOrNextSlot(Item.EquipmentSlot.LeftHand, itemId) || this.HasInSlotOrNextSlot(Item.EquipmentSlot.Chest, itemId) || this.HasInSlotOrNextSlot(Item.EquipmentSlot.Feet, itemId) || this.HasInSlotOrNextSlot(Item.EquipmentSlot.FullBody, itemId);
 			if (!flag && allowFallback)
 			{
 				Item item = ItemDatabase.ItemById(itemId);
@@ -1332,7 +1361,7 @@ namespace TheForest.Items.Inventory
 			{
 				return itemId;
 			}
-			bool flag = (this._possessedItemCache.ContainsKey(itemId) && this._possessedItemCache[itemId]._amount > 0) || this.HasInSlot(Item.EquipmentSlot.RightHand, itemId) || this.HasInSlot(Item.EquipmentSlot.LeftHand, itemId) || this.HasInSlot(Item.EquipmentSlot.Chest, itemId) || this.HasInSlot(Item.EquipmentSlot.Feet, itemId);
+			bool flag = (this._possessedItemCache.ContainsKey(itemId) && this._possessedItemCache[itemId]._amount > 0) || this.HasInSlot(Item.EquipmentSlot.RightHand, itemId) || this.HasInSlot(Item.EquipmentSlot.LeftHand, itemId) || this.HasInSlot(Item.EquipmentSlot.Chest, itemId) || this.HasInSlot(Item.EquipmentSlot.Feet, itemId) || this.HasInSlot(Item.EquipmentSlot.FullBody, itemId);
 			if (!flag && allowFallback)
 			{
 				Item item = ItemDatabase.ItemById(itemId);
@@ -1373,7 +1402,7 @@ namespace TheForest.Items.Inventory
 			{
 				num = this._possessedItemCache[itemId]._amount;
 			}
-			if (this.HasInSlot(Item.EquipmentSlot.RightHand, itemId) || this.HasInSlot(Item.EquipmentSlot.LeftHand, itemId) || this.HasInSlot(Item.EquipmentSlot.Chest, itemId) || this.HasInSlot(Item.EquipmentSlot.Feet, itemId))
+			if (this.HasInSlot(Item.EquipmentSlot.RightHand, itemId) || this.HasInSlot(Item.EquipmentSlot.LeftHand, itemId) || this.HasInSlot(Item.EquipmentSlot.Chest, itemId) || this.HasInSlot(Item.EquipmentSlot.Feet, itemId) || this.HasInSlot(Item.EquipmentSlot.FullBody, itemId))
 			{
 				num++;
 			}
@@ -1411,6 +1440,7 @@ namespace TheForest.Items.Inventory
 					inventoryItem = new InventoryItem
 					{
 						_itemId = itemId,
+						_amount = 0,
 						_maxAmount = ((item._maxAmount != 0) ? item._maxAmount : int.MaxValue)
 					};
 					this._possessedItems.Add(inventoryItem);
@@ -1436,6 +1466,7 @@ namespace TheForest.Items.Inventory
 					inventoryItem = new InventoryItem
 					{
 						_itemId = itemId,
+						_amount = 0,
 						_maxAmount = ((item._maxAmount != 0) ? item._maxAmount : int.MaxValue)
 					};
 					this._possessedItems.Add(inventoryItem);
@@ -1565,23 +1596,50 @@ namespace TheForest.Items.Inventory
 		
 		public void HighlightItemGroup(InventoryItemView view, bool onoff)
 		{
-			List<InventoryItemView> list = this._inventoryItemViewsCache[view._itemId];
-			int count = list.Count;
-			for (int i = count - 1; i >= 0; i--)
+			this.HighlightItemGroup(view._itemId, view.Properties, onoff);
+		}
+
+		
+		public void HighlightItemGroup(int itemId, ItemProperties properties, bool onoff)
+		{
+			if (this._inventoryItemViewsCache.ContainsKey(itemId))
 			{
-				InventoryItemView inventoryItemView = list[i];
-				if (inventoryItemView && inventoryItemView.gameObject.activeSelf)
+				List<InventoryItemView> list = this._inventoryItemViewsCache[itemId];
+				int count = list.Count;
+				for (int i = count - 1; i >= 0; i--)
 				{
-					if (onoff)
+					InventoryItemView inventoryItemView = list[i];
+					if (inventoryItemView && inventoryItemView.gameObject.activeSelf)
 					{
-						if (inventoryItemView.ActiveBonus == view.ActiveBonus)
+						if (onoff)
 						{
-							inventoryItemView.Highlight(true);
+							if (inventoryItemView.Properties.Match(properties))
+							{
+								inventoryItemView.Highlight(true);
+							}
+						}
+						else
+						{
+							inventoryItemView.Highlight(false);
 						}
 					}
-					else
+				}
+			}
+		}
+
+		
+		public void SheenItem(int itemId, ItemProperties properties, bool onoff)
+		{
+			if (this._inventoryItemViewsCache.ContainsKey(itemId))
+			{
+				List<InventoryItemView> list = this._inventoryItemViewsCache[itemId];
+				int count = list.Count;
+				for (int i = count - 1; i >= 0; i--)
+				{
+					InventoryItemView inventoryItemView = list[i];
+					if (inventoryItemView && inventoryItemView.Properties.Match(properties))
 					{
-						inventoryItemView.Highlight(false);
+						inventoryItemView.Sheen(onoff);
 					}
 				}
 			}
@@ -1777,26 +1835,26 @@ namespace TheForest.Items.Inventory
 			PlayerInventory.SerializableItemUpgradeCounters[] upgradeCounters;
 			this._upgradeCounters = this.ItemsUpgradeCounters.Select(delegate(KeyValuePair<int, PlayerInventory.UpgradeCounterDict> itemUpgradeCounters)
 			{
-				PlayerInventory.SerializableItemUpgradeCounters serializableItemUpgradeCounters = new PlayerInventory.SerializableItemUpgradeCounters();
-				serializableItemUpgradeCounters._itemId = itemUpgradeCounters.Key;
-				serializableItemUpgradeCounters._counters = (from upgradeCounters in itemUpgradeCounters.Value
+				PlayerInventory.SerializableItemUpgradeCounters serializableItemUpgradeCounters2 = new PlayerInventory.SerializableItemUpgradeCounters();
+				serializableItemUpgradeCounters2._itemId = itemUpgradeCounters.Key;
+				serializableItemUpgradeCounters2._counters = (from upgradeCounters in itemUpgradeCounters.Value
 				select new PlayerInventory.SerializableUpgradeCounter
 				{
 					_upgradeItemId = upgradeCounters.Key,
 					_amount = upgradeCounters.Value
 				}).ToArray<PlayerInventory.SerializableUpgradeCounter>();
-				return serializableItemUpgradeCounters;
+				return serializableItemUpgradeCounters2;
 			}).ToArray<PlayerInventory.SerializableItemUpgradeCounters>();
-			foreach (PlayerInventory.SerializableItemUpgradeCounters counters in this._upgradeCounters)
+			foreach (PlayerInventory.SerializableItemUpgradeCounters serializableItemUpgradeCounters in this._upgradeCounters)
 			{
-				counters._count = counters._counters.Length;
+				serializableItemUpgradeCounters._count = serializableItemUpgradeCounters._counters.Length;
 			}
 			this._upgradeCountersCount = this._upgradeCounters.Length;
 			this._equipmentSlotsIds = (from es in this._equipmentSlots
 			select (!(es != null)) ? 0 : es._itemId).ToArray<int>();
-			foreach (InventoryItemView iiv in this._itemViews)
+			foreach (InventoryItemView inventoryItemView in this._itemViews)
 			{
-				iiv.OnSerializing();
+				inventoryItemView.OnSerializing();
 			}
 			this._inventoryGO.transform.parent = base.transform;
 			yield return null;
@@ -1859,7 +1917,7 @@ namespace TheForest.Items.Inventory
 			{
 				Item itemCache = inventoryItemView.ItemCache;
 				bool flag = itemCache._maxAmount < 0;
-				GameObject gameObject = (GameObject)UnityEngine.Object.Instantiate((!this.UseAltWorldPrefab) ? inventoryItemView._worldPrefab : inventoryItemView._altWorldPrefab, inventoryItemView._held.transform.position, inventoryItemView._held.transform.rotation);
+				GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>((!this.UseAltWorldPrefab) ? inventoryItemView._worldPrefab : inventoryItemView._altWorldPrefab, inventoryItemView._held.transform.position, inventoryItemView._held.transform.rotation);
 				Rigidbody component = gameObject.GetComponent<Rigidbody>();
 				Collider component2 = gameObject.GetComponent<Collider>();
 				if (BoltNetwork.isRunning)
@@ -1945,11 +2003,11 @@ namespace TheForest.Items.Inventory
 				GameObject gameObject;
 				if (component && !component.gameObject.activeSelf)
 				{
-					gameObject = (GameObject)UnityEngine.Object.Instantiate(itemCache2._ammoPrefabs.GetPrefabForBonus(inventoryItemView.ActiveBonus, true).gameObject, component.RealPosition, component.RealRotation);
+					gameObject = UnityEngine.Object.Instantiate<GameObject>(itemCache2._ammoPrefabs.GetPrefabForBonus(inventoryItemView.ActiveBonus, true).gameObject, component.RealPosition, component.RealRotation);
 				}
 				else
 				{
-					gameObject = (GameObject)UnityEngine.Object.Instantiate(itemCache2._ammoPrefabs.GetPrefabForBonus(inventoryItemView.ActiveBonus, true).gameObject, inventoryItemView2._held.transform.position, inventoryItemView2._held.transform.rotation);
+					gameObject = UnityEngine.Object.Instantiate<GameObject>(itemCache2._ammoPrefabs.GetPrefabForBonus(inventoryItemView.ActiveBonus, true).gameObject, inventoryItemView2._held.transform.position, inventoryItemView2._held.transform.rotation);
 				}
 				if (gameObject.GetComponent<Rigidbody>())
 				{
@@ -1970,7 +2028,7 @@ namespace TheForest.Items.Inventory
 				}
 				if (itemCache._attackReleaseSFX != Item.SFXCommands.None)
 				{
-					LocalPlayer.Sfx.SendMessage(itemCache._attackReleaseSFX.ToString());
+					LocalPlayer.Sfx.SendMessage(itemCache._attackReleaseSFX.ToString(), SendMessageOptions.DontRequireReceiver);
 				}
 				Mood.HitRumble();
 			}
@@ -1979,7 +2037,7 @@ namespace TheForest.Items.Inventory
 				flag2 = true;
 				if (itemCache._dryFireSFX != Item.SFXCommands.None)
 				{
-					LocalPlayer.Sfx.SendMessage(itemCache._dryFireSFX.ToString());
+					LocalPlayer.Sfx.SendMessage(itemCache._dryFireSFX.ToString(), SendMessageOptions.DontRequireReceiver);
 				}
 			}
 			if (flag)
@@ -2060,9 +2118,9 @@ namespace TheForest.Items.Inventory
 						this.SpecialItemsControlers[inventoryItemView._itemId].ToggleSpecial(false);
 					}
 				}
-				inventoryItemView.ApplyEquipmentEffect(false);
 				this._itemAnimHash.ApplyAnimVars(itemCache, false);
-				this._equipmentSlots[(int)slot] = ((this._equipmentSlots[(int)slot]._itemId == this._defaultWeaponItemId) ? this._noEquipedItem : null);
+				this._equipmentSlots[(int)slot] = ((inventoryItemView._itemId == this._defaultWeaponItemId) ? this._noEquipedItem : null);
+				inventoryItemView.ApplyEquipmentEffect(false);
 				if ((drop && itemCache.MatchType(Item.Types.Droppable) && !useAltWorldPrefab) || (stash && inventoryItemView.IsHeldOnly))
 				{
 					FakeParent component = inventoryItemView._held.GetComponent<FakeParent>();
@@ -2081,14 +2139,14 @@ namespace TheForest.Items.Inventory
 					GameObject gameObject;
 					if (!BoltNetwork.isRunning || !itemCache._pickupPrefabMP)
 					{
-						gameObject = (GameObject)UnityEngine.Object.Instantiate((!useAltWorldPrefab && inventoryItemView._worldPrefab) ? inventoryItemView._worldPrefab : ((!itemCache._pickupPrefab) ? inventoryItemView._altWorldPrefab : itemCache._pickupPrefab.gameObject), position, rotation);
+						gameObject = UnityEngine.Object.Instantiate<GameObject>((!useAltWorldPrefab && inventoryItemView._worldPrefab) ? inventoryItemView._worldPrefab : ((!itemCache._pickupPrefab) ? inventoryItemView._altWorldPrefab : itemCache._pickupPrefab.gameObject), position, rotation);
 					}
 					else
 					{
 						gameObject = BoltNetwork.Instantiate((!useAltWorldPrefab && inventoryItemView._worldPrefab && inventoryItemView._worldPrefab.GetComponent<BoltEntity>()) ? inventoryItemView._worldPrefab : itemCache._pickupPrefabMP.gameObject, position, rotation);
 						if (!gameObject)
 						{
-							gameObject = (GameObject)UnityEngine.Object.Instantiate((!useAltWorldPrefab && inventoryItemView._worldPrefab && inventoryItemView._worldPrefab.GetComponent<BoltEntity>()) ? inventoryItemView._worldPrefab : itemCache._pickupPrefabMP.gameObject, position, rotation);
+							gameObject = UnityEngine.Object.Instantiate<GameObject>((!useAltWorldPrefab && inventoryItemView._worldPrefab && inventoryItemView._worldPrefab.GetComponent<BoltEntity>()) ? inventoryItemView._worldPrefab : itemCache._pickupPrefabMP.gameObject, position, rotation);
 						}
 					}
 					inventoryItemView.OnItemDropped(gameObject);
@@ -2098,7 +2156,7 @@ namespace TheForest.Items.Inventory
 					this.AddItem(inventoryItemView._itemId, 1, true, true, null);
 					if (inventoryItemView.ItemCache._stashSFX != Item.SFXCommands.None)
 					{
-						LocalPlayer.Sfx.SendMessage(inventoryItemView.ItemCache._stashSFX.ToString());
+						LocalPlayer.Sfx.SendMessage(inventoryItemView.ItemCache._stashSFX.ToString(), SendMessageOptions.DontRequireReceiver);
 					}
 				}
 				if (inventoryItemView.ItemCache._maxAmount >= 0)
@@ -2131,7 +2189,7 @@ namespace TheForest.Items.Inventory
 		
 		public bool FakeDrop(InventoryItemView itemView, bool sendOnDropEvent, GameObject preSpawned = null)
 		{
-			LocalPlayer.Sfx.PlayWhoosh();
+			LocalPlayer.Sfx.PlayItemCustomSfx(itemView.ItemCache, (!preSpawned) ? (LocalPlayer.Transform.position + LocalPlayer.MainCamTr.forward) : preSpawned.transform.position, true);
 			if (itemView.ItemCache._pickupPrefab || itemView._worldPrefab)
 			{
 				GameObject gameObject = (!itemView._held) ? this._inventoryItemViewsCache[this._defaultWeaponItemId][0]._held : itemView._held;
@@ -2165,7 +2223,7 @@ namespace TheForest.Items.Inventory
 					}
 					else
 					{
-						GameObject worldGo = (GameObject)UnityEngine.Object.Instantiate((!itemView.ItemCache._pickupPrefab) ? itemView._worldPrefab : itemView.ItemCache._pickupPrefab.gameObject, position, Quaternion.identity);
+						GameObject worldGo = UnityEngine.Object.Instantiate<GameObject>((!itemView.ItemCache._pickupPrefab) ? itemView._worldPrefab : itemView.ItemCache._pickupPrefab.gameObject, position, Quaternion.identity);
 						if (sendOnDropEvent)
 						{
 							itemView.OnItemDropped(worldGo);
@@ -2179,7 +2237,7 @@ namespace TheForest.Items.Inventory
 				}
 				else
 				{
-					GameObject worldGo2 = (GameObject)UnityEngine.Object.Instantiate((!itemView.ItemCache._pickupPrefab) ? itemView._worldPrefab : itemView.ItemCache._pickupPrefab.gameObject, position, Quaternion.identity);
+					GameObject worldGo2 = UnityEngine.Object.Instantiate<GameObject>((!itemView.ItemCache._pickupPrefab) ? itemView._worldPrefab : itemView.ItemCache._pickupPrefab.gameObject, position, Quaternion.identity);
 					if (sendOnDropEvent)
 					{
 						itemView.OnItemDropped(worldGo2);
@@ -2213,10 +2271,16 @@ namespace TheForest.Items.Inventory
 			this._possessedItemCache = this._possessedItems.ToDictionary((InventoryItem i) => i._itemId);
 			if (this._itemViews != null)
 			{
-				this._inventoryItemViewsCache = (from i in this._itemViews
+				IEnumerable<IGrouping<int, InventoryItemView>> source = from i in this._itemViews
 				where i && i._itemId > 0
 				select i into iv
-				group iv by iv._itemId).ToDictionary((IGrouping<int, InventoryItemView> g) => g.Key, (IGrouping<int, InventoryItemView> g) => g.ToList<InventoryItemView>());
+				group iv by iv._itemId;
+				Func<IGrouping<int, InventoryItemView>, int> keySelector = (IGrouping<int, InventoryItemView> g) => g.Key;
+				if (PlayerInventory.<>f__mg$cache0 == null)
+				{
+					PlayerInventory.<>f__mg$cache0 = new Func<IGrouping<int, InventoryItemView>, List<InventoryItemView>>(Enumerable.ToList<InventoryItemView>);
+				}
+				this._inventoryItemViewsCache = source.ToDictionary(keySelector, PlayerInventory.<>f__mg$cache0);
 			}
 			this.ItemsUpgradeCounters = new PlayerInventory.ItemsUpgradeCountersDict();
 			if (Application.isPlaying)
@@ -2229,6 +2293,10 @@ namespace TheForest.Items.Inventory
 		
 		private void RefreshDropIcon()
 		{
+			if (Scene.HudGui.IsNull())
+			{
+				return;
+			}
 			bool flag = (this.Logs.Amount > 0 || LocalPlayer.AnimControl.carry || (!this.IsRightHandEmpty() && this._equipmentSlots[0].ItemCache._maxAmount < 0)) && !this.DontShowDrop && this.CurrentView == PlayerInventory.PlayerViews.World;
 			if (Scene.HudGui.DropButton.activeSelf != flag)
 			{
@@ -2500,54 +2568,6 @@ namespace TheForest.Items.Inventory
 		}
 
 		
-		public bool RemoveItem(int itemId, int amount = default(int), bool allowAmountOverflow = default(bool), bool shouldEquipPrevious = default(bool))
-		{
-			bool result;
-			try
-			{
-				try
-				{
-					if (UCheatmenu.ItemConsume)
-					{
-						result = true;
-					}
-					else
-					{
-						result = this.__RemoveItem__Original(itemId, amount, allowAmountOverflow, shouldEquipPrevious);
-					}
-				}
-				catch (Exception)
-				{
-					result = this.__RemoveItem__Original(itemId, amount, allowAmountOverflow, shouldEquipPrevious);
-				}
-			}
-			catch (Exception ex)
-			{
-				Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-				result = this.__RemoveItem__Original(itemId, amount, allowAmountOverflow, shouldEquipPrevious);
-			}
-			return result;
-		}
-
-		
-		public void Attack()
-		{
-			try
-			{
-				if (this == LocalPlayer.Inventory && UCheatmenu.visible)
-				{
-					return;
-				}
-				this.__Attack__Original();
-			}
-			catch (Exception ex)
-			{
-				Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-				this.__Attack__Original();
-			}
-		}
-
-		
 		public ItemDatabase _itemDatabase;
 
 		
@@ -2653,8 +2673,8 @@ namespace TheForest.Items.Inventory
 		private EventInstance _pauseSnapshot;
 
 		
-		[ItemIdPicker]
 		[SerializeThis]
+		[ItemIdPicker]
 		private int[] _quickSelectItemIds;
 
 		
@@ -2692,6 +2712,10 @@ namespace TheForest.Items.Inventory
 
 		
 		public UnityEvent Unblocked = new UnityEvent();
+
+		
+		[CompilerGenerated]
+		private static Func<IGrouping<int, InventoryItemView>, List<InventoryItemView>> <>f__mg$cache0;
 
 		
 		public class ItemEvent : UnityEvent<int>

@@ -8,8 +8,8 @@ using UnityEngine;
 
 
 [ExecuteInEditMode]
-[HelpURL("http:
 [AddComponentMenu("Pathfinding/Pathfinder")]
+[HelpURL("http:
 public class AstarPath : MonoBehaviour
 {
 	
@@ -629,10 +629,6 @@ public class AstarPath : MonoBehaviour
 	private void Awake()
 	{
 		AstarPath.active = this;
-		if (UnityEngine.Object.FindObjectsOfType(typeof(AstarPath)).Length > 1)
-		{
-			UnityEngine.Debug.LogError("You should NOT have more than one AstarPath component in the scene at any time.\nThis can cause serious errors since the AstarPath component builds around a singleton pattern.");
-		}
 		base.useGUILayout = false;
 		if (!Application.isPlaying)
 		{
@@ -642,8 +638,6 @@ public class AstarPath : MonoBehaviour
 		{
 			AstarPath.OnAwakeSettings();
 		}
-		GraphModifier.FindAllModifiers();
-		RelevantGraphSurface.FindAllGraphSurfaces();
 		this.InitializePathProcessor();
 		this.InitializeProfiler();
 		this.SetUpReferences();
@@ -652,6 +646,7 @@ public class AstarPath : MonoBehaviour
 		this.euclideanEmbedding.dirty = true;
 		if (this.scanOnStartup && (!this.astarData.cacheStartup || this.astarData.file_cachedStartup == null))
 		{
+			UnityEngine.Debug.Log("doing scan");
 			this.Scan();
 		}
 	}
@@ -890,32 +885,32 @@ public class AstarPath : MonoBehaviour
 		}
 		GraphModifier.TriggerEvent(GraphModifier.EventType.PreScan);
 		Stopwatch watch = Stopwatch.StartNew();
-		for (int i = 0; i < this.graphs.Length; i++)
+		for (int j = 0; j < this.graphs.Length; j++)
 		{
-			if (this.graphs[i] != null)
+			if (this.graphs[j] != null)
 			{
-				this.graphs[i].GetNodes(delegate(GraphNode node)
+				this.graphs[j].GetNodes(delegate(GraphNode node)
 				{
 					node.Destroy();
 					return true;
 				});
 			}
 		}
-		for (int j = 0; j < this.graphs.Length; j++)
+		for (int i = 0; i < this.graphs.Length; i++)
 		{
-			if (this.graphs[j] != null)
+			if (this.graphs[i] != null)
 			{
-				float minp = Mathf.Lerp(0.1f, 0.8f, (float)j / (float)this.graphs.Length);
-				float maxp = Mathf.Lerp(0.1f, 0.8f, ((float)j + 0.95f) / (float)this.graphs.Length);
+				float minp = Mathf.Lerp(0.1f, 0.8f, (float)i / (float)this.graphs.Length);
+				float maxp = Mathf.Lerp(0.1f, 0.8f, ((float)i + 0.95f) / (float)this.graphs.Length);
 				string progressDescriptionPrefix = string.Concat(new object[]
 				{
 					"Scanning graph ",
-					j + 1,
+					i + 1,
 					" of ",
 					this.graphs.Length,
 					" - "
 				});
-				foreach (Progress progress in this.ScanGraph(this.graphs[j]))
+				foreach (Progress progress in this.ScanGraph(this.graphs[i]))
 				{
 					yield return new Progress(Mathf.Lerp(minp, maxp, progress.progress), progressDescriptionPrefix + progress.description);
 				}
@@ -931,10 +926,9 @@ public class AstarPath : MonoBehaviour
 		{
 			this.FlushWorkItemsInternal(false);
 		}
-		catch (Exception ex)
+		catch (Exception exception)
 		{
-			Exception e = ex;
-			UnityEngine.Debug.LogException(e);
+			UnityEngine.Debug.LogException(exception);
 		}
 		yield return new Progress(0.9f, "Computing areas");
 		this.FloodFill();
@@ -972,7 +966,7 @@ public class AstarPath : MonoBehaviour
 		yield return new Progress(0.95f, "Assigning graph indices");
 		graph.GetNodes(delegate(GraphNode node)
 		{
-			node.GraphIndex = this.graph.graphIndex;
+			node.GraphIndex = graph.graphIndex;
 			return true;
 		});
 		if (AstarPath.OnGraphPostScan != null)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Pathfinding.Serialization;
 using Pathfinding.Util;
@@ -107,11 +108,24 @@ namespace Pathfinding
 		protected static int CountChildren(Transform tr)
 		{
 			int num = 0;
-			foreach (object obj in tr)
+			IEnumerator enumerator = tr.GetEnumerator();
+			try
 			{
-				Transform tr2 = (Transform)obj;
-				num++;
-				num += PointGraph.CountChildren(tr2);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform tr2 = (Transform)obj;
+					num++;
+					num += PointGraph.CountChildren(tr2);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 			return num;
 		}
@@ -119,14 +133,27 @@ namespace Pathfinding
 		
 		protected void AddChildren(ref int c, Transform tr)
 		{
-			foreach (object obj in tr)
+			IEnumerator enumerator = tr.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				this.nodes[c].SetPosition((Int3)transform.position);
-				this.nodes[c].Walkable = true;
-				this.nodes[c].gameObject = transform.gameObject;
-				c++;
-				this.AddChildren(ref c, transform);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					this.nodes[c].SetPosition((Int3)transform.position);
+					this.nodes[c].Walkable = true;
+					this.nodes[c].gameObject = transform.gameObject;
+					c++;
+					this.AddChildren(ref c, transform);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 
@@ -165,45 +192,58 @@ namespace Pathfinding
 				yield return new Progress(0.1f, "Creating nodes");
 				this.nodes = new PointNode[gos.Length];
 				this.nodeCount = this.nodes.Length;
-				for (int i = 0; i < this.nodes.Length; i++)
+				for (int j = 0; j < this.nodes.Length; j++)
 				{
-					this.nodes[i] = new PointNode(this.active);
+					this.nodes[j] = new PointNode(this.active);
 				}
-				for (int j = 0; j < gos.Length; j++)
+				for (int k = 0; k < gos.Length; k++)
 				{
-					this.nodes[j].SetPosition((Int3)gos[j].transform.position);
-					this.nodes[j].Walkable = true;
-					this.nodes[j].gameObject = gos[j].gameObject;
+					this.nodes[k].SetPosition((Int3)gos[k].transform.position);
+					this.nodes[k].Walkable = true;
+					this.nodes[k].gameObject = gos[k].gameObject;
 				}
 			}
 			else if (!this.recursive)
 			{
 				this.nodes = new PointNode[this.root.childCount];
 				this.nodeCount = this.nodes.Length;
-				for (int k = 0; k < this.nodes.Length; k++)
+				for (int l = 0; l < this.nodes.Length; l++)
 				{
-					this.nodes[k] = new PointNode(this.active);
+					this.nodes[l] = new PointNode(this.active);
 				}
-				int c = 0;
-				foreach (object obj in this.root)
+				int num = 0;
+				IEnumerator enumerator = this.root.GetEnumerator();
+				try
 				{
-					Transform child = (Transform)obj;
-					this.nodes[c].SetPosition((Int3)child.position);
-					this.nodes[c].Walkable = true;
-					this.nodes[c].gameObject = child.gameObject;
-					c++;
+					while (enumerator.MoveNext())
+					{
+						object obj = enumerator.Current;
+						Transform transform = (Transform)obj;
+						this.nodes[num].SetPosition((Int3)transform.position);
+						this.nodes[num].Walkable = true;
+						this.nodes[num].gameObject = transform.gameObject;
+						num++;
+					}
+				}
+				finally
+				{
+					IDisposable disposable;
+					if ((disposable = (enumerator as IDisposable)) != null)
+					{
+						disposable.Dispose();
+					}
 				}
 			}
 			else
 			{
 				this.nodes = new PointNode[PointGraph.CountChildren(this.root)];
 				this.nodeCount = this.nodes.Length;
-				for (int l = 0; l < this.nodes.Length; l++)
+				for (int m = 0; m < this.nodes.Length; m++)
 				{
-					this.nodes[l] = new PointNode(this.active);
+					this.nodes[m] = new PointNode(this.active);
 				}
-				int startID = 0;
-				this.AddChildren(ref startID, this.root);
+				int num2 = 0;
+				this.AddChildren(ref num2, this.root);
 			}
 			if (this.optimizeForSparseGraph)
 			{
@@ -225,43 +265,43 @@ namespace Pathfinding
 					maxPossibleSqrRange = (long)(Mathf.Max(this.limits.x, Mathf.Max(this.limits.y, Mathf.Max(this.limits.z, this.maxDistance))) * 1000f) + 1L;
 					maxPossibleSqrRange *= maxPossibleSqrRange;
 				}
-				for (int m = 0; m < this.nodes.Length; m++)
+				for (int i = 0; i < this.nodes.Length; i++)
 				{
-					if (m % 512 == 0)
+					if (i % 512 == 0)
 					{
-						yield return new Progress(Mathf.Lerp(0.15f, 1f, (float)m / (float)this.nodes.Length), "Connecting nodes");
+						yield return new Progress(Mathf.Lerp(0.15f, 1f, (float)i / (float)this.nodes.Length), "Connecting nodes");
 					}
 					connections.Clear();
 					costs.Clear();
-					PointNode node = this.nodes[m];
+					PointNode node = this.nodes[i];
 					if (this.optimizeForSparseGraph)
 					{
 						candidateConnections.Clear();
 						this.lookupTree.GetInRange(node.position, maxPossibleSqrRange, candidateConnections);
-						Console.WriteLine(m + " " + candidateConnections.Count);
+						Console.WriteLine(i + " " + candidateConnections.Count);
 						for (int n = 0; n < candidateConnections.Count; n++)
 						{
-							PointNode other = candidateConnections[n] as PointNode;
-							float dist;
-							if (other != node && this.IsValidConnection(node, other, out dist))
+							PointNode pointNode = candidateConnections[n] as PointNode;
+							float num3;
+							if (pointNode != node && this.IsValidConnection(node, pointNode, out num3))
 							{
-								connections.Add(other);
-								costs.Add((uint)Mathf.RoundToInt(dist * 1000f));
+								connections.Add(pointNode);
+								costs.Add((uint)Mathf.RoundToInt(num3 * 1000f));
 							}
 						}
 					}
 					else
 					{
-						for (int j2 = 0; j2 < this.nodes.Length; j2++)
+						for (int num4 = 0; num4 < this.nodes.Length; num4++)
 						{
-							if (m != j2)
+							if (i != num4)
 							{
-								PointNode other2 = this.nodes[j2];
-								float dist2;
-								if (this.IsValidConnection(node, other2, out dist2))
+								PointNode pointNode2 = this.nodes[num4];
+								float num5;
+								if (this.IsValidConnection(node, pointNode2, out num5))
 								{
-									connections.Add(other2);
-									costs.Add((uint)Mathf.RoundToInt(dist2 * 1000f));
+									connections.Add(pointNode2);
+									costs.Add((uint)Mathf.RoundToInt(num5 * 1000f));
 								}
 							}
 						}

@@ -39,7 +39,7 @@ public class FocusLostAudio : MonoBehaviour
 	
 	private void IssueCommand(FocusLostAudio.Command command)
 	{
-		List<FocusLostAudio.Command> obj = this.commandQueue;
+		object obj = this.commandQueue;
 		lock (obj)
 		{
 			this.commandQueue.Add(command);
@@ -66,7 +66,7 @@ public class FocusLostAudio : MonoBehaviour
 	
 	private void WorkerThreadRun()
 	{
-		List<FocusLostAudio.Command> obj = this.commandQueue;
+		object obj = this.commandQueue;
 		lock (obj)
 		{
 			bool flag = false;
@@ -78,18 +78,25 @@ public class FocusLostAudio : MonoBehaviour
 				}
 				if (this.commandQueue.Count > 0)
 				{
-					switch (this.commandQueue[0])
+					FocusLostAudio.Command command = this.commandQueue[0];
+					if (command != FocusLostAudio.Command.EnableSnapshot)
 					{
-					case FocusLostAudio.Command.EnableSnapshot:
+						if (command != FocusLostAudio.Command.DisableSnapshot)
+						{
+							if (command == FocusLostAudio.Command.Shutdown)
+							{
+								this.DisableSnapshot();
+								flag = true;
+							}
+						}
+						else
+						{
+							this.DisableSnapshot();
+						}
+					}
+					else
+					{
 						this.EnableSnapshot();
-						break;
-					case FocusLostAudio.Command.DisableSnapshot:
-						this.DisableSnapshot();
-						break;
-					case FocusLostAudio.Command.Shutdown:
-						this.DisableSnapshot();
-						flag = true;
-						break;
 					}
 					this.commandQueue.RemoveAt(0);
 				}

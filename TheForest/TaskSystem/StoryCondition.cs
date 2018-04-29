@@ -27,7 +27,7 @@ namespace TheForest.TaskSystem
 		{
 			if (!this._done)
 			{
-				GameStats.StoryElements storyElements = (GameStats.StoryElements)((int)o);
+				GameStats.StoryElements storyElements = (GameStats.StoryElements)o;
 				if (storyElements == this._type)
 				{
 					this.SetDone();

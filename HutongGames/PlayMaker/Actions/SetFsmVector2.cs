@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Set the value of a Vector2 Variable in another FSM.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Set the value of a Vector2 Variable in another FSM.")]
 	public class SetFsmVector2 : FsmStateAction
 	{
 		
@@ -45,7 +45,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			if (this.fsm == null)
 			{
-				this.LogWarning("Could not find FSM: " + this.fsmName.Value);
+				base.LogWarning("Could not find FSM: " + this.fsmName.Value);
 				return;
 			}
 			FsmVector2 fsmVector = this.fsm.FsmVariables.GetFsmVector2(this.variableName.Value);
@@ -55,7 +55,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			else
 			{
-				this.LogWarning("Could not find variable: " + this.variableName.Value);
+				base.LogWarning("Could not find variable: " + this.variableName.Value);
 			}
 		}
 
@@ -77,13 +77,13 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("The name of the FSM variable.")]
 		[UIHint(UIHint.FsmVector2)]
+		[Tooltip("The name of the FSM variable.")]
 		public FsmString variableName;
 
 		
-		[Tooltip("Set the value of the variable.")]
 		[RequiredField]
+		[Tooltip("Set the value of the variable.")]
 		public FsmVector2 setValue;
 
 		

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Converts a Float value to an Integer value.")]
 	[ActionCategory(ActionCategory.Convert)]
+	[Tooltip("Converts a Float value to an Integer value.")]
 	public class ConvertFloatToInt : FsmStateAction
 	{
 		
@@ -36,24 +36,31 @@ namespace HutongGames.PlayMaker.Actions
 		
 		private void DoConvertFloatToInt()
 		{
-			switch (this.rounding)
+			ConvertFloatToInt.FloatRounding floatRounding = this.rounding;
+			if (floatRounding != ConvertFloatToInt.FloatRounding.Nearest)
 			{
-			case ConvertFloatToInt.FloatRounding.RoundDown:
-				this.intVariable.Value = Mathf.FloorToInt(this.floatVariable.Value);
-				break;
-			case ConvertFloatToInt.FloatRounding.RoundUp:
-				this.intVariable.Value = Mathf.CeilToInt(this.floatVariable.Value);
-				break;
-			case ConvertFloatToInt.FloatRounding.Nearest:
+				if (floatRounding != ConvertFloatToInt.FloatRounding.RoundDown)
+				{
+					if (floatRounding == ConvertFloatToInt.FloatRounding.RoundUp)
+					{
+						this.intVariable.Value = Mathf.CeilToInt(this.floatVariable.Value);
+					}
+				}
+				else
+				{
+					this.intVariable.Value = Mathf.FloorToInt(this.floatVariable.Value);
+				}
+			}
+			else
+			{
 				this.intVariable.Value = Mathf.RoundToInt(this.floatVariable.Value);
-				break;
 			}
 		}
 
 		
 		[RequiredField]
-		[Tooltip("The Float variable to convert to an integer.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The Float variable to convert to an integer.")]
 		public FsmFloat floatVariable;
 
 		

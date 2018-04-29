@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Bolt;
 using TheForest.Commons.Enums;
 using TheForest.UI;
 using TheForest.Utils;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 public static class CoopAdminCommand
@@ -17,81 +19,31 @@ public static class CoopAdminCommand
 		{
 			if (CoopSteamClientStarter.IsAdmin)
 			{
-				if (command != null)
+				switch (command)
 				{
-					if (CoopAdminCommand.<>f__switch$map4 == null)
-					{
-						CoopAdminCommand.<>f__switch$map4 = new Dictionary<string, int>(12)
-						{
-							{
-								"kick",
-								0
-							},
-							{
-								"ban",
-								0
-							},
-							{
-								"unban",
-								0
-							},
-							{
-								"save",
-								0
-							},
-							{
-								"restart",
-								0
-							},
-							{
-								"shutdown",
-								0
-							},
-							{
-								"openlogs",
-								0
-							},
-							{
-								"closelogs",
-								0
-							},
-							{
-								"treeregrowmode",
-								0
-							},
-							{
-								"allowbuildingdestruction",
-								0
-							},
-							{
-								"allowenemiescreative",
-								0
-							},
-							{
-								"help",
-								1
-							}
-						};
-					}
-					int num;
-					if (CoopAdminCommand.<>f__switch$map4.TryGetValue(command, out num))
-					{
-						if (num == 0)
-						{
-							AdminCommand adminCommand = AdminCommand.Create(GlobalTargets.OnlyServer);
-							adminCommand.Command = command;
-							adminCommand.Data = data;
-							adminCommand.Send();
-							goto IL_160;
-						}
-						if (num == 1)
-						{
-							CoopAdminCommand.SendLocalMessage("Help 1/3:\r\n/kick <steamId>, /ban <steamId>, /save <slotNum>, /restart, /shutdown");
-							CoopAdminCommand.SendLocalMessage("Help 2/3:\r\n/openlogs /closelogs");
-							CoopAdminCommand.SendLocalMessage("Help 3/3:\r\n/treeregrowmode <on|off>, /allowbuildingdestruction <on|off>, /allowenemiescreative <on|off>");
-							goto IL_160;
-						}
-					}
+				case "kick":
+				case "ban":
+				case "unban":
+				case "save":
+				case "restart":
+				case "shutdown":
+				case "openlogs":
+				case "closelogs":
+				case "treeregrowmode":
+				case "allowbuildingdestruction":
+				case "allowenemiescreative":
+				{
+					AdminCommand adminCommand = AdminCommand.Create(GlobalTargets.OnlyServer);
+					adminCommand.Command = command;
+					adminCommand.Data = data;
+					adminCommand.Send();
+					goto IL_163;
+				}
+				case "help":
+					CoopAdminCommand.SendLocalMessage("Help 1/3:\r\n/kick <steamId>, /ban <steamId>, /save <slotNum>, /restart, /shutdown");
+					CoopAdminCommand.SendLocalMessage("Help 2/3:\r\n/openlogs /closelogs");
+					CoopAdminCommand.SendLocalMessage("Help 3/3:\r\n/treeregrowmode <on|off>, /allowbuildingdestruction <on|off>, /allowenemiescreative <on|off>");
+					goto IL_163;
 				}
 				CoopAdminCommand.SendLocalMessage(string.Concat(new string[]
 				{
@@ -101,7 +53,7 @@ public static class CoopAdminCommand
 					data,
 					"'"
 				}));
-				IL_160:;
+				IL_163:;
 			}
 			else
 			{
@@ -122,9 +74,9 @@ public static class CoopAdminCommand
 	{
 		if (CoopPeerStarter.DedicatedHost && source.IsDedicatedServerAdmin() && command != null)
 		{
-			if (CoopAdminCommand.<>f__switch$map5 == null)
+			if (CoopAdminCommand.<>f__switch$map2 == null)
 			{
-				CoopAdminCommand.<>f__switch$map5 = new Dictionary<string, int>(11)
+				CoopAdminCommand.<>f__switch$map2 = new Dictionary<string, int>(11)
 				{
 					{
 						"save",
@@ -173,7 +125,7 @@ public static class CoopAdminCommand
 				};
 			}
 			int num;
-			if (CoopAdminCommand.<>f__switch$map5.TryGetValue(command, out num))
+			if (CoopAdminCommand.<>f__switch$map2.TryGetValue(command, out num))
 			{
 				switch (num)
 				{
@@ -191,17 +143,21 @@ public static class CoopAdminCommand
 				}
 				case 1:
 					CoopAdminCommand.SendNetworkMessageAll("Server shuting down for restart, please reconnect.");
-					Scene.ActiveMB.StartCoroutine(CoopAdminCommand.ShutDownRoutine(true));
+					TheForest.Utils.Scene.ActiveMB.StartCoroutine(CoopAdminCommand.ShutDownRoutine(true));
 					break;
 				case 2:
 					CoopAdminCommand.SendNetworkMessageAll("Server is shuting down (no restart)");
-					Scene.ActiveMB.StartCoroutine(CoopAdminCommand.ShutDownRoutine(false));
+					TheForest.Utils.Scene.ActiveMB.StartCoroutine(CoopAdminCommand.ShutDownRoutine(false));
 					break;
 				case 3:
 					if (!SteamDSConfig.ShowLogs)
 					{
 						ConsoleWriter.Open();
-						Application.logMessageReceived += CoopAdminCommand.Application_logMessageReceived;
+						if (CoopAdminCommand.<>f__mg$cache0 == null)
+						{
+							CoopAdminCommand.<>f__mg$cache0 = new Application.LogCallback(CoopAdminCommand.Application_logMessageReceived);
+						}
+						Application.logMessageReceived += CoopAdminCommand.<>f__mg$cache0;
 						SteamDSConfig.ShowLogs = true;
 						CoopAdminCommand.SendNetworkMessage("Opened logs console", source);
 					}
@@ -212,7 +168,11 @@ public static class CoopAdminCommand
 					break;
 				case 4:
 					ConsoleWriter.Close();
-					Application.logMessageReceived -= CoopAdminCommand.Application_logMessageReceived;
+					if (CoopAdminCommand.<>f__mg$cache1 == null)
+					{
+						CoopAdminCommand.<>f__mg$cache1 = new Application.LogCallback(CoopAdminCommand.Application_logMessageReceived);
+					}
+					Application.logMessageReceived -= CoopAdminCommand.<>f__mg$cache1;
 					SteamDSConfig.ShowLogs = false;
 					CoopAdminCommand.SendNetworkMessage("Closed logs console", source);
 					break;
@@ -375,7 +335,7 @@ public static class CoopAdminCommand
 	
 	private static void SendLocalMessage(string message)
 	{
-		Scene.HudGui.Chatbox.AddLine(null, message, true);
+		TheForest.Utils.Scene.HudGui.Chatbox.AddLine(null, message, true);
 	}
 
 	
@@ -389,7 +349,7 @@ public static class CoopAdminCommand
 		if (restart)
 		{
 			yield return YieldPresets.WaitPointFiveSeconds;
-			Application.LoadLevel("SteamDedicatedBootstrapScene");
+			SceneManager.LoadScene("SteamDedicatedBootstrapScene", LoadSceneMode.Single);
 		}
 		else
 		{
@@ -410,4 +370,12 @@ public static class CoopAdminCommand
 			stackTrace
 		}));
 	}
+
+	
+	[CompilerGenerated]
+	private static Application.LogCallback <>f__mg$cache0;
+
+	
+	[CompilerGenerated]
+	private static Application.LogCallback <>f__mg$cache1;
 }

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("GUILayout Label.")]
 	[ActionCategory(ActionCategory.GUILayout)]
+	[Tooltip("GUILayout Label.")]
 	public class GUILayoutLabel : GUILayoutAction
 	{
 		

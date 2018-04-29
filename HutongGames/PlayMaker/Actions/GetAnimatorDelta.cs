@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the avatar delta position and rotation for the last evaluated frame.")]
 	[ActionCategory("Animator")]
+	[Tooltip("Gets the avatar delta position and rotation for the last evaluated frame.")]
 	public class GetAnimatorDelta : FsmStateAction
 	{
 		
@@ -83,8 +83,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("The avatar delta position for the last evaluated frame")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The avatar delta position for the last evaluated frame")]
 		public FsmVector3 deltaPosition;
 
 		

@@ -37,9 +37,6 @@ public static class SteamClientDSConfig
 	}
 
 	
-	public const int steamBlobSize = 2048;
-
-	
 	public static bool isDedicatedClient = false;
 
 	
@@ -68,6 +65,9 @@ public static class SteamClientDSConfig
 
 	
 	public static int playerCount = 0;
+
+	
+	public const int steamBlobSize = 2048;
 
 	
 	public static byte[] steamClientBlob = new byte[2048];

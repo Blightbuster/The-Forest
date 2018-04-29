@@ -8,7 +8,7 @@ public class doBurn : MonoBehaviour
 	public void enableFire()
 	{
 		this.fire.SetActive(true);
-		base.Invoke("cancelFire", UnityEngine.Random.Range(7f, 15f));
+		base.Invoke("cancelFire", 10f);
 	}
 
 	

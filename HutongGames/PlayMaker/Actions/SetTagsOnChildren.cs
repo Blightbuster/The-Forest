@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Set the Tag on all children of a GameObject. Optionally filter by component.")]
 	[ActionCategory(ActionCategory.GameObject)]
+	[Tooltip("Set the Tag on all children of a GameObject. Optionally filter by component.")]
 	public class SetTagsOnChildren : FsmStateAction
 	{
 		
@@ -32,10 +33,23 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			if (string.IsNullOrEmpty(this.filterByComponent.Value))
 			{
-				foreach (object obj in parent.transform)
+				IEnumerator enumerator = parent.transform.GetEnumerator();
+				try
 				{
-					Transform transform = (Transform)obj;
-					transform.gameObject.tag = this.tag.Value;
+					while (enumerator.MoveNext())
+					{
+						object obj = enumerator.Current;
+						Transform transform = (Transform)obj;
+						transform.gameObject.tag = this.tag.Value;
+					}
+				}
+				finally
+				{
+					IDisposable disposable;
+					if ((disposable = (enumerator as IDisposable)) != null)
+					{
+						disposable.Dispose();
+					}
 				}
 			}
 			else
@@ -73,9 +87,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("Set Tag To...")]
 		[RequiredField]
 		[UIHint(UIHint.Tag)]
+		[Tooltip("Set Tag To...")]
 		public FsmString tag;
 
 		

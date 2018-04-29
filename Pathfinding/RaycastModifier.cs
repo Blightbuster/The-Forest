@@ -5,8 +5,8 @@ using UnityEngine;
 namespace Pathfinding
 {
 	
-	[RequireComponent(typeof(Seeker))]
 	[AddComponentMenu("Pathfinding/Modifiers/Raycast Simplifier")]
+	[RequireComponent(typeof(Seeker))]
 	[HelpURL("http:
 	[Serializable]
 	public class RaycastModifier : MonoModifier
@@ -72,13 +72,13 @@ namespace Pathfinding
 			}
 			for (int j = count - 1; j > 0; j--)
 			{
-				Vector3 from = points[j];
-				Vector3 to = points[j + 1];
+				Vector3 a = points[j];
+				Vector3 b = points[j + 1];
 				points[j * 3] = points[j];
 				if (j != count - 1)
 				{
-					points[j * 3 + 1] = Vector3.Lerp(from, to, 0.33f);
-					points[j * 3 + 2] = Vector3.Lerp(from, to, 0.66f);
+					points[j * 3 + 1] = Vector3.Lerp(a, b, 0.33f);
+					points[j * 3 + 2] = Vector3.Lerp(a, b, 0.66f);
 				}
 			}
 		}

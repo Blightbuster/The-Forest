@@ -77,29 +77,29 @@ namespace TheForest.Player
 		
 		public void OnEnable()
 		{
-			int displayedElemenntNum = 0;
-			displayedElemenntNum = this.ToggleDisplay(this._son, displayedElemenntNum);
-			displayedElemenntNum = this.ToggleDisplay(this._camp, displayedElemenntNum);
-			displayedElemenntNum = this.ToggleDisplay(this._food, displayedElemenntNum);
-			displayedElemenntNum = this.ToggleDisplay(this._defenses, displayedElemenntNum);
-			displayedElemenntNum = this.ToggleDisplay(this._redman, displayedElemenntNum);
-			displayedElemenntNum = this.ToggleDisplay(this._findClimbingAxe, displayedElemenntNum);
-			displayedElemenntNum = this.ToggleDisplay(this._findRebreather, displayedElemenntNum);
-			displayedElemenntNum = this.ToggleDisplay(this._sinkHole, displayedElemenntNum);
-			displayedElemenntNum = this.ToggleDisplay(this._passengers, displayedElemenntNum);
-			displayedElemenntNum = this.ToggleDisplay(this._megan, displayedElemenntNum);
-			this.ToggleDisplay(this._sacrifice, displayedElemenntNum);
-			displayedElemenntNum = 0;
-			displayedElemenntNum = this.ToggleDisplay(this._cave1, displayedElemenntNum);
-			displayedElemenntNum = this.ToggleDisplay(this._cave2, displayedElemenntNum);
-			displayedElemenntNum = this.ToggleDisplay(this._cave3, displayedElemenntNum);
-			displayedElemenntNum = this.ToggleDisplay(this._cave4, displayedElemenntNum);
-			displayedElemenntNum = this.ToggleDisplay(this._cave5, displayedElemenntNum);
-			displayedElemenntNum = this.ToggleDisplay(this._cave6, displayedElemenntNum);
-			displayedElemenntNum = this.ToggleDisplay(this._cave7, displayedElemenntNum);
-			displayedElemenntNum = this.ToggleDisplay(this._cave8, displayedElemenntNum);
-			displayedElemenntNum = this.ToggleDisplay(this._cave9, displayedElemenntNum);
-			displayedElemenntNum = this.ToggleDisplay(this._cave10, displayedElemenntNum);
+			int displayedElementNum = 0;
+			displayedElementNum = this.ToggleDisplay(this._son, displayedElementNum);
+			displayedElementNum = this.ToggleDisplay(this._camp, displayedElementNum);
+			displayedElementNum = this.ToggleDisplay(this._food, displayedElementNum);
+			displayedElementNum = this.ToggleDisplay(this._defenses, displayedElementNum);
+			displayedElementNum = this.ToggleDisplay(this._redman, displayedElementNum);
+			displayedElementNum = this.ToggleDisplay(this._findClimbingAxe, displayedElementNum);
+			displayedElementNum = this.ToggleDisplay(this._findRebreather, displayedElementNum);
+			displayedElementNum = this.ToggleDisplay(this._sinkHole, displayedElementNum);
+			displayedElementNum = this.ToggleDisplay(this._passengers, displayedElementNum);
+			displayedElementNum = this.ToggleDisplay(this._megan, displayedElementNum);
+			this.ToggleDisplay(this._sacrifice, displayedElementNum);
+			displayedElementNum = 0;
+			displayedElementNum = this.ToggleDisplay(this._cave1, displayedElementNum);
+			displayedElementNum = this.ToggleDisplay(this._cave2, displayedElementNum);
+			displayedElementNum = this.ToggleDisplay(this._cave3, displayedElementNum);
+			displayedElementNum = this.ToggleDisplay(this._cave4, displayedElementNum);
+			displayedElementNum = this.ToggleDisplay(this._cave5, displayedElementNum);
+			displayedElementNum = this.ToggleDisplay(this._cave6, displayedElementNum);
+			displayedElementNum = this.ToggleDisplay(this._cave7, displayedElementNum);
+			displayedElementNum = this.ToggleDisplay(this._cave8, displayedElementNum);
+			displayedElementNum = this.ToggleDisplay(this._cave9, displayedElementNum);
+			displayedElementNum = this.ToggleDisplay(this._cave10, displayedElementNum);
 		}
 
 		
@@ -130,15 +130,35 @@ namespace TheForest.Player
 		}
 
 		
-		private int ToggleDisplay(SurvivalBookTodo.TodoTask elem, int displayedElemenntNum)
+		public void Clone(SurvivalBookTodo other)
+		{
+			this._son.Clone(other._son);
+			this._camp.Clone(other._camp);
+			this._food.Clone(other._food);
+			this._defenses.Clone(other._defenses);
+			this._redman.Clone(other._redman);
+			this._cave1.Clone(other._cave1);
+			this._cave2.Clone(other._cave2);
+			this._cave5.Clone(other._cave5);
+			this._findClimbingAxe.Clone(other._findClimbingAxe);
+			this._findRebreather.Clone(other._findRebreather);
+			this._sinkHole.Clone(other._sinkHole);
+			this._passengers.Clone(other._passengers);
+			this._megan.Clone(other._megan);
+			this._sacrifice.Clone(other._sacrifice);
+			base.StartCoroutine(this.DelayedAwake());
+		}
+
+		
+		private int ToggleDisplay(SurvivalBookTodo.TodoTask elem, int displayedElementNum)
 		{
 			if (elem._available)
 			{
-				if (elem.DisplayedNum != displayedElemenntNum)
+				if (elem.DisplayedNum != displayedElementNum)
 				{
-					elem.DisplayedNum = displayedElemenntNum;
+					elem.DisplayedNum = displayedElementNum;
 					Vector3 localPosition = elem.GOs._text.transform.localPosition;
-					localPosition.y = this._displayOffset * (float)displayedElemenntNum;
+					localPosition.y = this._displayOffset * (float)displayedElementNum;
 					elem.GOs._text.transform.localPosition = localPosition;
 				}
 				if (!elem.GOs._text.activeSelf)
@@ -156,13 +176,13 @@ namespace TheForest.Player
 				{
 					elem.GOs._done.SetActive(false);
 				}
-				displayedElemenntNum++;
+				displayedElementNum += ((!elem.GOs._text.GetComponent<TextMesh>().text.Contains("\n")) ? 1 : 2);
 			}
 			else if (elem.GOs._text.activeSelf)
 			{
 				elem.GOs._text.SetActive(false);
 			}
-			return displayedElemenntNum;
+			return displayedElementNum;
 		}
 
 		
@@ -473,6 +493,13 @@ namespace TheForest.Player
 				this.LogMessage(UiTranslationDatabase.TranslateKey("TODO_LIST_DONE_MESSAGE", "to do list updated", true));
 				LocalPlayer.Sfx.PlayTaskCompleted();
 			}
+
+			
+			public virtual void Clone(SurvivalBookTodo.TodoTask other)
+			{
+				this.DisplayedNum = other.DisplayedNum;
+				base.Clone(other);
+			}
 		}
 
 		
@@ -513,6 +540,13 @@ namespace TheForest.Player
 					};
 				}
 				base.FixSerializer();
+			}
+
+			
+			public virtual void Clone(SurvivalBookTodo.CampTodoTask other)
+			{
+				this._completeConditionStorage = other._completeConditionStorage;
+				base.Clone(other);
 			}
 
 			
@@ -573,6 +607,14 @@ namespace TheForest.Player
 					this._completeConditionStorage = new CookFoodCondition();
 				}
 				base.FixSerializer();
+			}
+
+			
+			public virtual void Clone(SurvivalBookTodo.FoodTodoTask other)
+			{
+				this._availableConditionStorage = other._availableConditionStorage;
+				this._completeConditionStorage = other._completeConditionStorage;
+				base.Clone(other);
 			}
 
 			
@@ -644,6 +686,14 @@ namespace TheForest.Player
 			}
 
 			
+			public virtual void Clone(SurvivalBookTodo.DefensesTodoTask other)
+			{
+				this._availableConditionStorage = other._availableConditionStorage;
+				this._completeConditionStorage = other._completeConditionStorage;
+				base.Clone(other);
+			}
+
+			
 			[SerializeThis]
 			public EnemyContactCondition _availableConditionStorage;
 
@@ -683,6 +733,13 @@ namespace TheForest.Player
 			}
 
 			
+			public virtual void Clone(SurvivalBookTodo.RedmanTodoTask other)
+			{
+				this._availableConditionStorage = other._availableConditionStorage;
+				base.Clone(other);
+			}
+
+			
 			[SerializeThis]
 			public StoryCondition _availableConditionStorage;
 		}
@@ -713,6 +770,13 @@ namespace TheForest.Player
 					};
 				}
 				base.FixSerializer();
+			}
+
+			
+			public virtual void Clone(SurvivalBookTodo.FindTimmyTodoTask other)
+			{
+				this._completeConditionStorage = other._completeConditionStorage;
+				base.Clone(other);
 			}
 
 			
@@ -768,6 +832,14 @@ namespace TheForest.Player
 			}
 
 			
+			public virtual void Clone(SurvivalBookTodo.FindMeganTodoTask other)
+			{
+				this._availableConditionStorage = other._availableConditionStorage;
+				this._completeConditionStorage = other._completeConditionStorage;
+				base.Clone(other);
+			}
+
+			
 			[SerializeThis]
 			public StoryCondition _availableConditionStorage;
 
@@ -804,6 +876,13 @@ namespace TheForest.Player
 					};
 				}
 				base.FixSerializer();
+			}
+
+			
+			public virtual void Clone(SurvivalBookTodo.SacrificeTodoTask other)
+			{
+				this._availableConditionStorage = other._availableConditionStorage;
+				base.Clone(other);
 			}
 
 			
@@ -845,6 +924,7 @@ namespace TheForest.Player
 					this._availableConditionStorage = new ProximityCondition
 					{
 						_objectTag = "Cave1Door",
+						_isTag = false,
 						_use2dDistance = true,
 						_distance = 10f,
 						_done = done
@@ -852,9 +932,20 @@ namespace TheForest.Player
 				}
 				if (this._completeConditionStorage == null || this._completeConditionStorage._caveNumber == -1)
 				{
-					this._completeConditionStorage = new ExploredCaveCondition();
+					this._completeConditionStorage = new ExploredCaveCondition
+					{
+						_caveNumber = 0
+					};
 				}
 				base.FixSerializer();
+			}
+
+			
+			public virtual void Clone(SurvivalBookTodo.Cave1TodoTask other)
+			{
+				this._availableConditionStorage = other._availableConditionStorage;
+				this._completeConditionStorage = other._completeConditionStorage;
+				base.Clone(other);
 			}
 
 			
@@ -900,6 +991,7 @@ namespace TheForest.Player
 					this._availableConditionStorage = new ProximityCondition
 					{
 						_objectTag = "Cave2Door",
+						_isTag = false,
 						_use2dDistance = true,
 						_distance = 10f,
 						_done = done
@@ -913,6 +1005,14 @@ namespace TheForest.Player
 					};
 				}
 				base.FixSerializer();
+			}
+
+			
+			public virtual void Clone(SurvivalBookTodo.Cave2TodoTask other)
+			{
+				this._availableConditionStorage = other._availableConditionStorage;
+				this._completeConditionStorage = other._completeConditionStorage;
+				base.Clone(other);
 			}
 
 			
@@ -958,6 +1058,7 @@ namespace TheForest.Player
 					this._availableConditionStorage = new ProximityCondition
 					{
 						_objectTag = "Cave6Door3",
+						_isTag = false,
 						_use2dDistance = true,
 						_distance = 20f,
 						_inCaveOnly = true,
@@ -972,6 +1073,14 @@ namespace TheForest.Player
 					};
 				}
 				base.FixSerializer();
+			}
+
+			
+			public virtual void Clone(SurvivalBookTodo.Cave3TodoTask other)
+			{
+				this._availableConditionStorage = other._availableConditionStorage;
+				this._completeConditionStorage = other._completeConditionStorage;
+				base.Clone(other);
 			}
 
 			
@@ -1017,6 +1126,7 @@ namespace TheForest.Player
 					this._availableConditionStorage = new ProximityCondition
 					{
 						_objectTag = "Cave4ClimbEntrance_Altexit",
+						_isTag = false,
 						_use2dDistance = true,
 						_distance = 10f,
 						_inCaveOnly = true,
@@ -1031,6 +1141,14 @@ namespace TheForest.Player
 					};
 				}
 				base.FixSerializer();
+			}
+
+			
+			public virtual void Clone(SurvivalBookTodo.Cave4TodoTask other)
+			{
+				this._availableConditionStorage = other._availableConditionStorage;
+				this._completeConditionStorage = other._completeConditionStorage;
+				base.Clone(other);
 			}
 
 			
@@ -1076,6 +1194,7 @@ namespace TheForest.Player
 					this._availableConditionStorage = new ProximityCondition
 					{
 						_objectTag = "Cave5Door",
+						_isTag = false,
 						_use2dDistance = true,
 						_distance = 10f,
 						_done = done
@@ -1089,6 +1208,14 @@ namespace TheForest.Player
 					};
 				}
 				base.FixSerializer();
+			}
+
+			
+			public virtual void Clone(SurvivalBookTodo.Cave5TodoTask other)
+			{
+				this._availableConditionStorage = other._availableConditionStorage;
+				this._completeConditionStorage = other._completeConditionStorage;
+				base.Clone(other);
 			}
 
 			
@@ -1134,6 +1261,7 @@ namespace TheForest.Player
 					this._availableConditionStorage = new ProximityCondition
 					{
 						_objectTag = "Cave6Door",
+						_isTag = false,
 						_use2dDistance = true,
 						_distance = 10f,
 						_done = done
@@ -1147,6 +1275,14 @@ namespace TheForest.Player
 					};
 				}
 				base.FixSerializer();
+			}
+
+			
+			public virtual void Clone(SurvivalBookTodo.Cave6TodoTask other)
+			{
+				this._availableConditionStorage = other._availableConditionStorage;
+				this._completeConditionStorage = other._completeConditionStorage;
+				base.Clone(other);
 			}
 
 			
@@ -1192,6 +1328,7 @@ namespace TheForest.Player
 					this._availableConditionStorage = new ProximityCondition
 					{
 						_objectTag = "Cave7Door1",
+						_isTag = false,
 						_use2dDistance = true,
 						_distance = 10f,
 						_done = done
@@ -1205,6 +1342,14 @@ namespace TheForest.Player
 					};
 				}
 				base.FixSerializer();
+			}
+
+			
+			public virtual void Clone(SurvivalBookTodo.Cave7TodoTask other)
+			{
+				this._availableConditionStorage = other._availableConditionStorage;
+				this._completeConditionStorage = other._completeConditionStorage;
+				base.Clone(other);
 			}
 
 			
@@ -1250,6 +1395,7 @@ namespace TheForest.Player
 					this._availableConditionStorage = new ProximityCondition
 					{
 						_objectTag = "Cave7Door1",
+						_isTag = false,
 						_use2dDistance = true,
 						_distance = 10f,
 						_done = done
@@ -1263,6 +1409,14 @@ namespace TheForest.Player
 					};
 				}
 				base.FixSerializer();
+			}
+
+			
+			public virtual void Clone(SurvivalBookTodo.Cave8TodoTask other)
+			{
+				this._availableConditionStorage = other._availableConditionStorage;
+				this._completeConditionStorage = other._completeConditionStorage;
+				base.Clone(other);
 			}
 
 			
@@ -1308,6 +1462,7 @@ namespace TheForest.Player
 					this._availableConditionStorage = new ProximityCondition
 					{
 						_objectTag = "Cave9RopeLedgeEntrance",
+						_isTag = false,
 						_use2dDistance = true,
 						_distance = 10f,
 						_done = done
@@ -1321,6 +1476,14 @@ namespace TheForest.Player
 					};
 				}
 				base.FixSerializer();
+			}
+
+			
+			public virtual void Clone(SurvivalBookTodo.Cave9TodoTask other)
+			{
+				this._availableConditionStorage = other._availableConditionStorage;
+				this._completeConditionStorage = other._completeConditionStorage;
+				base.Clone(other);
 			}
 
 			
@@ -1366,6 +1529,7 @@ namespace TheForest.Player
 					this._availableConditionStorage = new ProximityCondition
 					{
 						_objectTag = "Cave10ClimbEntrance",
+						_isTag = false,
 						_use2dDistance = true,
 						_distance = 20f,
 						_done = done
@@ -1379,6 +1543,14 @@ namespace TheForest.Player
 					};
 				}
 				base.FixSerializer();
+			}
+
+			
+			public virtual void Clone(SurvivalBookTodo.Cave10TodoTask other)
+			{
+				this._availableConditionStorage = other._availableConditionStorage;
+				this._completeConditionStorage = other._completeConditionStorage;
+				base.Clone(other);
 			}
 
 			
@@ -1444,6 +1616,14 @@ namespace TheForest.Player
 					};
 				}
 				base.FixSerializer();
+			}
+
+			
+			public virtual void Clone(SurvivalBookTodo.FindClimbingAxeTodoTask other)
+			{
+				this._availableConditionStorage = other._availableConditionStorage;
+				this._completeConditionStorage = other._completeConditionStorage;
+				base.Clone(other);
 			}
 
 			
@@ -1523,6 +1703,15 @@ namespace TheForest.Player
 			}
 
 			
+			public virtual void Clone(SurvivalBookTodo.FindRebreatherTodoTask other)
+			{
+				this._airBreathingCondition = other._airBreathingCondition;
+				this._availableConditionStorage = other._availableConditionStorage;
+				this._completeConditionStorage = other._completeConditionStorage;
+				base.Clone(other);
+			}
+
+			
 			[SerializeThis]
 			public AirBreathingCondition _airBreathingCondition;
 
@@ -1579,10 +1768,19 @@ namespace TheForest.Player
 					{
 						_objectTag = "SinkHoleCenter",
 						_isTag = true,
+						_use2dDistance = false,
 						_distance = 135f
 					};
 				}
 				base.FixSerializer();
+			}
+
+			
+			public virtual void Clone(SurvivalBookTodo.SinkHoleTodoTask other)
+			{
+				this._availableConditionStorage = other._availableConditionStorage;
+				this._completeConditionStorage = other._completeConditionStorage;
+				base.Clone(other);
 			}
 
 			
@@ -1645,6 +1843,14 @@ namespace TheForest.Player
 					this._completeConditionStorage = new PassengersCondition();
 				}
 				base.FixSerializer();
+			}
+
+			
+			public virtual void Clone(SurvivalBookTodo.PassengersTodoTask other)
+			{
+				this._availableConditionStorage = other._availableConditionStorage;
+				this._completeConditionStorage = other._completeConditionStorage;
+				base.Clone(other);
 			}
 
 			

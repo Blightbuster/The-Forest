@@ -5,13 +5,13 @@ using UniLinq;
 using UnityEngine;
 
 
-[ComponentSerializerFor(typeof(LineRenderer))]
-[ComponentSerializerFor(typeof(MeshRenderer))]
-[ComponentSerializerFor(typeof(Cloth))]
-[ComponentSerializerFor(typeof(ParticleRenderer))]
 [ComponentSerializerFor(typeof(Renderer))]
+[ComponentSerializerFor(typeof(Cloth))]
+[ComponentSerializerFor(typeof(LineRenderer))]
 [ComponentSerializerFor(typeof(TrailRenderer))]
+[ComponentSerializerFor(typeof(ParticleRenderer))]
 [ComponentSerializerFor(typeof(SkinnedMeshRenderer))]
+[ComponentSerializerFor(typeof(MeshRenderer))]
 public class SerializeRenderer : IComponentSerializer
 {
 	

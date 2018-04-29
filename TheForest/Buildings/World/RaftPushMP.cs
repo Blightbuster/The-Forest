@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using TheForest.World;
 using UnityEngine;
 
 namespace TheForest.Buildings.World
@@ -18,6 +19,7 @@ namespace TheForest.Buildings.World
 				base.GetComponent<Rigidbody>().isKinematic = true;
 				UnityEngine.Object.Destroy(this);
 			}
+			this._floor = base.transform.GetComponent<DynamicFloor>();
 		}
 
 		
@@ -74,6 +76,9 @@ namespace TheForest.Buildings.World
 
 		
 		public List<RaftPush> _oars;
+
+		
+		private DynamicFloor _floor;
 
 		
 		private RaftPushMP.OarCommand[] _commands;

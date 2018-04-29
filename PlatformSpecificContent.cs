@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 
@@ -38,10 +39,23 @@ public class PlatformSpecificContent : MonoBehaviour
 		}
 		if (this.childrenOfThisObject)
 		{
-			foreach (object obj in base.transform)
+			IEnumerator enumerator = base.transform.GetEnumerator();
+			try
 			{
-				Transform transform = (Transform)obj;
-				transform.gameObject.SetActive(enabled);
+				while (enumerator.MoveNext())
+				{
+					object obj = enumerator.Current;
+					Transform transform = (Transform)obj;
+					transform.gameObject.SetActive(enabled);
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
+				}
 			}
 		}
 	}

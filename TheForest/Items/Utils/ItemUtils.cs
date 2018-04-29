@@ -96,7 +96,7 @@ namespace TheForest.Items.Utils
 					Transform transform = (!item._pickupPrefab) ? item._pickupPrefabMP : item._pickupPrefab;
 					if (transform)
 					{
-						gameObject = (GameObject)UnityEngine.Object.Instantiate(transform.gameObject, position, rotation);
+						gameObject = UnityEngine.Object.Instantiate<GameObject>(transform.gameObject, position, rotation);
 					}
 					else
 					{
@@ -128,47 +128,52 @@ namespace TheForest.Items.Utils
 			StatEffect.Types type = effect._type;
 			switch (type)
 			{
-			case StatEffect.Types.Stamina:
-				stats.Stamina += effect._amount * (float)num;
-				break;
-			case StatEffect.Types.Health:
-				stats.HealthChange(effect._amount * (float)num * LocalPlayer.Stats.FoodPoisoning.EffectRatio);
-				LocalPlayer.Stats.CheckStats();
-				break;
-			case StatEffect.Types.Energy:
-				stats.Energy += effect._amount * (float)num * LocalPlayer.Stats.FoodPoisoning.EffectRatio;
-				break;
-			case StatEffect.Types.Armor:
-				stats.Armor = Mathf.Clamp(stats.Armor + (int)effect._amount * num, 0, 1000);
-				break;
-			default:
-				if (type != StatEffect.Types.MaxAmountBonus)
-				{
-					FieldInfo field = typeFromHandle.GetField(effect._type.ToString(), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-					if (field.FieldType == typeof(float))
-					{
-						field.SetValue(stats, (float)field.GetValue(stats) + effect._amount * (float)num);
-					}
-					else if (field.FieldType == typeof(int))
-					{
-						field.SetValue(stats, (int)((float)((int)field.GetValue(stats)) + effect._amount * (float)num));
-					}
-					LocalPlayer.Stats.CheckStats();
-				}
-				else
-				{
-					LocalPlayer.Inventory.AddMaxAmountBonus(effect._itemId, (int)(effect._amount * (float)num));
-				}
-				break;
-			case StatEffect.Types.Fullness:
-				stats.Fullness += effect._amount * (float)num * LocalPlayer.Stats.FoodPoisoning.EffectRatio;
-				break;
 			case StatEffect.Types.BatteryCharge:
 				stats.BatteryCharge = Mathf.Clamp(stats.BatteryCharge + effect._amount * (float)num, 0f, 100f);
 				break;
 			case StatEffect.Types.VisibleLizardSkinArmor:
 				stats.AddArmorVisible(PlayerStats.ArmorTypes.LizardSkin);
 				inventory.PendingSendMessage = "CheckArmor";
+				break;
+			default:
+				switch (type)
+				{
+				case StatEffect.Types.Stamina:
+					stats.Stamina += effect._amount * (float)num;
+					break;
+				case StatEffect.Types.Health:
+					stats.HealthChange(effect._amount * (float)num * LocalPlayer.Stats.FoodPoisoning.EffectRatio);
+					LocalPlayer.Stats.CheckStats();
+					break;
+				case StatEffect.Types.Energy:
+					stats.Energy += effect._amount * (float)num * LocalPlayer.Stats.FoodPoisoning.EffectRatio;
+					break;
+				case StatEffect.Types.Armor:
+					stats.Armor = Mathf.Clamp(stats.Armor + (int)effect._amount * num, 0, 1000);
+					break;
+				default:
+					if (type != StatEffect.Types.MaxAmountBonus)
+					{
+						FieldInfo field = typeFromHandle.GetField(effect._type.ToString(), BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+						if (field.FieldType == typeof(float))
+						{
+							field.SetValue(stats, (float)field.GetValue(stats) + effect._amount * (float)num);
+						}
+						else if (field.FieldType == typeof(int))
+						{
+							field.SetValue(stats, (int)((float)((int)field.GetValue(stats)) + effect._amount * (float)num));
+						}
+						LocalPlayer.Stats.CheckStats();
+					}
+					else
+					{
+						LocalPlayer.Inventory.AddMaxAmountBonus(effect._itemId, (int)(effect._amount * (float)num));
+					}
+					break;
+				case StatEffect.Types.Fullness:
+					stats.Fullness += effect._amount * (float)num * LocalPlayer.Stats.FoodPoisoning.EffectRatio;
+					break;
+				}
 				break;
 			case StatEffect.Types.Method_PoisonMe:
 				if (effect._amount == 0f)
@@ -262,6 +267,28 @@ namespace TheForest.Items.Utils
 				break;
 			case StatEffect.Types.EatenCalories:
 				LocalPlayer.Stats.Calories.OnAteFood(Mathf.RoundToInt(effect._amount * (float)num));
+				break;
+			case StatEffect.Types.VisibleWarmsuit:
+				if (forward)
+				{
+					stats.AddArmorVisible(PlayerStats.ArmorTypes.Warmsuit);
+				}
+				else
+				{
+					stats.AddArmorVisible(PlayerStats.ArmorTypes.None);
+				}
+				inventory.PendingSendMessage = "CheckArmor";
+				break;
+			case StatEffect.Types.hairSprayFuelRecharge:
+				if (stats.hairSprayFuel.CurrentFuel >= stats.hairSprayFuel.MaxFuelCapacity)
+				{
+					return false;
+				}
+				stats.hairSprayFuel.CurrentFuel = stats.hairSprayFuel.MaxFuelCapacity;
+				break;
+			case StatEffect.Types.VisibleCreepyArmor:
+				stats.AddArmorVisible(PlayerStats.ArmorTypes.Creepy);
+				inventory.PendingSendMessage = "CheckArmor";
 				break;
 			}
 			return true;

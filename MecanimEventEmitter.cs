@@ -71,9 +71,6 @@ public class MecanimEventEmitter : MonoBehaviour
 	}
 
 	
-	private const float UPDATE_FREQ = 0.05f;
-
-	
 	public UnityEngine.Object animatorController;
 
 	
@@ -84,4 +81,7 @@ public class MecanimEventEmitter : MonoBehaviour
 
 	
 	private float timePassed;
+
+	
+	private const float UPDATE_FREQ = 0.05f;
 }

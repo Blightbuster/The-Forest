@@ -30,7 +30,13 @@ public class ShelterTrigger : MonoBehaviour
 	
 	private void Update()
 	{
-		if (LocalPlayer.Inventory.CurrentView == PlayerInventory.PlayerViews.World)
+		if (this.playerDoingAction())
+		{
+			this.SleepIcon.SetActive(false);
+			Scene.HudGui.SleepDelayIcon.gameObject.SetActive(false);
+			return;
+		}
+		if (LocalPlayer.Inventory.CurrentView == PlayerInventory.PlayerViews.World && !this.playerDoingAction())
 		{
 			if (this.CanSleep)
 			{
@@ -131,7 +137,7 @@ public class ShelterTrigger : MonoBehaviour
 				}
 			}
 		}
-		if ((!LocalPlayer.IsInEndgame || (LocalPlayer.SurfaceDetector.Surface == UnderfootSurfaceDetector.SurfaceType.Rock && Area.IsActiveAreaTheStartArea())) && TheForest.Utils.Input.GetButtonAfterDelay("Save", 0.5f, false))
+		if (this.PlayerCanSave() && TheForest.Utils.Input.GetButtonAfterDelay("Save", 0.5f, false))
 		{
 			LocalPlayer.Stats.JustSave();
 		}
@@ -166,7 +172,7 @@ public class ShelterTrigger : MonoBehaviour
 	
 	private void GrabEnter()
 	{
-		if (this.SleepIcon && !BoltNetwork.isRunning)
+		if (this.SleepIcon && !BoltNetwork.isRunning && !this.playerDoingAction())
 		{
 			if (this.CanSleep)
 			{
@@ -178,11 +184,17 @@ public class ShelterTrigger : MonoBehaviour
 				Scene.HudGui.SleepDelayIcon._target = this.SleepIcon.transform;
 			}
 		}
-		if ((!LocalPlayer.IsInEndgame || (LocalPlayer.SurfaceDetector.Surface == UnderfootSurfaceDetector.SurfaceType.Rock && Area.IsActiveAreaTheStartArea())) && this.SaveIcon)
+		if ((!LocalPlayer.IsInEndgame || (LocalPlayer.SurfaceDetector.Surface == UnderfootSurfaceDetector.SurfaceType.Rock && Area.IsActiveAreaTheStartArea())) && !this.playerDoingAction() && this.SaveIcon)
 		{
 			this.SaveIcon.SetActive(true);
 		}
 		base.enabled = true;
+	}
+
+	
+	private bool playerDoingAction()
+	{
+		return LocalPlayer.AnimControl.useRootMotion;
 	}
 
 	
@@ -219,7 +231,7 @@ public class ShelterTrigger : MonoBehaviour
 			}
 		}
 		LocalPlayer.Sfx.PlayStructureFall(base.gameObject, 0.01f);
-		UnityEngine.Object.Instantiate(Prefabs.Instance.DestroyedLeafShelter, base.transform.position, base.transform.rotation);
+		UnityEngine.Object.Instantiate<GameObject>(Prefabs.Instance.DestroyedLeafShelter, base.transform.position, base.transform.rotation);
 		yield return YieldPresets.WaitOneSecond;
 		if (this && base.transform)
 		{
@@ -236,9 +248,9 @@ public class ShelterTrigger : MonoBehaviour
 			}
 			else
 			{
-				RequestDestroy rd = RequestDestroy.Create(GlobalTargets.OnlyServer);
-				rd.Entity = base.transform.parent.GetComponent<BoltEntity>();
-				rd.Send();
+				RequestDestroy requestDestroy = RequestDestroy.Create(GlobalTargets.OnlyServer);
+				requestDestroy.Entity = base.transform.parent.GetComponent<BoltEntity>();
+				requestDestroy.Send();
 			}
 		}
 		yield break;
@@ -278,16 +290,29 @@ public class ShelterTrigger : MonoBehaviour
 					{
 						treeLodGrid.RegisterTreeRegrowth(list[index].transform.position);
 					}
-					foreach (object obj in list[index].transform)
+					IEnumerator enumerator = list[index].transform.GetEnumerator();
+					try
 					{
-						Transform transform = (Transform)obj;
-						LOD_Stump component2 = transform.GetComponent<LOD_Stump>();
-						if (component2)
+						while (enumerator.MoveNext())
 						{
-							component2.DespawnCurrent();
-							component2.CurrentView = null;
+							object obj = enumerator.Current;
+							Transform transform = (Transform)obj;
+							LOD_Stump component2 = transform.GetComponent<LOD_Stump>();
+							if (component2)
+							{
+								component2.DespawnCurrent();
+								component2.CurrentView = null;
+							}
+							UnityEngine.Object.Destroy(transform.gameObject);
 						}
-						UnityEngine.Object.Destroy(transform.gameObject);
+					}
+					finally
+					{
+						IDisposable disposable;
+						if ((disposable = (enumerator as IDisposable)) != null)
+						{
+							disposable.Dispose();
+						}
 					}
 					num3++;
 				}
@@ -307,7 +332,11 @@ public class ShelterTrigger : MonoBehaviour
 	}
 
 	
-	private const float MpSleepDelayDuration = 1f;
+	private bool PlayerCanSave()
+	{
+		bool flag = LocalPlayer.IsInEndgame && (LocalPlayer.SurfaceDetector.Surface != UnderfootSurfaceDetector.SurfaceType.Rock || !Area.IsActiveAreaTheStartArea());
+		return !LocalPlayer.FpCharacter.SailingRaft && !flag;
+	}
 
 	
 	public GameObject SleepIcon;
@@ -323,4 +352,7 @@ public class ShelterTrigger : MonoBehaviour
 
 	
 	private float _mpSleepDelay = float.MinValue;
+
+	
+	private const float MpSleepDelayDuration = 1f;
 }

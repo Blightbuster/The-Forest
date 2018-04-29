@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Transforms a Direction from a Game Object's local space to world space.")]
 	[ActionCategory(ActionCategory.Transform)]
+	[Tooltip("Transforms a Direction from a Game Object's local space to world space.")]
 	public class TransformDirection : FsmStateAction
 	{
 		
@@ -53,8 +53,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmVector3 localDirection;
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmVector3 storeResult;
 
 		

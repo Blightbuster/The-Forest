@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the current State information on a specified layer")]
 	[ActionCategory("Animator")]
+	[Tooltip("Gets the current State information on a specified layer")]
 	public class GetAnimatorCurrentStateInfo : FsmStateAction
 	{
 		
@@ -102,14 +102,14 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
+		[RequiredField]
 		[CheckForComponent(typeof(Animator))]
 		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
-		[RequiredField]
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("The layer's index")]
 		[RequiredField]
+		[Tooltip("The layer's index")]
 		public FsmInt layerIndex;
 
 		
@@ -117,9 +117,9 @@ namespace HutongGames.PlayMaker.Actions
 		public bool everyFrame;
 
 		
-		[Tooltip("The layer's name.")]
-		[UIHint(UIHint.Variable)]
 		[ActionSection("Results")]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("The layer's name.")]
 		public FsmString name;
 
 		
@@ -128,8 +128,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmInt nameHash;
 
 		
-		[Tooltip("The layer's tag hash")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The layer's tag hash")]
 		public FsmInt tagHash;
 
 		
@@ -153,8 +153,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmInt loopCount;
 
 		
-		[Tooltip("The progress in the current loop. This is extracted from the normalizedTime")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The progress in the current loop. This is extracted from the normalizedTime")]
 		public FsmFloat currentLoopProgress;
 
 		

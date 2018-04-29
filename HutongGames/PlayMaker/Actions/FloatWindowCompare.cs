@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sends Events based on a float being inside a window of values.")]
 	[ActionCategory(ActionCategory.Logic)]
+	[Tooltip("Sends Events based on a float being inside a window of values.")]
 	public class FloatWindowCompare : FsmStateAction
 	{
 		
@@ -60,8 +60,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("Float to Check")]
 		[RequiredField]
+		[Tooltip("Float to Check")]
 		public FsmFloat floatTest;
 
 		

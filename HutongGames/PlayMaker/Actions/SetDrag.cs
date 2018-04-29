@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[HelpUrl("http:
 	[ActionCategory(ActionCategory.Physics)]
+	[HelpUrl("http:
 	[Tooltip("Sets the Drag of a Game Object's Rigid Body.")]
 	public class SetDrag : ComponentAction<Rigidbody>
 	{
@@ -48,8 +48,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmOwnerDefault gameObject;
 
 		
-		[HasFloatSlider(0f, 10f)]
 		[RequiredField]
+		[HasFloatSlider(0f, 10f)]
 		public FsmFloat drag;
 
 		

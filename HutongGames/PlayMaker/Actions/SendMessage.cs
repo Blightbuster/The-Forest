@@ -76,25 +76,27 @@ namespace HutongGames.PlayMaker.Actions
 				obj = this.functionCall.ObjectParameter.Value;
 				break;
 			}
-			switch (this.delivery)
+			SendMessage.MessageType messageType = this.delivery;
+			if (messageType == SendMessage.MessageType.SendMessage)
 			{
-			case SendMessage.MessageType.SendMessage:
 				ownerDefaultTarget.SendMessage(this.functionCall.FunctionName, obj, this.options);
 				return;
-			case SendMessage.MessageType.SendMessageUpwards:
+			}
+			if (messageType == SendMessage.MessageType.SendMessageUpwards)
+			{
 				ownerDefaultTarget.SendMessageUpwards(this.functionCall.FunctionName, obj, this.options);
 				return;
-			case SendMessage.MessageType.BroadcastMessage:
-				ownerDefaultTarget.BroadcastMessage(this.functionCall.FunctionName, obj, this.options);
-				return;
-			default:
+			}
+			if (messageType != SendMessage.MessageType.BroadcastMessage)
+			{
 				return;
 			}
+			ownerDefaultTarget.BroadcastMessage(this.functionCall.FunctionName, obj, this.options);
 		}
 
 		
-		[Tooltip("GameObject that sends the message.")]
 		[RequiredField]
+		[Tooltip("GameObject that sends the message.")]
 		public FsmOwnerDefault gameObject;
 
 		

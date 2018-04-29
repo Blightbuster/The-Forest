@@ -48,9 +48,6 @@ public class FreeLookCam : AbstractTargetFollower
 	}
 
 	
-	private const float LookDistance = 100f;
-
-	
 	[SerializeField]
 	private float moveSpeed = 1f;
 
@@ -86,6 +83,9 @@ public class FreeLookCam : AbstractTargetFollower
 
 	
 	private ThirdPersonCharacter character;
+
+	
+	private const float LookDistance = 100f;
 
 	
 	private float smoothX;

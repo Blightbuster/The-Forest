@@ -661,8 +661,8 @@ public class UIWidget : UIRect
 	}
 
 	
-	[DebuggerStepThrough]
 	[DebuggerHidden]
+	[DebuggerStepThrough]
 	public static int FullCompareFunc(UIWidget left, UIWidget right)
 	{
 		int num = UIPanel.CompareFunc(left.panel, right.panel);
@@ -978,7 +978,10 @@ public class UIWidget : UIRect
 		}
 		if (this.mWidth != num5 || this.mHeight != num6)
 		{
-			this.mWidth = num5;
+			if (!this.SkipWidthUpdate)
+			{
+				this.mWidth = num5;
+			}
 			this.mHeight = num6;
 			if (this.mIsInFront)
 			{
@@ -1213,8 +1216,8 @@ public class UIWidget : UIRect
 	protected int mWidth = 100;
 
 	
-	[SerializeField]
 	[HideInInspector]
+	[SerializeField]
 	protected int mHeight = 100;
 
 	
@@ -1303,6 +1306,9 @@ public class UIWidget : UIRect
 	private int mAlphaFrameID = -1;
 
 	
+	public bool SkipWidthUpdate;
+
+	
 	private int mMatrixFrame = -1;
 
 	
@@ -1335,6 +1341,14 @@ public class UIWidget : UIRect
 	}
 
 	
+	
+	public delegate void OnDimensionsChanged();
+
+	
+	
+	public delegate void OnPostFillCallback(UIWidget widget, int bufferOffset, BetterList<Vector3> verts, BetterList<Vector2> uvs, BetterList<Color32> cols);
+
+	
 	public enum AspectRatioSource
 	{
 		
@@ -1344,14 +1358,6 @@ public class UIWidget : UIRect
 		
 		BasedOnHeight
 	}
-
-	
-	
-	public delegate void OnDimensionsChanged();
-
-	
-	
-	public delegate void OnPostFillCallback(UIWidget widget, int bufferOffset, BetterList<Vector3> verts, BetterList<Vector2> uvs, BetterList<Color32> cols);
 
 	
 	

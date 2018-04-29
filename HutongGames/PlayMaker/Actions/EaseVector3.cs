@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Easing Animation - Vector3")]
 	[ActionCategory(ActionCategory.AnimateVariables)]
+	[Tooltip("Easing Animation - Vector3")]
 	public class EaseVector3 : EaseFsmAction
 	{
 		

@@ -92,6 +92,7 @@ public class mutantAI : MonoBehaviour
 			Scene.SceneTracker.EndgameBoss = base.gameObject;
 			Scene.mecanimEvents.GetComponent<MecanimEventSetupHelper>().dataSources[19] = this._mecanimEventPrefab;
 			Scene.mecanimEvents.SendMessage("refreshDataSources");
+			base.transform.parent.GetComponentInChildren<arrowStickToTarget>().enabled = false;
 		}
 		this.getRotSpeed = this.rotationSpeed;
 		this.allPlayers = new List<GameObject>(this.setup.sceneInfo.allPlayers);
@@ -705,7 +706,7 @@ public class mutantAI : MonoBehaviour
 	
 	private IEnumerator doMovement()
 	{
-		IL_8D9:
+		IL_8AF:
 		while (this.doMove)
 		{
 			while (this.path == null || this.avatar == null)
@@ -758,15 +759,15 @@ public class mutantAI : MonoBehaviour
 			}
 			while (this.currentWaypoint < this.path.vectorPath.Count - 1)
 			{
-				Vector3 pathPos = this.thisTr.position;
+				Vector3 position = this.thisTr.position;
 				if (this.controller && !BoltNetwork.isRunning && (!this.avatar.enabled || !this.controller.enabled))
 				{
-					pathPos = this.setup.search.worldPositionTr.position;
+					position = this.setup.search.worldPositionTr.position;
 				}
-				float dist = this.XZSqrMagnitude(this.path.vectorPath[this.currentWaypoint], pathPos);
-				if (dist >= this.nextWaypointDistance * this.nextWaypointDistance)
+				float num = this.XZSqrMagnitude(this.path.vectorPath[this.currentWaypoint], position);
+				if (num >= this.nextWaypointDistance * this.nextWaypointDistance)
 				{
-					IL_387:
+					IL_376:
 					if (this.path.vectorPath.Count > 1)
 					{
 						this.targetDirection = this.path.vectorPath[this.currentWaypoint] - this.avatar.rootPosition;
@@ -779,20 +780,20 @@ public class mutantAI : MonoBehaviour
 					}
 					if (this.currentWaypoint < vPath.Count - 1)
 					{
-						Vector3 getPos = this.thisTr.position;
+						Vector3 position2 = this.thisTr.position;
 						if (this.controller && !BoltNetwork.isRunning && (!this.avatar.enabled || !this.controller.enabled))
 						{
-							getPos = this.setup.search.worldPositionTr.position;
+							position2 = this.setup.search.worldPositionTr.position;
 						}
-						if (Vector3.Distance(getPos, this.path.vectorPath[this.currentWaypoint]) < this.nextWaypointDistance)
+						if (Vector3.Distance(position2, this.path.vectorPath[this.currentWaypoint]) < this.nextWaypointDistance)
 						{
 							this.currentWaypoint++;
 						}
 					}
 					if (!this.creepy && !this.creepy_male)
 					{
-						float angle = this.FindAngle(this.thisTr.forward, this.wantedDir, this.thisTr.up);
-						if (Mathf.Abs(angle) < this.deadZone)
+						float f = this.FindAngle(this.thisTr.forward, this.wantedDir, this.thisTr.up);
+						if (Mathf.Abs(f) < this.deadZone)
 						{
 							this.absDir = 0f;
 						}
@@ -821,8 +822,8 @@ public class mutantAI : MonoBehaviour
 					}
 					if (!this.maleSkinny && !this.femaleSkinny && !this.creepy && !this.creepy_baby && !this.creepy_fat && !this.creepy_male)
 					{
-						Vector3 localPos = this.thisTr.InverseTransformPoint(this.wantedPos);
-						this.waypointAngle = Mathf.Atan2(localPos.x, localPos.z) * 57.29578f;
+						Vector3 vector = this.thisTr.InverseTransformPoint(this.wantedPos);
+						this.waypointAngle = Mathf.Atan2(vector.x, vector.z) * 57.29578f;
 						if (this.waypointAngle > 80f && this.waypointAngle < 135f)
 						{
 							this.avatar.SetInteger("sharpTurnDir", 1);
@@ -841,11 +842,11 @@ public class mutantAI : MonoBehaviour
 						}
 					}
 					yield return null;
-					goto IL_8D9;
+					goto IL_8AF;
 				}
 				this.currentWaypoint++;
 			}
-			goto IL_387;
+			goto IL_376;
 		}
 		yield break;
 	}
@@ -1068,46 +1069,46 @@ public class mutantAI : MonoBehaviour
 			}
 			if (!foundValidWall && getTarget && Scene.SceneTracker.climbableStructures[randVal] != null)
 			{
-				Vector3 playerPos2d = getTarget.position;
-				playerPos2d.y = this.thisTr.position.y;
-				Vector3 wallPos2d = Scene.SceneTracker.climbableStructures[randVal].transform.position;
-				wallPos2d.y = this.thisTr.position.y;
-				Vector3 wallToPlayerVector = playerPos2d - wallPos2d;
-				Vector3 wallToEnemyVector = this.thisTr.position - wallPos2d;
-				Vector3 enemyToPlayerVector = this.thisTr.position - playerPos2d;
-				float angle = Vector3.Angle(wallToEnemyVector, enemyToPlayerVector);
-				float wallToPlayerDist = wallToPlayerVector.sqrMagnitude;
-				float wallToEnemyDist = wallToEnemyVector.sqrMagnitude;
-				float enemyToPlayerDist = enemyToPlayerVector.sqrMagnitude;
-				if (wallToPlayerDist < enemyToPlayerDist && wallToPlayerDist < 2500f && wallToEnemyDist > 225f && angle < 70f)
+				Vector3 position = getTarget.position;
+				position.y = this.thisTr.position.y;
+				Vector3 position2 = Scene.SceneTracker.climbableStructures[randVal].transform.position;
+				position2.y = this.thisTr.position.y;
+				Vector3 vector = position - position2;
+				Vector3 from = this.thisTr.position - position2;
+				Vector3 to = this.thisTr.position - position;
+				float num = Vector3.Angle(from, to);
+				float sqrMagnitude = vector.sqrMagnitude;
+				float sqrMagnitude2 = from.sqrMagnitude;
+				float sqrMagnitude3 = to.sqrMagnitude;
+				if (sqrMagnitude < sqrMagnitude3 && sqrMagnitude < 2500f && sqrMagnitude2 > 225f && num < 70f)
 				{
-					Vector3 nodePos = Scene.SceneTracker.climbableStructures[randVal].transform.position;
-					nodePos.y = getTarget.position.y;
-					uint areaID = targetNode.Area;
-					NNConstraint nn = new NNConstraint();
-					nn.constrainArea = true;
-					int areaIDint = (int)areaID;
-					nn.area = areaIDint;
-					bool validNode = false;
-					GraphNode wallNode = this.rg.GetNearest(nodePos, nn).node;
-					if (wallNode != null)
+					Vector3 position3 = Scene.SceneTracker.climbableStructures[randVal].transform.position;
+					position3.y = getTarget.position.y;
+					uint area = targetNode.Area;
+					NNConstraint nnconstraint = new NNConstraint();
+					nnconstraint.constrainArea = true;
+					int area2 = (int)area;
+					nnconstraint.area = area2;
+					bool flag = false;
+					GraphNode node = this.rg.GetNearest(position3, nnconstraint).node;
+					if (node != null)
 					{
-						Vector3 wallNodePos = new Vector3((float)(wallNode.position[0] / 1000), (float)(wallNode.position[1] / 1000), (float)(wallNode.position[2] / 1000));
-						if (Vector3.Distance(nodePos, wallNodePos) < 8f)
+						Vector3 b = new Vector3((float)(node.position[0] / 1000), (float)(node.position[1] / 1000), (float)(node.position[2] / 1000));
+						if (Vector3.Distance(position3, b) < 8f)
 						{
-							validNode = true;
+							flag = true;
 						}
 					}
-					climbableWallSetup cw = Scene.SceneTracker.climbableStructures[randVal].GetComponent<climbableWallSetup>();
-					if (cw && !cw.occupied && !cw.invalid && validNode)
+					climbableWallSetup component = Scene.SceneTracker.climbableStructures[randVal].GetComponent<climbableWallSetup>();
+					if (component && !component.occupied && !component.invalid && flag)
 					{
 						this.setup.pmCombat.FsmVariables.GetFsmGameObject("wallGo").Value = Scene.SceneTracker.climbableStructures[randVal];
 						this.setup.pmCombatScript.wallGo = Scene.SceneTracker.climbableStructures[randVal];
 						this.setup.pmCombat.FsmVariables.GetFsmBool("toClimbWall").Value = true;
 						foundValidWall = true;
-						if (cw)
+						if (component)
 						{
-							cw.occupied = true;
+							component.occupied = true;
 						}
 					}
 				}

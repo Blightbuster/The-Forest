@@ -4,9 +4,9 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[HelpUrl("https:
-	[Tooltip("Gets the position and rotation of the target specified by SetTarget(AvatarTarget targetIndex, float targetNormalizedTime)).\nThe position and rotation are only valid when a frame has being evaluated after the SetTarget call")]
 	[ActionCategory("Animator")]
+	[Tooltip("Gets the position and rotation of the target specified by SetTarget(AvatarTarget targetIndex, float targetNormalizedTime)).\nThe position and rotation are only valid when a frame has being evaluated after the SetTarget call")]
+	[HelpUrl("https:
 	public class GetAnimatorTarget : FsmStateAction
 	{
 		
@@ -93,8 +93,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
 		[CheckForComponent(typeof(Animator))]
+		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -102,14 +102,14 @@ namespace HutongGames.PlayMaker.Actions
 		public bool everyFrame;
 
 		
-		[Tooltip("The target position")]
-		[UIHint(UIHint.Variable)]
 		[ActionSection("Results")]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("The target position")]
 		public FsmVector3 targetPosition;
 
 		
-		[Tooltip("The target rotation")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("The target rotation")]
 		public FsmQuaternion targetRotation;
 
 		

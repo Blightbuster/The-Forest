@@ -57,7 +57,7 @@ public class ParticleSceneControls : MonoBehaviour
 				{
 					if (ParticleSceneControls.selected.mode != ParticleSceneControls.Mode.Trail || this.instance == null)
 					{
-						this.instance = (Transform)UnityEngine.Object.Instantiate(ParticleSceneControls.selected.transform, vector, rotation);
+						this.instance = UnityEngine.Object.Instantiate<Transform>(ParticleSceneControls.selected.transform, vector, rotation);
 						if (this.particleMultiplier != null)
 						{
 							this.instance.GetComponent<ParticleSystemMultiplier>().multiplier = this.multiply;

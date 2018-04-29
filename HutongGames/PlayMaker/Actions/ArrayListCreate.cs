@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Adds a PlayMakerArrayList Component to a Game Object. Use this to create arrayList on the fly instead of during authoring.\n Optionally remove the ArrayList component on exiting the state.\n Simply point to existing if the reference exists already.")]
 	[ActionCategory("ArrayMaker/ArrayList")]
+	[Tooltip("Adds a PlayMakerArrayList Component to a Game Object. Use this to create arrayList on the fly instead of during authoring.\n Optionally remove the ArrayList component on exiting the state.\n Simply point to existing if the reference exists already.")]
 	public class ArrayListCreate : ArrayListActions
 	{
 		
@@ -46,7 +46,7 @@ namespace HutongGames.PlayMaker.Actions
 				this.addedComponent = ownerDefaultTarget.AddComponent<PlayMakerArrayListProxy>();
 				if (this.addedComponent == null)
 				{
-					this.LogError("Can't add PlayMakerArrayListProxy");
+					base.LogError("Can't add PlayMakerArrayListProxy");
 				}
 				else
 				{
@@ -57,8 +57,8 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[ActionSection("Set up")]
-		[Tooltip("The gameObject to add the PlayMaker ArrayList Proxy component to")]
 		[RequiredField]
+		[Tooltip("The gameObject to add the PlayMaker ArrayList Proxy component to")]
 		public FsmOwnerDefault gameObject;
 
 		

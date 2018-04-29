@@ -360,7 +360,7 @@ public class lb_Bird_old : MonoBehaviour
 	
 	private void SpawnAFeather()
 	{
-		UnityEngine.Object.Instantiate(this.MyFeather, base.transform.position, base.transform.rotation);
+		UnityEngine.Object.Instantiate<GameObject>(this.MyFeather, base.transform.position, base.transform.rotation);
 	}
 
 	

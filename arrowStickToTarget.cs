@@ -92,24 +92,28 @@ public class arrowStickToTarget : MonoBehaviour
 	public bool stickArrowToNearestBone(Transform arrow)
 	{
 		Transform parent = arrow.parent;
-		WeaponStatUpgrade.Types arrowBonus = (WeaponStatUpgrade.Types)(-1);
+		WeaponStatUpgrade.Types types = (WeaponStatUpgrade.Types)(-1);
 		ItemProperties properties = parent.GetComponent<arrowTrajectory>()._pickup.GetComponent<PickUp>()._properties;
 		if (properties != null && properties.ActiveBonus != (WeaponStatUpgrade.Types)(-1))
 		{
-			arrowBonus = properties.ActiveBonus;
+			types = properties.ActiveBonus;
 		}
 		GameObject gameObject;
-		switch (arrowBonus)
+		if (types != WeaponStatUpgrade.Types.BoneAmmo)
 		{
-		case WeaponStatUpgrade.Types.BoneAmmo:
-			gameObject = (GameObject)UnityEngine.Object.Instantiate(this.fakeArrowBonePickup, parent.transform.position, parent.transform.rotation);
-			goto IL_DE;
-		case WeaponStatUpgrade.Types.ModernAmmo:
-			gameObject = (GameObject)UnityEngine.Object.Instantiate(this.fakeArrowModernPickup, parent.transform.position, parent.transform.rotation);
-			goto IL_DE;
+			if (types != WeaponStatUpgrade.Types.ModernAmmo)
+			{
+				gameObject = UnityEngine.Object.Instantiate<GameObject>(this.fakeArrowPickup, parent.transform.position, parent.transform.rotation);
+			}
+			else
+			{
+				gameObject = UnityEngine.Object.Instantiate<GameObject>(this.fakeArrowModernPickup, parent.transform.position, parent.transform.rotation);
+			}
 		}
-		gameObject = (GameObject)UnityEngine.Object.Instantiate(this.fakeArrowPickup, parent.transform.position, parent.transform.rotation);
-		IL_DE:
+		else
+		{
+			gameObject = UnityEngine.Object.Instantiate<GameObject>(this.fakeArrowBonePickup, parent.transform.position, parent.transform.rotation);
+		}
 		Collider component = gameObject.GetComponent<Collider>();
 		if (component)
 		{
@@ -129,13 +133,26 @@ public class arrowStickToTarget : MonoBehaviour
 		else
 		{
 			Transform transform = this.stickToJoints[num];
-			foreach (object obj in this.stickToJoints[num])
+			IEnumerator enumerator = this.stickToJoints[num].GetEnumerator();
+			try
 			{
-				Transform transform2 = (Transform)obj;
-				if (!transform2.GetComponent<MonoBehaviour>())
+				while (enumerator.MoveNext())
 				{
-					transform = transform2;
-					break;
+					object obj = enumerator.Current;
+					Transform transform2 = (Transform)obj;
+					if (!transform2.GetComponent<MonoBehaviour>())
+					{
+						transform = transform2;
+						break;
+					}
+				}
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
+				{
+					disposable.Dispose();
 				}
 			}
 			Vector3 vector2 = (this.stickToJoints[num].position + transform.position) / 2f;
@@ -168,11 +185,11 @@ public class arrowStickToTarget : MonoBehaviour
 			{
 				if (this.IsCreature && BoltNetwork.isServer)
 				{
-					base.StartCoroutine(this.SendArrowMPDelayed(gameObject, num, arrowBonus));
+					base.StartCoroutine(this.SendArrowMPDelayed(gameObject, num, types));
 				}
 				else
 				{
-					this.sendArrowMP(gameObject, num, arrowBonus);
+					this.sendArrowMP(gameObject, num, types);
 				}
 			}
 		}

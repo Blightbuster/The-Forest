@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using TheForest.Items;
+using TheForest.Items.Inventory;
 using TheForest.Items.World;
 using TheForest.Utils;
 using UnityEngine;
@@ -29,6 +30,13 @@ public class slingShotController : MonoBehaviour
 	
 	private void Update()
 	{
+		if (LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.World)
+		{
+			this._playerAnimator.SetBool("attack", false);
+			this._playerAnimator.SetBool("aimSlingBool", false);
+			this._slingAnimator.SetBool("toAim", false);
+			return;
+		}
 		if ((TheForest.Utils.Input.GetButtonDown("Fire1") || TheForest.Utils.Input.GetButton("Fire1")) && !LocalPlayer.Animator.GetBool("ballHeld"))
 		{
 			this._playerAnimator.SetBool("aimSlingBool", true);
@@ -64,7 +72,7 @@ public class slingShotController : MonoBehaviour
 	{
 		if (LocalPlayer.Inventory.RemoveItem(this._ammoItemId, 1, false, true))
 		{
-			GameObject gameObject = UnityEngine.Object.Instantiate(this._Ammo, this._ammoSpawnPos.transform.position, this._ammoSpawnPos.transform.rotation) as GameObject;
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this._Ammo, this._ammoSpawnPos.transform.position, this._ammoSpawnPos.transform.rotation);
 			Rigidbody component = gameObject.GetComponent<Rigidbody>();
 			rockSound component2 = gameObject.GetComponent<rockSound>();
 			if (component2)

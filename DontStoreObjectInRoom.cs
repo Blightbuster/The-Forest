@@ -3,7 +3,7 @@ using UnityEngine;
 
 
 [AddComponentMenu("Storage/Rooms/Dont Store Object In Room")]
-public class DontStoreObjectInRoom : MonoBehaviour, IControlSerialization, IControlSerializationEx
+public class DontStoreObjectInRoom : MonoBehaviour, IControlSerializationEx, IControlSerialization
 {
 	
 	private void Awake()

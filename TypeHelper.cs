@@ -16,12 +16,27 @@ public static class TypeHelper
 	{
 		if (o is MemberInfo)
 		{
-			return ((T)((object)(o as MemberInfo).GetCustomAttributes(typeof(T), false).FirstOrDefault<object>())) ?? Activator.CreateInstance<T>();
+			T result;
+			if ((result = (T)((object)(o as MemberInfo).GetCustomAttributes(typeof(T), false).FirstOrDefault<object>())) == null)
+			{
+				result = Activator.CreateInstance<T>();
+			}
+			return result;
 		}
 		if (o is ParameterInfo)
 		{
-			return ((T)((object)(o as ParameterInfo).GetCustomAttributes(typeof(T), false).FirstOrDefault<object>())) ?? Activator.CreateInstance<T>();
+			T result2;
+			if ((result2 = (T)((object)(o as ParameterInfo).GetCustomAttributes(typeof(T), false).FirstOrDefault<object>())) == null)
+			{
+				result2 = Activator.CreateInstance<T>();
+			}
+			return result2;
 		}
-		return o.GetType().Attribute<T>() ?? Activator.CreateInstance<T>();
+		T result3;
+		if ((result3 = o.GetType().Attribute<T>()) == null)
+		{
+			result3 = Activator.CreateInstance<T>();
+		}
+		return result3;
 	}
 }

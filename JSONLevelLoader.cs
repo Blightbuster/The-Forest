@@ -4,32 +4,12 @@ using System.Collections.Generic;
 using Serialization;
 using UniLinq;
 using UnityEngine;
+using UnityEngine.AI;
 
 
 [AddComponentMenu("Storage/Internal/Level Loader (Internal use only, do not add this to your objects!)")]
 public class JSONLevelLoader : MonoBehaviour
 {
-	
-	static JSONLevelLoader()
-	{
-		
-		JSONLevelLoader.CreateGameObject = delegate
-		{
-		};
-		JSONLevelLoader.OnDestroyObject = delegate
-		{
-		};
-		JSONLevelLoader.LoadData = delegate
-		{
-		};
-		JSONLevelLoader.LoadComponent = delegate
-		{
-		};
-		JSONLevelLoader.LoadedComponent = delegate
-		{
-		};
-	}
-
 	
 	
 	
@@ -125,157 +105,157 @@ public class JSONLevelLoader : MonoBehaviour
 		LevelSerializer.RaiseProgress("Initializing", 0f);
 		if (this.Data.rootObject != null)
 		{
-			Debug.Log((!this.Data.StoredObjectNames.Any((JSONLevelSerializer.StoredItem sn) => sn.Name == this.<>f__this.Data.rootObject)) ? ("Not found " + this.Data.rootObject) : ("Located " + this.Data.rootObject));
+			Debug.Log((!this.Data.StoredObjectNames.Any((JSONLevelSerializer.StoredItem sn) => sn.Name == this.$this.Data.rootObject)) ? ("Not found " + this.Data.rootObject) : ("Located " + this.Data.rootObject));
 		}
 		if (!this.DontDelete)
 		{
-			foreach (UniqueIdentifier go in (from n in UniqueIdentifier.AllIdentifiers
-			where this.<>f__this.Data.StoredObjectNames.All((JSONLevelSerializer.StoredItem sn) => sn.Name != i.Id)
-			select n).ToList<UniqueIdentifier>())
+			foreach (UniqueIdentifier uniqueIdentifier in UniqueIdentifier.AllIdentifiers.Where(delegate(UniqueIdentifier n)
+			{
+				JSONLevelLoader $this = this.$this;
+				return this.$this.Data.StoredObjectNames.All((JSONLevelSerializer.StoredItem sn) => sn.Name != n.Id);
+			}).ToList<UniqueIdentifier>())
 			{
 				try
 				{
-					bool cancel = false;
-					JSONLevelLoader.OnDestroyObject(go.gameObject, ref cancel);
-					if (!cancel)
+					bool flag = false;
+					JSONLevelLoader.OnDestroyObject(uniqueIdentifier.gameObject, ref flag);
+					if (!flag)
 					{
-						UnityEngine.Object.Destroy(go.gameObject);
+						UnityEngine.Object.Destroy(uniqueIdentifier.gameObject);
 					}
 				}
 				catch (Exception ex)
 				{
-					Exception e = ex;
-					Radical.LogWarning("Problem destroying object " + go.name + " " + e.ToString());
+					Radical.LogWarning("Problem destroying object " + uniqueIdentifier.name + " " + ex.ToString());
 				}
 			}
 		}
 		List<UniqueIdentifier> flaggedObjects = new List<UniqueIdentifier>();
 		LevelSerializer.RaiseProgress("Initializing", 0.25f);
 		Vector3 position = new Vector3(0f, 2000f, 2000f);
-		foreach (JSONLevelSerializer.StoredItem sto in from c in this.Data.StoredObjectNames
+		foreach (JSONLevelSerializer.StoredItem storedItem in from c in this.Data.StoredObjectNames
 		where UniqueIdentifier.GetByName(c.Name) == null
 		select c)
 		{
 			try
 			{
-				if (sto.createEmptyObject || sto.ClassId == null || !LevelSerializer.AllPrefabs.ContainsKey(sto.ClassId))
+				if (storedItem.createEmptyObject || storedItem.ClassId == null || !LevelSerializer.AllPrefabs.ContainsKey(storedItem.ClassId))
 				{
-					sto.GameObject = new GameObject("CreatedObject");
-					sto.GameObject.transform.position = position;
-					EmptyObjectIdentifier emptyObjectMarker = sto.GameObject.AddComponent<EmptyObjectIdentifier>();
-					sto.GameObject.AddComponent<StoreMaterials>();
-					sto.GameObject.AddComponent<StoreMesh>();
-					emptyObjectMarker.IsDeserializing = true;
-					emptyObjectMarker.Id = sto.Name;
-					if (emptyObjectMarker.Id == this.Data.rootObject)
+					storedItem.GameObject = new GameObject("CreatedObject");
+					storedItem.GameObject.transform.position = position;
+					EmptyObjectIdentifier emptyObjectIdentifier = storedItem.GameObject.AddComponent<EmptyObjectIdentifier>();
+					storedItem.GameObject.AddComponent<StoreMaterials>();
+					storedItem.GameObject.AddComponent<StoreMesh>();
+					emptyObjectIdentifier.IsDeserializing = true;
+					emptyObjectIdentifier.Id = storedItem.Name;
+					if (emptyObjectIdentifier.Id == this.Data.rootObject)
 					{
 						Debug.Log("Set the root object on an empty");
 					}
-					flaggedObjects.Add(emptyObjectMarker);
+					flaggedObjects.Add(emptyObjectIdentifier);
 				}
 				else
 				{
-					GameObject pf = LevelSerializer.AllPrefabs[sto.ClassId];
-					bool cancel2 = false;
-					JSONLevelLoader.CreateGameObject(pf, ref cancel2);
-					if (cancel2)
+					GameObject gameObject = LevelSerializer.AllPrefabs[storedItem.ClassId];
+					bool flag2 = false;
+					JSONLevelLoader.CreateGameObject(gameObject, ref flag2);
+					if (flag2)
 					{
 						Debug.LogWarning("Cancelled");
 						continue;
 					}
-					UniqueIdentifier[] uis = pf.GetComponentsInChildren<UniqueIdentifier>();
-					foreach (UniqueIdentifier ui in uis)
+					UniqueIdentifier[] componentsInChildren = gameObject.GetComponentsInChildren<UniqueIdentifier>();
+					foreach (UniqueIdentifier uniqueIdentifier2 in componentsInChildren)
 					{
-						ui.IsDeserializing = true;
+						uniqueIdentifier2.IsDeserializing = true;
 					}
-					sto.GameObject = (UnityEngine.Object.Instantiate(pf, position, Quaternion.identity) as GameObject);
-					sto.GameObject.GetComponent<UniqueIdentifier>().Id = sto.Name;
-					if (sto.GameObject.GetComponent<UniqueIdentifier>().Id == this.Data.rootObject)
+					storedItem.GameObject = UnityEngine.Object.Instantiate<GameObject>(gameObject, position, Quaternion.identity);
+					storedItem.GameObject.GetComponent<UniqueIdentifier>().Id = storedItem.Name;
+					if (storedItem.GameObject.GetComponent<UniqueIdentifier>().Id == this.Data.rootObject)
 					{
 						Debug.Log("Set the root object on a prefab");
 					}
-					foreach (UniqueIdentifier ui2 in uis)
+					foreach (UniqueIdentifier uniqueIdentifier3 in componentsInChildren)
 					{
-						ui2.IsDeserializing = false;
+						uniqueIdentifier3.IsDeserializing = false;
 					}
-					flaggedObjects.AddRange(sto.GameObject.GetComponentsInChildren<UniqueIdentifier>());
+					flaggedObjects.AddRange(storedItem.GameObject.GetComponentsInChildren<UniqueIdentifier>());
 				}
 				position += Vector3.right * 50f;
-				sto.GameObject.GetComponent<UniqueIdentifier>().Id = sto.Name;
-				sto.GameObject.name = sto.GameObjectName;
-				if (sto.ChildIds.Count > 0)
+				storedItem.GameObject.GetComponent<UniqueIdentifier>().Id = storedItem.Name;
+				storedItem.GameObject.name = storedItem.GameObjectName;
+				if (storedItem.ChildIds.Count > 0)
 				{
-					List<UniqueIdentifier> list = sto.GameObject.GetComponentsInChildren<UniqueIdentifier>().ToList<UniqueIdentifier>();
-					int m = 0;
-					while (m < list.Count && m < sto.ChildIds.Count)
+					List<UniqueIdentifier> list4 = storedItem.GameObject.GetComponentsInChildren<UniqueIdentifier>().ToList<UniqueIdentifier>();
+					int num2 = 0;
+					while (num2 < list4.Count && num2 < storedItem.ChildIds.Count)
 					{
-						list[m].Id = sto.ChildIds[m];
-						m++;
+						list4[num2].Id = storedItem.ChildIds[num2];
+						num2++;
 					}
 				}
-				if (sto.Children.Count > 0)
+				if (storedItem.Children.Count > 0)
 				{
-					List<StoreInformation> list2 = JSONLevelSerializer.GetComponentsInChildrenWithClause(sto.GameObject);
+					List<StoreInformation> componentsInChildrenWithClause = JSONLevelSerializer.GetComponentsInChildrenWithClause(storedItem.GameObject);
 					this._indexDictionary.Clear();
-					foreach (StoreInformation c2 in list2)
+					foreach (StoreInformation storeInformation in componentsInChildrenWithClause)
 					{
-						if (sto.Children.ContainsKey(c2.ClassId))
+						if (storedItem.Children.ContainsKey(storeInformation.ClassId))
 						{
-							if (!this._indexDictionary.ContainsKey(c2.ClassId))
+							if (!this._indexDictionary.ContainsKey(storeInformation.ClassId))
 							{
-								this._indexDictionary[c2.ClassId] = 0;
+								this._indexDictionary[storeInformation.ClassId] = 0;
 							}
-							c2.Id = sto.Children[c2.ClassId][this._indexDictionary[c2.ClassId]];
-							this._indexDictionary[c2.ClassId] = this._indexDictionary[c2.ClassId] + 1;
+							storeInformation.Id = storedItem.Children[storeInformation.ClassId][this._indexDictionary[storeInformation.ClassId]];
+							this._indexDictionary[storeInformation.ClassId] = this._indexDictionary[storeInformation.ClassId] + 1;
 						}
 					}
 				}
 			}
 			catch (Exception ex2)
 			{
-				Exception e2 = ex2;
-				Debug.LogError(e2);
+				Debug.LogError(ex2);
 				Radical.LogWarning(string.Concat(new object[]
 				{
 					"Problem creating an object ",
-					sto.GameObjectName,
+					storedItem.GameObjectName,
 					" with classID ",
-					sto.ClassId,
+					storedItem.ClassId,
 					" ",
-					e2
+					ex2
 				}));
 			}
 		}
 		HashSet<GameObject> loadedGameObjects = new HashSet<GameObject>();
 		LevelSerializer.RaiseProgress("Initializing", 0.75f);
-		foreach (JSONLevelSerializer.StoredItem so in this.Data.StoredObjectNames)
+		foreach (JSONLevelSerializer.StoredItem storedItem2 in this.Data.StoredObjectNames)
 		{
-			GameObject go2 = UniqueIdentifier.GetByName(so.Name);
-			if (go2 == null)
+			GameObject byName = UniqueIdentifier.GetByName(storedItem2.Name);
+			if (byName == null)
 			{
-				Radical.LogNow("Could not find " + so.GameObjectName + " " + so.Name, new object[0]);
+				Radical.LogNow("Could not find " + storedItem2.GameObjectName + " " + storedItem2.Name, new object[0]);
 			}
 			else
 			{
-				loadedGameObjects.Add(go2);
-				if (so.Components != null && so.Components.Count > 0)
+				loadedGameObjects.Add(byName);
+				if (storedItem2.Components != null && storedItem2.Components.Count > 0)
 				{
-					List<Component> all = (from c in go2.GetComponents<Component>()
+					List<Component> list2 = (from c in byName.GetComponents<Component>()
 					where !typeof(UniqueIdentifier).IsAssignableFrom(c.GetType())
 					select c).ToList<Component>();
-					foreach (Component comp in all)
+					foreach (Component component in list2)
 					{
-						if (!so.Components.ContainsKey(comp.GetType().FullName))
+						if (!storedItem2.Components.ContainsKey(component.GetType().FullName))
 						{
-							UnityEngine.Object.Destroy(comp);
+							UnityEngine.Object.Destroy(component);
 						}
 					}
 				}
-				JSONLevelLoader.SetActive(go2, so.Active);
-				if (so.setExtraData)
+				JSONLevelLoader.SetActive(byName, storedItem2.Active);
+				if (storedItem2.setExtraData)
 				{
-					go2.layer = so.layer;
-					go2.tag = so.tag;
+					byName.layer = storedItem2.layer;
+					byName.tag = storedItem2.tag;
 				}
 			}
 		}
@@ -284,15 +264,15 @@ public class JSONLevelLoader : MonoBehaviour
 		{
 			Debug.Log("No root object has been configured");
 		}
-		foreach (JSONLevelSerializer.StoredItem go3 in from c in this.Data.StoredObjectNames
+		foreach (JSONLevelSerializer.StoredItem storedItem3 in from c in this.Data.StoredObjectNames
 		where !string.IsNullOrEmpty(c.ParentName)
 		select c)
 		{
-			GameObject parent = UniqueIdentifier.GetByName(go3.ParentName);
-			GameObject item = UniqueIdentifier.GetByName(go3.Name);
-			if (item != null && parent != null)
+			GameObject byName2 = UniqueIdentifier.GetByName(storedItem3.ParentName);
+			GameObject byName3 = UniqueIdentifier.GetByName(storedItem3.Name);
+			if (byName3 != null && byName2 != null)
 			{
-				item.transform.parent = parent.transform;
+				byName3.transform.parent = byName2.transform;
 			}
 		}
 		Time.timeScale = timeScale;
@@ -307,9 +287,7 @@ public class JSONLevelLoader : MonoBehaviour
 				{
 					using (new UnitySerializer.SerializationScope())
 					{
-						var cp;
-						Type type;
-						foreach (var item2 in this.Data.StoredItems.GroupBy((JSONLevelSerializer.StoredData i) => i.Name, (string name, IEnumerable<JSONLevelSerializer.StoredData> cps) => new
+						foreach (var <>__AnonType in this.Data.StoredItems.GroupBy((JSONLevelSerializer.StoredData i) => i.Name, (string name, IEnumerable<JSONLevelSerializer.StoredData> cps) => new
 						{
 							Name = name,
 							Components = (from cp in cps
@@ -321,128 +299,124 @@ public class JSONLevelLoader : MonoBehaviour
 							}).ToList()
 						}))
 						{
-							GameObject go4 = UniqueIdentifier.GetByName(item2.Name);
-							if (go4 == null)
+							GameObject byName4 = UniqueIdentifier.GetByName(<>__AnonType.Name);
+							if (byName4 == null)
 							{
-								Radical.LogWarning(item2.Name + " was null");
+								Radical.LogWarning(<>__AnonType.Name + " was null");
 							}
 							else
 							{
-								using (var enumerator8 = item2.Components.GetEnumerator())
+								foreach (var <>__AnonType2 in <>__AnonType.Components)
 								{
-									while (enumerator8.MoveNext())
+									try
 									{
-										cp = enumerator8.Current;
-										try
+										LevelSerializer.RaiseProgress("Loading", (float)(++currentProgress) / (float)this.Data.StoredItems.Count);
+										Type type = UnitySerializer.GetTypeEx(<>__AnonType2.Type);
+										if (type != null)
 										{
-											LevelSerializer.RaiseProgress("Loading", (float)(++currentProgress) / (float)this.Data.StoredItems.Count);
-											type = UnitySerializer.GetTypeEx(cp.Type);
-											if (type != null)
+											this.Last = byName4;
+											bool flag3 = false;
+											JSONLevelLoader.LoadData(byName4, ref flag3);
+											JSONLevelLoader.LoadComponent(byName4, type.Name, ref flag3);
+											if (!flag3)
 											{
-												this.Last = go4;
-												bool cancel3 = false;
-												JSONLevelLoader.LoadData(go4, ref cancel3);
-												JSONLevelLoader.LoadComponent(go4, type.Name, ref cancel3);
-												if (!cancel3)
+												List<Component> list = (from c in byName4.GetComponents(type)
+												where c.GetType() == type
+												select c).ToList<Component>();
+												while (list.Count > <>__AnonType2.List.Count)
 												{
-													List<Component> list3 = (from c in go4.GetComponents(type)
-													where c.GetType() == this.<type>__46
-													select c).ToList<Component>();
-													while (list3.Count > cp.List.Count)
+													UnityEngine.Object.DestroyImmediate(list.Last<Component>());
+													list.Remove(list.Last<Component>());
+												}
+												if (type == typeof(NavMeshAgent))
+												{
+													<>__AnonType2<string, List<JSONLevelSerializer.StoredData>> cp1 = <>__AnonType2;
+													<>__AnonType3<string, List<<>__AnonType2<string, List<JSONLevelSerializer.StoredData>>>> item1 = <>__AnonType;
+													int l;
+													Action action = delegate
 													{
-														UnityEngine.Object.DestroyImmediate(list3.Last<Component>());
-														list3.Remove(list3.Last<Component>());
-													}
-													if (type == typeof(NavMeshAgent))
-													{
-														int l;
-														Component comp;
-														Action perform = delegate
+														<>__AnonType2<string, List<JSONLevelSerializer.StoredData>> comp = cp1;
+														Type tp = type;
+														string tname = item1.Name;
+														UnitySerializer.AddFinalAction(delegate
 														{
-															<>__AnonType2<string, List<JSONLevelSerializer.StoredData>> comp = this.<cp1>__49;
-															Type tp = this.<type>__46;
-															string tname = this.<item1>__50.Name;
-															UnitySerializer.AddFinalAction(delegate
+															GameObject byName5 = UniqueIdentifier.GetByName(tname);
+															List<Component> list3 = (from c in byName5.GetComponents(tp)
+															where c.GetType() == tp
+															select c).ToList<Component>();
+															while (list3.Count < comp.List.Count)
 															{
-																GameObject byName = UniqueIdentifier.GetByName(tname);
-																List<Component> list4 = (from c in byName.GetComponents(tp)
-																where c.GetType() == tp
-																select c).ToList<Component>();
-																while (list4.Count < comp.List.Count)
+																try
 																{
-																	try
-																	{
-																		list4.Add(byName.AddComponent(tp));
-																	}
-																	catch
-																	{
-																	}
+																	list3.Add(byName5.AddComponent(tp));
 																}
-																this.<list>__48 = (from l in this.<list>__48
-																where l != null
-																select l).ToList<Component>();
-																for (int i = 0; i < list4.Count; i++)
+																catch
 																{
-																	if (JSONLevelSerializer.CustomSerializers.ContainsKey(tp))
-																	{
-																		JSONLevelSerializer.CustomSerializers[tp].Deserialize(UnitySerializer.TextEncoding.GetBytes(UnitySerializer.UnEscape(comp.List[i].Data)), list4[i]);
-																	}
-																	else
-																	{
-																		UnitySerializer.JSONDeserializeInto(UnitySerializer.UnEscape(comp.List[i].Data), list4[i]);
-																	}
-																	JSONLevelLoader.LoadedComponent(list4[i]);
 																}
-															});
-														};
-														perform();
-													}
-													else
+															}
+															list = (from l in list
+															where l != null
+															select l).ToList<Component>();
+															for (int i = 0; i < list3.Count; i++)
+															{
+																if (JSONLevelSerializer.CustomSerializers.ContainsKey(tp))
+																{
+																	JSONLevelSerializer.CustomSerializers[tp].Deserialize(UnitySerializer.TextEncoding.GetBytes(UnitySerializer.UnEscape(comp.List[i].Data)), list3[i]);
+																}
+																else
+																{
+																	UnitySerializer.JSONDeserializeInto(UnitySerializer.UnEscape(comp.List[i].Data), list3[i]);
+																}
+																JSONLevelLoader.LoadedComponent(list3[i]);
+															}
+														});
+													};
+													action();
+												}
+												else
+												{
+													while (list.Count < <>__AnonType2.List.Count)
 													{
-														while (list3.Count < cp.List.Count)
+														try
 														{
-															try
-															{
-																list3.Add(go4.AddComponent(type));
-															}
-															catch
-															{
-															}
+															list.Add(byName4.AddComponent(type));
 														}
-														int l;
-														list3 = (from l in list3
-														where l != null
-														select l).ToList<Component>();
-														for (int j = 0; j < list3.Count; j++)
+														catch
 														{
-															Radical.Log(string.Format("Deserializing {0} for {1}", type.Name, go4.GetFullName()), new object[0]);
-															if (JSONLevelSerializer.CustomSerializers.ContainsKey(type))
-															{
-																JSONLevelSerializer.CustomSerializers[type].Deserialize(UnitySerializer.TextEncoding.GetBytes(cp.List[j].Data), list3[j]);
-															}
-															else
-															{
-																UnitySerializer.JSONDeserializeInto(cp.List[j].Data, list3[j]);
-															}
-															JSONLevelLoader.LoadedComponent(list3[j]);
 														}
+													}
+													int l;
+													list = (from l in list
+													where l != null
+													select l).ToList<Component>();
+													for (int k = 0; k < list.Count; k++)
+													{
+														Radical.Log(string.Format("Deserializing {0} for {1}", type.Name, byName4.GetFullName()), new object[0]);
+														if (JSONLevelSerializer.CustomSerializers.ContainsKey(type))
+														{
+															JSONLevelSerializer.CustomSerializers[type].Deserialize(UnitySerializer.TextEncoding.GetBytes(<>__AnonType2.List[k].Data), list[k]);
+														}
+														else
+														{
+															UnitySerializer.JSONDeserializeInto(<>__AnonType2.List[k].Data, list[k]);
+														}
+														JSONLevelLoader.LoadedComponent(list[k]);
 													}
 												}
 											}
 										}
-										catch (Exception ex3)
+									}
+									catch (Exception ex3)
+									{
+										Radical.LogWarning(string.Concat(new string[]
 										{
-											Exception e3 = ex3;
-											Radical.LogWarning(string.Concat(new string[]
-											{
-												"Problem deserializing ",
-												cp.Type,
-												" for ",
-												go4.name,
-												" ",
-												e3.ToString()
-											}));
-										}
+											"Problem deserializing ",
+											<>__AnonType2.Type,
+											" for ",
+											byName4.name,
+											" ",
+											ex3.ToString()
+										}));
 									}
 								}
 							}
@@ -474,12 +448,12 @@ public class JSONLevelLoader : MonoBehaviour
 			if (this.rootObject == null && this.Data.rootObject != null)
 			{
 				Debug.LogError("Could not find the root object");
-				Debug.Log(this.Data.rootObject + " not found " + (this.Data.StoredObjectNames.Any((JSONLevelSerializer.StoredItem n) => n.Name == this.<>f__this.Data.rootObject) ? "was in the stored names" : "not in the stored names"));
+				Debug.Log(this.Data.rootObject + " not found " + (this.Data.StoredObjectNames.Any((JSONLevelSerializer.StoredItem n) => n.Name == this.$this.Data.rootObject) ? "was in the stored names" : "not in the stored names"));
 			}
-			foreach (UniqueIdentifier obj in flaggedObjects)
+			foreach (UniqueIdentifier uniqueIdentifier4 in flaggedObjects)
 			{
-				obj.IsDeserializing = false;
-				obj.SendMessage("OnDeserialized", SendMessageOptions.DontRequireReceiver);
+				uniqueIdentifier4.IsDeserializing = false;
+				uniqueIdentifier4.SendMessage("OnDeserialized", SendMessageOptions.DontRequireReceiver);
 			}
 			LevelSerializer.IsDeserializing = false;
 			RoomManager.loadingRoom = false;
@@ -487,6 +461,28 @@ public class JSONLevelLoader : MonoBehaviour
 			UnityEngine.Object.Destroy(base.gameObject, 0.1f);
 		}
 		yield break;
+	}
+
+	
+	static JSONLevelLoader()
+	{
+		
+		JSONLevelLoader.CreateGameObject = delegate
+		{
+		};
+		JSONLevelLoader.OnDestroyObject = delegate
+		{
+		};
+		JSONLevelLoader.LoadData = delegate
+		{
+		};
+		JSONLevelLoader.LoadComponent = delegate
+		{
+		};
+		JSONLevelLoader.LoadedComponent = delegate
+		{
+		};
+		JSONLevelLoader.loadingCount = 0;
 	}
 
 	
@@ -525,7 +521,7 @@ public class JSONLevelLoader : MonoBehaviour
 	private bool wasLoaded;
 
 	
-	private static int loadingCount = 0;
+	private static int loadingCount;
 
 	
 	

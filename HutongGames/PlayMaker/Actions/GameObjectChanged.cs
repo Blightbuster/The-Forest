@@ -39,9 +39,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
+		[RequiredField]
 		[UIHint(UIHint.Variable)]
 		[Tooltip("The GameObject variable to watch for a change.")]
-		[RequiredField]
 		public FsmGameObject gameObjectVariable;
 
 		
@@ -49,8 +49,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmEvent changedEvent;
 
 		
-		[Tooltip("Set to True if the variable changes.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Set to True if the variable changes.")]
 		public FsmBool storeResult;
 
 		

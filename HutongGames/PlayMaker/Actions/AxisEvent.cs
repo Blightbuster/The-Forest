@@ -5,8 +5,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sends events based on the direction of Input Axis (Left/Right/Up/Down...).")]
 	[ActionCategory(ActionCategory.Input)]
+	[Tooltip("Sends events based on the direction of Input Axis (Left/Right/Up/Down...).")]
 	public class AxisEvent : FsmStateAction
 	{
 		

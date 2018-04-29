@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Finds an ArrayList by reference. Warning: this function can be very slow.")]
 	[ActionCategory("ArrayMaker/ArrayList")]
+	[Tooltip("Finds an ArrayList by reference. Warning: this function can be very slow.")]
 	public class FindArrayList : CollectionsActions
 	{
 		
@@ -36,16 +36,16 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("Author defined Reference of the PlayMaker ArrayList Proxy component")]
 		[ActionSection("Set up")]
 		[RequiredField]
 		[UIHint(UIHint.FsmString)]
+		[Tooltip("Author defined Reference of the PlayMaker ArrayList Proxy component")]
 		public FsmString ArrayListReference;
 
 		
-		[Tooltip("Store the GameObject hosting the PlayMaker ArrayList Proxy component here")]
 		[ActionSection("Result")]
 		[RequiredField]
+		[Tooltip("Store the GameObject hosting the PlayMaker ArrayList Proxy component here")]
 		public FsmGameObject store;
 
 		

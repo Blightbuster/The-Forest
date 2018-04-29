@@ -23,7 +23,7 @@ namespace TheForest.Networking
 			if (BoltNetwork.isClient && this._destroyOnClientIfNotAttached)
 			{
 				yield return null;
-				if (!this.entity.isAttached)
+				if (!base.entity.isAttached)
 				{
 					UnityEngine.Object.Destroy(base.gameObject);
 				}

@@ -5,8 +5,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Adds the supplied vector to a GameObject's position.")]
 	[ActionCategory("iTween")]
+	[Tooltip("Adds the supplied vector to a GameObject's position.")]
 	public class iTweenMoveBy : iTweenFsmAction
 	{
 		

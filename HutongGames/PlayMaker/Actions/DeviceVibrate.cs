@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Causes the device to vibrate for half a second.")]
 	[ActionCategory(ActionCategory.Device)]
+	[Tooltip("Causes the device to vibrate for half a second.")]
 	public class DeviceVibrate : FsmStateAction
 	{
 		

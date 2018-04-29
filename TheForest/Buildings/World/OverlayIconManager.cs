@@ -229,8 +229,8 @@ namespace TheForest.Buildings.World
 		public bool _showAllGroupGizmos;
 
 		
-		[SerializeField]
 		[NameFromEnumIndex(typeof(OverlayIconManager.IconTypes))]
+		[SerializeField]
 		private List<OverlayIconManager.OverlayIconType> _icons = new List<OverlayIconManager.OverlayIconType>();
 
 		
@@ -364,11 +364,17 @@ namespace TheForest.Buildings.World
 										{
 											float num4 = this._unprocessedIcons[l].GroupTargetPosition.x - this._unprocessedIcons[l].GroupMinBreakRange;
 											float num5 = this._unprocessedIcons[l].GroupTargetPosition.x + this._unprocessedIcons[l].GroupMinBreakRange;
+											float y = this._unprocessedIcons[l].GroupTargetPosition.y;
+											float y2 = this._unprocessedIcons[l].GroupTargetPosition.y;
 											float num6 = this._unprocessedIcons[l].GroupTargetPosition.z - this._unprocessedIcons[l].GroupMinBreakRange;
 											float num7 = this._unprocessedIcons[l].GroupTargetPosition.z + this._unprocessedIcons[l].GroupMinBreakRange;
 											if (num4 < a.x)
 											{
 												a.x = num4;
+											}
+											if (y < a.y)
+											{
+												a.y = y;
 											}
 											if (num6 < a.z)
 											{
@@ -377,6 +383,10 @@ namespace TheForest.Buildings.World
 											if (num5 > b.x)
 											{
 												b.x = num5;
+											}
+											if (y2 > b.y)
+											{
+												b.y = y2;
 											}
 											if (num7 > b.z)
 											{
@@ -398,7 +408,7 @@ namespace TheForest.Buildings.World
 						if (num3 > 1)
 						{
 							Vector3 vector2 = (a + b) / 2f;
-							if (Terrain.activeTerrain)
+							if (Terrain.activeTerrain && !overlayIcon2.IsInCaves)
 							{
 								vector2.y = Terrain.activeTerrain.SampleHeight(vector2) + 10f;
 							}

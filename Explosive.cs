@@ -15,10 +15,10 @@ public class Explosive : MonoBehaviour
 	{
 		if (base.enabled && col.contacts.Length > 0)
 		{
-			float velocityAlongCollisionNormal = Vector3.Project(col.relativeVelocity, col.contacts[0].normal).magnitude;
-			if ((velocityAlongCollisionNormal > this.detonationImpactVelocity || this.exploded) && !this.exploded)
+			float magnitude = Vector3.Project(col.relativeVelocity, col.contacts[0].normal).magnitude;
+			if ((magnitude > this.detonationImpactVelocity || this.exploded) && !this.exploded)
 			{
-				UnityEngine.Object.Instantiate(this.explosionPrefab, col.contacts[0].point, Quaternion.LookRotation(col.contacts[0].normal));
+				UnityEngine.Object.Instantiate<Transform>(this.explosionPrefab, col.contacts[0].point, Quaternion.LookRotation(col.contacts[0].normal));
 				this.exploded = true;
 				base.SendMessage("Immobilize");
 				if (this.reset)

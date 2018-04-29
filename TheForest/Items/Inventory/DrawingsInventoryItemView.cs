@@ -6,8 +6,8 @@ using UnityEngine;
 namespace TheForest.Items.Inventory
 {
 	
-	[DoNotSerializePublic]
 	[AddComponentMenu("Items/Inventory/Drawings Inventory View")]
+	[DoNotSerializePublic]
 	public class DrawingsInventoryItemView : InventoryItemView
 	{
 		
@@ -30,10 +30,13 @@ namespace TheForest.Items.Inventory
 		
 		public override void OnDeserialized()
 		{
-			this._ids.RemoveRange(this._idsCount, this._ids.Count - this._idsCount);
-			this._usedIds.RemoveRange(this._usedIdsCount, this._usedIds.Count - this._usedIdsCount);
-			this.Init();
-			base.OnDeserialized();
+			if (this._held)
+			{
+				this._ids.RemoveRange(this._idsCount, this._ids.Count - this._idsCount);
+				this._usedIds.RemoveRange(this._usedIdsCount, this._usedIds.Count - this._usedIdsCount);
+				this.Init();
+				base.OnDeserialized();
+			}
 		}
 
 		

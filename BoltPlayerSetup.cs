@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using Bolt;
 using TheForest.Items.World;
 using TheForest.Networking;
@@ -12,28 +13,6 @@ using UnityEngine;
 
 public class BoltPlayerSetup : EntityEventListener<IPlayerState>, IPriorityCalculator
 {
-	
-	
-	bool IPriorityCalculator.Always
-	{
-		get
-		{
-			return true;
-		}
-	}
-
-	
-	float IPriorityCalculator.CalculateEventPriority(BoltConnection connection, Bolt.Event evnt)
-	{
-		return CoopUtils.CalculatePriorityFor(connection, this.entity, 1f, 1);
-	}
-
-	
-	float IPriorityCalculator.CalculateStatePriority(BoltConnection connection, int skipped)
-	{
-		return CoopUtils.CalculatePriorityFor(connection, this.entity, 1f, skipped);
-	}
-
 	
 	private void Awake()
 	{
@@ -102,54 +81,7 @@ public class BoltPlayerSetup : EntityEventListener<IPlayerState>, IPriorityCalcu
 		if (BoltNetwork.isServer)
 		{
 			CoopServerInfo.Instance.entity.Freeze(false);
-			CoopServerInfo.Instance.state.UsedPlayerVariations |= 1 << base.state.PlayerVariation * 4 + base.state.PlayerVariationTShirtMat;
-			PlayerCloting playerCloting = (PlayerCloting)(base.state.PlayerClothing & 1935);
-			switch (playerCloting)
-			{
-			case PlayerCloting.Jacket:
-				CoopServerInfo.Instance.state.UsedPlayerClothingVariations |= 2;
-				break;
-			case PlayerCloting.Blacksuit:
-				CoopServerInfo.Instance.state.UsedPlayerClothingVariations |= 1;
-				break;
-			default:
-				if (playerCloting != PlayerCloting.ShirtOpen)
-				{
-					if (playerCloting != PlayerCloting.ShirtClosed)
-					{
-						if (playerCloting != PlayerCloting.JacketLow)
-						{
-							if (playerCloting != PlayerCloting.HoodieUp)
-							{
-								CoopServerInfo.Instance.state.UsedPlayerClothingVariations |= 1 << base.state.PlayerClothingVariation;
-							}
-							else
-							{
-								CoopServerInfo.Instance.state.UsedPlayerClothingVariations |= 1 << 11 + base.state.PlayerClothingVariation;
-							}
-						}
-						else
-						{
-							CoopServerInfo.Instance.state.UsedPlayerClothingVariations |= 1 << 10 + base.state.PlayerClothingVariation;
-						}
-					}
-					else
-					{
-						CoopServerInfo.Instance.state.UsedPlayerClothingVariations |= 1 << 9 + base.state.PlayerClothingVariation;
-					}
-				}
-				else
-				{
-					CoopServerInfo.Instance.state.UsedPlayerClothingVariations |= 1 << 8 + base.state.PlayerClothingVariation;
-				}
-				break;
-			case PlayerCloting.Vest:
-				CoopServerInfo.Instance.state.UsedPlayerClothingVariations |= 1 << 2 + base.state.PlayerClothingVariation;
-				break;
-			case PlayerCloting.Hoodie:
-				CoopServerInfo.Instance.state.UsedPlayerClothingVariations |= 1 << 5 + base.state.PlayerClothingVariation;
-				break;
-			}
+			CoopServerInfo.Instance.state.UsedPlayerVariations |= 1 << base.state.PlayerVariation * 4;
 			if (CoopServerInfo.Instance.state.UsedPlayerVariations == (1 << this.variations.BodyVariationCount) - 1)
 			{
 				CoopServerInfo.Instance.state.UsedPlayerVariations = 0;
@@ -159,16 +91,20 @@ public class BoltPlayerSetup : EntityEventListener<IPlayerState>, IPriorityCalcu
 				CoopServerInfo.Instance.state.UsedPlayerClothingVariations = 0;
 			}
 		}
-		this.variations.SetVariation(base.state.PlayerVariation, base.state.PlayerVariationTShirtType, base.state.PlayerVariationTShirtMat, base.state.PlayerVariationPantsType, base.state.PlayerVariationPantsMat, base.state.PlayerVariationHair, (PlayerCloting)base.state.PlayerClothing, base.state.PlayerClothingVariation);
-		this.RefreshPlayerMaterials();
-		if (base.state.PlayerVariation != 0 || base.state.PlayerVariationTShirtType != 0 || base.state.PlayerVariationHair != 0 || base.state.PlayerClothing != 0 || base.state.PlayerClothingVariation != 0)
+		this.ClothingIds.Clear();
+		for (int i = 0; i < 4; i++)
 		{
-			this.removeClothing = base.GetComponentInChildren<coopPlayerRemoveUnusedClothing>();
-			if (this.removeClothing)
+			if (base.state.PlayerClothingIds[i] > 0)
 			{
-				this.removeClothing.StartCoroutine("PerformClothingCleanup");
+				this.ClothingIds.Add(base.state.PlayerClothingIds[i]);
 			}
 		}
+		if (this.ClothingIds.Count == 0)
+		{
+			this.ClothingIds.Add(-1);
+		}
+		this.variations.SetVariation(base.state.PlayerVariation, base.state.PlayerVariationHair, this.ClothingIds);
+		this.RefreshPlayerMaterials();
 	}
 
 	
@@ -178,53 +114,44 @@ public class BoltPlayerSetup : EntityEventListener<IPlayerState>, IPriorityCalcu
 	}
 
 	
+	private void InitClothingMpSync()
+	{
+		LocalPlayer.Clothing.RefreshVisibleClothing();
+		LocalPlayer.Clothing.MpSync();
+		this.PlayerVariationSetup();
+	}
+
+	
 	public override void Attached()
 	{
 		base.state.Transform.SetTransforms(base.transform);
-		if (this.entity.isOwner)
+		if (base.entity.isOwner)
 		{
 			base.state.PlayerVariation = LocalPlayer.Stats.PlayerVariation;
-			base.state.PlayerVariationTShirtType = LocalPlayer.Stats.PlayerVariationTShirtType;
-			base.state.PlayerVariationTShirtMat = LocalPlayer.Stats.PlayerVariationTShirtMat;
-			base.state.PlayerVariationPantsType = LocalPlayer.Stats.PlayerVariationPantsType;
-			base.state.PlayerVariationPantsMat = LocalPlayer.Stats.PlayerVariationPantsMat;
 			base.state.PlayerVariationHair = LocalPlayer.Stats.PlayerVariationHair;
-			base.state.PlayerClothing = (int)LocalPlayer.Stats.PlayerVariationExtras;
-			base.state.PlayerClothingVariation = LocalPlayer.Stats.PlayerClothingVariation;
-			this.PlayerVariationSetup();
+			base.Invoke("InitClothingMpSync", 0.1f);
 			base.Invoke("RefreshPlayerMaterials", 0.1f);
 			this.FindHands();
-			if (this.entity.isOwner && BoltNetwork.isClient)
+			if (base.entity.isOwner && BoltNetwork.isClient)
 			{
 				Scene.TriggerCutScene.clientPlayerOnPlaneGo.SendMessage("PlayerVariationSetupClean", base.state.PlayerVariation);
 				Scene.TriggerCutScene.clientCutScenePlayerGo.SendMessage("PlayerVariationSetup", base.state.PlayerVariation);
-				Scene.TriggerCutScene.clientCutScenePlayerGo.SendMessage("PlayerClothingSetup", base.state.PlayerClothing);
-				Scene.TriggerCutScene.clientCutScenePlayerGo.SendMessage("PlayerClothingVariationSetup", base.state.PlayerClothingVariation);
-				Scene.TriggerCutScene.clientPlayerOnPlaneGo.SendMessage("PlayerVariationTShirtTypeSetup", base.state.PlayerVariationTShirtType);
-				Scene.TriggerCutScene.clientPlayerOnPlaneGo.SendMessage("PlayerVariationTShirtMatSetup", base.state.PlayerVariationTShirtMat);
-				Scene.TriggerCutScene.clientPlayerOnPlaneGo.SendMessage("PlayerVariationPantsTypeSetup", base.state.PlayerVariationPantsType);
-				Scene.TriggerCutScene.clientPlayerOnPlaneGo.SendMessage("PlayerVariationPantsMatSetup", base.state.PlayerVariationPantsMat);
 			}
 		}
 		else
 		{
 			base.state.AddCallback("PlayerVariation", new PropertyCallbackSimple(this.PlayerVariationSetup));
-			base.state.AddCallback("PlayerVariationTShirtTypeSetup", new PropertyCallbackSimple(this.PlayerVariationSetup));
-			base.state.AddCallback("PlayerVariationTShirtMatSetup", new PropertyCallbackSimple(this.PlayerVariationSetup));
-			base.state.AddCallback("PlayerVariationPantsTypeSetup", new PropertyCallbackSimple(this.PlayerVariationSetup));
-			base.state.AddCallback("PlayerVariationPantsMatSetup", new PropertyCallbackSimple(this.PlayerVariationSetup));
 			base.state.AddCallback("PlayerVariationHair", new PropertyCallbackSimple(this.PlayerVariationSetup));
-			base.state.AddCallback("PlayerClothing", new PropertyCallbackSimple(this.PlayerVariationSetup));
-			base.state.AddCallback("PlayerClothingVariation", new PropertyCallbackSimple(this.PlayerVariationSetup));
+			base.state.AddCallback("PlayerClothingIds[]", new PropertyCallbackSimple(this.PlayerVariationSetup));
 			base.state.AddCallback("Bloody", new PropertyCallbackSimple(this.RefreshPlayerMaterials));
 			base.state.AddCallback("Muddy", new PropertyCallbackSimple(this.RefreshPlayerMaterials));
 			base.state.AddCallback("RedPaint", new PropertyCallbackSimple(this.RefreshPlayerMaterials));
 			base.state.AddCallback("Cold", new PropertyCallbackSimple(this.RefreshPlayerMaterials));
 			this.PlayerVariationSetup();
 			this.RefreshPlayerMaterials();
-			if (BoltNetwork.isServer && CoopTreeGrid.TodoPlayerSweeps.Contains(this.entity.source))
+			if (BoltNetwork.isServer && CoopTreeGrid.TodoPlayerSweeps.Contains(base.entity.source))
 			{
-				CoopTreeGrid.TodoPlayerSweeps.Remove(this.entity.source);
+				CoopTreeGrid.TodoPlayerSweeps.Remove(base.entity.source);
 				CoopTreeGrid.SweepGrid();
 			}
 			Transform playerTr = base.transform;
@@ -239,15 +166,15 @@ public class BoltPlayerSetup : EntityEventListener<IPlayerState>, IPriorityCalcu
 			{
 				if (!Scene.SceneTracker.allPlayers.Contains(base.gameObject))
 				{
-					Scene.SceneTracker.allPlayers.Add(this.entity.gameObject);
+					Scene.SceneTracker.allPlayers.Add(base.entity.gameObject);
 				}
-				if (!Scene.SceneTracker.allPlayerEntities.Contains(this.entity))
+				if (!Scene.SceneTracker.allPlayerEntities.Contains(base.entity))
 				{
-					Scene.SceneTracker.allPlayerEntities.Add(this.entity);
+					Scene.SceneTracker.allPlayerEntities.Add(base.entity);
 				}
 				if (!Scene.SceneTracker.allClients.Contains(base.gameObject))
 				{
-					Scene.SceneTracker.allClients.Add(this.entity.gameObject);
+					Scene.SceneTracker.allClients.Add(base.entity.gameObject);
 				}
 			}
 			base.state.AddCallback("CurrentView", delegate
@@ -333,23 +260,23 @@ public class BoltPlayerSetup : EntityEventListener<IPlayerState>, IPriorityCalcu
 		{
 			Scene.SceneTracker.allPlayers.Remove(base.gameObject);
 		}
-		if (Scene.SceneTracker.allPlayerEntities.Contains(this.entity))
+		if (Scene.SceneTracker.allPlayerEntities.Contains(base.entity))
 		{
-			Scene.SceneTracker.allPlayerEntities.Remove(this.entity);
+			Scene.SceneTracker.allPlayerEntities.Remove(base.entity);
 		}
 	}
 
 	
 	public override void OnEvent(HitPlayer evnt)
 	{
-		if (this.entity.isOwner)
+		if (base.entity.isOwner)
 		{
 			int num = 5;
 			if (evnt.damage > 0)
 			{
 				num = evnt.damage;
 			}
-			this.entity.SendMessage("hitFromEnemy", num);
+			base.entity.SendMessage("hitFromEnemy", num);
 		}
 	}
 
@@ -360,7 +287,11 @@ public class BoltPlayerSetup : EntityEventListener<IPlayerState>, IPriorityCalcu
 		{
 			for (int i = 0; i < this.lh.Available.Length; i++)
 			{
-				if (this.lh.Available[i].activeSelf)
+				if (this.lh.Available[i].IsNull())
+				{
+					Debug.LogError("Missing GameObject on Left Hand index : " + i);
+				}
+				else if (this.lh.Available[i].activeSelf)
 				{
 					base.state.itemInLeftHand = i;
 					return;
@@ -377,7 +308,11 @@ public class BoltPlayerSetup : EntityEventListener<IPlayerState>, IPriorityCalcu
 		{
 			for (int i = 0; i < this.rh.Available.Length; i++)
 			{
-				if (this.rh.Available[i].activeSelf)
+				if (this.rh.Available[i].IsNull())
+				{
+					Debug.LogError("Missing GameObject on Right Hand index : " + i);
+				}
+				else if (this.rh.Available[i].activeSelf)
 				{
 					if (base.state.itemInRightHand != i)
 					{
@@ -397,7 +332,11 @@ public class BoltPlayerSetup : EntityEventListener<IPlayerState>, IPriorityCalcu
 		{
 			for (int i = 0; i < this.feet.Available.Length; i++)
 			{
-				if (this.feet.Available[i].activeSelf)
+				if (this.feet.Available[i].IsNull())
+				{
+					Debug.LogError("Missing GameObject on Feet index : " + i);
+				}
+				else if (this.feet.Available[i].activeSelf)
 				{
 					if (base.state.itemAtFeet != i)
 					{
@@ -422,7 +361,7 @@ public class BoltPlayerSetup : EntityEventListener<IPlayerState>, IPriorityCalcu
 	
 	private void Update()
 	{
-		if (this.entity.IsOwner())
+		if (base.entity.IsOwner())
 		{
 			this.UpdateLH();
 			this.UpdateRH();
@@ -433,6 +372,28 @@ public class BoltPlayerSetup : EntityEventListener<IPlayerState>, IPriorityCalcu
 		{
 			base.enabled = false;
 		}
+	}
+
+	
+	
+	bool IPriorityCalculator.Always
+	{
+		get
+		{
+			return true;
+		}
+	}
+
+	
+	float IPriorityCalculator.CalculateEventPriority(BoltConnection connection, Bolt.Event evnt)
+	{
+		return CoopUtils.CalculatePriorityFor(connection, base.entity, 1f, 1);
+	}
+
+	
+	float IPriorityCalculator.CalculateStatePriority(BoltConnection connection, int skipped)
+	{
+		return CoopUtils.CalculatePriorityFor(connection, base.entity, 1f, skipped);
 	}
 
 	
@@ -477,6 +438,9 @@ public class BoltPlayerSetup : EntityEventListener<IPlayerState>, IPriorityCalcu
 
 	
 	private CoopPlayerVariations variations;
+
+	
+	private List<int> ClothingIds = new List<int>(4);
 
 	
 	public coopPlayerRemoveUnusedClothing removeClothing;

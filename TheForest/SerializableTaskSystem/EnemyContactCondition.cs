@@ -27,7 +27,7 @@ namespace TheForest.SerializableTaskSystem
 			{
 				if (this._type != EnemyType.none)
 				{
-					if (this._type == (EnemyType)((int)o))
+					if (this._type == (EnemyType)o)
 					{
 						this.SetDone();
 						this.Clear();

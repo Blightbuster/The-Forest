@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Interpolate through an array of Colors over a specified amount of Time.")]
 	[ActionCategory(ActionCategory.Color)]
+	[Tooltip("Interpolate through an array of Colors over a specified amount of Time.")]
 	public class ColorInterpolate : FsmStateAction
 	{
 		
@@ -85,8 +85,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("Array of colors to interpolate through.")]
 		[RequiredField]
+		[Tooltip("Array of colors to interpolate through.")]
 		public FsmColor[] colors;
 
 		
@@ -95,8 +95,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat time;
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		[Tooltip("Store the interpolated color in a Color variable.")]
 		public FsmColor storeColor;
 

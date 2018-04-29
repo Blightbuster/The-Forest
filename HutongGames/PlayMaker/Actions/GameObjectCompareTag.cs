@@ -47,14 +47,14 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject to test.")]
 		[RequiredField]
+		[Tooltip("The GameObject to test.")]
 		public FsmGameObject gameObject;
 
 		
-		[Tooltip("The Tag to check for.")]
-		[UIHint(UIHint.Tag)]
 		[RequiredField]
+		[UIHint(UIHint.Tag)]
+		[Tooltip("The Tag to check for.")]
 		public FsmString tag;
 
 		

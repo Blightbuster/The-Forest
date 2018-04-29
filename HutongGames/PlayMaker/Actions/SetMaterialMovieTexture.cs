@@ -28,7 +28,7 @@ namespace HutongGames.PlayMaker.Actions
 		
 		private void DoSetMaterialTexture()
 		{
-			MovieTexture texture = this.movieTexture.Value as MovieTexture;
+			MovieTexture value = this.movieTexture.Value as MovieTexture;
 			string text = this.namedTexture.Value;
 			if (text == string.Empty)
 			{
@@ -36,7 +36,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			if (this.material.Value != null)
 			{
-				this.material.Value.SetTexture(text, texture);
+				this.material.Value.SetTexture(text, value);
 				return;
 			}
 			GameObject ownerDefaultTarget = base.Fsm.GetOwnerDefaultTarget(this.gameObject);
@@ -46,17 +46,17 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			if (base.renderer.material == null)
 			{
-				this.LogError("Missing Material!");
+				base.LogError("Missing Material!");
 				return;
 			}
 			if (this.materialIndex.Value == 0)
 			{
-				base.renderer.material.SetTexture(text, texture);
+				base.renderer.material.SetTexture(text, value);
 			}
 			else if (base.renderer.materials.Length > this.materialIndex.Value)
 			{
 				Material[] materials = base.renderer.materials;
-				materials[this.materialIndex.Value].SetTexture(text, texture);
+				materials[this.materialIndex.Value].SetTexture(text, value);
 				base.renderer.materials = materials;
 			}
 		}

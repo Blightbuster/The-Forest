@@ -26,8 +26,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[ObjectType(typeof(MovieTexture))]
 		[RequiredField]
+		[ObjectType(typeof(MovieTexture))]
 		public FsmObject movieTexture;
 	}
 }

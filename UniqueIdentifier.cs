@@ -4,8 +4,8 @@ using UniLinq;
 using UnityEngine;
 
 
-[DontStore]
 [ExecuteInEditMode]
+[DontStore]
 [AddComponentMenu("Storage/Unique Identifier")]
 public class UniqueIdentifier : MonoBehaviour
 {

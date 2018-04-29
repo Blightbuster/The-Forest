@@ -1,11 +1,9 @@
 ﻿using System;
 using Bolt;
-using ModAPI;
 using TheForest.Items;
 using TheForest.Items.Craft;
 using TheForest.Items.Inventory;
 using TheForest.Utils;
-using UltimateCheatmenu;
 using UnityEngine;
 
 
@@ -120,7 +118,7 @@ public class Fire : EntityBehaviour
 	
 	public override void Attached()
 	{
-		IFireState state = this.entity.GetState<IFireState>();
+		IFireState state = base.entity.GetState<IFireState>();
 		state.AddCallback("Lit", delegate
 		{
 			if (state.Lit)
@@ -140,7 +138,7 @@ public class Fire : EntityBehaviour
 		if (BoltNetwork.isRunning)
 		{
 			FireLightEvent fireLightEvent = FireLightEvent.Raise(GlobalTargets.OnlyServer);
-			fireLightEvent.Target = this.entity;
+			fireLightEvent.Target = base.entity;
 			fireLightEvent.Send();
 		}
 		else
@@ -156,7 +154,7 @@ public class Fire : EntityBehaviour
 		if (BoltNetwork.isRunning)
 		{
 			FireAddFuelEvent fireAddFuelEvent = FireAddFuelEvent.Raise(GlobalTargets.OnlyServer);
-			fireAddFuelEvent.Target = this.entity;
+			fireAddFuelEvent.Target = base.entity;
 			fireAddFuelEvent.Send();
 		}
 		else
@@ -173,7 +171,7 @@ public class Fire : EntityBehaviour
 		Cook cook;
 		if (!BoltNetwork.isRunning)
 		{
-			cook = (Cook)UnityEngine.Object.Instantiate(foodPrefab, position, Quaternion.identity);
+			cook = UnityEngine.Object.Instantiate<Cook>(foodPrefab, position, Quaternion.identity);
 		}
 		else
 		{
@@ -217,7 +215,7 @@ public class Fire : EntityBehaviour
 	
 	public void LightFireMP()
 	{
-		this.entity.GetState<IFireState>().Lit = true;
+		base.entity.GetState<IFireState>().Lit = true;
 	}
 
 	
@@ -237,7 +235,7 @@ public class Fire : EntityBehaviour
 	}
 
 	
-	private void __Drain__Original()
+	private void Drain()
 	{
 		if (BoltNetwork.isClient)
 		{
@@ -263,29 +261,12 @@ public class Fire : EntityBehaviour
 		{
 			if (BoltNetwork.isRunning)
 			{
-				this.entity.GetState<IFireState>().Lit = false;
+				base.entity.GetState<IFireState>().Lit = false;
 			}
 			else
 			{
 				this.FireOut();
 			}
-		}
-	}
-
-	
-	private void Drain()
-	{
-		try
-		{
-			if (!UCheatmenu.InfFire)
-			{
-				this.__Drain__Original();
-			}
-		}
-		catch (Exception ex)
-		{
-			Log.Write("Exception thrown: " + ex.ToString(), "UltimateCheatmenu");
-			this.__Drain__Original();
 		}
 	}
 

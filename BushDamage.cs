@@ -31,7 +31,7 @@ public class BushDamage : EntityBehaviour
 		{
 			PoolManager.Pools["Particles"].Spawn(this.snowBurst, this.MyBurstPos.position, Quaternion.identity);
 		}
-		UnityEngine.Object.Instantiate(this.Burst, this.MyBurstPos.position, this.MyBurstPos.rotation);
+		UnityEngine.Object.Instantiate<Transform>(this.Burst, this.MyBurstPos.position, this.MyBurstPos.rotation);
 		this.Health -= damage;
 		if (this.Health <= 0)
 		{
@@ -42,10 +42,10 @@ public class BushDamage : EntityBehaviour
 	
 	private void CutDown()
 	{
-		if (this.entity.IsAttached() && this.entity.StateIs<IGardenDirtPileState>())
+		if (base.entity.IsAttached() && base.entity.StateIs<IGardenDirtPileState>())
 		{
 			DestroyPickUp destroyPickUp = DestroyPickUp.Create(GlobalTargets.OnlyServer);
-			destroyPickUp.PickUpEntity = this.entity;
+			destroyPickUp.PickUpEntity = base.entity;
 			destroyPickUp.Send();
 		}
 		else
@@ -57,8 +57,27 @@ public class BushDamage : EntityBehaviour
 	
 	public void CutDownReal()
 	{
-		Transform transform = (Transform)UnityEngine.Object.Instantiate(this.MyCut, base.transform.position, base.transform.rotation);
+		Transform transform = UnityEngine.Object.Instantiate<Transform>(this.MyCut, base.transform.position, base.transform.rotation);
 		transform.localScale = base.transform.localScale;
+		GameObject gameObject = (!this.DestroyTarget) ? base.gameObject : this.DestroyTarget;
+		if (this.LodBase)
+		{
+			this.LodBase.CurrentLodTransform = null;
+			this.LodBase = null;
+		}
+		if (PoolManager.Pools["Bushes"].IsSpawned(gameObject.transform))
+		{
+			PoolManager.Pools["Bushes"].Despawn(gameObject.transform);
+		}
+		else
+		{
+			UnityEngine.Object.Destroy(gameObject);
+		}
+	}
+
+	
+	public void DespawnBush()
+	{
 		GameObject gameObject = (!this.DestroyTarget) ? base.gameObject : this.DestroyTarget;
 		if (this.LodBase)
 		{

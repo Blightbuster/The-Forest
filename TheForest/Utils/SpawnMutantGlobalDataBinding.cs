@@ -97,9 +97,9 @@ namespace TheForest.Utils
 		}
 
 		
-		private const int UnsetDataKey = -1337;
+		public int _dataKey = -1337;
 
 		
-		public int _dataKey = -1337;
+		private const int UnsetDataKey = -1337;
 	}
 }

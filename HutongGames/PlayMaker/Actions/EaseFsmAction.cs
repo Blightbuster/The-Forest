@@ -646,6 +646,10 @@ namespace HutongGames.PlayMaker.Actions
 		protected bool isRunning;
 
 		
+		
+		protected delegate float EasingFunction(float start, float end, float value);
+
+		
 		public enum EaseType
 		{
 			
@@ -707,9 +711,5 @@ namespace HutongGames.PlayMaker.Actions
 			
 			punch
 		}
-
-		
-		
-		protected delegate float EasingFunction(float start, float end, float value);
 	}
 }

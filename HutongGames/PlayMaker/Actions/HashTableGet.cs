@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets an item from a PlayMaker HashTable Proxy component")]
 	[ActionCategory("ArrayMaker/HashTable")]
+	[Tooltip("Gets an item from a PlayMaker HashTable Proxy component")]
 	public class HashTableGet : HashTableActions
 	{
 		
@@ -44,10 +44,10 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(PlayMakerHashTableProxy))]
 		[ActionSection("Set up")]
 		[RequiredField]
 		[Tooltip("The gameObject with the PlayMaker HashTable Proxy component")]
+		[CheckForComponent(typeof(PlayMakerHashTableProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -61,8 +61,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString key;
 
 		
-		[UIHint(UIHint.Variable)]
 		[ActionSection("Result")]
+		[UIHint(UIHint.Variable)]
 		public FsmVar result;
 
 		
@@ -71,8 +71,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmEvent KeyFoundEvent;
 
 		
-		[Tooltip("The event to trigger when key is not found")]
 		[UIHint(UIHint.FsmEvent)]
+		[Tooltip("The event to trigger when key is not found")]
 		public FsmEvent KeyNotFoundEvent;
 	}
 }

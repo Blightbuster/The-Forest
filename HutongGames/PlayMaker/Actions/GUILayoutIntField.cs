@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("GUILayout Text Field to edit an Int Variable. Optionally send an event if the text has been edited.")]
 	[ActionCategory(ActionCategory.GUILayout)]
+	[Tooltip("GUILayout Text Field to edit an Int Variable. Optionally send an event if the text has been edited.")]
 	public class GUILayoutIntField : GUILayoutAction
 	{
 		
@@ -42,8 +42,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("Int Variable to show in the edit field.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Int Variable to show in the edit field.")]
 		public FsmInt intVariable;
 
 		

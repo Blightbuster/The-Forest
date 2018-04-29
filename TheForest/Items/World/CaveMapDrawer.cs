@@ -95,50 +95,48 @@ namespace TheForest.Items.World
 		{
 			if (this._visitedAreas == null || this._visitedAreas.GetLength(0) != this._gridSize + 1)
 			{
-				bool[,] visitedArea = new bool[this._gridSize + 1, this._gridSize + 1];
+				bool[,] array = new bool[this._gridSize + 1, this._gridSize + 1];
 				if (this._visitedAreas != null)
 				{
 					try
 					{
-						int xMax = Mathf.Min(this._visitedAreas.GetLength(0), this._gridSize + 1);
-						int yMax = Mathf.Min(this._visitedAreas.GetLength(1), this._gridSize + 1);
-						for (int x = 0; x < xMax; x++)
+						int num = Mathf.Min(this._visitedAreas.GetLength(0), this._gridSize + 1);
+						int num2 = Mathf.Min(this._visitedAreas.GetLength(1), this._gridSize + 1);
+						for (int i = 0; i < num; i++)
 						{
-							for (int y = 0; y < yMax; y++)
+							for (int j = 0; j < num2; j++)
 							{
-								visitedArea[x, y] = this._visitedAreas[x, y];
+								array[i, j] = this._visitedAreas[i, j];
 							}
 						}
 					}
-					catch (Exception ex3)
+					catch (Exception arg)
 					{
-						Exception ex = ex3;
-						Debug.LogError("Error copying cave map data: " + ex);
+						Debug.LogError("Error copying cave map data: " + arg);
 					}
 				}
-				this._visitedAreas = visitedArea;
-				visitedArea = new bool[this._gridSize + 1, this._gridSize + 1];
+				this._visitedAreas = array;
+				array = new bool[this._gridSize + 1, this._gridSize + 1];
 				if (this._worldVisitedAreas != null)
 				{
 					try
 					{
-						int xMax2 = Mathf.Min(this._worldVisitedAreas.GetLength(0), this._gridSize + 1);
-						int yMax2 = Mathf.Min(this._worldVisitedAreas.GetLength(1), this._gridSize + 1);
-						for (int x2 = 0; x2 < xMax2; x2++)
+						int num3 = Mathf.Min(this._worldVisitedAreas.GetLength(0), this._gridSize + 1);
+						int num4 = Mathf.Min(this._worldVisitedAreas.GetLength(1), this._gridSize + 1);
+						for (int k = 0; k < num3; k++)
 						{
-							for (int y2 = 0; y2 < yMax2; y2++)
+							for (int l = 0; l < num4; l++)
 							{
-								visitedArea[x2, y2] = this._worldVisitedAreas[x2, y2];
+								array[k, l] = this._worldVisitedAreas[k, l];
 							}
 						}
 					}
-					catch (Exception ex4)
+					catch (Exception arg2)
 					{
-						Exception ex2 = ex4;
-						Debug.LogError("Error copying cave map data: " + ex2);
+						Debug.LogError("Error copying cave map data: " + arg2);
 					}
 				}
-				this._worldVisitedAreas = visitedArea;
+				this._worldVisitedAreas = array;
 			}
 			yield return null;
 			this._renderer.sharedMaterial = (LocalPlayer.IsInCaves ? this._worldMap : this._caveMap);
@@ -417,16 +415,7 @@ namespace TheForest.Items.World
 		public float _mapZmax = 1470.557f;
 
 		
-		public float _worldMapXmin = 1750f;
-
-		
-		public float _worldMapXmax = -1750f;
-
-		
-		public float _worldMapZmin = -1750f;
-
-		
-		public float _worldMapZmax = 1750f;
+		public Renderer _landmarksRoot;
 
 		
 		public List<CaveMapDrawer.Area> _caveAreas;
@@ -499,6 +488,21 @@ namespace TheForest.Items.World
 
 			
 			public bool _showDebug = true;
+
+			
+			public float _mapXmin = 1443.252f;
+
+			
+			public float _mapXmax = -1305.252f;
+
+			
+			public float _mapZmin = -1178.557f;
+
+			
+			public float _mapZmax = 1470.557f;
+
+			
+			public Renderer _landmark;
 		}
 
 		

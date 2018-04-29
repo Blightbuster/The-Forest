@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Finds the Child of a GameObject by Name.\nNote, you can specify a path to the child, e.g., LeftShoulder/Arm/Hand/Finger. If you need to specify a tag, use GetChild.")]
 	[ActionCategory(ActionCategory.GameObject)]
+	[Tooltip("Finds the Child of a GameObject by Name.\nNote, you can specify a path to the child, e.g., LeftShoulder/Arm/Hand/Finger. If you need to specify a tag, use GetChild.")]
 	public class FindChild : FsmStateAction
 	{
 		
@@ -31,13 +31,13 @@ namespace HutongGames.PlayMaker.Actions
 			{
 				return;
 			}
-			Transform transform = ownerDefaultTarget.transform.FindChild(this.childName.Value);
+			Transform transform = ownerDefaultTarget.transform.Find(this.childName.Value);
 			this.storeResult.Value = ((!(transform != null)) ? null : transform.gameObject);
 		}
 
 		
-		[Tooltip("The GameObject to search.")]
 		[RequiredField]
+		[Tooltip("The GameObject to search.")]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -46,9 +46,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString childName;
 
 		
+		[RequiredField]
 		[UIHint(UIHint.Variable)]
 		[Tooltip("Store the child in a GameObject variable.")]
-		[RequiredField]
 		public FsmGameObject storeResult;
 	}
 }

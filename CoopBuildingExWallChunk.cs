@@ -11,7 +11,7 @@ public class CoopBuildingExWallChunk : EntityBehaviour<IWallChunkBuildingState>
 	
 	public override void Attached()
 	{
-		CoopWallChunkToken coopWallChunkToken = (CoopWallChunkToken)this.entity.attachToken;
+		CoopWallChunkToken coopWallChunkToken = (CoopWallChunkToken)base.entity.attachToken;
 		WallChunkArchitect component = base.GetComponent<WallChunkArchitect>();
 		component.transform.position = coopWallChunkToken.P1;
 		component.transform.LookAt(coopWallChunkToken.P2);
@@ -25,9 +25,9 @@ public class CoopBuildingExWallChunk : EntityBehaviour<IWallChunkBuildingState>
 		{
 			component.CurrentSupport = (coopWallChunkToken.Support.GetComponentInChildren(typeof(IStructureSupport)) as IStructureSupport);
 		}
-		if (!this.entity.isOwner)
+		if (!base.entity.isOwner)
 		{
-			this.entity.SendMessage("OnDeserialized");
+			base.entity.SendMessage("OnDeserialized");
 		}
 	}
 
@@ -38,7 +38,7 @@ public class CoopBuildingExWallChunk : EntityBehaviour<IWallChunkBuildingState>
 		{
 			foreach (BoltEntity boltEntity in base.GetComponentsInChildren<BoltEntity>())
 			{
-				if (!object.ReferenceEquals(boltEntity, this.entity))
+				if (!object.ReferenceEquals(boltEntity, base.entity))
 				{
 					boltEntity.transform.parent = null;
 				}

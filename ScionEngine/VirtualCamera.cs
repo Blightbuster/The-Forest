@@ -14,29 +14,50 @@ namespace ScionEngine
 		}
 
 		
+		public void ReleaseResources()
+		{
+			if (this.m_virtualCameraMat != null)
+			{
+				UnityEngine.Object.Destroy(this.m_virtualCameraMat);
+				this.m_virtualCameraMat = null;
+			}
+			if (this.m_currentResult1 != null)
+			{
+				RenderTexture.ReleaseTemporary(this.m_currentResult1);
+				this.m_currentResult1 = null;
+			}
+			if (this.m_currentResult2 != null)
+			{
+				RenderTexture.ReleaseTemporary(this.m_currentResult2);
+				this.m_currentResult2 = null;
+			}
+		}
+
+		
 		public bool PlatformCompatibility()
 		{
 			return Shader.Find("Hidden/ScionVirtualCamera").isSupported;
 		}
 
 		
-		private RenderTexture DownsampleTexture(RenderTexture renderTex, float energyNormalizer)
+		private RenderTexture DownsampleTexture(RenderTexture renderTex)
 		{
-			int width = renderTex.width;
-			int height = renderTex.height;
-			int i = (width <= height) ? height : width;
+			int num = renderTex.width;
+			int num2 = renderTex.height;
+			int i = (num <= num2) ? num2 : num;
 			renderTex.filterMode = FilterMode.Bilinear;
 			RenderTexture renderTexture = renderTex;
 			bool flag = true;
 			while (i > 1)
 			{
 				i = i / 2 + i % 2;
-				RenderTexture temporary = RenderTexture.GetTemporary(i, i, 0, renderTex.format);
+				num = Mathf.Max(num / 2 + num % 2, 1);
+				num2 = Mathf.Max(num2 / 2 + num2 % 2, 1);
+				RenderTexture temporary = RenderTexture.GetTemporary(num, num2, 0, renderTex.format);
 				temporary.filterMode = FilterMode.Bilinear;
 				temporary.wrapMode = TextureWrapMode.Clamp;
 				if (flag)
 				{
-					this.m_virtualCameraMat.SetFloat("_EnergyNormalizer", energyNormalizer);
 					Graphics.Blit(renderTexture, temporary, this.m_virtualCameraMat, 3);
 					flag = false;
 				}
@@ -48,12 +69,6 @@ namespace ScionEngine
 				renderTexture = temporary;
 			}
 			return renderTexture;
-		}
-
-		
-		public void BindExposureTexture(Material mat)
-		{
-			mat.SetTexture("_VirtualCameraResult", this.m_currentResult2);
 		}
 
 		
@@ -82,7 +97,7 @@ namespace ScionEngine
 			});
 			mat.SetVector("_VirtualCameraParams2", new Vector4
 			{
-				x = cameraParams.exposureCompensation + 1.8f,
+				x = cameraParams.exposureCompensation + 1f,
 				y = cameraParams.focalLength,
 				z = focalDistance,
 				w = ScionUtility.CoCToPixels(halfResWidth)
@@ -95,7 +110,7 @@ namespace ScionEngine
 		}
 
 		
-		public void CalculateVirtualCamera(CameraParameters cameraParams, RenderTexture textureToDownsample, float halfResWidth, float tanHalfFoV, float energyNormalizer, float focalDistance, bool isFirstRender)
+		public void CalculateVirtualCamera(CameraParameters cameraParams, RenderTexture textureToDownsample, float halfResWidth, float tanHalfFoV, float focalDistance, bool isFirstRender)
 		{
 			if (cameraParams.cameraMode == CameraMode.Manual || cameraParams.cameraMode == CameraMode.Off)
 			{
@@ -107,7 +122,7 @@ namespace ScionEngine
 				this.m_currentResult2 = null;
 			}
 			this.BindVirtualCameraParams(this.m_virtualCameraMat, cameraParams, focalDistance, halfResWidth, isFirstRender);
-			RenderTexture renderTexture = this.DownsampleTexture(textureToDownsample, energyNormalizer);
+			RenderTexture renderTexture = this.DownsampleTexture(textureToDownsample);
 			this.m_virtualCameraMat.SetTexture("_DownsampledScene", renderTexture);
 			if (this.m_previousExposureTexture != null)
 			{
@@ -134,22 +149,19 @@ namespace ScionEngine
 		}
 
 		
-		public const float FilmWidth = 70f;
+		public const float FilmWidth = 35f;
 
 		
-		private const float BuiltinExposureCompensation = 1.8f;
-
-		
-		private const RenderTextureFormat VCTextureFormat = RenderTextureFormat.ARGBFloat;
-
-		
-		public const float LIGHT_INTENSITY_MULT = 3000f;
+		private const float BuiltinExposureCompensation = 1f;
 
 		
 		private Material m_virtualCameraMat;
 
 		
 		private RenderTexture m_previousExposureTexture;
+
+		
+		private const RenderTextureFormat VCTextureFormat = RenderTextureFormat.ARGBFloat;
 
 		
 		private RenderTexture m_currentResult1;
@@ -159,6 +171,9 @@ namespace ScionEngine
 
 		
 		private RenderBuffer[] renderBuffers = new RenderBuffer[2];
+
+		
+		public const float LIGHT_INTENSITY_MULT = 3000f;
 
 		
 		private ComputeBuffer readBfr;

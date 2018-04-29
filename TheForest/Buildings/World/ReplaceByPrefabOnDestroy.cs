@@ -34,7 +34,7 @@ namespace TheForest.Buildings.World
 				}
 				else
 				{
-					Transform transform = (Transform)UnityEngine.Object.Instantiate(this._replaceByPrefab, base.transform.position, base.transform.rotation);
+					Transform transform = UnityEngine.Object.Instantiate<Transform>(this._replaceByPrefab, base.transform.position, base.transform.rotation);
 					if (parent)
 					{
 						transform.parent = parent;

@@ -9,9 +9,9 @@ public class ParticleSystemDestroyer : MonoBehaviour
 	private IEnumerator Start()
 	{
 		ParticleSystem[] systems = base.GetComponentsInChildren<ParticleSystem>();
-		foreach (ParticleSystem system in systems)
+		foreach (ParticleSystem particleSystem in systems)
 		{
-			this.maxLifetime = Mathf.Max(system.startLifetime, this.maxLifetime);
+			this.maxLifetime = Mathf.Max(particleSystem.startLifetime, this.maxLifetime);
 		}
 		float stopTime = Time.time + UnityEngine.Random.Range(this.minDuration, this.maxDuration);
 		while (Time.time < stopTime || this.earlyStop)
@@ -19,9 +19,9 @@ public class ParticleSystemDestroyer : MonoBehaviour
 			yield return null;
 		}
 		Debug.Log("stopping " + base.name);
-		foreach (ParticleSystem system2 in systems)
+		foreach (ParticleSystem particleSystem2 in systems)
 		{
-			system2.enableEmission = false;
+			particleSystem2.enableEmission = false;
 		}
 		base.BroadcastMessage("Extinguish", SendMessageOptions.DontRequireReceiver);
 		yield return new WaitForSeconds(this.maxLifetime);

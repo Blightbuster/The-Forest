@@ -12,8 +12,8 @@ namespace Ceto
 {
 	
 	[AddComponentMenu("Ceto/Components/WaveSpectrum")]
-	[RequireComponent(typeof(Ocean))]
 	[DisallowMultipleComponent]
+	[RequireComponent(typeof(Ocean))]
 	public class WaveSpectrum : WaveSpectrumBase
 	{
 		
@@ -572,13 +572,13 @@ namespace Ceto
 		
 		private void GenerateFoam(float time)
 		{
-			Vector4 vector = this.Choppyness;
+			Vector4 value = this.Choppyness;
 			if (!this.disableFoam && SystemInfo.graphicsShaderLevel < 30)
 			{
 				Ocean.LogWarning("Spectrum foam needs at least SM3 to run. Disabling foam.");
 				this.disableFoam = true;
 			}
-			float sqrMagnitude = vector.sqrMagnitude;
+			float sqrMagnitude = value.sqrMagnitude;
 			this.m_jacobianBuffer.EnableBuffer(-1);
 			if (this.disableFoam || this.foamAmount == 0f || sqrMagnitude == 0f || !this.m_conditions[0].SupportsJacobians)
 			{
@@ -614,7 +614,7 @@ namespace Ceto
 					this.m_foamCopyMat.SetTexture("Ceto_JacobianBuffer1", this.m_jacobianBuffer.GetTexture(1));
 					this.m_foamCopyMat.SetTexture("Ceto_JacobianBuffer2", this.m_jacobianBuffer.GetTexture(2));
 					this.m_foamCopyMat.SetTexture("Ceto_HeightBuffer", this.m_displacementBuffer.GetTexture(0));
-					this.m_foamCopyMat.SetVector("Ceto_FoamChoppyness", vector);
+					this.m_foamCopyMat.SetVector("Ceto_FoamChoppyness", value);
 					this.m_foamCopyMat.SetFloat("Ceto_FoamCoverage", this.foamCoverage);
 					Graphics.Blit(null, this.m_foamMaps[0], this.m_foamCopyMat, numGrids - 1);
 					Shader.SetGlobalTexture("Ceto_FoamMap0", this.m_foamMaps[0]);

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets the position, rotation and weights of an IK goal. A GameObject can be set to use for the position and rotation")]
 	[ActionCategory("Animator")]
+	[Tooltip("Gets the position, rotation and weights of an IK goal. A GameObject can be set to use for the position and rotation")]
 	public class GetAnimatorIKGoal : FsmStateAction
 	{
 		
@@ -84,9 +84,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
+		[RequiredField]
 		[CheckForComponent(typeof(Animator))]
 		[Tooltip("The target. An Animator component is required")]
-		[RequiredField]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -98,13 +98,13 @@ namespace HutongGames.PlayMaker.Actions
 		public bool everyFrame;
 
 		
-		[Tooltip("The gameObject to apply ik goal position and rotation to")]
 		[ActionSection("Results")]
+		[Tooltip("The gameObject to apply ik goal position and rotation to")]
 		public FsmGameObject goal;
 
 		
-		[Tooltip("Gets The position of the ik goal. If Goal GameObject define, position is used as an offset from Goal")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Gets The position of the ik goal. If Goal GameObject define, position is used as an offset from Goal")]
 		public FsmVector3 position;
 
 		
@@ -113,8 +113,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmQuaternion rotation;
 
 		
-		[Tooltip("Gets The translative weight of an IK goal (0 = at the original animation before IK, 1 = at the goal)")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Gets The translative weight of an IK goal (0 = at the original animation before IK, 1 = at the goal)")]
 		public FsmFloat positionWeight;
 
 		

@@ -11,6 +11,11 @@ namespace TheForest.Items.Special
 		
 		protected virtual void Start()
 		{
+			if (this._multiplayerOnly && !BoltNetwork.isRunning)
+			{
+				base.enabled = false;
+				return;
+			}
 			if (this._button != SpecialItemControlerBase.Buttons.None)
 			{
 				this._buttonCached = this._button.ToString();
@@ -105,6 +110,9 @@ namespace TheForest.Items.Special
 
 		
 		public bool _checkQuickSelectGamepadSwitch;
+
+		
+		public bool _multiplayerOnly;
 
 		
 		protected bool _checkRemoval;

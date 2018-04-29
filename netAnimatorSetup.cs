@@ -53,8 +53,10 @@ public class netAnimatorSetup : EntityEventListener<IPlayerState>
 		{
 			base.Invoke("fixRootRotation", 1f);
 		}
-		this.tempSphere.SetActive(false);
-		Debug.Log("net animator attached!");
+		if (this.tempSphere)
+		{
+			this.tempSphere.SetActive(false);
+		}
 		base.StartCoroutine(this.fixNetSpawnPosition());
 	}
 
@@ -387,13 +389,13 @@ public class netAnimatorSetup : EntityEventListener<IPlayerState>
 			this.heldRecurveArrow.transform.position = this.leftHandWeaponTr.position;
 			this.heldArrow.transform.position = this.leftHandWeaponTr.position;
 		}
-		float to = 0f;
+		float b = 0f;
 		if (this.animator.GetFloat("overallSpeed") > 0.05f)
 		{
-			to = 10f;
+			b = 10f;
 		}
 		float @float = this.animator.GetFloat("net_clampIdle");
-		this.animator.SetFloat("net_clampIdle", Mathf.Lerp(@float, to, Time.deltaTime * 2f));
+		this.animator.SetFloat("net_clampIdle", Mathf.Lerp(@float, b, Time.deltaTime * 2f));
 		if (this.currState0.tagHash == this.moveHash && this.animator.GetFloat("overallSpeed") > 0.05f && !this.animator.IsInTransition(1))
 		{
 			if (this.currState1.shortNameHash == this.stickIdleHash)
@@ -454,7 +456,7 @@ public class netAnimatorSetup : EntityEventListener<IPlayerState>
 	
 	private void enableBirdOnHand(float t)
 	{
-		this.bird = (GameObject)UnityEngine.Object.Instantiate((GameObject)Resources.Load("CutScene/smallBird_ANIM_landOnFinger_prefab"), this.birdOnHandPos.position, this.birdOnHandPos.rotation);
+		this.bird = UnityEngine.Object.Instantiate<GameObject>((GameObject)Resources.Load("CutScene/smallBird_ANIM_landOnFinger_prefab"), this.birdOnHandPos.position, this.birdOnHandPos.rotation);
 		this.bird.transform.parent = this.birdOnHandPos;
 		this.bird.transform.localPosition = Vector3.zero;
 		this.bird.transform.localRotation = Quaternion.identity;
@@ -601,6 +603,9 @@ public class netAnimatorSetup : EntityEventListener<IPlayerState>
 
 	
 	public GameObject skinLizardGo;
+
+	
+	public GameObject skinCreepyGo;
 
 	
 	public GameObject axePlaneHeldGo;

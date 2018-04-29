@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 
@@ -200,7 +201,12 @@ public class InvGameItem
 				}
 				i++;
 			}
-			list.Sort(new Comparison<InvStat>(InvStat.CompareArmor));
+			List<InvStat> list2 = list;
+			if (InvGameItem.<>f__mg$cache0 == null)
+			{
+				InvGameItem.<>f__mg$cache0 = new Comparison<InvStat>(InvStat.CompareArmor);
+			}
+			list2.Sort(InvGameItem.<>f__mg$cache0);
 		}
 		return list;
 	}
@@ -217,6 +223,10 @@ public class InvGameItem
 
 	
 	private InvBaseItem mBaseItem;
+
+	
+	[CompilerGenerated]
+	private static Comparison<InvStat> <>f__mg$cache0;
 
 	
 	public enum Quality

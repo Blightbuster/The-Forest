@@ -4,8 +4,8 @@ using UnityEngine;
 namespace Pathfinding.Examples
 {
 	
-	[HelpURL("http:
 	[RequireComponent(typeof(Seeker))]
+	[HelpURL("http:
 	public class MineBotAI : AIPath
 	{
 		
@@ -25,7 +25,7 @@ namespace Pathfinding.Examples
 		{
 			if (this.endOfPathEffect != null && Vector3.Distance(this.tr.position, this.lastTarget) > 1f)
 			{
-				UnityEngine.Object.Instantiate(this.endOfPathEffect, this.tr.position, this.tr.rotation);
+				UnityEngine.Object.Instantiate<GameObject>(this.endOfPathEffect, this.tr.position, this.tr.rotation);
 				this.lastTarget = this.tr.position;
 			}
 		}

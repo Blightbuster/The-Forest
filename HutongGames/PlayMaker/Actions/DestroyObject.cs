@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Destroys a Game Object.")]
 	[ActionCategory(ActionCategory.GameObject)]
+	[Tooltip("Destroys a Game Object.")]
 	public class DestroyObject : FsmStateAction
 	{
 		
@@ -43,8 +43,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The GameObject to destroy.")]
 		[RequiredField]
+		[Tooltip("The GameObject to destroy.")]
 		public FsmGameObject gameObject;
 
 		

@@ -7,6 +7,20 @@ namespace TheForest.UI
 	public class ActionIcon : MonoBehaviour
 	{
 		
+		
+		
+		public int StartHeight { get; private set; }
+
+		
+		private void Awake()
+		{
+			if (this._sprite)
+			{
+				this.StartHeight = this._sprite.height;
+			}
+		}
+
+		
 		public UiFollowTarget _follow;
 
 		
@@ -17,6 +31,9 @@ namespace TheForest.UI
 
 		
 		public UISprite _fillSprite;
+
+		
+		public DelayedAction _fillSpriteAction;
 
 		
 		public UISprite _sideUpArrowIcon;

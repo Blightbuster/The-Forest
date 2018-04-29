@@ -56,7 +56,7 @@ namespace TheForest.Items.Special
 		
 		protected override void OnActivating()
 		{
-			if (LocalPlayer.Inventory.LastUtility == this && !LocalPlayer.Animator.GetBool("drawBowBool"))
+			if (LocalPlayer.Inventory.LastUtility == this && !LocalPlayer.Animator.GetBool("drawBowBool") && !LocalPlayer.AnimControl.endGameCutScene)
 			{
 				LocalPlayer.Inventory.TurnOnLastUtility(Item.EquipmentSlot.LeftHand);
 			}
@@ -75,7 +75,7 @@ namespace TheForest.Items.Special
 		private IEnumerator DelayedStop()
 		{
 			this.ToggleSpecial(false);
-			LocalPlayer.Sfx.PlayWhoosh();
+			LocalPlayer.Sfx.PlayItemCustomSfx(this._itemId, true);
 			LocalPlayer.Animator.SetBoolReflected("pedHeld", false);
 			yield return new WaitForSeconds(1f);
 			if (this.IsActive)

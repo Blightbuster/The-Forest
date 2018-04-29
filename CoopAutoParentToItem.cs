@@ -11,19 +11,22 @@ public class CoopAutoParentToItem : EntityBehaviour<IWeaponFire>
 	
 	public override void Attached()
 	{
-		if (this.entity.isOwner)
+		if (base.entity && base.entity.isAttached)
 		{
-			HeldItemIdentifier componentInParent = base.GetComponentInParent<HeldItemIdentifier>();
-			base.state.Position = ((!this.attachToCloth) ? (componentInParent.transform.position - base.transform.position) : base.transform.parent.localPosition);
-			base.state.Rotation = Quaternion.Inverse(componentInParent.transform.rotation) * base.transform.rotation;
-			base.state.TargetPlayer = LocalPlayer.Entity;
-		}
-		else
-		{
-			base.state.AddCallback("TargetPlayer", new PropertyCallbackSimple(this.SetParent));
-			base.state.AddCallback("Position", new PropertyCallbackSimple(this.SetPosition));
-			base.state.AddCallback("Rotation", new PropertyCallbackSimple(this.SetRotation));
-			this.SetParent();
+			if (base.entity.isOwner)
+			{
+				HeldItemIdentifier componentInParent = base.GetComponentInParent<HeldItemIdentifier>();
+				base.state.Position = ((!this.attachToCloth) ? (componentInParent.transform.position - base.transform.position) : base.transform.parent.localPosition);
+				base.state.Rotation = Quaternion.Inverse(componentInParent.transform.rotation) * base.transform.rotation;
+				base.state.TargetPlayer = LocalPlayer.Entity;
+			}
+			else
+			{
+				base.state.AddCallback("TargetPlayer", new PropertyCallbackSimple(this.SetParent));
+				base.state.AddCallback("Position", new PropertyCallbackSimple(this.SetPosition));
+				base.state.AddCallback("Rotation", new PropertyCallbackSimple(this.SetRotation));
+				this.SetParent();
+			}
 		}
 	}
 
@@ -48,9 +51,17 @@ public class CoopAutoParentToItem : EntityBehaviour<IWeaponFire>
 			}
 			else
 			{
-				transform = component.rightHand.ActiveItem;
+				coopClientHeldFirePos componentInChildren = component.rightHand.ActiveItem.GetComponentInChildren<coopClientHeldFirePos>();
+				if (componentInChildren)
+				{
+					transform = componentInChildren.transform;
+				}
+				else
+				{
+					transform = component.rightHand.ActiveItem;
+				}
 			}
-			if (transform)
+			if (base.entity && base.entity.isAttached && transform)
 			{
 				base.transform.parent = transform;
 				base.transform.localPosition = base.state.Position;
@@ -66,7 +77,7 @@ public class CoopAutoParentToItem : EntityBehaviour<IWeaponFire>
 	
 	private void SetPosition()
 	{
-		if (base.transform.parent)
+		if (base.entity && base.entity.isAttached && base.transform.parent)
 		{
 			base.transform.localPosition = base.state.Position;
 		}
@@ -75,7 +86,7 @@ public class CoopAutoParentToItem : EntityBehaviour<IWeaponFire>
 	
 	private void SetRotation()
 	{
-		if (base.transform.parent)
+		if (base.entity && base.entity.isAttached && base.transform.parent)
 		{
 			base.transform.localRotation = base.state.Rotation;
 		}

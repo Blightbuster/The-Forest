@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Destroys a PlayMakerHashTableProxy Component of a Game Object.")]
 	[ActionCategory("ArrayMaker/HashTable")]
+	[Tooltip("Destroys a PlayMakerHashTableProxy Component of a Game Object.")]
 	public class DestroyHashTable : HashTableActions
 	{
 		
@@ -49,10 +49,10 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The gameObject with the PlayMaker HashTable Proxy component")]
-		[CheckForComponent(typeof(PlayMakerHashTableProxy))]
 		[ActionSection("Set up")]
 		[RequiredField]
+		[Tooltip("The gameObject with the PlayMaker HashTable Proxy component")]
+		[CheckForComponent(typeof(PlayMakerHashTableProxy))]
 		public FsmOwnerDefault gameObject;
 
 		
@@ -61,14 +61,14 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString reference;
 
 		
-		[Tooltip("The event to trigger if the HashTable proxy component is destroyed")]
-		[UIHint(UIHint.FsmEvent)]
 		[ActionSection("Result")]
+		[UIHint(UIHint.FsmEvent)]
+		[Tooltip("The event to trigger if the HashTable proxy component is destroyed")]
 		public FsmEvent successEvent;
 
 		
-		[Tooltip("The event to trigger if the HashTable proxy component was not found")]
 		[UIHint(UIHint.FsmEvent)]
+		[Tooltip("The event to trigger if the HashTable proxy component was not found")]
 		public FsmEvent notFoundEvent;
 	}
 }

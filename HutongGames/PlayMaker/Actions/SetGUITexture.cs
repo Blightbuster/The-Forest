@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the Texture used by the GUITexture attached to a Game Object.")]
 	[ActionCategory(ActionCategory.GUIElement)]
+	[Tooltip("Sets the Texture used by the GUITexture attached to a Game Object.")]
 	public class SetGUITexture : ComponentAction<GUITexture>
 	{
 		
@@ -27,9 +27,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
+		[RequiredField]
 		[CheckForComponent(typeof(GUITexture))]
 		[Tooltip("The GameObject that owns the GUITexture.")]
-		[RequiredField]
 		public FsmOwnerDefault gameObject;
 
 		

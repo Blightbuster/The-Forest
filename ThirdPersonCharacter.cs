@@ -184,8 +184,8 @@ public class ThirdPersonCharacter : MonoBehaviour
 	
 	private void HandleAirborneVelocities()
 	{
-		Vector3 to = new Vector3(this.moveInput.x * this.airSpeed, this.velocity.y, this.moveInput.z * this.airSpeed);
-		this.velocity = Vector3.Lerp(this.velocity, to, Time.deltaTime * this.airControl);
+		Vector3 b = new Vector3(this.moveInput.x * this.airSpeed, this.velocity.y, this.moveInput.z * this.airSpeed);
+		this.velocity = Vector3.Lerp(this.velocity, b, Time.deltaTime * this.airControl);
 		base.GetComponent<Rigidbody>().useGravity = true;
 		Vector3 force = Physics.gravity * this.gravityMultiplier - Physics.gravity;
 		base.GetComponent<Rigidbody>().AddForce(force);
@@ -259,9 +259,6 @@ public class ThirdPersonCharacter : MonoBehaviour
 	}
 
 	
-	private const float half = 0.5f;
-
-	
 	[SerializeField]
 	private float jumpPower = 12f;
 
@@ -279,8 +276,8 @@ public class ThirdPersonCharacter : MonoBehaviour
 	public float gravityMultiplier = 2f;
 
 	
-	[Range(0.1f, 3f)]
 	[SerializeField]
+	[Range(0.1f, 3f)]
 	private float moveSpeedMultiplier = 1f;
 
 	
@@ -309,6 +306,9 @@ public class ThirdPersonCharacter : MonoBehaviour
 
 	
 	private CapsuleCollider capsule;
+
+	
+	private const float half = 0.5f;
 
 	
 	private Vector3 moveInput;

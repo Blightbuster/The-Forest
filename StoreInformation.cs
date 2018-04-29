@@ -4,9 +4,9 @@ using UniLinq;
 using UnityEngine;
 
 
+[DontStore]
 [ExecuteInEditMode]
 [AddComponentMenu("Storage/Store Information")]
-[DontStore]
 public class StoreInformation : UniqueIdentifier
 {
 	

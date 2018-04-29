@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the value of a Color Variable.")]
 	[ActionCategory(ActionCategory.Color)]
+	[Tooltip("Sets the value of a Color Variable.")]
 	public class SetColorValue : FsmStateAction
 	{
 		

@@ -58,8 +58,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmFloat[] weights;
 
 		
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
 		public FsmVector3 storeVector3;
 	}
 }

@@ -29,9 +29,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
+		[RequiredField]
 		[CheckForComponent(typeof(Camera))]
 		[Tooltip("The GameObject to set as the main camera (should have a Camera component).")]
-		[RequiredField]
 		public FsmGameObject gameObject;
 	}
 }

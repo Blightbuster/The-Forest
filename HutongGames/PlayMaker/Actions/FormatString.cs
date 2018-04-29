@@ -47,14 +47,14 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			catch (FormatException ex)
 			{
-				this.LogError(ex.Message);
+				base.LogError(ex.Message);
 				base.Finish();
 			}
 		}
 
 		
-		[Tooltip("E.g. Hello {0} and {1}\nWith 2 variables that replace {0} and {1}\nSee C# string.Format docs.")]
 		[RequiredField]
+		[Tooltip("E.g. Hello {0} and {1}\nWith 2 variables that replace {0} and {1}\nSee C# string.Format docs.")]
 		public FsmString format;
 
 		
@@ -62,9 +62,9 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmVar[] variables;
 
 		
-		[Tooltip("Store the formatted result in a string variable.")]
-		[UIHint(UIHint.Variable)]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the formatted result in a string variable.")]
 		public FsmString storeResult;
 
 		

@@ -43,7 +43,7 @@ namespace TheForest.Buildings.World
 			bool canGather = this.CanGather;
 			if (canGather && TheForest.Utils.Input.GetButtonDown("Take"))
 			{
-				LocalPlayer.Sfx.PlayWhoosh();
+				LocalPlayer.Sfx.PlayItemCustomSfx(this._itemId, true);
 				LocalPlayer.Inventory.AddItem(this._itemId, this._amount, false, false, null);
 				this.RemoveItem((float)this._amount);
 			}
@@ -88,7 +88,7 @@ namespace TheForest.Buildings.World
 		public void AddItem(float amount)
 		{
 			this._amount = (int)Mathf.Min((float)this._amount + amount, this._maxAmount);
-			if (BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+			if (BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 			{
 				base.state.amount = (float)this._amount;
 			}
@@ -100,7 +100,7 @@ namespace TheForest.Buildings.World
 		public void RemoveItem(float amount)
 		{
 			this._amount = (int)Mathf.Max((float)this._amount - amount, 0f);
-			if (BoltNetwork.isRunning && this.entity && this.entity.isAttached)
+			if (BoltNetwork.isRunning && base.entity && base.entity.isAttached)
 			{
 				base.state.amount = (float)this._amount;
 			}
@@ -142,7 +142,7 @@ namespace TheForest.Buildings.World
 		
 		public override void Attached()
 		{
-			if (this.entity.isOwner)
+			if (base.entity.isOwner)
 			{
 				base.state.amount = (float)this._amount;
 				if (this._allowInCaves || Terrain.activeTerrain.SampleHeight(base.transform.position) < base.transform.position.y)

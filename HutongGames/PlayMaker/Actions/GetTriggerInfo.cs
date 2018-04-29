@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Gets info on the last Trigger event and store in variables.")]
 	[ActionCategory(ActionCategory.Physics)]
+	[Tooltip("Gets info on the last Trigger event and store in variables.")]
 	public class GetTriggerInfo : FsmStateAction
 	{
 		

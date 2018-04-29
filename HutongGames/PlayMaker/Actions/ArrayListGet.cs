@@ -49,8 +49,8 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[RequiredField]
 		[ActionSection("Set up")]
+		[RequiredField]
 		[Tooltip("The gameObject with the PlayMaker ArrayList Proxy component")]
 		[CheckForComponent(typeof(PlayMakerArrayListProxy))]
 		public FsmOwnerDefault gameObject;

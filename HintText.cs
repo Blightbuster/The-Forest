@@ -9,7 +9,7 @@ public class HintText : MonoBehaviour
 	private void Awake()
 	{
 		int num = UnityEngine.Random.Range(0, this.texts.Length - 1);
-		this.name = UiTranslationDatabase.TranslateKey("HINT_" + num, this.texts[num], false);
+		this.name = UiTranslationDatabase.TranslateKey("HINT_" + num, this.texts[num], true);
 		this.MyLabel = base.gameObject.GetComponent<UILabel>();
 		this.MyLabel.text = this.name;
 	}

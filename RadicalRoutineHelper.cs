@@ -5,8 +5,8 @@ using Serialization;
 using UnityEngine;
 
 
-[AddComponentMenu("Storage/Resumable Coroutine Support")]
 [Deferred]
+[AddComponentMenu("Storage/Resumable Coroutine Support")]
 public class RadicalRoutineHelper : MonoBehaviour, IDeserialized
 {
 	
@@ -15,37 +15,6 @@ public class RadicalRoutineHelper : MonoBehaviour, IDeserialized
 		DelegateSupport.RegisterFunctionType<RadicalRoutineHelper, string>();
 		DelegateSupport.RegisterFunctionType<RadicalRoutineHelper, bool>();
 		DelegateSupport.RegisterFunctionType<RadicalRoutineHelper, Transform>();
-	}
-
-	
-	void IDeserialized.Deserialized()
-	{
-		try
-		{
-			Loom.QueueOnMainThread(delegate
-			{
-				foreach (RadicalRoutine radicalRoutine in this.Running)
-				{
-					try
-					{
-						if (radicalRoutine.trackedObject)
-						{
-							radicalRoutine.trackedObject.StartCoroutine(radicalRoutine.enumerator);
-						}
-						else
-						{
-							base.StartCoroutine(radicalRoutine.enumerator);
-						}
-					}
-					catch (Exception ex)
-					{
-					}
-				}
-			}, 0.02f);
-		}
-		catch (Exception ex)
-		{
-		}
 	}
 
 	
@@ -123,6 +92,37 @@ public class RadicalRoutineHelper : MonoBehaviour, IDeserialized
 			catch
 			{
 			}
+		}
+	}
+
+	
+	void IDeserialized.Deserialized()
+	{
+		try
+		{
+			Loom.QueueOnMainThread(delegate
+			{
+				foreach (RadicalRoutine radicalRoutine in this.Running)
+				{
+					try
+					{
+						if (radicalRoutine.trackedObject)
+						{
+							radicalRoutine.trackedObject.StartCoroutine(radicalRoutine.enumerator);
+						}
+						else
+						{
+							base.StartCoroutine(radicalRoutine.enumerator);
+						}
+					}
+					catch (Exception ex)
+					{
+					}
+				}
+			}, 0.02f);
+		}
+		catch (Exception ex)
+		{
 		}
 	}
 

@@ -16,7 +16,7 @@ public class CoopConstruction : CoopBase<IConstructionState>
 	
 	public override void Attached()
 	{
-		if (this.entity.isOwner)
+		if (base.entity.isOwner)
 		{
 			base.enabled = false;
 		}
@@ -37,7 +37,7 @@ public class CoopConstruction : CoopBase<IConstructionState>
 	
 	private void Update()
 	{
-		if (this.entity && this.entity.isAttached && this._cs.Component)
+		if (base.entity && base.entity.isAttached && this._cs.Component)
 		{
 			bool flag = false;
 			if (base.state == null)

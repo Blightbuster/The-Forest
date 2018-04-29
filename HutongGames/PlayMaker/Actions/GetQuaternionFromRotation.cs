@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Creates a rotation which rotates from fromDirection to toDirection. Usually you use this to rotate a transform so that one of its axes eg. the y-axis - follows a target direction toDirection in world space.")]
 	[ActionCategory("Quaternion")]
+	[Tooltip("Creates a rotation which rotates from fromDirection to toDirection. Usually you use this to rotate a transform so that one of its axes eg. the y-axis - follows a target direction toDirection in world space.")]
 	[HelpUrl("https:
 	public class GetQuaternionFromRotation : FsmStateAction
 	{
@@ -46,14 +46,14 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmVector3 fromDirection;
 
 		
-		[Tooltip("the 'to' direction")]
 		[RequiredField]
+		[Tooltip("the 'to' direction")]
 		public FsmVector3 toDirection;
 
 		
+		[RequiredField]
 		[UIHint(UIHint.Variable)]
 		[Tooltip("the resulting quaternion")]
-		[RequiredField]
 		public FsmQuaternion result;
 
 		

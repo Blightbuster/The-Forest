@@ -93,7 +93,8 @@ namespace TheForest.Buildings.Creation
 				{
 					int num2 = Mathf.Min(j, 5);
 					j -= num2;
-					Transform transform3 = (Transform)UnityEngine.Object.Instantiate(Prefabs.Instance.RockFenceChunksGhostPrefabs[num2 - 1], vector, rotation);
+					Transform transform3 = UnityEngine.Object.Instantiate<Transform>(Prefabs.Instance.RockFenceChunksGhostPrefabs[num2 - 1], vector, rotation);
+					transform3.GetComponentInChildren<Renderer>().sharedMaterial = Create.CurrentGhostMat;
 					transform3.parent = transform2;
 					vector += a * (float)num2;
 				}

@@ -61,11 +61,11 @@ public class ItemHolder : EntityEventListener<IItemHolderState>
 		bool takeIcon = this.Items > 0;
 		if (this.Items > 0 && TheForest.Utils.Input.GetButtonDown("Take") && LocalPlayer.Inventory.AddItem(this._itemid, 1, false, false, (!this._bonusManager) ? ItemProperties.Any : this._bonusManager.GetItemProperties(this.Items - 1)))
 		{
-			LocalPlayer.Sfx.PlayWhoosh();
+			LocalPlayer.Sfx.PlayItemCustomSfx(this._itemid, true);
 			if (BoltNetwork.isRunning)
 			{
 				ItemHolderTakeItem itemHolderTakeItem = ItemHolderTakeItem.Create(GlobalTargets.OnlyServer);
-				itemHolderTakeItem.Target = this.entity;
+				itemHolderTakeItem.Target = base.entity;
 				itemHolderTakeItem.Player = LocalPlayer.Entity;
 				itemHolderTakeItem.Send();
 			}
@@ -95,7 +95,7 @@ public class ItemHolder : EntityEventListener<IItemHolderState>
 				if (BoltNetwork.isRunning)
 				{
 					ItemHolderAddItem itemHolderAddItem = ItemHolderAddItem.Create(GlobalTargets.OnlyServer);
-					itemHolderAddItem.Target = this.entity;
+					itemHolderAddItem.Target = base.entity;
 					itemHolderAddItem.Send();
 				}
 				else
@@ -133,7 +133,7 @@ public class ItemHolder : EntityEventListener<IItemHolderState>
 	
 	private void GrabEnter()
 	{
-		base.enabled = (!BoltNetwork.isRunning || this.entity.isAttached);
+		base.enabled = (!BoltNetwork.isRunning || base.entity.isAttached);
 	}
 
 	
@@ -158,7 +158,7 @@ public class ItemHolder : EntityEventListener<IItemHolderState>
 	{
 		if (this.Items > 0)
 		{
-			this.entity.Freeze(false);
+			base.entity.Freeze(false);
 			base.state.ItemCount = (this.Items = Mathf.Max(0, this.Items - 1));
 		}
 		else
@@ -183,7 +183,7 @@ public class ItemHolder : EntityEventListener<IItemHolderState>
 		if (this.Items < this.ItemsRender.Length)
 		{
 			base.state.ItemCount = (this.Items = Mathf.Min(this.Items + 1, this.ItemsRender.Length));
-			this.entity.Freeze(false);
+			base.entity.Freeze(false);
 		}
 		else
 		{
@@ -217,7 +217,7 @@ public class ItemHolder : EntityEventListener<IItemHolderState>
 		this.Items--;
 		if (this.Items > 0)
 		{
-			LocalPlayer.Sfx.PlayWhoosh();
+			LocalPlayer.Sfx.PlayItemCustomSfx(this._itemid, true);
 		}
 	}
 

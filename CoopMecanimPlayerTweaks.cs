@@ -43,9 +43,9 @@ public class CoopMecanimPlayerTweaks : EntityBehaviour<IPlayerState>
 	
 	private void Update()
 	{
-		if (this.entity.IsAttached())
+		if (base.entity.IsAttached())
 		{
-			if (this.entity.IsOwner())
+			if (base.entity.IsOwner())
 			{
 				if (this.Replicator.TargetAnimator.GetBool("knockBackTrigger"))
 				{

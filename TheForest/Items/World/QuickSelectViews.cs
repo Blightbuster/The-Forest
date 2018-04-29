@@ -62,59 +62,72 @@ namespace TheForest.Items.World
 		public void ShowViews(IEnumerable itemIds)
 		{
 			int num = 0;
-			foreach (object obj in itemIds)
+			IEnumerator enumerator = itemIds.GetEnumerator();
+			try
 			{
-				int num2 = (int)obj;
-				bool flag = num2 > 0;
-				Item item = (!flag) ? null : ItemDatabase.ItemById(num2);
-				if (flag && this._localPlayer)
+				while (enumerator.MoveNext())
 				{
-					if (!item.MatchType(Item.Types.Equipment))
+					object obj = enumerator.Current;
+					int num2 = (int)obj;
+					bool flag = num2 > 0;
+					Item item = (!flag) ? null : ItemDatabase.ItemById(num2);
+					if (flag && this._localPlayer)
 					{
-						flag = false;
-					}
-					else
-					{
-						flag = LocalPlayer.Inventory.Owns(num2, false);
-						if (flag && LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Inventory)
+						if (!item.MatchType(Item.Types.Equipment))
 						{
-							flag = (!LocalPlayer.Inventory.HasInSlot(item._equipmentSlot, num2) && !LocalPlayer.Inventory.HasInNextSlot(item._equipmentSlot, num2));
+							flag = false;
 						}
-						if (!flag && LocalPlayer.Inventory.CurrentView == PlayerInventory.PlayerViews.Inventory)
+						else
 						{
-							foreach (ReceipeIngredient receipeIngredient in LocalPlayer.Inventory._craftingCog.Ingredients)
+							flag = LocalPlayer.Inventory.Owns(num2, false);
+							if (flag && LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Inventory)
 							{
-								if (receipeIngredient._itemID == num2)
+								flag = (!LocalPlayer.Inventory.HasInSlot(item._equipmentSlot, num2) && !LocalPlayer.Inventory.HasInNextSlot(item._equipmentSlot, num2));
+							}
+							if (!flag && LocalPlayer.Inventory.CurrentView == PlayerInventory.PlayerViews.Inventory)
+							{
+								foreach (ReceipeIngredient receipeIngredient in LocalPlayer.Inventory._craftingCog.Ingredients)
 								{
-									flag = true;
-									break;
+									if (receipeIngredient._itemID == num2)
+									{
+										flag = true;
+										break;
+									}
 								}
 							}
 						}
 					}
+					bool flag2 = this._slotsCurrentId[num] > 0 && this._slots[num].childCount > 0;
+					bool flag3 = flag2 && this._slotsCurrentId[num] != num2;
+					if (flag != flag2 || flag3)
+					{
+						if (!flag || flag3)
+						{
+							QuickSelectViewsPool.Despawn(this._slotsCurrentId[num], this._slots[num].GetChild(0), this._shadowsOnly);
+						}
+						if (flag && LocalPlayer.Inventory && !QuickSelectViewsPool.Spawn(num2, this._slots[num], this._shadowsOnly))
+						{
+							if (item.MatchType(Item.Types.Equipment))
+							{
+								this.SpawnEquipment(num2, num);
+							}
+							else
+							{
+								this.SpawnNonEquipment(num2, num);
+							}
+						}
+						this._slotsCurrentId[num] = num2;
+					}
+					num++;
 				}
-				bool flag2 = this._slotsCurrentId[num] > 0 && this._slots[num].childCount > 0;
-				bool flag3 = flag2 && this._slotsCurrentId[num] != num2;
-				if (flag != flag2 || flag3)
+			}
+			finally
+			{
+				IDisposable disposable;
+				if ((disposable = (enumerator as IDisposable)) != null)
 				{
-					if (!flag || flag3)
-					{
-						QuickSelectViewsPool.Despawn(this._slotsCurrentId[num], this._slots[num].GetChild(0), this._shadowsOnly);
-					}
-					if (flag && LocalPlayer.Inventory && !QuickSelectViewsPool.Spawn(num2, this._slots[num], this._shadowsOnly))
-					{
-						if (item.MatchType(Item.Types.Equipment))
-						{
-							this.SpawnEquipment(num2, num);
-						}
-						else
-						{
-							this.SpawnNonEquipment(num2, num);
-						}
-					}
-					this._slotsCurrentId[num] = num2;
+					disposable.Dispose();
 				}
-				num++;
 			}
 		}
 

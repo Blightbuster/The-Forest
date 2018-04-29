@@ -31,9 +31,13 @@ public class camFollowHead : MonoBehaviour
 		this.anim["camShakeZipline"].layer = 1;
 		this.setup = base.transform.root.GetComponentInChildren<playerScriptSetup>();
 		this.thisTr = base.transform;
-		this.mouse1 = base.GetComponentInChildren<SimpleMouseRotator>();
-		this.mouse2 = base.transform.root.GetComponent<SimpleMouseRotator>();
-		this.camTr = this.mouse1.transform;
+		this.startCamPos = this.thisTr.localPosition;
+		if (!ForestVR.Enabled)
+		{
+			this.mouse1 = base.GetComponentInChildren<SimpleMouseRotator>();
+			this.mouse2 = base.transform.root.GetComponent<SimpleMouseRotator>();
+			this.camTr = this.mouse1.transform;
+		}
 	}
 
 	
@@ -41,15 +45,24 @@ public class camFollowHead : MonoBehaviour
 	{
 		this.offsetY = 0f;
 		this.offsetZ = -0.05f;
-		GameObject gameObject = GameObject.Find("PlayerPlanePosition");
-		if (gameObject)
+		if (Scene.TriggerCutScene)
 		{
-			this.planePos = gameObject.transform;
-		}
-		GameObject gameObject2 = GameObject.Find("PlayerAislePosition");
-		if (gameObject2)
-		{
-			this.aislePos = gameObject2.transform;
+			if (Scene.TriggerCutScene.playerPlanePosition)
+			{
+				GameObject gameObject = Scene.TriggerCutScene.playerPlanePosition.gameObject;
+				if (gameObject)
+				{
+					this.planePos = gameObject.transform;
+				}
+			}
+			if (Scene.TriggerCutScene.playerAislePosition)
+			{
+				GameObject gameObject2 = Scene.TriggerCutScene.playerAislePosition.gameObject;
+				if (gameObject2)
+				{
+					this.aislePos = gameObject2.transform;
+				}
+			}
 		}
 		if (this.setup.playerCam)
 		{
@@ -71,11 +84,14 @@ public class camFollowHead : MonoBehaviour
 	
 	private void checkPlayerControl()
 	{
-		if (!Clock.planecrash)
+		if (base.enabled)
 		{
-			LocalPlayer.CamRotator.enabled = true;
+			if (!Clock.planecrash)
+			{
+				LocalPlayer.CamRotator.enabled = true;
+			}
+			LocalPlayer.MainRotator.enabled = true;
 		}
-		LocalPlayer.MainRotator.enabled = true;
 	}
 
 	
@@ -93,6 +109,10 @@ public class camFollowHead : MonoBehaviour
 	
 	public IEnumerator preCrashCameraShake()
 	{
+		if (ForestVR.Enabled)
+		{
+			yield break;
+		}
 		yield return YieldPresets.WaitTwoSeconds;
 		yield return YieldPresets.WaitTwoSeconds;
 		this.anim.Play("noShake", PlayMode.StopAll);
@@ -103,6 +123,10 @@ public class camFollowHead : MonoBehaviour
 	
 	public IEnumerator planeCameraShake()
 	{
+		if (ForestVR.Enabled)
+		{
+			yield break;
+		}
 		this.anim.Stop("turbulanceLight");
 		this.anim.Play("camShakePlaneStart", PlayMode.StopAll);
 		yield return YieldPresets.WaitTwoSeconds;
@@ -133,6 +157,10 @@ public class camFollowHead : MonoBehaviour
 	
 	public IEnumerator startFallingShake()
 	{
+		if (ForestVR.Enabled)
+		{
+			yield break;
+		}
 		this.anim.Play("noShake", PlayMode.StopAll);
 		this.anim.CrossFade("camShakeFall", 1.3f, PlayMode.StopSameLayer);
 		yield return YieldPresets.WaitTwoSeconds;
@@ -142,6 +170,10 @@ public class camFollowHead : MonoBehaviour
 	
 	public IEnumerator startZipLineShake()
 	{
+		if (ForestVR.Enabled)
+		{
+			yield break;
+		}
 		this.anim.Play("noShake", PlayMode.StopAll);
 		this.anim.CrossFade("camShakeZipline", 4f, PlayMode.StopSameLayer);
 		yield return YieldPresets.WaitTwoSeconds;
@@ -170,6 +202,10 @@ public class camFollowHead : MonoBehaviour
 				if (BoltNetwork.isClient)
 				{
 					this.seatPos = Scene.TriggerCutScene.clientStartCamPos;
+				}
+				else if (ForestVR.Enabled)
+				{
+					this.seatPos = Scene.TriggerCutScene.playerSeatPosVR;
 				}
 				else
 				{
@@ -206,14 +242,17 @@ public class camFollowHead : MonoBehaviour
 		else
 		{
 			this.pos = this.headJnt.position;
-			this.thisTr.position = this.pos;
-			if (this.setup.playerCam)
+			if (this.vrAllowFollow())
 			{
-				this.setup.playerCam.localPosition = new Vector3(this.playerCamPos.x, this.playerCamPos.y + this.offsetY, this.playerCamPos.z + this.offsetZ);
+				this.thisTr.position = this.pos;
+				if (this.setup.playerCam)
+				{
+					this.setup.playerCam.localPosition = new Vector3(this.playerCamPos.x, this.playerCamPos.y + this.offsetY, this.playerCamPos.z + this.offsetZ);
+				}
 			}
-			if (this.setup.OvrCam)
+			else
 			{
-				this.setup.OvrCam.localPosition = new Vector3(this.ovrCamPos.x, this.ovrCamPos.y + this.offsetY, this.ovrCamPos.z + this.offsetZ);
+				this.thisTr.localPosition = this.startCamPos;
 			}
 		}
 		this.doCamFollow();
@@ -224,40 +263,49 @@ public class camFollowHead : MonoBehaviour
 	}
 
 	
+	private bool vrAllowFollow()
+	{
+		return !ForestVR.Enabled || (ForestVR.Enabled && (LocalPlayer.CamFollowHead.followAnim || LocalPlayer.AnimControl.useRootMotion));
+	}
+
+	
 	private void doCamFollow()
 	{
-		if (this.followAnim || this.lockYCam)
+		if (!ForestVR.Enabled)
 		{
-			if (this.smoothLock)
+			if (this.followAnim || this.lockYCam)
 			{
-				Quaternion quaternion = this.camTr.rotation;
-				quaternion = Quaternion.Slerp(quaternion, this.headJnt.rotation, Time.deltaTime * 5f);
-				this.camTr.rotation = quaternion;
-				if (this.camTr.rotation == this.headJnt.rotation)
+				if (this.smoothLock)
 				{
-					this.smoothLock = false;
+					Quaternion quaternion = this.camTr.rotation;
+					quaternion = Quaternion.Slerp(quaternion, this.headJnt.rotation, Time.deltaTime * 5f);
+					this.camTr.rotation = quaternion;
+					if (this.camTr.rotation == this.headJnt.rotation)
+					{
+						this.smoothLock = false;
+					}
+				}
+				else if (!this.smoothUnLock)
+				{
+					this.storePrevRot = false;
+					this.thisTr.rotation = this.headJnt.rotation;
+				}
+				if (!this.smoothLock && !this.smoothUnLock)
+				{
+					this.thisTr.rotation = this.headJnt.rotation;
+					this.camTr.localEulerAngles = new Vector3(0f, 0f, 0f);
 				}
 			}
-			else if (!this.smoothUnLock)
+			if (this.smoothUnLock)
 			{
-				this.storePrevRot = false;
-				this.thisTr.rotation = this.headJnt.rotation;
-			}
-			if (!this.smoothLock && !this.smoothUnLock)
-			{
-				this.thisTr.rotation = this.headJnt.rotation;
-				this.camTr.localEulerAngles = new Vector3(0f, 0f, 0f);
-			}
-		}
-		if (this.smoothUnLock)
-		{
-			this.thisTr.localRotation = Quaternion.Slerp(this.thisTr.localRotation, this.thisTr.parent.localRotation, Time.deltaTime * 2f);
-			if (this.thisTr.localEulerAngles == Vector3.zero)
-			{
-				LocalPlayer.CamRotator.resetOriginalRotation = true;
-				this.smoothUnLock = false;
-				this.followAnim = false;
-				LocalPlayer.CamRotator.enabled = true;
+				this.thisTr.localRotation = Quaternion.Slerp(this.thisTr.localRotation, this.thisTr.parent.localRotation, Time.deltaTime * 2f);
+				if (this.thisTr.localEulerAngles == Vector3.zero)
+				{
+					LocalPlayer.CamRotator.resetOriginalRotation = true;
+					this.smoothUnLock = false;
+					this.followAnim = false;
+					LocalPlayer.CamRotator.enabled = true;
+				}
 			}
 		}
 	}
@@ -277,14 +325,17 @@ public class camFollowHead : MonoBehaviour
 	
 	public void enableMouseControl(bool on)
 	{
-		if (on)
+		if (!ForestVR.Enabled)
 		{
-			this.mouse1.enabled = true;
-		}
-		else
-		{
-			this.mouse1.enabled = false;
-			this.mouse2.enabled = false;
+			if (on)
+			{
+				this.mouse1.enabled = true;
+			}
+			else
+			{
+				this.mouse1.enabled = false;
+				this.mouse2.enabled = false;
+			}
 		}
 	}
 
@@ -295,8 +346,16 @@ public class camFollowHead : MonoBehaviour
 		this.flying = false;
 		this.shakeBlock = false;
 		this.aisle = true;
-		LocalPlayer.CamFollowHead.mouse2.rotationRange = new Vector2(0f, 70f);
-		LocalPlayer.CamRotator.rotationRange = new Vector2(95f, 0f);
+		if (BoltNetwork.isClient)
+		{
+			LocalPlayer.CamRotator.rotationRange = new Vector2(45f, 45f);
+			LocalPlayer.MainRotator.enabled = false;
+		}
+		else
+		{
+			LocalPlayer.MainRotator.rotationRange = new Vector2(0f, 70f);
+			LocalPlayer.CamRotator.rotationRange = new Vector2(95f, 0f);
+		}
 	}
 
 	
@@ -364,6 +423,9 @@ public class camFollowHead : MonoBehaviour
 
 	
 	private Quaternion prevRotation;
+
+	
+	private Vector3 startCamPos;
 
 	
 	public float offsetY;

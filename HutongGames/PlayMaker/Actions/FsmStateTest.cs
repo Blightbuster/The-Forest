@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Tests if an FSM is in the specified State.")]
 	[ActionCategory(ActionCategory.Logic)]
+	[Tooltip("Tests if an FSM is in the specified State.")]
 	public class FsmStateTest : FsmStateAction
 	{
 		
@@ -72,8 +72,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmGameObject gameObject;
 
 		
-		[Tooltip("Optional name of Fsm on Game Object. Useful if there is more than one FSM on the GameObject.")]
 		[UIHint(UIHint.FsmName)]
+		[Tooltip("Optional name of Fsm on Game Object. Useful if there is more than one FSM on the GameObject.")]
 		public FsmString fsmName;
 
 		

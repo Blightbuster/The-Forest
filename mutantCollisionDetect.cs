@@ -184,9 +184,13 @@ public class mutantCollisionDetect : MonoBehaviour
 		{
 			return;
 		}
+		if (!this.setup)
+		{
+			return;
+		}
 		if (other.gameObject.CompareTag("effigy") && !this.setup.ai.fireman && !this.animator.GetBool("trapBool") && !this.animator.GetBool("deathBOOL") && !this.fsmDeathBool.Value && !this.setup.health.onFire)
 		{
-			if (this.fsmFearOverrideBool.Value || this.setup.hitReactions.onStructure)
+			if ((this.fsmFearOverrideBool.Value && !this.setup.pmCombatScript.toRepelArtifact) || this.setup.hitReactions.onStructure)
 			{
 				this.forceExit();
 			}

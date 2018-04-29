@@ -42,39 +42,42 @@ public class SimpleMouseRotator : MonoBehaviour
 	
 	private void UpdateRotation()
 	{
-		this.CheckResetOriginalRotation();
-		if (this.cameraRotator)
+		if (!ForestVR.Enabled)
 		{
-			if (this.originalRotation.y != 0f)
+			this.CheckResetOriginalRotation();
+			if (this.cameraRotator)
 			{
-				this.originalRotation.y = 0f;
+				if (this.originalRotation.y != 0f)
+				{
+					this.originalRotation.y = 0f;
+				}
+				if (this.originalRotation.z != 0f)
+				{
+					this.originalRotation.z = 0f;
+				}
+				if (this.originalRotation.x != 0f)
+				{
+					this.originalRotation.x = 0f;
+				}
 			}
-			if (this.originalRotation.z != 0f)
+			else
 			{
-				this.originalRotation.z = 0f;
+				if (this.originalRotation.x != 0f)
+				{
+					this.originalRotation.x = 0f;
+				}
+				if (this.originalRotation.z != 0f)
+				{
+					this.originalRotation.z = 0f;
+				}
 			}
-			if (this.originalRotation.x != 0f)
-			{
-				this.originalRotation.x = 0f;
-			}
+			Vector2 zero = Vector2.zero;
+			Vector2 input = this.GetInput();
+			this.ClampAngles(input);
+			zero.y = this.targetAngles.y + this.yOffset;
+			zero.x = this.targetAngles.x + this.xOffset;
+			this.UpdateCameraRotation(zero);
 		}
-		else
-		{
-			if (this.originalRotation.x != 0f)
-			{
-				this.originalRotation.x = 0f;
-			}
-			if (this.originalRotation.z != 0f)
-			{
-				this.originalRotation.z = 0f;
-			}
-		}
-		Vector2 zero = Vector2.zero;
-		Vector2 input = this.GetInput();
-		this.ClampAngles(input);
-		zero.y = this.targetAngles.y + this.yOffset;
-		zero.x = this.targetAngles.x + this.xOffset;
-		this.UpdateCameraRotation(zero);
 	}
 
 	
@@ -172,7 +175,7 @@ public class SimpleMouseRotator : MonoBehaviour
 		{
 			num5 = -num5;
 		}
-		if (LocalPlayer.FpCharacter.MovementLocked)
+		if (LocalPlayer.FpCharacter.MovementLocked || ForestVR.Enabled)
 		{
 			num4 = 0f;
 			num5 = 0f;

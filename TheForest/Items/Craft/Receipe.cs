@@ -24,11 +24,22 @@ namespace TheForest.Items.Craft
 		}
 
 		
+		
+		
+		public bool CanCarryProduct { get; set; }
+
+		
 		public static string IngredientsToRecipeHash(IEnumerable<ReceipeIngredient> ingredients)
 		{
 			return string.Join("_", (from i in ingredients
 			orderby i._itemID
 			select i._itemID.ToString()).ToArray<string>());
+		}
+
+		
+		public bool HasIngredient(ReceipeIngredient searchIngredient)
+		{
+			return this._ingredients != null && this._ingredients.Any((ReceipeIngredient eachIngredient) => searchIngredient._itemID == eachIngredient._itemID);
 		}
 
 		
@@ -57,6 +68,12 @@ namespace TheForest.Items.Craft
 
 		
 		public WeaponStatUpgrade[] _weaponStatUpgrades;
+
+		
+		public bool _hidden;
+
+		
+		public bool _forceUnique;
 
 		
 		private string hash;

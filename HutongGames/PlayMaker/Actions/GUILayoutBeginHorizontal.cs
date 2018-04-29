@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("GUILayout BeginHorizontal.")]
 	[ActionCategory(ActionCategory.GUILayout)]
+	[Tooltip("GUILayout BeginHorizontal.")]
 	public class GUILayoutBeginHorizontal : GUILayoutAction
 	{
 		

@@ -3,8 +3,8 @@
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Adds a value to an Integer Variable.")]
 	[ActionCategory(ActionCategory.Math)]
+	[Tooltip("Adds a value to an Integer Variable.")]
 	public class IntAdd : FsmStateAction
 	{
 		

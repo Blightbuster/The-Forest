@@ -54,11 +54,11 @@ namespace TheForest.Buildings.World
 				this.CurrentTakeIcon.SetActive(true);
 				if (TheForest.Utils.Input.GetButtonDown("Take") && LocalPlayer.Inventory.AddItem(this.CurrentItemId, 1, false, false, null))
 				{
-					LocalPlayer.Sfx.PlayWhoosh();
+					LocalPlayer.Sfx.PlayItemCustomSfx(this.CurrentItemId, true);
 					if (BoltNetwork.isRunning)
 					{
 						ItemHolderTakeItem itemHolderTakeItem = ItemHolderTakeItem.Create(GlobalTargets.OnlyServer);
-						itemHolderTakeItem.Target = this.entity;
+						itemHolderTakeItem.Target = base.entity;
 						itemHolderTakeItem.Player = LocalPlayer.Entity;
 						itemHolderTakeItem.ContentType = this.Current;
 						itemHolderTakeItem.Send();
@@ -92,7 +92,7 @@ namespace TheForest.Buildings.World
 						if (BoltNetwork.isRunning)
 						{
 							ItemHolderAddItem itemHolderAddItem = ItemHolderAddItem.Create(GlobalTargets.OnlyServer);
-							itemHolderAddItem.Target = this.entity;
+							itemHolderAddItem.Target = base.entity;
 							itemHolderAddItem.ContentType = this.Current;
 							itemHolderAddItem.Send();
 						}
@@ -122,7 +122,7 @@ namespace TheForest.Buildings.World
 		
 		public void GrabEnter()
 		{
-			base.enabled = (!BoltNetwork.isRunning || this.entity.isAttached);
+			base.enabled = (!BoltNetwork.isRunning || base.entity.isAttached);
 		}
 
 		
@@ -176,7 +176,7 @@ namespace TheForest.Buildings.World
 		{
 			if (this._itemsAmount[contentType] > 0)
 			{
-				this.entity.Freeze(false);
+				base.entity.Freeze(false);
 				base.state.ItemCount[contentType] = (this._itemsAmount[contentType] = Mathf.Max(0, this._itemsAmount[contentType] - 1));
 			}
 			else
@@ -202,7 +202,7 @@ namespace TheForest.Buildings.World
 			if (this._itemsAmount[contentType] < num)
 			{
 				base.state.ItemCount[contentType] = (this._itemsAmount[contentType] = Mathf.Min(this._itemsAmount[contentType] + 1, num));
-				this.entity.Freeze(false);
+				base.entity.Freeze(false);
 			}
 		}
 

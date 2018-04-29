@@ -46,14 +46,14 @@ namespace HutongGames.PlayMaker.Actions
 
 		
 		[RequiredField]
-		[Tooltip("The Target. An Animator component is required")]
 		[CheckForComponent(typeof(Animator))]
+		[Tooltip("The Target. An Animator component is required")]
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("the scale of the current Avatar")]
 		[ActionSection("Result")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("the scale of the current Avatar")]
 		public FsmFloat humanScale;
 
 		

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Set the value of a Rect Variable in another FSM.")]
 	[ActionCategory(ActionCategory.StateMachine)]
+	[Tooltip("Set the value of a Rect Variable in another FSM.")]
 	public class SetFsmRect : FsmStateAction
 	{
 		
@@ -47,7 +47,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			if (this.fsm == null)
 			{
-				this.LogWarning("Could not find FSM: " + this.fsmName.Value);
+				base.LogWarning("Could not find FSM: " + this.fsmName.Value);
 				return;
 			}
 			FsmRect fsmRect = this.fsm.FsmVariables.GetFsmRect(this.variableName.Value);
@@ -57,7 +57,7 @@ namespace HutongGames.PlayMaker.Actions
 			}
 			else
 			{
-				this.LogWarning("Could not find variable: " + this.variableName.Value);
+				base.LogWarning("Could not find variable: " + this.variableName.Value);
 			}
 		}
 
@@ -73,19 +73,19 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmOwnerDefault gameObject;
 
 		
-		[Tooltip("Optional name of FSM on Game Object")]
 		[UIHint(UIHint.FsmName)]
+		[Tooltip("Optional name of FSM on Game Object")]
 		public FsmString fsmName;
 
 		
-		[Tooltip("The name of the FSM variable.")]
 		[RequiredField]
 		[UIHint(UIHint.FsmRect)]
+		[Tooltip("The name of the FSM variable.")]
 		public FsmString variableName;
 
 		
-		[Tooltip("Set the value of the variable.")]
 		[RequiredField]
+		[Tooltip("Set the value of the variable.")]
 		public FsmRect setValue;
 
 		

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Get the current network time (seconds).")]
 	[ActionCategory(ActionCategory.Network)]
+	[Tooltip("Get the current network time (seconds).")]
 	public class NetworkGetTime : FsmStateAction
 	{
 		

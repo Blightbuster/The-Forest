@@ -4,8 +4,8 @@ using UnityEngine;
 
 
 [ExecuteInEditMode]
-[AddComponentMenu("Image Effects/Blackfire Studio/Frost")]
 [RequireComponent(typeof(Camera))]
+[AddComponentMenu("Image Effects/Blackfire Studio/Frost")]
 public class Frost : MonoBehaviour
 {
 	

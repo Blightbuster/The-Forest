@@ -16,6 +16,18 @@ namespace TheForest.Items.World
 			if (!enableGoReceiver)
 			{
 				this._pickup._itemId = itemId;
+				Item item = ItemDatabase.ItemById(itemId);
+				if (item != null)
+				{
+					if (item._sheenMaterial)
+					{
+						this._pickup._sheen.GetComponent<Renderer>().sharedMaterial = item._sheenMaterial;
+					}
+					if (item._pickupMaterial)
+					{
+						this._pickup._myPickUp.GetComponent<Renderer>().sharedMaterial = item._pickupMaterial;
+					}
+				}
 			}
 			else
 			{
@@ -67,7 +79,7 @@ namespace TheForest.Items.World
 		
 		private void setStateBroken(bool set)
 		{
-			if (this.entity && this.entity.isAttached)
+			if (base.entity && base.entity.isAttached)
 			{
 				base.state.Broken = set;
 			}

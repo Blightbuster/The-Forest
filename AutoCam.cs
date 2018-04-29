@@ -57,9 +57,9 @@ public class AutoCam : AbstractTargetFollower
 				forward = base.transform.forward;
 			}
 		}
-		Quaternion to = Quaternion.LookRotation(forward, this.rollUp);
+		Quaternion b = Quaternion.LookRotation(forward, this.rollUp);
 		this.rollUp = ((this.rollSpeed <= 0f) ? Vector3.up : Vector3.Slerp(this.rollUp, up, this.rollSpeed * Time.deltaTime));
-		base.transform.rotation = Quaternion.Lerp(base.transform.rotation, to, this.turnSpeed * this.currentTurnAmount * Time.smoothDeltaTime);
+		base.transform.rotation = Quaternion.Lerp(base.transform.rotation, b, this.turnSpeed * this.currentTurnAmount * Time.smoothDeltaTime);
 	}
 
 	

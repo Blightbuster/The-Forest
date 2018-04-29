@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Returns the culling of this Animator component. Optionnaly sends events.\nIf true ('AlwaysAnimate'): always animate the entire character. Object is animated even when offscreen.\nIf False ('BasedOnRenderers') animation is disabled when renderers are not visible.")]
 	[ActionCategory("Animator")]
+	[Tooltip("Returns the culling of this Animator component. Optionnaly sends events.\nIf true ('AlwaysAnimate'): always animate the entire character. Object is animated even when offscreen.\nIf False ('BasedOnRenderers') animation is disabled when renderers are not visible.")]
 	public class GetAnimatorCullingMode : FsmStateAction
 	{
 		
@@ -56,16 +56,16 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[CheckForComponent(typeof(Animator))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animator))]
 		[Tooltip("The Target. An Animator component is required")]
 		public FsmOwnerDefault gameObject;
 
 		
-		[UIHint(UIHint.Variable)]
 		[ActionSection("Results")]
-		[Tooltip("If true, always animate the entire character, else animation is disabled when renderers are not visible")]
 		[RequiredField]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("If true, always animate the entire character, else animation is disabled when renderers are not visible")]
 		public FsmBool alwaysAnimate;
 
 		

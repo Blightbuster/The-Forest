@@ -81,7 +81,7 @@ namespace Serialization
 		
 		public GetSetGeneric(Type t, string name)
 		{
-			GetSetGeneric <>f__this = this;
+			GetSetGeneric $this = this;
 			this.Name = name;
 			PropertyInfo property = t.GetProperty(name);
 			if (property == null)
@@ -98,10 +98,10 @@ namespace Serialization
 			MethodInfo getMethod = property.GetGetMethod(true);
 			MethodInfo setMethod = property.GetSetMethod(true);
 			this.IsStatic = getMethod.IsStatic;
-			this.Get = ((object o) => getMethod.Invoke(<>f__this.IsStatic ? null : o, null));
+			this.Get = ((object o) => getMethod.Invoke($this.IsStatic ? null : o, null));
 			this.Set = delegate(object o, object v)
 			{
-				setMethod.Invoke(<>f__this.IsStatic ? null : o, new object[]
+				setMethod.Invoke($this.IsStatic ? null : o, new object[]
 				{
 					v
 				});

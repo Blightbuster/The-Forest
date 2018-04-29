@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the value of a float parameter")]
 	[ActionCategory("Animator")]
+	[Tooltip("Sets the value of a float parameter")]
 	[HelpUrl("https:
 	public class SetAnimatorFloat : FsmStateAction
 	{
@@ -101,9 +101,9 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
 		[RequiredField]
 		[CheckForComponent(typeof(Animator))]
+		[Tooltip("The target. An Animator component and a PlayMakerAnimatorProxy component are required")]
 		public FsmOwnerDefault gameObject;
 
 		

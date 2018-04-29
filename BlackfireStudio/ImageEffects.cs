@@ -4,8 +4,8 @@ using UnityEngine;
 namespace BlackfireStudio
 {
 	
-	[RequireComponent(typeof(Camera))]
 	[ExecuteInEditMode]
+	[RequireComponent(typeof(Camera))]
 	public class ImageEffects : MonoBehaviour
 	{
 		

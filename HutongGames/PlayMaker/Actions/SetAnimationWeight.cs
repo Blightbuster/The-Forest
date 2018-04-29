@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Sets the Blend Weight of an Animation. Check Every Frame to update the weight continuosly, e.g., if you're manipulating a variable that controls the weight.")]
 	[ActionCategory(ActionCategory.Animation)]
+	[Tooltip("Sets the Blend Weight of an Animation. Check Every Frame to update the weight continuosly, e.g., if you're manipulating a variable that controls the weight.")]
 	public class SetAnimationWeight : ComponentAction<Animation>
 	{
 		
@@ -43,15 +43,15 @@ namespace HutongGames.PlayMaker.Actions
 			AnimationState animationState = base.animation[this.animName.Value];
 			if (animationState == null)
 			{
-				this.LogWarning("Missing animation: " + this.animName.Value);
+				base.LogWarning("Missing animation: " + this.animName.Value);
 				return;
 			}
 			animationState.weight = this.weight.Value;
 		}
 
 		
-		[CheckForComponent(typeof(Animation))]
 		[RequiredField]
+		[CheckForComponent(typeof(Animation))]
 		public FsmOwnerDefault gameObject;
 
 		

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using TheForest.Utils;
 using UnityEngine;
 
@@ -12,10 +13,26 @@ public class destroyAfter : MonoBehaviour
 		{
 			base.InvokeRepeating("destroyMe", this.destroyTime, 10f);
 		}
+		else if (this.useUnscaledTime)
+		{
+			base.StartCoroutine(this.destroyUnscaledTimeRoutine());
+		}
 		else
 		{
 			base.Invoke("destroyMe", this.destroyTime);
 		}
+	}
+
+	
+	private IEnumerator destroyUnscaledTimeRoutine()
+	{
+		float t = Time.unscaledTime + this.destroyTime;
+		while (Time.unscaledTime < t)
+		{
+			yield return null;
+		}
+		this.destroyMe();
+		yield break;
 	}
 
 	
@@ -59,4 +76,7 @@ public class destroyAfter : MonoBehaviour
 
 	
 	public float destroyDistance;
+
+	
+	public bool useUnscaledTime;
 }

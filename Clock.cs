@@ -16,6 +16,11 @@ public class Clock : MonoBehaviour
 		{
 			this.Atmos.TimeOfDay = 302f;
 		}
+		if (ForestVR.Prototype)
+		{
+			base.enabled = false;
+			return;
+		}
 		this.isValidNextSleepTime = (!BoltNetwork.isRunning || BoltNetwork.isServer);
 		Clock.Temp = 30;
 		Clock.Dark = false;
@@ -27,6 +32,11 @@ public class Clock : MonoBehaviour
 	
 	private IEnumerator Start()
 	{
+		if (ForestVR.Prototype)
+		{
+			base.enabled = false;
+			yield break;
+		}
 		this.UpdatePlaneMoss();
 		if (BoltNetwork.isClient)
 		{
@@ -37,12 +47,12 @@ public class Clock : MonoBehaviour
 			}
 			else if (!LocalPlayer.IsInCaves)
 			{
-				float playerHeight = LocalPlayer.Transform.position.y;
-				float terrainHeight = Terrain.activeTerrain.SampleHeight(LocalPlayer.Transform.position);
-				if (playerHeight < terrainHeight)
+				float y = LocalPlayer.Transform.position.y;
+				float num = Terrain.activeTerrain.SampleHeight(LocalPlayer.Transform.position);
+				if (y < num)
 				{
-					float distanceToSinkholeCenter = Vector3.Distance(new Vector3(Scene.SinkHoleCenter.position.x, LocalPlayer.Transform.position.y, Scene.SinkHoleCenter.position.z), LocalPlayer.Transform.position);
-					if (distanceToSinkholeCenter > 234f)
+					float num2 = Vector3.Distance(new Vector3(Scene.SinkHoleCenter.position.x, LocalPlayer.Transform.position.y, Scene.SinkHoleCenter.position.z), LocalPlayer.Transform.position);
+					if (num2 > 234f)
 					{
 						LocalPlayer.GameObject.SendMessage("InACave");
 					}
@@ -65,7 +75,7 @@ public class Clock : MonoBehaviour
 			yield return null;
 			if (LocalPlayer.IsInCaves)
 			{
-				if (LocalPlayer.Transform.position.y < Terrain.activeTerrain.SampleHeight(LocalPlayer.Transform.position))
+				if (LocalPlayer.Transform.position.y < Terrain.activeTerrain.SampleHeight(LocalPlayer.Transform.position) || LocalPlayer.ActiveAreaInfo.CurrentCave == CaveNames.SnowCave)
 				{
 					LocalPlayer.GameObject.SendMessage("InACave");
 				}
@@ -110,6 +120,11 @@ public class Clock : MonoBehaviour
 		if (!this.isValidNextSleepTime && BoltNetwork.isRunning && Scene.FinishGameLoad)
 		{
 			this.RequestValidSleeptime();
+		}
+		if (ForestVR.Prototype)
+		{
+			base.enabled = false;
+			return;
 		}
 		if (this.Atmos.TimeOfDay > 88f && this.Atmos.TimeOfDay < 270f)
 		{

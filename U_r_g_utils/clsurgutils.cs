@@ -989,12 +989,12 @@ namespace U_r_g_utils
 			}
 			if (varpparentparticle != null)
 			{
-				GameObject gameObject4 = UnityEngine.Object.Instantiate(varpparentparticle, transform.position, transform.rotation) as GameObject;
+				GameObject gameObject4 = UnityEngine.Object.Instantiate<GameObject>(varpparentparticle, transform.position, transform.rotation);
 				gameObject4.transform.parent = transform;
 			}
 			if (varpchildparticle != null)
 			{
-				GameObject gameObject5 = UnityEngine.Object.Instantiate(varpchildparticle, transform2.position, Quaternion.Inverse(transform2.rotation)) as GameObject;
+				GameObject gameObject5 = UnityEngine.Object.Instantiate<GameObject>(varpchildparticle, transform2.position, Quaternion.Inverse(transform2.rotation));
 				gameObject5.transform.parent = transform2;
 			}
 			if (varpcinematiccut)
@@ -1072,7 +1072,7 @@ namespace U_r_g_utils
 							{
 								if (!clsurgutils.metsetsegmentplaneintersection(varpplane, varpcontactpoint, array[i].position, array[i].parent.position, ref position))
 								{
-									goto IL_23B9;
+									goto IL_23BB;
 								}
 							}
 							else
@@ -1362,24 +1362,29 @@ namespace U_r_g_utils
 												}
 												else if (num25 < -1)
 												{
-													int num26 = num25;
-													switch (num26 + 4)
+													if (num25 != -2)
 													{
-													case 0:
-														list3.Add(num8);
+														if (num25 != -3)
+														{
+															if (num25 == -4)
+															{
+																list3.Add(num8);
+																list3.Add(item);
+																list3.Add(item2);
+															}
+														}
+														else
+														{
+															list3.Add(item);
+															list3.Add(num8);
+															list3.Add(item2);
+														}
+													}
+													else
+													{
 														list3.Add(item);
 														list3.Add(item2);
-														break;
-													case 1:
-														list3.Add(item);
 														list3.Add(num8);
-														list3.Add(item2);
-														break;
-													case 2:
-														list3.Add(item);
-														list3.Add(item2);
-														list3.Add(num8);
-														break;
 													}
 												}
 												else if (num25 == 0)
@@ -1404,36 +1409,36 @@ namespace U_r_g_utils
 										skinnedMeshRenderer.bones[i].GetComponent<Rigidbody>().angularDrag = 1f;
 										if (rigidbody)
 										{
-											for (int num27 = 0; num27 < clsdismemberator.vargambonerelationsindexes[num4].propchildrenside.propindexes.Length; num27++)
+											for (int num26 = 0; num26 < clsdismemberator.vargambonerelationsindexes[num4].propchildrenside.propindexes.Length; num26++)
 											{
-												int num28 = clsdismemberator.vargambonerelationsindexes[num4].propchildrenside.propindexes[num27];
-												CharacterJoint component5 = array[num28].GetComponent<CharacterJoint>();
-												float num29 = (varpslashdirection.x * array[num28].position.x + varpslashdirection.y * array[num28].position.y + varpslashdirection.z * array[num28].position.z + (-varpslashdirection.x * varpcontactpoint.x - varpslashdirection.y * varpcontactpoint.y - varpslashdirection.z * varpcontactpoint.z)) * num7;
+												int num27 = clsdismemberator.vargambonerelationsindexes[num4].propchildrenside.propindexes[num26];
+												CharacterJoint component5 = array[num27].GetComponent<CharacterJoint>();
+												float num28 = (varpslashdirection.x * array[num27].position.x + varpslashdirection.y * array[num27].position.y + varpslashdirection.z * array[num27].position.z + (-varpslashdirection.x * varpcontactpoint.x - varpslashdirection.y * varpcontactpoint.y - varpslashdirection.z * varpcontactpoint.z)) * num7;
 												if (component5 != null && component5.connectedBody != null)
 												{
 													Transform transform = component5.connectedBody.transform;
-													float num30 = (varpslashdirection.x * transform.transform.position.x + varpslashdirection.y * transform.transform.position.y + varpslashdirection.z * transform.transform.position.z + (-varpslashdirection.x * varpcontactpoint.x - varpslashdirection.y * varpcontactpoint.y - varpslashdirection.z * varpcontactpoint.z)) * num7;
-													if (num30 > 0f && num29 <= 0f)
+													float num29 = (varpslashdirection.x * transform.transform.position.x + varpslashdirection.y * transform.transform.position.y + varpslashdirection.z * transform.transform.position.z + (-varpslashdirection.x * varpcontactpoint.x - varpslashdirection.y * varpcontactpoint.y - varpslashdirection.z * varpcontactpoint.z)) * num7;
+													if (num29 > 0f && num28 <= 0f)
 													{
 														component5.connectedBody = rigidbody;
 													}
-													else if (num30 <= 0f && num29 > 0f)
+													else if (num29 <= 0f && num28 > 0f)
 													{
 														component5.connectedBody = array[num4].GetComponent<Rigidbody>();
 													}
 												}
-												if (array[num28].parent != null && num29 <= 0f)
+												if (array[num27].parent != null && num28 <= 0f)
 												{
-													if (array[num28].parent == array[num4])
+													if (array[num27].parent == array[num4])
 													{
-														array[num28].parent = gameObject2.transform;
+														array[num27].parent = gameObject2.transform;
 													}
 													else
 													{
-														num29 = (varpslashdirection.x * array[num28].parent.position.x + varpslashdirection.y * array[num28].parent.position.y + varpslashdirection.z * array[num28].parent.position.z + (-varpslashdirection.x * varpcontactpoint.x - varpslashdirection.y * varpcontactpoint.y - varpslashdirection.z * varpcontactpoint.z)) * num7;
-														if (num29 > 0f)
+														num28 = (varpslashdirection.x * array[num27].parent.position.x + varpslashdirection.y * array[num27].parent.position.y + varpslashdirection.z * array[num27].parent.position.z + (-varpslashdirection.x * varpcontactpoint.x - varpslashdirection.y * varpcontactpoint.y - varpslashdirection.z * varpcontactpoint.z)) * num7;
+														if (num28 > 0f)
 														{
-															array[num28].parent = gameObject2.transform;
+															array[num27].parent = gameObject2.transform;
 														}
 													}
 												}
@@ -1444,17 +1449,17 @@ namespace U_r_g_utils
 									Transform[] array7 = new Transform[0];
 									List<Transform> list4 = new List<Transform>();
 									List<Transform> list5 = new List<Transform>();
-									for (int num31 = 0; num31 < clsdismemberator.vargambonerelationsindexes[num4].propchildrenside.propindexes.Length; num31++)
+									for (int num30 = 0; num30 < clsdismemberator.vargambonerelationsindexes[num4].propchildrenside.propindexes.Length; num30++)
 									{
-										int num32 = clsdismemberator.vargambonerelationsindexes[num4].propchildrenside.propindexes[num31];
-										float num33 = (varpslashdirection.x * array[num32].position.x + varpslashdirection.y * array[num32].position.y + varpslashdirection.z * array[num32].position.z + (-varpslashdirection.x * varpcontactpoint.x - varpslashdirection.y * varpcontactpoint.y - varpslashdirection.z * varpcontactpoint.z)) * num7;
-										if (num33 < 0f)
+										int num31 = clsdismemberator.vargambonerelationsindexes[num4].propchildrenside.propindexes[num30];
+										float num32 = (varpslashdirection.x * array[num31].position.x + varpslashdirection.y * array[num31].position.y + varpslashdirection.z * array[num31].position.z + (-varpslashdirection.x * varpcontactpoint.x - varpslashdirection.y * varpcontactpoint.y - varpslashdirection.z * varpcontactpoint.z)) * num7;
+										if (num32 < 0f)
 										{
-											list4.Add(array[num32]);
+											list4.Add(array[num31]);
 										}
 										else
 										{
-											list5.Add(array[num32]);
+											list5.Add(array[num31]);
 										}
 									}
 									if (list4.Count > 0)
@@ -1478,20 +1483,21 @@ namespace U_r_g_utils
 										}
 										else
 										{
-											for (int num34 = 0; num34 < list2.Count; num34++)
+											for (int num33 = 0; num33 < list2.Count; num33++)
 											{
-												if (list2[num34] < num9 || list2[num34] == num8)
+												if (list2[num33] < num9 || list2[num33] == num8)
 												{
-													hashSet.Add(list2[num34]);
+													hashSet.Add(list2[num33]);
 												}
 											}
 										}
 										HashSet<int> hashSet2 = new HashSet<int>();
 										hashSet2.UnionWith(list3);
-										int num35 = vertices.Length + hashSet.Count + 1;
-										int num36 = vertices.Length + hashSet2.Count + 1;
-										Vector3[] array8 = new Vector3[num35];
-										Vector3[] array9 = new Vector3[num36];
+										int num34 = vertices.Length + hashSet.Count + 1;
+										int num35 = vertices.Length + hashSet2.Count + 1;
+										int num36 = 0;
+										Vector3[] array8 = new Vector3[num34];
+										Vector3[] array9 = new Vector3[num35];
 										vertices.CopyTo(array8, 0);
 										vertices.CopyTo(array9, 0);
 										array8[num8] = vector;
@@ -1505,29 +1511,29 @@ namespace U_r_g_utils
 										float num37 = (float)((hashSet.Count <= 0) ? 0 : (360 / hashSet.Count));
 										float x = 0f;
 										float y = 0f;
-										Vector2[] array11 = new Vector2[num35];
-										Vector2[] array12 = new Vector2[num36];
+										Vector2[] array11 = new Vector2[num34];
+										Vector2[] array12 = new Vector2[num35];
 										uv.CopyTo(array11, 0);
 										uv.CopyTo(array12, 0);
 										List<int> list6 = new List<int>();
 										array11[num8] = new Vector2(0.5f, 0.5f);
 										array12[num8] = new Vector2(0.5f, 0.5f);
-										Vector4[] array13 = new Vector4[num35];
-										Vector4[] array14 = new Vector4[num36];
+										Vector4[] array13 = new Vector4[num34];
+										Vector4[] array14 = new Vector4[num35];
 										tangents.CopyTo(array13, 0);
 										tangents.CopyTo(array14, 0);
 										array13[num8] = new Vector4(1f, 1f, 1f, 1f);
 										array14[num8] = new Vector4(1f, 1f, 1f, 1f);
-										BoneWeight[] array15 = new BoneWeight[num35];
-										BoneWeight[] array16 = new BoneWeight[num36];
+										BoneWeight[] array15 = new BoneWeight[num34];
+										BoneWeight[] array16 = new BoneWeight[num35];
 										boneWeights.CopyTo(array15, 0);
 										boneWeights.CopyTo(array16, 0);
 										array15[num8].boneIndex0 = num4;
 										array15[num8].weight0 = 1f;
 										array16[num8].boneIndex0 = num4;
 										array16[num8].weight0 = 1f;
-										Vector3[] array17 = new Vector3[num35];
-										Vector3[] array18 = new Vector3[num36];
+										Vector3[] array17 = new Vector3[num34];
+										Vector3[] array18 = new Vector3[num35];
 										normals.CopyTo(array17, 0);
 										normals.CopyTo(array18, 0);
 										Vector3 normalized = (clsdismemberator.vargamoriginalbonepositions[i] - clsdismemberator.vargamoriginalbonepositions[num4]).normalized;
@@ -1536,225 +1542,225 @@ namespace U_r_g_utils
 										array18[num8] = normalized2;
 										int[] array19 = new int[0];
 										int[] array20 = new int[0];
-										int num38 = 0;
+										num36 = 0;
 										float[] array21 = new float[hashSet.Count];
 										Vector2 vector5;
 										Vector2 vector6;
-										foreach (int num39 in hashSet)
+										foreach (int num38 in hashSet)
 										{
-											if (num39 == num8)
+											if (num38 == num8)
 											{
-												array21[num38] = 0f;
-												list6.Insert(0, num38);
-												num38++;
+												array21[num36] = 0f;
+												list6.Insert(0, num36);
+												num36++;
 											}
 											else
 											{
-												Vector3 position2 = vertices[num39];
+												Vector3 position2 = vertices[num38];
 												Vector3 vector4 = gameObject3.transform.InverseTransformPoint(position2) - Vector3.Dot(gameObject3.transform.InverseTransformPoint(position2), gameObject3.transform.InverseTransformDirection(vector2.normalized)) * gameObject3.transform.InverseTransformDirection(vector2.normalized);
 												vector5.x = -vector3.x;
 												vector5.y = -vector3.y;
 												vector6.x = -vector4.x;
 												vector6.y = -vector4.y;
-												float num40 = Mathf.Atan2(vector5.y, vector5.x);
-												float num41 = Mathf.Atan2(vector6.y, vector6.x);
-												float num42 = num40 - num41;
-												float num43 = num42 * 180f / 3.14159274f;
-												float num44 = (num43 <= 0f) ? (-num43) : (360f - num43);
-												array21[num38] = num44;
+												float num39 = Mathf.Atan2(vector5.y, vector5.x);
+												float num40 = Mathf.Atan2(vector6.y, vector6.x);
+												float num41 = num39 - num40;
+												float num42 = num41 * 180f / 3.14159274f;
+												float num43 = (num42 <= 0f) ? (-num42) : (360f - num42);
+												array21[num36] = num43;
 												int count = list6.Count;
-												int num45 = -1;
-												for (int num46 = 0; num46 < count; num46++)
+												int num44 = -1;
+												for (int num45 = 0; num45 < count; num45++)
 												{
-													if (num44 < array21[list6[num46]])
+													if (num43 < array21[list6[num45]])
 													{
-														num45 = num46;
+														num44 = num45;
 														break;
 													}
 												}
-												if (num45 > -1)
+												if (num44 > -1)
 												{
-													list6.Insert(num45, num38);
+													list6.Insert(num44, num36);
 												}
 												else
 												{
-													list6.Add(num38);
+													list6.Add(num36);
 												}
-												num38++;
+												num36++;
 											}
 										}
 										array19 = new int[hashSet.Count];
 										array20 = new int[hashSet.Count];
 										hashSet.CopyTo(array20, 0);
-										for (int num47 = 0; num47 < array19.Length; num47++)
+										for (int num46 = 0; num46 < array19.Length; num46++)
 										{
-											array19[num47] = array20[list6[num47]];
+											array19[num46] = array20[list6[num46]];
 										}
 										hashSet.Clear();
 										hashSet.UnionWith(array19);
-										int num48 = num8 + 1;
-										int num49 = 0;
-										num38 = 0;
-										foreach (int num50 in hashSet)
+										int num47 = num8 + 1;
+										int num48 = 0;
+										num36 = 0;
+										foreach (int num49 in hashSet)
 										{
-											if (num50 == num8)
+											if (num49 == num8)
 											{
-												num49 = num50;
+												num48 = num49;
 											}
 											else
 											{
-												array8[num48] = vertices[num50];
-												for (int num51 = 0; num51 < list2.Count; num51++)
+												array8[num47] = vertices[num49];
+												for (int num50 = 0; num50 < list2.Count; num50++)
 												{
-													if (list2[num51] == num50)
+													if (list2[num50] == num49)
 													{
-														list2[num51] = num48;
+														list2[num50] = num47;
 													}
 												}
-												float num44 = (float)num38 * num37;
-												if (num44 <= 90f)
+												float num43 = (float)num36 * num37;
+												if (num43 <= 90f)
 												{
-													x = num44 / 90f;
+													x = num43 / 90f;
 													y = 0f;
 												}
-												else if (num44 <= 180f)
+												else if (num43 <= 180f)
 												{
 													x = 1f;
-													y = (num44 - 90f) / 90f;
+													y = (num43 - 90f) / 90f;
 												}
-												else if (num44 <= 270f)
+												else if (num43 <= 270f)
 												{
-													x = (270f - num44) / 90f;
+													x = (270f - num43) / 90f;
 													y = 1f;
 												}
-												else if (num44 <= 360f)
+												else if (num43 <= 360f)
 												{
 													x = 0f;
-													y = (360f - num44) / 90f;
+													y = (360f - num43) / 90f;
 												}
-												if (num49 != num8 && vertices[num50] == vertices[num49])
+												if (num48 != num8 && vertices[num49] == vertices[num48])
 												{
-													array11[num48] = array11[num48 - 1];
+													array11[num47] = array11[num47 - 1];
 												}
 												else
 												{
-													array11[num48] = new Vector2(x, y);
+													array11[num47] = new Vector2(x, y);
 												}
-												array15[num48] = boneWeights[num50];
-												array17[num48] = normalized;
-												num49 = num50;
-												num48++;
-												num38++;
+												array15[num47] = boneWeights[num49];
+												array17[num47] = normalized;
+												num48 = num49;
+												num47++;
+												num36++;
 											}
 										}
-										num38 = 0;
+										num36 = 0;
 										list6.Clear();
 										array21 = new float[hashSet2.Count];
-										foreach (int num52 in hashSet2)
+										foreach (int num51 in hashSet2)
 										{
-											if (num52 == num8)
+											if (num51 == num8)
 											{
-												array21[num38] = 0f;
-												list6.Insert(0, num38);
-												num38++;
+												array21[num36] = 0f;
+												list6.Insert(0, num36);
+												num36++;
 											}
 											else
 											{
-												Vector3 position2 = vertices[num52];
+												Vector3 position2 = vertices[num51];
 												Vector3 vector4 = gameObject3.transform.InverseTransformPoint(position2) - Vector3.Dot(gameObject3.transform.InverseTransformPoint(position2), gameObject3.transform.InverseTransformDirection(vector2.normalized)) * gameObject3.transform.InverseTransformDirection(vector2.normalized);
 												vector5.x = -vector3.x;
 												vector5.y = -vector3.y;
 												vector6.x = -vector4.x;
 												vector6.y = -vector4.y;
-												float num40 = Mathf.Atan2(vector5.y, vector5.x);
-												float num41 = Mathf.Atan2(vector6.y, vector6.x);
-												float num42 = num40 - num41;
-												float num43 = num42 * 180f / 3.14159274f;
-												float num44 = (num43 <= 0f) ? (-num43) : (360f - num43);
-												array21[num38] = num44;
+												float num39 = Mathf.Atan2(vector5.y, vector5.x);
+												float num40 = Mathf.Atan2(vector6.y, vector6.x);
+												float num41 = num39 - num40;
+												float num42 = num41 * 180f / 3.14159274f;
+												float num43 = (num42 <= 0f) ? (-num42) : (360f - num42);
+												array21[num36] = num43;
 												int count = list6.Count;
-												int num45 = -1;
-												for (int num53 = 0; num53 < count; num53++)
+												int num44 = -1;
+												for (int num52 = 0; num52 < count; num52++)
 												{
-													if (num44 < array21[list6[num53]])
+													if (num43 < array21[list6[num52]])
 													{
-														num45 = num53;
+														num44 = num52;
 														break;
 													}
 												}
-												if (num45 > -1)
+												if (num44 > -1)
 												{
-													list6.Insert(num45, num38);
+													list6.Insert(num44, num36);
 												}
 												else
 												{
-													list6.Add(num38);
+													list6.Add(num36);
 												}
-												num38++;
+												num36++;
 											}
 										}
 										array19 = new int[hashSet2.Count];
 										array20 = new int[hashSet2.Count];
 										hashSet2.CopyTo(array20, 0);
-										for (int num54 = 0; num54 < array19.Length; num54++)
+										for (int num53 = 0; num53 < array19.Length; num53++)
 										{
-											array19[num54] = array20[list6[num54]];
+											array19[num53] = array20[list6[num53]];
 										}
 										hashSet2.Clear();
 										hashSet2.UnionWith(array19);
-										num48 = num8 + 1;
-										num49 = 0;
-										num38 = 0;
-										foreach (int num55 in hashSet2)
+										num47 = num8 + 1;
+										num48 = 0;
+										num36 = 0;
+										foreach (int num54 in hashSet2)
 										{
-											if (num55 == num8)
+											if (num54 == num8)
 											{
-												num49 = num55;
+												num48 = num54;
 											}
 											else
 											{
-												array9[num48] = vertices[num55];
-												for (int num56 = 0; num56 < list3.Count; num56++)
+												array9[num47] = vertices[num54];
+												for (int num55 = 0; num55 < list3.Count; num55++)
 												{
-													if (list3[num56] == num55)
+													if (list3[num55] == num54)
 													{
-														list3[num56] = num48;
+														list3[num55] = num47;
 													}
 												}
-												float num44 = (float)num38 * num37;
-												if (num44 <= 90f)
+												float num43 = (float)num36 * num37;
+												if (num43 <= 90f)
 												{
-													x = num44 / 90f;
+													x = num43 / 90f;
 													y = 0f;
 												}
-												else if (num44 <= 180f)
+												else if (num43 <= 180f)
 												{
 													x = 1f;
-													y = (num44 - 90f) / 90f;
+													y = (num43 - 90f) / 90f;
 												}
-												else if (num44 <= 270f)
+												else if (num43 <= 270f)
 												{
-													x = (270f - num44) / 90f;
+													x = (270f - num43) / 90f;
 													y = 1f;
 												}
-												else if (num44 <= 360f)
+												else if (num43 <= 360f)
 												{
 													x = 0f;
-													y = (360f - num44) / 90f;
+													y = (360f - num43) / 90f;
 												}
-												if (num49 != num8 && vertices[num55] == vertices[num49])
+												if (num48 != num8 && vertices[num54] == vertices[num48])
 												{
-													array12[num48] = array12[num48 - 1];
+													array12[num47] = array12[num47 - 1];
 												}
 												else
 												{
-													array12[num48] = new Vector2(x, y);
+													array12[num47] = new Vector2(x, y);
 												}
-												array16[num48] = boneWeights[num55];
-												array18[num48] = normalized2;
-												num49 = num55;
-												num48++;
-												num38++;
+												array16[num47] = boneWeights[num54];
+												array18[num47] = normalized2;
+												num48 = num54;
+												num47++;
+												num36++;
 											}
 										}
 										mesh.vertices = array8;
@@ -1781,17 +1787,17 @@ namespace U_r_g_utils
 											mesh.subMeshCount = num5 + 1;
 											mesh2.subMeshCount = num5 + 1;
 										}
-										int num57 = 0;
-										for (int num58 = 0; num58 < num5; num58++)
+										int num56 = 0;
+										for (int num57 = 0; num57 < num5; num57++)
 										{
-											int num59 = sharedMesh.GetTriangles(num58).Length;
-											int[] array22 = new int[num59];
-											for (int num60 = 0; num60 < num59; num60++)
+											int num58 = sharedMesh.GetTriangles(num57).Length;
+											int[] array22 = new int[num58];
+											for (int num59 = 0; num59 < num58; num59++)
 											{
-												array22[num60] = array4[num60 + num57];
+												array22[num59] = array4[num59 + num56];
 											}
-											mesh.SetTriangles(array22, num58);
-											num57 = num59;
+											mesh.SetTriangles(array22, num57);
+											num56 = num58;
 										}
 										mesh.SetTriangles(list2.ToArray(), num5);
 										mesh2.SetTriangles(list3.ToArray(), num5);
@@ -1818,17 +1824,17 @@ namespace U_r_g_utils
 										int subMeshCount = sharedMesh.subMeshCount;
 										mesh.subMeshCount = subMeshCount;
 										mesh2.subMeshCount = subMeshCount;
-										int num61 = 0;
-										for (int num62 = 0; num62 < subMeshCount; num62++)
+										int num60 = 0;
+										for (int num61 = 0; num61 < subMeshCount; num61++)
 										{
-											int num63 = sharedMesh.GetTriangles(num62).Length;
-											int[] array23 = new int[num63];
-											for (int num64 = 0; num64 < num63; num64++)
+											int num62 = sharedMesh.GetTriangles(num61).Length;
+											int[] array23 = new int[num62];
+											for (int num63 = 0; num63 < num62; num63++)
 											{
-												array23[num64] = array4[num64 + num61];
+												array23[num63] = array4[num63 + num60];
 											}
-											mesh.SetTriangles(array23, num62);
-											num61 = num63;
+											mesh.SetTriangles(array23, num61);
+											num60 = num62;
 										}
 									}
 									Transform[] array24 = new Transform[clsdismemberator.vargamskinnedmeshrenderer.bones.Length];
@@ -1837,20 +1843,20 @@ namespace U_r_g_utils
 									sharedMesh.bindposes.CopyTo(array25, 0);
 									Transform[] bones = clsdismemberator.vargamskinnedmeshrenderer.bones;
 									Matrix4x4[] bindposes = sharedMesh.bindposes;
-									for (int num65 = 0; num65 < array24.Length; num65++)
+									for (int num64 = 0; num64 < array24.Length; num64++)
 									{
-										array24[num65] = gameObject2.transform;
-										array25[num65] = array25[num4];
+										array24[num64] = gameObject2.transform;
+										array25[num64] = array25[num4];
 									}
-									for (int num66 = 0; num66 < array6.Length; num66++)
+									for (int num65 = 0; num65 < array6.Length; num65++)
 									{
-										int num67 = clsdismemberator.vargamboneindexes.IndexOf(array6[num66]);
-										if (num67 != -1)
+										int num66 = clsdismemberator.vargamboneindexes.IndexOf(array6[num65]);
+										if (num66 != -1)
 										{
-											array24[num67] = array6[num66];
-											array25[num67] = bindposes[num67];
-											bones[num67] = gameObject.transform;
-											bindposes[num67] = bindposes[num4];
+											array24[num66] = array6[num65];
+											array25[num66] = bindposes[num66];
+											bones[num66] = gameObject.transform;
+											bindposes[num66] = bindposes[num4];
 										}
 									}
 									skinnedMeshRenderer.bones = array24;
@@ -1862,9 +1868,9 @@ namespace U_r_g_utils
 									if (varpcinematiccut)
 									{
 										Rigidbody[] componentsInChildren = gameObject2.GetComponentsInChildren<Rigidbody>();
-										for (int num68 = 0; num68 < componentsInChildren.Length; num68++)
+										for (int num67 = 0; num67 < componentsInChildren.Length; num67++)
 										{
-											componentsInChildren[num68].isKinematic = false;
+											componentsInChildren[num67].isKinematic = false;
 										}
 									}
 								}
@@ -1872,7 +1878,7 @@ namespace U_r_g_utils
 						}
 					}
 				}
-				IL_23B9:;
+				IL_23BB:;
 			}
 			return true;
 		}

@@ -4,6 +4,7 @@ using TheForest.Items.Craft;
 using TheForest.Items.Craft.Interfaces;
 using TheForest.Items.Inventory;
 using TheForest.Items.World;
+using TheForest.UI.Interfaces;
 using TheForest.Utils;
 using UniLinq;
 using UnityEngine;
@@ -11,7 +12,7 @@ using UnityEngine;
 namespace TheForest.UI
 {
 	
-	public class QuickSelectCombine : MonoBehaviour, ICraftOverride
+	public class QuickSelectCombine : MonoBehaviour, ICraftOverride, IScreenSizeRatio
 	{
 		
 		private void Update()
@@ -123,7 +124,7 @@ namespace TheForest.UI
 				base.gameObject.GetComponent<Renderer>().sharedMaterial = this._selectedMaterial;
 				if (!this._isCraft)
 				{
-					Scene.HudGui.ShowQuickSelectInfo(LocalPlayer.InventoryCam.ScreenToViewportPoint(TheForest.Utils.Input.mousePosition));
+					Scene.HudGui.ShowQuickSelectInfoDelayed(base.GetComponent<Renderer>());
 				}
 				else
 				{
@@ -176,6 +177,7 @@ namespace TheForest.UI
 					lastActiveView.gameObject.SetActive(false);
 					this._hiddenInventoryItemView[slotNum] = true;
 					this._combiningItemId = 0;
+					Scene.HudGui.ShowQuickSelectCombineInfo();
 				}
 				LocalPlayer.Sfx.PlayTwinkle();
 			}
@@ -194,51 +196,27 @@ namespace TheForest.UI
 		
 		private void CombineUpdate()
 		{
-			int targetSlot = this.GetTargetSlot();
-			for (int i = 0; i < this._cogs.Length; i++)
-			{
-				this._cogs[i].sharedMaterial = ((i != targetSlot) ? this._cogDefaultMaterial : this._cogSelectedMaterial);
-			}
 			if (TheForest.Utils.Input.GetButtonDown("AltFire"))
 			{
-				if (targetSlot >= 0)
-				{
-					this.SetItemAsQuickSlot(targetSlot);
-				}
-				else
-				{
-					LocalPlayer.Sfx.PlayWhoosh();
-					this.StopCombining();
-				}
+				LocalPlayer.Sfx.PlayWhoosh();
+				this.StopCombining();
 			}
-			bool flag = targetSlot >= 0;
-			if (Scene.HudGui._quickSelectInfoView._selectButton.activeSelf != flag)
+			if (TheForest.Utils.Input.GetButtonDown("ItemSlot1"))
 			{
-				Scene.HudGui._quickSelectInfoView._selectButton.SetActive(flag);
+				this.SetItemAsQuickSlot(0);
 			}
-			if (Scene.HudGui._quickSelectInfoView._exitButton.activeSelf == flag)
+			if (TheForest.Utils.Input.GetButtonDown("ItemSlot2"))
 			{
-				Scene.HudGui._quickSelectInfoView._exitButton.SetActive(!flag);
+				this.SetItemAsQuickSlot(1);
 			}
-		}
-
-		
-		private int GetTargetSlot()
-		{
-			int result = -1;
-			float num = float.MaxValue;
-			for (int i = 0; i < this._slots.Length; i++)
+			if (TheForest.Utils.Input.GetButtonDown("ItemSlot3"))
 			{
-				Vector3 vector = LocalPlayer.InventoryCam.WorldToScreenPoint(this._slots[i].position);
-				float num2 = Mathf.Abs(vector.x - TheForest.Utils.Input.mousePosition.x) / (float)Screen.width;
-				float num3 = Mathf.Abs(vector.y - TheForest.Utils.Input.mousePosition.y) / (float)Screen.height;
-				if (num2 < 0.05f && num3 < 0.05f && num2 + num3 < num)
-				{
-					num = num2 + num3;
-					result = i;
-				}
+				this.SetItemAsQuickSlot(2);
 			}
-			return result;
+			if (TheForest.Utils.Input.GetButtonDown("ItemSlot4"))
+			{
+				this.SetItemAsQuickSlot(3);
+			}
 		}
 
 		
@@ -266,7 +244,6 @@ namespace TheForest.UI
 			if (!this._isCombining)
 			{
 				LocalPlayer.Sfx.PlayWhoosh();
-				this._slotsGo.SetActive(true);
 				this._combiningItemId = this._crafting.Ingredients.First<ReceipeIngredient>()._itemID;
 				this._combiningItemProperties = this._crafting.GetPropertiesOf(this._combiningItemId);
 				this._crafting.Remove(this._combiningItemId, 1, null);
@@ -286,8 +263,7 @@ namespace TheForest.UI
 				this._isCombining = true;
 				this._hovered = false;
 				this._crafting.CheckForValidRecipe();
-				Scene.HudGui._quickSelectInfoView._root.SetActive(true);
-				Scene.HudGui._quickSelectInfoView._selectButton.SetActive(false);
+				Scene.HudGui.ShowQuickSelectCombineInfo();
 				this._startingCombine = true;
 				LocalPlayer.Inventory.QuickSelectGamepadSwitch = true;
 				LocalPlayer.Inventory.BlockTogglingInventory = true;
@@ -304,14 +280,13 @@ namespace TheForest.UI
 			else if (this._isCombining)
 			{
 				this._stopCombining = true;
-				this._slotsGo.SetActive(false);
 				if (this._combiningItemId > 0)
 				{
 					this._crafting.Add(this._combiningItemId, 1, this._combiningItemProperties);
 				}
 				this._crafting.Close();
 				this._crafting.CheckForValidRecipe();
-				Scene.HudGui._quickSelectInfoView._root.SetActive(false);
+				Scene.HudGui.HideQuickSelectCombineInfo();
 				LocalPlayer.Inventory.QuickSelectGamepadSwitch = false;
 				LocalPlayer.Inventory.BlockTogglingInventory = false;
 			}
@@ -334,6 +309,16 @@ namespace TheForest.UI
 			get
 			{
 				return this._acceptedTypes;
+			}
+		}
+
+		
+		
+		public float ScreenSizeRatio
+		{
+			get
+			{
+				return 0f;
 			}
 		}
 

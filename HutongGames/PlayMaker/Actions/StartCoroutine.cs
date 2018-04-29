@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Start a Coroutine in a Behaviour on a Game Object. See Unity StartCoroutine docs.")]
 	[ActionCategory(ActionCategory.ScriptControl)]
+	[Tooltip("Start a Coroutine in a Behaviour on a Game Object. See Unity StartCoroutine docs.")]
 	public class StartCoroutine : FsmStateAction
 	{
 		
@@ -35,7 +35,7 @@ namespace HutongGames.PlayMaker.Actions
 			this.component = (ownerDefaultTarget.GetComponent(this.behaviour.Value) as MonoBehaviour);
 			if (this.component == null)
 			{
-				this.LogWarning("StartCoroutine: " + ownerDefaultTarget.name + " missing behaviour: " + this.behaviour.Value);
+				base.LogWarning("StartCoroutine: " + ownerDefaultTarget.name + " missing behaviour: " + this.behaviour.Value);
 				return;
 			}
 			if (!ownerDefaultTarget.activeSelf)
@@ -101,20 +101,20 @@ namespace HutongGames.PlayMaker.Actions
 		}
 
 		
-		[Tooltip("The game object that owns the Behaviour.")]
 		[RequiredField]
+		[Tooltip("The game object that owns the Behaviour.")]
 		public FsmOwnerDefault gameObject;
 
 		
+		[RequiredField]
 		[UIHint(UIHint.Behaviour)]
 		[Tooltip("The Behaviour that contains the method to start as a coroutine.")]
-		[RequiredField]
 		public FsmString behaviour;
 
 		
 		[RequiredField]
-		[Tooltip("The name of the coroutine method.")]
 		[UIHint(UIHint.Coroutine)]
+		[Tooltip("The name of the coroutine method.")]
 		public FunctionCall functionCall;
 
 		

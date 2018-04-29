@@ -4,8 +4,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Detect collisions between the Owner of this FSM and other Game Objects that have RigidBody components.\nNOTE: The system events, COLLISION ENTER, COLLISION STAY, and COLLISION EXIT are sent automatically on collisions with any object. Use this action to filter collisions by Tag.")]
 	[ActionCategory(ActionCategory.Physics)]
+	[Tooltip("Detect collisions between the Owner of this FSM and other Game Objects that have RigidBody components.\nNOTE: The system events, COLLISION ENTER, COLLISION STAY, and COLLISION EXIT are sent automatically on collisions with any object. Use this action to filter collisions by Tag.")]
 	public class CollisionEvent : FsmStateAction
 	{
 		
@@ -21,17 +21,24 @@ namespace HutongGames.PlayMaker.Actions
 		
 		public override void Awake()
 		{
-			switch (this.collision)
+			CollisionType collisionType = this.collision;
+			if (collisionType != CollisionType.OnCollisionEnter)
 			{
-			case CollisionType.OnCollisionEnter:
+				if (collisionType != CollisionType.OnCollisionStay)
+				{
+					if (collisionType == CollisionType.OnCollisionExit)
+					{
+						base.Fsm.HandleCollisionExit = true;
+					}
+				}
+				else
+				{
+					base.Fsm.HandleCollisionStay = true;
+				}
+			}
+			else
+			{
 				base.Fsm.HandleCollisionEnter = true;
-				break;
-			case CollisionType.OnCollisionStay:
-				base.Fsm.HandleCollisionStay = true;
-				break;
-			case CollisionType.OnCollisionExit:
-				base.Fsm.HandleCollisionExit = true;
-				break;
 			}
 		}
 
@@ -106,8 +113,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmEvent sendEvent;
 
 		
-		[Tooltip("Store the GameObject that collided with the Owner of this FSM.")]
 		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the GameObject that collided with the Owner of this FSM.")]
 		public FsmGameObject storeCollider;
 
 		

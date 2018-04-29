@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Bolt;
-using TheForest.Buildings.Creation;
 using TheForest.Utils;
 using UnityEngine;
 
@@ -19,7 +18,10 @@ public class CoopPlayerRaft : EntityBehaviour<IPlayerState>
 	{
 		this._proxyTransform = new GameObject("ProxyDynamicTransform").transform;
 		base.state.RaftTransform.SetTransforms(this._proxyTransform);
-		base.state.AddCallback("RaftEntity", new PropertyCallbackSimple(this.OnDynamicEntityChange));
+		if (base.entity && base.entity.isAttached && !base.entity.IsOwner())
+		{
+			base.state.AddCallback("RaftEntity", new PropertyCallbackSimple(this.OnDynamicEntityChange));
+		}
 		base.enabled = true;
 	}
 
@@ -30,6 +32,7 @@ public class CoopPlayerRaft : EntityBehaviour<IPlayerState>
 		this._hasDynamicEntity = this._dynamicEntity;
 		if (this._hasDynamicEntity)
 		{
+			this.delayProxyTimer = Time.time + 1f;
 			this._dynamicTransform = this.GetDynamicTransform(this._dynamicEntity);
 		}
 		else
@@ -53,15 +56,17 @@ public class CoopPlayerRaft : EntityBehaviour<IPlayerState>
 	
 	private void OnTriggerEnter(Collider other)
 	{
-		if (BoltNetwork.isRunning && this.entity.IsOwner() && other.gameObject.CompareTag("RaftMPTrigger"))
+		if (BoltNetwork.isRunning && base.entity.IsOwner() && other.gameObject.CompareTag("RaftMPTrigger"))
 		{
 			if (!this._dynamicMpTriggers.Contains(other))
 			{
 				this._dynamicMpTriggers.Add(other);
 			}
+			this.delayProxyTimer = Time.time + 1f;
+			base.state.RaftEntity = null;
 			base.state.RaftEntity = other.gameObject.GetComponentInParent<BoltEntity>();
 		}
-		if (BoltNetwork.isRunning && !this.entity.IsOwner() && base.gameObject.CompareTag("PlayerNet") && other.gameObject.CompareTag("RaftMPTrigger"))
+		if (BoltNetwork.isRunning && !base.entity.IsOwner() && base.gameObject.CompareTag("PlayerNet") && other.gameObject.CompareTag("RaftMPTrigger"))
 		{
 			Collider component = base.gameObject.GetComponent<CapsuleCollider>();
 			if (component && component.enabled && component.gameObject.activeSelf)
@@ -81,9 +86,9 @@ public class CoopPlayerRaft : EntityBehaviour<IPlayerState>
 	
 	private void LateUpdate()
 	{
-		if (this.entity.isAttached)
+		if (base.entity.isAttached)
 		{
-			if (this.entity.isOwner)
+			if (base.entity.isOwner)
 			{
 				if (this._dynamicMpTriggers.Count > 0)
 				{
@@ -92,6 +97,7 @@ public class CoopPlayerRaft : EntityBehaviour<IPlayerState>
 						if (this._dynamicMpTriggers[i] == null || !this._dynamicMpTriggers[i].bounds.Intersects(LocalPlayer.FpCharacter.capsule.bounds))
 						{
 							this._dynamicMpTriggers.RemoveAt(i);
+							this._hasDynamicEntity = false;
 						}
 					}
 					if (this._dynamicMpTriggers.Count == 0)
@@ -113,7 +119,7 @@ public class CoopPlayerRaft : EntityBehaviour<IPlayerState>
 					this._proxyTransform.position = this._dynamicTransform.InverseTransformPoint(base.transform.position);
 				}
 			}
-			else if (this._hasDynamicEntity && this._dynamicTransform)
+			else if (this._hasDynamicEntity && this._dynamicTransform && Time.time > this.delayProxyTimer)
 			{
 				base.transform.position = this._dynamicTransform.TransformPoint(this._proxyTransform.position);
 			}
@@ -123,26 +129,24 @@ public class CoopPlayerRaft : EntityBehaviour<IPlayerState>
 	
 	private Transform GetDynamicTransform(BoltEntity entity)
 	{
-		DynamicBuilding component = entity.GetComponent<DynamicBuilding>();
-		if (component && component._parentOverride)
-		{
-			return component._parentOverride;
-		}
 		return entity.transform;
 	}
 
 	
-	private BoltEntity _dynamicEntity;
+	public BoltEntity _dynamicEntity;
 
 	
-	private Transform _dynamicTransform;
+	public Transform _dynamicTransform;
 
 	
-	private Transform _proxyTransform;
+	public Transform _proxyTransform;
 
 	
-	private bool _hasDynamicEntity;
+	public bool _hasDynamicEntity;
 
 	
-	private List<Collider> _dynamicMpTriggers = new List<Collider>();
+	public List<Collider> _dynamicMpTriggers = new List<Collider>();
+
+	
+	private float delayProxyTimer;
 }

@@ -20,8 +20,8 @@ public class LookAtTarget : MonoBehaviour
 			float magnitude = forward.magnitude;
 			if (magnitude > 0.001f)
 			{
-				Quaternion to = Quaternion.LookRotation(forward);
-				this.mTrans.rotation = Quaternion.Slerp(this.mTrans.rotation, to, Mathf.Clamp01(this.speed * Time.deltaTime));
+				Quaternion b = Quaternion.LookRotation(forward);
+				this.mTrans.rotation = Quaternion.Slerp(this.mTrans.rotation, b, Mathf.Clamp01(this.speed * Time.deltaTime));
 			}
 		}
 	}

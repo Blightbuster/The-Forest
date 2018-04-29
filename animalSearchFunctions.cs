@@ -100,24 +100,24 @@ public class animalSearchFunctions : MonoBehaviour
 	
 	public IEnumerator findCloseWater()
 	{
-		for (int i = 0; i < this.info.drinkMarkers.Count; i++)
-		{
-			Transform temp = this.info.drinkMarkers[i];
-			int randomIndex = UnityEngine.Random.Range(i, this.info.drinkMarkers.Count);
-			this.info.drinkMarkers[i] = this.info.drinkMarkers[randomIndex];
-			this.info.drinkMarkers[randomIndex] = temp;
-		}
-		this.currentDrinkMarker = null;
 		for (int j = 0; j < this.info.drinkMarkers.Count; j++)
 		{
-			float dist = Vector3.Distance(this.tr.position, this.info.drinkMarkers[j].position);
+			Transform value = this.info.drinkMarkers[j];
+			int index = UnityEngine.Random.Range(j, this.info.drinkMarkers.Count);
+			this.info.drinkMarkers[j] = this.info.drinkMarkers[index];
+			this.info.drinkMarkers[index] = value;
+		}
+		this.currentDrinkMarker = null;
+		for (int i = 0; i < this.info.drinkMarkers.Count; i++)
+		{
+			float dist = Vector3.Distance(this.tr.position, this.info.drinkMarkers[i].position);
 			if (dist < 120f)
 			{
-				Vector3 leadPos = this.info.drinkMarkers[j].forward * -30f;
-				leadPos = this.info.drinkMarkers[j].position + leadPos;
-				leadPos.y = Terrain.activeTerrain.SampleHeight(leadPos) + Terrain.activeTerrain.transform.position.y;
-				this.currentDrinkMarker = this.info.drinkMarkers[j];
-				this.updateCurrentWaypoint(leadPos);
+				Vector3 vector = this.info.drinkMarkers[i].forward * -30f;
+				vector = this.info.drinkMarkers[i].position + vector;
+				vector.y = Terrain.activeTerrain.SampleHeight(vector) + Terrain.activeTerrain.transform.position.y;
+				this.currentDrinkMarker = this.info.drinkMarkers[i];
+				this.updateCurrentWaypoint(vector);
 				this.setToWaypoint();
 				this.pmBase.SendEvent("doAction");
 			}
@@ -142,14 +142,14 @@ public class animalSearchFunctions : MonoBehaviour
 		this.layerMask = 4096;
 		Collider[] allBush = Physics.OverlapSphere(this.tr.position, 40f, this.layerMask);
 		Collider closestColl = null;
-		foreach (Collider coll in allBush)
+		foreach (Collider collider in allBush)
 		{
-			if (coll.CompareTag("SmallTree") && closestColl == null)
+			if (collider.CompareTag("SmallTree") && closestColl == null)
 			{
-				float dist = (coll.transform.position - this.tr.position).magnitude;
-				if (dist > 12f)
+				float magnitude = (collider.transform.position - this.tr.position).magnitude;
+				if (magnitude > 12f)
 				{
-					closestColl = coll;
+					closestColl = collider;
 				}
 			}
 		}
@@ -358,10 +358,10 @@ public class animalSearchFunctions : MonoBehaviour
 		Collider[] allTrees = Physics.OverlapSphere(this.tr.position, dist, layerMask);
 		for (int i = 0; i < allTrees.Length; i++)
 		{
-			Collider temp = allTrees[i];
-			int randomIndex = UnityEngine.Random.Range(i, allTrees.Length);
-			allTrees[i] = allTrees[randomIndex];
-			allTrees[randomIndex] = temp;
+			Collider collider = allTrees[i];
+			int num = UnityEngine.Random.Range(i, allTrees.Length);
+			allTrees[i] = allTrees[num];
+			allTrees[num] = collider;
 		}
 		float closestDist = 0f;
 		for (int j = 0; j < allTrees.Length; j++)
@@ -369,16 +369,16 @@ public class animalSearchFunctions : MonoBehaviour
 			closestDist = (allTrees[j].transform.position - this.tr.position).magnitude;
 			if (closestDist > 15f && closestDist < 35f)
 			{
-				climbable climbScript = allTrees[j].transform.GetComponent<climbable>();
-				if (climbScript)
+				climbable component = allTrees[j].transform.GetComponent<climbable>();
+				if (component)
 				{
-					Vector3 wpPos = new Vector3(allTrees[j].bounds.center.x, this.tr.position.y, allTrees[j].bounds.center.z);
-					if (this.WaypointIsReachable(wpPos))
+					Vector3 vector = new Vector3(allTrees[j].bounds.center.x, this.tr.position.y, allTrees[j].bounds.center.z);
+					if (this.WaypointIsReachable(vector))
 					{
-						this.updateCurrentWaypoint(wpPos);
+						this.updateCurrentWaypoint(vector);
 						this.pmBase.FsmVariables.GetFsmGameObject("treeGO").Value = this.currentWaypoint;
-						this.pmBase.FsmVariables.GetFsmVector3("treePos").Value = wpPos;
-						this.treeGirth = climbScript.climbDistance;
+						this.pmBase.FsmVariables.GetFsmVector3("treePos").Value = vector;
+						this.treeGirth = component.climbDistance;
 						this.nearestTree = this.currentWaypoint;
 						this.activeTreeGo = allTrees[j].gameObject;
 						base.StartCoroutine("validateCurrentTree", allTrees[j].gameObject);
@@ -427,15 +427,15 @@ public class animalSearchFunctions : MonoBehaviour
 		this.currentMarker = null;
 		if (this.info.beachMarkers.Count > 0)
 		{
-			this.info.beachMarkers.Sort((GameObject c1, GameObject c2) => (this.<>f__this.tr.position - c1.transform.position).sqrMagnitude.CompareTo((this.<>f__this.tr.position - c2.transform.position).sqrMagnitude));
+			this.info.beachMarkers.Sort((GameObject c1, GameObject c2) => (this.$this.tr.position - c1.transform.position).sqrMagnitude.CompareTo((this.$this.tr.position - c2.transform.position).sqrMagnitude));
 		}
 		this.currentMarker = this.info.beachMarkers[UnityEngine.Random.Range(0, 3)];
 		this.pmBase.FsmVariables.GetFsmGameObject("currentMarkerGo").Value = this.currentMarker;
 		Vector3 pos;
 		if (this.spawn.turtle)
 		{
-			Vector2 randomPoint = this.Circle2(UnityEngine.Random.Range(5f, 10f));
-			pos = new Vector3(this.currentMarker.transform.position.x + randomPoint.x, this.currentMarker.transform.position.y, this.currentMarker.transform.position.z + randomPoint.y);
+			Vector2 vector = this.Circle2(UnityEngine.Random.Range(5f, 10f));
+			pos = new Vector3(this.currentMarker.transform.position.x + vector.x, this.currentMarker.transform.position.y, this.currentMarker.transform.position.z + vector.y);
 		}
 		else
 		{
@@ -468,21 +468,21 @@ public class animalSearchFunctions : MonoBehaviour
 		this.currentMarker = null;
 		for (int i = 0; i < this.info.swimMarkers.Count; i++)
 		{
-			float dist = (this.tr.position - this.info.swimMarkers[i].transform.position).sqrMagnitude;
-			if (dist < closestDist)
+			float sqrMagnitude = (this.tr.position - this.info.swimMarkers[i].transform.position).sqrMagnitude;
+			if (sqrMagnitude < closestDist)
 			{
-				closestDist = dist;
+				closestDist = sqrMagnitude;
 				this.currentMarker = this.info.swimMarkers[i];
 			}
 		}
 		if (this.currentMarker)
 		{
-			Vector2 randomPoint = this.Circle2((float)UnityEngine.Random.Range(5, 20));
-			Vector3 newPos = new Vector3(this.currentMarker.transform.position.x + randomPoint.x, this.currentMarker.transform.position.y, this.currentMarker.transform.position.z + randomPoint.y);
-			if (this.WaypointIsReachable(newPos) || this.spawn.crocodile)
+			Vector2 vector = this.Circle2((float)UnityEngine.Random.Range(5, 20));
+			Vector3 vector2 = new Vector3(this.currentMarker.transform.position.x + vector.x, this.currentMarker.transform.position.y, this.currentMarker.transform.position.z + vector.y);
+			if (this.WaypointIsReachable(vector2) || this.spawn.crocodile)
 			{
 				this.pmBase.FsmVariables.GetFsmGameObject("currentMarkerGo").Value = this.currentMarker;
-				this.updateCurrentWaypoint(newPos);
+				this.updateCurrentWaypoint(vector2);
 				this.setToWaypoint();
 				this.ai.StartCoroutine("enableForceTarget", this.currentWaypoint);
 			}
@@ -506,12 +506,12 @@ public class animalSearchFunctions : MonoBehaviour
 		this.currentMarker = null;
 		while (closestDist > 100f)
 		{
-			int rand = UnityEngine.Random.Range(0, this.info.swimMarkers.Count);
-			float dist = (this.tr.position - this.info.swimMarkers[rand].transform.position).magnitude;
-			if (dist < 100f)
+			int index = UnityEngine.Random.Range(0, this.info.swimMarkers.Count);
+			float magnitude = (this.tr.position - this.info.swimMarkers[index].transform.position).magnitude;
+			if (magnitude < 100f)
 			{
-				closestDist = dist;
-				this.currentMarker = this.info.swimMarkers[rand];
+				closestDist = magnitude;
+				this.currentMarker = this.info.swimMarkers[index];
 			}
 		}
 		if (this.currentMarker && (this.WaypointIsReachable(this.currentMarker.transform.position) || this.spawn.crocodile))
@@ -549,15 +549,15 @@ public class animalSearchFunctions : MonoBehaviour
 		this.layerMask = 1 << this.layer;
 		for (int i = 0; i < 5; i++)
 		{
-			float attemptDistance = dist * (float)(5 - i) / 5f;
-			Vector2 randomPoint = this.Circle2(UnityEngine.Random.Range(attemptDistance - 5f, 10f + attemptDistance));
-			Vector3 pos = new Vector3(this.tr.position.x + randomPoint.x, this.tr.position.y, this.tr.position.z + randomPoint.y);
-			pos.y = Terrain.activeTerrain.SampleHeight(pos) + Terrain.activeTerrain.transform.position.y;
-			GraphNode node = this.rg.GetNearest(pos).node;
+			float num = dist * (float)(5 - i) / 5f;
+			Vector2 vector = this.Circle2(UnityEngine.Random.Range(num - 5f, 10f + num));
+			Vector3 vector2 = new Vector3(this.tr.position.x + vector.x, this.tr.position.y, this.tr.position.z + vector.y);
+			vector2.y = Terrain.activeTerrain.SampleHeight(vector2) + Terrain.activeTerrain.transform.position.y;
+			GraphNode node = this.rg.GetNearest(vector2).node;
 			if (this.WaypointIsReachable(node))
 			{
-				Vector3 newWaypoint = new Vector3((float)(node.position[0] / 1000), (float)(node.position[1] / 1000), (float)(node.position[2] / 1000));
-				this.updateCurrentWaypoint(newWaypoint);
+				Vector3 vect = new Vector3((float)(node.position[0] / 1000), (float)(node.position[1] / 1000), (float)(node.position[2] / 1000));
+				this.updateCurrentWaypoint(vect);
 				this.pmBase.SendEvent("doAction");
 				this.search = false;
 			}
@@ -584,17 +584,17 @@ public class animalSearchFunctions : MonoBehaviour
 			}
 			for (int i = 0; i < 5; i++)
 			{
-				Vector3 playerDir = this.tr.position - this.info.allPlayers[0].transform.position;
-				float attemptDistance = dist * (float)(5 - i) / 5f;
-				Vector3 endPoint = this.tr.position + playerDir.normalized * UnityEngine.Random.Range(attemptDistance - 10f, 10f + attemptDistance);
-				endPoint = new Vector3(endPoint.x + UnityEngine.Random.Range(-10f, 10f), endPoint.y, endPoint.z + UnityEngine.Random.Range(-10f, 10f));
+				Vector3 vector = this.tr.position - this.info.allPlayers[0].transform.position;
+				float num = dist * (float)(5 - i) / 5f;
+				Vector3 position = this.tr.position + vector.normalized * UnityEngine.Random.Range(num - 10f, 10f + num);
+				position = new Vector3(position.x + UnityEngine.Random.Range(-10f, 10f), position.y, position.z + UnityEngine.Random.Range(-10f, 10f));
 				this.layer = 26;
 				this.layerMask = 1 << this.layer;
-				GraphNode node = this.rg.GetNearest(endPoint).node;
+				GraphNode node = this.rg.GetNearest(position).node;
 				if (this.WaypointIsReachable(node))
 				{
-					Vector3 newWaypoint = new Vector3((float)(node.position[0] / 1000), (float)(node.position[1] / 1000), (float)(node.position[2] / 1000));
-					this.updateCurrentWaypoint(newWaypoint);
+					Vector3 vect = new Vector3((float)(node.position[0] / 1000), (float)(node.position[1] / 1000), (float)(node.position[2] / 1000));
+					this.updateCurrentWaypoint(vect);
 					this.setToWaypoint();
 					this.pmBase.SendEvent("doAction");
 					foundPath = true;
@@ -631,8 +631,8 @@ public class animalSearchFunctions : MonoBehaviour
 		GraphNode node = this.rg.GetNearest(endPoint).node;
 		if (this.WaypointIsReachable(node))
 		{
-			Vector3 newWaypoint = new Vector3((float)(node.position[0] / 1000), (float)(node.position[1] / 1000), (float)(node.position[2] / 1000));
-			this.updateCurrentWaypoint(newWaypoint);
+			Vector3 vect = new Vector3((float)(node.position[0] / 1000), (float)(node.position[1] / 1000), (float)(node.position[2] / 1000));
+			this.updateCurrentWaypoint(vect);
 			this.setToWaypoint();
 			this.pmBase.SendEvent("doAction");
 		}
@@ -861,9 +861,6 @@ public class animalSearchFunctions : MonoBehaviour
 	}
 
 	
-	private const int MaxPathingAttempts = 5;
-
-	
 	public GameObject currentWaypoint;
 
 	
@@ -943,4 +940,7 @@ public class animalSearchFunctions : MonoBehaviour
 
 	
 	private RecastGraph rg;
+
+	
+	private const int MaxPathingAttempts = 5;
 }

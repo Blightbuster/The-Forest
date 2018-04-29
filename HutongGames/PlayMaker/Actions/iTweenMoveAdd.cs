@@ -5,8 +5,8 @@ using UnityEngine;
 namespace HutongGames.PlayMaker.Actions
 {
 	
-	[Tooltip("Translates a GameObject's position over time.")]
 	[ActionCategory("iTween")]
+	[Tooltip("Translates a GameObject's position over time.")]
 	public class iTweenMoveAdd : iTweenFsmAction
 	{
 		
@@ -110,8 +110,8 @@ namespace HutongGames.PlayMaker.Actions
 		public FsmString id;
 
 		
-		[Tooltip("A vector that will be added to a GameObjects position.")]
 		[RequiredField]
+		[Tooltip("A vector that will be added to a GameObjects position.")]
 		public FsmVector3 vector;
 
 		
