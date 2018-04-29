@@ -1,0 +1,46 @@
+﻿using System;
+
+namespace HutongGames.PlayMaker.Actions
+{
+	
+	[Tooltip("Get Vector3 Length.")]
+	[ActionCategory(ActionCategory.Vector3)]
+	public class GetVectorLength : FsmStateAction
+	{
+		
+		public override void Reset()
+		{
+			this.vector3 = null;
+			this.storeLength = null;
+		}
+
+		
+		public override void OnEnter()
+		{
+			this.DoVectorLength();
+			base.Finish();
+		}
+
+		
+		private void DoVectorLength()
+		{
+			if (this.vector3 == null)
+			{
+				return;
+			}
+			if (this.storeLength == null)
+			{
+				return;
+			}
+			this.storeLength.Value = this.vector3.Value.magnitude;
+		}
+
+		
+		public FsmVector3 vector3;
+
+		
+		[RequiredField]
+		[UIHint(UIHint.Variable)]
+		public FsmFloat storeLength;
+	}
+}

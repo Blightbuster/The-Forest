@@ -1,0 +1,56 @@
+﻿using System;
+using TheForest.Utils;
+
+namespace HutongGames.PlayMaker.Actions
+{
+	
+	[Tooltip("Gets the pressed state of the specified Button and stores it in a Bool Variable. See Unity Input Manager docs.")]
+	[ActionCategory(ActionCategory.Input)]
+	public class GetButton : FsmStateAction
+	{
+		
+		public override void Reset()
+		{
+			this.buttonName = "Fire1";
+			this.storeResult = null;
+			this.everyFrame = true;
+		}
+
+		
+		public override void OnEnter()
+		{
+			this.DoGetButton();
+			if (!this.everyFrame)
+			{
+				base.Finish();
+			}
+		}
+
+		
+		public override void OnUpdate()
+		{
+			this.DoGetButton();
+		}
+
+		
+		private void DoGetButton()
+		{
+			this.storeResult.Value = Input.GetButton(this.buttonName.Value);
+		}
+
+		
+		[Tooltip("The name of the button. Set in the Unity Input Manager.")]
+		[RequiredField]
+		public FsmString buttonName;
+
+		
+		[RequiredField]
+		[UIHint(UIHint.Variable)]
+		[Tooltip("Store the result in a bool variable.")]
+		public FsmBool storeResult;
+
+		
+		[Tooltip("Repeat every frame.")]
+		public bool everyFrame;
+	}
+}

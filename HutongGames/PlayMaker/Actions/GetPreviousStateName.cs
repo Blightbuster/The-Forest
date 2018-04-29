@@ -1,0 +1,27 @@
+﻿using System;
+
+namespace HutongGames.PlayMaker.Actions
+{
+	
+	[Tooltip("Gets the name of the previously active state and stores it in a String Variable.")]
+	[ActionCategory(ActionCategory.StateMachine)]
+	public class GetPreviousStateName : FsmStateAction
+	{
+		
+		public override void Reset()
+		{
+			this.storeName = null;
+		}
+
+		
+		public override void OnEnter()
+		{
+			this.storeName.Value = ((base.Fsm.PreviousActiveState != null) ? base.Fsm.PreviousActiveState.Name : null);
+			base.Finish();
+		}
+
+		
+		[UIHint(UIHint.Variable)]
+		public FsmString storeName;
+	}
+}
