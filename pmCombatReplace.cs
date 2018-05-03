@@ -1381,7 +1381,6 @@ public class pmCombatReplace : MonoBehaviour
 				this.animator.SetBool("ritualBOOL", false);
 				this.setup.pmCombat.SendEvent("toReset");
 				this.setup.pmSearchScript.toResetSearchEvent();
-				Debug.Log("resetting red player");
 				yield break;
 			}
 			if (this.setup.ai.mainPlayerDist < 7f || this.fsmFearOverrideBool.Value)
@@ -1553,7 +1552,7 @@ public class pmCombatReplace : MonoBehaviour
 			this.setup.followerFunctions.sendTreeStalkEvent();
 		}
 		this.ai.StartCoroutine("toRun");
-		timer = Time.time + 9f;
+		timer = Time.time + 6f;
 		if (this.fsmTreeGo.Value)
 		{
 			Collider component = this.fsmTreeGo.Value.GetComponent<Collider>();
@@ -1566,12 +1565,12 @@ public class pmCombatReplace : MonoBehaviour
 		{
 			if (Time.time > timer || this.fsmTreeGo.Value == null)
 			{
-				if (!this.ai.startedRun)
-				{
-					this.ai.StartCoroutine("toRun");
-				}
 				this.setup.pmCombat.SendEvent("toReset");
 				yield break;
+			}
+			if (!this.ai.startedRun)
+			{
+				this.ai.StartCoroutine("toRun");
 			}
 			yield return null;
 		}
@@ -1581,11 +1580,17 @@ public class pmCombatReplace : MonoBehaviour
 		}
 		Vector3 attachPos = this.search.findTreeAttachPos(treePos, 1.7f);
 		this.animator.SetBool("treeBOOL", true);
+		timer = Time.time + 5f;
 		while (this.setup.animControl.currLayerState1.tagHash != this.setup.hashs.onRockTag)
 		{
 			if (this.setup.animControl.currLayerState1.tagHash == this.setup.hashs.idleTag)
 			{
 				break;
+			}
+			if (Time.time > timer)
+			{
+				this.setup.pmCombat.SendEvent("toReset");
+				yield break;
 			}
 			this.doSmoothLookAt(treePos, 5f);
 			yield return null;
@@ -3089,7 +3094,6 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator goToBurnStructureRoutine()
 	{
-		Debug.Log(base.transform.parent.gameObject.name + " starting BURN structure");
 		float timer = Time.time;
 		this.ai.resetCombatParams();
 		this.ai.StartCoroutine("toStop");
@@ -3246,7 +3250,6 @@ public class pmCombatReplace : MonoBehaviour
 			}
 			catch
 			{
-				Debug.Log("fsmCurrentMemberGo was null");
 			}
 		}
 		this.animator.SetInteger("randInt1", UnityEngine.Random.Range(0, 3));

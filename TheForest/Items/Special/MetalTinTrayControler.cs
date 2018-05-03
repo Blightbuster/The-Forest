@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using TheForest.Items.Core;
+using TheForest.Items.Craft;
 using TheForest.Items.Inventory;
 using TheForest.Utils;
 
@@ -26,11 +27,12 @@ namespace TheForest.Items.Special
 		
 		public override bool ToggleSpecialCraft(bool enable)
 		{
+			CraftingCog craftingCog = LocalPlayer.Inventory._craftingCog;
 			if (enable)
 			{
-				if (LocalPlayer.Inventory._craftingCog.Storage == null || this._storage.Equals(LocalPlayer.Inventory._craftingCog.Storage))
+				if (craftingCog.Storage == null || this._storage.Equals(craftingCog.Storage))
 				{
-					LocalPlayer.Inventory._craftingCog.Storage = this._storage;
+					craftingCog.Storage = this._storage;
 					this._storage.Open();
 					return true;
 				}
@@ -38,15 +40,15 @@ namespace TheForest.Items.Special
 			}
 			else
 			{
-				if (LocalPlayer.Inventory.CurrentView == PlayerInventory.PlayerViews.Inventory && this._storage.Equals(LocalPlayer.Inventory._craftingCog.Storage) && !LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.RightHand, this._itemId) && !LocalPlayer.Inventory.HasInNextSlot(Item.EquipmentSlot.RightHand, this._itemId))
+				if (LocalPlayer.Inventory.CurrentView == PlayerInventory.PlayerViews.Inventory && this._storage.Equals(craftingCog.Storage) && !LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.RightHand, this._itemId) && !LocalPlayer.Inventory.HasInNextSlot(Item.EquipmentSlot.RightHand, this._itemId))
 				{
 					this.EmptyToInventory();
-					LocalPlayer.Inventory._craftingCog.Storage = null;
+					craftingCog.Storage = null;
 					return true;
 				}
-				if (this._storage.Equals(LocalPlayer.Inventory._craftingCog.Storage))
+				if (this._storage.Equals(craftingCog.Storage))
 				{
-					LocalPlayer.Inventory._craftingCog.Storage = null;
+					craftingCog.Storage = null;
 				}
 				return false;
 			}

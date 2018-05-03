@@ -4,6 +4,7 @@ using FMOD.Studio;
 using TheForest.Tools;
 using TheForest.UI;
 using TheForest.Utils;
+using UniLinq;
 using UnityEngine;
 using UnityEngine.VR;
 
@@ -75,6 +76,12 @@ public class PlayerPreferences : MonoBehaviour
 			{
 				this.Warning32Bits.SetActive(true);
 			}
+		}
+		string[] commandLineArgs = Environment.GetCommandLineArgs();
+		if (commandLineArgs.Contains("-language"))
+		{
+			int num = commandLineArgs.IndexOf("-language");
+			PlayerPrefs.SetString("Language", commandLineArgs[num + 1]);
 		}
 	}
 

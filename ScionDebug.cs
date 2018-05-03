@@ -11,7 +11,7 @@ public class ScionDebug
 		this.registeredTextures.Add(texture);
 		this.forceBilinear.Add(forceBilinear);
 		this.forcePoint.Add(forcePoint);
-		this.shouldRelease.Add(shouldRelease);
+		this.shouldRelease.Add(forcePoint);
 	}
 
 	

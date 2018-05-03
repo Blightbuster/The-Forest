@@ -285,13 +285,10 @@ public class UIPopupListIcon : UIPopupList
 			this.mHighlight.width = Mathf.RoundToInt(f);
 			this.mHighlight.height = Mathf.RoundToInt(f2);
 			bool flag = this.position == UIPopupList.Position.Above;
-			if (this.position == UIPopupList.Position.Auto)
+			UICamera uicamera = UICamera.FindCameraForLayer(this.mSelection.layer);
+			if (this.position == UIPopupList.Position.Auto && uicamera != null)
 			{
-				UICamera uicamera = UICamera.FindCameraForLayer(this.mSelection.layer);
-				if (uicamera != null)
-				{
-					flag = (uicamera.cachedCamera.WorldToViewportPoint(vector).y < 0.5f);
-				}
+				flag = (uicamera.cachedCamera.WorldToViewportPoint(vector).y < 0.5f);
 			}
 			if (this.isAnimated)
 			{
@@ -331,11 +328,18 @@ public class UIPopupListIcon : UIPopupList
 				vector2 = parent.InverseTransformPoint(vector2);
 				vector3 = parent.InverseTransformPoint(vector3);
 			}
-			Vector3 b = (!this.mPanel.hasClipping) ? this.mPanel.CalculateConstrainOffset(vector2, vector3) : Vector3.zero;
-			vector = transform.localPosition + b;
-			vector.x = Mathf.Round(vector.x);
-			vector.y = Mathf.Round(vector.y);
-			transform.localPosition = vector;
+			if (uicamera != null)
+			{
+				transform.position = base.transform.TransformPoint(new Vector3((float)(-(float)this.mBackground.width) + this.iconWidth / 2f, (float)(((!flag) ? -1 : 1) * (this.mBackground.height + 10)), 0f));
+			}
+			else
+			{
+				Vector3 b = (!this.mPanel.hasClipping) ? this.mPanel.CalculateConstrainOffset(vector2, vector3) : Vector3.zero;
+				vector = transform.localPosition + b;
+				vector.x = Mathf.Round(vector.x);
+				vector.y = Mathf.Round(vector.y);
+				transform.localPosition = vector;
+			}
 		}
 		else
 		{

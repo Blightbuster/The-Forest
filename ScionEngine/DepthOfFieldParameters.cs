@@ -7,19 +7,13 @@ namespace ScionEngine
 	public struct DepthOfFieldParameters
 	{
 		
-		public LayerMask depthOfFieldMask;
-
-		
 		public bool useMedianFilter;
 
 		
-		public DepthOfFieldSamples quality;
+		public DepthOfFieldQuality quality;
 
 		
 		public DepthFocusMode depthFocusMode;
-
-		
-		public bool visualizeFocalDistance;
 
 		
 		public float maxCoCRadius;
@@ -41,14 +35,5 @@ namespace ScionEngine
 
 		
 		public float focalRange;
-
-		
-		public bool useTemporal;
-
-		
-		public float temporalBlend;
-
-		
-		public int temporalSteps;
 	}
 }

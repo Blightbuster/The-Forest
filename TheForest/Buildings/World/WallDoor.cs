@@ -237,10 +237,13 @@ namespace TheForest.Buildings.World
 					this._alpha = 1f - this._alpha;
 				}
 				this._currentAction = activeDoorStatusAction;
-				this._targetRb.isKinematic = (this._currentAction == WallDoor.Actions.Closing);
-				if (this._targetRb.isKinematic)
+				if (this._targetRb)
 				{
-					this._targetRb.transform.localRotation = Quaternion.identity;
+					this._targetRb.isKinematic = (this._currentAction == WallDoor.Actions.Closing);
+					if (this._targetRb.isKinematic)
+					{
+						this._targetRb.transform.localRotation = Quaternion.identity;
+					}
 				}
 				this.PlaySfx(activeDoorStatusAction);
 			}

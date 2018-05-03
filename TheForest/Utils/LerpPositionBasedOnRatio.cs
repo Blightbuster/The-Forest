@@ -7,7 +7,23 @@ namespace TheForest.Utils
 	public class LerpPositionBasedOnRatio : MonoBehaviour
 	{
 		
+		private void Update()
+		{
+			float a = (float)Screen.width / (float)Screen.height;
+			if (!Mathf.Approximately(a, this._lastAspectRatio))
+			{
+				this.Refresh();
+			}
+		}
+
+		
 		private void OnEnable()
+		{
+			this.Refresh();
+		}
+
+		
+		private void Refresh()
 		{
 			float num = (float)Screen.width / (float)Screen.height;
 			float t = (num - this._fromAspectRatio) / (this._toAspectRatio - this._fromAspectRatio);
@@ -19,6 +35,7 @@ namespace TheForest.Utils
 			{
 				base.transform.position = Vector3.Lerp(this._from.position, this._to.position, t);
 			}
+			this._lastAspectRatio = num;
 		}
 
 		
@@ -35,5 +52,8 @@ namespace TheForest.Utils
 
 		
 		public bool _localPosition;
+
+		
+		private float _lastAspectRatio;
 	}
 }

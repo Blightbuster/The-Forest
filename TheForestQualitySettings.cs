@@ -190,7 +190,7 @@ public class TheForestQualitySettings : ScriptableObject
 			TheForestQualitySettings.UserSettings.ShadowLevel = (TheForestQualitySettings.ShadowLevels)shadowLevel;
 			TheForestQualitySettings.UserSettings.FarShadowMode = (TheForestQualitySettings.FarShadowModes)PlayerPrefs.GetInt("Quality_v016_FarShadowMode", (int)TheForestQualitySettings.UserSettings.FarShadowMode);
 			TheForestQualitySettings.UserSettings.MotionBlur = (TheForestQualitySettings.MotionBlurQuality)PlayerPrefs.GetInt("Quality_v016_MotionBlur", (int)TheForestQualitySettings.UserSettings.MotionBlur);
-			TheForestQualitySettings.UserSettings.DrawDistance = (TheForestQualitySettings.DrawDistances)Mathf.Clamp(PlayerPrefs.GetInt("Quality_v016_DrawDistance", (int)TheForestQualitySettings.UserSettings.DrawDistance), 2, 5);
+			TheForestQualitySettings.UserSettings.DrawDistance = (TheForestQualitySettings.DrawDistances)Mathf.Clamp(PlayerPrefs.GetInt("Quality_v016_DrawDistance", (int)TheForestQualitySettings.UserSettings.DrawDistance), 1, 5);
 			TheForestQualitySettings.UserSettings.GrassDistance = PlayerPrefs.GetFloat("Quality_v016_GrassDistance", TheForestQualitySettings.UserSettings.GrassDistance);
 			TheForestQualitySettings.UserSettings.GrassDensity = PlayerPrefs.GetFloat("Quality_v016_GrassDensity", TheForestQualitySettings.UserSettings.GrassDensity);
 			TheForestQualitySettings.UserSettings.SSAOType = (TheForestQualitySettings.SSAOTypes)PlayerPrefs.GetInt("Quality_v016_SSAOType", (int)TheForestQualitySettings.UserSettings.SSAOType);

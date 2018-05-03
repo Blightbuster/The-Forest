@@ -9,7 +9,7 @@ namespace ScionEngine
 		
 		public PostProcessParameters()
 		{
-			this.glareParams = default(GlareParameters);
+			this.bloomParams = default(BloomParameters);
 			this.lensDirtParams = default(LensDirtParameters);
 			this.cameraParams = default(CameraParameters);
 			this.DoFParams = default(DepthOfFieldParameters);
@@ -19,64 +19,36 @@ namespace ScionEngine
 		}
 
 		
-		public void Fill(ScionPostProcessBase postProcess, bool forceFill)
+		public void Fill(ScionPostProcess postProcess)
 		{
-			if (this.isFilled && !forceFill)
-			{
-				return;
-			}
-			this.isFilled = true;
+			this.tonemapping = postProcess.tonemapping;
 			this.bloom = postProcess.bloom;
-			this.lensFlare = postProcess.lensFlare;
-			this.lensDirt = postProcess.lensDirt;
+			this.lensDirt = (postProcess.lensDirt && postProcess.lensDirtTexture != null);
 			this.lensDirtTexture = postProcess.lensDirtTexture;
 			this.bloomTexture = null;
 			this.dofTexture = null;
 			this.exposure = (postProcess.cameraMode != CameraMode.Off);
 			this.depthOfField = postProcess.depthOfField;
 			this.halfResSource = null;
-			this.glareParams.threshold = postProcess.bloomThreshold;
-			this.glareParams.intensity = ScionUtility.Square(postProcess.bloomIntensity);
-			this.glareParams.brightness = postProcess.bloomBrightness;
-			this.glareParams.distanceMultiplier = postProcess.bloomDistanceMultiplier;
-			this.glareParams.downsamples = postProcess.bloomDownsamples;
-			this.lensFlareParams.ghostSamples = postProcess.lensFlareGhostSamples;
-			this.lensFlareParams.ghostIntensity = postProcess.lensFlareGhostIntensity;
-			this.lensFlareParams.ghostDispersal = postProcess.lensFlareGhostDispersal;
-			this.lensFlareParams.ghostDistortion = postProcess.lensFlareGhostDistortion;
-			this.lensFlareParams.ghostEdgeFade = postProcess.lensFlareGhostEdgeFade;
-			this.lensFlareParams.haloIntensity = postProcess.lensFlareHaloIntensity;
-			this.lensFlareParams.haloWidth = postProcess.lensFlareHaloWidth;
-			this.lensFlareParams.haloDistortion = postProcess.lensFlareHaloDistortion;
-			this.lensFlareParams.starUVScale = postProcess.lensFlareDiffractionUVScale;
-			this.lensFlareParams.starTexture = postProcess.lensFlareDiffractionTexture;
-			this.lensFlareParams.lensColorTexture = postProcess.lensFlareLensColorTexture;
-			this.lensFlareParams.blurSamples = postProcess.lensFlareBlurSamples;
-			this.lensFlareParams.blurStrength = postProcess.lensFlareBlurStrength;
-			this.lensFlareParams.downsamples = postProcess.lensFlareDownsamples;
-			this.lensFlareParams.threshold = postProcess.lensFlareThreshold;
-			this.lensDirtParams.bloomThreshold = postProcess.lensDirtBloomThreshold;
-			this.lensDirtParams.bloomEffect = ScionUtility.Square(postProcess.lensDirtBloomEffect);
-			this.lensDirtParams.bloomBrightness = postProcess.lensDirtBloomBrightness;
-			this.lensDirtParams.lensFlareEffect = postProcess.lensDirtLensFlareEffect;
-			this.lensDirtParams.lensFlareBrightness = postProcess.lensDirtLensFlareBrightness;
+			this.bloomParams.intensity = ScionUtility.Square(postProcess.bloomIntensity);
+			this.bloomParams.brightness = postProcess.bloomBrightness;
+			this.bloomParams.downsamples = postProcess.bloomDownsamples;
+			this.lensDirtParams.intensity = ScionUtility.Square(postProcess.lensDirtIntensity);
+			this.lensDirtParams.brightness = postProcess.lensDirtBrightness;
 			this.DoFParams.depthFocusMode = postProcess.depthFocusMode;
 			this.DoFParams.maxCoCRadius = postProcess.maxCoCRadius;
-			this.DoFParams.quality = postProcess.depthOfFieldSamples;
-			this.DoFParams.visualizeFocalDistance = postProcess.visualizeFocalDistance;
+			this.DoFParams.quality = ((SystemInfo.graphicsShaderLevel >= 40) ? postProcess.depthOfFieldQuality : DepthOfFieldQuality.Normal);
 			this.DoFParams.pointAveragePosition = postProcess.pointAveragePosition;
 			this.DoFParams.pointAverageRange = postProcess.pointAverageRange;
 			this.DoFParams.visualizePointFocus = postProcess.visualizePointFocus;
 			this.DoFParams.depthAdaptionSpeed = postProcess.depthAdaptionSpeed;
 			this.DoFParams.focalDistance = postProcess.focalDistance;
 			this.DoFParams.focalRange = postProcess.focalRange;
-			this.DoFParams.useTemporal = postProcess.depthOfFieldTemporalSupersampling;
-			this.DoFParams.temporalBlend = postProcess.depthOfFieldTemporalBlend;
-			this.DoFParams.temporalSteps = postProcess.depthOfFieldTemporalSteps;
 			this.colorGradingParams.colorGradingMode = ((!(postProcess.colorGradingTex1 == null)) ? postProcess.colorGradingMode : ColorGradingMode.Off);
 			this.colorGradingParams.colorGradingTex1 = postProcess.colorGradingTex1;
 			this.colorGradingParams.colorGradingTex2 = postProcess.colorGradingTex2;
 			this.colorGradingParams.colorGradingBlendFactor = postProcess.colorGradingBlendFactor;
+			this.colorGradingParams.colorGradingCompatibility = postProcess.colorGradingCompatibility;
 			this.cameraParams.cameraMode = postProcess.cameraMode;
 			this.cameraParams.fNumber = postProcess.fNumber;
 			this.cameraParams.ISO = postProcess.ISO;
@@ -91,22 +63,14 @@ namespace ScionEngine
 			this.commonPostProcess.chromaticAberration = postProcess.chromaticAberration;
 			this.commonPostProcess.chromaticAberrationDistortion = postProcess.chromaticAberrationDistortion;
 			this.commonPostProcess.chromaticAberrationIntensity = postProcess.chromaticAberrationIntensity;
+			this.commonPostProcess.whitePoint = postProcess.whitePoint;
 		}
-
-		
-		public Camera camera;
-
-		
-		public Transform cameraTransform;
 
 		
 		public bool tonemapping;
 
 		
 		public bool bloom;
-
-		
-		public bool lensFlare;
 
 		
 		public bool lensDirt;
@@ -142,19 +106,13 @@ namespace ScionEngine
 		public RenderTexture bloomTexture;
 
 		
-		public RenderTexture lensFlareTexture;
-
-		
 		public RenderTexture dofTexture;
 
 		
 		public Texture lensDirtTexture;
 
 		
-		public GlareParameters glareParams;
-
-		
-		public LensFlareParameters lensFlareParams;
+		public BloomParameters bloomParams;
 
 		
 		public LensDirtParameters lensDirtParams;
@@ -173,8 +131,5 @@ namespace ScionEngine
 
 		
 		public CommonPostProcess commonPostProcess;
-
-		
-		private bool isFilled;
 	}
 }

@@ -2526,6 +2526,10 @@ public class mutantSearchFunctions : MonoBehaviour
 	public IEnumerator toLook()
 	{
 		this.lookingForTarget = true;
+		if (this.setup.pmBrain)
+		{
+			this.setup.pmBrain.FsmVariables.GetFsmBool("targetSeenBool").Value = false;
+		}
 		this.targetCounter = 0;
 		base.StopCoroutine("toTrack");
 		base.StopCoroutine("toDisableVis");
@@ -2595,6 +2599,10 @@ public class mutantSearchFunctions : MonoBehaviour
 					this.updateClosePlayerTarget();
 					this.storeLastSighting();
 					this.trackCounter = 0;
+					if (this.setup.pmBrain)
+					{
+						this.setup.pmBrain.FsmVariables.GetFsmBool("targetSeenBool").Value = true;
+					}
 					yield return null;
 				}
 			}

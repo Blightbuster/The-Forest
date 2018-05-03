@@ -8,8 +8,6 @@ namespace ScionEngine
 		
 		Off,
 		
-		On,
-		
-		Blend
+		On
 	}
 }

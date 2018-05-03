@@ -10,6 +10,9 @@ namespace ScionEngine
 		public ColorGradingMode colorGradingMode;
 
 		
+		public ColorGradingCompatibility colorGradingCompatibility;
+
+		
 		public Texture2D colorGradingTex1;
 
 		

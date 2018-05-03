@@ -491,7 +491,7 @@ public class TheForestAtmosphere : MonoBehaviour
 			switch (TheForestQualitySettings.UserSettings.ShadowLevel)
 			{
 			case TheForestQualitySettings.ShadowLevels.High:
-				num11 = 180;
+				num11 = 230;
 				goto IL_FA9;
 			case TheForestQualitySettings.ShadowLevels.Medium:
 				num11 = 140;

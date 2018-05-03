@@ -79,7 +79,7 @@ public class HudGui : MonoBehaviour
 			this._nextBuildMissionDisplay = Time.realtimeSinceStartup + 0.15f;
 		}
 		this.CheckDelayedActionController();
-		this.CheckItemInfoViewCounter();
+		this.CheckItemInfoViewCounter(false);
 		if (this._nextItemInfoIIV && this._nextItemInfoDisplay < Time.realtimeSinceStartup)
 		{
 			this.ShowItemInfoView(this._nextItemInfoIIV, this._nextItemInfoRenderer, this._nextItemInfoIsCraft, this._nextItemInfoViewCounter);
@@ -713,7 +713,8 @@ public class HudGui : MonoBehaviour
 							itemView.Properties.ActiveBonusValue / 2f
 						}) + ")";
 					}
-					this._inventoryItemInfoView._description.text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._descriptionTextTranslationKey, inventoryItemInfo._descriptionText, true).Replace("%", newValue);
+					this._inventoryItemInfoView._effect.text = UiTranslationDatabase.TranslateKey(inventoryItemInfo._effectTextTranslationKey, inventoryItemInfo._effectText, true).Replace("%", newValue);
+					this._inventoryItemInfoView._effect.gameObject.SetActive(true);
 					break;
 				}
 				case HudGui.InventoryItemInfo.AmountDisplay.Fuel:
@@ -878,7 +879,7 @@ public class HudGui : MonoBehaviour
 	}
 
 	
-	private void CheckItemInfoViewCounter()
+	public void CheckItemInfoViewCounter(bool forceReset = false)
 	{
 		if (this._inventoryItemInfoView.ViewCounter <= 0 && this._inventoryItemInfoView._itemId != 0)
 		{
@@ -887,6 +888,10 @@ public class HudGui : MonoBehaviour
 			if (this._inventoryItemInfoView._root.activeSelf)
 			{
 				this._inventoryItemInfoView._root.SetActive(false);
+			}
+			if (LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Inventory || forceReset)
+			{
+				this._inventoryItemInfoView._itemId = 0;
 			}
 			this._inventoryItemInfoView.ViewCounter = 0;
 		}

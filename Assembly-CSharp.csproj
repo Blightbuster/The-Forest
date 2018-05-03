@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{566F655E-0CF2-4043-8D50-664FE2696740}</ProjectGuid>
+    <ProjectGuid>{5F25A13E-2009-4CAC-A076-71295D13AB1B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Assembly-CSharp</RootNamespace>
@@ -925,7 +925,6 @@
     <Compile Include="FPSDisplay.cs" />
     <Compile Include="FPSmeter.cs" />
     <Compile Include="FPSTEMP.cs" />
-    <Compile Include="FrameCounter.cs" />
     <Compile Include="FreeLookCam.cs" />
     <Compile Include="Frost.cs" />
     <Compile Include="FTEM_AnimationScrollTexture.cs" />
@@ -1888,6 +1887,7 @@
     <Compile Include="MakeClearing.cs" />
     <Compile Include="Manifest.cs" />
     <Compile Include="ManualRVOAgent.cs" />
+    <Compile Include="MappingButtonState.cs" />
     <Compile Include="mapRaiseController.cs" />
     <Compile Include="MassDestructionSaveManager.cs" />
     <Compile Include="MasterFireSpread.cs" />
@@ -2510,12 +2510,12 @@
     <Compile Include="SaveLoad.cs" />
     <Compile Include="SaveTurnOff.cs" />
     <Compile Include="ScaleObject.cs" />
-    <Compile Include="SceneCameraMovement.cs" />
     <Compile Include="SceneColorControl_Anim.cs" />
     <Compile Include="SceneIndex.cs" />
     <Compile Include="sceneTracker.cs" />
     <Compile Include="ScionDebug.cs" />
     <Compile Include="ScionEngine\Bloom.cs" />
+    <Compile Include="ScionEngine\BloomParameters.cs" />
     <Compile Include="ScionEngine\CameraMode.cs" />
     <Compile Include="ScionEngine\CameraParameters.cs" />
     <Compile Include="ScionEngine\ColorGrading.cs" />
@@ -2527,20 +2527,13 @@
     <Compile Include="ScionEngine\DepthFocusMode.cs" />
     <Compile Include="ScionEngine\DepthOfField.cs" />
     <Compile Include="ScionEngine\DepthOfFieldParameters.cs" />
-    <Compile Include="ScionEngine\DepthOfFieldSamples.cs" />
+    <Compile Include="ScionEngine\DepthOfFieldQuality.cs" />
     <Compile Include="ScionEngine\Downsampling.cs" />
-    <Compile Include="ScionEngine\GlareParameters.cs" />
     <Compile Include="ScionEngine\LensDirtParameters.cs" />
-    <Compile Include="ScionEngine\LensFlareBlurSamples.cs" />
-    <Compile Include="ScionEngine\LensFlareGhostSamples.cs" />
-    <Compile Include="ScionEngine\LensFlareParameters.cs" />
     <Compile Include="ScionEngine\PostProcessParameters.cs" />
     <Compile Include="ScionEngine\PreCalcValues.cs" />
     <Compile Include="ScionEngine\ScionGraphics.cs" />
-    <Compile Include="ScionEngine\ScionLensFlare.cs" />
     <Compile Include="ScionEngine\ScionPostProcess.cs" />
-    <Compile Include="ScionEngine\ScionPostProcessBase.cs" />
-    <Compile Include="ScionEngine\ScionPostProcessNoTonemap.cs" />
     <Compile Include="ScionEngine\ScionUtility.cs" />
     <Compile Include="ScionEngine\ShaderSettings.cs" />
     <Compile Include="ScionEngine\TonemappingMode.cs" />
@@ -3253,6 +3246,8 @@
     <Compile Include="TheForest\UI\ToggleUIPopupListSelection.cs" />
     <Compile Include="TheForest\UI\UiFollowTarget.cs" />
     <Compile Include="TheForest\UI\UiFollowTarget2.cs" />
+    <Compile Include="TheForest\UI\UiIconSlot.cs" />
+    <Compile Include="TheForest\UI\UiIconSlotToken.cs" />
     <Compile Include="TheForest\UI\UiTranslationDatabase.cs" />
     <Compile Include="TheForest\UI\UiTranslationLabel.cs" />
     <Compile Include="TheForest\UI\UiTranslationLabelDyn.cs" />
@@ -3314,6 +3309,8 @@
     <Compile Include="TheForest\Utils\InputActionRow.cs" />
     <Compile Include="TheForest\Utils\InputMapping.cs" />
     <Compile Include="TheForest\Utils\InputMappingAction.cs" />
+    <Compile Include="TheForest\Utils\InputMappingButton.cs" />
+    <Compile Include="TheForest\Utils\InputMappingButtonManager.cs" />
     <Compile Include="TheForest\Utils\LerpPositionBasedOnRatio.cs" />
     <Compile Include="TheForest\Utils\ListExtensions.cs" />
     <Compile Include="TheForest\Utils\LocalPlayer.cs" />

@@ -152,7 +152,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 			this.ArmorVis = minArmorVis;
 		}
 		this.UpdateArmorNibbles();
-		this.Armor = Mathf.Clamp(armor, 0, 1000);
+		this.Armor = Mathf.Clamp(armor, 0, 2000);
 		this.ColdArmor = Mathf.Clamp(this.ColdArmor, 0f, 2f);
 		yield return null;
 		if (this.DaySurvived == -1f)
@@ -5356,7 +5356,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		internal void SanityChange(float value)
 		{
 			this.CurrentSanity = Mathf.Clamp(this.CurrentSanity + value, 0f, 100f);
-			if (this.CurrentSanity < 50f && !LocalPlayer.SavedData.ReachedLowSanityThreshold)
+			if (this.CurrentSanity < 90f && !LocalPlayer.SavedData.ReachedLowSanityThreshold)
 			{
 				LocalPlayer.SavedData.ReachedLowSanityThreshold.SetValue(true);
 				LocalPlayer.Tuts.ShowNewBuildingsAvailableTut();

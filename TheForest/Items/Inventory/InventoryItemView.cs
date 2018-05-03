@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using TheForest.Items.Craft;
+using TheForest.Items.Special;
 using TheForest.Items.Utils;
 using TheForest.Tools;
 using TheForest.UI;
@@ -100,13 +101,15 @@ namespace TheForest.Items.Inventory
 				InventoryItemView.CombiningItemId = -1;
 				InventoryItemView.CombiningItemProperty = ItemProperties.Any;
 			}
+			bool flag2 = this._item.MatchType(Item.Types.Special);
+			SpecialItemControlerBase specialItemControlerBase = flag2 ? LocalPlayer.Inventory.SpecialItemsControlers[this._itemId] : null;
 			if (this._isCraft)
 			{
 				if (flag)
 				{
-					if (this._item.MatchType(Item.Types.Special))
+					if (flag2)
 					{
-						LocalPlayer.Inventory.SpecialItemsControlers[this._itemId].ToggleSpecialCraft(false);
+						specialItemControlerBase.ToggleSpecialCraft(false);
 					}
 					if (this._allowMultiView && this.MultiViewOwner != null)
 					{
@@ -167,7 +170,7 @@ namespace TheForest.Items.Inventory
 					}
 					else if (this.CanBeStored && this._item._equipmentSlot < Item.EquipmentSlot.Chest)
 					{
-						if (!this._item.MatchType(Item.Types.Special) || LocalPlayer.Inventory.SpecialItemsControlers[this._itemId].ToggleSpecialCraft(true))
+						if (!flag2 || specialItemControlerBase.ToggleSpecialCraft(true))
 						{
 							if (this._allowMultiView && this.MultiViewOwner != null)
 							{
@@ -258,7 +261,7 @@ namespace TheForest.Items.Inventory
 							}
 						}
 					}
-					else if (this._item.MatchType(Item.Types.Special))
+					else if (flag2)
 					{
 						this._inventory.SpecialItemsControlers[this._itemId].ToggleSpecial(true);
 						if (this._item._equipedSFX != Item.SFXCommands.None)

@@ -35,7 +35,7 @@ namespace TheForest.World
 		private void FixedUpdate()
 		{
 			this.UpdatePlayerPosition();
-			if (Time.time > this._interectTimer)
+			if (Time.time > this._interectTimer && !this.Crane)
 			{
 				if (!this.validateIntersectingColliders())
 				{
@@ -81,6 +81,7 @@ namespace TheForest.World
 					this.ValidPlayerCount = 0;
 				}
 				base.enabled = true;
+				this._interectTimer = Time.time + 0.5f;
 				this._prevPlayerPosition = LocalPlayer.Transform.position;
 				this._prevLocalPlayerOffset = this.FollowTarget.InverseTransformDirection(LocalPlayer.Transform.position - this.FollowTarget.position);
 				if (this._rb && this._rb.collisionDetectionMode != CollisionDetectionMode.ContinuousDynamic)
@@ -159,6 +160,9 @@ namespace TheForest.World
 
 		
 		public bool largeRaft;
+
+		
+		public bool Crane;
 
 		
 		public int ValidPlayerCount;

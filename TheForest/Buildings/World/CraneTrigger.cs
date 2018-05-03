@@ -355,6 +355,22 @@ namespace TheForest.Buildings.World
 		}
 
 		
+		private IEnumerator refreshPlatformTriggerRoutine()
+		{
+			Collider platformCollider = this._platformTr.GetComponent<Collider>();
+			if (platformCollider)
+			{
+				platformCollider.enabled = false;
+			}
+			yield return YieldPresets.WaitForFixedUpdate;
+			if (platformCollider)
+			{
+				platformCollider.enabled = true;
+			}
+			yield break;
+		}
+
+		
 		public float _onRopeOffset;
 
 		
@@ -386,6 +402,9 @@ namespace TheForest.Buildings.World
 
 		
 		public CraneTrigger _mainTrigger;
+
+		
+		public Collider _buildBlocker;
 
 		
 		public bool _driveOnPlatform = true;

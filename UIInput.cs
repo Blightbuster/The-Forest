@@ -488,7 +488,7 @@ public class UIInput : MonoBehaviour
 	private void OnKey(KeyCode key)
 	{
 		int frameCount = Time.frameCount;
-		if (UIInput.mIgnoreKey == frameCount)
+		if (UIInput.mIgnoreKey == frameCount || this.mCam == null)
 		{
 			return;
 		}

@@ -30,104 +30,91 @@ namespace ScionEngine
 		}
 
 		
-		public RenderTexture TryGetSmallGlareTexture(int minimumReqPixels, out int numSearches)
+		public RenderTexture TryGetSmallBloomTexture(int minimumReqPixels)
 		{
-			numSearches = 1;
+			this.iteratedTextures = 1;
 			for (int i = this.numDownsamples - 1; i >= 0; i--)
 			{
-				int num = (this.m_glareTextures[i].width <= this.m_glareTextures[i].height) ? this.m_glareTextures[i].width : this.m_glareTextures[i].height;
+				int num = (this.m_bloomTextures[i].width <= this.m_bloomTextures[i].height) ? this.m_bloomTextures[i].width : this.m_bloomTextures[i].height;
 				if (num >= minimumReqPixels)
 				{
-					return this.m_glareTextures[i];
+					return this.m_bloomTextures[i];
 				}
-				numSearches++;
+				this.iteratedTextures++;
 			}
 			return null;
 		}
 
 		
-		public float GetEnergyNormalizer(int forNumDownsamples)
+		public float GetEnergyNormalizer()
 		{
-			float num = 1f;
-			for (int i = forNumDownsamples - 1; i > 0; i--)
+			if (this.iteratedTextures == this.numDownsamples)
 			{
-				num = num * this.distanceMultiplier + 1f;
+				return 1f;
 			}
-			return 1f / num;
+			return 1f / (float)this.iteratedTextures;
 		}
 
 		
 		public void EndOfFrameCleanup()
 		{
-			if (this.m_glareTextures == null)
+			if (this.m_bloomTextures == null)
 			{
 				return;
 			}
 			for (int i = 0; i < this.numDownsamples; i++)
 			{
-				RenderTexture.ReleaseTemporary(this.m_glareTextures[i]);
-				this.m_glareTextures[i] = null;
+				RenderTexture.ReleaseTemporary(this.m_bloomTextures[i]);
+				this.m_bloomTextures[i] = null;
 			}
 		}
 
 		
-		public RenderTexture GetGlareTexture(int downsampleIndex)
+		public RenderTexture CreateBloomTexture(RenderTexture halfResSource, BloomParameters bloomParams)
 		{
-			return this.m_glareTextures[downsampleIndex];
-		}
-
-		
-		public void RunUpsamplingChain(RenderTexture halfResSource)
-		{
-			for (int i = this.numDownsamples - 1; i > 1; i--)
+			if (this.numDownsamples != bloomParams.downsamples)
 			{
-				Graphics.Blit(this.m_glareTextures[i], this.m_glareTextures[i - 1], this.m_bloomMat, 1);
-			}
-			this.m_bloomMat.SetTexture("_HalfResSource", halfResSource);
-			Graphics.Blit(this.m_glareTextures[1], this.m_glareTextures[0], this.m_bloomMat, 2);
-		}
-
-		
-		public void RunDownsamplingChain(RenderTexture halfResSource, int numDownsamples, float distanceMultiplier)
-		{
-			this.distanceMultiplier = distanceMultiplier;
-			if (numDownsamples != this.numDownsamples)
-			{
-				this.numDownsamples = numDownsamples;
-				this.m_glareTextures = new RenderTexture[numDownsamples];
+				this.numDownsamples = bloomParams.downsamples;
+				this.m_bloomTextures = new RenderTexture[this.numDownsamples];
 			}
 			halfResSource.filterMode = FilterMode.Bilinear;
 			RenderTextureFormat format = halfResSource.format;
 			int num = halfResSource.width;
 			int num2 = halfResSource.height;
-			for (int i = 0; i < numDownsamples; i++)
+			for (int i = 0; i < this.numDownsamples; i++)
 			{
-				this.m_glareTextures[i] = RenderTexture.GetTemporary(num, num2, 0, format);
-				this.m_glareTextures[i].filterMode = FilterMode.Bilinear;
-				this.m_glareTextures[i].wrapMode = TextureWrapMode.Clamp;
+				this.m_bloomTextures[i] = RenderTexture.GetTemporary(num, num2, 0, format);
+				this.m_bloomTextures[i].filterMode = FilterMode.Bilinear;
+				this.m_bloomTextures[i].wrapMode = TextureWrapMode.Clamp;
 				num /= 2;
 				num2 /= 2;
 			}
 			halfResSource.filterMode = FilterMode.Bilinear;
 			RenderTexture source = halfResSource;
-			this.m_bloomMat.SetFloat("_GlareDistanceMultiplier", distanceMultiplier);
-			for (int j = 1; j < numDownsamples; j++)
+			for (int j = 1; j < this.numDownsamples; j++)
 			{
-				Graphics.Blit(source, this.m_glareTextures[j], this.m_bloomMat, 0);
-				source = this.m_glareTextures[j];
+				Graphics.Blit(source, this.m_bloomTextures[j], this.m_bloomMat, 0);
+				source = this.m_bloomTextures[j];
 			}
+			for (int k = this.numDownsamples - 1; k > 1; k--)
+			{
+				Graphics.Blit(this.m_bloomTextures[k], this.m_bloomTextures[k - 1], this.m_bloomMat, 1);
+			}
+			this.m_bloomMat.SetFloat("_EnergyNormalizer", 1f / (float)this.numDownsamples);
+			Graphics.Blit(this.m_bloomTextures[1], this.m_bloomTextures[0], this.m_bloomMat, 2);
+			return this.m_bloomTextures[0];
 		}
 
 		
 		private Material m_bloomMat;
 
 		
-		private RenderTexture[] m_glareTextures;
+		private RenderTexture[] m_bloomTextures;
 
 		
 		private int numDownsamples = -1;
 
 		
-		private float distanceMultiplier;
+		private int iteratedTextures = 1;
 	}
 }

@@ -255,6 +255,8 @@ namespace TheForest.Utils
 					player.controllers.maps.ClearMaps(ControllerType.Mouse, true);
 				}
 				player.controllers.maps.AddMapsFromXml(ControllerType.Mouse, 0, allControllerMapsXml2);
+				player.controllers.maps.SetMapsEnabled(true, ControllerType.Joystick, "Default");
+				player.controllers.maps.SetMapsEnabled(true, ControllerType.Keyboard, "Default");
 			}
 			foreach (Rewired.Joystick joystick2 in ReInput.controllers.Joysticks)
 			{

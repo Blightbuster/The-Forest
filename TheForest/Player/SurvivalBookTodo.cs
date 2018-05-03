@@ -126,6 +126,10 @@ namespace TheForest.Player
 		{
 			yield return null;
 			base.StartCoroutine(this.DelayedAwake());
+			if (LocalPlayer.SavedData.ExitedEndgame)
+			{
+				this.StrikeThroughAll();
+			}
 			yield break;
 		}
 
@@ -147,6 +151,25 @@ namespace TheForest.Player
 			this._megan.Clone(other._megan);
 			this._sacrifice.Clone(other._sacrifice);
 			base.StartCoroutine(this.DelayedAwake());
+		}
+
+		
+		public void StrikeThroughAll()
+		{
+			this._son._done = true;
+			this._camp._done = true;
+			this._food._done = true;
+			this._defenses._done = true;
+			this._redman._done = true;
+			this._cave1._done = true;
+			this._cave2._done = true;
+			this._cave5._done = true;
+			this._findClimbingAxe._done = true;
+			this._findRebreather._done = true;
+			this._sinkHole._done = true;
+			this._passengers._done = true;
+			this._megan._done = true;
+			this._sacrifice._done = true;
 		}
 
 		

@@ -322,7 +322,7 @@ public class touchBendingCollisionGS : MonoBehaviour
 	
 	private bool IsStructure(Collider col)
 	{
-		return col.gameObject.CompareTag("Target") || col.gameObject.CompareTag("Multisled") || col.gameObject.CompareTag("SLTier1") || col.gameObject.CompareTag("SLTier2") || col.gameObject.CompareTag("SLTier3") || col.gameObject.CompareTag("structure") || col.GetComponent<BuildingHealthHitRelay>() || col.GetComponent<BuildingHealthChunkHitRelay>();
+		return col.gameObject.CompareTag("Target") || col.gameObject.CompareTag("SLTier1") || col.gameObject.CompareTag("SLTier2") || col.gameObject.CompareTag("SLTier3") || col.gameObject.CompareTag("structure") || col.GetComponent<BuildingHealthHitRelay>() || col.GetComponent<BuildingHealthChunkHitRelay>();
 	}
 
 	

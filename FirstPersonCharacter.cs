@@ -819,7 +819,7 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 		}
 		else
 		{
-			this.speed = this.runSpeed * Mathf.Min(1f + (float)LocalPlayer.Stats.Skills.AthleticismSkillLevel * 0.05f, 1.5f);
+			this.speed = this.runSpeed * Mathf.Min(1f + (float)LocalPlayer.Stats.Skills.AthleticismSkillLevel * 0.05f, 1.3f);
 		}
 	}
 

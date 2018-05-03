@@ -30,50 +30,23 @@ namespace ScionEngine
 		}
 
 		
-		private void PrepareBloomSampling(RenderTexture bloomTexture, GlareParameters glareParams)
+		private void PrepareBloomSampling(RenderTexture bloomTexture, BloomParameters bloomParams)
 		{
 			this.m_combinationMat.SetTexture("_BloomTexture", bloomTexture);
 			Vector4 value = default(Vector4);
-			value.x = glareParams.intensity;
-			value.y = glareParams.brightness;
-			value.z = glareParams.bloomNormalizationTerm;
-			value.w = glareParams.threshold;
-			this.m_combinationMat.SetVector("_GlareParameters", value);
+			value.x = ((bloomParams.intensity <= 0.0001f) ? 0.0001f : bloomParams.intensity);
+			value.y = bloomParams.brightness;
+			this.m_combinationMat.SetVector("_BloomParameters", value);
 		}
 
 		
-		private void PrepareLensDirtSampling(Texture lensDirtTexture, LensDirtParameters lensDirtParams, GlareParameters glareParams)
+		private void PrepareLensDirtSampling(Texture lensDirtTexture, LensDirtParameters lensDirtParams)
 		{
 			this.m_combinationMat.SetTexture("_LensDirtTexture", lensDirtTexture);
 			Vector4 value = default(Vector4);
-			value.x = lensDirtParams.bloomEffect;
-			value.y = lensDirtParams.bloomBrightness * glareParams.brightness;
-			value.z = lensDirtParams.lensFlareEffect;
-			value.w = lensDirtParams.lensFlareBrightness;
+			value.x = ((lensDirtParams.intensity <= 0.0001f) ? 0.0001f : lensDirtParams.intensity);
+			value.y = lensDirtParams.brightness;
 			this.m_combinationMat.SetVector("_LensDirtParameters", value);
-		}
-
-		
-		private void PrepareLensFlareSampling(LensFlareParameters lensFlareParams, RenderTexture lensFlareTexture, Transform cameraTransform)
-		{
-			Vector3 lhs = -cameraTransform.right;
-			Vector3 forward = cameraTransform.forward;
-			float num = Vector3.Dot(lhs, Vector3.forward) + Vector3.Dot(forward, Vector3.up);
-			Vector4 value = default(Vector4);
-			value.x = Mathf.Cos(num * 2f * 3.14159274f);
-			value.y = Mathf.Sin(num * 2f * 3.14159274f);
-			value.z = lensFlareParams.starUVScale;
-			value.w = (1f - lensFlareParams.starUVScale) * 0.5f;
-			this.m_combinationMat.SetVector("_LensStarParams1", value);
-			if (lensFlareParams.starTexture != null)
-			{
-				this.m_combinationMat.SetTexture("_LensFlareStarTexture", lensFlareParams.starTexture);
-			}
-			else
-			{
-				this.m_combinationMat.SetTexture("_LensFlareStarTexture", ScionUtility.WhiteTexture);
-			}
-			this.m_combinationMat.SetTexture("_LensFlareTexture", lensFlareTexture);
 		}
 
 		
@@ -85,7 +58,7 @@ namespace ScionEngine
 			}
 			else if (cameraParams.cameraMode != CameraMode.Manual)
 			{
-				virtualCamera.BindVirtualCameraTextures(this.m_combinationMat);
+				virtualCamera.BindExposureTexture(this.m_combinationMat);
 			}
 			else
 			{
@@ -94,36 +67,25 @@ namespace ScionEngine
 		}
 
 		
-		private bool ShouldInvertVAxis(PostProcessParameters postProcessParams)
-		{
-			return postProcessParams.camera.actualRenderingPath == RenderingPath.Forward && QualitySettings.antiAliasing > 0;
-		}
-
-		
-		private void UploadVariables(PostProcessParameters postProcessParams)
+		private void UploadVariables(CommonPostProcess commonPostProcess)
 		{
 			Vector4 value = default(Vector4);
-			value.x = postProcessParams.commonPostProcess.grainIntensity;
-			value.y = postProcessParams.commonPostProcess.vignetteIntensity;
-			value.z = postProcessParams.commonPostProcess.vignetteScale;
-			value.w = postProcessParams.commonPostProcess.chromaticAberrationDistortion;
+			value.x = commonPostProcess.grainIntensity;
+			value.y = commonPostProcess.vignetteIntensity;
+			value.z = commonPostProcess.vignetteScale;
+			value.w = commonPostProcess.chromaticAberrationDistortion;
 			this.m_combinationMat.SetVector("_PostProcessParams1", value);
 			Vector4 value2 = default(Vector4);
-			value2.x = postProcessParams.commonPostProcess.vignetteColor.r;
-			value2.y = postProcessParams.commonPostProcess.vignetteColor.g;
-			value2.z = postProcessParams.commonPostProcess.vignetteColor.b;
-			value2.w = postProcessParams.commonPostProcess.chromaticAberrationIntensity;
+			value2.x = commonPostProcess.vignetteColor.r;
+			value2.y = commonPostProcess.vignetteColor.g;
+			value2.z = commonPostProcess.vignetteColor.b;
+			value2.w = commonPostProcess.chromaticAberrationIntensity;
 			this.m_combinationMat.SetVector("_PostProcessParams2", value2);
 			Vector4 value3 = default(Vector4);
 			value3.x = UnityEngine.Random.value;
-			value3.y = ScionUtility.GetWhitePointMultiplier(postProcessParams.commonPostProcess.whitePoint);
-			value3.z = 1f / postProcessParams.commonPostProcess.whitePoint;
+			value3.y = 5f / commonPostProcess.whitePoint;
+			value3.z = 1f / commonPostProcess.whitePoint;
 			this.m_combinationMat.SetVector("_PostProcessParams3", value3);
-			Vector4 value4 = default(Vector4);
-			value4.x = postProcessParams.lensFlareParams.threshold;
-			value4.y = postProcessParams.lensDirtParams.bloomThreshold * postProcessParams.lensDirtParams.bloomBrightness;
-			value4.z = postProcessParams.glareParams.threshold * postProcessParams.glareParams.brightness;
-			this.m_combinationMat.SetVector("_ThresholdParams", value4);
 		}
 
 		
@@ -134,13 +96,23 @@ namespace ScionEngine
 				return;
 			}
 			this.m_combinationMat.SetTexture("_ColorGradingLUT1", colorGradingParams.colorGradingTex1);
-			ColorGrading.UploadColorGradingParams(this.m_combinationMat, (float)colorGradingParams.colorGradingTex1.height);
-			if (colorGradingParams.colorGradingMode == ColorGradingMode.On)
-			{
-				return;
-			}
-			this.m_combinationMat.SetTexture("_ColorGradingLUT2", colorGradingParams.colorGradingTex2);
-			this.m_combinationMat.SetFloat("_ColorGradingBlendFactor", colorGradingParams.colorGradingBlendFactor);
+			Vector2 vector = default(Vector2);
+			float num = 32f;
+			vector.x = 1024f;
+			vector.y = 32f;
+			float num2 = 1f / num;
+			Vector4 value = default(Vector4);
+			value.x = 1f * num2 - 1f / vector.x;
+			value.y = 1f - 1f * num2;
+			value.z = num - 1f;
+			value.w = num;
+			Vector4 value2 = default(Vector4);
+			value2.x = 0.5f / vector.x;
+			value2.y = 0.5f / vector.y;
+			value2.z = 0f;
+			value2.w = num2;
+			this.m_combinationMat.SetVector("_ColorGradingParams1", value);
+			this.m_combinationMat.SetVector("_ColorGradingParams2", value2);
 		}
 
 		
@@ -148,29 +120,25 @@ namespace ScionEngine
 		{
 			if (postProcessParams.bloom)
 			{
-				this.PrepareBloomSampling(postProcessParams.bloomTexture, postProcessParams.glareParams);
+				this.PrepareBloomSampling(postProcessParams.bloomTexture, postProcessParams.bloomParams);
 			}
 			if (postProcessParams.lensDirt)
 			{
-				this.PrepareLensDirtSampling(postProcessParams.lensDirtTexture, postProcessParams.lensDirtParams, postProcessParams.glareParams);
-			}
-			if (postProcessParams.lensFlare)
-			{
-				this.PrepareLensFlareSampling(postProcessParams.lensFlareParams, postProcessParams.lensFlareTexture, postProcessParams.cameraTransform);
+				this.PrepareLensDirtSampling(postProcessParams.lensDirtTexture, postProcessParams.lensDirtParams);
 			}
 			this.PrepareExposure(postProcessParams.cameraParams, virtualCamera);
 			this.PrepareColorGrading(postProcessParams.colorGradingParams);
-			this.UploadVariables(postProcessParams);
+			this.UploadVariables(postProcessParams.commonPostProcess);
 			int num = 0;
 			if (!postProcessParams.tonemapping)
 			{
-				num += 4;
+				num += 3;
 			}
 			if (!postProcessParams.bloom)
 			{
 				num += 2;
 			}
-			if (!postProcessParams.lensDirt || postProcessParams.lensDirtTexture == null)
+			else if (!postProcessParams.lensDirt)
 			{
 				num++;
 			}

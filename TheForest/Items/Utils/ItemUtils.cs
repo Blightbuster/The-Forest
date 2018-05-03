@@ -149,7 +149,7 @@ namespace TheForest.Items.Utils
 					stats.Energy += effect._amount * (float)num * LocalPlayer.Stats.FoodPoisoning.EffectRatio;
 					break;
 				case StatEffect.Types.Armor:
-					stats.Armor = Mathf.Clamp(stats.Armor + (int)effect._amount * num, 0, 1000);
+					stats.Armor = Mathf.Clamp(stats.Armor + (int)effect._amount * num, 0, 2000);
 					break;
 				default:
 					if (type != StatEffect.Types.MaxAmountBonus)

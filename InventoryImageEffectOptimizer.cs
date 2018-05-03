@@ -27,7 +27,7 @@ public class InventoryImageEffectOptimizer : MonoBehaviour
 		{
 			ssaotechnique = TheForestQualitySettings.SSAOTechnique.Off;
 		}
-		if (this.amplifyOcclusion && (TheForestQualitySettings.UserSettings.SSAOType == TheForestQualitySettings.SSAOTypes.AMPLIFY || !InventoryImageEffectOptimizer._instancedProfile))
+		if (this.amplifyOcclusion && (TheForestQualitySettings.UserSettings.SSAOType == TheForestQualitySettings.SSAOTypes.AMPLIFY || TheForestQualitySettings.UserSettings.SSAOType == TheForestQualitySettings.SSAOTypes.UNITY || !InventoryImageEffectOptimizer._instancedProfile))
 		{
 			this.amplifyOcclusion.enabled = (ssaotechnique != TheForestQualitySettings.SSAOTechnique.Off);
 			if (InventoryImageEffectOptimizer._instancedProfile)
@@ -53,7 +53,7 @@ public class InventoryImageEffectOptimizer : MonoBehaviour
 				this.amplifyOcclusion.SampleCount = AmplifyOcclusionBase.SampleCountLevel.VeryHigh;
 			}
 		}
-		else if (InventoryImageEffectOptimizer._instancedProfile && (TheForestQualitySettings.UserSettings.SSAOType == TheForestQualitySettings.SSAOTypes.UNITY || !this.amplifyOcclusion))
+		else if (InventoryImageEffectOptimizer._instancedProfile && !this.amplifyOcclusion)
 		{
 			InventoryImageEffectOptimizer._instancedProfile.ambientOcclusion.enabled = (ssaotechnique != TheForestQualitySettings.SSAOTechnique.Off);
 			if (this.amplifyOcclusion)

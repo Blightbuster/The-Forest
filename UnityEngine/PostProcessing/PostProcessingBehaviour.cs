@@ -218,6 +218,10 @@ namespace UnityEngine.PostProcessing
 			{
 				return;
 			}
+			if (Application.isPlaying)
+			{
+				this.CheckScionEyeAdaptation();
+			}
 			if (this.profile == null || this.m_Camera == null)
 			{
 				return;
@@ -312,6 +316,22 @@ namespace UnityEngine.PostProcessing
 		}
 
 		
+		public void CheckScionEyeAdaptation()
+		{
+			if (this._scionPostProcess == null || this.profile == null || this.profile.eyeAdaptation == null)
+			{
+				return;
+			}
+			if (this._scionPostProcess.enabled != this.profile.eyeAdaptation.enabled)
+			{
+				return;
+			}
+			this._scionPostProcess.enabled = true;
+			this.profile.eyeAdaptation.enabled = false;
+			this.profile.colorGrading.enabled = false;
+		}
+
+		
 		public void EnableScionEyeAdaption(bool enabledValue)
 		{
 			if (this._scionPostProcess == null)
@@ -320,6 +340,7 @@ namespace UnityEngine.PostProcessing
 			}
 			this._scionPostProcess.enabled = enabledValue;
 			this.profile.eyeAdaptation.enabled = !enabledValue;
+			this.profile.colorGrading.enabled = !enabledValue;
 		}
 
 		

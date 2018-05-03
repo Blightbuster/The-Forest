@@ -571,13 +571,14 @@ namespace TheForest.Items.Craft
 		private void DoStorage()
 		{
 			List<ReceipeIngredient> list = new List<ReceipeIngredient>();
-			InventoryItemView targetView = null;
+			InventoryItemView inventoryItemView = null;
+			bool flag = false;
 			this._craftSfxEmitter.Play();
 			foreach (ReceipeIngredient receipeIngredient in this._ingredients)
 			{
-				bool flag = this.InItemViewsCache(receipeIngredient._itemID);
-				ItemStorageProxy itemStorageProxy = (!flag) ? null : this._itemViewsCache[receipeIngredient._itemID].GetComponent<ItemStorageProxy>();
-				if (!flag)
+				bool flag2 = this.InItemViewsCache(receipeIngredient._itemID);
+				ItemStorageProxy itemStorageProxy = (!flag2) ? null : this._itemViewsCache[receipeIngredient._itemID].GetComponent<ItemStorageProxy>();
+				if (!flag2)
 				{
 					while (this._lambdaMultiView.ContainsMultiView(receipeIngredient._itemID))
 					{
@@ -643,7 +644,8 @@ namespace TheForest.Items.Craft
 				}
 				else if (itemStorageProxy._storage == this.Storage)
 				{
-					targetView = this._itemViewsCache[receipeIngredient._itemID];
+					inventoryItemView = this._itemViewsCache[receipeIngredient._itemID];
+					flag = true;
 				}
 			}
 			foreach (ReceipeIngredient receipeIngredient2 in list)
@@ -653,7 +655,15 @@ namespace TheForest.Items.Craft
 			}
 			this.Storage.UpdateContentVersion();
 			this.CheckStorage();
-			this._completedItemViewProxy._targetView = targetView;
+			this._completedItemViewProxy._targetView = inventoryItemView;
+			if (flag)
+			{
+				int itemId = inventoryItemView._itemId;
+				this._inventory.AddItem(itemId, 1, true, true, inventoryItemView.Properties);
+				this._inventory.Equip(itemId, false);
+				this._inventory.CurrentStorage.Remove(itemId, 1, null);
+				this._inventory.Close();
+			}
 		}
 
 		

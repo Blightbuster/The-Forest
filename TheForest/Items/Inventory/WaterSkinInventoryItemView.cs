@@ -38,6 +38,7 @@ namespace TheForest.Items.Inventory
 					this._inventory.SendMessage("PlayInventorySound", base.ItemCache._usedSFX);
 				}
 				Scene.HudGui.HideItemInfoView(this._itemId, this._isCraft);
+				Scene.HudGui.CheckItemInfoViewCounter(true);
 				Scene.HudGui.ShowItemInfoViewDelayed(this, (this._renderers.Length <= 0) ? null : this._renderers[0]._renderer, this._isCraft);
 			}
 			else

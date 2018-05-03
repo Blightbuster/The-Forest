@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using TheForest.Items;
+using TheForest.Player;
 using TheForest.Utils;
 using TheForest.World;
 using UnityEngine;
@@ -135,6 +136,7 @@ public class PlayerGoodbyeTimmyAction : MonoBehaviour
 		{
 			yield return YieldPresets.WaitThreeSeconds;
 			LocalPlayer.SavedData.ExitedEndgame.SetValue(true);
+			LocalPlayer.SpecialItems.GetComponentInChildren<SurvivalBookTodo>().StrikeThroughAll();
 			LocalPlayer.Tuts.ShowNewBuildingsAvailableTut();
 		}
 		yield break;

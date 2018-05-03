@@ -6,12 +6,6 @@ namespace ScionEngine
 	public enum TonemappingMode
 	{
 		
-		Reinhard,
-		
-		LumaReinhard,
-		
-		Filmic,
-		
-		Photographic
+		Filmic = 2
 	}
 }

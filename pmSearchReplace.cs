@@ -41,6 +41,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private void Update()
 	{
+		this.fsmBrainTargetSeenBool = this.setup.pmBrain.FsmVariables.GetFsmBool("targetSeenBool").Value;
 		if (this._searchActive && Time.time > this.resetSearchTimer)
 		{
 			float sqrMagnitude = (base.transform.position - this.lastResetPos).sqrMagnitude;
@@ -537,7 +538,7 @@ public class pmSearchReplace : MonoBehaviour
 		this.search.StartCoroutine(this.search.toLook());
 		this._toPlayerNoise = false;
 		this._toStructure = false;
-		if ((UnityEngine.Random.value < 0.65f || this.ai.mainPlayerDist > 350f) && !this.setup.typeSetup.inCave)
+		if ((UnityEngine.Random.value < 0.4f || this.ai.mainPlayerDist > 350f) && !this.setup.typeSetup.inCave)
 		{
 			this.ai.StartCoroutine("toRun");
 		}
@@ -1523,6 +1524,7 @@ public class pmSearchReplace : MonoBehaviour
 		this.ai.StartCoroutine("toStop");
 		this.search.playSearchScream();
 		this._targetSpotted = true;
+		this.setup.pmBrain.SendEvent("toActivateFSM");
 		float timer = 0f;
 		float val = this.animator.GetFloat("walkTypeFloat1");
 		while (timer < 1f)
@@ -1546,7 +1548,6 @@ public class pmSearchReplace : MonoBehaviour
 		this.animator.SetBool("sleepBOOL", false);
 		this.setup.pmBrain.FsmVariables.GetFsmBool("sleepBool").Value = false;
 		this.setup.familyFunctions.sendTargetSpotted();
-		this.setup.pmBrain.SendEvent("toActivateFSM");
 		this.toDisableSearchEvent();
 		yield return null;
 		yield break;
@@ -1626,6 +1627,12 @@ public class pmSearchReplace : MonoBehaviour
 	
 	public IEnumerator goToActivateRoutine()
 	{
+		if (this.setup.pmBrain && this.setup.pmBrain.FsmVariables.GetFsmBool("targetSeenBool").Value)
+		{
+			this.setup.pmBrain.SendEvent("toActivateFSM");
+			this.toDisableSearchEvent();
+			yield break;
+		}
 		if (!this._searchActive)
 		{
 			this.ActiveRoutine = base.StartCoroutine(this.goToStartSearchRoutine());
@@ -1861,6 +1868,9 @@ public class pmSearchReplace : MonoBehaviour
 
 	
 	public bool _doingRepel;
+
+	
+	public bool fsmBrainTargetSeenBool;
 
 	
 	public float waypointArriveDist = 13f;

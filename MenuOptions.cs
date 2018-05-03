@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Rewired;
 using TheForest.UI;
 using TheForest.Utils;
 using UnityEngine;
@@ -47,6 +48,8 @@ public class MenuOptions : MonoBehaviour
 			}
 		}
 		TheForest.Utils.Input.UpdateControlMapping();
+		TheForest.Utils.Input.player.controllers.maps.SetMapsEnabled(true, ControllerType.Joystick, "Default");
+		TheForest.Utils.Input.player.controllers.maps.SetMapsEnabled(true, ControllerType.Keyboard, "Default");
 	}
 
 	

@@ -86,6 +86,15 @@ public class playerCraneClimbAction : MonoBehaviour
 	}
 
 	
+	private IEnumerator RefreshPlayerCollisionRoutine()
+	{
+		LocalPlayer.AnimControl.playerCollider.enabled = false;
+		yield return YieldPresets.WaitForFixedUpdate;
+		LocalPlayer.AnimControl.playerCollider.enabled = true;
+		yield break;
+	}
+
+	
 	private IEnumerator StickToCrane(Vector3 pos, Vector3 dir)
 	{
 		while (this._onCrane)
