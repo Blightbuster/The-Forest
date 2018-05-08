@@ -15,6 +15,7 @@ internal class CoopSteamServerStarter : CoopPeerStarter
 	private IEnumerator Start()
 	{
 		PlayerPrefs.Save();
+		CoopTreeGrid.Init();
 		LoadSave.OnGameStart += this.OnGameStart;
 		yield return CoopPeerStarter.PrefabDbResource;
 		if (!CoopPeerStarter.Dedicated)

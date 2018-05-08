@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{5F25A13E-2009-4CAC-A076-71295D13AB1B}</ProjectGuid>
+    <ProjectGuid>{CAB5FCB2-7B7E-424D-86A2-CE8AA88C3E0E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Assembly-CSharp</RootNamespace>
@@ -1887,7 +1887,6 @@
     <Compile Include="MakeClearing.cs" />
     <Compile Include="Manifest.cs" />
     <Compile Include="ManualRVOAgent.cs" />
-    <Compile Include="MappingButtonState.cs" />
     <Compile Include="mapRaiseController.cs" />
     <Compile Include="MassDestructionSaveManager.cs" />
     <Compile Include="MasterFireSpread.cs" />
@@ -3315,6 +3314,7 @@
     <Compile Include="TheForest\Utils\ListExtensions.cs" />
     <Compile Include="TheForest\Utils\LocalPlayer.cs" />
     <Compile Include="TheForest\Utils\Lookup.cs" />
+    <Compile Include="TheForest\Utils\MappingButtonState.cs" />
     <Compile Include="TheForest\Utils\MaterialPropertyColors.cs" />
     <Compile Include="TheForest\Utils\MathEx.cs" />
     <Compile Include="TheForest\Utils\Mood.cs" />

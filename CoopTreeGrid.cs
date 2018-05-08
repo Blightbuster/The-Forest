@@ -117,10 +117,26 @@ public static class CoopTreeGrid
 	}
 
 	
-	public static void Update(IEnumerable<BoltEntity> trees)
+	public static void Init()
 	{
 		CoopTreeGrid.Nodes = new CoopTreeGrid.Node[4096];
 		CoopTreeGrid.AttachQueue = new Queue<BoltEntity>();
+		for (int i = 0; i < CoopTreeGrid.Nodes.Length; i++)
+		{
+			if (CoopTreeGrid.Nodes[i].Objects == null)
+			{
+				CoopTreeGrid.Nodes[i].Objects = new List<CoopGridObject>();
+			}
+			if (CoopTreeGrid.Nodes[i].Trees == null)
+			{
+				CoopTreeGrid.Nodes[i].Trees = new List<BoltEntity>();
+			}
+		}
+	}
+
+	
+	public static void Update(IEnumerable<BoltEntity> trees)
+	{
 		foreach (BoltEntity boltEntity in trees)
 		{
 			int num = CoopTreeGrid.CalculateNode(boltEntity.transform.position);

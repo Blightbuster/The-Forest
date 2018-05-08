@@ -104,7 +104,7 @@ public class IgnoreCollisionInChildren : MonoBehaviour
 			{
 				for (int i = 0; i < componentsInChildren.Length; i++)
 				{
-					if (this.storedColliders[i] != null && !this.storedColliders[i].isTrigger)
+					if (componentsInChildren[i] != null && !componentsInChildren[i].isTrigger)
 					{
 						this.storedColliders.Add(componentsInChildren[i]);
 					}

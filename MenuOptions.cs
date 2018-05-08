@@ -56,7 +56,8 @@ public class MenuOptions : MonoBehaviour
 	private void OnEnable()
 	{
 		this.shouldSave = true;
-		this.ShowMenuButton(GameSetup.IsCreativeGame, this.AllowEnemies, true);
+		this.ShowMenuWidget(GameSetup.IsCreativeGame, this.AllowEnemies, true);
+		this.RefreshOptionalWidgets();
 		if (LoadAsync.Scenery)
 		{
 			Blur blur = (!LoadAsync.Scenery) ? null : LoadAsync.Scenery.GetComponentInChildren<Blur>();
@@ -69,22 +70,32 @@ public class MenuOptions : MonoBehaviour
 	}
 
 	
-	private void ShowMenuButton(bool showValue, UIWidgetContainer buttonTarget, bool reconnectUiKeyNav)
+	private void RefreshOptionalWidgets()
 	{
-		if (buttonTarget == null)
+		this.ShowMenuWidget(!PlayerPreferences.IsBelowDX11, this.PostEffectsSystem, true);
+		bool flag = TheForestQualitySettings.UserSettings.PostEffectsSystem == TheForestQualitySettings.PostEffectsSystems.Legacy;
+		this.ShowMenuWidget(!flag, this.GammaWorldAndDay, true);
+		this.ShowMenuWidget(!flag, this.GammaCavesAndNight, true);
+		this.ShowMenuWidget(!flag, this.Contrast, true);
+	}
+
+	
+	private void ShowMenuWidget(bool showValue, UIWidgetContainer widgetTarget, bool reconnectUiKeyNav)
+	{
+		if (widgetTarget == null)
 		{
 			return;
 		}
-		if (buttonTarget.transform.parent.gameObject.activeSelf == showValue)
+		if (widgetTarget.transform.parent.gameObject.activeSelf == showValue)
 		{
 			return;
 		}
-		buttonTarget.transform.parent.gameObject.SetActive(showValue);
+		widgetTarget.transform.parent.gameObject.SetActive(showValue);
 		if (!reconnectUiKeyNav)
 		{
 			return;
 		}
-		MenuOptions.ReconnectMenuButton(buttonTarget, !showValue);
+		MenuOptions.ReconnectMenuButton(widgetTarget, !showValue);
 	}
 
 	
@@ -141,6 +152,7 @@ public class MenuOptions : MonoBehaviour
 				this.SSAO.enabled = true;
 			}
 		}
+		this.RefreshOptionalWidgets();
 	}
 
 	
@@ -223,6 +235,10 @@ public class MenuOptions : MonoBehaviour
 		if (this.VolumetricsType)
 		{
 			EventDelegate.Add(this.VolumetricsType.onChange, new EventDelegate.Callback(this.OnChange));
+		}
+		if (this.PostEffectsSystem)
+		{
+			EventDelegate.Add(this.PostEffectsSystem.onChange, new EventDelegate.Callback(this.OnChange));
 		}
 		if (this.MotionBlur)
 		{
@@ -384,6 +400,10 @@ public class MenuOptions : MonoBehaviour
 		{
 			EventDelegate.Add(this.GammaCavesAndNight.onChange, new EventDelegate.Callback(this.OnChange));
 		}
+		if (this.Contrast)
+		{
+			EventDelegate.Add(this.Contrast.onChange, new EventDelegate.Callback(this.OnChange));
+		}
 		if (this.Volume)
 		{
 			EventDelegate.Add(this.Volume.onChange, new EventDelegate.Callback(this.OnChange));
@@ -488,6 +508,10 @@ public class MenuOptions : MonoBehaviour
 		if (this.VolumetricsType)
 		{
 			EventDelegate.Remove(this.VolumetricsType.onChange, new EventDelegate.Callback(this.OnChange));
+		}
+		if (this.PostEffectsSystem)
+		{
+			EventDelegate.Remove(this.PostEffectsSystem.onChange, new EventDelegate.Callback(this.OnChange));
 		}
 		if (this.MotionBlur)
 		{
@@ -649,6 +673,10 @@ public class MenuOptions : MonoBehaviour
 		{
 			EventDelegate.Remove(this.GammaCavesAndNight.onChange, new EventDelegate.Callback(this.OnChange));
 		}
+		if (this.Contrast)
+		{
+			EventDelegate.Remove(this.Contrast.onChange, new EventDelegate.Callback(this.OnChange));
+		}
 		if (this.Volume)
 		{
 			EventDelegate.Remove(this.Volume.onChange, new EventDelegate.Callback(this.OnChange));
@@ -793,6 +821,10 @@ public class MenuOptions : MonoBehaviour
 					this.GrassD.value = this.GetPopupItem(this.GrassD, num);
 				}
 			}
+			if (PlayerPreferences.IsBelowDX11)
+			{
+				TheForestQualitySettings.UserSettings.PostEffectsSystem = TheForestQualitySettings.PostEffectsSystems.Legacy;
+			}
 		}
 		catch
 		{
@@ -856,6 +888,13 @@ public class MenuOptions : MonoBehaviour
 		try
 		{
 			this.ScreenSpaceReflection.value = this.GetPopupItem(this.ScreenSpaceReflection, (int)TheForestQualitySettings.UserSettings.screenSpaceReflection);
+		}
+		catch
+		{
+		}
+		try
+		{
+			this.PostEffectsSystem.value = this.GetPopupItem(this.PostEffectsSystem, (int)TheForestQualitySettings.UserSettings.PostEffectsSystem);
 		}
 		catch
 		{
@@ -1124,14 +1163,21 @@ public class MenuOptions : MonoBehaviour
 		}
 		try
 		{
-			this.GammaWorldAndDay.value = Mathf.InverseLerp(2f, 2.2f, PlayerPreferences.GammaWorldAndDay);
+			this.GammaWorldAndDay.value = Mathf.InverseLerp(1.5f, 2.3f, PlayerPreferences.GammaWorldAndDay);
 		}
 		catch
 		{
 		}
 		try
 		{
-			this.GammaCavesAndNight.value = Mathf.InverseLerp(2f, 2.2f, PlayerPreferences.GammaCavesAndNight);
+			this.GammaCavesAndNight.value = Mathf.InverseLerp(2f, 2.5f, PlayerPreferences.GammaCavesAndNight);
+		}
+		catch
+		{
+		}
+		try
+		{
+			this.Contrast.value = Mathf.InverseLerp(0.9f, 1.15f, PlayerPreferences.Contrast);
 		}
 		catch
 		{
@@ -1252,6 +1298,10 @@ public class MenuOptions : MonoBehaviour
 		if (this.VolumetricsType)
 		{
 			TheForestQualitySettings.UserSettings.VolumetricsType = (TheForestQualitySettings.VolumetricsTypes)this.PopupIndex(this.VolumetricsType);
+		}
+		if (this.PostEffectsSystem)
+		{
+			TheForestQualitySettings.UserSettings.PostEffectsSystem = (TheForestQualitySettings.PostEffectsSystems)this.PopupIndex(this.PostEffectsSystem);
 		}
 		if (this.TerrainQuality)
 		{
@@ -1423,11 +1473,15 @@ public class MenuOptions : MonoBehaviour
 		}
 		if (this.GammaCavesAndNight)
 		{
-			PlayerPreferences.GammaCavesAndNight = Mathf.Lerp(2f, 2.2f, this.GammaCavesAndNight.value);
+			PlayerPreferences.GammaCavesAndNight = Mathf.Lerp(2f, 2.5f, this.GammaCavesAndNight.value);
 		}
 		if (this.GammaWorldAndDay)
 		{
-			PlayerPreferences.GammaWorldAndDay = Mathf.Lerp(2f, 2.2f, this.GammaWorldAndDay.value);
+			PlayerPreferences.GammaWorldAndDay = Mathf.Lerp(1.5f, 2.3f, this.GammaWorldAndDay.value);
+		}
+		if (this.Contrast)
+		{
+			PlayerPreferences.Contrast = Mathf.Lerp(0.9f, 1.15f, this.Contrast.value);
 		}
 		if (this.Volume)
 		{
@@ -1548,6 +1602,9 @@ public class MenuOptions : MonoBehaviour
 	public UIPopupList Resolution;
 
 	
+	public UIPopupList PostEffectsSystem;
+
+	
 	public UIPopupList DrawDistance;
 
 	
@@ -1645,6 +1702,9 @@ public class MenuOptions : MonoBehaviour
 
 	
 	public UISlider GammaCavesAndNight;
+
+	
+	public UISlider Contrast;
 
 	
 	public UISlider Volume;

@@ -43,16 +43,6 @@ namespace UnityEngine.PostProcessing
 				this.m_ComponentStates.Add(key, false);
 			}
 			base.useGUILayout = false;
-			if (this._forceScionForBelowDX11 && this.IsBelowDX11())
-			{
-				this.EnableScionEyeAdaption(true);
-			}
-		}
-
-		
-		private bool IsBelowDX11()
-		{
-			return SystemInfo.graphicsShaderLevel < 50 || !SystemInfo.supportsComputeShaders;
 		}
 
 		
@@ -220,21 +210,22 @@ namespace UnityEngine.PostProcessing
 			}
 			if (Application.isPlaying)
 			{
+				this.EnableScionEyeAdaption(TheForestQualitySettings.UserSettings.PostEffectsSystem == TheForestQualitySettings.PostEffectsSystems.Legacy);
 				this.CheckScionEyeAdaptation();
 			}
 			if (this.profile == null || this.m_Camera == null)
 			{
 				return;
 			}
-			if (this.m_EyeAdaptation.active && this.profile.debugViews.IsModeActive(BuiltinDebugViewsModel.Mode.EyeAdaptation))
+			if (this.m_EyeAdaptation != null && this.m_EyeAdaptation.active && this.profile.debugViews.IsModeActive(BuiltinDebugViewsModel.Mode.EyeAdaptation))
 			{
 				this.m_EyeAdaptation.OnGUI();
 			}
-			else if (this.m_ColorGrading.active && this.profile.debugViews.IsModeActive(BuiltinDebugViewsModel.Mode.LogLut))
+			else if (this.m_ColorGrading != null && this.m_ColorGrading.active && this.profile.debugViews.IsModeActive(BuiltinDebugViewsModel.Mode.LogLut))
 			{
 				this.m_ColorGrading.OnGUI();
 			}
-			else if (this.m_UserLut.active && this.profile.debugViews.IsModeActive(BuiltinDebugViewsModel.Mode.UserLut))
+			else if (this.m_UserLut != null && this.m_UserLut.active && this.profile.debugViews.IsModeActive(BuiltinDebugViewsModel.Mode.UserLut))
 			{
 				this.m_UserLut.OnGUI();
 			}
@@ -334,7 +325,7 @@ namespace UnityEngine.PostProcessing
 		
 		public void EnableScionEyeAdaption(bool enabledValue)
 		{
-			if (this._scionPostProcess == null)
+			if (this._scionPostProcess == null || this._scionPostProcess.enabled == enabledValue)
 			{
 				return;
 			}

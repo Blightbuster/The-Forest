@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,92 +12,6 @@ namespace TheForest.Utils
 	
 	public class InputMappingButton : MonoBehaviour
 	{
-		
-		private static void GetAllActions()
-		{
-			if (!Application.isPlaying)
-			{
-				return;
-			}
-			StringBuilder stringBuilder = new StringBuilder();
-			foreach (InputAction inputAction in ReInput.mapping.Actions)
-			{
-				stringBuilder.AppendLine(string.Concat(new object[]
-				{
-					inputAction.name,
-					" ",
-					inputAction.id,
-					" ",
-					inputAction.type,
-					" ",
-					inputAction.userAssignable
-				}));
-			}
-			Debug.Log(stringBuilder);
-		}
-
-		
-		private void UpdateGameObjectNames()
-		{
-		}
-
-		
-		public void OnEnable()
-		{
-			this.Refresh();
-		}
-
-		
-		public void Refresh()
-		{
-			this.UpdateElementMap();
-			this.UpdateAssignedInput();
-			this.UpdateActionLabel();
-			this.UpdateGameObjectNames();
-		}
-
-		
-		private void UpdateElementMap()
-		{
-			this._foundAction = InputMappingButton.GetAction(this._actionName);
-			this._foundMaps = InputMappingButton.GetElementMap(this._foundAction, this._negativeAxis);
-			if (this._foundMaps.NullOrEmpty<ActionElementMap>() || this._foundMaps[0] == null)
-			{
-				this._controllerType = ControllerType.Keyboard;
-			}
-			else
-			{
-				this._controllerType = this._foundMaps[0].controllerMap.controllerType;
-			}
-		}
-
-		
-		private void UpdateActionLabel()
-		{
-			if (this._foundAction == null)
-			{
-				this._actionLabel.text = "NULL";
-			}
-			else
-			{
-				this._actionLabel.text = InputMappingButton.GetActionUIText(this._foundAction, this._negativeAxis).ToUpperInvariant();
-			}
-		}
-
-		
-		private void UpdateAssignedInput()
-		{
-			if (this._foundMaps.SafeCount<ActionElementMap>() == 0)
-			{
-				this._actionInput = null;
-			}
-			else
-			{
-				this._actionInput = this._foundMaps[0].elementIdentifierName.ToUpperInvariant();
-			}
-			this._inputLabel.text = this._actionInput;
-		}
-
 		
 		private static string GetActionUIText(InputAction action, bool negativeAxis = false)
 		{
@@ -143,7 +58,7 @@ namespace TheForest.Utils
 						bool flag = actionElementMap.axisContribution == Pole.Negative;
 						if (flag == negativeAxis)
 						{
-							if (actionElementMap.elementType == ControllerElementType.Button)
+							if (actionElementMap.elementType == ControllerElementType.Button || actionElementMap.elementType == ControllerElementType.Axis)
 							{
 								if (array[0] != null)
 								{
@@ -169,6 +84,35 @@ namespace TheForest.Utils
 		}
 
 		
+		private static void GetAllActions()
+		{
+			if (!Application.isPlaying)
+			{
+				return;
+			}
+			StringBuilder stringBuilder = new StringBuilder();
+			foreach (InputAction inputAction in ReInput.mapping.Actions)
+			{
+				stringBuilder.AppendLine(string.Concat(new object[]
+				{
+					inputAction.name,
+					" ",
+					inputAction.id,
+					" ",
+					inputAction.type,
+					" ",
+					inputAction.userAssignable
+				}));
+			}
+			Debug.Log(stringBuilder);
+		}
+
+		
+		private void UpdateGameObjectNames()
+		{
+		}
+
+		
 		public void Update()
 		{
 			if (this._state == MappingButtonState.Idle)
@@ -179,10 +123,16 @@ namespace TheForest.Utils
 		}
 
 		
+		public void OnEnable()
+		{
+			this.Refresh();
+		}
+
+		
 		private void OnDisable()
 		{
-			this._foundMaps = null;
-			this._foundAction = null;
+			this._foundRewiredMaps = null;
+			this._foundRewiredAction = null;
 			this._controllerMap = null;
 			this._pollingInfo = default(ControllerPollingInfo);
 			this._modifierKeyFlags = ModifierKeyFlags.None;
@@ -191,103 +141,90 @@ namespace TheForest.Utils
 		}
 
 		
-		private void CancelAssignInput()
+		public IEnumerator EnableButtonAfterDelay(float delay)
 		{
-			this.PollingStop();
+			yield return new WaitForSeconds(delay);
+			yield return 0;
+			if (this._button == null)
+			{
+				yield break;
+			}
+			this._button.enabled = true;
+			yield break;
 		}
 
 		
-		private void ClearMapping()
+		public void Refresh()
 		{
-			if (this._foundMaps.NullOrEmpty<ActionElementMap>())
-			{
-				return;
-			}
-			this._controllerMap = Input.player.controllers.maps.GetMap(this._foundMaps[0].controllerMap.controllerType, 0, 0, 1);
-			if (this._foundMaps[0] == null || this._controllerMap == null)
-			{
-				return;
-			}
-			if (!this._foundMaps[0].controllerMap.DeleteElementMap(this._foundMaps[0].id))
-			{
-				Debug.Log("Clear Map Failed!");
-			}
-			else
-			{
-				this._foundMaps = null;
-			}
-			this.Refresh();
-		}
-
-		
-		public void AssignInput()
-		{
-			this.PollingStop();
-			if (this._foundMaps.NullOrEmpty<ActionElementMap>() || this._foundMaps[0] == null)
-			{
-				this.CreateElementMap(this._pollingInfo);
-			}
-			else
-			{
-				this.ReplaceElementMap(this._pollingInfo);
-			}
-			this.UpdateElementMap();
+			this._foundRewiredAction = null;
+			this._foundRewiredMaps = null;
+			this._controllerType = ControllerType.Keyboard;
+			this._controllerMap = null;
+			this._pollingInfo = default(ControllerPollingInfo);
+			this._pollingControllerType = ControllerType.Keyboard;
+			this._pollingControllerMap = null;
+			this.CollectRewiredRepresentations();
 			this.UpdateAssignedInput();
+			this.UpdateActionLabel();
+			this.UpdateGameObjectNames();
 		}
 
 		
-		private void ReplaceElementMap(ControllerPollingInfo pollingInfo)
+		private void UpdateActionLabel()
 		{
-			try
+			if (this._foundRewiredAction == null)
 			{
-				ElementAssignment elementAssignment = new ElementAssignment
-				{
-					elementMapId = this._foundMaps[0].id,
-					actionId = this._foundAction.id,
-					axisContribution = ((!this._negativeAxis) ? Pole.Positive : Pole.Negative),
-					keyboardKey = pollingInfo.keyboardKey,
-					modifierKeyFlags = this._modifierKeyFlags
-				};
-				if (!this._controllerMap.ReplaceElementMap(elementAssignment))
-				{
-					throw new InvalidOperationException("Rewire reported failure");
-				}
-				Debug.Log(string.Format("Replaced Map {0} {1} + {2}", this._foundAction.name, pollingInfo.keyboardKey, this._modifierKeyFlags));
+				this._actionLabel.text = "NULL";
 			}
-			catch (Exception ex)
+			else
 			{
-				Debug.Log(string.Format("Replace Map failed! {0}", ex.Message));
+				this._actionLabel.text = InputMappingButton.GetActionUIText(this._foundRewiredAction, this._negativeAxis).ToUpperInvariant();
 			}
 		}
 
 		
-		private void CreateElementMap(ControllerPollingInfo pollingInfo)
+		private void UpdateAssignedInput()
 		{
-			try
+			if (this._foundRewiredMaps.SafeCount<ActionElementMap>() == 0)
 			{
-				ElementAssignment elementAssignment = new ElementAssignment
-				{
-					actionId = this._foundAction.id,
-					axisContribution = ((!this._negativeAxis) ? Pole.Positive : Pole.Negative),
-					keyboardKey = this._pollingInfo.keyboardKey,
-					modifierKeyFlags = this._modifierKeyFlags
-				};
-				if (!this._controllerMap.CreateElementMap(elementAssignment))
-				{
-					throw new InvalidOperationException("Rewire reported failure");
-				}
-				Debug.Log(string.Format("Created Map {0} {1} + {2}", this._foundAction.name, pollingInfo.keyboardKey, this._modifierKeyFlags));
+				this._actionInput = null;
 			}
-			catch (Exception ex)
+			else
 			{
-				Debug.Log(string.Format("Create Map failed! {0}", ex.Message));
+				this._actionInput = this._foundRewiredMaps[0].elementIdentifierName.ToUpperInvariant();
+			}
+			this._inputLabel.text = this._actionInput;
+		}
+
+		
+		public void OnClick()
+		{
+			if (UICamera.currentTouchID == -1)
+			{
+				this.PollingStart();
+			}
+			else if (UICamera.currentTouchID == -2)
+			{
+				this.DeleteCurrentElementMap();
+				this.Refresh();
 			}
 		}
 
 		
-		private void ShowWaiting(bool showValue)
+		private void PollingStart()
 		{
-			this._pulseObject.SetActive(showValue);
+			this._state = MappingButtonState.Waiting;
+			this._modifierKeyFlags = ModifierKeyFlags.None;
+			InputMappingButtonManager.PollingStarted(this);
+			this.ShowWaiting(true);
+		}
+
+		
+		private void PollingStop()
+		{
+			this._state = MappingButtonState.Idle;
+			InputMappingButtonManager.PollingStopped(this);
+			this.ShowWaiting(false);
 		}
 
 		
@@ -301,8 +238,8 @@ namespace TheForest.Utils
 			this._pollingInfo = player.controllers.polling.PollControllerForFirstElementDown(ControllerType.Mouse, 0);
 			if (this._pollingInfo.success && ((this._pollingInfo.elementType == ControllerElementType.Axis && this._actionType == InputActionType.Axis) || this._pollingInfo.elementType == ControllerElementType.Button))
 			{
-				this._controllerMap = Input.player.controllers.maps.GetMap(ControllerType.Mouse, 0, 0, 0);
-				this._controllerType = ControllerType.Mouse;
+				this._pollingControllerMap = Input.player.controllers.maps.GetMap(ControllerType.Mouse, 0, 0, 0);
+				this._pollingControllerType = ControllerType.Mouse;
 				this.AssignInput();
 			}
 		}
@@ -344,56 +281,128 @@ namespace TheForest.Utils
 				if (num == 0)
 				{
 					this._pollingInfo = pollingInfo;
-					this._controllerMap = Input.player.controllers.maps.GetMap(ControllerType.Keyboard, 0, 0, 1);
-					this._controllerType = ControllerType.Keyboard;
+					this._pollingControllerMap = Input.player.controllers.maps.GetMap(ControllerType.Keyboard, 0, 0, 1);
+					this._pollingControllerType = ControllerType.Keyboard;
 					this.AssignInput();
 					return;
 				}
 				this._pollingInfo = pollingInfo;
 				this._modifierKeyFlags = modifierKeyFlags;
-				this._controllerMap = Input.player.controllers.maps.GetMap(ControllerType.Keyboard, 0, 0, 1);
-				this._controllerType = ControllerType.Keyboard;
+				this._pollingControllerMap = Input.player.controllers.maps.GetMap(ControllerType.Keyboard, 0, 0, 1);
+				this._pollingControllerType = ControllerType.Keyboard;
 				this.AssignInput();
 				return;
 			}
 			else if (num > 0 && num == 1 && ReInput.controllers.Keyboard.GetKeyTimePressed(pollingInfo2.keyboardKey) > 1f)
 			{
 				this._pollingInfo = pollingInfo2;
-				this._controllerMap = Input.player.controllers.maps.GetMap(ControllerType.Keyboard, 0, 0, 1);
-				this._controllerType = ControllerType.Keyboard;
+				this._pollingControllerMap = Input.player.controllers.maps.GetMap(ControllerType.Keyboard, 0, 0, 1);
+				this._pollingControllerType = ControllerType.Keyboard;
 				this.AssignInput();
 				return;
 			}
 		}
 
 		
-		public void OnClick()
+		private void CancelAssignInput()
 		{
-			if (UICamera.currentTouchID == -1)
+			this.PollingStop();
+		}
+
+		
+		private void AssignInput()
+		{
+			this.PollingStop();
+			if (this._foundRewiredMaps.NullOrEmpty<ActionElementMap>() || this._foundRewiredMaps[0] == null)
 			{
-				this.PollingStart();
+				this.CreateElementMap();
 			}
-			else if (UICamera.currentTouchID == -2)
+			else
 			{
-				this.ClearMapping();
+				this.ReplaceElementMap();
+			}
+			this.CollectRewiredRepresentations();
+			this.UpdateAssignedInput();
+		}
+
+		
+		private void CollectRewiredRepresentations()
+		{
+			this._foundRewiredAction = InputMappingButton.GetAction(this._actionName);
+			this._foundRewiredMaps = InputMappingButton.GetElementMap(this._foundRewiredAction, this._negativeAxis);
+			this._controllerMap = null;
+			this._controllerType = ControllerType.Keyboard;
+			if (!this._foundRewiredMaps.NullOrEmpty<ActionElementMap>() && this._foundRewiredMaps[0] != null)
+			{
+				this._controllerMap = this._foundRewiredMaps[0].controllerMap;
+				this._controllerType = this._controllerMap.controllerType;
 			}
 		}
 
 		
-		private void PollingStart()
+		private void DeleteCurrentElementMap()
 		{
-			this._state = MappingButtonState.Waiting;
-			this._modifierKeyFlags = ModifierKeyFlags.None;
-			InputMappingButtonManager.PollingStarted(this);
-			this.ShowWaiting(true);
+			if (this._foundRewiredMaps.NullOrEmpty<ActionElementMap>())
+			{
+				return;
+			}
+			if (this._foundRewiredMaps[0] == null || this._controllerMap == null)
+			{
+				return;
+			}
+			try
+			{
+				if (!this._controllerMap.DeleteElementMap(this._foundRewiredMaps[0].id))
+				{
+					throw new InvalidOperationException("Rewire reported failure");
+				}
+				Debug.Log(string.Format("Delete Map {0} {1} + {2}", this._foundRewiredAction.name, this._pollingInfo.keyboardKey, this._modifierKeyFlags));
+			}
+			catch (Exception ex)
+			{
+				Debug.Log(string.Format("Delete Map failed! {0}", ex.Message));
+			}
+			this._foundRewiredMaps = null;
 		}
 
 		
-		private void PollingStop()
+		private void ReplaceElementMap()
 		{
-			this._state = MappingButtonState.Idle;
-			InputMappingButtonManager.PollingStopped(this);
-			this.ShowWaiting(false);
+			this.DeleteCurrentElementMap();
+			this.CreateElementMap();
+		}
+
+		
+		private void CreateElementMap()
+		{
+			try
+			{
+				ElementAssignment elementAssignment = new ElementAssignment
+				{
+					actionId = this._foundRewiredAction.id,
+					axisContribution = ((!this._negativeAxis) ? Pole.Positive : Pole.Negative),
+					keyboardKey = this._pollingInfo.keyboardKey,
+					elementIdentifierId = this._pollingInfo.elementIdentifierId,
+					modifierKeyFlags = this._modifierKeyFlags
+				};
+				if (!this._pollingControllerMap.CreateElementMap(elementAssignment))
+				{
+					throw new InvalidOperationException("Rewire reported failure");
+				}
+				this._controllerMap = this._pollingControllerMap;
+				this._controllerType = this._pollingControllerType;
+				Debug.Log(string.Format("Created Map {0} {1} + {2}", this._foundRewiredAction.name, this._pollingInfo.keyboardKey, this._modifierKeyFlags));
+			}
+			catch (Exception ex)
+			{
+				Debug.Log(string.Format("Create Map failed! {0}", ex.Message));
+			}
+		}
+
+		
+		private void ShowWaiting(bool showValue)
+		{
+			this._pulseObject.SetActive(showValue);
 		}
 
 		
@@ -407,9 +416,6 @@ namespace TheForest.Utils
 
 		
 		public bool _negativeAxis;
-
-		
-		private ControllerType _controllerType;
 
 		
 		public UIButton _button;
@@ -430,16 +436,25 @@ namespace TheForest.Utils
 		private string _actionInput;
 
 		
-		private ActionElementMap[] _foundMaps;
+		private ActionElementMap[] _foundRewiredMaps;
 
 		
-		private InputAction _foundAction;
+		private InputAction _foundRewiredAction;
 
 		
 		private ControllerMap _controllerMap;
 
 		
+		private ControllerType _controllerType;
+
+		
 		private ControllerPollingInfo _pollingInfo;
+
+		
+		private ControllerMap _pollingControllerMap;
+
+		
+		private ControllerType _pollingControllerType;
 
 		
 		private ModifierKeyFlags _modifierKeyFlags;

@@ -48,6 +48,9 @@ namespace TheForest.UI
 			case NumericOptionValueLabel.Option.MicrophoneVolume:
 				this.ShowFloat(Mathf.InverseLerp(0f, 10f, PlayerPreferences.MicrophoneVolume));
 				break;
+			case NumericOptionValueLabel.Option.Contrast:
+				this.ShowFloat(Mathf.InverseLerp(0.9f, 1.15f, PlayerPreferences.Contrast));
+				break;
 			}
 		}
 
@@ -109,7 +112,9 @@ namespace TheForest.UI
 			
 			GammaCaves,
 			
-			MicrophoneVolume
+			MicrophoneVolume,
+			
+			Contrast
 		}
 
 		

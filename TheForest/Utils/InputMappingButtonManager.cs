@@ -111,7 +111,17 @@ namespace TheForest.Utils
 			}
 			foreach (InputMappingButton inputMappingButton2 in InputMappingButtonManager._instance._buttons)
 			{
-				inputMappingButton2._button.enabled = true;
+				if (!(inputMappingButton2 == null) && !(inputMappingButton2._button == null))
+				{
+					if (inputMappingButton2 == inputMappingButton)
+					{
+						inputMappingButton2.StartCoroutine(inputMappingButton2.EnableButtonAfterDelay(0.5f));
+					}
+					else
+					{
+						inputMappingButton2._button.enabled = true;
+					}
+				}
 			}
 		}
 

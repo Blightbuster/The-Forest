@@ -102,6 +102,25 @@ public class TheForestQualitySettings : ScriptableObject
 	
 	
 	
+	public TheForestQualitySettings.PostEffectsSystems PostEffectsSystem
+	{
+		get
+		{
+			if (PlayerPreferences.IsBelowDX11)
+			{
+				return TheForestQualitySettings.PostEffectsSystems.Legacy;
+			}
+			return this._postEffectSystem;
+		}
+		set
+		{
+			this._postEffectSystem = value;
+		}
+	}
+
+	
+	
+	
 	public TheForestQualitySettings.ShadowCascadeCount CascadeCount
 	{
 		get
@@ -151,6 +170,7 @@ public class TheForestQualitySettings : ScriptableObject
 		PlayerPrefs.SetInt("Quality_v016_ScreenSpaceReflection", (int)TheForestQualitySettings.UserSettings.screenSpaceReflection);
 		PlayerPrefs.SetInt("Quality_v016_SunshineOcclusion", (int)TheForestQualitySettings.UserSettings.SunshineOcclusion);
 		PlayerPrefs.SetInt("Quality_v016_VolumetricsType", (int)TheForestQualitySettings.UserSettings.VolumetricsType);
+		PlayerPrefs.SetInt("Quality_v016_PostEffectsSystem", (int)TheForestQualitySettings.UserSettings.PostEffectsSystem);
 		PlayerPrefs.SetInt("Quality_v016_Caustics", (int)TheForestQualitySettings.UserSettings.Caustics);
 		PlayerPrefs.SetInt("Quality_v016_AntiAliasing", (int)TheForestQualitySettings.UserSettings.AntiAliasing);
 		PlayerPrefs.SetInt("Quality_v016_LightmapResolution", TheForestQualitySettings.UserSettings.LightmapResolution);
@@ -202,6 +222,7 @@ public class TheForestQualitySettings : ScriptableObject
 			TheForestQualitySettings.UserSettings.screenSpaceReflection = (TheForestQualitySettings.ScreenSpaceReflection)PlayerPrefs.GetInt("Quality_v016_ScreenSpaceReflection", (int)TheForestQualitySettings.UserSettings.screenSpaceReflection);
 			TheForestQualitySettings.UserSettings.SunshineOcclusion = (TheForestQualitySettings.SunshineOcclusionOn)PlayerPrefs.GetInt("Quality_v016_SunshineOcclusion", (int)TheForestQualitySettings.UserSettings.SunshineOcclusion);
 			TheForestQualitySettings.UserSettings.VolumetricsType = (TheForestQualitySettings.VolumetricsTypes)PlayerPrefs.GetInt("Quality_v016_VolumetricsType", (int)TheForestQualitySettings.UserSettings.VolumetricsType);
+			TheForestQualitySettings.UserSettings.PostEffectsSystem = (TheForestQualitySettings.PostEffectsSystems)PlayerPrefs.GetInt("Quality_v016_PostEffectsSystem", (int)TheForestQualitySettings.UserSettings.PostEffectsSystem);
 			TheForestQualitySettings.UserSettings.Caustics = (TheForestQualitySettings.CausticsOn)PlayerPrefs.GetInt("Quality_v016_Caustics", (int)TheForestQualitySettings.UserSettings.Caustics);
 			TheForestQualitySettings.UserSettings.AntiAliasing = (TheForestQualitySettings.AntiAliasingTechnique)PlayerPrefs.GetInt("Quality_v016_AntiAliasing", (int)TheForestQualitySettings.UserSettings.AntiAliasing);
 			TheForestQualitySettings.UserSettings.LightmapResolution = PlayerPrefs.GetInt("Quality_v016_LightmapResolution", TheForestQualitySettings.UserSettings.LightmapResolution);
@@ -297,6 +318,7 @@ public class TheForestQualitySettings : ScriptableObject
 		to.ScatterSamplingQuality = from.ScatterSamplingQuality;
 		to.SSAOType = from.SSAOType;
 		to.SSAO = from.SSAO;
+		to.PostEffectsSystem = from.PostEffectsSystem;
 		to.SEBloom = from.SEBloom;
 		to.Fg = from.Fg;
 		to.CA = from.CA;
@@ -369,7 +391,7 @@ public class TheForestQualitySettings : ScriptableObject
 		{
 			TheForestQualitySettings theForestQualitySettings = TheForestQualitySettings.UserSettings;
 			TheForestQualitySettings preset = TheForestQualitySettings.GetPreset((int)theForestQualitySettings.Preset);
-			return theForestQualitySettings.AntiAliasing != preset.AntiAliasing || theForestQualitySettings.CascadeCount != preset.CascadeCount || theForestQualitySettings.FarShadowMode != preset.FarShadowMode || !Mathf.Approximately(theForestQualitySettings.GrassDistance, preset.GrassDistance) || !Mathf.Approximately(theForestQualitySettings.GrassDensity, preset.GrassDensity) || !Mathf.Approximately(theForestQualitySettings.LightDistance, preset.LightDistance) || theForestQualitySettings.LightmapResolution != preset.LightmapResolution || theForestQualitySettings.LightmapUpdateIntervalFrames != preset.LightmapUpdateIntervalFrames || theForestQualitySettings.MotionBlur != preset.MotionBlur || theForestQualitySettings.ScatterResolution != preset.ScatterResolution || theForestQualitySettings.ScatterSamplingQuality != preset.ScatterSamplingQuality || theForestQualitySettings.SSAOType != preset.SSAOType || theForestQualitySettings.SSAO != preset.SSAO || theForestQualitySettings.SEBloom != preset.SEBloom || theForestQualitySettings.Fg != preset.Fg || theForestQualitySettings.CA != preset.CA || theForestQualitySettings.DofTech != preset.DofTech || theForestQualitySettings.screenSpaceReflection != preset.screenSpaceReflection || theForestQualitySettings.SunshineOcclusion != preset.SunshineOcclusion || theForestQualitySettings.VolumetricsType != preset.VolumetricsType || theForestQualitySettings.Caustics != preset.Caustics || theForestQualitySettings.SkyLighting != preset.SkyLighting || theForestQualitySettings.TerrainQuality != preset.TerrainQuality || theForestQualitySettings.DrawDistance != preset.DrawDistance || theForestQualitySettings.ReflexionMode != preset.ReflexionMode || theForestQualitySettings.OceanQuality != preset.OceanQuality || theForestQualitySettings.TextureQuality != preset.TextureQuality || theForestQualitySettings.MaterialQuality != preset.MaterialQuality;
+			return theForestQualitySettings.AntiAliasing != preset.AntiAliasing || theForestQualitySettings.CascadeCount != preset.CascadeCount || theForestQualitySettings.FarShadowMode != preset.FarShadowMode || !Mathf.Approximately(theForestQualitySettings.GrassDistance, preset.GrassDistance) || !Mathf.Approximately(theForestQualitySettings.GrassDensity, preset.GrassDensity) || !Mathf.Approximately(theForestQualitySettings.LightDistance, preset.LightDistance) || theForestQualitySettings.LightmapResolution != preset.LightmapResolution || theForestQualitySettings.LightmapUpdateIntervalFrames != preset.LightmapUpdateIntervalFrames || theForestQualitySettings.MotionBlur != preset.MotionBlur || theForestQualitySettings.ScatterResolution != preset.ScatterResolution || theForestQualitySettings.ScatterSamplingQuality != preset.ScatterSamplingQuality || theForestQualitySettings.SSAOType != preset.SSAOType || theForestQualitySettings.SSAO != preset.SSAO || theForestQualitySettings.PostEffectsSystem != preset.PostEffectsSystem || theForestQualitySettings.SEBloom != preset.SEBloom || theForestQualitySettings.Fg != preset.Fg || theForestQualitySettings.CA != preset.CA || theForestQualitySettings.DofTech != preset.DofTech || theForestQualitySettings.screenSpaceReflection != preset.screenSpaceReflection || theForestQualitySettings.SunshineOcclusion != preset.SunshineOcclusion || theForestQualitySettings.VolumetricsType != preset.VolumetricsType || theForestQualitySettings.Caustics != preset.Caustics || theForestQualitySettings.SkyLighting != preset.SkyLighting || theForestQualitySettings.TerrainQuality != preset.TerrainQuality || theForestQualitySettings.DrawDistance != preset.DrawDistance || theForestQualitySettings.ReflexionMode != preset.ReflexionMode || theForestQualitySettings.OceanQuality != preset.OceanQuality || theForestQualitySettings.TextureQuality != preset.TextureQuality || theForestQualitySettings.MaterialQuality != preset.MaterialQuality;
 		}
 	}
 
@@ -487,6 +509,9 @@ public class TheForestQualitySettings : ScriptableObject
 
 	
 	public TheForestQualitySettings.SkyLightingOn SkyLighting = TheForestQualitySettings.SkyLightingOn.Off;
+
+	
+	private TheForestQualitySettings.PostEffectsSystems _postEffectSystem = TheForestQualitySettings.PostEffectsSystems.DX11;
 
 	
 	public TheForestQualitySettings.CausticsOn Caustics;
@@ -770,6 +795,15 @@ public class TheForestQualitySettings : ScriptableObject
 		Hx,
 		
 		Sunshine
+	}
+
+	
+	public enum PostEffectsSystems
+	{
+		
+		Legacy,
+		
+		DX11
 	}
 
 	

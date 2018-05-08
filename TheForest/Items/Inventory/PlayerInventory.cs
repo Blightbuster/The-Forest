@@ -440,6 +440,10 @@ namespace TheForest.Items.Inventory
 					this._inventoryGO.transform.rotation = LocalPlayer.InventoryPositionVR.transform.rotation;
 					LocalPlayer.InventoryMouseEventsVR.enabled = true;
 				}
+				else
+				{
+					this._inventoryGO.transform.position = new Vector3(this._inventoryGO.transform.position.x, 300f, this._inventoryGO.transform.position.z);
+				}
 				LocalPlayer.Sfx.PlayOpenInventory();
 				this.IsOpenningInventory = true;
 				base.Invoke("PauseTimeInInventory", (!flag) ? 0.05f : 0.25f);

@@ -62,6 +62,16 @@ public class PlayerPreferences : MonoBehaviour
 	public static bool AllowEnemiesCreative { get; private set; }
 
 	
+	
+	public static bool IsBelowDX11
+	{
+		get
+		{
+			return PlayerPreferences._isBelowDX11;
+		}
+	}
+
+	
 	private void Awake()
 	{
 		PlayerPreferences.Instance = this;
@@ -185,7 +195,7 @@ public class PlayerPreferences : MonoBehaviour
 		PlayerPreferences.MemorySafeSaveMode = (PlayerPrefs.GetInt("MemorySafeSaveMode", 0) > 0);
 		PlayerPreferences.GammaWorldAndDay = PlayerPrefs.GetFloat("GammaWorldAndDay", 2f);
 		PlayerPreferences.GammaCavesAndNight = PlayerPrefs.GetFloat("GammaCavesAndNight", 2f);
-		PlayerPreferences.Brightness = PlayerPrefs.GetFloat("Brightness", 0.5f);
+		PlayerPreferences.Contrast = PlayerPrefs.GetFloat("Contrast", 1f);
 		PlayerPreferences.Volume = PlayerPrefs.GetFloat("Volume", 0.5f);
 		PlayerPreferences.MusicVolume = PlayerPrefs.GetFloat("MusicVolume", 1f);
 		PlayerPreferences.MicrophoneVolume = PlayerPrefs.GetFloat("MicrophoneVolume", 5f);
@@ -244,9 +254,9 @@ public class PlayerPreferences : MonoBehaviour
 		PlayerPrefs.SetInt("Preset_v16", PlayerPreferences.Preset);
 		PlayerPrefs.SetInt("LowMemoryMode", (!PlayerPreferences.LowMemoryMode) ? 0 : 1);
 		PlayerPrefs.SetInt("MemorySafeSaveMode", (!PlayerPreferences.MemorySafeSaveMode) ? 0 : 1);
-		PlayerPrefs.SetFloat("Brightness", PlayerPreferences.Brightness);
 		PlayerPrefs.SetFloat("GammaCavesAndNight", PlayerPreferences.GammaCavesAndNight);
 		PlayerPrefs.SetFloat("GammaWorldAndDay", PlayerPreferences.GammaWorldAndDay);
+		PlayerPrefs.SetFloat("Contrast", PlayerPreferences.Contrast);
 		PlayerPrefs.SetFloat("Volume", PlayerPreferences.Volume);
 		PlayerPrefs.SetFloat("MusicVolume", PlayerPreferences.MusicVolume);
 		PlayerPrefs.SetFloat("MicrophoneVolume", PlayerPreferences.MicrophoneVolume);
@@ -305,6 +315,7 @@ public class PlayerPreferences : MonoBehaviour
 	private void Update()
 	{
 		Shader.globalMaximumLOD = TheForestQualitySettings.UserSettings.MaterialQualityShaderLOD;
+		PlayerPreferences._isBelowDX11 = (SystemInfo.graphicsShaderLevel < 50 || !SystemInfo.supportsComputeShaders);
 		if (this.activeTerrain)
 		{
 			this.activeTerrain.heightmapPixelError = TheForestQualitySettings.UserSettings.TerrainQualityPixelErrorPercentage;
@@ -418,19 +429,40 @@ public class PlayerPreferences : MonoBehaviour
 	public static int Preset = 1;
 
 	
-	public static float Brightness = 0.5f;
-
-	
 	public static float GammaCavesAndNight = 2f;
 
 	
 	public static float GammaWorldAndDay = 2f;
 
 	
-	public const float MinGamma = 2f;
+	public const float GammaMin = 1.5f;
 
 	
-	public const float MaxGamma = 2.2f;
+	public const float GammaMax = 2.3f;
+
+	
+	public const float GammaDefault = 2f;
+
+	
+	public const float GammaCavesMin = 2f;
+
+	
+	public const float GammaCavesMax = 2.5f;
+
+	
+	public const float GammaCavesDefault = 2f;
+
+	
+	public static float Contrast = 1f;
+
+	
+	public const float ContrastMin = 0.9f;
+
+	
+	public const float ContrastMax = 1.15f;
+
+	
+	public const float ContrastDefault = 1f;
 
 	
 	public static float Volume = 0.5f;
@@ -560,6 +592,9 @@ public class PlayerPreferences : MonoBehaviour
 
 	
 	public static bool PreventSaving;
+
+	
+	private static bool _isBelowDX11;
 
 	
 	public static bool is32bit;

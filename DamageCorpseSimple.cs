@@ -76,7 +76,7 @@ public class DamageCorpseSimple : EntityBehaviour
 		{
 			this.baseBody.enabled = false;
 		}
-		if (!BoltNetwork.isClient)
+		if (!BoltNetwork.isClient && this.MyCut)
 		{
 			this.MyCut.SetActive(true);
 		}

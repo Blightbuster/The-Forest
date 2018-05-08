@@ -17,7 +17,7 @@ namespace TheForest.Items.Special
 		}
 
 		
-		private new void Update()
+		protected override void Update()
 		{
 			if (LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.RightHand, LocalPlayer.AnimControl._walkmanId) && LocalPlayer.Inventory.CurrentView == PlayerInventory.PlayerViews.World)
 			{

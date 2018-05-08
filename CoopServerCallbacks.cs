@@ -1810,12 +1810,15 @@ public class CoopServerCallbacks : GlobalEventListener
 		{
 			return;
 		}
-		Transform transform = PoolManager.Pools["misc"].Spawn(LocalPlayer.AnimControl.torchVisGo.transform, evnt.position, Quaternion.identity);
-		torchLightSetup component = transform.GetComponent<torchLightSetup>();
-		if (component)
+		if (LocalPlayer.AnimControl)
 		{
-			component.sourcePos = evnt.sourcePosition;
-			component.distanceToPlayer = evnt.distanceToPlayer;
+			Transform transform = PoolManager.Pools["misc"].Spawn(LocalPlayer.AnimControl.torchVisGo.transform, evnt.position, Quaternion.identity);
+			torchLightSetup component = transform.GetComponent<torchLightSetup>();
+			if (component)
+			{
+				component.sourcePos = evnt.sourcePosition;
+				component.distanceToPlayer = evnt.distanceToPlayer;
+			}
 		}
 	}
 
