@@ -7,6 +7,7 @@ using TheForest.Player;
 using TheForest.Tools;
 using TheForest.Utils;
 using UnityEngine;
+using Valve.VR.InteractionSystem;
 
 namespace TheForest.Items.World
 {
@@ -34,6 +35,25 @@ namespace TheForest.Items.World
 		
 		private void OnEnable()
 		{
+			if (ForestVR.Enabled)
+			{
+				if (this._bowVr)
+				{
+					if (this._bowVr)
+					{
+						this._bowVr.SetActive(true);
+					}
+					this._bowVr.SendMessage("SpawnAndAttachObject", LocalPlayer.vrPlayerControl.RightHand);
+				}
+				if (this._bowAnimator)
+				{
+					this._bowAnimator.SetBool("VR", true);
+				}
+			}
+			else if (this._bowVr)
+			{
+				this._bowVr.SetActive(false);
+			}
 			EventRegistry.Player.Subscribe(TfEvent.AddedItem, new EventRegistry.SubscriberCallback(this.OnItemAdded));
 			if (this.CurrentArrowItemView.ActiveBonus == WeaponStatUpgrade.Types.BurningAmmo)
 			{
@@ -47,6 +67,14 @@ namespace TheForest.Items.World
 		
 		private void OnDisable()
 		{
+			if (ForestVR.Enabled && this._bowVr)
+			{
+				ItemPackageSpawner component = this._bowVr.GetComponent<ItemPackageSpawner>();
+				if (component)
+				{
+					component.removeAttachedObjects(LocalPlayer.vrPlayerControl.RightHand);
+				}
+			}
 			EventRegistry.Player.Unsubscribe(TfEvent.AddedItem, new EventRegistry.SubscriberCallback(this.OnItemAdded));
 			LighterControler.HasLightableItem = false;
 			this._nextReArm = float.MaxValue;
@@ -83,6 +111,22 @@ namespace TheForest.Items.World
 		{
 			if (this._player.CurrentView == PlayerInventory.PlayerViews.World)
 			{
+				if (ForestVR.Enabled)
+				{
+					if (this._longbowVr == null)
+					{
+						this._longbowVr = LocalPlayer.vrPlayerControl.VRCameraRig.GetComponentInChildren<Longbow>();
+					}
+					if (this._arrowHandVr == null)
+					{
+						this._arrowHandVr = LocalPlayer.vrPlayerControl.VRCameraRig.GetComponentInChildren<ArrowHand>();
+					}
+					if (this._bowAnimatorVr == null && this._longbowVr)
+					{
+						this._bowAnimatorVr = this._longbowVr.GetComponent<Animator>();
+					}
+					LocalPlayer.Inventory.CancelNextChargedAttack = false;
+				}
 				if (this._player.Owns(this._ammoItemId, false))
 				{
 					LocalPlayer.Animator.SetBool("noAmmo", false);
@@ -92,7 +136,7 @@ namespace TheForest.Items.World
 					LocalPlayer.Animator.SetBool("noAmmo", true);
 				}
 				this._bowAnimator.SetFloat("bowSpeed", this._bowSpeed);
-				if (LocalPlayer.AnimControl.currLayerState1.shortNameHash == this._releaseBowHash && !LocalPlayer.Animator.IsInTransition(1))
+				if (LocalPlayer.AnimControl.currLayerState1.shortNameHash == this._releaseBowHash && !LocalPlayer.Animator.IsInTransition(1) && !ForestVR.Enabled)
 				{
 					this._ammoAnimated.transform.position = LocalPlayer.ScriptSetup.leftHandHeld.position;
 				}
@@ -149,7 +193,7 @@ namespace TheForest.Items.World
 				if (!this._lightingArrow)
 				{
 					AnimatorStateInfo currentAnimatorStateInfo = LocalPlayer.Animator.GetCurrentAnimatorStateInfo(1);
-					if (TheForest.Utils.Input.GetButtonDown("Fire1") && !LocalPlayer.Animator.GetBool("ballHeld"))
+					if (TheForest.Utils.Input.GetButtonDown("Fire1") && !LocalPlayer.Animator.GetBool("ballHeld") && !ForestVR.Enabled)
 					{
 						LocalPlayer.Inventory.CancelNextChargedAttack = false;
 						if (this._aimingReticle)
@@ -171,7 +215,7 @@ namespace TheForest.Items.World
 						this._animator.SetBoolReflected("checkArms", false);
 						this._animator.SetBoolReflected("onHand", false);
 					}
-					else if (TheForest.Utils.Input.GetButtonDown("AltFire") || LocalPlayer.Animator.GetBool("ballHeld"))
+					else if ((TheForest.Utils.Input.GetButtonDown("AltFire") || LocalPlayer.Animator.GetBool("ballHeld")) && !ForestVR.Enabled)
 					{
 						LocalPlayer.AnimControl.animEvents.enableSpine();
 						this._player.CancelNextChargedAttack = true;
@@ -189,7 +233,7 @@ namespace TheForest.Items.World
 					{
 						this._bowAnimator.Play(this._drawBowHash, 0, currentAnimatorStateInfo.normalizedTime);
 					}
-					if (TheForest.Utils.Input.GetButtonUp("Fire1") || LocalPlayer.Animator.GetBool("ballHeld"))
+					if ((TheForest.Utils.Input.GetButtonUp("Fire1") || LocalPlayer.Animator.GetBool("ballHeld")) && !ForestVR.Enabled)
 					{
 						this._currentAmmo = this.CurrentArrowItemView;
 						if (this._aimingReticle)
@@ -231,7 +275,7 @@ namespace TheForest.Items.World
 						this.ReArm();
 					}
 				}
-				else
+				else if (!ForestVR.Enabled)
 				{
 					LocalPlayer.Inventory.CancelNextChargedAttack = true;
 				}
@@ -241,9 +285,31 @@ namespace TheForest.Items.World
 		
 		private void LateUpdate()
 		{
-			if (LocalPlayer.AnimControl.currLayerState1.shortNameHash == this._releaseBowHash && !LocalPlayer.Animator.IsInTransition(1))
+			if (LocalPlayer.AnimControl.currLayerState1.shortNameHash == this._releaseBowHash && !LocalPlayer.Animator.IsInTransition(1) && !ForestVR.Enabled)
 			{
 				this._ammoAnimated.transform.position = LocalPlayer.ScriptSetup.leftHandHeld.position;
+			}
+			if (ForestVR.Enabled)
+			{
+				if (this._longbowVr)
+				{
+					base.transform.position = this._longbowVr.bowFollowTransform.transform.position;
+					base.transform.rotation = this._longbowVr.bowFollowTransform.transform.rotation;
+					this._bowAnimator.Play(this._bowPullVrHash, 0, this._bowAnimatorVr.GetCurrentAnimatorStateInfo(0).normalizedTime);
+				}
+				if (this._arrowHandVr)
+				{
+					if (this._arrowHandVr.currentArrow != null)
+					{
+						this._ammoAnimated.transform.position = this._arrowHandVr.currentArrow.GetComponent<Arrow>().arrowFollowTransform.position;
+						this._ammoAnimated.transform.rotation = this._arrowHandVr.currentArrow.GetComponent<Arrow>().arrowFollowTransform.rotation;
+						this._ammoAnimated.SetActive(true);
+					}
+					else
+					{
+						this._ammoAnimated.SetActive(false);
+					}
+				}
 			}
 		}
 
@@ -493,6 +559,13 @@ namespace TheForest.Items.World
 		}
 
 		
+		private void setupBowForVr()
+		{
+			Hand componentInParent = base.transform.GetComponentInParent<Hand>();
+			this._bowVr.SendMessage("SpawnAndAttachObject", componentInParent);
+		}
+
+		
 		
 		public bool CanSetArrowOnFire
 		{
@@ -574,6 +647,18 @@ namespace TheForest.Items.World
 		public AimingReticle _aimingReticle;
 
 		
+		public GameObject _bowVr;
+
+		
+		public Longbow _longbowVr;
+
+		
+		public ArrowHand _arrowHandVr;
+
+		
+		private Animator _bowAnimatorVr;
+
+		
 		private InventoryItemView _currentAmmo;
 
 		
@@ -602,6 +687,9 @@ namespace TheForest.Items.World
 
 		
 		private int _lightBowHash = Animator.StringToHash("lightBow");
+
+		
+		private int _bowPullVrHash = Animator.StringToHash("bowPull_VR");
 
 		
 		private Animator _animator;

@@ -24,6 +24,9 @@ public class slingShotController : MonoBehaviour
 			this._slingAnimator = base.transform.GetComponent<Animator>();
 			this._playerAnimator = LocalPlayer.Animator;
 		}
+		if (ForestVR.Enabled)
+		{
+		}
 		this.resetAttack();
 	}
 
@@ -37,28 +40,31 @@ public class slingShotController : MonoBehaviour
 			this._slingAnimator.SetBool("toAim", false);
 			return;
 		}
-		if ((TheForest.Utils.Input.GetButtonDown("Fire1") || TheForest.Utils.Input.GetButton("Fire1")) && !LocalPlayer.Animator.GetBool("ballHeld"))
+		if (!ForestVR.Enabled)
 		{
-			this._playerAnimator.SetBool("aimSlingBool", true);
-			this._slingAnimator.SetBool("toAim", true);
-			LocalPlayer.Inventory.StashLeftHand();
-		}
-		if (TheForest.Utils.Input.GetButtonUp("Fire1"))
-		{
-			if (LocalPlayer.AnimControl.currLayerState1.shortNameHash == this.aimSlingIdleHash)
+			if ((TheForest.Utils.Input.GetButtonDown("Fire1") || TheForest.Utils.Input.GetButton("Fire1")) && !LocalPlayer.Animator.GetBool("ballHeld"))
 			{
-				this._playerAnimator.SetBool("attack", true);
-				this._slingAnimator.SetBool("attack", true);
-				base.Invoke("resetAttack", 0.5f);
-				base.Invoke("fireProjectile", 0.15f);
-				LocalPlayer.Sfx.PlayBowSnap();
-				LocalPlayer.TargetFunctions.sendPlayerAttacking();
+				this._playerAnimator.SetBool("aimSlingBool", true);
+				this._slingAnimator.SetBool("toAim", true);
+				LocalPlayer.Inventory.StashLeftHand();
 			}
-			else
+			if (TheForest.Utils.Input.GetButtonUp("Fire1"))
 			{
-				this._playerAnimator.SetBool("attack", false);
-				this._playerAnimator.SetBool("aimSlingBool", false);
-				this._slingAnimator.SetBool("toAim", false);
+				if (LocalPlayer.AnimControl.currLayerState1.shortNameHash == this.aimSlingIdleHash)
+				{
+					this._playerAnimator.SetBool("attack", true);
+					this._slingAnimator.SetBool("attack", true);
+					base.Invoke("resetAttack", 0.5f);
+					base.Invoke("fireProjectile", 0.15f);
+					LocalPlayer.Sfx.PlayBowSnap();
+					LocalPlayer.TargetFunctions.sendPlayerAttacking();
+				}
+				else
+				{
+					this._playerAnimator.SetBool("attack", false);
+					this._playerAnimator.SetBool("aimSlingBool", false);
+					this._slingAnimator.SetBool("toAim", false);
+				}
 			}
 		}
 		if (this._AmmoHeld.activeSelf != LocalPlayer.Inventory.Owns(this._ammoItemId, true))
@@ -68,11 +74,18 @@ public class slingShotController : MonoBehaviour
 	}
 
 	
-	private void fireProjectile()
+	public void fireProjectile()
 	{
 		if (LocalPlayer.Inventory.RemoveItem(this._ammoItemId, 1, false, true))
 		{
-			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this._Ammo, this._ammoSpawnPos.transform.position, this._ammoSpawnPos.transform.rotation);
+			Vector3 position = this._ammoSpawnPos.transform.position;
+			Quaternion rotation = this._ammoSpawnPos.transform.rotation;
+			if (ForestVR.Enabled)
+			{
+				position = this._ammoSpawnPosVR.transform.position;
+				rotation = this._ammoSpawnPosVR.transform.rotation;
+			}
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(this._Ammo, position, rotation);
 			Rigidbody component = gameObject.GetComponent<Rigidbody>();
 			rockSound component2 = gameObject.GetComponent<rockSound>();
 			if (component2)
@@ -101,7 +114,12 @@ public class slingShotController : MonoBehaviour
 					base.StartCoroutine(this.enablePickupTrigger(componentInChildren.gameObject));
 				}
 			}
-			component.AddForce(4000f * (0.016666f / Time.fixedDeltaTime) * this._ammoSpawnPos.transform.forward);
+			Vector3 forward = this._ammoSpawnPos.transform.forward;
+			if (ForestVR.Enabled)
+			{
+				forward = this._ammoSpawnPosVR.transform.forward;
+			}
+			component.AddForce(4000f * (0.016666f / Time.fixedDeltaTime) * forward);
 		}
 	}
 
@@ -141,14 +159,17 @@ public class slingShotController : MonoBehaviour
 	public GameObject _ammoSpawnPos;
 
 	
+	public GameObject _ammoSpawnPosVR;
+
+	
 	[ItemIdPicker(Item.Types.Ammo)]
 	public int _ammoItemId;
 
 	
-	private Animator _playerAnimator;
+	public Animator _playerAnimator;
 
 	
-	private Animator _slingAnimator;
+	public Animator _slingAnimator;
 
 	
 	private int aimSlingIdleHash = Animator.StringToHash("slingShotAimIdle");

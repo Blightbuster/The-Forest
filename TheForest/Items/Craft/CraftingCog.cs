@@ -114,10 +114,10 @@ namespace TheForest.Items.Craft
 			ItemStorageProxy itemStorageProxy = (!(rightHand == null)) ? rightHand.GetComponent<ItemStorageProxy>() : null;
 			if (itemStorageProxy != null && itemStorageProxy._storage != null)
 			{
-				this.Storage = itemStorageProxy._storage;
-				this.Storage.Open();
-				int num = this._inventory.CurrentStorage.Add(rightHand._itemId, 1, rightHand.Properties);
-				this._inventory.RemoveItem(rightHand._itemId, 1 - num, true, true);
+				int itemId = rightHand._itemId;
+				ItemProperties properties = rightHand.Properties;
+				this._inventory.RemoveItem(itemId, 1, true, true);
+				this._inventory.AddItem(itemId, 1, true, true, properties);
 			}
 		}
 

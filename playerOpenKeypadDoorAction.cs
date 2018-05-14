@@ -36,6 +36,7 @@ public class playerOpenKeypadDoorAction : MonoBehaviour
 		LocalPlayer.CamRotator.rotationRange = new Vector2(0f, 0f);
 		LocalPlayer.CamRotator.transform.localEulerAngles = new Vector3(0f, 0f, 0f);
 		LocalPlayer.CamRotator.enabled = false;
+		LocalPlayer.vrPlayerControl.useGhostMode = true;
 		LocalPlayer.CamFollowHead.followAnim = true;
 		LocalPlayer.AnimControl.lockGravity = true;
 		if (!keycardWasActive)
@@ -186,6 +187,7 @@ public class playerOpenKeypadDoorAction : MonoBehaviour
 		LocalPlayer.FpCharacter.Locked = true;
 		LocalPlayer.FpCharacter.CanJump = false;
 		LocalPlayer.AnimControl.endGameCutScene = true;
+		LocalPlayer.vrPlayerControl.useGhostMode = true;
 		LocalPlayer.AnimControl.playerHeadCollider.enabled = false;
 		LocalPlayer.FpCharacter.enabled = false;
 		LocalPlayer.AnimControl.lockGravity = true;
@@ -202,6 +204,7 @@ public class playerOpenKeypadDoorAction : MonoBehaviour
 		LocalPlayer.FpCharacter.Locked = false;
 		LocalPlayer.FpCharacter.CanJump = true;
 		LocalPlayer.AnimControl.endGameCutScene = false;
+		LocalPlayer.vrPlayerControl.useGhostMode = false;
 		LocalPlayer.AnimControl.playerHeadCollider.enabled = true;
 		LocalPlayer.FpCharacter.enabled = true;
 		LocalPlayer.AnimControl.lockGravity = false;

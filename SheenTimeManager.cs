@@ -13,7 +13,7 @@ public class SheenTimeManager : MonoBehaviour
 		{
 			return;
 		}
-		float num = (LocalPlayer.Inventory.CurrentView == PlayerInventory.PlayerViews.Pause) ? Time.time : Time.unscaledTime;
+		float num = (!(LocalPlayer.Inventory != null) || LocalPlayer.Inventory.CurrentView == PlayerInventory.PlayerViews.Pause) ? Time.time : Time.unscaledTime;
 		Shader.SetGlobalFloat("_SheenTime", num * this._globalSheenTimeScale);
 	}
 

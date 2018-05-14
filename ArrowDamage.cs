@@ -45,6 +45,10 @@ public class ArrowDamage : MonoBehaviour
 			if (num > 0f && Physics.Raycast(base.transform.position, normalized, out this.hit, num, this.layers))
 			{
 				this.hitPointUpdated = true;
+				if (this.hit.collider.gameObject.CompareTag("Player"))
+				{
+					return;
+				}
 				this.CheckHit(this.hit.point, this.hit.transform, this.hit.collider.isTrigger, this.hit.collider);
 			}
 		}
@@ -53,6 +57,10 @@ public class ArrowDamage : MonoBehaviour
 	
 	private void OnTriggerEnter(Collider other)
 	{
+		if (other.gameObject.CompareTag("Player"))
+		{
+			return;
+		}
 		if (this.Live && this.PhysicBody)
 		{
 			this.CheckHit(other.transform.position, other.transform, other.isTrigger, this.hit.collider);

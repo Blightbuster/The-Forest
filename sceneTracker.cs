@@ -1090,6 +1090,9 @@ public class sceneTracker : MonoBehaviour
 	}
 
 	
+	public GameObject TheatreGo;
+
+	
 	public lb_BirdController birdController;
 
 	

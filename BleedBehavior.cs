@@ -17,6 +17,10 @@ public class BleedBehavior : MonoBehaviour
 	
 	public void Update()
 	{
+		if (ForestVR.Enabled)
+		{
+			return;
+		}
 		if (this.autoFadeOut && BleedBehavior.BloodAmount > 0f)
 		{
 			BleedBehavior.BloodAmount -= this.autoFadeOutAbsReduc * Time.deltaTime * BleedBehavior.BloodReductionRatio;

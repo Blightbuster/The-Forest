@@ -633,7 +633,7 @@ public class CoopServerCallbacks : GlobalEventListener
 			return;
 		}
 		ValidSleepTime validSleepTime = ValidSleepTime.Create(GlobalTargets.AllClients);
-		validSleepTime.NextSleepTime = Scene.Clock.NextSleepTime;
+		validSleepTime.NextSleepTime = Convert.ToSingle(Scene.Clock.NextSleepTime);
 		validSleepTime.Send();
 	}
 

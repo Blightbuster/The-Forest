@@ -64,6 +64,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private IEnumerator goToStartSearchRoutine()
 	{
+		this.CurrentActiveRoutine = 1;
 		this._searchActive = true;
 		this.search.StartCoroutine("toLook");
 		this.ai.StartCoroutine(this.ai.setRepathRate(1f));
@@ -112,6 +113,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private IEnumerator goToFollowLeaderRoutine()
 	{
+		this.CurrentActiveRoutine = 2;
 		this.setup.search.setToLeader();
 		yield return YieldPresets.WaitPointFiveSeconds;
 		base.StartCoroutine(this.setup.search.getRandomTargetOffset(5f));
@@ -186,6 +188,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private IEnumerator goToLastSightingRoutine()
 	{
+		this.CurrentActiveRoutine = 3;
 		this.animator.SetBool("searchingBOOL", true);
 		this.animator.SetBool("stalkingBOOL", false);
 		float walkType = 0f;
@@ -279,6 +282,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private IEnumerator goToCloseBushRoutine()
 	{
+		this.CurrentActiveRoutine = 4;
 		this.ai.enablePathSearch();
 		yield return YieldPresets.WaitForFixedUpdate;
 		this._toPlayerNoise = false;
@@ -347,6 +351,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private IEnumerator goToCloseSearchRoutine()
 	{
+		this.CurrentActiveRoutine = 5;
 		this.animator.SetBool("attackBOOL", false);
 		this.ai.StartCoroutine("toStop");
 		this.search.StartCoroutine("toLook");
@@ -433,6 +438,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private IEnumerator goToLongSearchRoutine()
 	{
+		this.CurrentActiveRoutine = 6;
 		this.animator.SetBool("stalkingBOOL", false);
 		this.animator.SetBool("sleepBOOL", false);
 		this._longSearchBool = false;
@@ -534,6 +540,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private IEnumerator moveToSearchPointRoutine()
 	{
+		this.CurrentActiveRoutine = 7;
 		this.search.setToWaypoint();
 		this.search.StartCoroutine(this.search.toLook());
 		this._toPlayerNoise = false;
@@ -709,6 +716,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private IEnumerator goToTrapTriggerRoutine()
 	{
+		this.CurrentActiveRoutine = 8;
 		this.ai.StartCoroutine("toStop");
 		this.ai.enablePathSearch();
 		yield return YieldPresets.WaitPointTwoSeconds;
@@ -750,6 +758,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private IEnumerator goToArtifactRoutine(bool attract)
 	{
+		this.CurrentActiveRoutine = 9;
 		if (attract)
 		{
 			this.search.updateCurrentWaypoint(this._lastArtifactPos);
@@ -834,6 +843,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private IEnumerator goToNoiseRoutine()
 	{
+		this.CurrentActiveRoutine = 10;
 		this.search.setToLastSighting();
 		this.animator.SetBool("soundBool1", true);
 		this.search.StartCoroutine("toLook");
@@ -932,6 +942,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private IEnumerator goToPlaceArtRoutine()
 	{
+		this.CurrentActiveRoutine = 11;
 		if (this.ai.mainPlayerDist > 200f || this.search.playerAware)
 		{
 			this.ActiveRoutine = base.StartCoroutine(this.goToResetRoutine());
@@ -1020,6 +1031,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private IEnumerator goToBurnStructureRoutine()
 	{
+		this.CurrentActiveRoutine = 12;
 		float timer = Time.time;
 		this.ai.resetCombatParams();
 		this.ai.StartCoroutine("toStop");
@@ -1076,6 +1088,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private IEnumerator goToStructureRoutine()
 	{
+		this.CurrentActiveRoutine = 13;
 		float timer = Time.time;
 		this.animControl.resetAllActionBools();
 		this.ai.StartCoroutine("toStop");
@@ -1202,6 +1215,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private IEnumerator goToPatrolRoutine()
 	{
+		this.CurrentActiveRoutine = 14;
 		if (!this.search.findCloseCaveWayPoint())
 		{
 			this._doPatrol = false;
@@ -1286,6 +1300,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private IEnumerator goToRunAwayRoutine()
 	{
+		this.CurrentActiveRoutine = 15;
 		this.setup.animControl.resetAllActionBools();
 		this.setup.search.StartCoroutine(this.setup.search.findPointAwayFromPlayer(20f));
 		yield return null;
@@ -1335,6 +1350,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private IEnumerator goToRandomPointRoutine()
 	{
+		this.CurrentActiveRoutine = 16;
 		this.animControl.resetAllActionBools();
 		this.setup.ai.StartCoroutine("toStop");
 		yield return null;
@@ -1387,6 +1403,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private IEnumerator goToEatBodyRoutine()
 	{
+		this.CurrentActiveRoutine = 17;
 		float timer = Time.time;
 		float bodyDist = float.PositiveInfinity;
 		if (this._currentMemberGo)
@@ -1500,6 +1517,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private IEnumerator goToTargetFoundRoutine()
 	{
+		this.CurrentActiveRoutine = 18;
 		if (!this._searchActive)
 		{
 			this.toDisableSearchEvent();
@@ -1556,6 +1574,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private IEnumerator goToTargetSpottedRoutine()
 	{
+		this.CurrentActiveRoutine = 19;
 		this.resetSearchparams();
 		this.ai.StartCoroutine("toStop");
 		float timer;
@@ -1607,6 +1626,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	private IEnumerator goToResetRoutine()
 	{
+		this.CurrentActiveRoutine = 20;
 		this.ActiveRoutine = base.StartCoroutine(this.goToStartSearchRoutine());
 		yield return null;
 		yield break;
@@ -1615,6 +1635,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	public IEnumerator gotHitRoutine()
 	{
+		this.CurrentActiveRoutine = 21;
 		this.animator.SetBool("idleWaryBOOL", false);
 		this.animControl.disablePatrolAnimSpeed();
 		this.setup.familyFunctions.sendAggressive();
@@ -1627,6 +1648,7 @@ public class pmSearchReplace : MonoBehaviour
 	
 	public IEnumerator goToActivateRoutine()
 	{
+		this.CurrentActiveRoutine = 22;
 		if (this.setup.pmBrain && this.setup.pmBrain.FsmVariables.GetFsmBool("targetSeenBool").Value)
 		{
 			this.setup.pmBrain.SendEvent("toActivateFSM");
@@ -1871,6 +1893,9 @@ public class pmSearchReplace : MonoBehaviour
 
 	
 	public bool fsmBrainTargetSeenBool;
+
+	
+	public int CurrentActiveRoutine;
 
 	
 	public float waypointArriveDist = 13f;

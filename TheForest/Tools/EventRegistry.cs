@@ -93,6 +93,7 @@ namespace TheForest.Tools
 				es.Value._callbacks.Clear();
 			});
 			EventRegistry.Achievements._eventSubscriptions.Clear();
+			EventRegistry.System.Publish(EventRegistry.Cleared, null);
 		}
 
 		
@@ -119,6 +120,12 @@ namespace TheForest.Tools
 
 		
 		private IDictionary<object, EventRegistry.EventSubscription> _eventSubscriptions = new Dictionary<object, EventRegistry.EventSubscription>();
+
+		
+		public static object Cleared = new object();
+
+		
+		public static EventRegistry System = new EventRegistry();
 
 		
 		public static EventRegistry Game = new EventRegistry();

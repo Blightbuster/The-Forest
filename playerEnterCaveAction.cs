@@ -50,12 +50,16 @@ public class playerEnterCaveAction : MonoBehaviour
 		LocalPlayer.AnimControl.playerCollider.isTrigger = true;
 		LocalPlayer.AnimControl.playerHeadCollider.isTrigger = true;
 		LocalPlayer.Rigidbody.velocity = Vector3.zero;
-		if (this.swimCave)
+		if (!ForestVR.Enabled)
 		{
-			LocalPlayer.CamFollowHead.smoothLock = true;
+			if (this.swimCave)
+			{
+				LocalPlayer.CamFollowHead.smoothLock = true;
+			}
+			LocalPlayer.CamFollowHead.followAnim = true;
 		}
-		LocalPlayer.CamFollowHead.followAnim = true;
 		LocalPlayer.AnimControl.lockGravity = true;
+		LocalPlayer.FpCharacter.disableToggledCrouch();
 		if (!this.swimCave)
 		{
 			LocalPlayer.Inventory.MemorizeItem(Item.EquipmentSlot.RightHand);

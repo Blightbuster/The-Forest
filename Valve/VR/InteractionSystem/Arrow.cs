@@ -9,7 +9,10 @@ namespace Valve.VR.InteractionSystem
 		
 		private void Start()
 		{
-			Physics.IgnoreCollision(this.shaftRB.GetComponent<Collider>(), Player.instance.headCollider);
+			if (Player.instance.headCollider != null)
+			{
+				Physics.IgnoreCollision(this.shaftRB.GetComponent<Collider>(), Player.instance.headCollider);
+			}
 		}
 
 		
@@ -173,6 +176,9 @@ namespace Valve.VR.InteractionSystem
 				UnityEngine.Object.Destroy(this.scaleParentObject);
 			}
 		}
+
+		
+		public Transform arrowFollowTransform;
 
 		
 		public ParticleSystem glintParticle;

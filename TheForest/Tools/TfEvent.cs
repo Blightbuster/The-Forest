@@ -84,6 +84,8 @@ namespace TheForest.Tools
 				return TfEvent.InspectedPlant;
 			case TfEvent.Types.Endgame_Shutdown2ndArtifact:
 				return TfEvent.Endgame.Shutdown2ndArtifact;
+			case TfEvent.Types.CheatAllowedSet:
+				return TfEvent.CheatAllowedSet;
 			default:
 				return null;
 			}
@@ -211,6 +213,9 @@ namespace TheForest.Tools
 
 		
 		public static readonly object InspectedPlant = new object();
+
+		
+		public static readonly object CheatAllowedSet = new object();
 
 		
 		public class Achievements
@@ -398,7 +403,9 @@ namespace TheForest.Tools
 			
 			InspectedPlant,
 			
-			Endgame_Shutdown2ndArtifact
+			Endgame_Shutdown2ndArtifact,
+			
+			CheatAllowedSet
 		}
 	}
 }

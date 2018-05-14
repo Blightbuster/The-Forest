@@ -121,6 +121,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	
 	private IEnumerator OnDeserialized()
 	{
+		this.Stealth = 0f;
 		int minArmorVis = 0;
 		int armor = 0;
 		for (int i = 0; i < this.CurrentArmorTypes.Length; i++)
@@ -446,7 +447,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		{
 			return;
 		}
-		float num = LocalPlayer.Stats.DaySurvived + TheForest.Utils.Scene.Atmosphere.DeltaTimeOfDay;
+		float num = Convert.ToSingle((double)LocalPlayer.Stats.DaySurvived + TheForest.Utils.Scene.Atmosphere.DeltaTimeOfDay);
 		if (Mathf.FloorToInt(num) != Mathf.FloorToInt(LocalPlayer.Stats.DaySurvived))
 		{
 			LocalPlayer.Stats.DaySurvived = num;
@@ -600,23 +601,23 @@ public class PlayerStats : MonoBehaviour, IBurnable
 				num3++;
 				break;
 			case PlayerStats.ArmorTypes.DeerSkin:
-				goto IL_591;
+				goto IL_597;
 			default:
 				if (armorTypes == PlayerStats.ArmorTypes.Warmsuit)
 				{
-					goto IL_591;
+					goto IL_597;
 				}
 				break;
 			case PlayerStats.ArmorTypes.Creepy:
 				num3++;
 				break;
 			}
-			IL_5B2:
+			IL_5B8:
 			i++;
 			continue;
-			IL_591:
+			IL_597:
 			num4++;
-			goto IL_5B2;
+			goto IL_5B8;
 		}
 		this.ColdArmorResult = (float)num4 / 10f / 2f + 0.5f;
 		this.ArmorResult = (float)num3 / 10f / 2f + this.ColdArmorResult;
@@ -646,7 +647,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		}
 		if (!TheForest.Utils.Scene.Atmosphere.Sleeping || this.Fullness > this.StarvationSettings.SleepingFullnessThreshold)
 		{
-			this.Fullness -= TheForest.Utils.Scene.Atmosphere.DeltaTimeOfDay * 1.35f;
+			this.Fullness -= Convert.ToSingle(TheForest.Utils.Scene.Atmosphere.DeltaTimeOfDay * 1.3500000238418579);
 		}
 		if (!Cheats.NoSurvival)
 		{
@@ -666,7 +667,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 						}
 						TheForest.Utils.Scene.HudGui.StomachStarvation.gameObject.SetActive(true);
 					}
-					this.Starvation += TheForest.Utils.Scene.Atmosphere.DeltaTimeOfDay / this.StarvationCurrentDuration;
+					this.Starvation += Convert.ToSingle(TheForest.Utils.Scene.Atmosphere.DeltaTimeOfDay / (double)this.StarvationCurrentDuration);
 					if (this.Starvation >= 1f)
 					{
 						if (!this.StarvationSettings.TakingDamage)
@@ -726,7 +727,10 @@ public class PlayerStats : MonoBehaviour, IBurnable
 							LocalPlayer.Tuts.ShowThirstTut();
 						}
 						this.Hit(Mathf.CeilToInt((float)this.ThirstSettings.Damage * GameSettings.Survival.ThirstDamageRatio), true, PlayerStats.DamageType.Physical);
-						BleedBehavior.BloodAmount += 0.6f;
+						if (!ForestVR.Enabled)
+						{
+							BleedBehavior.BloodAmount += 0.6f;
+						}
 						TheForest.Utils.Scene.HudGui.ThirstDamageTimerTween.ResetToBeginning();
 						TheForest.Utils.Scene.HudGui.ThirstDamageTimerTween.PlayForward();
 					}
@@ -744,7 +748,7 @@ public class PlayerStats : MonoBehaviour, IBurnable
 				{
 					if (!TheForest.Utils.Scene.Atmosphere.Sleeping || this.Thirst < this.ThirstSettings.SleepingThirstThreshold)
 					{
-						this.Thirst += TheForest.Utils.Scene.Atmosphere.DeltaTimeOfDay / this.ThirstSettings.Duration * GameSettings.Survival.ThirstRatio;
+						this.Thirst += Convert.ToSingle(TheForest.Utils.Scene.Atmosphere.DeltaTimeOfDay / (double)this.ThirstSettings.Duration * (double)GameSettings.Survival.ThirstRatio);
 					}
 					if (this.Thirst > this.ThirstSettings.TutorialThreshold)
 					{
@@ -2173,7 +2177,10 @@ public class PlayerStats : MonoBehaviour, IBurnable
 			this.isExplode = true;
 			base.Invoke("resetExplosion", 2.2f);
 			int num = this.HitArmor(25);
-			BleedBehavior.BloodAmount += Mathf.Clamp01(3f * (float)num / this.Health) * 0.9f;
+			if (!ForestVR.Enabled)
+			{
+				BleedBehavior.BloodAmount += Mathf.Clamp01(3f * (float)num / this.Health) * 0.9f;
+			}
 			this.HealthChange((float)(-(float)num));
 			BleedBehavior.BloodReductionRatio = (Mathf.Clamp01(this.Health / 100f) + 0.1f) * ((!this.IsHealthInGreyZone) ? 1f : 0.75f);
 			LocalPlayer.Inventory.Close();
@@ -2258,7 +2265,10 @@ public class PlayerStats : MonoBehaviour, IBurnable
 				damage = ((!ignoreArmor) ? this.HitArmor(damage) : damage);
 				if (damage > 0)
 				{
-					BleedBehavior.BloodAmount += Mathf.Clamp01(3f * (float)damage / this.Health) * 0.9f;
+					if (!ForestVR.Enabled)
+					{
+						BleedBehavior.BloodAmount += Mathf.Clamp01(3f * (float)damage / this.Health) * 0.9f;
+					}
 					this.HealthChange((float)(-(float)damage));
 					BleedBehavior.BloodReductionRatio = (Mathf.Clamp01(this.Health / 100f) + 0.1f) * ((!this.IsHealthInGreyZone) ? 1f : 0.75f);
 				}
@@ -2311,7 +2321,10 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	public void HitShark(int damage)
 	{
 		this.HealthChange((float)(-(float)damage));
-		BleedBehavior.BloodAmount += Mathf.Clamp01(3f * (float)damage / this.Health) * 0.9f;
+		if (!ForestVR.Enabled)
+		{
+			BleedBehavior.BloodAmount += Mathf.Clamp01(3f * (float)damage / this.Health) * 0.9f;
+		}
 		BleedBehavior.BloodReductionRatio = (Mathf.Clamp01(this.Health / 100f) + 0.1f) * ((!this.IsHealthInGreyZone) ? 1f : 0.5f);
 		if (this.Health > 0f)
 		{
@@ -2352,7 +2365,10 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		}
 		this.animator.SetBoolReflected("deathBool", true);
 		this.camFollow.followAnim = true;
-		BleedBehavior.BloodAmount += Mathf.Clamp01(3f * (float)damage / this.Health) * 0.9f;
+		if (!ForestVR.Enabled)
+		{
+			BleedBehavior.BloodAmount += Mathf.Clamp01(3f * (float)damage / this.Health) * 0.9f;
+		}
 		BleedBehavior.BloodReductionRatio = (Mathf.Clamp01(this.Health / 100f) + 0.1f) * ((!this.IsHealthInGreyZone) ? 1f : 0.5f);
 		base.Invoke("ResetHit", 1f);
 	}
@@ -2426,7 +2442,10 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		this.camFollow.followAnim = true;
 		base.Invoke("BlackScreen", time);
 		float num = 50f;
-		BleedBehavior.BloodAmount += Mathf.Clamp01(3f * num / this.Health) * 0.9f;
+		if (!ForestVR.Enabled)
+		{
+			BleedBehavior.BloodAmount += Mathf.Clamp01(3f * num / this.Health) * 0.9f;
+		}
 		BleedBehavior.BloodReductionRatio = (Mathf.Clamp01(this.Health / 100f) + 0.1f) * ((!this.IsHealthInGreyZone) ? 1f : 0.5f);
 		base.Invoke("ResetHit", 1f);
 	}
@@ -2449,7 +2468,10 @@ public class PlayerStats : MonoBehaviour, IBurnable
 	
 	private void KnockOut()
 	{
-		BleedBehavior.BloodAmount += 1f;
+		if (!ForestVR.Enabled)
+		{
+			BleedBehavior.BloodAmount += 1f;
+		}
 		BleedBehavior.BloodReductionRatio = (Mathf.Clamp01(this.Health / 100f) + 0.1f) * ((!this.IsHealthInGreyZone) ? 1f : 0.5f);
 		this.pmDamage.SendEvent("toHit");
 		this.pm.SendEvent("toHit");
@@ -2530,8 +2552,11 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		LocalPlayer.CamFollowHead.followAnim = true;
 		LocalPlayer.Inventory.StashLeftHand();
 		LocalPlayer.Inventory.StashEquipedWeapon(false);
-		BleedBehavior.BloodAmount = 1f;
-		BleedBehavior.BloodReductionRatio = 1f;
+		if (!ForestVR.Enabled)
+		{
+			BleedBehavior.BloodAmount = 1f;
+			BleedBehavior.BloodReductionRatio = 1f;
+		}
 		pos.y += base.transform.position.y - LocalPlayer.Animator.transform.position.y;
 		base.transform.position = pos;
 		base.transform.rotation = marker.rotation;
@@ -3000,7 +3025,10 @@ public class PlayerStats : MonoBehaviour, IBurnable
 		this.animator.SetBoolReflected("deathBool", true);
 		this.camFollow.followAnim = true;
 		float num = 5f;
-		BleedBehavior.BloodAmount += Mathf.Clamp01(3f * num / this.Health) * 0.9f;
+		if (!ForestVR.Enabled)
+		{
+			BleedBehavior.BloodAmount += Mathf.Clamp01(3f * num / this.Health) * 0.9f;
+		}
 		BleedBehavior.BloodReductionRatio = (Mathf.Clamp01(this.Health / 100f) + 0.1f) * ((!this.IsHealthInGreyZone) ? 1f : 0.5f);
 		base.Invoke("ResetHit", 1f);
 	}

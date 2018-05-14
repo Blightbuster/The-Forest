@@ -89,6 +89,7 @@ public class CoopDedicatedBootstrap : MonoBehaviour
 		SteamDSConfig.TreeRegrowMode = this.HasOption(args, "-treeregrowmode", SteamDSConfig.TreeRegrowMode);
 		SteamDSConfig.AllowBuildingDestruction = this.HasOption(args, "-allowbuildingdestruction", SteamDSConfig.AllowBuildingDestruction);
 		SteamDSConfig.AllowEnemiesCreative = this.HasOption(args, "-allowenemiescreative", SteamDSConfig.AllowEnemiesCreative);
+		SteamDSConfig.AllowCheats = this.HasOption(args, "-allowcheats", SteamDSConfig.AllowCheats);
 		this.ApplyCheatsAndOptions();
 		SteamDSConfig.UseServerConfigFile = false;
 		if (SteamDSConfig.useLaunchDisplay)
@@ -110,6 +111,7 @@ public class CoopDedicatedBootstrap : MonoBehaviour
 		PlayerPreferences.SetLocalTreeRegrowth(SteamDSConfig.TreeRegrowMode);
 		PlayerPreferences.SetLocalNoDestructionMode(!SteamDSConfig.AllowBuildingDestruction);
 		PlayerPreferences.SetLocalAllowEnemiesCreativeMode(SteamDSConfig.AllowEnemiesCreative);
+		PlayerPreferences.SetAllowCheatsMode(SteamDSConfig.AllowCheats);
 	}
 
 	

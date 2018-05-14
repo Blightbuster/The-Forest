@@ -203,6 +203,7 @@ namespace TheForest.Player.Actions
 				LocalPlayer.PlayerBase.transform.localPosition = fixLocalPos;
 				LocalPlayer.ScriptSetup.forceLocalPos.enabled = false;
 				LocalPlayer.AnimControl.endGameCutScene = true;
+				LocalPlayer.vrPlayerControl.useGhostMode = true;
 				LocalPlayer.AnimControl.useRootMotion = true;
 				LocalPlayer.Inventory.UnequipItemAtSlot(Item.EquipmentSlot.Chest, false, true, false);
 				LocalPlayer.Animator.SetBool("toMachine", true);
@@ -302,6 +303,7 @@ namespace TheForest.Player.Actions
 				LocalPlayer.AnimControl.useRootRotation = false;
 				LocalPlayer.AnimControl.holdingGirl = false;
 				LocalPlayer.AnimControl.endGameCutScene = false;
+				LocalPlayer.vrPlayerControl.useGhostMode = false;
 				LocalPlayer.ScriptSetup.forceLocalPos.enabled = true;
 				LocalPlayer.Inventory.EquipPreviousWeapon(true);
 				LocalPlayer.Inventory.ShowAllEquiped(true);

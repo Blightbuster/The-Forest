@@ -74,7 +74,7 @@ namespace TheForest.Buildings.World
 		
 		public void AddRandomAmount()
 		{
-			if (Scene.Atmosphere.DeltaTimeOfDay > 0f && (!LocalPlayer.Inventory || Vector3.Distance(LocalPlayer.Transform.position, base.transform.position) > 150f))
+			if (Scene.Atmosphere.DeltaTimeOfDay > 0.0 && (!LocalPlayer.Inventory || Vector3.Distance(LocalPlayer.Transform.position, base.transform.position) > 150f))
 			{
 				int num = this._gain;
 				if (num > 0)

@@ -66,13 +66,13 @@ public class TheForestQualitySettings : ScriptableObject
 			}
 			if (materialQuality == TheForestQualitySettings.MaterialQualities.Medium)
 			{
-				return 300;
+				return 600;
 			}
 			if (materialQuality != TheForestQualitySettings.MaterialQualities.Low)
 			{
 				return 1000;
 			}
-			return 300;
+			return 600;
 		}
 	}
 

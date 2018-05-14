@@ -453,6 +453,21 @@ public static class SteamDSConfig
 
 	
 	
+	
+	public static bool AllowCheats
+	{
+		get
+		{
+			return SteamDSConfig.defaultBool("allowCheat", SteamDSConfig._allowcheats);
+		}
+		set
+		{
+			SteamDSConfig._allowcheats = value;
+		}
+	}
+
+	
+	
 	public static AppId_t AppIdDS
 	{
 		get
@@ -674,6 +689,9 @@ public static class SteamDSConfig
 	private static bool _allowEnemiesCreativeMode = false;
 
 	
+	private static bool _allowcheats = false;
+
+	
 	public static string serverConfigurationDir = "ds";
 
 	
@@ -745,6 +763,8 @@ public static class SteamDSConfig
 		"
 		"allowBuildingDestruction on",
 		"
-		"allowEnemiesCreativeMode off"
+		"allowEnemiesCreativeMode off",
+		"
+		"allowcheats off"
 	};
 }

@@ -145,6 +145,14 @@ public class playerAnimatorControl : MonoBehaviour
 				this.setup.leftHandHeld.gameObject.SetActive(true);
 			}
 		}
+		if (ForestVR.Enabled)
+		{
+			this.animator.SetFloat("VRBlend", 1f);
+		}
+		else
+		{
+			this.animator.SetFloat("VRBlend", 0f);
+		}
 		if (this.currLayerState1.shortNameHash == this.eatMeatHash)
 		{
 			if (this.setup.weaponRight.gameObject.activeSelf)
@@ -317,7 +325,7 @@ public class playerAnimatorControl : MonoBehaviour
 			}
 			else
 			{
-				LocalPlayer.Inventory.blockRangedAttack = true;
+				LocalPlayer.Inventory.blockRangedAttack = !ForestVR.Enabled;
 			}
 		}
 		else if (this.currLayerState1.tagHash == this.knockBackHash || this.fullBodyState2.tagHash == this.knockBackHash || this.fullBodyState2.tagHash == this.deathHash)
@@ -2827,6 +2835,12 @@ public class playerAnimatorControl : MonoBehaviour
 
 	
 	public int axeToAxeAttackHash = Animator.StringToHash("axeToAxeAttack");
+
+	
+	public int drinkAtPondHash = Animator.StringToHash("drinkAtPond");
+
+	
+	public int fillWaterSkinHash = Animator.StringToHash("fillWaterSkin");
 
 	
 	private FsmFloat fsmPlayerAngle;

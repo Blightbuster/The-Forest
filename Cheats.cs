@@ -1,6 +1,7 @@
 ﻿using System;
 using TheForest;
 using TheForest.Modding.Bridge.Interfaces;
+using TheForest.Tools;
 using TheForest.Utils;
 using UnityEngine;
 
@@ -23,8 +24,14 @@ public class Cheats : MonoBehaviour
 	}
 
 	
+	
+	
+	public static bool Allowed { get; private set; }
+
+	
 	private void Start()
 	{
+		Cheats.Allowed = true;
 		this.MeatModeCode = new string[]
 		{
 			"m",
@@ -257,6 +264,13 @@ public class Cheats : MonoBehaviour
 				Debug.Log("Disabling debug console");
 			}
 		}
+	}
+
+	
+	public static void SetAllowed(bool onoff)
+	{
+		Cheats.Allowed = onoff;
+		EventRegistry.Game.Publish(TfEvent.CheatAllowedSet, onoff);
 	}
 
 	

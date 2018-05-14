@@ -280,13 +280,20 @@ namespace Valve.VR.InteractionSystem
 		}
 
 		
+		public void removeAttachedObjects(Hand hand)
+		{
+			this.RemoveMatchingItemTypesFromHand(ItemPackage.ItemPackageType.TwoHanded, hand);
+			this.RemoveMatchingItemTypesFromHand(ItemPackage.ItemPackageType.TwoHanded, hand.otherHand);
+		}
+
+		
 		public ItemPackage _itemPackage;
 
 		
-		private bool useItemPackagePreview = true;
+		public bool useItemPackagePreview = true;
 
 		
-		private bool useFadedPreview;
+		public bool useFadedPreview;
 
 		
 		private GameObject previewObject;
@@ -314,7 +321,7 @@ namespace Valve.VR.InteractionSystem
 		public bool acceptDifferentItems;
 
 		
-		private GameObject spawnedItem;
+		public GameObject spawnedItem;
 
 		
 		private bool itemIsSpawned;

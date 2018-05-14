@@ -62,7 +62,7 @@ namespace TheForest.Player.Clothing
 		public int AmountOf(int clothingId)
 		{
 			int num = 0;
-			for (int i = 0; i < this._wornClothingItems.Count; i++)
+			for (int i = 0; i < this._wornClothingItems.SafeCount<int>(); i++)
 			{
 				if (this._wornClothingItems[i] == clothingId)
 				{
@@ -70,11 +70,13 @@ namespace TheForest.Player.Clothing
 					break;
 				}
 			}
-			for (int j = 0; j < this._availableClothingOutfits.Count; j++)
+			List<List<int>> availableClothingOutfits = this._availableClothingOutfits;
+			for (int j = 0; j < availableClothingOutfits.SafeCount<List<int>>(); j++)
 			{
-				for (int k = 0; k < this._availableClothingOutfits[j].Count; k++)
+				List<int> list = availableClothingOutfits[j];
+				for (int k = 0; k < list.SafeCount<int>(); k++)
 				{
-					if (this._availableClothingOutfits[j][k] == clothingId)
+					if (list[k] == clothingId)
 					{
 						num++;
 						break;

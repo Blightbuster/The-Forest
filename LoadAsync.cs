@@ -4,6 +4,7 @@ using TheForest.Commons.Enums;
 using TheForest.UI;
 using TheForest.Utils;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 public class LoadAsync : MonoBehaviour
@@ -43,6 +44,7 @@ public class LoadAsync : MonoBehaviour
 	
 	private void Start()
 	{
+		PerfTimerLogger perfTimerLogger = new PerfTimerLogger("[<color=#FFF>TIMER</color>] LoadAsync Start", PerfTimerLogger.LogResultType.Milliseconds, null);
 		TheForest.Utils.Input.LockMouse();
 		base.transform.parent = null;
 		if (this.Menu)
@@ -55,31 +57,41 @@ public class LoadAsync : MonoBehaviour
 			LoadAsync.Scenery = null;
 		}
 		base.StartCoroutine(this.LoadLevelWithProgress(this._levelName));
+		perfTimerLogger.Stop();
 	}
 
 	
 	private IEnumerator LoadLevelWithProgress(string levelToLoad)
 	{
-		if (this.delayForCleanup)
+		using (new PerfTimerLogger("[<color=#FFF>TIMER</color>] Cleanup", PerfTimerLogger.LogResultType.Milliseconds, null))
 		{
-			Resources.UnloadUnusedAssets();
-			GC.Collect();
-			yield return null;
+			if (this.delayForCleanup)
+			{
+				Resources.UnloadUnusedAssets();
+				GC.Collect();
+				yield return null;
+			}
 		}
-		float failsafe = 5f;
-		while (BoltNetwork.isRunning && failsafe > 0f)
+		using (new PerfTimerLogger("[<color=#FFF>TIMER</color>] failsafe", PerfTimerLogger.LogResultType.Milliseconds, null))
 		{
-			failsafe -= Time.deltaTime;
-			yield return null;
+			float failsafe = 5f;
+			while (BoltNetwork.isRunning && failsafe > 0f)
+			{
+				failsafe -= Time.deltaTime;
+				yield return null;
+			}
 		}
 		yield return null;
+		PerfTimerLogger queryStateTimer = new PerfTimerLogger("[<color=#FFF>TIMER</color>] Query state", PerfTimerLogger.LogResultType.Milliseconds, null);
 		bool canResume = LevelSerializer.CanResume;
 		bool boltIsRunning = BoltNetwork.isRunning;
 		bool boltIsServer = BoltNetwork.isServer;
 		bool boltIsClient = BoltNetwork.isClient;
 		bool isSavedGame = GameSetup.IsSavedGame;
+		queryStateTimer.Stop();
 		if (canResume && (!boltIsRunning || boltIsServer) && isSavedGame)
 		{
+			PerfTimerLogger resumeTimer = new PerfTimerLogger("[<color=#FFF>TIMER</color>] Resume", PerfTimerLogger.LogResultType.Milliseconds, null);
 			ResourceRequest req = Resources.LoadAsync("PreloadingPrefabs");
 			while (!req.isDone)
 			{
@@ -90,19 +102,23 @@ public class LoadAsync : MonoBehaviour
 			LevelSerializer.InitPrefabList();
 			yield return null;
 			LevelSerializer.Resume();
+			resumeTimer.Stop();
 			yield break;
 		}
+		PerfTimerLogger loadLevelTimer = new PerfTimerLogger(string.Format("[<color=#FFF>TIMER</color>] Load {0}", levelToLoad), PerfTimerLogger.LogResultType.Milliseconds, null);
+		UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		if (!boltIsClient && !canResume)
 		{
 			GameSetup.SetInitType(InitTypes.New);
 		}
-		this.async = Application.LoadLevelAsync(levelToLoad);
+		this.async = SceneManager.LoadSceneAsync(levelToLoad);
 		while (!this.async.isDone)
 		{
 			LoadingProgress.Progress = this.async.progress * 0.5f;
 			yield return null;
 		}
 		LoadingProgress.Progress = 0.5f;
+		loadLevelTimer.Stop();
 		UnityEngine.Object.Destroy(base.gameObject);
 		yield break;
 	}

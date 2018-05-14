@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{CAB5FCB2-7B7E-424D-86A2-CE8AA88C3E0E}</ProjectGuid>
+    <ProjectGuid>{7FC63A19-1A14-4477-B340-8C20F1677ECB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Assembly-CSharp</RootNamespace>
@@ -2290,6 +2290,7 @@
     <Compile Include="PauseMenuAudio.cs" />
     <Compile Include="perchEnable.cs" />
     <Compile Include="perchTargetSetup.cs" />
+    <Compile Include="PerfTimerLogger.cs" />
     <Compile Include="PhysicsSfx.cs" />
     <Compile Include="pickupSpawn.cs" />
     <Compile Include="placedDeviceOnTreeCutDown.cs" />
@@ -2960,6 +2961,7 @@
     <Compile Include="TheForest\Graphics\Water.cs" />
     <Compile Include="TheForest\Graphics\WaterEngine.cs" />
     <Compile Include="TheForest\Interfaces\IBurnable.cs" />
+    <Compile Include="TheForest\Interfaces\IGameMode.cs" />
     <Compile Include="TheForest\Items\Core\IItemStorage.cs" />
     <Compile Include="TheForest\Items\Core\ItemAnimatorHashHelper.cs" />
     <Compile Include="TheForest\Items\Core\ItemStorage.cs" />
@@ -3310,6 +3312,7 @@
     <Compile Include="TheForest\Utils\InputMappingAction.cs" />
     <Compile Include="TheForest\Utils\InputMappingButton.cs" />
     <Compile Include="TheForest\Utils\InputMappingButtonManager.cs" />
+    <Compile Include="TheForest\Utils\InstanceManager.cs" />
     <Compile Include="TheForest\Utils\LerpPositionBasedOnRatio.cs" />
     <Compile Include="TheForest\Utils\ListExtensions.cs" />
     <Compile Include="TheForest\Utils\LocalPlayer.cs" />
@@ -3720,14 +3723,18 @@
     <Compile Include="VRCameraControl.cs" />
     <Compile Include="VRCameraTextureSwitcher.cs" />
     <Compile Include="VRCameraUISwitcher.cs" />
+    <Compile Include="VRFlameThrowerTrigger.cs" />
     <Compile Include="VRGameobjectSwitcher.cs" />
     <Compile Include="VRHudControl.cs" />
     <Compile Include="VRInventoryTreeDisabler.cs" />
+    <Compile Include="VRLightThrowableController.cs" />
     <Compile Include="VRPlayerAdapter.cs" />
     <Compile Include="VRPlayerControl.cs" />
+    <Compile Include="VRSlingshotController.cs" />
     <Compile Include="VRSwitcher.cs" />
     <Compile Include="VRSystemTarget.cs" />
     <Compile Include="VRTheatreController.cs" />
+    <Compile Include="VRThrowable.cs" />
     <Compile Include="VRTurnOn.cs" />
     <Compile Include="VRVignetteController.cs" />
     <Compile Include="WaitForAnimation.cs" />

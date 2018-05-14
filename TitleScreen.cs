@@ -5,6 +5,7 @@ using TheForest.Commons.Enums;
 using TheForest.Modding;
 using TheForest.Modding.Bridge;
 using TheForest.Modding.Bridge.Interfaces;
+using TheForest.Tools;
 using TheForest.UI;
 using TheForest.Utils;
 using TheForest.Utils.Settings;
@@ -17,6 +18,7 @@ public class TitleScreen : MonoBehaviour, ITitleScene
 	
 	private void Awake()
 	{
+		EventRegistry.Clear();
 		GameModeStarter.Prefab = null;
 		GameSetup.SetInitType(InitTypes.New);
 		GameSetup.SetGameType(GameTypes.Standard);

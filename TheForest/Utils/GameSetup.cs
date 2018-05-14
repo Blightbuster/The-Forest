@@ -27,11 +27,6 @@ namespace TheForest.Utils
 		
 		
 		
-		public static bool HardSurvival { get; private set; }
-
-		
-		
-		
 		public static InitTypes Init { get; private set; }
 
 		

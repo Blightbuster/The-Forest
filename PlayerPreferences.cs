@@ -63,6 +63,11 @@ public class PlayerPreferences : MonoBehaviour
 
 	
 	
+	
+	public static bool CheatsAllowed { get; private set; }
+
+	
+	
 	public static bool IsBelowDX11
 	{
 		get
@@ -227,6 +232,7 @@ public class PlayerPreferences : MonoBehaviour
 			PlayerPreferences.TreeRegrowthLocal = (PlayerPrefs.GetInt("TreeRegrowth", 0) > 0);
 			PlayerPreferences.NoDestructionLocal = (PlayerPrefs.GetInt("NoDestruction", 0) > 0);
 			PlayerPreferences.AllowEnemiesCreative = (PlayerPrefs.GetInt("AllowEnemiesCreative", 0) > 0);
+			PlayerPreferences.CheatsAllowed = (PlayerPrefs.GetInt("CheatsAllowed", 0) > 0);
 		}
 		PlayerPreferences.ExWallAutofill = (PlayerPrefs.GetInt("ExWallAutofill", 1) > 0);
 		PlayerPreferences.ExFloorsAutofill = (PlayerPrefs.GetInt("ExFloorsAutofill", 1) > 0);
@@ -286,6 +292,7 @@ public class PlayerPreferences : MonoBehaviour
 		PlayerPrefs.SetInt("UseGamepadRumble", (!PlayerPreferences.UseGamepadRumble) ? 0 : 1);
 		PlayerPrefs.SetInt("TreeRegrowth", (!PlayerPreferences.TreeRegrowthLocal) ? 0 : 1);
 		PlayerPrefs.SetInt("NoDestruction", (!PlayerPreferences.NoDestructionLocal) ? 0 : 1);
+		PlayerPrefs.SetInt("CheatsAllowed", (!PlayerPreferences.CheatsAllowed) ? 0 : 1);
 		PlayerPrefs.SetInt("AllowEnemiesCreative", (!PlayerPreferences.AllowEnemiesCreative) ? 0 : 1);
 		PlayerPrefs.Save();
 	}
@@ -365,6 +372,13 @@ public class PlayerPreferences : MonoBehaviour
 	{
 		PlayerPreferences.NoDestructionLocal = onoff;
 		EventRegistry.Game.Publish(TfEvent.NoDestrutionModeSet, onoff);
+	}
+
+	
+	public static void SetAllowCheatsMode(bool onoff)
+	{
+		PlayerPreferences.CheatsAllowed = onoff;
+		EventRegistry.Game.Publish(TfEvent.CheatAllowedSet, onoff);
 	}
 
 	

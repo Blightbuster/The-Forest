@@ -12,7 +12,7 @@ namespace TheForest.UI
 		{
 			if (LocalPlayer.Stats)
 			{
-				this._fillSprite.fillAmount = 1f - Mathf.Abs(Scene.Clock.ElapsedGameTime - Scene.Clock.NextSleepTime);
+				this._fillSprite.fillAmount = 1f - Mathf.Abs(Convert.ToSingle(Scene.Clock.ElapsedGameTime - Scene.Clock.NextSleepTime));
 			}
 		}
 

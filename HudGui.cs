@@ -597,7 +597,7 @@ public class HudGui : MonoBehaviour
 		{
 			return;
 		}
-		if (this._inventoryItemInfoView._itemId == itemView._itemId && this._inventoryItemInfoView.IsCraft == isCraft)
+		if (this._inventoryItemInfoView._itemId == itemView._itemId && itemView.Properties.Match(this._inventoryItemInfoView._itemProperties) && this._inventoryItemInfoView.IsCraft == isCraft)
 		{
 			this._inventoryItemInfoView.ViewCounter++;
 			if (isCraft)
@@ -616,7 +616,7 @@ public class HudGui : MonoBehaviour
 				this._inventoryItemInfoView._root.SetActive(true);
 			}
 		}
-		else if (this._nextItemInfoIIV && this._nextItemInfoIIV._itemId == itemView._itemId && this._nextItemInfoIsCraft == isCraft)
+		else if (this._nextItemInfoIIV && this._nextItemInfoIIV._itemId == itemView._itemId && this._nextItemInfoIIV.Properties.Match(itemView.Properties) && this._nextItemInfoIsCraft == isCraft)
 		{
 			this._nextItemInfoViewCounter++;
 		}
@@ -643,6 +643,7 @@ public class HudGui : MonoBehaviour
 			{
 				this._inventoryItemInfoView.ViewCounter = viewCounter;
 				this._inventoryItemInfoView._itemId = itemView._itemId;
+				this._inventoryItemInfoView._itemProperties = itemView.Properties;
 				this._inventoryItemInfoView.IsCraft = false;
 				this._inventoryItemInfoView._root.transform.position = this.GetInventoryScreenPos(renderer, HudGui.AllowPositions.Right | HudGui.AllowPositions.Top | HudGui.AllowPositions.Bottom);
 				HudGui.InventoryItemInfo inventoryItemInfo = this._inventoryItemsInfoCache[itemView._itemId];
@@ -866,13 +867,13 @@ public class HudGui : MonoBehaviour
 	}
 
 	
-	public void HideItemInfoView(int itemId, bool isCraft)
+	public void HideItemInfoView(InventoryItemView itemView, bool isCraft)
 	{
-		if (this._inventoryItemInfoView._itemId == itemId && this._inventoryItemInfoView.IsCraft == isCraft)
+		if (this._inventoryItemInfoView._itemId == itemView._itemId && (isCraft || itemView.Properties.Match(this._inventoryItemInfoView._itemProperties)) && this._inventoryItemInfoView.IsCraft == isCraft)
 		{
 			this._inventoryItemInfoView.ViewCounter--;
 		}
-		else if (this._nextItemInfoIIV && this._nextItemInfoIIV._itemId == itemId && this._nextItemInfoIsCraft == isCraft)
+		else if (this._nextItemInfoIIV && this._nextItemInfoIIV._itemId == itemView._itemId && (isCraft || this._nextItemInfoIIV.Properties.Match(itemView.Properties)) && this._nextItemInfoIsCraft == isCraft)
 		{
 			this._nextItemInfoViewCounter--;
 		}
@@ -892,6 +893,7 @@ public class HudGui : MonoBehaviour
 			if (LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Inventory || forceReset)
 			{
 				this._inventoryItemInfoView._itemId = 0;
+				this._inventoryItemInfoView._itemProperties = ItemProperties.Any;
 			}
 			this._inventoryItemInfoView.ViewCounter = 0;
 		}
@@ -2419,6 +2421,10 @@ public class HudGui : MonoBehaviour
 		
 		[HideInInspector]
 		public int _itemId;
+
+		
+		[HideInInspector]
+		public ItemProperties _itemProperties;
 
 		
 		public GameObject _root;

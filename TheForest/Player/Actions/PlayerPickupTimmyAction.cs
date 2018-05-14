@@ -30,6 +30,8 @@ namespace TheForest.Player.Actions
 				Scene.HudGui.ShowHud(false);
 				LocalPlayer.FpCharacter.CanJump = false;
 				LocalPlayer.AnimControl.endGameCutScene = true;
+				LocalPlayer.vrPlayerControl.gameObject.SendMessage("setCustomGhostPosition", LocalPlayer.Transform.position + LocalPlayer.Transform.right * -2f);
+				LocalPlayer.vrPlayerControl.useGhostMode = true;
 				LocalPlayer.Create.Grabber.gameObject.SetActive(false);
 				LocalPlayer.AnimControl.playerHeadCollider.enabled = false;
 				LocalPlayer.Animator.SetBool("onHand", false);
@@ -138,6 +140,7 @@ namespace TheForest.Player.Actions
 			Quaternion lastPlayerAngle = Quaternion.identity;
 			bool syncCables = false;
 			bool syncTimmy = false;
+			bool syncVrCam = false;
 			if (!this.spectator)
 			{
 				LocalPlayer.Inventory.StashLeftHand();
@@ -169,6 +172,11 @@ namespace TheForest.Player.Actions
 				{
 					timmyAnim.CrossFade(this.timmyPickupHash, 0f, 0, this.currState2.normalizedTime);
 					syncTimmy = true;
+				}
+				if (this.currState2.normalizedTime > 0.388f && !syncVrCam && ForestVR.Enabled && !this.spectator)
+				{
+					LocalPlayer.vrPlayerControl.gameObject.SendMessage("goToNextVrPos");
+					syncVrCam = true;
 				}
 				if (this.currState2.normalizedTime > 0.585f && !syncCables)
 				{
@@ -203,6 +211,7 @@ namespace TheForest.Player.Actions
 				this.startedCutScene = false;
 				this.unlockPlayerParams();
 				LocalPlayer.AnimControl.endGameCutScene = false;
+				LocalPlayer.vrPlayerControl.useGhostMode = false;
 				LocalPlayer.AnimControl.skinningAnimal = false;
 				LocalPlayer.AnimControl.useRootMotion = false;
 				LocalPlayer.AnimControl.useRootRotation = false;
@@ -454,6 +463,7 @@ namespace TheForest.Player.Actions
 			LocalPlayer.FpCharacter.Locked = true;
 			LocalPlayer.FpCharacter.CanJump = false;
 			LocalPlayer.AnimControl.endGameCutScene = true;
+			LocalPlayer.vrPlayerControl.useGhostMode = true;
 			LocalPlayer.AnimControl.playerHeadCollider.enabled = false;
 			LocalPlayer.FpCharacter.enabled = false;
 			LocalPlayer.AnimControl.lockGravity = true;
@@ -468,6 +478,7 @@ namespace TheForest.Player.Actions
 			LocalPlayer.FpCharacter.Locked = false;
 			LocalPlayer.FpCharacter.CanJump = true;
 			LocalPlayer.AnimControl.endGameCutScene = false;
+			LocalPlayer.vrPlayerControl.useGhostMode = false;
 			LocalPlayer.AnimControl.playerHeadCollider.enabled = true;
 			LocalPlayer.FpCharacter.enabled = true;
 			LocalPlayer.AnimControl.lockGravity = false;

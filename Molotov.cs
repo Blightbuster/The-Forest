@@ -1,5 +1,6 @@
 ﻿using System;
 using Bolt;
+using TheForest.Utils;
 using UnityEngine;
 
 
@@ -11,6 +12,26 @@ public class Molotov : EntityBehaviour<IMolotovState>
 		if (BoltNetwork.isRunning && base.entity && !base.entity.isAttached)
 		{
 			BoltNetwork.Attach(base.entity);
+		}
+	}
+
+	
+	private void OnEnable()
+	{
+		if (!CoopPeerStarter.DedicatedHost && ForestVR.Enabled)
+		{
+			BoxCollider component = base.transform.GetComponent<BoxCollider>();
+			CapsuleCollider component2 = base.transform.GetComponent<CapsuleCollider>();
+			if (component != null)
+			{
+				Physics.IgnoreCollision(component, LocalPlayer.AnimControl.playerCollider, true);
+				Physics.IgnoreCollision(component, LocalPlayer.AnimControl.playerHeadCollider, true);
+			}
+			if (component2 != null)
+			{
+				Physics.IgnoreCollision(component2, LocalPlayer.AnimControl.playerCollider, true);
+				Physics.IgnoreCollision(component2, LocalPlayer.AnimControl.playerHeadCollider, true);
+			}
 		}
 	}
 

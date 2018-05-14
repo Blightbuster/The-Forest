@@ -34,6 +34,7 @@ namespace TheForest.Player.Actions
 				LocalPlayer.FpCharacter.allowFallDamage = false;
 				LocalPlayer.ScriptSetup.bodyCollisionGo.SetActive(false);
 				LocalPlayer.AnimControl.endGameCutScene = true;
+				LocalPlayer.vrPlayerControl.useGhostMode = true;
 				LocalPlayer.ScriptSetup.pmControl.enabled = false;
 				LocalPlayer.FpCharacter.Locked = true;
 				LocalPlayer.FpCharacter.CanJump = false;
@@ -170,6 +171,7 @@ namespace TheForest.Player.Actions
 				LocalPlayer.ScriptSetup.pmControl.enabled = true;
 				LocalPlayer.ScriptSetup.bodyCollisionGo.SetActive(true);
 				LocalPlayer.AnimControl.endGameCutScene = false;
+				LocalPlayer.vrPlayerControl.useGhostMode = false;
 				LocalPlayer.AnimControl.skinningAnimal = false;
 				LocalPlayer.AnimControl.useRootMotion = false;
 				LocalPlayer.AnimControl.useRootRotation = false;
@@ -268,6 +270,7 @@ namespace TheForest.Player.Actions
 			LocalPlayer.FpCharacter.Locked = true;
 			LocalPlayer.FpCharacter.CanJump = false;
 			LocalPlayer.AnimControl.endGameCutScene = true;
+			LocalPlayer.vrPlayerControl.useGhostMode = true;
 			LocalPlayer.AnimControl.playerHeadCollider.enabled = false;
 			LocalPlayer.FpCharacter.enabled = false;
 			LocalPlayer.AnimControl.lockGravity = true;
@@ -283,6 +286,7 @@ namespace TheForest.Player.Actions
 			LocalPlayer.FpCharacter.CanJump = true;
 			LocalPlayer.AnimControl.useRootMotion = true;
 			LocalPlayer.AnimControl.endGameCutScene = false;
+			LocalPlayer.vrPlayerControl.useGhostMode = false;
 			LocalPlayer.AnimControl.playerHeadCollider.enabled = true;
 			LocalPlayer.FpCharacter.enabled = true;
 			LocalPlayer.AnimControl.lockGravity = false;

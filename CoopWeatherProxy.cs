@@ -173,10 +173,10 @@ public class CoopWeatherProxy : EntityBehaviour<IWeatherState>
 			}
 			else
 			{
-				this.Clock.Atmos.TimeOfDay = Mathf.LerpAngle(this.Clock.Atmos.TimeOfDay, base.state.TimeOfDay, Time.deltaTime * 10f);
+				this.Clock.Atmos.TimeOfDay = Mathf.LerpAngle(this.Clock.Atmos.TimeOfDay, base.state.TimeOfDay, Time.deltaTime * 10f) % 360f;
 				this.lastWasNegative = false;
 			}
-			Scene.Atmosphere.DeltaTimeOfDay = base.state.ElapsedGameTime - Scene.Clock.ElapsedGameTime;
+			Scene.Atmosphere.DeltaTimeOfDay = (double)(base.state.ElapsedGameTime - Scene.Clock.ElapsedGameTime);
 			Scene.Clock.ElapsedGameTime = base.state.ElapsedGameTime;
 		}
 	}

@@ -23,14 +23,16 @@ public class VRPlayerAdapter : MonoBehaviour
 			{
 				this.MainCamera.transform.GetChild(i).SetParent(this.VREyeCamera);
 			}
+			AudioListener componentInChildren = this.MainCamera.GetComponentInChildren<AudioListener>(true);
+			if (componentInChildren)
+			{
+				UnityEngine.Object.Destroy(componentInChildren);
+			}
 			this.MainCamera.SetActive(false);
 			this.VRCameraRig.SetActive(true);
 			this.Player.GetComponent<FirstPersonHeadBob>().enabled = false;
 			this.Player.GetComponent<SimpleMouseRotator>().enabled = false;
-			camFollowHead componentInChildren = this.PlayerBase.GetComponentInChildren<camFollowHead>(true);
-			LocalPlayer.ScriptSetup.rightHandHeld.parent = this.RightWeaponOffset.transform;
-			LocalPlayer.ScriptSetup.rightHandHeld.localPosition = Vector3.zero;
-			LocalPlayer.ScriptSetup.rightHandHeld.localRotation = Quaternion.identity;
+			camFollowHead componentInChildren2 = this.PlayerBase.GetComponentInChildren<camFollowHead>(true);
 			IEnumerator enumerator = this.PlayerMeshesToDisable.transform.GetEnumerator();
 			try
 			{
@@ -53,6 +55,11 @@ public class VRPlayerAdapter : MonoBehaviour
 					disposable.Dispose();
 				}
 			}
+			this.VRPlayerHands.gameObject.SetActive(true);
+			this.VRPlayerHands.shadowCastingMode = ShadowCastingMode.On;
+			this.VRWatchGo.SetActive(true);
+			this.defaultPlayerArms.gameObject.SetActive(false);
+			LocalPlayer.ScriptSetup.pmControl.FsmVariables.GetFsmBool("vrBool").Value = true;
 		}
 	}
 
@@ -78,6 +85,9 @@ public class VRPlayerAdapter : MonoBehaviour
 	public GameObject RightWeaponOffset;
 
 	
+	public GameObject VRWatchGo;
+
+	
 	public bool BindCamHead;
 
 	
@@ -88,4 +98,13 @@ public class VRPlayerAdapter : MonoBehaviour
 
 	
 	public GameObject PlayerMeshesToDisable;
+
+	
+	public Renderer PlayerHead1;
+
+	
+	public Renderer VRPlayerHands;
+
+	
+	public Renderer defaultPlayerArms;
 }

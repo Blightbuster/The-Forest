@@ -42,7 +42,7 @@ namespace TheForest.Items.Inventory
 			{
 				if (Scene.HudGui)
 				{
-					Scene.HudGui.HideItemInfoView(this._itemId, this._isCraft);
+					Scene.HudGui.HideItemInfoView(this, this._isCraft);
 				}
 				this.Highlight(false);
 				this._hovered = false;
@@ -113,7 +113,7 @@ namespace TheForest.Items.Inventory
 					}
 					if (this._allowMultiView && this.MultiViewOwner != null)
 					{
-						Scene.HudGui.HideItemInfoView(this._itemId, this._isCraft);
+						Scene.HudGui.HideItemInfoView(this, this._isCraft);
 						this.MultiViewOwner.BubbleDownMultiview(this);
 					}
 					if (buttonDown)
@@ -174,7 +174,7 @@ namespace TheForest.Items.Inventory
 						{
 							if (this._allowMultiView && this.MultiViewOwner != null)
 							{
-								Scene.HudGui.HideItemInfoView(this._itemId, this._isCraft);
+								Scene.HudGui.HideItemInfoView(this, this._isCraft);
 								this.MultiViewOwner.RemovedMultiView(this);
 							}
 							if (buttonDown)

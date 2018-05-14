@@ -20,6 +20,7 @@ using TheForest.Items.Utils;
 using TheForest.Items.World;
 using TheForest.Player;
 using TheForest.Player.Clothing;
+using TheForest.Tools;
 using TheForest.Utils;
 using TheForest.World;
 using TheForest.World.Areas;
@@ -340,6 +341,27 @@ namespace TheForest
 				this._gamepadWheelEntries.Add("⟳\nToggle\nWorkScheduler", "toggleWorkScheduler toggle");
 				this._gamepadWheelEntries.Add("▦\nToggle\nCullingGrid", "toggleCullingGrid toggle");
 				this.CheckDisplayState();
+				EventRegistry system = EventRegistry.System;
+				object cleared = EventRegistry.Cleared;
+				if (DebugConsole.<>f__mg$cache0 == null)
+				{
+					DebugConsole.<>f__mg$cache0 = new EventRegistry.SubscriberCallback(DebugConsole.EventRegistryCleared);
+				}
+				system.Unsubscribe(cleared, DebugConsole.<>f__mg$cache0);
+				EventRegistry system2 = EventRegistry.System;
+				object cleared2 = EventRegistry.Cleared;
+				if (DebugConsole.<>f__mg$cache1 == null)
+				{
+					DebugConsole.<>f__mg$cache1 = new EventRegistry.SubscriberCallback(DebugConsole.EventRegistryCleared);
+				}
+				system2.Subscribe(cleared2, DebugConsole.<>f__mg$cache1);
+				EventRegistry game = EventRegistry.Game;
+				object cheatAllowedSet = TfEvent.CheatAllowedSet;
+				if (DebugConsole.<>f__mg$cache2 == null)
+				{
+					DebugConsole.<>f__mg$cache2 = new EventRegistry.SubscriberCallback(DebugConsole.CheatsAllowedSet);
+				}
+				game.Subscribe(cheatAllowedSet, DebugConsole.<>f__mg$cache2);
 				UnityEngine.Object.DontDestroyOnLoad(this);
 			}
 			else
@@ -367,6 +389,20 @@ namespace TheForest
 			}
 			if (DebugConsole.Instance == this)
 			{
+				EventRegistry system = EventRegistry.System;
+				object cleared = EventRegistry.Cleared;
+				if (DebugConsole.<>f__mg$cache3 == null)
+				{
+					DebugConsole.<>f__mg$cache3 = new EventRegistry.SubscriberCallback(DebugConsole.EventRegistryCleared);
+				}
+				system.Unsubscribe(cleared, DebugConsole.<>f__mg$cache3);
+				EventRegistry game = EventRegistry.Game;
+				object cheatAllowedSet = TfEvent.CheatAllowedSet;
+				if (DebugConsole.<>f__mg$cache4 == null)
+				{
+					DebugConsole.<>f__mg$cache4 = new EventRegistry.SubscriberCallback(DebugConsole.CheatsAllowedSet);
+				}
+				game.Unsubscribe(cheatAllowedSet, DebugConsole.<>f__mg$cache4);
 				DebugConsole.Instance = this;
 			}
 		}
@@ -464,23 +500,23 @@ namespace TheForest
 				});
 				GUILayout.EndVertical();
 				GUILayout.BeginVertical(new GUILayoutOption[0]);
-				GUILayout.Label("Total Alloc: " + Profiler.GetTotalAllocatedMemory() / 1000u / 1000u + "MB", GUI.skin.button, new GUILayoutOption[]
+				GUILayout.Label(string.Format("Total Alloc: {0}", DebugConsole.ToMbString(Profiler.GetTotalAllocatedMemoryLong())), GUI.skin.button, new GUILayoutOption[]
 				{
 					GUILayout.MinWidth(140f)
 				});
-				GUILayout.Label("Total Reserved: " + Profiler.GetTotalReservedMemory() / 1000u / 1000u + "MB", GUI.skin.button, new GUILayoutOption[]
+				GUILayout.Label(string.Format("Total Reserved: {0}", DebugConsole.ToMbString(Profiler.GetTotalReservedMemoryLong())), GUI.skin.button, new GUILayoutOption[]
 				{
 					GUILayout.MinWidth(140f)
 				});
-				GUILayout.Label("Heap Size: " + Profiler.GetMonoHeapSize() / 1000u / 1000u + "MB", GUI.skin.button, new GUILayoutOption[]
+				GUILayout.Label(string.Format("Heap Size: {0}", DebugConsole.ToMbString(Profiler.GetMonoHeapSizeLong())), GUI.skin.button, new GUILayoutOption[]
 				{
 					GUILayout.MinWidth(140f)
 				});
-				GUILayout.Label("Used Size: " + Profiler.GetMonoUsedSize() / 1000u / 1000u + "MB", GUI.skin.button, new GUILayoutOption[]
+				GUILayout.Label(string.Format("Used Size: {0}", DebugConsole.ToMbString(Profiler.GetMonoUsedSizeLong())), GUI.skin.button, new GUILayoutOption[]
 				{
 					GUILayout.MinWidth(140f)
 				});
-				GUILayout.Label("GC: " + GC.GetTotalMemory(false) / 1000L / 1000L + "MB", GUI.skin.button, new GUILayoutOption[]
+				GUILayout.Label(string.Format("GC: {0}", DebugConsole.ToMbString(GC.GetTotalMemory(false))), GUI.skin.button, new GUILayoutOption[]
 				{
 					GUILayout.MinWidth(100f)
 				});
@@ -601,6 +637,21 @@ namespace TheForest
 			{
 				this.ShowGamepadWheel();
 			}
+		}
+
+		
+		private static string ToMbString(long bytesValue)
+		{
+			if (bytesValue == 0L)
+			{
+				return "0 MB";
+			}
+			float f = (float)bytesValue / 1024f / 1024f;
+			if (Mathf.Abs(f) < 1f)
+			{
+				return "< 1MB";
+			}
+			return string.Format("{0}MB", Mathf.RoundToInt(f));
 		}
 
 		
@@ -868,27 +919,30 @@ namespace TheForest
 			yield return null;
 			for (;;)
 			{
-				if (UnityEngine.Input.anyKeyDown)
+				if (!BoltNetwork.isClient || Cheats.Allowed)
 				{
-					if (UnityEngine.Input.GetKeyDown(KeyCode.F1))
+					if (UnityEngine.Input.anyKeyDown)
 					{
-						yield return null;
-						this.ToggleConsole();
+						if (UnityEngine.Input.GetKeyDown(KeyCode.F1))
+						{
+							yield return null;
+							this.ToggleConsole();
+						}
+						else if (UnityEngine.Input.GetKeyDown(KeyCode.Quote) || UnityEngine.Input.GetKeyDown(KeyCode.BackQuote) || UnityEngine.Input.GetKeyDown(KeyCode.F2))
+						{
+							yield return null;
+							this.ToggleOverlay();
+						}
+						if (UnityEngine.Input.GetKeyDown(KeyCode.F3))
+						{
+							yield return null;
+							this.TogglePlayerStats();
+						}
 					}
-					else if (UnityEngine.Input.GetKeyDown(KeyCode.Quote) || UnityEngine.Input.GetKeyDown(KeyCode.BackQuote) || UnityEngine.Input.GetKeyDown(KeyCode.F2))
+					if (TheForest.Utils.Input.GetButtonDown("Debug") || this.CheckPS4Debug())
 					{
-						yield return null;
-						this.ToggleOverlay();
+						this.ToggleGamePadWheel();
 					}
-					if (UnityEngine.Input.GetKeyDown(KeyCode.F3))
-					{
-						yield return null;
-						this.TogglePlayerStats();
-					}
-				}
-				if (TheForest.Utils.Input.GetButtonDown("Debug") || this.CheckPS4Debug())
-				{
-					this.ToggleGamePadWheel();
 				}
 				yield return null;
 			}
@@ -1076,6 +1130,35 @@ namespace TheForest
 			else if (!string.IsNullOrEmpty(list[0]))
 			{
 				Debug.Log("$> Unknown console command '" + list[0] + "'");
+			}
+		}
+
+		
+		public static void EventRegistryCleared(object eventParameter)
+		{
+			EventRegistry game = EventRegistry.Game;
+			object cheatAllowedSet = TfEvent.CheatAllowedSet;
+			if (DebugConsole.<>f__mg$cache5 == null)
+			{
+				DebugConsole.<>f__mg$cache5 = new EventRegistry.SubscriberCallback(DebugConsole.CheatsAllowedSet);
+			}
+			game.Subscribe(cheatAllowedSet, DebugConsole.<>f__mg$cache5);
+		}
+
+		
+		public static void CheatsAllowedSet(object eventParameter)
+		{
+			if (DebugConsole.Instance && BoltNetwork.isClient && !Cheats.Allowed)
+			{
+				if (DebugConsole.Instance._showConsole)
+				{
+					DebugConsole.Instance.ShowConsole(false);
+				}
+				DebugConsole.Instance._showLog = false;
+				DebugConsole.Instance._showOverlay = false;
+				DebugConsole.Instance._showGamePadWheel = false;
+				DebugConsole.Instance._showPlayerStats = false;
+				DebugConsole.Instance.CheckDisplayState();
 			}
 		}
 
@@ -3221,51 +3304,51 @@ namespace TheForest
 			string format = text;
 			object arg2 = "Textures";
 			IEnumerable<UnityEngine.Object> source = Resources.FindObjectsOfTypeAll(typeof(Texture));
-			if (DebugConsole.<>f__mg$cache0 == null)
+			if (DebugConsole.<>f__mg$cache6 == null)
 			{
-				DebugConsole.<>f__mg$cache0 = new Func<UnityEngine.Object, int>(Profiler.GetRuntimeMemorySize);
+				DebugConsole.<>f__mg$cache6 = new Func<UnityEngine.Object, int>(Profiler.GetRuntimeMemorySize);
 			}
-			Debug.Log(string.Format(format, arg2, source.Sum(DebugConsole.<>f__mg$cache0) / 1048576));
+			Debug.Log(string.Format(format, arg2, source.Sum(DebugConsole.<>f__mg$cache6) / 1048576));
 			string format2 = text;
 			object arg3 = "AudioClip";
 			IEnumerable<UnityEngine.Object> source2 = Resources.FindObjectsOfTypeAll(typeof(AudioClip));
-			if (DebugConsole.<>f__mg$cache1 == null)
+			if (DebugConsole.<>f__mg$cache7 == null)
 			{
-				DebugConsole.<>f__mg$cache1 = new Func<UnityEngine.Object, int>(Profiler.GetRuntimeMemorySize);
+				DebugConsole.<>f__mg$cache7 = new Func<UnityEngine.Object, int>(Profiler.GetRuntimeMemorySize);
 			}
-			Debug.Log(string.Format(format2, arg3, source2.Sum(DebugConsole.<>f__mg$cache1) / 1048576));
+			Debug.Log(string.Format(format2, arg3, source2.Sum(DebugConsole.<>f__mg$cache7) / 1048576));
 			string format3 = text;
 			object arg4 = "Mesh";
 			IEnumerable<UnityEngine.Object> source3 = Resources.FindObjectsOfTypeAll(typeof(Mesh));
-			if (DebugConsole.<>f__mg$cache2 == null)
+			if (DebugConsole.<>f__mg$cache8 == null)
 			{
-				DebugConsole.<>f__mg$cache2 = new Func<UnityEngine.Object, int>(Profiler.GetRuntimeMemorySize);
+				DebugConsole.<>f__mg$cache8 = new Func<UnityEngine.Object, int>(Profiler.GetRuntimeMemorySize);
 			}
-			Debug.Log(string.Format(format3, arg4, source3.Sum(DebugConsole.<>f__mg$cache2) / 1048576));
+			Debug.Log(string.Format(format3, arg4, source3.Sum(DebugConsole.<>f__mg$cache8) / 1048576));
 			string format4 = text;
 			object arg5 = "Material";
 			IEnumerable<UnityEngine.Object> source4 = Resources.FindObjectsOfTypeAll(typeof(Material));
-			if (DebugConsole.<>f__mg$cache3 == null)
+			if (DebugConsole.<>f__mg$cache9 == null)
 			{
-				DebugConsole.<>f__mg$cache3 = new Func<UnityEngine.Object, int>(Profiler.GetRuntimeMemorySize);
+				DebugConsole.<>f__mg$cache9 = new Func<UnityEngine.Object, int>(Profiler.GetRuntimeMemorySize);
 			}
-			Debug.Log(string.Format(format4, arg5, source4.Sum(DebugConsole.<>f__mg$cache3) / 1048576));
+			Debug.Log(string.Format(format4, arg5, source4.Sum(DebugConsole.<>f__mg$cache9) / 1048576));
 			string format5 = text;
 			object arg6 = "GameObject";
 			IEnumerable<UnityEngine.Object> source5 = Resources.FindObjectsOfTypeAll(typeof(GameObject));
-			if (DebugConsole.<>f__mg$cache4 == null)
+			if (DebugConsole.<>f__mg$cacheA == null)
 			{
-				DebugConsole.<>f__mg$cache4 = new Func<UnityEngine.Object, int>(Profiler.GetRuntimeMemorySize);
+				DebugConsole.<>f__mg$cacheA = new Func<UnityEngine.Object, int>(Profiler.GetRuntimeMemorySize);
 			}
-			Debug.Log(string.Format(format5, arg6, source5.Sum(DebugConsole.<>f__mg$cache4) / 1048576));
+			Debug.Log(string.Format(format5, arg6, source5.Sum(DebugConsole.<>f__mg$cacheA) / 1048576));
 			string format6 = text;
 			object arg7 = "Component";
 			IEnumerable<UnityEngine.Object> source6 = Resources.FindObjectsOfTypeAll(typeof(Component));
-			if (DebugConsole.<>f__mg$cache5 == null)
+			if (DebugConsole.<>f__mg$cacheB == null)
 			{
-				DebugConsole.<>f__mg$cache5 = new Func<UnityEngine.Object, int>(Profiler.GetRuntimeMemorySize);
+				DebugConsole.<>f__mg$cacheB = new Func<UnityEngine.Object, int>(Profiler.GetRuntimeMemorySize);
 			}
-			Debug.Log(string.Format(format6, arg7, source6.Sum(DebugConsole.<>f__mg$cache5) / 1048576));
+			Debug.Log(string.Format(format6, arg7, source6.Sum(DebugConsole.<>f__mg$cacheB) / 1048576));
 			Debug.Log("----------[ EoS ]----------");
 		}
 
@@ -5150,11 +5233,11 @@ namespace TheForest
 			}
 			else
 			{
-				if (DebugConsole.<>f__mg$cache6 == null)
+				if (DebugConsole.<>f__mg$cacheC == null)
 				{
-					DebugConsole.<>f__mg$cache6 = new Func<char, bool>(char.IsUpper);
+					DebugConsole.<>f__mg$cacheC = new Func<char, bool>(char.IsUpper);
 				}
-				if (param.All(DebugConsole.<>f__mg$cache6))
+				if (param.All(DebugConsole.<>f__mg$cacheC))
 				{
 					if (AccountInfo.ResetAchievement(param))
 					{
@@ -5511,30 +5594,54 @@ namespace TheForest
 
 		
 		[CompilerGenerated]
-		private static Func<UnityEngine.Object, int> <>f__mg$cache0;
+		private static EventRegistry.SubscriberCallback <>f__mg$cache0;
 
 		
 		[CompilerGenerated]
-		private static Func<UnityEngine.Object, int> <>f__mg$cache1;
+		private static EventRegistry.SubscriberCallback <>f__mg$cache1;
 
 		
 		[CompilerGenerated]
-		private static Func<UnityEngine.Object, int> <>f__mg$cache2;
+		private static EventRegistry.SubscriberCallback <>f__mg$cache2;
 
 		
 		[CompilerGenerated]
-		private static Func<UnityEngine.Object, int> <>f__mg$cache3;
+		private static EventRegistry.SubscriberCallback <>f__mg$cache3;
 
 		
 		[CompilerGenerated]
-		private static Func<UnityEngine.Object, int> <>f__mg$cache4;
+		private static EventRegistry.SubscriberCallback <>f__mg$cache4;
 
 		
 		[CompilerGenerated]
-		private static Func<UnityEngine.Object, int> <>f__mg$cache5;
+		private static EventRegistry.SubscriberCallback <>f__mg$cache5;
 
 		
 		[CompilerGenerated]
-		private static Func<char, bool> <>f__mg$cache6;
+		private static Func<UnityEngine.Object, int> <>f__mg$cache6;
+
+		
+		[CompilerGenerated]
+		private static Func<UnityEngine.Object, int> <>f__mg$cache7;
+
+		
+		[CompilerGenerated]
+		private static Func<UnityEngine.Object, int> <>f__mg$cache8;
+
+		
+		[CompilerGenerated]
+		private static Func<UnityEngine.Object, int> <>f__mg$cache9;
+
+		
+		[CompilerGenerated]
+		private static Func<UnityEngine.Object, int> <>f__mg$cacheA;
+
+		
+		[CompilerGenerated]
+		private static Func<UnityEngine.Object, int> <>f__mg$cacheB;
+
+		
+		[CompilerGenerated]
+		private static Func<char, bool> <>f__mg$cacheC;
 	}
 }

@@ -183,12 +183,20 @@ public class flameThrowerController : MonoBehaviour
 	
 	private bool lighterInPosition()
 	{
+		if (ForestVR.Enabled)
+		{
+			return this.VRLighterInRange;
+		}
 		return this.animState3.shortNameHash == this.flameThrowerAttackHash;
 	}
 
 	
 	private bool hairSprayInPosition()
 	{
+		if (ForestVR.Enabled)
+		{
+			return LocalPlayer.Animator.GetBool("flameAttack");
+		}
 		return this.animState1.shortNameHash == this.flameThrowerAttackHash;
 	}
 
@@ -211,6 +219,9 @@ public class flameThrowerController : MonoBehaviour
 
 	
 	public bool remote;
+
+	
+	public bool VRLighterInRange;
 
 	
 	public GameObject flameFX;

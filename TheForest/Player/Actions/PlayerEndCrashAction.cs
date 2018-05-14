@@ -41,6 +41,7 @@ namespace TheForest.Player.Actions
 			LocalPlayer.FpCharacter.CanJump = false;
 			LocalPlayer.Create.Grabber.gameObject.SetActive(false);
 			LocalPlayer.AnimControl.endGameCutScene = true;
+			LocalPlayer.vrPlayerControl.useGhostMode = true;
 			LocalPlayer.AnimControl.playerHeadCollider.enabled = false;
 			LocalPlayer.Animator.SetBool("onHand", false);
 			LocalPlayer.Rigidbody.interpolation = RigidbodyInterpolation.None;
@@ -137,6 +138,7 @@ namespace TheForest.Player.Actions
 			LocalPlayer.AnimControl.skinningAnimal = false;
 			LocalPlayer.ScriptSetup.bodyCollisionGo.SetActive(true);
 			LocalPlayer.AnimControl.endGameCutScene = false;
+			LocalPlayer.vrPlayerControl.useGhostMode = false;
 			LocalPlayer.AnimControl.useRootMotion = false;
 			LocalPlayer.AnimControl.useRootRotation = false;
 			LocalPlayer.Create.Grabber.gameObject.SetActive(true);
@@ -219,6 +221,7 @@ namespace TheForest.Player.Actions
 			LocalPlayer.FpCharacter.CanJump = false;
 			LocalPlayer.Create.Grabber.gameObject.SetActive(false);
 			LocalPlayer.AnimControl.endGameCutScene = true;
+			LocalPlayer.vrPlayerControl.useGhostMode = true;
 			LocalPlayer.AnimControl.playerHeadCollider.enabled = false;
 			LocalPlayer.Animator.SetBool("onHand", false);
 			LocalPlayer.Rigidbody.interpolation = RigidbodyInterpolation.None;
@@ -308,6 +311,7 @@ namespace TheForest.Player.Actions
 			LocalPlayer.AnimControl.skinningAnimal = false;
 			LocalPlayer.ScriptSetup.bodyCollisionGo.SetActive(true);
 			LocalPlayer.AnimControl.endGameCutScene = false;
+			LocalPlayer.vrPlayerControl.useGhostMode = false;
 			LocalPlayer.AnimControl.useRootMotion = false;
 			LocalPlayer.AnimControl.useRootRotation = false;
 			LocalPlayer.Create.Grabber.gameObject.SetActive(true);
@@ -400,6 +404,7 @@ namespace TheForest.Player.Actions
 			LocalPlayer.FpCharacter.Locked = true;
 			LocalPlayer.FpCharacter.CanJump = false;
 			LocalPlayer.AnimControl.endGameCutScene = true;
+			LocalPlayer.vrPlayerControl.useGhostMode = true;
 			LocalPlayer.AnimControl.playerHeadCollider.enabled = false;
 			LocalPlayer.FpCharacter.enabled = false;
 			LocalPlayer.AnimControl.lockGravity = true;
@@ -414,6 +419,7 @@ namespace TheForest.Player.Actions
 			LocalPlayer.FpCharacter.Locked = false;
 			LocalPlayer.FpCharacter.CanJump = true;
 			LocalPlayer.AnimControl.endGameCutScene = false;
+			LocalPlayer.vrPlayerControl.useGhostMode = false;
 			LocalPlayer.AnimControl.playerHeadCollider.enabled = true;
 			LocalPlayer.FpCharacter.enabled = true;
 			LocalPlayer.AnimControl.lockGravity = false;

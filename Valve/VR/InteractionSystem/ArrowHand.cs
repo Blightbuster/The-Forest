@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using TheForest.Utils;
 using UnityEngine;
 
 namespace Valve.VR.InteractionSystem
@@ -15,6 +16,15 @@ namespace Valve.VR.InteractionSystem
 			this.allowTeleport.teleportAllowed = true;
 			this.allowTeleport.overrideHoverLock = false;
 			this.arrowList = new List<GameObject>();
+		}
+
+		
+		private void OnEnable()
+		{
+			if (this.useCustomScale)
+			{
+				base.transform.localScale = new Vector3(2f, 2f, 2f);
+			}
 		}
 
 		
@@ -150,7 +160,25 @@ namespace Valve.VR.InteractionSystem
 		
 		private void FireArrow()
 		{
+			if (LocalPlayer.Inventory)
+			{
+				LocalPlayer.Inventory.ReleaseAttack();
+			}
 			this.currentArrow.transform.parent = null;
+			if (ForestVR.Enabled)
+			{
+				if (this.currentArrow != null)
+				{
+					UnityEngine.Object.Destroy(this.currentArrow);
+				}
+				this.nocked = false;
+				this.bow.ArrowReleased();
+				this.currentArrow = null;
+				this.allowArrowSpawn = false;
+				base.Invoke("EnableArrowSpawn", 0.5f);
+				base.StartCoroutine(this.ArrowReleaseHaptics());
+				return;
+			}
 			Arrow component = this.currentArrow.GetComponent<Arrow>();
 			component.shaftRB.isKinematic = false;
 			component.shaftRB.useGravity = true;
@@ -215,13 +243,16 @@ namespace Valve.VR.InteractionSystem
 		private Longbow bow;
 
 		
-		private GameObject currentArrow;
+		public GameObject currentArrow;
 
 		
 		public GameObject arrowPrefab;
 
 		
 		public Transform arrowNockTransform;
+
+		
+		public Transform arrowFollowTransform;
 
 		
 		public float nockDistance = 0.1f;
@@ -258,5 +289,8 @@ namespace Valve.VR.InteractionSystem
 
 		
 		private List<GameObject> arrowList;
+
+		
+		public bool useCustomScale;
 	}
 }

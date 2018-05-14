@@ -118,13 +118,16 @@ namespace TheForest.Buildings.World
 		
 		protected override void PlaySfx(WallDoor.Actions action)
 		{
-			if (action == WallDoor.Actions.Closing)
+			if (LocalPlayer.Sfx)
 			{
-				LocalPlayer.Sfx.PlayStructureBreak(base.gameObject, 0.4f);
-			}
-			else
-			{
-				LocalPlayer.Sfx.PlayStructureBreak(base.gameObject, 0.4f);
+				if (action == WallDoor.Actions.Closing)
+				{
+					LocalPlayer.Sfx.PlayStructureBreak(base.gameObject, 0.4f);
+				}
+				else
+				{
+					LocalPlayer.Sfx.PlayStructureBreak(base.gameObject, 0.4f);
+				}
 			}
 		}
 

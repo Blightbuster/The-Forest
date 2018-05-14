@@ -8,12 +8,6 @@ namespace TheForest.Tools
 	public class PreloadSerializerPrefabs : MonoBehaviour
 	{
 		
-		private void Awake()
-		{
-			EventRegistry.Clear();
-		}
-
-		
 		private IEnumerator Start()
 		{
 			yield return null;

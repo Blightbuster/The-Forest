@@ -61,6 +61,8 @@ public class simpleIkSolver : MonoBehaviour
 			num--;
 		}
 		while (num2++ < 20 && (position2 - this.Target.position).sqrMagnitude > 0.0001f);
+		this.JointEntities[2].Joint.position = this.Target.position;
+		this.JointEntities[2].Joint.rotation = this.Target.rotation;
 	}
 
 	

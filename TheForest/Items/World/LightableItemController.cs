@@ -46,6 +46,17 @@ namespace TheForest.Items.World
 			LighterControler.HasLightableItem = true;
 			LocalPlayer.Inventory.UseAltWorldPrefab = true;
 			LocalPlayer.ActiveBurnableItem = this;
+			if (ForestVR.Enabled)
+			{
+				if (this._vrTriggerGo != null)
+				{
+					this._vrTriggerGo.SetActive(true);
+				}
+			}
+			else if (this._vrTriggerGo != null)
+			{
+				this._vrTriggerGo.SetActive(false);
+			}
 		}
 
 		
@@ -194,6 +205,9 @@ namespace TheForest.Items.World
 
 		
 		public GameObject fire;
+
+		
+		public GameObject _vrTriggerGo;
 
 		
 		public bool isLit;

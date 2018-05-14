@@ -59,13 +59,12 @@ namespace Valve.VR.InteractionSystem
 		{
 			base.transform.localPosition = Vector3.zero;
 			base.transform.localRotation = Quaternion.identity;
-			this.EvaluateHandedness();
 			if (this.nocked)
 			{
 				this.deferNewPoses = true;
 				Vector3 lhs = this.arrowHand.arrowNockTransform.parent.position - this.nockRestTransform.position;
 				float num = Util.RemapNumberClamped(Time.time, this.nockLerpStartTime, this.nockLerpStartTime + this.lerpDuration, 0f, 1f);
-				float d = Util.RemapNumberClamped(lhs.magnitude, 0.05f, 0.5f, 0f, 1f);
+				float d = Util.RemapNumberClamped(lhs.magnitude, this.minPull, this.maxPull, 0f, 1f);
 				Vector3 normalized = (Player.instance.hmdTransform.position + Vector3.down * 0.05f - this.arrowHand.arrowNockTransform.parent.position).normalized;
 				Vector3 a = this.arrowHand.arrowNockTransform.parent.position + normalized * this.drawOffset * d;
 				Vector3 normalized2 = (a - this.pivotTransform.position).normalized;
@@ -74,13 +73,13 @@ namespace Valve.VR.InteractionSystem
 				this.pivotTransform.rotation = Quaternion.Lerp(this.nockLerpStartRotation, Quaternion.LookRotation(normalized2, this.bowLeftVector), num);
 				if (Vector3.Dot(lhs, -this.nockTransform.forward) > 0f)
 				{
-					float num2 = lhs.magnitude * num;
-					this.nockTransform.localPosition = new Vector3(0f, 0f, Mathf.Clamp(-num2, -0.5f, 0f));
+					float num2 = lhs.magnitude / 3f * num;
+					this.nockTransform.localPosition = new Vector3(0f, 0f, Mathf.Clamp(-num2, -this.maxPull, 0f));
 					this.nockDistanceTravelled = -this.nockTransform.localPosition.z;
-					this.arrowVelocity = Util.RemapNumber(this.nockDistanceTravelled, 0.05f, 0.5f, this.arrowMinVelocity, this.arrowMaxVelocity);
-					this.drawTension = Util.RemapNumberClamped(this.nockDistanceTravelled, 0f, 0.5f, 0f, 1f);
+					this.arrowVelocity = Util.RemapNumber(this.nockDistanceTravelled, this.minPull, this.maxPull, this.arrowMinVelocity, this.arrowMaxVelocity);
+					this.drawTension = Util.RemapNumberClamped(this.nockDistanceTravelled, 0f, this.maxPull, 0f, 1f);
 					this.bowDrawLinearMapping.value = this.drawTension;
-					if (this.nockDistanceTravelled > 0.05f)
+					if (this.nockDistanceTravelled > this.minPull)
 					{
 						this.pulled = true;
 					}
@@ -90,13 +89,13 @@ namespace Valve.VR.InteractionSystem
 					}
 					if (this.nockDistanceTravelled > this.lastTickDistance + this.hapticDistanceThreshold || this.nockDistanceTravelled < this.lastTickDistance - this.hapticDistanceThreshold)
 					{
-						ushort durationMicroSec = (ushort)Util.RemapNumber(this.nockDistanceTravelled, 0f, 0.5f, 100f, 500f);
+						ushort durationMicroSec = (ushort)Util.RemapNumber(this.nockDistanceTravelled, 0f, this.maxPull, 100f, 500f);
 						hand.controller.TriggerHapticPulse(durationMicroSec, EVRButtonId.k_EButton_Axis0);
 						hand.otherHand.controller.TriggerHapticPulse(durationMicroSec, EVRButtonId.k_EButton_Axis0);
 						this.drawSound.PlayBowTensionClicks(this.drawTension);
 						this.lastTickDistance = this.nockDistanceTravelled;
 					}
-					if (this.nockDistanceTravelled >= 0.5f && Time.time > this.nextStrainTick)
+					if (this.nockDistanceTravelled >= this.maxPull && Time.time > this.nextStrainTick)
 					{
 						hand.controller.TriggerHapticPulse(400, EVRButtonId.k_EButton_Axis0);
 						hand.otherHand.controller.TriggerHapticPulse(400, EVRButtonId.k_EButton_Axis0);
@@ -293,6 +292,9 @@ namespace Valve.VR.InteractionSystem
 		private bool possibleHandSwitch;
 
 		
+		public Transform bowFollowTransform;
+
+		
 		public Transform pivotTransform;
 
 		
@@ -302,7 +304,7 @@ namespace Valve.VR.InteractionSystem
 		private Hand hand;
 
 		
-		private ArrowHand arrowHand;
+		public ArrowHand arrowHand;
 
 		
 		public Transform nockTransform;
@@ -326,10 +328,10 @@ namespace Valve.VR.InteractionSystem
 		public bool pulled;
 
 		
-		private const float minPull = 0.05f;
+		public float minPull = 0.05f;
 
 		
-		private const float maxPull = 0.5f;
+		public float maxPull = 0.5f;
 
 		
 		private float nockDistanceTravelled;
@@ -387,6 +389,9 @@ namespace Valve.VR.InteractionSystem
 
 		
 		public float drawOffset = 0.06f;
+
+		
+		public bool useCustomScale;
 
 		
 		public LinearMapping bowDrawLinearMapping;

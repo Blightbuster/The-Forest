@@ -91,6 +91,11 @@ public class Clock : MonoBehaviour
 			}
 			this.UpdatePlaneMoss();
 		}
+		this.ElapsedGameTimePrecise = (double)this.ElapsedGameTime;
+		if (Scene.Clock.NextSleepTime - 1f > Scene.Clock.ElapsedGameTime)
+		{
+			Scene.Clock.NextSleepTime = Scene.Clock.ElapsedGameTime + 1.1f;
+		}
 		yield break;
 	}
 
@@ -151,7 +156,8 @@ public class Clock : MonoBehaviour
 		{
 			return;
 		}
-		this.ElapsedGameTime += Scene.Atmosphere.DeltaTimeOfDay;
+		this.ElapsedGameTimePrecise += Scene.Atmosphere.DeltaTimeOfDay;
+		this.ElapsedGameTime = Convert.ToSingle(this.ElapsedGameTimePrecise);
 		if (this.RainbowA.activeSelf && Clock.Dark)
 		{
 			this.RainbowA.SetActive(false);
@@ -347,6 +353,9 @@ public class Clock : MonoBehaviour
 
 	
 	public bool dayOverride;
+
+	
+	public double ElapsedGameTimePrecise;
 
 	
 	[SerializeThis]

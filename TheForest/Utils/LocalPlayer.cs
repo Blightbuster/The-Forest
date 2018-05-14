@@ -183,7 +183,7 @@ namespace TheForest.Utils
 		
 		private void OnDestroy()
 		{
-			if (LocalPlayer.Transform == base.transform)
+			if (LocalPlayer.Transform == this._transform)
 			{
 				LocalPlayer.Transform = null;
 				LocalPlayer.Rigidbody = null;

@@ -232,6 +232,10 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 		{
 			this.crouch = ((!PlayerPreferences.UseCrouchToggle) ? TheForest.Utils.Input.GetButton("Crouch") : TheForest.Utils.Input.GetButtonDown("Crouch"));
 		}
+		else if (LocalPlayer.AnimControl.enteringACave)
+		{
+			this.standUp = true;
+		}
 		else
 		{
 			this.standUp = ((!PlayerPreferences.UseCrouchToggle) ? (!TheForest.Utils.Input.GetButton("Crouch")) : TheForest.Utils.Input.GetButtonDown("Crouch"));
@@ -270,13 +274,13 @@ public class FirstPersonCharacter : MonoBehaviour, IOnCollisionEnterProxy, IOnCo
 		}
 		if (this.crouch)
 		{
-			if (!this.crouching && !LocalPlayer.AnimControl.swimming && this.validateGrounded && !LocalPlayer.AnimControl.doShellRideMode && !LocalPlayer.AnimControl.doSledPushMode)
+			if (!this.crouching && !LocalPlayer.AnimControl.swimming && this.validateGrounded && !LocalPlayer.AnimControl.doShellRideMode && !LocalPlayer.AnimControl.doSledPushMode && !LocalPlayer.AnimControl.enteringACave)
 			{
 				this.crouching = true;
 				this.standingUp = false;
 				base.StartCoroutine("EnableCrouch");
 			}
-			if (this.standUp || value || LocalPlayer.AnimControl.swimming || this.animator.GetBool("zipLineAttach") || this.animator.GetBool("craneAttach") || LocalPlayer.AnimControl.doShellRideMode || LocalPlayer.AnimControl.doSledPushMode)
+			if (this.standUp || value || LocalPlayer.AnimControl.swimming || this.animator.GetBool("zipLineAttach") || this.animator.GetBool("craneAttach") || LocalPlayer.AnimControl.doShellRideMode || LocalPlayer.AnimControl.doSledPushMode || LocalPlayer.AnimControl.enteringACave || LocalPlayer.AnimControl.endGameCutScene)
 			{
 				base.StartCoroutine("DisableCrouch");
 				this.standingUp = true;

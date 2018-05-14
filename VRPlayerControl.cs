@@ -2,6 +2,7 @@
 using TheForest.Items.Inventory;
 using TheForest.Utils;
 using UnityEngine;
+using Valve.VR.InteractionSystem;
 
 
 public class VRPlayerControl : MonoBehaviour
@@ -9,9 +10,14 @@ public class VRPlayerControl : MonoBehaviour
 	
 	private void Start()
 	{
-		this.ikSolve = LocalPlayer.PlayerBase.GetComponent<simpleIkSolver>();
+		this.ikSolve = LocalPlayer.PlayerBase.GetComponents<simpleIkSolver>();
 		if (ForestVR.Enabled)
 		{
+			foreach (simpleIkSolver simpleIkSolver in this.ikSolve)
+			{
+				simpleIkSolver.enabled = true;
+			}
+			this.canSolveIk = true;
 			this.VRLighterHeldGo.SetActive(false);
 			this.updateCameraCentre();
 		}
@@ -25,7 +31,6 @@ public class VRPlayerControl : MonoBehaviour
 			this.UpdateFlick();
 			this.UpdateDebugMenu();
 			this.updateCameraCentre();
-			this.updateLighterManagement();
 		}
 	}
 
@@ -35,6 +40,14 @@ public class VRPlayerControl : MonoBehaviour
 		if (ForestVR.Enabled)
 		{
 			this.updateSpineRotation();
+			this.canSolveIk = !LocalPlayer.vrPlayerControl.useGhostMode;
+			if (this.canSolveIk)
+			{
+				for (int i = 0; i < this.ikSolve.Length; i++)
+				{
+					this.ikSolve[i].Solve();
+				}
+			}
 		}
 	}
 
@@ -44,31 +57,14 @@ public class VRPlayerControl : MonoBehaviour
 	}
 
 	
-	private void updateLighterManagement()
-	{
-		this.canSolveIk = this.playerLighterHeldGo.activeSelf;
-		if (this.playerLighterHeldGo.activeSelf)
-		{
-			if (!this.VRLighterHeldGo.activeSelf)
-			{
-				this.targetArmsRenderer.sharedMesh = this.VRArms.sharedMesh;
-				this.leftHandHeldGo.SetActive(false);
-				this.VRLighterHeldGo.SetActive(true);
-			}
-		}
-		else if (this.VRLighterHeldGo.activeSelf)
-		{
-			this.targetArmsRenderer.sharedMesh = this.DefaultArms.sharedMesh;
-			this.leftHandHeldGo.SetActive(true);
-			this.VRLighterHeldGo.SetActive(false);
-		}
-	}
-
-	
 	private void updateCameraCentre()
 	{
+		if (LocalPlayer.vrPlayerControl.useGhostMode)
+		{
+			return;
+		}
 		Transform transform = this.VRCameraOrigin;
-		float num = 1.8f;
+		float num = 1f;
 		float num2 = 0.5f;
 		if (LocalPlayer.Inventory.CurrentView == PlayerInventory.PlayerViews.PlaneCrash)
 		{
@@ -128,6 +124,10 @@ public class VRPlayerControl : MonoBehaviour
 	
 	private void updateSpineRotation()
 	{
+		if (LocalPlayer.vrPlayerControl.useGhostMode)
+		{
+			return;
+		}
 		Vector3 vector = this.VRCameraOrigin.InverseTransformPoint(this.followTarget.position);
 		vector.x = Mathf.Clamp(vector.x, -this.xClampValue, this.xClampValue) * this.spineBendAmount / 2f;
 		vector.z = Mathf.Clamp(vector.z, -this.zClampValue, this.zClampValue) * this.spineBendAmount;
@@ -161,6 +161,10 @@ public class VRPlayerControl : MonoBehaviour
 	
 	private void UpdateFlick()
 	{
+		if (LocalPlayer.vrPlayerControl.useGhostMode)
+		{
+			return;
+		}
 		Vector2 vector = new Vector2(TheForest.Utils.Input.GetAxis("Mouse X"), TheForest.Utils.Input.GetAxis("Mouse Y"));
 		if (this.HorizontalFlickable && Mathf.Abs(vector.x) >= this.HorizontalDeadzone && Mathf.Abs(this.lastAim.x) < this.HorizontalDeadzone)
 		{
@@ -180,7 +184,7 @@ public class VRPlayerControl : MonoBehaviour
 	}
 
 	
-	private simpleIkSolver ikSolve;
+	private simpleIkSolver[] ikSolve;
 
 	
 	public GameObject VRLighterHeldGo;
@@ -216,6 +220,12 @@ public class VRPlayerControl : MonoBehaviour
 	public Transform VRCameraRig;
 
 	
+	public Hand LeftHand;
+
+	
+	public Hand RightHand;
+
+	
 	public bool HorizontalFlickable;
 
 	
@@ -235,6 +245,9 @@ public class VRPlayerControl : MonoBehaviour
 
 	
 	private bool canSolveIk;
+
+	
+	public bool useGhostMode;
 
 	
 	public Transform[] spineBones;

@@ -384,6 +384,10 @@ public class MenuOptions : MonoBehaviour
 		{
 			EventDelegate.Add(this.IronForestMode.onChange, new EventDelegate.Callback(this.OnChange));
 		}
+		if (this.AllowCheats)
+		{
+			EventDelegate.Add(this.AllowCheats.onChange, new EventDelegate.Callback(this.OnChange));
+		}
 		if (this.AllowEnemies)
 		{
 			EventDelegate.Add(this.AllowEnemies.onChange, new EventDelegate.Callback(this.OnChange));
@@ -656,6 +660,10 @@ public class MenuOptions : MonoBehaviour
 		if (this.IronForestMode)
 		{
 			EventDelegate.Remove(this.IronForestMode.onChange, new EventDelegate.Callback(this.OnChange));
+		}
+		if (this.AllowCheats)
+		{
+			EventDelegate.Remove(this.AllowCheats.onChange, new EventDelegate.Callback(this.OnChange));
 		}
 		if (this.AllowEnemies)
 		{
@@ -1144,6 +1152,13 @@ public class MenuOptions : MonoBehaviour
 		catch
 		{
 		}
+		try
+		{
+			this.AllowCheats.value = this.GetPopupItem(this.AllowCheats, (!PlayerPreferences.CheatsAllowed) ? 1 : 0);
+		}
+		catch
+		{
+		}
 		if (GameSetup.IsCreativeGame)
 		{
 			try
@@ -1423,6 +1438,10 @@ public class MenuOptions : MonoBehaviour
 		{
 			PlayerPreferences.SetLocalNoDestructionMode(!this.OnOff(this.IronForestMode));
 		}
+		if (this.AllowCheats)
+		{
+			PlayerPreferences.SetAllowCheatsMode(this.OnOff(this.AllowCheats));
+		}
 		if (GameSetup.IsCreativeGame && this.AllowEnemies)
 		{
 			PlayerPreferences.SetLocalAllowEnemiesCreativeMode(this.OnOff(this.AllowEnemies));
@@ -1690,6 +1709,9 @@ public class MenuOptions : MonoBehaviour
 
 	
 	public UIPopupList IronForestMode;
+
+	
+	public UIPopupList AllowCheats;
 
 	
 	public UIPopupList AllowEnemies;

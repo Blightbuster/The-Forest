@@ -365,29 +365,33 @@ public class TheForestAtmosphere : MonoBehaviour
 				Sunshine.Instance.PostScatterMaterial.SetFloat("Vanishing", this.Vanishing);
 			}
 			this.sunE = 10000f * Mathf.Max(0f, 1f - Mathf.Exp(-((this.cutoffAngle - Mathf.Acos(this.LdotUp)) / this.steepness)));
-			if (this.Animate)
+			if (this.Animate && !BoltNetwork.isClient)
 			{
-				if (!BoltNetwork.isClient && (!SteamDSConfig.isDedicatedServer || Scene.SceneTracker.allPlayerEntities.Count != 0))
+				if (!SteamDSConfig.isDedicatedServer || Scene.SceneTracker.allPlayerEntities.Count != 0)
 				{
 					float num7 = Time.deltaTime * this.RotationSpeed * TheForestAtmosphere.GameTimeScale;
 					if (this.Sleeping)
 					{
 						this.TimeOfDay += num7 * 600f;
-						this.DeltaTimeOfDay = num7 * 600f / 360f;
+						this.DeltaTimeOfDay = (double)(num7 * 600f / 360f);
 					}
 					else if (this.Moon.enabled)
 					{
 						this.TimeOfDay += num7 * 2f;
-						this.DeltaTimeOfDay = num7 * 2f / 360f;
+						this.DeltaTimeOfDay = (double)(num7 * 2f / 360f);
 					}
 					else
 					{
 						this.TimeOfDay += num7;
-						this.DeltaTimeOfDay = num7 / 360f;
+						this.DeltaTimeOfDay = (double)(num7 / 360f);
 					}
+					this.TimeOfDay %= 360f;
+					FMOD_StudioEventEmitter.HoursSinceMidnight = (this.TimeOfDay + 180f) % 360f * 0.06666667f;
 				}
-				this.TimeOfDay %= 360f;
-				FMOD_StudioEventEmitter.HoursSinceMidnight = (this.TimeOfDay + 180f) % 360f * 0.06666667f;
+				else
+				{
+					this.DeltaTimeOfDay = 0.0;
+				}
 			}
 			bool flag = !LocalPlayer.Inventory || this.Sleeping || (!LocalPlayer.Inventory.enabled && !ChatBox.IsChatOpen) || LocalPlayer.Inventory.CurrentView < PlayerInventory.PlayerViews.World || (LocalPlayer.Inventory.CurrentView > PlayerInventory.PlayerViews.Inventory && LocalPlayer.Inventory.CurrentView < PlayerInventory.PlayerViews.Sleep && LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Book);
 			bool flag2 = !LocalPlayer.MainCamTr || Vector3.Distance(LocalPlayer.MainCamTr.forward, this.PrevCameraForward) > 0.01f;
@@ -492,19 +496,19 @@ public class TheForestAtmosphere : MonoBehaviour
 			{
 			case TheForestQualitySettings.ShadowLevels.High:
 				num11 = 230;
-				goto IL_FA9;
+				goto IL_FC0;
 			case TheForestQualitySettings.ShadowLevels.Medium:
 				num11 = 140;
-				goto IL_FA9;
+				goto IL_FC0;
 			case TheForestQualitySettings.ShadowLevels.Low:
 				num11 = 130;
-				goto IL_FA9;
+				goto IL_FC0;
 			case TheForestQualitySettings.ShadowLevels.Fastest:
 				num11 = 100;
-				goto IL_FA9;
+				goto IL_FC0;
 			}
 			num11 = 60;
-			IL_FA9:
+			IL_FC0:
 			if (this.LowerShadowsAtExtremeLightAngles)
 			{
 				QualitySettings.shadowDistance = Mathf.Lerp(1f, 0.35f, (vector.magnitude - 0.9f) * 10f) * (float)num11;
@@ -1183,7 +1187,7 @@ public class TheForestAtmosphere : MonoBehaviour
 	private bool CatchUpTimeOfDay;
 
 	
-	public float DeltaTimeOfDay;
+	public double DeltaTimeOfDay;
 
 	
 	public static float GameTimeScale = 1f;

@@ -32,18 +32,19 @@ public static class CoopAdminCommand
 				case "treeregrowmode":
 				case "allowbuildingdestruction":
 				case "allowenemiescreative":
+				case "allowcheats":
 				{
 					AdminCommand adminCommand = AdminCommand.Create(GlobalTargets.OnlyServer);
 					adminCommand.Command = command;
 					adminCommand.Data = data;
 					adminCommand.Send();
-					goto IL_163;
+					goto IL_16F;
 				}
 				case "help":
 					CoopAdminCommand.SendLocalMessage("Help 1/3:\r\n/kick <steamId>, /ban <steamId>, /save <slotNum>, /restart, /shutdown");
 					CoopAdminCommand.SendLocalMessage("Help 2/3:\r\n/openlogs /closelogs");
 					CoopAdminCommand.SendLocalMessage("Help 3/3:\r\n/treeregrowmode <on|off>, /allowbuildingdestruction <on|off>, /allowenemiescreative <on|off>");
-					goto IL_163;
+					goto IL_16F;
 				}
 				CoopAdminCommand.SendLocalMessage(string.Concat(new string[]
 				{
@@ -53,7 +54,7 @@ public static class CoopAdminCommand
 					data,
 					"'"
 				}));
-				IL_163:;
+				IL_16F:;
 			}
 			else
 			{
@@ -76,7 +77,7 @@ public static class CoopAdminCommand
 		{
 			if (CoopAdminCommand.<>f__switch$map2 == null)
 			{
-				CoopAdminCommand.<>f__switch$map2 = new Dictionary<string, int>(11)
+				CoopAdminCommand.<>f__switch$map2 = new Dictionary<string, int>(12)
 				{
 					{
 						"save",
@@ -121,6 +122,10 @@ public static class CoopAdminCommand
 					{
 						"allowenemiescreative",
 						10
+					},
+					{
+						"allowcheats",
+						11
 					}
 				};
 			}
@@ -304,6 +309,24 @@ public static class CoopAdminCommand
 						SteamDSConfig.AllowEnemiesCreative = false;
 						PlayerPreferences.SetLocalAllowEnemiesCreativeMode(SteamDSConfig.AllowEnemiesCreative);
 						CoopAdminCommand.SendNetworkMessage("AllowEnemiesCreative set to off", source);
+					}
+					else
+					{
+						CoopAdminCommand.SendNetworkMessage("Invalid parameter (data=" + data + ")", source);
+					}
+					break;
+				case 11:
+					if (data == "on")
+					{
+						SteamDSConfig.AllowCheats = true;
+						PlayerPreferences.SetAllowCheatsMode(SteamDSConfig.AllowCheats);
+						CoopAdminCommand.SendNetworkMessage("allowcheats set to on", source);
+					}
+					else if (data == "off")
+					{
+						SteamDSConfig.AllowCheats = false;
+						PlayerPreferences.SetAllowCheatsMode(SteamDSConfig.AllowCheats);
+						CoopAdminCommand.SendNetworkMessage("allowcheats set to off", source);
 					}
 					else
 					{

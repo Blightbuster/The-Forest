@@ -10,6 +10,7 @@ public class VRVignetteController : MonoBehaviour
 	
 	private void Awake()
 	{
+		this.PostProcessingProfile = InstanceManager.GetSharedInstance<PostProcessingProfile>(this.PostProcessingProfile);
 		this._vignetteModel = this.PostProcessingProfile.vignette;
 	}
 
@@ -18,7 +19,7 @@ public class VRVignetteController : MonoBehaviour
 	{
 		if (ForestVR.Enabled)
 		{
-			if (LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.World)
+			if (LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.World || LocalPlayer.vrPlayerControl.useGhostMode)
 			{
 				this.SetVignetteIntensity(0f);
 			}
@@ -41,11 +42,11 @@ public class VRVignetteController : MonoBehaviour
 	}
 
 	
-	public void SetVignetteIntensity(float intensity)
+	public void SetVignetteIntensity(float targetIntensity)
 	{
-		this._intensity = Mathf.Lerp(this._intensity, intensity, this.Smoothness);
+		this._currentIntensity = Mathf.Lerp(this._currentIntensity, targetIntensity, this.Smoothness);
 		VignetteModel.Settings settings = this._vignetteModel.settings;
-		settings.intensity = this._intensity;
+		settings.intensity = this._currentIntensity;
 		this._vignetteModel.settings = settings;
 	}
 
@@ -72,5 +73,5 @@ public class VRVignetteController : MonoBehaviour
 	public VignetteModel _vignetteModel;
 
 	
-	private float _intensity;
+	private float _currentIntensity;
 }

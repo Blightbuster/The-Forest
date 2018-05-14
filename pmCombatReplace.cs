@@ -68,6 +68,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator doResetRoutine()
 	{
+		this.CurrentActiveRoutine = 1;
 		if (!this.setup)
 		{
 			yield break;
@@ -101,6 +102,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator gotHitRoutine()
 	{
+		this.CurrentActiveRoutine = 2;
 		this.setup.animControl.runGotHitScripts();
 		this.setup.ai.resetCombatParams();
 		this.setup.animator.SetInteger("randInt2", UnityEngine.Random.Range(0, 2));
@@ -200,6 +202,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator doDeathRoutine()
 	{
+		this.CurrentActiveRoutine = 3;
 		this.search.StartCoroutine("toDisableVis");
 		if (this.setup.pmCombat.FsmVariables.GetFsmBool("stealthKillBool").Value)
 		{
@@ -231,6 +234,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator deathOnGroundRoutine()
 	{
+		this.CurrentActiveRoutine = 4;
 		this.animator.SetBool("rescueBool1", false);
 		this.animator.SetBool("recoverBool", true);
 		this.animator.SetBool("damageBOOL", false);
@@ -305,6 +309,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator deathFinalRoutine()
 	{
+		this.CurrentActiveRoutine = 5;
 		this.fsmDeathBool.Value = true;
 		this.animator.SetBool("deathfinalBOOL", true);
 		this.fsmOnFireBool.Value = false;
@@ -318,6 +323,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator doDraggedRescueRoutine()
 	{
+		this.CurrentActiveRoutine = 6;
 		this.setup.familyFunctions.cancelRescueEvent();
 		this.setup.familyFunctions.cancelEatMeEvent();
 		this.animator.SetBool("rescueBool1", true);
@@ -357,6 +363,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator runToAttackRoutine()
 	{
+		this.CurrentActiveRoutine = 7;
 		this.setup.targetFunctions.sendAddAttacker();
 		yield return null;
 		this.ai.resetCombatParams();
@@ -535,6 +542,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator doCloseAttackRoutine(bool skipAttackerCheck)
 	{
+		this.CurrentActiveRoutine = 8;
 		float timer = Time.time + 1f;
 		if (!skipAttackerCheck)
 		{
@@ -616,6 +624,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator throwFireBombRoutine()
 	{
+		this.CurrentActiveRoutine = 9;
 		this.setup.search.setToClosestPlayer();
 		this.setup.ai.StartCoroutine("toStop");
 		this.animator.SetInteger("randAttackInt1", 7);
@@ -637,6 +646,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator doPostAttackRoutine()
 	{
+		this.CurrentActiveRoutine = 10;
 		switch (weightsRandomizer.From<int>(new Dictionary<int, int>
 		{
 			{
@@ -707,6 +717,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator doCloseCombatRoutine()
 	{
+		this.CurrentActiveRoutine = 11;
 		this.setup.targetFunctions.sendAddAttacker();
 		yield return null;
 		if (!this.fsmTargetSeenBool.Value)
@@ -886,6 +897,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator doKeepAwayRoutine()
 	{
+		this.CurrentActiveRoutine = 12;
 		this.setup.ai.resetCombatParams();
 		this.setup.ai.StartCoroutine("toStop");
 		this.fsmCloseCombatBool.Value = false;
@@ -996,6 +1008,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator doRunHideRoutine()
 	{
+		this.CurrentActiveRoutine = 13;
 		this.setup.ai.resetCombatParams();
 		this.doAction = false;
 		this.setup.search.StartCoroutine(this.setup.search.findPointAwayFromPlayer(25f));
@@ -1085,6 +1098,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator doStalkRoutine()
 	{
+		this.CurrentActiveRoutine = 14;
 		this.setup.search.StartCoroutine("toTrack");
 		this.setup.search.StartCoroutine(this.setup.search.setVisRetry(12));
 		this.setup.StartCoroutine(this.setup.disableNonActiveFSM(this.setup.pmCombat.FsmName));
@@ -1276,6 +1290,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator doFearRoutine()
 	{
+		this.CurrentActiveRoutine = 15;
 		this.setup.ai.resetCombatParams();
 		this.animator.SetBool("fearBOOL", true);
 		this.setup.familyFunctions.resetFamilyParams();
@@ -1365,6 +1380,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator doPrayToPlayerRoutine()
 	{
+		this.CurrentActiveRoutine = 16;
 		this.setup.familyFunctions.resetFamilyParams();
 		this.fsmCloseCombatBool.Value = false;
 		this.setup.ai.StartCoroutine("toStop");
@@ -1404,6 +1420,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator doOnRockRoutine()
 	{
+		this.CurrentActiveRoutine = 17;
 		this.toOnRock = false;
 		this.setup.search.StartCoroutine(this.setup.search.findCloseJumpObj());
 		float timer = Time.time + 1f;
@@ -1525,6 +1542,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator doOnTreeRoutine()
 	{
+		this.CurrentActiveRoutine = 18;
 		this.setup.search.StartCoroutine(this.setup.search.findCloseTree(60f));
 		this.ai.StartCoroutine("toStop");
 		yield return YieldPresets.WaitPointOneSeconds;
@@ -1795,6 +1813,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator doTreeJumpDownRoutine()
 	{
+		this.CurrentActiveRoutine = 19;
 		this.animator.SetBool("actionBOOL1", false);
 		this.animator.SetBool("treeJumpBOOL", false);
 		this.animator.SetBool("turnLeftBOOL", false);
@@ -1843,6 +1862,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator doLowTreeAttackRoutine()
 	{
+		this.CurrentActiveRoutine = 20;
 		Vector3 treePos = this.setup.pmCombat.FsmVariables.GetFsmVector3("treePos").Value;
 		Vector3 attachPos = this.search.findTreeAttachPos(treePos, 1f);
 		this.animator.SetBool("treeJumpBOOL", true);
@@ -1947,6 +1967,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator doSideWalkRoutine()
 	{
+		this.CurrentActiveRoutine = 21;
 		float timer = Time.time;
 		this.animator.SetInteger("randInt1", UnityEngine.Random.Range(0, 2));
 		this.animator.SetBool("sideWalkBOOL", true);
@@ -1988,6 +2009,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator goToRandomPointRoutine()
 	{
+		this.CurrentActiveRoutine = 22;
 		this.setup.ai.resetCombatParams();
 		this.setup.ai.StartCoroutine("toStop");
 		yield return null;
@@ -2032,6 +2054,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator doFlankRoutine()
 	{
+		this.CurrentActiveRoutine = 23;
 		this.resetDefaultParams();
 		this.setup.search.StartCoroutine(this.setup.search.findFlankPointToPlayer(30f));
 		yield return null;
@@ -2074,6 +2097,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator doRunAwayRoutine()
 	{
+		this.CurrentActiveRoutine = 24;
 		this.resetDefaultParams();
 		this.setup.search.StartCoroutine(this.setup.search.findPointAwayFromPlayer(20f));
 		yield return null;
@@ -2128,6 +2152,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator doTimeoutRoutine()
 	{
+		this.CurrentActiveRoutine = 25;
 		this.ai.resetCombatParams();
 		this.setup.pmCombat.FsmVariables.GetFsmBool("timeOutBool").Value = false;
 		this.toRepelArtifact = false;
@@ -2212,6 +2237,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator goToSpawnRoutine()
 	{
+		this.CurrentActiveRoutine = 26;
 		this.ai.resetCombatParams();
 		this.ai.StartCoroutine("toStop");
 		this.doAction = false;
@@ -2249,6 +2275,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator goToExplodeRunRoutine()
 	{
+		this.CurrentActiveRoutine = 27;
 		this.ai.resetCombatParams();
 		this.ai.StartCoroutine("toStop");
 		this.doAction = false;
@@ -2288,6 +2315,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator goToNearbyPointRoutine()
 	{
+		this.CurrentActiveRoutine = 28;
 		this.ai.resetCombatParams();
 		this.ai.StartCoroutine("toStop");
 		this.doAction = false;
@@ -2327,6 +2355,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator goToBackAwayRoutine()
 	{
+		this.CurrentActiveRoutine = 29;
 		this.ai.resetCombatParams();
 		this.ai.StartCoroutine("toStop");
 		this.doAction = false;
@@ -2378,6 +2407,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator goToRescueRoutine()
 	{
+		this.CurrentActiveRoutine = 30;
 		float timer = Time.time;
 		this.ai.resetCombatParams();
 		this.ai.StartCoroutine("toStop");
@@ -2520,6 +2550,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator goToGuardRoutine()
 	{
+		this.CurrentActiveRoutine = 31;
 		float timer = Time.time;
 		this.ai.resetCombatParams();
 		this.ai.StartCoroutine("toStop");
@@ -2602,6 +2633,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator goToClimbWallRoutine()
 	{
+		this.CurrentActiveRoutine = 32;
 		float timer = Time.time;
 		this.animator.SetInteger("climbDirInt", 0);
 		this.ai.resetCombatParams();
@@ -2766,6 +2798,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator cancelClimbWallRoutine(bool doAttack, bool attackBelow)
 	{
+		this.CurrentActiveRoutine = 33;
 		this.fsmAttackStructure.Value = false;
 		this.fsmInTreeBool.Value = false;
 		this.fsmToClimbWall.Value = false;
@@ -2809,6 +2842,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator goToAttackBelowRoutine()
 	{
+		this.CurrentActiveRoutine = 34;
 		float timer = Time.time;
 		this.ai.resetCombatParams();
 		this.ai.StartCoroutine("toStop");
@@ -2859,6 +2893,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator goToStructureRoutine()
 	{
+		this.CurrentActiveRoutine = 35;
 		float timer = Time.time;
 		this.ai.resetCombatParams();
 		this.ai.StartCoroutine("toStop");
@@ -2982,6 +3017,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator goToVisibleStructureRoutine()
 	{
+		this.CurrentActiveRoutine = 36;
 		float timer = Time.time;
 		this.ai.resetCombatParams();
 		this.ai.StartCoroutine("toStop");
@@ -3094,6 +3130,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator goToBurnStructureRoutine()
 	{
+		this.CurrentActiveRoutine = 37;
 		float timer = Time.time;
 		this.ai.resetCombatParams();
 		this.ai.StartCoroutine("toStop");
@@ -3151,6 +3188,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator goToEatBodyRoutine()
 	{
+		this.CurrentActiveRoutine = 39;
 		float timer = Time.time;
 		float bodyDist = float.PositiveInfinity;
 		if (this.currentMemberGo)
@@ -3267,6 +3305,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator goToFreakoutRoutine()
 	{
+		this.CurrentActiveRoutine = 40;
 		this.setup.pmCombat.FsmVariables.GetFsmBool("freakoutBool").Value = false;
 		this.ai.StartCoroutine("toStop");
 		this.animator.SetInteger("randInt1", 0);
@@ -3291,6 +3330,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator goToRockJumpAttackRoutine()
 	{
+		this.CurrentActiveRoutine = 41;
 		this.setup.search.setToWaypoint();
 		this.ai.StartCoroutine("toRun");
 		float t = Time.time + 0.5f;
@@ -3365,6 +3405,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator goToTreeAttackRoutine()
 	{
+		this.CurrentActiveRoutine = 42;
 		float t = Time.time + 4f;
 		this.search.setToClosestPlayer();
 		while (this.animControl.fullBodyState.tagHash != this.animControl.idlehash)
@@ -3428,6 +3469,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator goToExitWaterRoutine()
 	{
+		this.CurrentActiveRoutine = 43;
 		this.animControl.resetAllActionBools();
 		this.ai.resetCombatParams();
 		this.ai.StartCoroutine("toStop");
@@ -3463,6 +3505,7 @@ public class pmCombatReplace : MonoBehaviour
 	
 	private IEnumerator goToBurningRoutine()
 	{
+		this.CurrentActiveRoutine = 44;
 		this.ai.StartCoroutine("toStop");
 		this.ai.resetCombatParams();
 		this.search.StartCoroutine("toDisableVis");
@@ -3722,7 +3765,7 @@ public class pmCombatReplace : MonoBehaviour
 	public bool toRepelArtifact;
 
 	
-	public List<IEnumerator> activeRoutines = new List<IEnumerator>();
+	public int CurrentActiveRoutine;
 
 	
 	private Quaternion desiredRotation;

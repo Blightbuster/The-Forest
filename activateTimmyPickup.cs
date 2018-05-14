@@ -104,6 +104,8 @@ public class activateTimmyPickup : MonoBehaviour
 			LocalPlayer.SpecialActions.SendMessage("setScreensGo", this.screensGo);
 			LocalPlayer.SpecialActions.SendMessage("setGirlTrigger", this.girlTrigger);
 			LocalPlayer.SpecialActions.SendMessage("setCurrentSequence", this.sequence);
+			LocalPlayer.vrPlayerControl.gameObject.SendMessage("setVrStandPos1", this.vrPos1);
+			LocalPlayer.vrPlayerControl.gameObject.SendMessage("setVrStandPos2", this.vrPos2);
 		}
 		this.pickup = true;
 		if (this.Sheen)
@@ -195,6 +197,12 @@ public class activateTimmyPickup : MonoBehaviour
 
 	
 	public GameObject girlTrigger;
+
+	
+	public Transform vrPos1;
+
+	
+	public Transform vrPos2;
 
 	
 	public ArtifactAudioState audioState;

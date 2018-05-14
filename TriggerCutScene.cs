@@ -821,6 +821,10 @@ public class TriggerCutScene : MonoBehaviour
 				yield return YieldPresets.WaitOnePointThreeSeconds;
 			}
 		}
+		else
+		{
+			LocalPlayer.Transform.localEulerAngles = new Vector3(0f, LocalPlayer.Transform.localEulerAngles.y, 0f);
+		}
 		int standupHash = Animator.StringToHash("standup");
 		AnimatorStateInfo state = LocalPlayer.Animator.GetCurrentAnimatorStateInfo(2);
 		while (state.IsTag("getup"))
@@ -856,6 +860,10 @@ public class TriggerCutScene : MonoBehaviour
 		LocalPlayer.Inventory.CurrentView = PlayerInventory.PlayerViews.World;
 		LocalPlayer.ScriptSetup.bodyCollisionGo.SetActive(true);
 		LocalPlayer.CamFollowHead.stopAllCameraShake();
+		if (ForestVR.Enabled)
+		{
+			LocalPlayer.Transform.localEulerAngles = new Vector3(0f, LocalPlayer.Transform.localEulerAngles.y, 0f);
+		}
 		if (BoltNetwork.isClient)
 		{
 			LocalPlayer.Animator.SetBool("client", true);

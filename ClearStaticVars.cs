@@ -23,6 +23,7 @@ public class ClearStaticVars : MonoBehaviour
 			SteamClientDSConfig.Clear();
 			CoopLobby.HostGuid = null;
 			OverlayIconManager.Clear();
+			Cheats.SetAllowed(true);
 		}
 		AssetBundleManager.Initialize();
 		Time.timeScale = 1f;

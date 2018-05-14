@@ -16,7 +16,7 @@ public class ImageEffectOptimizer : MonoBehaviour
 		PostProcessingBehaviour component = base.GetComponent<PostProcessingBehaviour>();
 		if (component && component.profile)
 		{
-			component.profile = UnityEngine.Object.Instantiate<PostProcessingProfile>(component.profile);
+			component.profile = InstanceManager.GetSharedInstance<PostProcessingProfile>(component.profile);
 			this.postProcessingProfile = component.profile;
 		}
 		Camera component2 = base.gameObject.GetComponent<Camera>();
@@ -230,12 +230,12 @@ public class ImageEffectOptimizer : MonoBehaviour
 				}
 				else
 				{
-					this.amplifyOcclusion.SampleCount = AmplifyOcclusionBase.SampleCountLevel.High;
+					this.amplifyOcclusion.SampleCount = AmplifyOcclusionBase.SampleCountLevel.Medium;
 				}
 			}
 			else
 			{
-				this.amplifyOcclusion.SampleCount = AmplifyOcclusionBase.SampleCountLevel.VeryHigh;
+				this.amplifyOcclusion.SampleCount = AmplifyOcclusionBase.SampleCountLevel.High;
 			}
 		}
 		else if (this.postProcessingProfile && (TheForestQualitySettings.UserSettings.SSAOType == TheForestQualitySettings.SSAOTypes.UNITY || !this.amplifyOcclusion))
@@ -257,12 +257,12 @@ public class ImageEffectOptimizer : MonoBehaviour
 				}
 				else
 				{
-					settings5.sampleCount = AmbientOcclusionModel.SampleCount.Medium;
+					settings5.sampleCount = AmbientOcclusionModel.SampleCount.Low;
 				}
 			}
 			else
 			{
-				settings5.sampleCount = AmbientOcclusionModel.SampleCount.High;
+				settings5.sampleCount = AmbientOcclusionModel.SampleCount.Medium;
 			}
 			this.postProcessingProfile.ambientOcclusion.settings = settings5;
 		}

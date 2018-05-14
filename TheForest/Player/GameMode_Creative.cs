@@ -1,12 +1,13 @@
 ﻿using System;
 using Bolt;
 using TheForest.Commons.Enums;
+using TheForest.Interfaces;
 using TheForest.Utils;
 
 namespace TheForest.Player
 {
 	
-	public class GameMode_Creative : EntityBehaviour<IGameModeState>
+	public class GameMode_Creative : EntityBehaviour<IGameModeState>, IGameMode
 	{
 		
 		private void Awake()
@@ -15,10 +16,8 @@ namespace TheForest.Player
 			{
 				GameSetup.SetGameType(GameTypes.Creative);
 			}
-			Cheats.NoSurvival = true;
-			Cheats.Creative = true;
-			Cheats.GodMode = true;
-			Cheats.InfiniteEnergy = true;
+			CoopServerInfo.Instance.SetGameMode(this);
+			this.RestoreSettings();
 		}
 
 		
@@ -28,6 +27,16 @@ namespace TheForest.Player
 			Cheats.Creative = false;
 			Cheats.GodMode = false;
 			Cheats.InfiniteEnergy = false;
+			CoopServerInfo.Instance.SetGameMode(null);
+		}
+
+		
+		public void RestoreSettings()
+		{
+			Cheats.NoSurvival = true;
+			Cheats.Creative = true;
+			Cheats.GodMode = true;
+			Cheats.InfiniteEnergy = true;
 		}
 	}
 }

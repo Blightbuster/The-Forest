@@ -1094,6 +1094,11 @@ public class UICamera : MonoBehaviour
 	
 	private void Awake()
 	{
+		if (CoopPeerStarter.DedicatedHost)
+		{
+			base.enabled = false;
+			return;
+		}
 		UICamera.mWidth = Screen.width;
 		UICamera.mHeight = Screen.height;
 		UICamera.mMouse[0].pos = UnityEngine.Input.mousePosition;

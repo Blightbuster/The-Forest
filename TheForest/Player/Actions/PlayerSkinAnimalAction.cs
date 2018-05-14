@@ -59,6 +59,7 @@ namespace TheForest.Player.Actions
 			LocalPlayer.Create.Grabber.gameObject.SetActive(false);
 			LocalPlayer.AnimControl.playerHeadCollider.enabled = false;
 			LocalPlayer.Animator.SetBool("onHand", false);
+			LocalPlayer.vrPlayerControl.useGhostMode = true;
 			bool canEquipLeft = false;
 			bool canEquipRight = false;
 			if (!LocalPlayer.Inventory.IsLeftHandEmpty())
@@ -194,6 +195,7 @@ namespace TheForest.Player.Actions
 				LocalPlayer.AnimControl.skinningAnimal = false;
 				this.planeAxeHeldGo.SetActive(false);
 				this.enablePickupType(false);
+				LocalPlayer.vrPlayerControl.useGhostMode = false;
 				LocalPlayer.Create.Grabber.gameObject.SetActive(true);
 				LocalPlayer.AnimControl.playerHeadCollider.enabled = true;
 				LocalPlayer.AnimControl.playerCollider.enabled = true;
@@ -306,6 +308,7 @@ namespace TheForest.Player.Actions
 					this.resetRigidBody = false;
 				}
 				base.StartCoroutine(this.resetPlayerDragParams());
+				LocalPlayer.vrPlayerControl.useGhostMode = false;
 				LocalPlayer.Animator.SetBool("skinAnimal", false);
 				this.planeAxeHeldGo.SetActive(false);
 				LocalPlayer.AnimControl.skinningAnimal = false;

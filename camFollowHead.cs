@@ -32,12 +32,9 @@ public class camFollowHead : MonoBehaviour
 		this.setup = base.transform.root.GetComponentInChildren<playerScriptSetup>();
 		this.thisTr = base.transform;
 		this.startCamPos = this.thisTr.localPosition;
-		if (!ForestVR.Enabled)
-		{
-			this.mouse1 = base.GetComponentInChildren<SimpleMouseRotator>();
-			this.mouse2 = base.transform.root.GetComponent<SimpleMouseRotator>();
-			this.camTr = this.mouse1.transform;
-		}
+		this.mouse1 = base.GetComponentInChildren<SimpleMouseRotator>();
+		this.mouse2 = base.transform.root.GetComponent<SimpleMouseRotator>();
+		this.camTr = this.mouse1.transform;
 	}
 
 	
@@ -265,13 +262,13 @@ public class camFollowHead : MonoBehaviour
 	
 	private bool vrAllowFollow()
 	{
-		return !ForestVR.Enabled || (ForestVR.Enabled && (LocalPlayer.CamFollowHead.followAnim || LocalPlayer.AnimControl.useRootMotion));
+		return !ForestVR.Enabled || (ForestVR.Enabled && (LocalPlayer.CamFollowHead.followAnim || LocalPlayer.AnimControl.endGameCutScene));
 	}
 
 	
 	private void doCamFollow()
 	{
-		if (!ForestVR.Enabled)
+		if (this.vrAllowFollow())
 		{
 			if (this.followAnim || this.lockYCam)
 			{

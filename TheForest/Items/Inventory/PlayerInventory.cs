@@ -94,6 +94,11 @@ namespace TheForest.Items.Inventory
 		
 		public IEnumerator OnDeserialized()
 		{
+			if (CoopPeerStarter.DedicatedHost)
+			{
+				UnityEngine.Object.Destroy(base.gameObject);
+				yield break;
+			}
 			this._possessedItems.RemoveRange(this._possessedItemsCount, this._possessedItems.Count - this._possessedItemsCount);
 			this._possessedItemCache = this._possessedItems.ToDictionary((InventoryItem i) => i._itemId);
 			yield return YieldPresets.WaitOnePointFiveSeconds;
@@ -337,7 +342,10 @@ namespace TheForest.Items.Inventory
 				}
 				if (TheForest.Utils.Input.GetButtonUp("Fire1"))
 				{
-					this.ReleaseAttack();
+					if (!ForestVR.Enabled)
+					{
+						this.ReleaseAttack();
+					}
 				}
 				else if (TheForest.Utils.Input.GetButtonDown("AltFire"))
 				{
@@ -974,10 +982,13 @@ namespace TheForest.Items.Inventory
 				}
 				if (itemCache.MatchType(Item.Types.Projectile))
 				{
-					this._isThrowing = true;
-					base.Invoke("ThrowProjectile", itemCache._projectileThrowDelay);
-					LocalPlayer.TargetFunctions.Invoke("sendPlayerAttacking", 0.5f);
-					LocalPlayer.SpecialItems.SendMessage("stopLightHeldFire", SendMessageOptions.DontRequireReceiver);
+					if (!ForestVR.Enabled)
+					{
+						this._isThrowing = true;
+						base.Invoke("ThrowProjectile", itemCache._projectileThrowDelay);
+						LocalPlayer.TargetFunctions.Invoke("sendPlayerAttacking", 0.5f);
+						LocalPlayer.SpecialItems.SendMessage("stopLightHeldFire", SendMessageOptions.DontRequireReceiver);
+					}
 				}
 				else if (itemCache.MatchType(Item.Types.RangedWeapon))
 				{
@@ -1950,16 +1961,32 @@ namespace TheForest.Items.Inventory
 						}
 					}
 				}
-				component.AddForce((float)itemCache._projectileThrowForceRange * (0.016666f / Time.fixedDeltaTime) * LocalPlayer.MainCamTr.forward);
+				if (ForestVR.Enabled)
+				{
+					VRThrowable component4 = inventoryItemView._held.GetComponent<VRThrowable>();
+					if (component4)
+					{
+						Debug.Log("adding vr force!!");
+						component.AddForce(component4.lastThrowForce * (0.016666f / Time.fixedDeltaTime));
+						component.AddTorque(component4.lastThrowForceAngular * (0.016666f / Time.fixedDeltaTime));
+					}
+				}
+				else
+				{
+					component.AddForce((float)itemCache._projectileThrowForceRange * (0.016666f / Time.fixedDeltaTime) * LocalPlayer.MainCamTr.forward);
+				}
 				inventoryItemView._held.SendMessage("OnProjectileThrown", gameObject, SendMessageOptions.DontRequireReceiver);
 				inventoryItemView.ActiveBonus = (WeaponStatUpgrade.Types)(-1);
-				if (itemCache._rangedStyle == Item.RangedStyle.Bell)
+				if (!ForestVR.Enabled)
 				{
-					component.AddTorque((float)itemCache._projectileThrowTorqueRange * base.transform.forward);
-				}
-				else if (itemCache._rangedStyle == Item.RangedStyle.Forward)
-				{
-					component.AddTorque((float)itemCache._projectileThrowTorqueRange * LocalPlayer.MainCamTr.forward);
+					if (itemCache._rangedStyle == Item.RangedStyle.Bell)
+					{
+						component.AddTorque((float)itemCache._projectileThrowTorqueRange * base.transform.forward);
+					}
+					else if (itemCache._rangedStyle == Item.RangedStyle.Forward)
+					{
+						component.AddTorque((float)itemCache._projectileThrowTorqueRange * LocalPlayer.MainCamTr.forward);
+					}
 				}
 				if (base.transform.GetComponent<Collider>().enabled && component2 && component2.enabled)
 				{
@@ -2022,7 +2049,14 @@ namespace TheForest.Items.Inventory
 					else
 					{
 						float num = Time.time - this._weaponChargeStartTime;
-						gameObject.GetComponent<Rigidbody>().AddForce(inventoryItemView2._held.transform.up * Mathf.Clamp01(num / itemCache._projectileMaxChargeDuration) * (0.016666f / Time.fixedDeltaTime) * (float)itemCache._projectileThrowForceRange);
+						if (ForestVR.Enabled)
+						{
+							gameObject.GetComponent<Rigidbody>().AddForce(inventoryItemView2._held.transform.up * (float)itemCache._projectileThrowForceRange);
+						}
+						else
+						{
+							gameObject.GetComponent<Rigidbody>().AddForce(inventoryItemView2._held.transform.up * Mathf.Clamp01(num / itemCache._projectileMaxChargeDuration) * (0.016666f / Time.fixedDeltaTime) * (float)itemCache._projectileThrowForceRange);
+						}
 						if (LocalPlayer.Inventory.HasInSlot(Item.EquipmentSlot.RightHand, LocalPlayer.AnimControl._bowId))
 						{
 							gameObject.SendMessage("setCraftedBowDamage", SendMessageOptions.DontRequireReceiver);

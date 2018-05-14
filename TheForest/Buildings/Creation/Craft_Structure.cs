@@ -772,6 +772,10 @@ namespace TheForest.Buildings.Creation
 										transform3.rotation = Quaternion.LookRotation(transform2.right);
 									}
 									i++;
+									if (i >= num2)
+									{
+										break;
+									}
 								}
 								else
 								{
